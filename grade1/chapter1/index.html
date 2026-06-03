@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Body Explorer</title>
+<style>
+body{margin:0;font-family:"Comic Sans MS",sans-serif;background:linear-gradient(135deg,#fffae3,#e0f7fa,#dcedc8);text-align:center;color:#263238;}
+.screen{display:none;min-height:100vh;padding:12px;}
+.active{display:block;}
+h1{font-size:clamp(28px,6vw,48px); color:#ff7043;}
+h2{color:#00796b;}
+button{border:none;border-radius:18px;padding:12px 20px;margin:6px;font-size:18px;cursor:pointer;background:#ffca28;box-shadow:0 4px 0 #f57f17;font-weight:bold;}
+button:active{transform:translateY(3px); box-shadow:0 2px 0 #f57f17;}
+.card{background: rgba(255,255,255,0.9); border-radius:24px; padding:16px; max-width:900px; margin:12px auto; box-shadow:0 6px 16px rgba(0,0,0,0.12);}
+.topbar{display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; background: rgba(255,255,255,0.75); padding:8px; border-radius:18px; margin-bottom:10px;}
+.badge{background:white;padding:6px 10px;border-radius:12px;font-weight:bold;}
+.question{font-size:clamp(18px,4vw,28px); font-weight:bold;color:#5d4037;}
+.clue{font-size:clamp(14px,3vw,20px); background:#fff9c4;padding:8px;border-radius:14px;margin-top:8px;}
+.message{min-height:36px;font-size:18px;font-weight:bold;margin:6px;}
+.timer{font-size:18px;font-weight:bold;margin:6px;color:#d84315;}
+.game-area{position:relative; height:360px; max-width:900px; margin:0 auto; border:4px dashed #81c784; border-radius:20px; background: linear-gradient(#e3f2fd,#fffde7); overflow:hidden;}
+.draggable{position:absolute; cursor:grab; user-select:none; min-width:60px; padding:6px; border:2px solid #ffb74d; border-radius:12px; background:white; font-weight:bold;}
+#bodyOutline{max-width:400px;margin:12px auto; display:block;}
+.confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none; animation:fall 2.5s linear forwards; z-index:999;}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0;}}
+.final{font-size:clamp(22px,5vw,38px); color:#2e7d32; font-weight:bold;}
+@media(max-width:650px){.game-area{height:320px;}}
+</style>
+</head>
+<body>
 
+<!-- Splash Screen -->
+<div id="splashScreen" class="screen active">
+  <img src="assets/innovine-logo.png" style="width:240px;margin-top:100px;">
+</div>
+
+<!-- Start Screen -->
+<div id="startScreen" class="screen">
+  <div class="card">
+    <h1>My Body Explorer</h1>
+    <h2>Drag the correct body part to answer each question!</h2>
+    <button onclick="initGame()">▶ Start Game</button>
+  </div>
+</div>
+
+<!-- Gameplay Screen -->
+<div id="gameScreen" class="screen">
+  <div class="topbar">
+    <div class="badge">⭐ Score: <span id="score">0</span></div>
+    <div class="badge">❤️ Lives: <span id="lives">3</span></div>
+    <div class="badge">Q <span id="qNo">1</span>/12</div>
+    <div class="timer">Time: <span id="timer">20</span>s</div>
+  </div>
+  <div class="card">
+    <div class="question" id="questionText"></div>
+    <div class="clue" id="clueText"></div>
+    <div class="message" id="message"></div>
+  </div>
+  <div class="game-area">
+    <img id="bodyOutline" src="assets/bodyoutline.png">
+  </div>
+</div>
+
+<!-- End Screen -->
+<div id="endScreen" class="screen">
+  <div class="card">
+    <div class="final" id="finalMsg">Great work, champ!</div>
+    <h2>Your Score: <span id="finalScore"></span></h2>
+    <button onclick="initGame()">🔄 Play Again</button>
+  </div>
+</div>
+
+<script>
+// Questions
+const questions=[
+{q:"Which part helps you hear a bird singing?",part:"ears.png",hint:"It helps you listen."},
+{q:"What part helps you see the rainbow?",part:"eyes.png",hint:"Helps you look at things."},
+{q:"Mia is climbing stairs. Which part helps her balance?",part:"legs.png",hint:"We use these to stand and walk."},
+{q:"Sam wants to pick up a pencil. Which part should he use?",part:"hands.png",hint:"Used to hold and grab objects."},
+{q:"What part helps you taste your favorite food?",part:"tongue.png",hint:"We taste with this."},
+{q:"Which part helps you smell flowers in the garden?",part:"nose.png",hint:"We use this to sense smells."},
+{q:"Tom wears a cap on this body part. Which part is it?",part:"head.png",hint:"Top of the body."},
+{q:"What part helps you speak to a friend?",part:"mouth.png",hint:"We use it to talk and eat."},
+{q:"While bending, which parts help you bend your arms?",part:"elbow.png",hint:"Middle part of the arms."},
+{q:"While running, which parts help you bend and straighten your legs?",part:"knee.png",hint:"Middle part of the legs."},
+{q:"Mia combs this part every morning. What is it?",part:"hair.png",hint:"Grows from the top of your head."},
+{q:"Tom wears a scarf around this part. Which part is it?",part:"neck.png",hint:"Connects your head and body."}
+];
+
+let current=0,score=0,lives=3,timerInterval,questionTime=20;
+
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+
+function initGame(){score=0;lives=3;current=0;questionTime=20;showScreen("gameScreen");loadQuestion();}
+
+function restartGame(){score=0;lives=3;current=0;questionTime=20;showScreen("startScreen");}
+
+function loadQuestion(){
+  if(current>=questions.length){endGame();return;}
+  clearInterval(timerInterval);
+  const q=questions[current];
+  document.getElementById("questionText").textContent=q.q;
+  document.getElementById("clueText").textContent="";
+  document.getElementById("message").textContent="";
+  document.getElementById("qNo").textContent=current+1;
+  document.getElementById("score").textContent=score;
+  document.getElementById("lives").textContent=lives;
+  questionTime=20;document.getElementById("timer").textContent=questionTime;
+  renderDraggables(q);
+  // Timer countdown
+  timerInterval=setInterval(()=>{
+    questionTime--;
+    document.getElementById("timer").textContent=questionTime;
+    if(questionTime<=0){
+      clearInterval(timerInterval);
+      lives--; document.getElementById("lives").textContent=lives;
+      document.getElementById("clueText").textContent=q.hint;
+      document.getElementById("message").textContent="Time's up!"; new Audio("assets/wrong.mp3").play();
+      if(lives<=0){endGame(true);} else {setTimeout(()=>{current++;loadQuestion();},1500);}
+    }
+  },1000);
+}
+
+function renderDraggables(q){
+  const area=document.querySelector(".game-area"); area.querySelectorAll(".draggable")?.forEach(d=>d.remove());
+  const parts=["head.png","eyes.png","ears.png","nose.png","mouth.png","hands.png","legs.png","elbow.png","knee.png","neck.png","hair.png","tongue.png"];
+  shuffle(parts).forEach((p,i)=>{
+    const div=document.createElement("img");
+    div.src="assets/"+p; div.className="draggable"; div.style.top=(20+i*20)+"px"; div.style.left=(10+i*60)%300+"px";
+    div.draggable=true; div.addEventListener("dragstart",e=>{e.dataTransfer.setData("text",p);});
+    area.appendChild(div);
+  });
+  const outline=document.getElementById("bodyOutline");
+  outline.addEventListener("dragover",e=>{e.preventDefault();});
+  outline.addEventListener("drop",e=>{
+    const dropped=e.dataTransfer.getData("text");
+    if(dropped===q.part){
+      clearInterval(timerInterval);
+      score+=10; document.getElementById("score").textContent=score;
+      document.getElementById("message").textContent="Correct!"; new Audio("assets/right.mp3").play(); confetti();
+      current++; setTimeout(loadQuestion,1000);
+    } else {
+      lives--; document.getElementById("lives").textContent=lives;
+      document.getElementById("clueText").textContent=q.hint;
+      document.getElementById("message").textContent="Try again!";
+      new Audio("assets/wrong.mp3").play(); navigator.vibrate?.(140);
+      if(lives<=0){endGame();}
+    }
+  });
+}
+
+function endGame(timeout=false){
+  clearInterval(timerInterval);
+  document.getElementById("finalScore").textContent=score;
+  if(timeout && score===0){
+    document.getElementById("finalMsg").textContent="Don't worry! Try again and you’ll do great!";
+  } else {
+    document.getElementById("finalMsg").textContent="Great work, champ!";
+  }
+  showScreen("endScreen");
+  new Audio("assets/freesound_community-claps-44774.mp3").play();
+}
+
+function confetti(){for(let i=0;i<35;i++){const c=document.createElement("div");c.className="confetti";c.style.left=Math.random()*100+"vw";c.style.background=["#ff5252","#ffca28","#66bb6a","#42a5f5","#ab47bc"][Math.floor(Math.random()*5)];c.style.animationDelay=Math.random()*0.5+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),3000);}}
+
+function shuffle(array){return array.sort(()=>Math.random()-0.5);}
+
+// Splash auto-advance
+setTimeout(()=>{showScreen("startScreen");},5000);
