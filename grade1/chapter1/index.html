@@ -42,7 +42,7 @@ button:active{transform:translateY(3px); box-shadow:0 2px 0 #f57f17;}
   <div class="card">
     <h1>My Body Explorer</h1>
     <h2>Drag the correct body part to answer each question!</h2>
-    <button onclick="initGame()">▶ Start Game</button>
+    <button id="startBtn">▶ Start Game</button>
   </div>
 </div>
 
@@ -74,6 +74,7 @@ button:active{transform:translateY(3px); box-shadow:0 2px 0 #f57f17;}
 </div>
 
 <script>
+// Questions
 const questions=[
 {q:"Which part helps you hear a bird singing?",part:"ears.png",hint:"It helps you listen."},
 {q:"What part helps you see the rainbow?",part:"eyes.png",hint:"Helps you look at things."},
@@ -93,10 +94,15 @@ let current=0,score=0,lives=3,hintTimeout;
 
 function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
 
-function initGame(){score=0;lives=3;current=0;questions=shuffle(questions);showScreen("gameScreen");loadQuestion();}
+// Initialize Game
+function initGame(){
+    score=0;lives=3;current=0;questions=shuffle(questions);
+    showScreen("gameScreen"); loadQuestion();
+}
 
+// Load Question
 function loadQuestion(){
-  if(current>=questions.length){endGame();return;}
+  if(current>=questions.length){endGame(); return;}
   clearTimeout(hintTimeout);
   const q=questions[current];
   document.getElementById("questionText").textContent=q.q;
@@ -106,9 +112,15 @@ function loadQuestion(){
   document.getElementById("score").textContent=score;
   document.getElementById("lives").textContent=lives;
   renderDraggables(q);
-  hintTimeout=setTimeout(()=>{document.getElementById("clueText").textContent=q.hint; highlightCorrect(q.part);},15000);
+
+  // Hint after 15 sec
+  hintTimeout=setTimeout(()=>{
+    document.getElementById("clueText").textContent=q.hint;
+    highlightCorrect(q.part);
+  },15000);
 }
 
+// Render Draggables
 function renderDraggables(q){
   const parts=["head.png","eyes.png","ears.png","nose.png","mouth.png","hands.png","legs.png","elbow.png","knee.png","neck.png","hair.png","tongue.png"];
   const shuffled=shuffle(parts);
@@ -119,6 +131,7 @@ function renderDraggables(q){
     img.addEventListener("dragstart",e=>e.dataTransfer.setData("text",p));
     container.appendChild(img);
   });
+
   const outline=document.getElementById("bodyOutline");
   outline.addEventListener("dragover",e=>e.preventDefault());
   outline.addEventListener("drop",e=>{
@@ -139,13 +152,18 @@ function renderDraggables(q){
   });
 }
 
+// Highlight correct image
 function highlightCorrect(part){
   const imgs=document.querySelectorAll(".draggable");
-  imgs.forEach(img=>{if(img.src.includes(part)){img.style.border="3px solid #42a5f5"; setTimeout(()=>{img.style.border="2px solid #ffb74d";},5000);}});
+  imgs.forEach(img=>{
+    if(img.src.includes(part)){img.style.border="3px solid #42a5f5"; setTimeout(()=>{img.style.border="2px solid #ffb74d";},5000);}
+  });
 }
 
+// End Game
 function endGame(){
-  showScreen("endScreen"); document.getElementById("finalScore").textContent=score;
+  showScreen("endScreen");
+  document.getElementById("finalScore").textContent=score;
   const feedback=document.getElementById("finalMsg");
   if(score===12){feedback.textContent="Well done, champ!"; new Audio("assets/freesound_community-claps-44774.mp3").play(); confetti();}
   else if(score>=10){feedback.textContent="Good work!"; new Audio("assets/freesound_community-claps-44774.mp3").play(); confetti();}
@@ -153,12 +171,17 @@ function endGame(){
   else{feedback.textContent="Try again! Better luck next time.";}
 }
 
+// Confetti effect
 function confetti(){for(let i=0;i<50;i++){const c=document.createElement("div");c.className="confetti";c.style.left=Math.random()*100+"vw";c.style.background=["#ff5252","#ffca28","#66bb6a","#42a5f5","#ab47bc"][Math.floor(Math.random()*5)];c.style.animationDelay=Math.random()*0.5+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),3000);}}
 
 function shuffle(array){return array.sort(()=>Math.random()-0.5);}
 
-// Splash auto-advance after 5 sec
-setTimeout(()=>{showScreen("startScreen");},5000);
+// Splash auto-advance after 5 sec and attach start button
+window.addEventListener("load",()=>{
+    setTimeout(()=>{showScreen("startScreen");
+        document.querySelector("#startBtn").addEventListener("click",()=>{initGame();});
+    },5000);
+});
 </script>
 </body>
 </html>
