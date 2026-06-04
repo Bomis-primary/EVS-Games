@@ -92,15 +92,20 @@ const questions=[
 
 let current=0,score=0,lives=3,hintTimeout;
 
-function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
-
-// Initialize Game
-function initGame(){
-    score=0;lives=3;current=0;questions=shuffle(questions);
-    showScreen("gameScreen"); loadQuestion();
+// Show a screen
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-// Load Question
+// Initialize game
+function initGame(){
+    score=0;lives=3;current=0;questions=shuffle(questions);
+    showScreen("gameScreen");
+    loadQuestion();
+}
+
+// Load question
 function loadQuestion(){
   if(current>=questions.length){endGame(); return;}
   clearTimeout(hintTimeout);
@@ -113,14 +118,14 @@ function loadQuestion(){
   document.getElementById("lives").textContent=lives;
   renderDraggables(q);
 
-  // Give hint after 15 sec if not answered
+  // Hint after 15 sec
   hintTimeout=setTimeout(()=>{
     document.getElementById("clueText").textContent=q.hint;
     highlightCorrect(q.part);
   },15000);
 }
 
-// Render Draggables
+// Render draggable images
 function renderDraggables(q){
   const parts=["head.png","eyes.png","ears.png","nose.png","mouth.png","hands.png","legs.png","elbow.png","knee.png","neck.png","hair.png","tongue.png"];
   const shuffled=shuffle(parts);
@@ -160,7 +165,7 @@ function highlightCorrect(part){
   });
 }
 
-// End Game
+// End game
 function endGame(){
   showScreen("endScreen");
   document.getElementById("finalScore").textContent=score;
@@ -177,7 +182,9 @@ function confetti(){for(let i=0;i<50;i++){const c=document.createElement("div");
 function shuffle(array){return array.sort(()=>Math.random()-0.5);}
 
 // Splash auto-advance after 5 sec
-setTimeout(()=>{showScreen("startScreen");},5000);
+window.addEventListener("load",()=>{
+    setTimeout(()=>{showScreen("startScreen");},5000);
+});
 </script>
 </body>
 </html>
