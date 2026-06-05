@@ -10,23 +10,21 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f8ff;color:#2
 .screen{display:none;min-height:100vh;padding:12px}
 .active{display:block}
 
-/* PERFECT CENTERING FOR LOGO ON ALL DEVICES */
+/* PERFECT CENTERING AND SCALING FOR LOGO ON ALL DEVICES */
 #splashScreen{
   background:#fff;
   display:none;
   align-items:center;
   justify-content:center;
-  min-height:100vh;
-  width:100vw;
   position:fixed;
-  top:0;
-  left:0;
+  inset:0;
   z-index:9999;
 }
 #splashScreen.active{display:flex}
 #splashScreen img{
-  width:clamp(150px, 40vw, 380px);
-  max-width:85vw;
+  width: 45%; 
+  max-width: 380px;  /* Max size on desktops/laptops */
+  min-width: 160px;  /* Min size on small mobiles */
   height:auto;
   object-fit:contain;
 }
@@ -42,7 +40,7 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 .message{min-height:28px;font-size:18px;font-weight:700;margin-top:6px;line-height:1.35;text-align:center}
 .game-layout{display:grid;grid-template-columns:1.9fr 1fr;gap:14px;align-items:start;max-width:1180px;margin:8px auto 0}
 
-.path-zone{min-height:67vh;border-radius:26px;position:relative;overflow:hidden;background:url('assets/images/shared/background.png') center/cover no-repeat;box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.path-zone{min-height:67vh;border-radius:26px;position:relative;overflow:hidden;background:url('assets/background.png') center/cover no-repeat;box-shadow:0 8px 18px rgba(0,0,0,.12)}
 .path-map-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:transparent}
 .path-map{width:min(94%,1050px);max-width:100%;height:auto;object-fit:contain;filter:saturate(1.05);mix-blend-mode:multiply;opacity:.95}
 #pathAvatar{position:absolute;left:4%;bottom:14%;width:clamp(52px,7vw,82px);transition:left .45s ease,transform .25s ease;z-index:5;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
@@ -80,7 +78,7 @@ input[type="range"]{width:120px}
 <body>
 
 <div id="splashScreen" class="screen active">
-  <img src="assets/logo/innovine-logo.png" alt="Innovine Logo">
+  <img src="assets/innovine-logo.png" alt="Innovine Logo">
 </div>
 
 <div id="startScreen" class="screen">
@@ -110,9 +108,9 @@ input[type="range"]{width:120px}
   <div class="game-layout">
     <div class="path-zone">
       <div class="path-map-wrap">
-        <img class="path-map" src="assets/images/shared/pathmap.png" alt="Path map">
+        <img class="path-map" src="assets/pathmap.png" alt="Path map">
       </div>
-      <img id="pathAvatar" src="assets/images/shared/zippysmiling.png" alt="Zippy">
+      <img id="pathAvatar" src="assets/zippysmiling.png" alt="Zippy">
       <div id="milestones" class="milestones"></div>
     </div>
 
@@ -131,10 +129,10 @@ input[type="range"]{width:120px}
   </div>
 </div>
 
-<audio id="rightSound" preload="auto" src="assets/audio/correct.mp3"></audio>
-<audio id="wrongSound" preload="auto" src="assets/audio/wrong.mp3"></audio>
-<audio id="clapSound" preload="auto" src="assets/audio/freesound_community-claps-44774.mp3"></audio>
-<audio id="music" preload="auto" loop src="assets/audio/bg-music.mp3"></audio>
+<audio id="rightSound" preload="auto" src="assets/correct.mp3"></audio>
+<audio id="wrongSound" preload="auto" src="assets/wrong.mp3"></audio>
+<audio id="clapSound" preload="auto" src="assets/freesound_community-claps-44774.mp3"></audio>
+<audio id="music" preload="auto" loop src="assets/correct.mp3"></audio>
 
 <script>
 const questions=[
@@ -153,23 +151,23 @@ const questions=[
 ];
 
 const map={
-  jointfamily:'assets/images/cards/jointfamily.png',
-  helpinginkitchen:'assets/images/cards/helpinginkitchen.png',
-  wateringplant:'assets/images/cards/wateringplants.png',
-  classroom:'assets/images/cards/classroom.png',
-  library:'assets/images/cards/library.png',
-  bussafety:'assets/images/cards/bussafety.png',
-  strangerdanger:'assets/images/cards/strangerdanger.png',
-  principleoffice:'assets/images/cards/principleoffice.png',
-  staffroom:'assets/images/cards/staffroom.png',
-  medicalroom:'assets/images/cards/medicalroom.png',
-  playground:'assets/images/cards/playground.png',
-  nuclearfamily:'assets/images/cards/nuclearfamily.png'
+  jointfamily:'assets/jointfamily.png',
+  helpinginkitchen:'assets/helpinginkitchen.png',
+  wateringplant:'assets/wateringplants.png',
+  classroom:'assets/classroom.png',
+  library:'assets/library.png',
+  bussafety:'assets/bussafety.png',
+  strangerdanger:'assets/strangerdanger.png',
+  principleoffice:'assets/principleoffice.png',
+  staffroom:'assets/staffroom.png',
+  medicalroom:'assets/medicalroom.png',
+  playground:'assets/playground.png',
+  nuclearfamily:'assets/nuclearfamily.png'
 };
 
 const faces={
-  happy:'assets/images/shared/zippysmiling.png',
-  sad:'assets/images/shared/zippysad.png'
+  happy:'assets/zippysmiling.png',
+  sad:'assets/zippysad.png'
 };
 
 let current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true;
@@ -307,10 +305,25 @@ function endGame(){
   showScreen('endScreen');
   document.getElementById('finalScore').textContent=score;
   const f=document.getElementById('finalMsg');
-  if(score===12){f.textContent='Well done, champ!';clapSound.currentTime=0;clapSound.play().catch(()=>{});confetti()}
-  else if(score>=10){f.textContent='Good work!';clapSound.currentTime=0;clapSound.play().catch(()=>{});confetti()}
-  else if(score>=8){f.textContent='Great effort!'}
-  else{f.textContent='Try again! Better luck next time.'}
+  
+  if(score===12){
+    f.textContent='Well done, champ!';
+    clapSound.currentTime=0;
+    clapSound.play().catch(()=>{});
+    confetti();
+  }
+  else if(score>=10){
+    f.textContent='Good work!';
+    clapSound.currentTime=0;
+    clapSound.play().catch(()=>{});
+    confetti();
+  }
+  else if(score>=8){
+    f.textContent='Great effort!';
+  }
+  else{
+    f.textContent='Try again! Better luck next time.';
+  }
 }
 
 function toggleMusic(){
@@ -325,7 +338,6 @@ function toggleMusic(){
   }
 }
 
-// Fixed 2-second short splash time so it loads into your game fluidly
 window.addEventListener('load',()=>{
   setTimeout(()=>showScreen('startScreen'),2000)
 });
