@@ -23,8 +23,8 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f8ff;color:#2
 #splashScreen.active{display:flex}
 #splashScreen img{
   width: 45%; 
-  max-width: 380px;  /* Max size on desktops/laptops */
-  min-width: 160px;  /* Min size on small mobiles */
+  max-width: 380px;  
+  min-width: 160px;  
   height:auto;
   object-fit:contain;
 }
@@ -38,18 +38,42 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 .instructions-line{font-size:clamp(16px,2.6vw,21px);background:#fff7c9;padding:10px;border-radius:14px;margin:12px auto;max-width:850px;line-height:1.4;text-align:center}
 .question{font-size:clamp(18px,3vw,28px);font-weight:700;color:#5e3d2f;margin-bottom:6px;text-align:center}
 .message{min-height:28px;font-size:18px;font-weight:700;margin-top:6px;line-height:1.35;text-align:center}
-.game-layout{display:grid;grid-template-columns:1.9fr 1fr;gap:14px;align-items:start;max-width:1180px;margin:8px auto 0}
 
-.path-zone{min-height:67vh;border-radius:26px;position:relative;overflow:hidden;background:url('assets/background.png') center/cover no-repeat;box-shadow:0 8px 18px rgba(0,0,0,.12)}
-.path-map-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:transparent}
-.path-map{width:min(94%,1050px);max-width:100%;height:auto;object-fit:contain;filter:saturate(1.05);mix-blend-mode:multiply;opacity:.95}
+/* STACKED LAYOUT: OPTIONS DIRECTLY UNDER BOARD GAME */
+.game-layout{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+  align-items:start;
+  max-width:1180px;
+  margin:8px auto 0;
+}
+
+/* TOUCH DRAGGABLE OVERFLOW MAP SYSTEM FOR MOBILE SCREEN PROTECTION */
+.path-zone{
+  min-height:60vh;
+  border-radius:26px;
+  position:relative;
+  overflow-x:auto; 
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  background:url('assets/boardgame.png') center/cover no-repeat;
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+.path-zone-inner {
+  min-width: 750px; 
+  position: relative;
+  min-height: 60vh;
+}
+
 #pathAvatar{position:absolute;left:4%;bottom:14%;width:clamp(52px,7vw,82px);transition:left .45s ease,transform .25s ease;z-index:5;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
 .path-zone::before{content:"Help Zippy move to school";position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.85);padding:6px 14px;border-radius:14px;font-weight:700;color:#2f7f57;font-size:15px;z-index:4}
 .milestones{position:absolute;left:7%;right:7%;bottom:12%;display:flex;justify-content:space-between;z-index:2}
 .dot{width:18px;height:18px;border-radius:50%;background:#d2d9ef;border:3px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.12)}
 .dot.done{background:#66bb6a}
+
 .options-panel{background:rgba(255,255,255,.96);padding:12px;border-radius:24px;box-shadow:0 5px 12px rgba(0,0,0,.12)}
-#options{display:grid;grid-template-columns:1fr;gap:10px}
+#options{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px}
 .option-btn{border:none;border-radius:18px;padding:10px;background:#f5f8ff;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);min-height:110px}
 .option-btn img{width:100%;max-width:150px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:14px;padding:6px;display:block;margin:0 auto}
 .option-btn.correct{background:#dff7eb;outline:3px solid #57b97c}
@@ -61,13 +85,6 @@ input[type="range"]{width:120px}
 .confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999}
 
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
-@media(max-width:760px){
-  .game-layout{grid-template-columns:1fr}
-  .path-zone{min-height:42vh}
-  .path-map-wrap{padding:.8rem}
-  .path-map{width:100%}
-  #pathAvatar{width:56px;bottom:13%}
-}
 @media(max-width:420px){
   button{font-size:16px;padding:11px 18px}
   .option-btn{min-height:95px}
@@ -107,11 +124,10 @@ input[type="range"]{width:120px}
 
   <div class="game-layout">
     <div class="path-zone">
-      <div class="path-map-wrap">
-        <img class="path-map" src="assets/pathmap.png" alt="Path map">
+      <div class="path-zone-inner">
+        <img id="pathAvatar" src="assets/zippysmiling.png" alt="Zippy">
+        <div id="milestones" class="milestones"></div>
       </div>
-      <img id="pathAvatar" src="assets/zippysmiling.png" alt="Zippy">
-      <div id="milestones" class="milestones"></div>
     </div>
 
     <div class="options-panel">
@@ -131,8 +147,7 @@ input[type="range"]{width:120px}
 
 <audio id="rightSound" preload="auto" src="assets/correct.mp3"></audio>
 <audio id="wrongSound" preload="auto" src="assets/wrong.mp3"></audio>
-<audio id="clapSound" preload="auto" src="assets/freesound_community-claps-44774.mp3"></audio>
-<audio id="music" preload="auto" loop src="assets/correct.mp3"></audio>
+<audio id="music" preload="auto" loop src="assets/cheerfulmusic.mp3"></audio>
 
 <script>
 const questions=[
@@ -170,10 +185,9 @@ const faces={
   sad:'assets/zippysad.png'
 };
 
-let current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true;
+let gameQuestions=[],current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true;
 const rightSound=document.getElementById('rightSound');
 const wrongSound=document.getElementById('wrongSound');
-const clapSound=document.getElementById('clapSound');
 const musicEl=document.getElementById('music');
 
 musicEl.volume=0.4;
@@ -211,19 +225,21 @@ function moveAvatar(){
 
 function startGame(){
   current=0;score=0;busy=false;avatarStep=0;
+  // Completely randomizes the sequence of questions every playthrough
+  gameQuestions=shuffle([...questions]);
   showScreen('gameScreen');
   document.getElementById('pathAvatar').src=faces.happy;
   moveAvatar();
   loadQuestion();
   if(musicOn) {
-    musicEl.play().catch(e=>console.log("Audio waiting for user click interaction."));
+    musicEl.play().catch(e=>console.log("Audio awaiting click interaction."));
   }
 }
 
 function loadQuestion(){
-  if(current>=questions.length){endGame();return}
+  if(current>=gameQuestions.length){endGame();return}
   busy=false;
-  const q=questions[current];
+  const q=gameQuestions[current];
   
   clearTimeout(hintTimer);
   document.getElementById('score').textContent=score;
@@ -243,10 +259,12 @@ function loadQuestion(){
     box.appendChild(b)
   });
   renderMilestones();
-  hintTimer=setTimeout(()=>showHint(q.a),10000)
+  hintTimer=setTimeout(()=>showHint(q.a,q.h),10000)
 }
 
-function showHint(correctKey){
+function showHint(correctKey,clueText){
+  // Shows textual prompt alongside the highlighting action
+  document.getElementById('helperText').textContent=clueText;
   document.querySelectorAll('.option-btn').forEach(btn=>{
     const img=btn.querySelector('img');
     if(img&&img.getAttribute('src')===map[correctKey]){
@@ -308,14 +326,10 @@ function endGame(){
   
   if(score===12){
     f.textContent='Well done, champ!';
-    clapSound.currentTime=0;
-    clapSound.play().catch(()=>{});
     confetti();
   }
   else if(score>=10){
     f.textContent='Good work!';
-    clapSound.currentTime=0;
-    clapSound.play().catch(()=>{});
     confetti();
   }
   else if(score>=8){
