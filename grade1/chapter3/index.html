@@ -9,8 +9,28 @@
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f8ff;color:#22324a;overflow-x:hidden}
 .screen{display:none;min-height:100vh;padding:12px}
 .active{display:block}
-#splashScreen{background:#fff;position:relative}
-#splashScreen img{width:clamp(180px,48vw,420px);max-width:82vw;max-height:48vh;object-fit:contain;display:block;margin:0 auto}
+
+/* PERFECT CENTERING FOR LOGO ON ALL DEVICES */
+#splashScreen{
+  background:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  width:100vw;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:9999;
+}
+#splashScreen.active{display:flex}
+#splashScreen img{
+  width:clamp(150px, 40vw, 380px);
+  max-width:85vw;
+  height:auto;
+  object-fit:contain;
+}
+
 h1{font-size:clamp(28px,5vw,46px);color:#ff7b54;margin:10px 0 8px}
 button{border:none;border-radius:18px;padding:12px 22px;margin:8px;font-size:18px;cursor:pointer;background:#ffd166;box-shadow:0 4px 0 #d99b16;font-weight:700}
 button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
@@ -21,6 +41,7 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 .question{font-size:clamp(18px,3vw,28px);font-weight:700;color:#5e3d2f;margin-bottom:6px;text-align:center}
 .message{min-height:28px;font-size:18px;font-weight:700;margin-top:6px;line-height:1.35;text-align:center}
 .game-layout{display:grid;grid-template-columns:1.9fr 1fr;gap:14px;align-items:start;max-width:1180px;margin:8px auto 0}
+
 .path-zone{min-height:67vh;border-radius:26px;position:relative;overflow:hidden;background:url('assets/images/shared/background.png') center/cover no-repeat;box-shadow:0 8px 18px rgba(0,0,0,.12)}
 .path-map-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:transparent}
 .path-map{width:min(94%,1050px);max-width:100%;height:auto;object-fit:contain;filter:saturate(1.05);mix-blend-mode:multiply;opacity:.95}
@@ -40,23 +61,27 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 input[type="range"]{width:120px}
 .final{font-size:clamp(24px,5vw,40px);color:#2e7d32;font-weight:700}
 .confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999}
+
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
 @media(max-width:760px){
-.game-layout{grid-template-columns:1fr}
-.path-zone{min-height:42vh}
-.path-map-wrap{padding:.8rem}
-.path-map{width:100%}
-#pathAvatar{width:56px;bottom:13%}
+  .game-layout{grid-template-columns:1fr}
+  .path-zone{min-height:42vh}
+  .path-map-wrap{padding:.8rem}
+  .path-map{width:100%}
+  #pathAvatar{width:56px;bottom:13%}
 }
 @media(max-width:420px){
-button{font-size:16px;padding:11px 18px}
-.option-btn{min-height:95px}
-.option-btn img{max-width:120px}
+  button{font-size:16px;padding:11px 18px}
+  .option-btn{min-height:95px}
+  .option-btn img{max-width:120px}
 }
 </style>
 </head>
 <body>
-<div id="splashScreen" class="screen active"><img src="assets/logo/innovine-logo.png" alt="Innovine Logo"></div>
+
+<div id="splashScreen" class="screen active">
+  <img src="assets/logo/innovine-logo.png" alt="Innovine Logo">
+</div>
 
 <div id="startScreen" class="screen">
   <div class="card">
@@ -99,9 +124,9 @@ button{font-size:16px;padding:11px 18px}
 </div>
 
 <div id="endScreen" class="screen">
-  <div class="card">
+  <div class="card" style="text-align:center">
     <div class="final" id="finalMsg">Great work!</div>
-    <h2 style="text-align:center">Your Score: <span id="finalScore"></span>/12</h2>
+    <h2>Your Score: <span id="finalScore"></span>/12</h2>
     <button onclick="startGame()">🔄 Play Again</button>
   </div>
 </div>
@@ -109,78 +134,109 @@ button{font-size:16px;padding:11px 18px}
 <audio id="rightSound" preload="auto" src="assets/audio/correct.mp3"></audio>
 <audio id="wrongSound" preload="auto" src="assets/audio/wrong.mp3"></audio>
 <audio id="clapSound" preload="auto" src="assets/audio/freesound_community-claps-44774.mp3"></audio>
-<audio id="music" preload="auto" loop src="assets/audio/correct.mp3"></audio>
+<audio id="music" preload="auto" loop src="assets/audio/bg-music.mp3"></audio>
 
 <script>
 const questions=[
-{q:'Zippy is with a big family that includes grandparents. Which picture should he choose?',a:'jointfamily',h:'Hint: Look for grandparents in the picture.',e:'A joint family includes grandparents, parents, and children.',o:['jointfamily','nuclearfamily','classroom']},
-{q:'Mumma is busy in the kitchen and Zippy wants to help. Which picture fits best?',a:'helpinginkitchen',h:'Hint: Look for helping with food at home.',e:'Helping at home is a good habit.',o:['helpinginkitchen','library','wateringplant']},
-{q:'The flowers need water. Which picture shows Zippy taking care of them?',a:'wateringplant',h:'Hint: Look for the watering action.',e:'Plants need water to stay healthy.',o:['wateringplant','medicalroom','bussafety']},
-{q:'Zippy is ready for study time. Which picture shows the learning place?',a:'classroom',h:'Hint: Look for a place with desks.',e:'A classroom is where lessons happen.',o:['classroom','library','playground']},
-{q:'Zippy wants a quiet place full of books. Which picture should he go to?',a:'library',h:'Hint: Look for shelves full of books.',e:'The library is a place for reading.',o:['library','classroom','staffroom']},
-{q:'The school bus is waiting. Which picture shows Zippy playing it safe?',a:'bussafety',h:'Hint: Look for the school bus safety scene.',e:'Bus safety helps children travel safely.',o:['bussafety','strangerdanger','playground']},
-{q:'A stranger is calling Zippy near school. Which picture warns him to stay away?',a:'strangerdanger',h:'Hint: Look for the caution sign near a stranger.',e:'Children should stay away from strangers.',o:['strangerdanger','bussafety','jointfamily']},
-{q:'The principal has called Zippy. Which picture shows the right office to visit?',a:'principleoffice',h:'Hint: Look for the school office door.',e:'The principal meets students in the principal office.',o:['principleoffice','staffroom','library']},
-{q:'Zippy gets hurt while playing. Which picture shows where he should get help?',a:'medicalroom',h:'Hint: Look for the help room in school.',e:'The medical room helps when a child is hurt.',o:['medicalroom','playground','classroom']},
-{q:'Zippy is back in class. Which picture shows the teacher and students together?',a:'classroom',h:'Hint: Look for the learning room scene.',e:'Children learn in the classroom.',o:['classroom','staffroom','library']},
-{q:'Zippy spots himself in a picture with a little family nearby. Which scene matches what he sees?',a:'nuclearfamily',h:'Hint: Look for a child with only parents nearby.',e:'A nuclear family has parents and children.',o:['nuclearfamily','jointfamily','principleoffice']},
-{q:'Zippy wants to run, jump, and play. Which picture shows that place?',a:'playground',h:'Hint: Look for swings, slides, and play.',e:'A playground is for play and exercise.',o:['playground','library','medicalroom']}
+  {q:'Zippy is with a big family that includes grandparents. Which picture should he choose?',a:'jointfamily',h:'Hint: Look for grandparents in the picture.',e:'A joint family includes grandparents, parents, and children.',o:['jointfamily','nuclearfamily','classroom']},
+  {q:'Mumma is busy in the kitchen and Zippy wants to help. Which picture fits best?',a:'helpinginkitchen',h:'Hint: Look for helping with food at home.',e:'Helping at home is a good habit.',o:['helpinginkitchen','library','wateringplant']},
+  {q:'The flowers need water. Which picture shows Zippy taking care of them?',a:'wateringplant',h:'Hint: Look for the watering action.',e:'Plants need water to stay healthy.',o:['wateringplant','medicalroom','bussafety']},
+  {q:'Zippy is ready for study time. Which picture shows the learning place?',a:'classroom',h:'Hint: Look for a place with desks.',e:'A classroom is where lessons happen.',o:['classroom','library','playground']},
+  {q:'Zippy wants a quiet place full of books. Which picture should he go to?',a:'library',h:'Hint: Look for shelves full of books.',e:'The library is a place for reading.',o:['library','classroom','staffroom']},
+  {q:'The school bus is waiting. Which picture shows Zippy playing it safe?',a:'bussafety',h:'Hint: Look for the school bus safety scene.',e:'Bus safety helps children travel safely.',o:['bussafety','strangerdanger','playground']},
+  {q:'A stranger is calling Zippy near school. Which picture warns him to stay away?',a:'strangerdanger',h:'Hint: Look for the caution sign near a stranger.',e:'Children should stay away from strangers.',o:['strangerdanger','bussafety','jointfamily']},
+  {q:'The principal has called Zippy. Which picture shows the right office to visit?',a:'principleoffice',h:'Hint: Look for the school office door.',e:'The principal meets students in the principal office.',o:['principleoffice','staffroom','library']},
+  {q:'Zippy gets hurt while playing. Which picture shows where he should get help?',a:'medicalroom',h:'Hint: Look for the help room in school.',e:'The medical room helps when a child is hurt.',o:['medicalroom','playground','classroom']},
+  {q:'Zippy is back in class. Which picture shows the teacher and students together?',a:'classroom',h:'Hint: Look for the learning room scene.',e:'Children learn in the classroom.',o:['classroom','staffroom','library']},
+  {q:'Zippy spots himself in a picture with a little family nearby. Which scene matches what he sees?',a:'nuclearfamily',h:'Hint: Look for a child with only parents nearby.',e:'A nuclear family has parents and children.',o:['nuclearfamily','jointfamily','principleoffice']},
+  {q:'Zippy wants to run, jump, and play. Which picture shows that place?',a:'playground',h:'Hint: Look for swings, slides, and play.',e:'A playground is for play and exercise.',o:['playground','library','medicalroom']}
 ];
-const map={jointfamily:'assets/images/cards/jointfamily.png',helpinginkitchen:'assets/images/cards/helpinginkitchen.png',wateringplant:'assets/images/cards/wateringplants.png',classroom:'assets/images/cards/classroom.png',library:'assets/images/cards/library.png',bussafety:'assets/images/cards/bussafety.png',strangerdanger:'assets/images/cards/strangerdanger.png',principleoffice:'assets/images/cards/principleoffice.png',staffroom:'assets/images/cards/staffroom.png',medicalroom:'assets/images/cards/medicalroom.png',playground:'assets/images/cards/playground.png',nuclearfamily:'assets/images/cards/nuclearfamily.png'};
-const faces={happy:'assets/images/shared/zippysmiling.png',sad:'assets/images/shared/zippysad.png'};
-let current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true,loaded=new Set();
+
+const map={
+  jointfamily:'assets/images/cards/jointfamily.png',
+  helpinginkitchen:'assets/images/cards/helpinginkitchen.png',
+  wateringplant:'assets/images/cards/wateringplants.png',
+  classroom:'assets/images/cards/classroom.png',
+  library:'assets/images/cards/library.png',
+  bussafety:'assets/images/cards/bussafety.png',
+  strangerdanger:'assets/images/cards/strangerdanger.png',
+  principleoffice:'assets/images/cards/principleoffice.png',
+  staffroom:'assets/images/cards/staffroom.png',
+  medicalroom:'assets/images/cards/medicalroom.png',
+  playground:'assets/images/cards/playground.png',
+  nuclearfamily:'assets/images/cards/nuclearfamily.png'
+};
+
+const faces={
+  happy:'assets/images/shared/zippysmiling.png',
+  sad:'assets/images/shared/zippysad.png'
+};
+
+let current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true;
 const rightSound=document.getElementById('rightSound');
 const wrongSound=document.getElementById('wrongSound');
 const clapSound=document.getElementById('clapSound');
 const musicEl=document.getElementById('music');
+
 musicEl.volume=0.4;
 document.getElementById('volumeSlider').addEventListener('input',e=>musicEl.volume=Number(e.target.value));
 
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function preload(){
-  const imgs=['assets/logo/innovine-logo.png','assets/images/shared/background.png','assets/images/shared/zippysmiling.png','assets/images/shared/zippysad.png','assets/images/shared/pathmap.png'];
-  Object.values(map).forEach(v=>imgs.push(v));
-  imgs.forEach(src=>{const i=new Image();i.src=src});
-  ['assets/audio/correct.mp3','assets/audio/wrong.mp3','assets/audio/freesound_community-claps-44774.mp3'].forEach(src=>{const a=new Audio();a.preload='auto';a.src=src})
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]]
+  }
+  return a;
+}
+
 function renderMilestones(){
   const row=document.getElementById('milestones');
   row.innerHTML='';
-  for(let i=0;i<12;i++){const d=document.createElement('div');d.className='dot'+(i<avatarStep?' done':'');row.appendChild(d)}
+  for(let i=0;i<12;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i<avatarStep?' done':'');
+    row.appendChild(d);
+  }
 }
+
 function moveAvatar(){
   const avatar=document.getElementById('pathAvatar');
   const pct=(avatarStep/11)*88;
   avatar.style.left=Math.min(4+pct,90)+'%';
   avatar.src=faces.happy;
 }
+
 function startGame(){
-  current=0;score=0;busy=false;avatarStep=0;loaded.clear();
+  current=0;score=0;busy=false;avatarStep=0;
   showScreen('gameScreen');
   document.getElementById('pathAvatar').src=faces.happy;
   moveAvatar();
   loadQuestion();
-  if(musicOn)musicEl.play().catch(()=>{})
+  if(musicOn) {
+    musicEl.play().catch(e=>console.log("Audio waiting for user click interaction."));
+  }
 }
+
 function loadQuestion(){
   if(current>=questions.length){endGame();return}
   busy=false;
   const q=questions[current];
-  if(!loaded.has(current)){
-    const delay=current>=7?650:20;
-    const start=performance.now();
-    while(performance.now()-start<delay){}
-    loaded.add(current)
-  }
+  
   clearTimeout(hintTimer);
   document.getElementById('score').textContent=score;
   document.getElementById('qNo').textContent=current+1;
   document.getElementById('questionText').textContent=q.q;
   document.getElementById('helperText').textContent='';
   document.getElementById('message').textContent='';
+  
   const box=document.getElementById('options');
   box.innerHTML='';
+  
   shuffle(q.o.map(k=>({key:k,img:map[k],correct:k===q.a}))).forEach(opt=>{
     const b=document.createElement('button');
     b.className='option-btn';
@@ -191,6 +247,7 @@ function loadQuestion(){
   renderMilestones();
   hintTimer=setTimeout(()=>showHint(q.a),10000)
 }
+
 function showHint(correctKey){
   document.querySelectorAll('.option-btn').forEach(btn=>{
     const img=btn.querySelector('img');
@@ -200,6 +257,7 @@ function showHint(correctKey){
     }
   })
 }
+
 function confetti(){
   for(let i=0;i<28;i++){
     const c=document.createElement('div');
@@ -211,12 +269,14 @@ function confetti(){
     setTimeout(()=>c.remove(),3000)
   }
 }
+
 function checkAnswer(button,isCorrect,correctKey,explain){
   if(busy)return;
   busy=true;
   clearTimeout(hintTimer);
   const all=[...document.querySelectorAll('.option-btn')];
   all.forEach(b=>b.disabled=true);
+  
   if(isCorrect){
     score++;
     document.getElementById('score').textContent=score;
@@ -242,6 +302,7 @@ function checkAnswer(button,isCorrect,correctKey,explain){
   }
   setTimeout(()=>{current++;loadQuestion()},1700)
 }
+
 function endGame(){
   showScreen('endScreen');
   document.getElementById('finalScore').textContent=score;
@@ -251,19 +312,23 @@ function endGame(){
   else if(score>=8){f.textContent='Great effort!'}
   else{f.textContent='Try again! Better luck next time.'}
 }
+
 function toggleMusic(){
   musicOn=!musicOn;
   const btn=document.getElementById('musicBtn');
   if(musicOn){
     btn.textContent='🔊 Music';
-    musicEl.volume=Number(document.getElementById('volumeSlider').value);
     musicEl.play().catch(()=>{})
   }else{
     btn.textContent='🔇 Music';
     musicEl.pause()
   }
 }
-window.addEventListener('load',()=>{preload();setTimeout(()=>showScreen('startScreen'),5000)});
+
+// Fixed 2-second short splash time so it loads into your game fluidly
+window.addEventListener('load',()=>{
+  setTimeout(()=>showScreen('startScreen'),2000)
+});
 </script>
 </body>
 </html>
