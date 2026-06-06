@@ -57,7 +57,7 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #f5b041}
 .board-wrapper{position:relative;display:inline-block;margin:10px auto;background:#263238;border:6px solid #2e7d32;border-radius:16px;overflow:hidden;box-shadow:0 6px 12px rgba(0,0,0,0.15)}
 canvas{display:block;background:#37474f}
 
-/* LARGE TOUCH CONTROLS FOR GRADE 1 ACCURACY */
+/* LARGE TOUCH CONTROLS FOR GRADE 1 PLAYER ACCURACY */
 .dpad{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;width:170px;height:170px;margin:12px auto}
 .dpad-btn{background:#a5d6a7;border:2px solid #66bb6a;border-radius:16px;font-size:24px;color:#fff;font-weight:700;box-shadow:0 4px 0 #4caf50;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .dpad-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #4caf50}
@@ -83,20 +83,23 @@ canvas{display:block;background:#37474f}
 </head>
 <body>
 
+<!-- CH1: SPLASH VIEW -->
 <div id="splashScreen" class="screen active">
   <img src="assets/innovine-logo.png" alt="Innovine Logo">
 </div>
 
+<!-- CH2: IMMERSIVE ONE-LINER START SCREEN -->
 <div id="startScreen" class="screen">
-  <div class="game-container" style="margin-top:40px">
+  <div class="game-container" style="margin-top:50px">
     <h1>Animal Dash Quest</h1>
-    <p style="font-size:20px; line-height:1.6; color:#2e7d32; font-weight:700; margin:24px 10px; padding:0 5px;">
+    <p style="font-size:19px; line-height:1.6; color:#2e7d32; font-weight:700; margin:28px 10px; padding:0 5px;">
       Eat 2 treats with your snake to unlock and solve fun animal riddles!
     </p>
     <button onclick="bootGame()">▶ Start Quest</button>
   </div>
 </div>
 
+<!-- CH3: ACTIVE ENVIRONMENT CANVAS -->
 <div id="gameScreen" class="screen">
   <div class="game-container">
     <div class="topbar">
@@ -108,6 +111,7 @@ canvas{display:block;background:#37474f}
     <div class="board-wrapper">
       <canvas id="stage" width="300" height="300"></canvas>
       
+      <!-- INTEGRATED DYNAMIC POPUP OVERLAY WINDOW -->
       <div class="popup-overlay" id="quizPopup">
         <div class="quiz-box">
           <div class="q-text" id="qContainer">Riddle statement goes right here...</div>
@@ -118,6 +122,7 @@ canvas{display:block;background:#37474f}
       </div>
     </div>
 
+    <!-- TOUCH CONTROLLER BUTTONS -->
     <div class="dpad">
       <div></div>
       <div class="dpad-btn" onclick="steer('UP')">⬆️</div>
@@ -132,6 +137,7 @@ canvas{display:block;background:#37474f}
   </div>
 </div>
 
+<!-- CH4: COMPLETION RESOLUTION VIEW -->
 <div id="endScreen" class="screen">
   <div class="game-container" style="margin-top:30px">
     <h1 id="endTitle">Quest Done!</h1>
@@ -140,6 +146,7 @@ canvas{display:block;background:#37474f}
   </div>
 </div>
 
+<!-- TARGET SYSTEM EMBED AUDIOS -->
 <audio id="soundRight" preload="auto" src="assets/correct.mp3"></audio>
 <audio id="soundWrong" preload="auto" src="assets/wrong.mp3"></audio>
 <audio id="soundTrack" preload="auto" loop src="assets/snakegamesound.mp3"></audio>
@@ -210,7 +217,7 @@ function bootGame() {
   navigate("gameScreen");
   
   clearInterval(loopEngine);
-  // SLOW SNAKE SPEED: Adjusted frame timing to 340ms so Grade 1 players can navigate easily
+  // SPEED CONTROL: Set frame loop interval timer to 340ms so the snake moves slow and easy
   loopEngine = setInterval(gameTick, 340);
   
   sndTrack.currentTime = 0;
@@ -271,7 +278,7 @@ function gameTick() {
   if (head.x === food.x && head.y === food.y) {
     score += 10;
     targetCounter++;
-    // SOUND AUDIT: Removed food pickup noise to prioritize focus on quiz audio channels
+    // SOUND AUDIT: No pickup noises here to preserve attention for the riddle popups
     refreshFood();
     syncPanel();
     
@@ -304,7 +311,7 @@ function renderCanvas() {
 }
 
 function handleFailure() {
-  // SOUND AUDIT: Bumping into obstacles does not fire an intrusive game-layer buzzer sound
+  // SOUND AUDIT: Removed collision buzzers from the standard snake movement layer
   lives--;
   syncPanel();
   
@@ -381,12 +388,14 @@ function verifyQuizAction(element, isCorrect) {
     score += 50;
     msg.style.color = "#2e7d32";
     msg.textContent = "Great Job! 🎉";
+    // SOUND IS INTENTIONAL HERE: Confirm right answers with audio feedback
     sndRight.currentTime = 0;
     sndRight.play().catch(()=>{});
   } else {
     element.classList.add("wrong");
     msg.style.color = "#d32f2f";
     msg.textContent = "Oops! Keep learning!";
+    // SOUND IS INTENTIONAL HERE: Feed back incorrect answers with audio feedback
     sndWrong.currentTime = 0;
     sndWrong.play().catch(()=>{});
     lives--;
@@ -420,7 +429,7 @@ function terminateQuest(isWin) {
   if (isWin) {
     title.textContent = "Super Animal Champ! 🏆";
     title.style.color = "#2e7d32";
-    // Play celebratory claps upon puzzle chapter mastery
+    // Play celebratory claps upon final screen puzzle mastery
     sndClaps.currentTime = 0;
     sndClaps.play().catch(()=>{});
   } else {
