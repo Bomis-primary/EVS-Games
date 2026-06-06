@@ -5,121 +5,295 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Animal Dash Quest</title>
 <style>
-*{box-sizing:border-box;-webkit-user-select:none;user-select:none}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef7ee;color:#2c3e2b;overflow-x:hidden}
-.screen{display:none;min-height:100vh;padding:16px;position:relative}
-.active{display:block}
-
-/* PERFECT CENTERING AND SCALING FOR LOGO ON ALL DEVICES */
-#splashScreen{
-  background:#fff;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  position:fixed;
-  inset:0;
-  z-index:9999;
+* {
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+  margin: 0;
+  padding: 0;
 }
-#splashScreen.active{display:flex}
-#splashScreen img{
-  width:45%; 
-  max-width:380px;  
-  min-width:160px;  
-  height:auto;
-  object-fit:contain;
+body {
+  font-family: 'Comfortaa', Arial, Helvetica, sans-serif;
+  background: #f4fcf4;
+  color: #2e4a2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-
-/* CUSTOM HIGH-FIDELITY PASTEL ENVIRONMENT DYNAMICALLY GENERATED VIA CSS */
-.game-container{
-  max-width:600px;
-  margin:0 auto;
-  background-color: #e8f5e9;
-  background-image: 
-    radial-gradient(circle at 20% 20%, rgba(200, 230, 201, 0.4) 0%, rgba(200, 230, 201, 0) 40%),
-    radial-gradient(circle at 80% 30%, rgba(255, 224, 178, 0.5) 0%, rgba(255, 224, 178, 0) 35%),
-    radial-gradient(circle at 40% 70%, rgba(244, 143, 177, 0.3) 0%, rgba(244, 143, 177, 0) 30%),
-    radial-gradient(circle at 85% 85%, rgba(144, 202, 249, 0.4) 0%, rgba(144, 202, 249, 0) 45%);
-  border: 5px solid #81c784;
-  border-radius:28px;
-  padding:16px;
-  box-shadow:0 12px 32px rgba(46, 125, 50, 0.15);
-  text-align:center;
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+  animation: fadeIn 0.4s ease-out;
+}
+.screen.active {
+  display: block;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-h1{font-size:clamp(28px,5vw,42px);color:#2e7d32;margin:10px 0;text-shadow:1px 1px 2px #fff}
-button{border:none;border-radius:16px;padding:12px 24px;margin:8px;font-size:18px;cursor:pointer;background:#ffca28;box-shadow:0 5px 0 #f5b041;font-weight:700;transition:transform 0.1s}
-button:active{transform:translateY(3px);box-shadow:0 2px 0 #f5b041}
+/* CH1: SPLASH VIEW */
+#splashScreen {
+  background: #ffffff;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#splashScreen.active { display: flex; }
+#splashScreen img {
+  width: 50%;
+  max-width: 250px;
+  height: auto;
+}
 
-.topbar{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.92);padding:10px 16px;border-radius:18px;margin-bottom:12px;border:2px solid #a5d6a7}
-.badge{padding:6px 12px;border-radius:10px;font-weight:700;font-size:16px;background:#fff;color:#1b5e20}
+/* PREMIUM PASTEL PLAY CONTAINER */
+.game-card {
+  background: #ffffff;
+  border: 6px solid #ccebca;
+  border-radius: 36px;
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(165, 214, 167, 0.3);
+  text-align: center;
+  position: relative;
+}
 
-/* RETRO SNAKE GRID PANEL */
-.board-wrapper{position:relative;display:inline-block;margin:10px auto;background:#263238;border:6px solid #2e7d32;border-radius:16px;overflow:hidden;box-shadow:0 6px 12px rgba(0,0,0,0.15)}
-canvas{display:block;background:#37474f}
+h1 {
+  font-size: 32px;
+  color: #3b7a3e;
+  margin-bottom: 12px;
+  text-shadow: 1px 2px 0px #e8f5e9;
+}
 
-/* LARGE TOUCH CONTROLS FOR GRADE 1 PLAYER ACCURACY */
-.dpad{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;width:170px;height:170px;margin:12px auto}
-.dpad-btn{background:#a5d6a7;border:2px solid #66bb6a;border-radius:16px;font-size:24px;color:#fff;font-weight:700;box-shadow:0 4px 0 #4caf50;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.dpad-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #4caf50}
+/* BIG FANCY ACTION BUTTON */
+.btn-main {
+  border: none;
+  border-radius: 20px;
+  padding: 16px 36px;
+  font-size: 20px;
+  cursor: pointer;
+  background: #ffd54f;
+  color: #5d4037;
+  box-shadow: 0 6px 0 #ffb300;
+  font-weight: 800;
+  margin-top: 15px;
+  display: inline-block;
+  transition: all 0.1s ease;
+}
+.btn-main:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #ffb300;
+}
 
-/* INTEGRATED QUESTION POPUP INTERFACE */
-.popup-overlay{position:absolute;inset:0;background:rgba(38,50,56,0.85);display:none;align-items:center;justify-content:center;padding:12px;z-index:100}
-.popup-overlay.active{display:flex}
-.quiz-box{background:#ffffff;border:4px solid #ffca28;border-radius:24px;padding:16px;width:100%;max-width:380px;box-shadow:0 10px 24px rgba(0,0,0,0.4);text-align:center;animation:popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
-@keyframes popIn{from{transform:scale(0.85);opacity:0}to{transform:scale(1);opacity:1}}
+/* HUD / STATUS TOP BAR */
+.hud-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.hud-item {
+  flex: 1;
+  background: #f1fbf0;
+  border: 2px solid #c8e6c9;
+  padding: 8px 4px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #2e7d32;
+}
 
-.q-text{font-size:17px;font-weight:700;color:#1b5e20;margin-bottom:12px;line-height:1.45}
-.hint-area{min-height:28px;font-size:14px;font-weight:700;color:#ef6c00;background:#fff3e0;padding:6px;border-radius:10px;margin-bottom:10px;display:none;border:1px dashed #ffb74d}
-.hint-area.visible{display:block}
-.msg-area{font-size:18px;font-weight:700;min-height:24px;margin-bottom:8px}
+/* RETRO SNAKE BOARD WRAPPER */
+.board-container {
+  display: inline-block;
+  background: #eef7ee;
+  border: 5px solid #a5d6a7;
+  border-radius: 24px;
+  overflow: hidden;
+  margin: 10px 0;
+  line-height: 0;
+}
+canvas {
+  background: #fafafa;
+}
 
-.opt-list{display:flex;flex-direction:column;gap:8px}
-.opt-btn{background:#f1f8e9;border:2px solid #c8e6c9;color:#2e7d32;border-radius:14px;padding:12px;font-size:17px;font-weight:700;box-shadow:0 3px 0 #a5d6a7;text-align:center}
-.opt-btn:active{transform:translateY(1px);box-shadow:0 2px 0 #a5d6a7}
-.opt-btn.correct{background:#a5d6a7!important;border-color:#4caf50!important;color:#1b5e20!important;box-shadow:0 3px 0 #2e7d32!important}
-.opt-btn.wrong{background:#ffcdd2!important;border-color:#e57373!important;color:#b71c1c!important;box-shadow:0 3px 0 #c62828!important}
-.opt-btn.flash-clue{outline:4px solid #29b6f6!important;box-shadow:0 0 10px #29b6f6!important}
+/* LARGE IN-SCREEN QUIZ OVERLAY - BROUGHT OUTSIDE GAME BOX TO PREVENT SQUASHING */
+.quiz-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  background: #ffffff;
+  border: 4px solid #fff9c4;
+  border-radius: 28px;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+}
+.quiz-overlay.active {
+  display: flex;
+}
+@keyframes popIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.q-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b5e20;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.hint-banner {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e65100;
+  background: #fff3e0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  border: 1px dashed #ffb74d;
+}
+.status-msg {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  min-height: 24px;
+}
+
+.options-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.opt-card {
+  background: #f9f9f9;
+  border: 3px solid #e0e0e0;
+  color: #37474f;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 0 #e0e0e0;
+  transition: all 0.1s ease;
+}
+.opt-card:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #e0e0e0;
+}
+.opt-card.correct {
+  background: #c8e6c9 !important;
+  border-color: #81c784 !important;
+  color: #1b5e20 !important;
+  box-shadow: 0 4px 0 #66bb6a !important;
+}
+.opt-card.wrong {
+  background: #ffcdd2 !important;
+  border-color: #ef9a9a !important;
+  color: #b71c1c !important;
+  box-shadow: 0 4px 0 #e57373 !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* GRADE 1 EASY TOUCH CONTROLS */
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  width: 160px;
+  height: 160px;
+  margin: 15px auto 0 auto;
+}
+.dpad-btn {
+  background: #fff;
+  border: 3px solid #c8e6c9;
+  border-radius: 18px;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #c8e6c9;
+}
+.dpad-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #c8e6c9;
+}
+
+/* DECORATIVE BACKGROUND BALLOONS */
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  z-index: -1;
+  filter: blur(40px);
+  opacity: 0.4;
+}
 </style>
 </head>
 <body>
+
+<!-- BLOB ART -->
+<div class="bg-blob" style="width:200px;height:200px;background:#c8e6c9;top:10%;left:5%;"></div>
+<div class="bg-blob" style="width:250px;height:250px;background:#ffe082;bottom:10%;right:5%;"></div>
 
 <!-- CH1: SPLASH VIEW -->
 <div id="splashScreen" class="screen active">
   <img src="assets/innovine-logo.png" alt="Innovine Logo">
 </div>
 
-<!-- CH2: IMMERSIVE ONE-LINER START SCREEN -->
+<!-- CH2: ENHANCED ONE-LINER START SCREEN -->
 <div id="startScreen" class="screen">
-  <div class="game-container" style="margin-top:50px">
+  <div class="game-card">
     <h1>Animal Dash Quest</h1>
-    <p style="font-size:19px; line-height:1.6; color:#2e7d32; font-weight:700; margin:28px 10px; padding:0 5px;">
+    <p style="font-size: 19px; line-height: 1.6; color: #43a047; font-weight: 700; margin: 25px 0;">
       Eat 2 treats with your snake to unlock and solve fun animal riddles!
     </p>
-    <button onclick="bootGame()">▶ Start Quest</button>
+    <button class="btn-main" onclick="bootGame()">▶ Play Game</button>
   </div>
 </div>
 
 <!-- CH3: ACTIVE ENVIRONMENT CANVAS -->
 <div id="gameScreen" class="screen">
-  <div class="game-container">
-    <div class="topbar">
-      <div class="badge">🍎 Food: <span id="lblFood">0/2</span></div>
-      <div class="badge">⭐ Score: <span id="lblScore">0</span></div>
-      <div class="badge" id="lblHearts">❤️❤️❤️</div>
+  <div class="game-card">
+    
+    <!-- TOP STATS BAR -->
+    <div class="hud-bar">
+      <div class="hud-item">🍎 Treats: <span id="lblFood">0/2</span></div>
+      <div class="hud-item">⭐ Score: <span id="lblScore">0</span></div>
+      <div class="hud-item" id="lblHearts">❤️❤️❤️</div>
     </div>
 
-    <div class="board-wrapper">
+    <!-- MAIN BOARD CONTAINER -->
+    <div class="board-container">
       <canvas id="stage" width="300" height="300"></canvas>
-      
-      <!-- INTEGRATED DYNAMIC POPUP OVERLAY WINDOW -->
-      <div class="popup-overlay" id="quizPopup">
-        <div class="quiz-box">
-          <div class="q-text" id="qContainer">Riddle statement goes right here...</div>
-          <div class="hint-area" id="hintContainer"></div>
-          <div class="msg-area" id="msgContainer"></div>
-          <div class="opt-list" id="optContainer"></div>
-        </div>
-      </div>
+    </div>
+
+    <!-- INTEGRATED WIDE POPUP (PREVENTS OVERLAP & SQUASHING) -->
+    <div class="quiz-overlay" id="quizPopup">
+      <div class="q-text" id="qContainer">Riddle statement goes right here...</div>
+      <div class="hint-banner" id="hintContainer"></div>
+      <div class="status-msg" id="msgContainer"></div>
+      <div class="options-stack" id="optContainer"></div>
     </div>
 
     <!-- TOUCH CONTROLLER BUTTONS -->
@@ -128,7 +302,7 @@ canvas{display:block;background:#37474f}
       <div class="dpad-btn" onclick="steer('UP')">⬆️</div>
       <div></div>
       <div class="dpad-btn" onclick="steer('LEFT')">⬅️</div>
-      <div style="background:rgba(255,255,255,0.4);border-radius:12px"></div>
+      <div style="background:#f5f5f5; border-radius:14px;"></div>
       <div class="dpad-btn" onclick="steer('RIGHT')">➡️</div>
       <div></div>
       <div class="dpad-btn" onclick="steer('DOWN')">⬇️</div>
@@ -137,16 +311,16 @@ canvas{display:block;background:#37474f}
   </div>
 </div>
 
-<!-- CH4: COMPLETION RESOLUTION VIEW -->
+<!-- CH4: COMPLETION SCREEN -->
 <div id="endScreen" class="screen">
-  <div class="game-container" style="margin-top:30px">
+  <div class="game-card">
     <h1 id="endTitle">Quest Done!</h1>
-    <h2 style="color:#2e7d32">Final Score: <span id="endScore">0</span></h2>
-    <button onclick="bootGame()">🔄 Play Again</button>
+    <h2 style="color:#2e7d32; margin:15px 0;">Final Score: <span id="endScore">0</span></h2>
+    <button class="btn-main" onclick="bootGame()">🔄 Play Again</button>
   </div>
 </div>
 
-<!-- TARGET SYSTEM EMBED AUDIOS -->
+<!-- TARGET SYSTEM AUDIO LAYER -->
 <audio id="soundRight" preload="auto" src="assets/correct.mp3"></audio>
 <audio id="soundWrong" preload="auto" src="assets/wrong.mp3"></audio>
 <audio id="soundTrack" preload="auto" loop src="assets/snakegamesound.mp3"></audio>
@@ -168,14 +342,15 @@ const questionsBank = [
 
 const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
-const gridSize = 15;
+const gridSize = 20; // Expanded segment sizing for better visibility
 const tileCount = canvas.width / gridSize;
 
 let snake = [], food = {x:0, y:0};
 let dx = gridSize, dy = 0;
 let score = 0, lives = 3, targetCounter = 0;
 let loopEngine = null, isPaused = false;
-let sessionQuestions = [], currentQ = null, hintTimer = null;
+let sessionQuestions = [], currentQ = null;
+let wrongAttempts = 0; // Tracking chances per question
 
 const sndRight = document.getElementById("soundRight");
 const sndWrong = document.getElementById("soundWrong");
@@ -206,9 +381,9 @@ function bootGame() {
   sessionQuestions = shuffle([...questionsBank]);
   
   snake = [
-    {x: gridSize * 5, y: gridSize * 5},
     {x: gridSize * 4, y: gridSize * 5},
-    {x: gridSize * 3, y: gridSize * 5}
+    {x: gridSize * 3, y: gridSize * 5},
+    {x: gridSize * 2, y: gridSize * 5}
   ];
   
   refreshFood();
@@ -217,11 +392,11 @@ function bootGame() {
   navigate("gameScreen");
   
   clearInterval(loopEngine);
-  // SPEED CONTROL: Set frame loop interval timer to 340ms so the snake moves slow and easy
-  loopEngine = setInterval(gameTick, 340);
+  // ULTRA EXTRA SLOW FOR GRADE 1: Changed loop rate to 450ms for effortlessly simple wins
+  loopEngine = setInterval(gameTick, 450);
   
   sndTrack.currentTime = 0;
-  sndTrack.volume = 0.35;
+  sndTrack.volume = 0.2;
   sndTrack.play().catch(()=>{});
 }
 
@@ -276,9 +451,8 @@ function gameTick() {
   snake.unshift(head);
   
   if (head.x === food.x && head.y === food.y) {
-    score += 10;
+    score += 10; // Simple reward for grabbing a treat
     targetCounter++;
-    // SOUND AUDIT: No pickup noises here to preserve attention for the riddle popups
     refreshFood();
     syncPanel();
     
@@ -294,43 +468,38 @@ function gameTick() {
 }
 
 function renderCanvas() {
-  ctx.fillStyle = "#37474f";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Render Food Target
-  ctx.fillStyle = "#ff5722";
+  // Fancy Pastel Treat Food
+  ctx.fillStyle = "#ff8a80";
   ctx.beginPath();
-  ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2 - 1, 0, Math.PI * 2);
+  ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
   ctx.fill();
   
-  // Render Snake Units
+  // Fancy Pastel Snake Body
   snake.forEach((part, idx) => {
-    ctx.fillStyle = idx === 0 ? "#4caf50" : "#81c784";
-    ctx.fillRect(part.x + 1, part.y + 1, gridSize - 2, gridSize - 2);
+    ctx.fillStyle = idx === 0 ? "#81c784" : "#a5d6a7";
+    ctx.beginPath();
+    ctx.roundRect(part.x + 2, part.y + 2, gridSize - 4, gridSize - 4, [8]);
+    ctx.fill();
   });
 }
 
 function handleFailure() {
-  // SOUND AUDIT: Removed collision buzzers from the standard snake movement layer
-  lives--;
-  syncPanel();
-  
-  if (lives <= 0) {
-    terminateQuest(false);
-  } else {
-    dx = gridSize; dy = 0;
-    snake = [
-      {x: gridSize * 5, y: gridSize * 5},
-      {x: gridSize * 4, y: gridSize * 5},
-      {x: gridSize * 3, y: gridSize * 5}
-    ];
-    refreshFood();
-  }
+  // Gracefully reset orientation without frustrating sound effects
+  dx = gridSize; dy = 0;
+  snake = [
+    {x: gridSize * 4, y: gridSize * 5},
+    {x: gridSize * 3, y: gridSize * 5},
+    {x: gridSize * 2, y: gridSize * 5}
+  ];
+  refreshFood();
 }
 
 function triggerQuizOverlay() {
   isPaused = true;
   targetCounter = 0;
+  wrongAttempts = 0; // Reset counter for new quiz card
   
   if (sessionQuestions.length === 0) {
     terminateQuest(true);
@@ -340,11 +509,8 @@ function triggerQuizOverlay() {
   currentQ = sessionQuestions.pop();
   
   document.getElementById("qContainer").textContent = currentQ.q;
+  document.getElementById("hintContainer").textContent = currentQ.h;
   document.getElementById("msgContainer").textContent = "";
-  
-  const hBox = document.getElementById("hintContainer");
-  hBox.textContent = "";
-  hBox.classList.remove("visible");
   
   const optBox = document.getElementById("optContainer");
   optBox.innerHTML = "";
@@ -352,74 +518,92 @@ function triggerQuizOverlay() {
   const shuffledOptions = shuffle([...currentQ.o]);
   shuffledOptions.forEach(opt => {
     const btn = document.createElement("button");
-    btn.className = "opt-btn";
+    btn.className = "opt-card";
     btn.textContent = opt;
     btn.onclick = () => verifyQuizAction(btn, opt === currentQ.a);
     optBox.appendChild(btn);
   });
   
   document.getElementById("quizPopup").classList.add("active");
-  
-  clearTimeout(hintTimer);
-  hintTimer = setTimeout(() => {
-    hBox.textContent = currentQ.h;
-    hBox.classList.add("visible");
-    
-    document.querySelectorAll(".opt-btn").forEach(b => {
-      if (b.textContent === currentQ.a) {
-        b.classList.add("flash-clue");
-      }
-    });
-  }, 10000);
 }
 
 function verifyQuizAction(element, isCorrect) {
-  clearTimeout(hintTimer);
-  document.getElementById("hintContainer").classList.remove("visible");
-  
-  document.querySelectorAll(".opt-btn").forEach(b => {
-    b.disabled = true;
-    b.classList.remove("flash-clue");
-    if (b.textContent === currentQ.a) b.classList.add("correct");
-  });
-  
-  const msg = document.getElementById("msgContainer");
   if (isCorrect) {
-    score += 50;
+    // Correct Answer: Add full learning points!
+    score += 100;
+    
+    document.querySelectorAll(".opt-card").forEach(b => {
+      b.disabled = true;
+      if (b.textContent === currentQ.a) b.classList.add("correct");
+    });
+    
+    const msg = document.getElementById("msgContainer");
     msg.style.color = "#2e7d32";
     msg.textContent = "Great Job! 🎉";
-    // SOUND IS INTENTIONAL HERE: Confirm right answers with audio feedback
+    
     sndRight.currentTime = 0;
     sndRight.play().catch(()=>{});
+    syncPanel();
+    
+    setTimeout(() => {
+      document.getElementById("quizPopup").classList.remove("active");
+      if (sessionQuestions.length === 0) {
+        terminateQuest(true);
+      } else {
+        isPaused = false;
+      }
+    }, 2000);
+    
   } else {
-    element.classList.add("wrong");
-    msg.style.color = "#d32f2f";
-    msg.textContent = "Oops! Keep learning!";
-    // SOUND IS INTENTIONAL HERE: Feed back incorrect answers with audio feedback
-    sndWrong.currentTime = 0;
-    sndWrong.play().catch(()=>{});
-    lives--;
-  }
-  
-  syncPanel();
-  
-  setTimeout(() => {
-    document.getElementById("quizPopup").classList.remove("active");
-    if (lives <= 0) {
-      terminateQuest(false);
-    } else if (sessionQuestions.length === 0) {
-      terminateQuest(true);
+    // Incorrect answer handling
+    wrongAttempts++;
+    
+    if (wrongAttempts === 1) {
+      // Chance 1: Disable wrong option, play correct wrong sound and prompt to try again
+      element.classList.add("wrong");
+      element.disabled = true;
+      
+      const msg = document.getElementById("msgContainer");
+      msg.style.color = "#f57c00";
+      msg.textContent = "Try again! You have 1 more choice! 🤔";
+      
+      sndWrong.currentTime = 0;
+      sndWrong.play().catch(()=>{});
+      
     } else {
-      isPaused = false;
+      // Chance 2: Used up both choices. Mark question wrong, take a heart
+      element.classList.add("wrong");
+      document.querySelectorAll(".opt-card").forEach(b => {
+        b.disabled = true;
+        if (b.textContent === currentQ.a) b.classList.add("correct");
+      });
+      
+      lives--;
+      const msg = document.getElementById("msgContainer");
+      msg.style.color = "#d32f2f";
+      msg.textContent = "Let's check the right answer!";
+      
+      sndWrong.currentTime = 0;
+      sndWrong.play().catch(()=>{});
+      syncPanel();
+      
+      setTimeout(() => {
+        document.getElementById("quizPopup").classList.remove("active");
+        if (lives <= 0) {
+          terminateQuest(false);
+        } else if (sessionQuestions.length === 0) {
+          terminateQuest(true);
+        } else {
+          isPaused = false;
+        }
+      }, 2000);
     }
-  }, 1600);
+  }
 }
 
 function terminateQuest(isWin) {
   isPaused = true;
   clearInterval(loopEngine);
-  
-  // Stop background music completely
   sndTrack.pause();
   sndTrack.currentTime = 0;
   
@@ -429,7 +613,6 @@ function terminateQuest(isWin) {
   if (isWin) {
     title.textContent = "Super Animal Champ! 🏆";
     title.style.color = "#2e7d32";
-    // Play celebratory claps upon final screen puzzle mastery
     sndClaps.currentTime = 0;
     sndClaps.play().catch(()=>{});
   } else {
