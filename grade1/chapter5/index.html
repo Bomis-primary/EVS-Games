@@ -37,7 +37,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH VIEW */
+/* CH1: SPLASH VIEW - PERFECT LAYER SCALE AND RESPONSIVE CENTERING */
 #splashScreen {
   background: #ffffff;
   position: fixed;
@@ -47,14 +47,18 @@ body {
   align-items: center;
   justify-content: center;
 }
-#splashScreen.active { display: flex; }
+#splashScreen.active { 
+  display: flex; 
+}
 #splashScreen img {
-  width: 50%;
-  max-width: 250px;
+  width: 45%; 
+  max-width: 260px;  
+  min-width: 150px;  
   height: auto;
+  object-fit: contain;
 }
 
-/* PREMIUM PASTEL PLAY CONTAINER */
+/* MODERN REFRESHED PASTEL PLAY CONTAINER */
 .game-card {
   background: #ffffff;
   border: 6px solid #ccebca;
@@ -72,7 +76,7 @@ h1 {
   text-shadow: 1px 2px 0px #e8f5e9;
 }
 
-/* BIG FANCY ACTION BUTTON */
+/* ACCENT BUTTON STYLE */
 .btn-main {
   border: none;
   border-radius: 20px;
@@ -92,7 +96,7 @@ h1 {
   box-shadow: 0 2px 0 #ffb300;
 }
 
-/* HUD / STATUS TOP BAR */
+/* TOP STATUS HUD BAR */
 .hud-bar {
   display: flex;
   justify-content: space-between;
@@ -110,7 +114,7 @@ h1 {
   color: #2e7d32;
 }
 
-/* GAME BOARD LAYOUT SECTION */
+/* SNAKE BOARD CANVAS BLOCK WRAPPER */
 #gamePlayArea {
   display: block;
 }
@@ -127,7 +131,7 @@ canvas {
   background: #fafafa;
 }
 
-/* FULL-WIDTH INDEPENDENT QUIZ CONTAINER (SEPARATED FROM THE CANVAS) */
+/* FULL-WIDTH DETACHED QUIZ INTERFACE CANVAS */
 #quizPlayArea {
   display: none;
   background: #ffffff;
@@ -204,7 +208,7 @@ canvas {
   cursor: not-allowed;
 }
 
-/* EASY TOUCH CONTROLS */
+/* HIGH-ACCURACY LARGE TOUCH CONTROLS */
 .dpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -260,24 +264,24 @@ canvas {
   </div>
 </div>
 
-<!-- CH3: ACTIVE ENVIRONMENT VIEWS -->
+<!-- CH3: ACTIVE ENVIRONMENT CANVAS VIEWS -->
 <div id="gameScreen" class="screen">
   <div class="game-card">
     
-    <!-- HEADER BAR -->
+    <!-- SYSTEM LEVEL HUD HEADER -->
     <div class="hud-bar">
       <div class="hud-item">🍎 Treats: <span id="lblFood">0/2</span></div>
       <div class="hud-item">⭐ Score: <span id="lblScore">0</span></div>
       <div class="hud-item" id="lblHearts">❤️❤️❤️</div>
     </div>
 
-    <!-- MAIN SNAKE MOVEMENT BOX STEP -->
+    <!-- MAIN SNAKE ARENA ELEMENT -->
     <div id="gamePlayArea">
       <div class="board-container">
         <canvas id="stage" width="300" height="300"></canvas>
       </div>
 
-      <!-- DPAD CONTROLS -->
+      <!-- DPAD TOUCH TARGET CONTROLLER -->
       <div class="dpad">
         <div></div>
         <div class="dpad-btn" onclick="steer('UP')">⬆️</div>
@@ -291,7 +295,7 @@ canvas {
       </div>
     </div>
 
-    <!-- SEPARATE FULL-SIZE QUIZ SCREEN AREA -->
+    <!-- FULL SIZE SEPARATE QUESTION CANVAS PANEL -->
     <div id="quizPlayArea">
       <div class="q-text" id="qContainer">Riddle statement goes right here...</div>
       <div class="hint-banner" id="hintContainer"></div>
@@ -302,7 +306,7 @@ canvas {
   </div>
 </div>
 
-<!-- CH4: COMPLETION SCREEN -->
+<!-- CH4: DISMISSAL WIN-LOSS COMPLETION SCREEN -->
 <div id="endScreen" class="screen">
   <div class="game-card">
     <h1 id="endTitle">Quest Done!</h1>
@@ -311,7 +315,7 @@ canvas {
   </div>
 </div>
 
-<!-- TARGET SYSTEM AUDIO LAYER -->
+<!-- TARGET SYSTEM SYSTEM FILE LAYER ELEMENT CONFIG -->
 <audio id="soundRight" preload="auto" src="assets/correct.mp3"></audio>
 <audio id="soundWrong" preload="auto" src="assets/wrong.mp3"></audio>
 <audio id="soundTrack" preload="auto" loop src="assets/snakegamesound.mp3"></audio>
@@ -342,6 +346,7 @@ let score = 0, lives = 3, targetCounter = 0;
 let loopEngine = null, isPaused = false;
 let sessionQuestions = [], currentQ = null;
 let wrongAttempts = 0; 
+let quizCounter = 0; // Tracking questions within the modern quiz sequence block
 
 const sndRight = document.getElementById("soundRight");
 const sndWrong = document.getElementById("soundWrong");
@@ -365,19 +370,21 @@ function bootGame() {
   score = 0;
   lives = 3;
   targetCounter = 0;
-  isPaused = false;
+  quizCounter = 0;
+  isPaused = false; // CHRONOLOGY: Start the game running immediately!
   dx = gridSize; 
   dy = 0;
   
   sessionQuestions = shuffle([...questionsBank]);
   
+  // Clean initialization of standard snake positioning configurations
   snake = [
     {x: gridSize * 4, y: gridSize * 5},
     {x: gridSize * 3, y: gridSize * 5},
     {x: gridSize * 2, y: gridSize * 5}
   ];
   
-  // Reset the display boxes back to active snake mode
+  // Set default structural layout visible blocks
   document.getElementById("gamePlayArea").style.display = "block";
   document.getElementById("quizPlayArea").style.display = "none";
   
@@ -386,8 +393,7 @@ function bootGame() {
   navigate("gameScreen");
   
   clearInterval(loopEngine);
-  // SLOW GRADE 1 TIMING
-  loopEngine = setInterval(gameTick, 450);
+  loopEngine = setInterval(gameTick, 450); // Effortless simple movement velocity scale
   
   sndTrack.currentTime = 0;
   sndTrack.volume = 0.2;
@@ -445,13 +451,16 @@ function gameTick() {
   snake.unshift(head);
   
   if (head.x === food.x && head.y === food.y) {
-    // SCORING UPDATE: 0 points for snake gameplay treats
-    targetCounter++;
+    targetCounter++; // Earn 1 treat count towards quiz gating milestones
     refreshFood();
     syncPanel();
     
     if (targetCounter >= 2) {
-      triggerQuizOverlay();
+      // 2 treats eaten! CHRONOLOGY: Hide snake screen module and slide over to next 2 questions block sequence.
+      isPaused = true;
+      targetCounter = 0;
+      quizCounter = 0; 
+      triggerQuizRound();
       return;
     }
   } else {
@@ -464,13 +473,13 @@ function gameTick() {
 function renderCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Fancy Pastel Treat Food
+  // Fancy Pastel Target Treat Circle
   ctx.fillStyle = "#ff8a80";
   ctx.beginPath();
   ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
   ctx.fill();
   
-  // Fancy Pastel Snake Body
+  // Fancy Pastel Snake Body Elements
   snake.forEach((part, idx) => {
     ctx.fillStyle = idx === 0 ? "#81c784" : "#a5d6a7";
     ctx.beginPath();
@@ -480,18 +489,14 @@ function renderCanvas() {
 }
 
 function handleFailure() {
-  dx = gridSize; dy = 0;
-  snake = [
-    {x: gridSize * 4, y: gridSize * 5},
-    {x: gridSize * 3, y: gridSize * 5},
-    {x: gridSize * 2, y: gridSize * 5}
-  ];
-  refreshFood();
+  // Safe edge direction wrap handling without resizing or resetting structural length values
+  if (dx === gridSize) { dx = 0; dy = gridSize; }
+  else if (dy === gridSize) { dx = -gridSize; dy = 0; }
+  else if (dx === -gridSize) { dx = 0; dy = -gridSize; }
+  else if (dy === -gridSize) { dx = gridSize; dy = 0; }
 }
 
-function triggerQuizOverlay() {
-  isPaused = true;
-  targetCounter = 0;
+function triggerQuizRound() {
   wrongAttempts = 0; 
   
   if (sessionQuestions.length === 0) {
@@ -499,11 +504,12 @@ function triggerQuizOverlay() {
     return;
   }
   
-  // HIDE THE SNAKE AND SHOW THE WIDE QUIZ CONTAINER ELIMINATING ANY SMALL BOX OVERLAP
+  // Toggle Visibility Layout Layer Panels safely away from tiny game wrapper constraints
   document.getElementById("gamePlayArea").style.display = "none";
   document.getElementById("quizPlayArea").style.display = "block";
   
   currentQ = sessionQuestions.pop();
+  quizCounter++; 
   
   document.getElementById("qContainer").textContent = currentQ.q;
   document.getElementById("hintContainer").textContent = currentQ.h;
@@ -524,7 +530,7 @@ function triggerQuizOverlay() {
 
 function verifyQuizAction(element, isCorrect) {
   if (isCorrect) {
-    // PROGRESS SCORE LOGIC: +1 for correct answers
+    // SCORING PROGRESSION: Increments explicitly with simple +1 value scale!
     score += 1;
     
     document.querySelectorAll(".opt-card").forEach(b => {
@@ -536,19 +542,13 @@ function verifyQuizAction(element, isCorrect) {
     msg.style.color = "#2e7d32";
     msg.textContent = "Great Job! 🎉";
     
+    // SOUND AUDIT: Correct audio responds to correct answers immediately
     sndRight.currentTime = 0;
     sndRight.play().catch(()=>{});
     syncPanel();
     
     setTimeout(() => {
-      if (sessionQuestions.length === 0) {
-        terminateQuest(true);
-      } else {
-        // Swap UI modules back to explore step
-        document.getElementById("quizPlayArea").style.display = "none";
-        document.getElementById("gamePlayArea").style.display = "block";
-        isPaused = false;
-      }
+      evaluateRoundProgression();
     }, 2000);
     
   } else {
@@ -562,6 +562,7 @@ function verifyQuizAction(element, isCorrect) {
       msg.style.color = "#f57c00";
       msg.textContent = "Try again! You have 1 more choice! 🤔";
       
+      // SOUND AUDIT: Wrong audio responds to wrong clicks immediately
       sndWrong.currentTime = 0;
       sndWrong.play().catch(()=>{});
       
@@ -577,6 +578,7 @@ function verifyQuizAction(element, isCorrect) {
       msg.style.color = "#d32f2f";
       msg.textContent = "Let's check the right answer!";
       
+      // SOUND AUDIT: Wrong audio responds to wrong clicks immediately
       sndWrong.currentTime = 0;
       sndWrong.play().catch(()=>{});
       syncPanel();
@@ -584,15 +586,29 @@ function verifyQuizAction(element, isCorrect) {
       setTimeout(() => {
         if (lives <= 0) {
           terminateQuest(false);
-        } else if (sessionQuestions.length === 0) {
-          terminateQuest(true);
         } else {
-          document.getElementById("quizPlayArea").style.display = "none";
-          document.getElementById("gamePlayArea").style.display = "block";
-          isPaused = false;
+          evaluateRoundProgression();
         }
       }, 2000);
     }
+  }
+}
+
+function evaluateRoundProgression() {
+  if (sessionQuestions.length === 0) {
+    terminateQuest(true);
+    return;
+  }
+  
+  if (quizCounter < 2) {
+    // Block count lower than 2: continue triggering questions sequentially
+    triggerQuizRound();
+  } else {
+    // Block count at 2: swap visibility elements back into the snake break scene safely
+    document.getElementById("quizPlayArea").style.display = "none";
+    document.getElementById("gamePlayArea").style.display = "block";
+    isPaused = false;
+    renderCanvas();
   }
 }
 
@@ -608,6 +624,7 @@ function terminateQuest(isWin) {
   if (isWin) {
     title.textContent = "Super Animal Champ! 🏆";
     title.style.color = "#2e7d32";
+    // SOUND AUDIT: Clapping noise is locked safely to only play right at final resolution screen
     sndClaps.currentTime = 0;
     sndClaps.play().catch(()=>{});
   } else {
