@@ -21,7 +21,34 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow-x: hidden;
 }
+
+/* FIXED SPLASH LAYER WITH SMOOTH FADE OUT */
+#splashScreenLayer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease-in-out;
+  opacity: 1;
+}
+#splashScreenLayer.fade-out {
+  opacity: 0;
+}
+#splashScreenLayer img {
+  max-width: 70vw;
+  max-height: 40vh;
+  object-fit: contain;
+}
+
+/* GAME PANELS */
 .screen {
   display: none;
   width: 100%;
@@ -37,28 +64,6 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH SCREEN - STAYS STRICLY LOCKED DEAD-CENTER */
-#splashScreen {
-  background: #ffffff;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 9999;
-  display: none; /* Controlled dynamically via flex classes */
-  align-items: center;
-  justify-content: center;
-}
-#splashScreen.active { 
-  display: flex !important; 
-}
-#splashScreen img {
-  max-width: 70vw;
-  max-height: 40vh;
-  object-fit: contain;
-}
-
 /* THEMED PASTEL CONTAINER */
 .game-card {
   background: #ffffff;
@@ -68,6 +73,7 @@ body {
   box-shadow: 0 16px 40px rgba(255, 171, 145, 0.3);
   text-align: center;
   position: relative;
+  width: 100%;
 }
 
 h1 {
@@ -251,7 +257,7 @@ h1 {
 <div class="bg-blob" style="width:220px;height:220px;background:#ffccbc;top:8%;left:6%;"></div>
 <div class="bg-blob" style="width:260px;height:260px;background:#ffe082;bottom:12%;right:6%;"></div>
 
-<div id="splashScreen" class="screen active">
+<div id="splashScreenLayer">
   <img src="assets/innovine-logo.png" alt="Innovine Logo">
 </div>
 
@@ -330,7 +336,7 @@ const questionsBank = [
   { q: "What should you wear to stay dry when it rains outside?", a: "Raincoat", o: ["Raincoat", "Swimsuit", "Sweater"], h: "Hint: It is made of plastic and drops slide right off it!", r: "Raincoats are waterproof! They act like an umbrella shield for your clothes." },
   { q: "How many times should you brush your teeth every day?", a: "Two times", o: ["Two times", "Zero times", "One time a week"], h: "Hint: Brush once in the morning, and once before bed!", r: "Brushing twice a day chases away the tiny sugar bugs that hide in your mouth while you sleep!" },
   { q: "What should you do right before you eat your lunch?", a: "Wash your hands", o: ["Wash your hands", "Play with toys", "Put on shoes"], h: "Hint: Use warm water and bubbly soap!", r: "Washing your hands cleans off sneaky, invisible germs so they don't jump onto your food!" },
-  { q: "What keeps you warm when playing in the cold snow?", a: "Warm jacket", o: ["Warm jacket", "T-shirt", "Sunglasses"], h: "Hint: It is thick, fluffy, and zips up tight!", r: "Heavy jackets trap your body heat inside like a cozy, warm hug!" },
+  { q: "What keeps you warm when playing in the cold snow?", a: "Warm jacket", o: ["Warm jacket", "T-shirt", "Sunglasses"], h: "Hint: It is thick, fluffy, and zipped up tight!", r: "Heavy jackets trap your body heat inside like a cozy, warm hug!" },
   { q: "I am a red fruit that grows on a tree. I am healthy, but I am not a strawberry. What am I?", a: "Apple", o: ["Apple", "Strawberry", "French Fries"], h: "Hint: Strawberries grow on the ground, but I grow high up on branches!", r: "Both are red and yummy, but apples grow high in the sky on trees!" },
   { q: "Carrots are orange. Cheese balls are orange. Which one helps your eyes see better?", a: "Carrots", o: ["Carrots", "Cheese balls", "Candy"], h: "Hint: Bunnies love this crunchy snack! It grows in the dirt.", r: "Carrots have Vitamin A. It works like magic night-vision goggles for your eyes!" },
   { q: "It is a hot, sunny day. Which shirt will keep you feeling cooler?", a: "White shirt", o: ["White shirt", "Black shirt", "Winter coat"], h: "Hint: Dark colors soak up the hot sun. Light colors bounce it away!", r: "A black shirt acts like a sponge for heat. A white shirt acts like a mirror and bounces the hot sun rays away!" },
@@ -400,7 +406,6 @@ function syncPanel(wrongInThisTurn = 0) {
 }
 
 function checkNextStepText() {
-  // Triggers precisely before Q1 (index 0), Q5 (index 4), and Q10 (index 9)
   if (questionsAnsweredCount === 0 || questionsAnsweredCount === 4 || questionsAnsweredCount === 9) {
     targetCounter = 0;
     loadSortingGame();
@@ -615,12 +620,22 @@ function terminateQuest(isWin) {
   navigate("endScreen");
 }
 
-// SECURE AUTO-ADVANCING CONTROLLER WITHOUT CONFLICTS
+// HANDLES COLD INITIAL LOADS EXCLUSIVELY
 window.addEventListener("DOMContentLoaded", () => {
-  navigate("splashScreen");
+  navigate("startScreen"); // Ensure title screen is active beneath the layer
+  
+  // Exact 5-second hold on splash, then add the fade class
   setTimeout(() => {
-    navigate("startScreen");
-  }, 2500); // Transitions seamlessly to Title screen automatically
+    const splash = document.getElementById("splashScreenLayer");
+    if (splash) {
+      splash.classList.add("fade-out");
+      
+      // Wait for CSS opacity fade (0.8s) to complete, then hide the display entirely
+      setTimeout(() => {
+        splash.style.display = "none";
+      }, 800);
+    }
+  }, 5000);
 });
 </script>
 </body>
