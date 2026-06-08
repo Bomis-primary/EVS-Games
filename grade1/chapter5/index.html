@@ -37,25 +37,30 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH VIEW - HIGH FIDELITY DEVICE SCALING & CENTERING */
+/* CH1: SPLASH VIEW - CRITICAL FIX FOR ABSOLUTE DEAD-CENTER ALIGNMENT */
 #splashScreen {
   background: #ffffff;
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 9999;
   display: none;
-  align-items: center;
+  place-items: center;
   justify-content: center;
-  padding: 20px;
+  align-items: center;
 }
 #splashScreen.active { 
   display: flex; 
 }
 #splashScreen img {
+  display: block;
+  margin: 0 auto;
   width: auto;
   height: auto;
-  max-width: 80vw;
-  max-height: 50vh;
+  max-width: 75vw;
+  max-height: 45vh;
   object-fit: contain;
 }
 
@@ -155,6 +160,7 @@ canvas {
   line-height: 1.5;
 }
 .hint-banner {
+  display: none; /* Controlled dynamically via timers and micro-actions */
   font-size: 14px;
   font-weight: 700;
   color: #e65100;
@@ -163,6 +169,7 @@ canvas {
   border-radius: 14px;
   margin-bottom: 16px;
   border: 1px dashed #ffb74d;
+  animation: fadeIn 0.3s ease;
 }
 .status-msg {
   font-size: 18px;
@@ -206,8 +213,6 @@ canvas {
   border-color: #ef9a9a !important;
   color: #b71c1c !important;
   box-shadow: 0 4px 0 #e57373 !important;
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* HIGH-ACCURACY LARGE TOUCH CONTROLS */
@@ -340,6 +345,7 @@ let loopEngine = null, isPaused = false;
 let sessionQuestions = [], currentQ = null;
 let wrongAttempts = 0; 
 let quizCounter = 0; 
+let hintTimeoutTracker = null; // Watchdog timer placeholder for activity checking
 
 const sndRight = document.getElementById("soundRight");
 const sndWrong = document.getElementById("soundWrong");
@@ -376,7 +382,6 @@ function bootGame() {
     {x: gridSize * 2, y: gridSize * 5}
   ];
   
-  // Make sure game field and its HUD elements are explicitly visible
   document.getElementById("gamePlayArea").style.display = "block";
   document.getElementById("hudTreatsBox").style.visibility = "visible";
   document.getElementById("quizPlayArea").style.display = "none";
@@ -487,22 +492,26 @@ function handleFailure() {
 
 function triggerQuizRound() {
   wrongAttempts = 0; 
+  clearTimeout(hintTimeoutTracker);
   
   if (sessionQuestions.length === 0) {
     terminateQuest(true);
     return;
   }
   
-  // Cleanly switch visibility: Hide the game box AND hide its treats indicator counter from the HUD
   document.getElementById("gamePlayArea").style.display = "none";
   document.getElementById("hudTreatsBox").style.visibility = "hidden";
   document.getElementById("quizPlayArea").style.display = "block";
+  
+  // Reset Hint Layout Container to hidden state initially
+  const hintBanner = document.getElementById("hintContainer");
+  hintBanner.style.display = "none";
   
   currentQ = sessionQuestions.pop();
   quizCounter++; 
   
   document.getElementById("qContainer").textContent = currentQ.q;
-  document.getElementById("hintContainer").textContent = currentQ.h;
+  hintBanner.textContent = currentQ.h;
   document.getElementById("msgContainer").textContent = "";
   
   const optBox = document.getElementById("optContainer");
@@ -516,9 +525,17 @@ function triggerQuizRound() {
     btn.onclick = () => verifyQuizAction(btn, opt === currentQ.a);
     optBox.appendChild(btn);
   });
+
+  // START 15-SECOND IDLE WATCHDOG TIMER FOR THE HINT
+  hintTimeoutTracker = setTimeout(() => {
+    hintBanner.style.display = "block";
+  }, 15000);
 }
 
 function verifyQuizAction(element, isCorrect) {
+  // Clear the idle hint countdown once an option is picked
+  clearTimeout(hintTimeoutTracker);
+
   if (isCorrect) {
     score += 1;
     
@@ -542,6 +559,9 @@ function verifyQuizAction(element, isCorrect) {
   } else {
     wrongAttempts++;
     
+    // INSTANTLY SHOW THE HINT UPON A MISTAKE
+    document.getElementById("hintContainer").style.display = "block";
+    
     if (wrongAttempts === 1) {
       element.classList.add("wrong");
       element.disabled = true;
@@ -555,6 +575,8 @@ function verifyQuizAction(element, isCorrect) {
       
     } else {
       element.classList.add("wrong");
+      
+      // SHOW CORRECT ANSWER HIGHLIGHT IMMEDIATELY UPON SECOND MISTAKE
       document.querySelectorAll(".opt-card").forEach(b => {
         b.disabled = true;
         if (b.textContent === currentQ.a) b.classList.add("correct");
@@ -575,7 +597,7 @@ function verifyQuizAction(element, isCorrect) {
         } else {
           evaluateRoundProgression();
         }
-      }, 2000);
+      }, 2500);
     }
   }
 }
@@ -589,7 +611,6 @@ function evaluateRoundProgression() {
   if (quizCounter < 2) {
     triggerQuizRound();
   } else {
-    // Return to the game loop safely: Re-display the game box AND turn the treats counter indicator back on
     document.getElementById("quizPlayArea").style.display = "none";
     document.getElementById("gamePlayArea").style.display = "block";
     document.getElementById("hudTreatsBox").style.visibility = "visible";
@@ -600,6 +621,7 @@ function evaluateRoundProgression() {
 
 function terminateQuest(isWin) {
   isPaused = true;
+  clearTimeout(hintTimeoutTracker);
   clearInterval(loopEngine);
   sndTrack.pause();
   sndTrack.currentTime = 0;
