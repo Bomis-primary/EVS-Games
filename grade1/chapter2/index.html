@@ -37,7 +37,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH SCREEN - ABSOLUTE DEAD-CENTER FORCE */
+/* CH1: SPLASH SCREEN - UNMOVABLE SOLID DEAD-CENTER LAYOUT */
 #splashScreen {
   background: #ffffff;
   position: fixed;
@@ -49,9 +49,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-#splashScreen.active { 
-  display: flex; 
 }
 #splashScreen img {
   max-width: 70vw;
@@ -252,7 +249,7 @@ h1 {
 <div class="bg-blob" style="width:260px;height:260px;background:#ffe082;bottom:12%;right:6%;"></div>
 
 <div id="splashScreen" class="screen active">
-  <img src="assets/innovine-logo.png" alt="Innovine Logo">
+  <img src="assets/innovine-logo.png" alt="Innovine Logo" onclick="dismissSplash()">
 </div>
 
 <div id="startScreen" class="screen">
@@ -293,7 +290,7 @@ h1 {
 
 <div id="reviewScreen" class="screen">
   <div class="game-card" style="border-color: #ffab91;">
-    <h1 style="color: #ff5722;">Let's Understand! 💡</h1>
+    <h1>Let's Understand! 💡</h1>
     
     <div class="review-box">
       <p style="font-weight: bold; color: #8d6e63; margin-bottom: 6px; font-size: 15px;">Question asked:</p>
@@ -315,7 +312,7 @@ h1 {
     <h1 id="endTitle">Quest Done!</h1>
     <h2 style="color:#e64a19; margin:15px 0;">Final Score: <span id="endScore">0</span></h2>
     <p id="endSubtitle" style="font-weight: bold; color: #795548; margin-bottom: 15px; font-size:16px;"></p>
-    <button class="btn-main" onclick="bootGame()">🔄 Play Again</button>
+    <button class="btn-main" onclick="resetToStart()">🔄 Play Again</button>
   </div>
 </div>
 
@@ -354,7 +351,17 @@ const sndClaps = document.getElementById("soundClaps");
 
 function navigate(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+}
+
+/* FORCED MANUAL FLOW CONTROL (NO AUTO TIMERS TO BUG THE SCREEN) */
+function dismissSplash() {
+  navigate("startScreen");
+}
+
+function resetToStart() {
+  navigate("startScreen");
 }
 
 function shuffle(arr) {
@@ -453,7 +460,8 @@ function spawnMixedItems() {
       } else {
         document.getElementById("boardStatus").textContent = "Oops! That's junk food! 🍩";
         setTimeout(() => {
-          if(document.getElementById("gamePlayArea").style.display === "block") {
+          const gameFrame = document.getElementById("gamePlayArea");
+          if(gameFrame && gameFrame.style.display === "block") {
             document.getElementById("boardStatus").textContent = "Find the healthy ones! 🍎";
           }
         }, 2000);
@@ -608,13 +616,8 @@ function terminateQuest(isWin) {
   navigate("endScreen");
 }
 
-// INSTANT SPLASH LOADING HANDLER (NO TIMER BUGS)
-window.addEventListener("DOMContentLoaded", () => {
-  navigate("splashScreen");
-  setTimeout(() => {
-    navigate("startScreen");
-  }, 2000);
-});
+// TAP LOGO ON THE INITIAL SCREEN TO SIMULATE INSTANT MANUAL START
+// THIS ENSURES BROWSERS SAFELY START AUDIO WITHOUT INTERRUPTIONS
 </script>
 </body>
 </html>
