@@ -37,7 +37,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH VIEW - CRITICAL FIX FOR ABSOLUTE DEAD-CENTER ALIGNMENT */
+/* CH1: SPLASH VIEW - FORCED ABSOLUTE DEAD-CENTER ALIGNMENT */
 #splashScreen {
   background: #ffffff;
   position: fixed;
@@ -47,16 +47,18 @@ body {
   height: 100vh;
   z-index: 9999;
   display: none;
-  place-items: center;
-  justify-content: center;
+  grid-template-columns: 1fr;
   align-items: center;
+  justify-content: center;
+  place-content: center;
+  place-items: center;
 }
 #splashScreen.active { 
-  display: flex; 
+  display: grid; 
 }
 #splashScreen img {
   display: block;
-  margin: 0 auto;
+  margin: auto;
   width: auto;
   height: auto;
   max-width: 75vw;
@@ -160,7 +162,7 @@ canvas {
   line-height: 1.5;
 }
 .hint-banner {
-  display: none; /* Controlled dynamically via timers and micro-actions */
+  display: none; 
   font-size: 14px;
   font-weight: 700;
   color: #e65100;
@@ -241,6 +243,16 @@ canvas {
   box-shadow: 0 1px 0 #c8e6c9;
 }
 
+/* INCORRECT REVIEW PANEL CARDS */
+.review-box {
+  background: #fffcf4;
+  border: 3px dashed #ffb300;
+  border-radius: 20px;
+  padding: 16px;
+  margin: 15px 0;
+  text-align: left;
+}
+
 .bg-blob {
   position: absolute;
   border-radius: 50%;
@@ -306,6 +318,25 @@ canvas {
   </div>
 </div>
 
+<div id="reviewScreen" class="screen">
+  <div class="game-card" style="border-color: #ffcc80;">
+    <h1 style="color: #e65100;">Let's Learn! 💡</h1>
+    
+    <div class="review-box">
+      <p style="font-weight: bold; color: #5d4037; margin-bottom: 8px;">Question:</p>
+      <p id="revQuestion" style="font-size: 16px; margin-bottom: 14px; color: #2e4a2e; line-height: 1.4;"></p>
+      
+      <p style="font-weight: bold; color: #2e7d32; margin-bottom: 4px;">Correct Answer:</p>
+      <div id="revAnswer" style="background: #e8f5e9; color: #1b5e20; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 18px; margin-bottom: 14px; border: 2px solid #81c784; text-align: center;"></div>
+      
+      <p style="font-weight: bold; color: #e65100; margin-bottom: 4px;">Why?</p>
+      <p id="revReason" style="font-size: 15px; color: #795548; line-height: 1.4;"></p>
+    </div>
+    
+    <button class="btn-main" style="background: #ffb74d; box-shadow: 0 6px 0 #f57c00;" onclick="dismissReviewScreen()">Got It! 👍</button>
+  </div>
+</div>
+
 <div id="endScreen" class="screen">
   <div class="game-card">
     <h1 id="endTitle">Quest Done!</h1>
@@ -321,16 +352,16 @@ canvas {
 
 <script>
 const questionsBank = [
-  { q: "A farmer wants milk for his family every morning. Which animal should he keep?", a: "Cow", o: ["Cow", "Lion", "Duck"], h: "Hint: This friendly animal lives inside a shed and says 'Moo'!" },
-  { q: "At night, a child hears a soft meowing outside the window. Which pet might be there?", a: "Cat", o: ["Cat", "Dog", "Frog"], h: "Hint: This furry pet has whiskers and loves drinking fresh milk!" },
-  { q: "A small baby is seen playing near a dog. What is the baby dog called?", a: "Puppy", o: ["Puppy", "Kitten", "Calf"], h: "Hint: It is a small, playful baby animal that wags its tail!" },
-  { q: "On a farm, one useful animal gives eggs for breakfast. Which animal is it?", a: "Hen", o: ["Hen", "Horse", "Rabbit"], h: "Hint: This feathered creature lives in a coop and can cluck!" },
-  { q: "A little one looks up and sees beautiful feathers moving across the sky. Which animal is flying?", a: "Bird", o: ["Bird", "Fish", "Monkey"], h: "Hint: This animal has wings, chirps happily, and builds warm nests!" },
-  { q: "A tiny buzzing creature is very busy flying near the colorful flowers. Which animal is it?", a: "Bee", o: ["Bee", "Ant", "Spider"], h: "Hint: This insect makes sweet golden honey inside a buzz-filled hive!" },
-  { q: "Inside a deep forest den, a very loud roar is heard. Which animal lives there?", a: "Lion", o: ["Lion", "Deer", "Sheep"], h: "Hint: This brave wild predator is called the King of the Jungle!" },
-  { q: "A child goes to a clear pond and sees an animal swimming around with shiny fins. Which animal is it?", a: "Fish", o: ["Fish", "Bird", "Cat"], h: "Hint: This little animal breathes underwater and lives inside ponds!" },
-  { q: "A girl sees a small animal hopping quickly into a cozy hole in the ground. Which animal is it?", a: "Rabbit", o: ["Rabbit", "Goat", "Elephant"], h: "Hint: This animal has long soft ears and loves crunching on carrots!" },
-  { q: "At a farm, a rider climbs safely onto an animal that lives inside a stable. Which animal is it?", a: "Horse", o: ["Horse", "Pig", "Bear"], h: "Hint: This strong animal runs super fast and says 'Neigh'!" }
+  { q: "A farmer wants milk for his family every morning. Which animal should he keep?", a: "Cow", o: ["Cow", "Lion", "Duck"], h: "Hint: This friendly animal lives inside a shed and says 'Moo'!", r: "Cows live on farms and are cared for specifically because they give lots of fresh, healthy milk every single morning!" },
+  { q: "At night, a child hears a soft meowing outside the window. Which pet might be there?", a: "Cat", o: ["Cat", "Dog", "Frog"], h: "Hint: This furry pet has whiskers and loves drinking fresh milk!", r: "Cats make a soft 'meow' sound to talk to us, while dogs bark and frogs make croaking sounds." },
+  { q: "A small baby is seen playing near a dog. What is the baby dog called?", a: "Puppy", o: ["Puppy", "Kitten", "Calf"], h: "Hint: It is a small, playful baby animal that wags its tail!", r: "A baby dog is always called a puppy! Baby cats are called kittens, and baby cows are called calves." },
+  { q: "On a farm, one useful animal gives eggs for breakfast. Which animal is it?", a: "Hen", o: ["Hen", "Horse", "Rabbit"], h: "Hint: This feathered creature lives in a coop and can cluck!", r: "Hens lay eggs every morning inside their farm coops. Horses and rabbits don't lay eggs at all!" },
+  { q: "A little one looks up and sees beautiful feathers moving across the sky. Which animal is flying?", a: "Bird", o: ["Bird", "Fish", "Monkey"], h: "Hint: This animal has wings, chirps happily, and builds warm nests!", r: "Birds have lightweight feathers and strong wings that allow them to fly high in the air, unlike fish or monkeys." },
+  { q: "A tiny buzzing creature is very busy flying near the colorful flowers. Which animal is it?", a: "Bee", o: ["Bee", "Ant", "Spider"], h: "Hint: This insect makes sweet golden honey inside a buzz-filled hive!", r: "Bees buzz from flower to flower to collect sweet nectar, which they use to make yummy honey back inside their hives." },
+  { q: "Inside a deep forest den, a very loud roar is heard. Which animal lives there?", a: "Lion", o: ["Lion", "Deer", "Sheep"], h: "Hint: This brave wild predator is called the King of the Jungle!", r: "Lions make a booming roar that can be heard far away to show they are the strong leaders of their wild territory." },
+  { q: "A child goes to a clear pond and sees an animal swimming around with shiny fins. Which animal is it?", a: "Fish", o: ["Fish", "Bird", "Cat"], h: "Hint: This little animal breathes underwater and lives inside ponds!", r: "Fish are built to live underwater using their fins to paddle around and breathe comfortably, while cats and birds live on land." },
+  { q: "A girl sees a small animal hopping quickly into a cozy hole in the ground. Which animal is it?", a: "Rabbit", o: ["Rabbit", "Goat", "Elephant"], h: "Hint: This animal has long soft ears and loves crunching on carrots!", r: "Rabbits are quick hoppers that build safe, cozy underground tunnels called burrows to hide from danger and rest safely." },
+  { q: "At a farm, a rider climbs safely onto an animal that lives inside a stable. Which animal is it?", a: "Horse", o: ["Horse", "Pig", "Bear"], h: "Hint: This strong animal runs super fast and says 'Neigh'!", r: "Horses live in cozy stables on farms. They are built with strong legs made for galloping fast and carrying riders safely." }
 ];
 
 const canvas = document.getElementById("stage");
@@ -345,7 +376,7 @@ let loopEngine = null, isPaused = false;
 let sessionQuestions = [], currentQ = null;
 let wrongAttempts = 0; 
 let quizCounter = 0; 
-let hintTimeoutTracker = null; // Watchdog timer placeholder for activity checking
+let hintTimeoutTracker = null; 
 
 const sndRight = document.getElementById("soundRight");
 const sndWrong = document.getElementById("soundWrong");
@@ -503,7 +534,6 @@ function triggerQuizRound() {
   document.getElementById("hudTreatsBox").style.visibility = "hidden";
   document.getElementById("quizPlayArea").style.display = "block";
   
-  // Reset Hint Layout Container to hidden state initially
   const hintBanner = document.getElementById("hintContainer");
   hintBanner.style.display = "none";
   
@@ -526,14 +556,12 @@ function triggerQuizRound() {
     optBox.appendChild(btn);
   });
 
-  // START 15-SECOND IDLE WATCHDOG TIMER FOR THE HINT
   hintTimeoutTracker = setTimeout(() => {
     hintBanner.style.display = "block";
   }, 15000);
 }
 
 function verifyQuizAction(element, isCorrect) {
-  // Clear the idle hint countdown once an option is picked
   clearTimeout(hintTimeoutTracker);
 
   if (isCorrect) {
@@ -558,8 +586,6 @@ function verifyQuizAction(element, isCorrect) {
     
   } else {
     wrongAttempts++;
-    
-    // INSTANTLY SHOW THE HINT UPON A MISTAKE
     document.getElementById("hintContainer").style.display = "block";
     
     if (wrongAttempts === 1) {
@@ -576,7 +602,7 @@ function verifyQuizAction(element, isCorrect) {
     } else {
       element.classList.add("wrong");
       
-      // SHOW CORRECT ANSWER HIGHLIGHT IMMEDIATELY UPON SECOND MISTAKE
+      // Immediately display correct highlight states across the board
       document.querySelectorAll(".opt-card").forEach(b => {
         b.disabled = true;
         if (b.textContent === currentQ.a) b.classList.add("correct");
@@ -591,15 +617,29 @@ function verifyQuizAction(element, isCorrect) {
       sndWrong.play().catch(()=>{});
       syncPanel();
       
+      // NAVIGATE TO NEW WRONG ANSWER EXPLANATION SCREEN
       setTimeout(() => {
         if (lives <= 0) {
           terminateQuest(false);
         } else {
-          evaluateRoundProgression();
+          loadReviewScreen();
         }
-      }, 2500);
+      }, 1800);
     }
   }
+}
+
+function loadReviewScreen() {
+  document.getElementById("revQuestion").textContent = currentQ.q;
+  document.getElementById("revAnswer").textContent = currentQ.a;
+  document.getElementById("revReason").textContent = currentQ.r;
+  navigate("reviewScreen");
+}
+
+function dismissReviewScreen() {
+  // Re-enter central hub screen loop context cleanly
+  navigate("gameScreen");
+  evaluateRoundProgression();
 }
 
 function evaluateRoundProgression() {
