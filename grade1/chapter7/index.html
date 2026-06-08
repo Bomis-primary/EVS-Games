@@ -1,1 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chapter 7: My Home - Blueprint Builder</title>
+    <style>
+        :root {
+            --primary-bg: #e0f2fe;
+            --accent-orange: #f97316;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --text-dark: #1e293b;
+            --chalkboard-green: #14532d;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-dark);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Responsive Safe Containment */
+        .screen-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            transform: translate3d(0,0,0);
+            will-change: transform;
+        }
+
+        .active-screen {
+            display: flex !important;
+        }
+
+        /* 1. Splash Screen View */
+        #splash-screen {
+            background: #ffffff;
+            justify-content: center;
+            gap: 20px;
+        }
+        .splash-logo {
+            max-width: 220px;
+            width: 50vw;
+            height: auto;
+            animation: pulseIntro 1.5s infinite ease-in-out;
+        }
+        .loader-bar {
+            width: 60%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .loader-fill {
+            width: 100%;
+            height: 100%;
+            background: var(--accent-orange);
+            transform: translateX(-100%);
+            animation: fillProgress 4.5s forwards linear;
+        }
+
+        /* 2. Welcome Menu View */
+        #welcome-screen {
+            justify-content: center;
+            gap: 25px;
+            text-align: center;
+        }
+        .welcome-emoji {
+            font-size: clamp(80px, 20vh, 140px);
+            line-height: 1;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+            animation: bounceFloat 3s infinite ease-in-out;
+        }
+        .game-title {
+            font-size: clamp(22px, 4vw, 36px);
+            font-weight: 800;
+            padding: 0 10px;
+            color: #0369a1;
+        }
+        .btn-action {
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #c2410c;
+            transform: translate3d(0,0,0);
+            transition: transform 0.1s;
+        }
+        .btn-action:active {
+            transform: translate3d(0, 8px, 0);
+            box-shadow: 0 0px 0 #c2410c;
+        }
+
+        /* Top HUD Row */
+        .game-hud {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-weight: bold;
+            font-size: clamp(14px, 2vw, 18px);
+        }
+
+        /* 3. Core Blueprint Central Canvas Display Zone */
+        .central-canvas {
+            flex: 1;
+            width: 100%;
+            max-width: 650px;
+            background: white;
+            border-radius: 24px;
+            margin: 15px 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border: 4px dashed #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            position: relative;
+        }
+        .target-image-frame {
+            width: 100%;
+            height: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+        .target-image-frame img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        .prompt-text {
+            margin-top: 15px;
+            font-size: clamp(16px, 2.5vw, 22px);
+            font-weight: 700;
+            text-align: center;
+            color: #334155;
+            padding: 0 5px;
+        }
+
+        /* 4. Bottom Conveyor Belt Layout Grid */
+        .conveyor-belt {
+            width: 100%;
+            max-width: 800px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 5px;
+        }
+
+        /* Uniform Choice Buttons */
+        .conveyor-item {
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 15px 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: clamp(13px, 1.8vw, 16px);
+            color: #475569;
+            box-shadow: 0 6px 0 #cbd5e1;
+            transform: translate3d(0,0,0);
+        }
+        .conveyor-item:active {
+            transform: translate3d(0, 4px, 0);
+            box-shadow: 0 2px 0 #cbd5e1;
+        }
+        .conveyor-item img {
+            width: auto;
+            height: clamp(55px, 9vh, 85px);
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* Micro-Animations & Feedback Classes */
+        .shake-error {
+            animation: rubberBandShake 0.5s ease-in-out !important;
+            border-color: var(--accent-red) !important;
+            background-color: #fef2f2 !important;
+            color: var(--accent-red) !important;
+        }
+        .pulse-success {
+            animation: heartbeatPulse 0.5s ease-in-out !important;
+            border-color: var(--accent-green) !important;
+            background-color: #f0fdf4 !important;
+            color: var(--accent-green) !important;
+        }
+
+        /* 5. Fact Chalkboard & Explanation Screen Views */
+        .fullscreen-overlay {
+            background: rgba(15, 23, 42, 0.95);
+            color: white;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        .chalkboard {
+            background: var(--chalkboard-green);
+            border: 12px solid #b45309;
+            border-radius: 10px;
+            padding: clamp(20px, 5vh, 40px);
+            width: 100%;
+            max-width: 600px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 12px 24px rgba(0,0,0,0.3);
+        }
+        .chalkboard-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: clamp(16px, 2.5vw, 24px);
+            color: #f0fdf4;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+
+        /* Performance Keyframes */
+        @keyframes fillProgress { from { transform: translateX(-100%); } to { transform: translateX(0%); } }
+        @keyframes pulseIntro { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes bounceFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes heartbeatPulse { 0% { transform: scale(1); } 30% { transform: scale(1.12); } 100% { transform: scale(1); } }
+        @keyframes rubberBandShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="snd-cheer" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <div id="splash-screen" class="screen-container active-screen">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
+        <div class="loader-bar">
+            <div class="loader-fill"></div>
+        </div>
+    </div>
+
+    <div id="welcome-screen" class="screen-container">
+        <div class="welcome-emoji">🏠</div>
+        <h1 class="game-title">Build and Protect Your Dream Home!</h1>
+        <button class="btn-action" onclick="jumpToScreen('game-screen'); initLevel(1);">▶ Begin the Quest</button>
+    </div>
+
+    <div id="game-screen" class="screen-container">
+        <div class="game-hud">
+            <span id="hud-level">Level: 1/3</span>
+            <span id="hud-score">Points: 0</span>
+        </div>
+
+        <div class="central-canvas">
+            <div class="target-image-frame">
+                <img id="main-target-img" src="" alt="Target Challenge">
+            </div>
+            <div id="main-prompt-text" class="prompt-text">Loading prompt...</div>
+        </div>
+
+        <div id="main-conveyor" class="conveyor-belt"></div>
+    </div>
+
+    <div id="explain-screen" class="screen-container fullscreen-overlay">
+        <div style="font-size: 70px;">💡</div>
+        <h2 style="color: #f59e0b; font-size: clamp(24px, 4vw, 32px);">Let's Think!</h2>
+        <p id="explain-text" style="font-size: clamp(16px, 2.3vw, 22px); max-width: 500px; line-height: 1.4;"></p>
+        <button class="btn-action" style="background:#3b82f6; box-shadow: 0 6px 0 #1d4ed8;" onclick="dismissExplanation()">Try Again 🔄</button>
+    </div>
+
+    <div id="chalkboard-screen" class="screen-container fullscreen-overlay">
+        <div class="chalkboard">
+            <p id="chalkboard-msg" class="chalkboard-text"></p>
+        </div>
+        <button id="chalkboard-btn" class="btn-action" onclick="advanceFromChalkboard()">Next Level ➔</button>
+    </div>
+
+    <div id="victory-screen" class="screen-container fullscreen-overlay" style="background: linear-gradient(#0f172a, #1e1b4b);">
+        <div style="font-size: clamp(80px, 15vh, 120px); animation: bounceFloat 2.5s infinite ease-in-out;">🏆</div>
+        <h1 style="color: #f59e0b; font-size: clamp(28px, 5vw, 42px); font-weight: 900;">Master Architect!</h1>
+        <p style="font-size: clamp(16px, 2.5vw, 22px); max-width: 550px; color: #cbd5e1;">You know all about different houses, rooms, and how to keep your home safe and clean!</p>
+        <button class="btn-action" onclick="resetEntireGame()">Play Again 🔄</button>
+    </div>
+
+    <script>
+        // High-Speed Level 1 Image Caching Declarations
+        const lvl1Images = ["assets/building.png", "assets/hut.png", "assets/igloo.png"];
+        lvl1Images.forEach(src => { const i = new Image(); i.src = src; });
+
+        // Defer Level 2 & 3 Background Asset Buffering
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const deferred = [
+                    "assets/kitchen.png", "assets/bedroom.png", "assets/livingroom.png",
+                    "assets/throwingwaste.png", "assets/climbingladder.png", "assets/playingwithmatchbox.png"
+                ];
+                deferred.forEach(src => { const img = new Image(); img.src = src; });
+            }, 1500);
+            
+            // Splash auto-transition sequence
+            setTimeout(() => { jumpToScreen('welcome-screen'); }, 4500);
+        });
+
+        // Application State Tracking Variables
+        let currentLevel = 1;
+        let score = 0;
+        let currentRoundIndex = 0;
+        let currentRoundData = null;
+        let activeRounds = [];
+        let interactionLocked = false;
+
+        // Structured Game Dataset Layout Configuration
+        const gameDatabase = {
+            level1: {
+                prompt: "What building materials make this house style?",
+                rounds: [
+                    {
+                        targetImg: "assets/building.png",
+                        answerText: "Bricks, Cement, & Steel",
+                        isCorrect: true,
+                        choices: [
+                            { text: "Bricks, Cement, & Steel", isCorrect: true },
+                            { text: "Mud, Straw, & Bamboo", isCorrect: false, hint: "Mud and straw huts are found in villages, while town buildings use strong bricks and cement!" },
+                            { text: "Blocks of Ice", isCorrect: false, hint: "Ice blocks are used to build igloos in freezing cold places, not town apartments!" },
+                            { text: "Canvas Cloth & Ropes", isCorrect: false, hint: "Canvas cloth is used to pitch temporary tents, not solid brick buildings!" }
+                        ]
+                    },
+                    {
+                        targetImg: "assets/hut.png",
+                        answerText: "Mud, Straw, & Bamboo",
+                        isCorrect: true,
+                        choices: [
+                            { text: "Mud, Straw, & Bamboo", isCorrect: true },
+                            { text: "Bricks, Cement, & Steel", isCorrect: false, hint: "Bricks and cement make a strong pucca building, but a village hut is built from raw mud and straw!" },
+                            { text: "Blocks of Ice", isCorrect: false, hint: "An igloo is made from snow blocks, whereas a village hut is made of mud!" },
+                            { text: "Car Wheels & Engine", isCorrect: false, hint: "Wheels are used under mobile caravans, but a hut sits flat on mud ground!" }
+                        ]
+                    },
+                    {
+                        targetImg: "assets/igloo.png",
+                        answerText: "Blocks of Ice",
+                        isCorrect: true,
+                        choices: [
+                            { text: "Blocks of Ice", isCorrect: true },
+                            { text: "Mud, Straw, & Bamboo", isCorrect: false, hint: "Mud and straw would freeze up! Igloos are crafted purely out of frozen solid block ice!" },
+                            { text: "Canvas Cloth & Ropes", isCorrect: false, hint: "Tents utilize canvas cloth, whereas igloos are carved from thick mountain ice!" },
+                            { text: "Bricks, Cement, & Iron", isCorrect: false, hint: "Cement would crack in the intense freezing cold! Snow blocks keep an igloo insulated!" }
+                        ]
+                    }
+                ],
+                chalkboardFact: "Houses protect us from rain, heat, wind, and wild animals! Pucca houses are strong buildings made of bricks and steel, while Kutcha huts are built out of mud and straw."
+            },
+            level2: {
+                prompt: "Look at this room! What action belongs here?",
+                rounds: [
+                    {
+                        targetImg: "assets/kitchen.png",
+                        answerText: "We cook yummy food here! 🍳",
+                        isCorrect: true,
+                        choices: [
+                            { text: "We cook yummy food here! 🍳", isCorrect: true },
+                            { text: "We sleep and rest here! 🛏️", isCorrect: false, hint: "We sleep in the quiet bedroom, not in the kitchen around hot active stoves!" },
+                            { text: "We sit and welcome guests! 🛋️", isCorrect: false, hint: "Guests are welcomed out inside the living room or drawing room area!" },
+                            { text: "We take a clean bath! 🛁", isCorrect: false, hint: "The kitchen is strictly for preparing food! Bathing happens inside the bathroom." }
+                        ]
+                    },
+                    {
+                        targetImg: "assets/bedroom.png",
+                        answerText: "We sleep and rest here! 🛏️",
+                        isCorrect: true,
+                        choices: [
+                            { text: "We sleep and rest here! 🛏️", isCorrect: true },
+                            { text: "We cook yummy food here! 🍳", isCorrect: false, hint: "Cooking food inside a bedroom would make your bed sheets dirty! Food belongs in the kitchen." },
+                            { text: "We sit and welcome guests! 🛋️", isCorrect: false, hint: "The bedroom is for personal rest. We receive our visitors in the spacious living room!" },
+                            { text: "We take a clean bath! 🛁", isCorrect: false, hint: "The bedroom has furniture to keep us cozy; water splashing baths belong in the bathroom!" }
+                        ]
+                    },
+                    {
+                        targetImg: "assets/livingroom.png",
+                        answerText: "We sit and welcome guests! 🛋️",
+                        isCorrect: true,
+                        choices: [
+                            { text: "We sit and welcome guests! 🛋️", isCorrect: true },
+                            { text: "We cook yummy food here! 🍳", isCorrect: false, hint: "The living room is for conversations and family relaxation. Cooking is done inside the kitchen!" },
+                            { text: "We sleep and rest here! 🛏️", isCorrect: false, hint: "We sleep on our soft mattress inside the bedroom, not out on the common living room couch!" },
+                            { text: "We take a clean bath! 🛁", isCorrect: false, hint: "Bathing belongs in the private bathroom so you don't splash the electronic items!" }
+                        ]
+                    }
+                ],
+                chalkboardFact: "A happy home has many different rooms! Each room has its own unique purpose, like the kitchen for cooking, the bedroom for sleeping, and the living room for greeting friends."
+            },
+            level3: {
+                prompt: "Find the Safe and Clean Action!",
+                rounds: [
+                    {
+                        targetImg: "assets/throwingwaste.png",
+                        isSafetyLevel: true,
+                        choices: [
+                            { img: "assets/throwingwaste.png", text: "Throw trash in a covered bin", isCorrect: true },
+                            { img: "assets/climbingladder.png", text: "Climb high shelves", isCorrect: false, hint: "Climbing onto shelves is dangerous! The furniture can tip over and cause injuries." },
+                            { img: "assets/playingwithmatchbox.png", text: "Play with matchsticks", isCorrect: false, hint: "Playing with bright matchboxes is a fire hazard! It can cause burns on your body parts." }
+                        ]
+                    }
+                ],
+                chalkboardFact: "We must throw garbage inside a covered dustbin to prevent flies and diseases. Never play with sharp scissors, electrical plugs, or fire matchsticks, as they can hurt you!"
+            }
+        };
+
+        // Screen State Utility Switcher Engine
+        function jumpToScreen(screenId) {
+            document.querySelectorAll('.screen-container').forEach(scr => {
+                scr.classList.remove('active-screen');
+            });
+            document.getElementById(screenId).classList.add('active-screen');
+        }
+
+        // Standard Fisher-Yates Array Shuffling Loop
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Audio Handler Pipeline Core
+        function playSound(audioId) {
+            const track = document.getElementById(audioId);
+            if (track) {
+                track.currentTime = 0;
+                track.play().catch(err => console.log("Audio playback held by device security configuration"));
+            }
+        }
+
+        // Initialize Level Sequence
+        function initLevel(levelNum) {
+            currentLevel = levelNum;
+            currentRoundIndex = 0;
+            document.getElementById('hud-level').innerText = "Level: " + currentLevel + "/3";
+            
+            const levelKey = "level" + currentLevel;
+            // Duplicate active data array context
+            activeRounds = [...gameDatabase[levelKey].rounds];
+            shuffleArray(activeRounds);
+            
+            loadRound();
+        }
+
+        // Construct Dynamic Interactive Elements Into View
+        function loadRound() {
+            interactionLocked = false;
+            currentRoundData = activeRounds[currentRoundIndex];
+            const levelKey = "level" + currentLevel;
+
+            // Render Prompt Headers
+            document.getElementById('main-prompt-text').innerText = gameDatabase[levelKey].prompt;
+            
+            // Set primary image node target element
+            const mainImg = document.getElementById('main-target-img');
+            if (currentRoundData.targetImg) {
+                mainImg.src = currentRoundData.targetImg;
+                mainImg.style.display = "block";
+            } else {
+                mainImg.style.display = "none";
+            }
+
+            // Clean previous choices
+            const conveyor = document.getElementById('main-conveyor');
+            conveyor.innerHTML = "";
+
+            // Clone and Shuffle Choices Grid Context Array
+            let roundChoices = [...currentRoundData.choices];
+            shuffleArray(roundChoices);
+
+            // Reconstruct Grid Layout depending on Type
+            if (currentLevel === 3) {
+                conveyor.style.gridTemplateColumns = "repeat(auto-fit, minmax(140px, 1fr))";
+            } else {
+                conveyor.style.gridTemplateColumns = "repeat(auto-fit, minmax(150px, 1fr))";
+            }
+
+            // Loop and Append Uniform Interactive Elements via JS Data Loops
+            roundChoices.forEach(choice => {
+                const element = document.createElement('div');
+                element.className = "conveyor-item";
+                
+                // Bind choice click data
+                element.dataset.correct = choice.isCorrect;
+                element.dataset.hint = choice.hint || "";
+
+                // Inject child image assets if present (Level 3 Asset Mapping integration)
+                if (choice.img) {
+                    const imgNode = document.createElement('img');
+                    imgNode.src = choice.img;
+                    element.appendChild(imgNode);
+                }
+
+                const labelNode = document.createElement('span');
+                labelNode.innerText = choice.text;
+                element.appendChild(labelNode);
+
+                // Attach Hardware Touch Event Hooks
+                element.addEventListener('click', handleChoiceSelection);
+                conveyor.appendChild(element);
+            });
+        }
+
+        // Process Student Input Choices Action
+        function handleChoiceSelection(e) {
+            if (interactionLocked) return;
+            const selectedItem = e.currentTarget;
+            const isCorrect = selectedItem.dataset.correct === "true";
+
+            if (isCorrect) {
+                interactionLocked = true;
+                score += 10;
+                document.getElementById('hud-score').innerText = "Points: " + score;
+                selectedItem.classList.add('pulse-success');
+                playSound('snd-correct');
+
+                setTimeout(() => {
+                    currentRoundIndex++;
+                    if (currentRoundIndex < activeRounds.length) {
+                        loadRound();
+                    } else {
+                        // Level cleared! Trigger chalkboard story sequence
+                        const levelKey = "level" + currentLevel;
+                        document.getElementById('chalkboard-msg').innerText = gameDatabase[levelKey].chalkboardFact;
+                        
+                        if (currentLevel === 3) {
+                            document.getElementById('chalkboard-btn').innerText = "Finish Quest 🏆";
+                        } else {
+                            document.getElementById('chalkboard-btn').innerText = "Next Level ➔";
+                        }
+                        
+                        jumpToScreen('chalkboard-screen');
+                    }
+                }, 800);
+
+            } else {
+                // Incorrect choice path configuration
+                interactionLocked = true;
+                selectedItem.classList.add('shake-error');
+                playSound('wrong.mp3'); // Fallback string check
+                playSound('snd-wrong');
+
+                setTimeout(() => {
+                    // Update explanations frame context
+                    document.getElementById('explain-text').innerText = selectedItem.dataset.hint;
+                    jumpToScreen('explain-screen');
+                }, 600);
+            }
+        }
+
+        // Dismiss Jump Explanation Layer Screen View
+        function dismissExplanation() {
+            jumpToScreen('game-screen');
+            // Shuffle choice item containers seamlessly on current round reset
+            loadRound();
+        }
+
+        // Story Navigation Matrix Controls
+        function advanceFromChalkboard() {
+            if (currentLevel < 3) {
+                initLevel(currentLevel + 1);
+                jumpToScreen('game-screen');
+            } else {
+                // All chapters cleared completely
+                playSound('snd-cheer');
+                jumpToScreen('victory-screen');
+            }
+        }
+
+        // System Variables Master Reset
+        function resetEntireGame() {
+            score = 0;
+            document.getElementById('hud-score').innerText = "Points: 0";
+            jumpToScreen('welcome-screen');
+        }
+    </script>
+</body>
+</html>
