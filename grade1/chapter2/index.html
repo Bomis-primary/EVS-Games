@@ -37,7 +37,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH VIEW - ABSOLUTE DEAD-CENTER ALIGNMENT */
+/* CH1: SPLASH SCREEN - DEAD-CENTER ALIGNMENT */
 #splashScreen {
   background: #ffffff;
   position: fixed;
@@ -121,21 +121,44 @@ h1 {
   color: #e65100;
 }
 
-/* SNAKE BOARD CANVAS STYLING */
+/* NEW INTERACTIVE CLICKER BOARD LAYOUT */
 #gamePlayArea {
   display: block;
 }
-.board-container {
-  display: inline-block;
-  background: #faf0ec;
-  border: 5px solid #ffab91;
-  border-radius: 24px;
+.board-box {
+  width: 100%;
+  height: 260px;
+  background: #fff8f5;
+  border: 4px dashed #ffab91;
+  border-radius: 28px;
+  margin: 15px 0;
+  position: relative;
   overflow: hidden;
-  margin: 10px 0;
-  line-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-canvas {
-  background: #fafafa;
+.board-instruction {
+  font-size: 16px;
+  font-weight: bold;
+  color: #d84315;
+  position: absolute;
+  top: 15px;
+}
+.target-treat {
+  font-size: 55px;
+  cursor: pointer;
+  position: absolute;
+  transition: all 0.1s ease;
+  animation: floatBounce 1.5s infinite ease-in-out alternate;
+}
+.target-treat:active {
+  transform: scale(0.8);
+}
+@keyframes floatBounce {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-12px); }
 }
 
 /* QUIZ INTERFACE VIEW */
@@ -214,33 +237,7 @@ canvas {
   box-shadow: 0 4px 0 #e57373 !important;
 }
 
-/* DPAD CONTROLS */
-.dpad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 10px;
-  width: 160px;
-  height: 160px;
-  margin: 15px auto 0 auto;
-}
-.dpad-btn {
-  background: #fff;
-  border: 3px solid #ffcc80;
-  border-radius: 18px;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #ffcc80;
-}
-.dpad-btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 #ffcc80;
-}
-
-/* EXPLANATION REVIEW PANEL - STRICT DOTTED OUTLINE */
+/* DOTTED OUTLINE REVIEW BOX */
 .review-box {
   background: #fffdfb;
   border: 4px dotted #ff7043;
@@ -272,7 +269,7 @@ canvas {
   <div class="game-card">
     <h1>Healthy Life Quest</h1>
     <p style="font-size: 19px; line-height: 1.6; color: #e64a19; font-weight: 700; margin: 25px 0;">
-      Chomp 2 energy treats to test your skills on Food, Clothes, and Healthy Habits!
+      Tap the popping treats to gather energy and answer fun healthy riddles!
     </p>
     <button class="btn-main" onclick="bootGame()">▶ Start Quest</button>
   </div>
@@ -288,20 +285,9 @@ canvas {
     </div>
 
     <div id="gamePlayArea">
-      <div class="board-container">
-        <canvas id="stage" width="300" height="300"></canvas>
-      </div>
-
-      <div class="dpad">
-        <div></div>
-        <div class="dpad-btn" onclick="steer('UP')">⬆️</div>
-        <div></div>
-        <div class="dpad-btn" onclick="steer('LEFT')">⬅️</div>
-        <div style="background:#fdf5f2; border-radius:14px;"></div>
-        <div class="dpad-btn" onclick="steer('RIGHT')">➡️</div>
-        <div></div>
-        <div class="dpad-btn" onclick="steer('DOWN')">⬇️</div>
-        <div></div>
+      <div class="board-box">
+        <div class="board-instruction">Tap the Treat Quick! 👇</div>
+        <div id="treatElement" class="target-treat" onclick="collectTreat()">🍎</div>
       </div>
     </div>
 
@@ -362,15 +348,10 @@ const questionsBank = [
   { q: "You sit in a warm bathtub for a long time but do not use any soap. Are you clean?", a: "No, you need soap", o: ["No, you need soap", "Yes, water is enough", "Yes, the water was hot"], h: "Hint: Water alone cannot wash away sticky sweat!", r: "Soap acts like a magnet! It grabs onto sticky dirt and sweat so the water can slide them down the drain." }
 ];
 
-const canvas = document.getElementById("stage");
-const ctx = canvas.getContext("2d");
-const gridSize = 20; 
-const tileCount = canvas.width / gridSize;
+// Treat designs to cycle through on the board layout
+const fruitEmojis = ["🍎", "🥦", "🍌", "🥕", "🍊", "💧", "🥛"];
 
-let snake = [], food = {x:0, y:0};
-let dx = gridSize, dy = 0;
-let score = 0, lives = 4, targetCounter = 0; // Configured at 4 smileys
-let loopEngine = null, isPaused = false;
+let score = 0, lives = 4, targetCounter = 0; 
 let sessionQuestions = [], currentQ = null;
 let wrongAttempts = 0; 
 let quizCounter = 0; 
@@ -399,28 +380,16 @@ function bootGame() {
   lives = 4;
   targetCounter = 0;
   quizCounter = 0;
-  isPaused = false; 
-  dx = gridSize; 
-  dy = 0;
   
   sessionQuestions = shuffle([...questionsBank]);
-  
-  snake = [
-    {x: gridSize * 4, y: gridSize * 5},
-    {x: gridSize * 3, y: gridSize * 5},
-    {x: gridSize * 2, y: gridSize * 5}
-  ];
   
   document.getElementById("gamePlayArea").style.display = "block";
   document.getElementById("hudTreatsBox").style.visibility = "visible";
   document.getElementById("quizPlayArea").style.display = "none";
   
-  refreshFood();
-  syncPanel(0); // Pass 0 wrong choices initially
+  repositionTreat();
+  syncPanel(0);
   navigate("gameScreen");
-  
-  clearInterval(loopEngine);
-  loopEngine = setInterval(gameTick, 450); 
   
   sndTrack.currentTime = 0;
   sndTrack.volume = 0.2;
@@ -431,101 +400,44 @@ function syncPanel(wrongInThisTurn = 0) {
   document.getElementById("lblScore").textContent = score;
   document.getElementById("lblFood").textContent = `${targetCounter}/2`;
   
-  // DYNAMIC MOOD INDICATOR SYSTEM (4 FIXED STATUSES)
   let arrayDisplay = ["⚫", "⚫", "⚫", "⚫"];
   for (let i = 0; i < lives; i++) {
     arrayDisplay[i] = "🙂"; 
   }
-  // Change state of active warning smileys dynamically
   if (wrongInThisTurn === 1 && lives > 0) {
     arrayDisplay[lives - 1] = "🤔";
   }
-  
   document.getElementById("lblSmileys").textContent = arrayDisplay.join("");
 }
 
-function refreshFood() {
-  food.x = Math.floor(Math.random() * tileCount) * gridSize;
-  food.y = Math.floor(Math.random() * tileCount) * gridSize;
-  snake.forEach(part => {
-    if(part.x === food.x && part.y === food.y) refreshFood();
-  });
+// RANDOMIZE LOCATION OF TREAT INSIDE BOX CONTAINER
+function repositionTreat() {
+  const treat = document.getElementById("treatElement");
+  
+  // Choose a completely random healthy emoji look
+  treat.textContent = fruitEmojis[Math.floor(Math.random() * fruitEmojis.length)];
+  
+  // Frame position constraints calculations
+  const topPos = Math.floor(Math.random() * 140) + 50; 
+  const leftPos = Math.floor(Math.random() * 70) + 10; 
+  
+  treat.style.top = `${topPos}px`;
+  treat.style.left = `${leftPos}%`;
 }
 
-function steer(dir) {
-  if (isPaused) return;
-  if (dir === "UP" && dy === 0) { dx = 0; dy = -gridSize; }
-  if (dir === "DOWN" && dy === 0) { dx = 0; dy = gridSize; }
-  if (dir === "LEFT" && dx === 0) { dx = -gridSize; dy = 0; }
-  if (dir === "RIGHT" && dx === 0) { dx = gridSize; dy = 0; }
-}
-
-window.addEventListener("keydown", e => {
-  if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") steer("UP");
-  if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") steer("DOWN");
-  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") steer("LEFT");
-  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") steer("RIGHT");
-});
-
-function gameTick() {
-  if (isPaused) return;
+function collectTreat() {
+  targetCounter++;
+  sndRight.currentTime = 0;
+  sndRight.play().catch(()=>{});
+  syncPanel(0);
   
-  const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-  
-  if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-    handleFailure();
-    return;
-  }
-  
-  for (let i = 0; i < snake.length; i++) {
-    if (snake[i].x === head.x && snake[i].y === head.y) {
-      handleFailure();
-      return;
-    }
-  }
-  
-  snake.unshift(head);
-  
-  if (head.x === food.x && head.y === food.y) {
-    targetCounter++; 
-    refreshFood();
-    syncPanel(0);
-    
-    if (targetCounter >= 2) {
-      isPaused = true;
-      targetCounter = 0;
-      quizCounter = 0; 
-      triggerQuizRound();
-      return;
-    }
+  if (targetCounter >= 2) {
+    targetCounter = 0;
+    quizCounter = 0; 
+    triggerQuizRound();
   } else {
-    snake.pop();
+    repositionTreat();
   }
-  
-  renderCanvas();
-}
-
-function renderCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  ctx.fillStyle = "#ff7043";
-  ctx.beginPath();
-  ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
-  ctx.fill();
-  
-  snake.forEach((part, idx) => {
-    ctx.fillStyle = idx === 0 ? "#ff8a65" : "#ffab91";
-    ctx.beginPath();
-    ctx.roundRect(part.x + 2, part.y + 2, gridSize - 4, gridSize - 4, [8]);
-    ctx.fill();
-  });
-}
-
-function handleFailure() {
-  if (dx === gridSize) { dx = 0; dy = gridSize; }
-  else if (dy === gridSize) { dx = -gridSize; dy = 0; }
-  else if (dx === -gridSize) { dx = 0; dy = -gridSize; }
-  else if (dy === -gridSize) { dx = gridSize; dy = 0; }
 }
 
 function triggerQuizRound() {
@@ -579,7 +491,6 @@ function verifyQuizAction(element, isCorrect) {
       if (b.textContent === currentQ.a) b.classList.add("correct");
     });
     
-    // ATTACH UNIVERSAL CONVERSATIONAL FUN FACT DISCOVERY ON SUCCESS
     const msg = document.getElementById("msgContainer");
     msg.style.color = "#2e7d32";
     msg.innerHTML = `🎉 Correct! <br><span style='font-size:14px; font-weight:500; color:#5d4037;'>Fact: ${currentQ.r}</span>`;
@@ -590,7 +501,7 @@ function verifyQuizAction(element, isCorrect) {
     
     setTimeout(() => {
       evaluateRoundProgression();
-    }, 4000); // Extended slightly so they can read the fun fact corner text
+    }, 4000); 
     
   } else {
     wrongAttempts++;
@@ -606,8 +517,7 @@ function verifyQuizAction(element, isCorrect) {
       
       sndWrong.currentTime = 0;
       sndWrong.play().catch(()=>{});
-      
-      syncPanel(1); // Shifts latest active face element into thinking mode
+      syncPanel(1); 
       
     } else {
       element.classList.add("wrong");
@@ -617,7 +527,7 @@ function verifyQuizAction(element, isCorrect) {
         if (b.textContent === currentQ.a) b.classList.add("correct");
       });
       
-      lives--; // Deducts and removes smiley
+      lives--; 
       const msg = document.getElementById("msgContainer");
       msg.style.color = "#d32f2f";
       msg.textContent = "Let's check the right answer!";
@@ -628,7 +538,7 @@ function verifyQuizAction(element, isCorrect) {
       
       setTimeout(() => {
         if (lives <= 0) {
-          terminateQuest(false); // Triggers soft game over screen
+          terminateQuest(false); 
         } else {
           loadReviewScreen();
         }
@@ -661,15 +571,12 @@ function evaluateRoundProgression() {
     document.getElementById("quizPlayArea").style.display = "none";
     document.getElementById("gamePlayArea").style.display = "block";
     document.getElementById("hudTreatsBox").style.visibility = "visible";
-    isPaused = false;
-    renderCanvas();
+    repositionTreat();
   }
 }
 
 function terminateQuest(isWin) {
-  isPaused = true;
   clearTimeout(hintTimeoutTracker);
-  clearInterval(loopEngine);
   sndTrack.pause();
   sndTrack.currentTime = 0;
   
@@ -684,7 +591,6 @@ function terminateQuest(isWin) {
     sndClaps.currentTime = 0;
     sndClaps.play().catch(()=>{});
   } else {
-    // TIMEOUT GAME OVER SCREEN SPECIFICATIONS
     title.textContent = "Keep Trying, Champ! 💪";
     title.style.color = "#e64a19";
     sub.textContent = "Eat more treats to try the riddles again!";
