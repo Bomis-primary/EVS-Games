@@ -37,7 +37,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH VIEW - PERFECT LAYER SCALE AND RESPONSIVE CENTERING */
+/* CH1: SPLASH VIEW - HIGH FIDELITY DEVICE SCALING & CENTERING */
 #splashScreen {
   background: #ffffff;
   position: fixed;
@@ -46,19 +46,20 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 #splashScreen.active { 
   display: flex; 
 }
 #splashScreen img {
-  width: 45%; 
-  max-width: 260px;  
-  min-width: 150px;  
+  width: auto;
   height: auto;
+  max-width: 80vw;
+  max-height: 50vh;
   object-fit: contain;
 }
 
-/* MODERN REFRESHED PASTEL PLAY CONTAINER */
+/* REFRESHED PASTEL PLAY CONTAINER */
 .game-card {
   background: #ffffff;
   border: 6px solid #ccebca;
@@ -112,6 +113,7 @@ h1 {
   font-weight: 700;
   font-size: 14px;
   color: #2e7d32;
+  transition: opacity 0.2s ease;
 }
 
 /* SNAKE BOARD CANVAS BLOCK WRAPPER */
@@ -248,12 +250,10 @@ canvas {
 <div class="bg-blob" style="width:200px;height:200px;background:#c8e6c9;top:10%;left:5%;"></div>
 <div class="bg-blob" style="width:250px;height:250px;background:#ffe082;bottom:10%;right:5%;"></div>
 
-<!-- CH1: SPLASH VIEW -->
 <div id="splashScreen" class="screen active">
   <img src="assets/innovine-logo.png" alt="Innovine Logo">
 </div>
 
-<!-- CH2: IMMERSIVE ONE-LINER START SCREEN -->
 <div id="startScreen" class="screen">
   <div class="game-card">
     <h1>Animal Dash Quest</h1>
@@ -264,24 +264,20 @@ canvas {
   </div>
 </div>
 
-<!-- CH3: ACTIVE ENVIRONMENT CANVAS VIEWS -->
 <div id="gameScreen" class="screen">
   <div class="game-card">
     
-    <!-- SYSTEM LEVEL HUD HEADER -->
     <div class="hud-bar">
-      <div class="hud-item">🍎 Treats: <span id="lblFood">0/2</span></div>
+      <div class="hud-item" id="hudTreatsBox">🍎 Treats: <span id="lblFood">0/2</span></div>
       <div class="hud-item">⭐ Score: <span id="lblScore">0</span></div>
       <div class="hud-item" id="lblHearts">❤️❤️❤️</div>
     </div>
 
-    <!-- MAIN SNAKE ARENA ELEMENT -->
     <div id="gamePlayArea">
       <div class="board-container">
         <canvas id="stage" width="300" height="300"></canvas>
       </div>
 
-      <!-- DPAD TOUCH TARGET CONTROLLER -->
       <div class="dpad">
         <div></div>
         <div class="dpad-btn" onclick="steer('UP')">⬆️</div>
@@ -295,7 +291,6 @@ canvas {
       </div>
     </div>
 
-    <!-- FULL SIZE SEPARATE QUESTION CANVAS PANEL -->
     <div id="quizPlayArea">
       <div class="q-text" id="qContainer">Riddle statement goes right here...</div>
       <div class="hint-banner" id="hintContainer"></div>
@@ -306,7 +301,6 @@ canvas {
   </div>
 </div>
 
-<!-- CH4: DISMISSAL WIN-LOSS COMPLETION SCREEN -->
 <div id="endScreen" class="screen">
   <div class="game-card">
     <h1 id="endTitle">Quest Done!</h1>
@@ -315,7 +309,6 @@ canvas {
   </div>
 </div>
 
-<!-- TARGET SYSTEM SYSTEM FILE LAYER ELEMENT CONFIG -->
 <audio id="soundRight" preload="auto" src="assets/correct.mp3"></audio>
 <audio id="soundWrong" preload="auto" src="assets/wrong.mp3"></audio>
 <audio id="soundTrack" preload="auto" loop src="assets/snakegamesound.mp3"></audio>
@@ -346,7 +339,7 @@ let score = 0, lives = 3, targetCounter = 0;
 let loopEngine = null, isPaused = false;
 let sessionQuestions = [], currentQ = null;
 let wrongAttempts = 0; 
-let quizCounter = 0; // Tracking questions within the modern quiz sequence block
+let quizCounter = 0; 
 
 const sndRight = document.getElementById("soundRight");
 const sndWrong = document.getElementById("soundWrong");
@@ -371,21 +364,21 @@ function bootGame() {
   lives = 3;
   targetCounter = 0;
   quizCounter = 0;
-  isPaused = false; // CHRONOLOGY: Start the game running immediately!
+  isPaused = false; 
   dx = gridSize; 
   dy = 0;
   
   sessionQuestions = shuffle([...questionsBank]);
   
-  // Clean initialization of standard snake positioning configurations
   snake = [
     {x: gridSize * 4, y: gridSize * 5},
     {x: gridSize * 3, y: gridSize * 5},
     {x: gridSize * 2, y: gridSize * 5}
   ];
   
-  // Set default structural layout visible blocks
+  // Make sure game field and its HUD elements are explicitly visible
   document.getElementById("gamePlayArea").style.display = "block";
+  document.getElementById("hudTreatsBox").style.visibility = "visible";
   document.getElementById("quizPlayArea").style.display = "none";
   
   refreshFood();
@@ -393,7 +386,7 @@ function bootGame() {
   navigate("gameScreen");
   
   clearInterval(loopEngine);
-  loopEngine = setInterval(gameTick, 450); // Effortless simple movement velocity scale
+  loopEngine = setInterval(gameTick, 450); 
   
   sndTrack.currentTime = 0;
   sndTrack.volume = 0.2;
@@ -451,12 +444,11 @@ function gameTick() {
   snake.unshift(head);
   
   if (head.x === food.x && head.y === food.y) {
-    targetCounter++; // Earn 1 treat count towards quiz gating milestones
+    targetCounter++; 
     refreshFood();
     syncPanel();
     
     if (targetCounter >= 2) {
-      // 2 treats eaten! CHRONOLOGY: Hide snake screen module and slide over to next 2 questions block sequence.
       isPaused = true;
       targetCounter = 0;
       quizCounter = 0; 
@@ -473,13 +465,11 @@ function gameTick() {
 function renderCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Fancy Pastel Target Treat Circle
   ctx.fillStyle = "#ff8a80";
   ctx.beginPath();
   ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
   ctx.fill();
   
-  // Fancy Pastel Snake Body Elements
   snake.forEach((part, idx) => {
     ctx.fillStyle = idx === 0 ? "#81c784" : "#a5d6a7";
     ctx.beginPath();
@@ -489,7 +479,6 @@ function renderCanvas() {
 }
 
 function handleFailure() {
-  // Safe edge direction wrap handling without resizing or resetting structural length values
   if (dx === gridSize) { dx = 0; dy = gridSize; }
   else if (dy === gridSize) { dx = -gridSize; dy = 0; }
   else if (dx === -gridSize) { dx = 0; dy = -gridSize; }
@@ -504,8 +493,9 @@ function triggerQuizRound() {
     return;
   }
   
-  // Toggle Visibility Layout Layer Panels safely away from tiny game wrapper constraints
+  // Cleanly switch visibility: Hide the game box AND hide its treats indicator counter from the HUD
   document.getElementById("gamePlayArea").style.display = "none";
+  document.getElementById("hudTreatsBox").style.visibility = "hidden";
   document.getElementById("quizPlayArea").style.display = "block";
   
   currentQ = sessionQuestions.pop();
@@ -530,7 +520,6 @@ function triggerQuizRound() {
 
 function verifyQuizAction(element, isCorrect) {
   if (isCorrect) {
-    // SCORING PROGRESSION: Increments explicitly with simple +1 value scale!
     score += 1;
     
     document.querySelectorAll(".opt-card").forEach(b => {
@@ -542,7 +531,6 @@ function verifyQuizAction(element, isCorrect) {
     msg.style.color = "#2e7d32";
     msg.textContent = "Great Job! 🎉";
     
-    // SOUND AUDIT: Correct audio responds to correct answers immediately
     sndRight.currentTime = 0;
     sndRight.play().catch(()=>{});
     syncPanel();
@@ -562,7 +550,6 @@ function verifyQuizAction(element, isCorrect) {
       msg.style.color = "#f57c00";
       msg.textContent = "Try again! You have 1 more choice! 🤔";
       
-      // SOUND AUDIT: Wrong audio responds to wrong clicks immediately
       sndWrong.currentTime = 0;
       sndWrong.play().catch(()=>{});
       
@@ -578,7 +565,6 @@ function verifyQuizAction(element, isCorrect) {
       msg.style.color = "#d32f2f";
       msg.textContent = "Let's check the right answer!";
       
-      // SOUND AUDIT: Wrong audio responds to wrong clicks immediately
       sndWrong.currentTime = 0;
       sndWrong.play().catch(()=>{});
       syncPanel();
@@ -601,12 +587,12 @@ function evaluateRoundProgression() {
   }
   
   if (quizCounter < 2) {
-    // Block count lower than 2: continue triggering questions sequentially
     triggerQuizRound();
   } else {
-    // Block count at 2: swap visibility elements back into the snake break scene safely
+    // Return to the game loop safely: Re-display the game box AND turn the treats counter indicator back on
     document.getElementById("quizPlayArea").style.display = "none";
     document.getElementById("gamePlayArea").style.display = "block";
+    document.getElementById("hudTreatsBox").style.visibility = "visible";
     isPaused = false;
     renderCanvas();
   }
@@ -624,7 +610,6 @@ function terminateQuest(isWin) {
   if (isWin) {
     title.textContent = "Super Animal Champ! 🏆";
     title.style.color = "#2e7d32";
-    // SOUND AUDIT: Clapping noise is locked safely to only play right at final resolution screen
     sndClaps.currentTime = 0;
     sndClaps.play().catch(()=>{});
   } else {
