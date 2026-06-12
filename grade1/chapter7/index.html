@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chapter 7: My Home Game</title>
     <style>
         :root {
@@ -31,15 +31,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow: hidden;
         }
 
-        /* Responsive Scrolling Canvas Screen Wrappers */
         .screen-layout {
             display: none;
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             min-height: 100vh;
-            padding: 15px;
+            padding: 20px 15px;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
@@ -52,97 +52,100 @@
             display: flex !important;
         }
 
-        /* 1. Splash Loading Screen Alignment */
-        #splash-screen {
-            justify-content: center;
+        /* 1. Splash View Timing Hold Settings */
+        #screen-splash {
             background: #ffffff;
-            gap: 25px;
-        }
-        .splash-block {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 20px;
-            width: 100%;
+            gap: 25px;
+            z-index: 9999;
         }
         .splash-logo {
-            width: 65%;
-            max-width: 250px;
+            width: 75%;
+            max-width: 300px;
             height: auto;
+            object-fit: contain;
             animation: pulseSoft 1.5s infinite ease-in-out;
         }
         .loading-track {
-            width: 60%;
-            height: 10px;
+            width: 65%;
+            max-width: 260px;
+            height: 14px;
             background: #e2e8f0;
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
+            border: 1px solid #cbd5e1;
         }
         .loading-bar-fill {
             width: 100%;
             height: 100%;
             background: var(--clay-orange);
             transform: translateX(-100%);
-            animation: startLoad 4.5s forwards linear;
+            animation: startLoad 4.5s forwards linear; /* Matches the 5-second handoff loop */
         }
 
-        /* 2. Welcome View Setup */
-        #welcome-screen {
+        /* 2. Menu Interface Layout */
+        #screen-welcome {
             justify-content: center;
             text-align: center;
             gap: 30px;
         }
         .welcome-house {
-            font-size: clamp(70px, 18vh, 120px);
+            font-size: clamp(85px, 22vh, 140px);
             animation: floatMove 3s infinite ease-in-out;
         }
         .welcome-heading {
-            font-size: clamp(22px, 5vw, 32px);
+            font-size: clamp(26px, 6.5vw, 36px);
             color: #0369a1;
             font-weight: 800;
             line-height: 1.3;
         }
 
-        /* Action Push Buttons */
         .btn-push {
             background: var(--clay-orange);
             color: white;
             border: none;
-            padding: 15px 35px;
-            font-size: clamp(16px, 4vw, 22px);
+            padding: 16px 45px;
+            font-size: clamp(18px, 4.5vw, 24px);
             font-weight: bold;
-            border-radius: 30px;
+            border-radius: 35px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #c2410c;
+            box-shadow: 0 7px 0 #c2410c;
             transition: transform 0.05s;
         }
         .btn-push:active {
             transform: translateY(4px);
-            box-shadow: 0 2px 0 #c2410c;
+            box-shadow: 0 3px 0 #c2410c;
         }
 
-        /* Top HUD Row */
         .hud-row {
             width: 100%;
             display: flex;
             justify-content: space-between;
             background: white;
-            padding: 12px 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.04);
-            font-weight: bold;
-            font-size: clamp(14px, 3.5vw, 18px);
+            padding: 14px 20px;
+            border-radius: 16px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.04);
+            font-weight: 800;
+            font-size: clamp(15px, 4vw, 19px);
         }
 
-        /* 3. Central Interactive Question Windows */
+        /* 3. Main Display Dashboard Frame Elements */
         .main-card {
             width: 100%;
             background: white;
-            border-radius: 20px;
-            padding: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            border: 4px dashed #cbd5e1;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            border: 4px dashed #94a3b8;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -150,47 +153,51 @@
         }
         .display-frame {
             width: 100%;
-            max-height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border-radius: 12px;
+            border-radius: 16px;
+            background-color: #fafafa;
         }
         .display-frame img {
-            max-width: 100%;
-            max-height: 200px;
+            width: 100%;
+            max-width: 380px; 
+            height: auto;
+            max-height: 240px;
             object-fit: contain;
         }
         .question-bubble {
-            font-size: clamp(15px, 4vw, 19px);
+            font-size: clamp(16px, 4.2vw, 20px);
             font-weight: 700;
             text-align: center;
             color: #334155;
             line-height: 1.4;
         }
 
-        /* Multi-Image Dashboards (Level 3 Layout) */
+        /* Level 3 Large Dashboard Grid Layout */
         .multi-image-row {
             display: none;
             width: 100%;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 14px;
+            margin-bottom: 5px;
         }
         .scan-box {
-            border: 4px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 6px;
+            border: 4px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 10px;
             background: #f8fafc;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            min-height: 145px;
         }
         .scan-box img {
             width: 100%;
-            height: 75px;
+            height: auto;
+            max-height: 130px; 
             object-fit: contain;
         }
         .scan-active {
@@ -200,71 +207,106 @@
         }
         .stamp-overlay {
             position: absolute;
-            font-size: 28px;
+            font-size: clamp(14px, 3.5vw, 20px);
             font-weight: 900;
-            padding: 2px 6px;
-            border-radius: 6px;
-            transform: rotate(-15deg);
+            padding: 4px 8px;
+            border-radius: 8px;
+            transform: rotate(-12deg);
             display: none;
+            background: rgba(255,255,255,0.94);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* 4. Choice Button Arrays */
-        .choice-stack {
+        /* 4. Moving Conveyor Belt Mechanical Framework (Level 1 & 2) */
+        .conveyor-belt-system {
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            background: #475569;
+            border-top: 6px solid #334155;
+            border-bottom: 8px solid #1e293b;
+            padding: 16px 0;
+            overflow: hidden;
+            position: relative;
+            border-radius: 20px;
+            box-shadow: inset 0 8px 16px rgba(0,0,0,0.4);
         }
+        
+        /* The structural rollers under the belt */
+        .conveyor-belt-system::before {
+            content: "●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●  ●";
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            width: 100%;
+            color: #64748b;
+            font-size: 10px;
+            letter-spacing: 24px;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .conveyor-track-infinite {
+            display: flex;
+            width: max-content;
+            gap: 40px;
+            padding-left: 20px;
+            animation: moveConveyorLoop 16s linear infinite;
+        }
+
+        /* Pauses belt processing loops during touch interactions */
+        .conveyor-track-infinite:hover,
+        .conveyor-track-infinite:active {
+            animation-play-state: paused;
+        }
+
         .choice-item-btn {
             background: white;
-            border: 3px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 16px 12px;
+            border: 4px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 14px 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 15px;
             text-align: center;
             font-weight: 700;
             font-size: clamp(14px, 3.8vw, 17px);
-            color: #475569;
-            box-shadow: 0 5px 0 #cbd5e1;
-            width: 100%;
-        }
-        .choice-item-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #cbd5e1;
+            color: #1e293b;
+            box-shadow: 0 6px 0 #94a3b8;
+            flex-shrink: 0;
+            max-width: 280px;
+            white-space: normal;
         }
         .choice-item-btn img {
-            height: 60px;
+            height: 95px;
             width: auto;
             object-fit: contain;
+            border-radius: 8px;
         }
 
-        /* Level 3 Dual Stamp Button Layout */
         .stamp-row {
             display: none;
             width: 100%;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+            margin-top: 5px;
         }
         .btn-stamp {
             border: none;
-            padding: 18px;
-            font-size: 18px;
-            font-weight: bold;
+            padding: 22px 10px;
+            font-size: clamp(18px, 4.5vw, 22px);
+            font-weight: 900;
             color: white;
-            border-radius: 20px;
+            border-radius: 24px;
             cursor: pointer;
             text-align: center;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+            box-shadow: 0 7px 0 rgba(0,0,0,0.25);
         }
         .btn-danger { background: var(--brick-red); }
         .btn-safe { background: var(--grass-green); }
-        .btn-stamp:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+        .btn-stamp:active { transform: translateY(4px); box-shadow: 0 3px 0 rgba(0,0,0,0.25); }
 
-        /* Animation Feedback Utility Rules */
         .animate-shake {
             animation: shakeLeftRight 0.4s ease-in-out !important;
             border-color: var(--brick-red) !important;
@@ -278,9 +320,8 @@
             color: var(--grass-green) !important;
         }
 
-        /* Fullscreen Overlay Jumps */
         .overlay-screen {
-            background: rgba(15, 23, 42, 0.96);
+            background: rgba(15, 23, 42, 0.97);
             color: white;
             justify-content: center;
             text-align: center;
@@ -289,24 +330,28 @@
         }
         .blackboard {
             background: var(--board-green);
-            border: 10px solid #b45309;
-            border-radius: 12px;
-            padding: 25px 15px;
+            border: 12px solid #b45309;
+            border-radius: 16px;
+            padding: 30px 20px;
             width: 100%;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
         }
         .blackboard-text {
-            font-size: clamp(16px, 4vw, 22px);
+            font-size: clamp(17px, 4.2vw, 22px);
             color: #f0fdf4;
             line-height: 1.5;
             font-weight: bold;
         }
 
-        /* CSS GPU Keyframe Configurations */
+        /* 5. Translation Animation Vector Spaces */
+        @keyframes moveConveyorLoop {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-33.33% - 13px)); } /* Perfect infinite offset alignment loop */
+        }
         @keyframes startLoad { from { transform: translateX(-100%); } to { transform: translateX(0%); } }
         @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-        @keyframes floatMove { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes pulsePop { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
+        @keyframes floatMove { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulsePop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         @keyframes pulseBorder { from { border-color: #cbd5e1; } to { border-color: #eab308; } }
         @keyframes shakeLeftRight {
             0%, 100% { transform: translateX(0); }
@@ -322,21 +367,22 @@
     <audio id="audio-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="audio-cheer" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
-    <div id="screen-splash" class="screen-layout active-view">
-        <div class="splash-block">
-            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
-            <div class="loading-track">
-                <div class="loading-bar-fill"></div>
-            </div>
+    <!-- 1. Centered Splash View Stack -->
+    <div id="screen-splash">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
+        <div class="loading-track">
+            <div class="loading-bar-fill"></div>
         </div>
     </div>
 
+    <!-- 2. Welcome Menu Interface -->
     <div id="screen-welcome" class="screen-layout">
         <div class="welcome-house">🏠</div>
-        <h1 class="welcome-heading">Build and Protect<br>Your Dream Home!</h1>
+        <h1 class="welcome-heading">My Home Game!</h1>
         <button class="btn-push" onclick="changeScreen('screen-game'); startNewLevel(1);">▶ Start Game</button>
     </div>
 
+    <!-- 3. Core Gameplay Space -->
     <div id="screen-game" class="screen-layout">
         <div class="hud-row">
             <span id="hud-level-lbl">Level: 1/3</span>
@@ -344,33 +390,41 @@
         </div>
 
         <div class="main-card">
+            <!-- Level 3 Layout Space -->
             <div id="dashboard-split" class="multi-image-row">
                 <div id="box-waste" class="scan-box"><img src="assets/throwingwaste.png"><div class="stamp-overlay"></div></div>
                 <div id="box-ladder" class="scan-box"><img src="assets/climbingladder.png"><div class="stamp-overlay"></div></div>
                 <div id="box-matches" class="scan-box"><img src="assets/playingwithmatchbox.png"><div class="stamp-overlay"></div></div>
             </div>
 
+            <!-- Level 1 & 2 Graphics Target Workspace Canvas -->
             <div id="canvas-img-frame" class="display-frame">
                 <img id="canvas-target-pic" src="">
             </div>
-            <div id="canvas-prompt-msg" class="question-bubble">Loading question...</div>
+            <div id="canvas-prompt-msg" class="question-bubble">Loading...</div>
         </div>
 
-        <div id="wrapper-choices" class="choice-stack"></div>
+        <!-- Animated Conveyor Belt Platform Container Element Wrapper (Level 1 & 2) -->
+        <div id="wrapper-conveyor-housing" class="conveyor-belt-system">
+            <div id="wrapper-choices" class="conveyor-track-infinite"></div>
+        </div>
 
+        <!-- Level 3 Double Macro Stamp Inputs -->
         <div id="wrapper-stamps" class="stamp-row">
             <button class="btn-stamp btn-danger" onclick="evaluateStampInput(false)">🛑 DANGER</button>
             <button class="btn-stamp btn-safe" onclick="evaluateStampInput(true)">💪 SAFE</button>
         </div>
     </div>
 
+    <!-- 4. Explanation Overlay Screen View -->
     <div id="screen-explain" class="screen-layout overlay-screen">
         <div style="font-size: 65px;">💡</div>
         <h2 style="color: #f59e0b; font-size: 26px;">Let's Think!</h2>
-        <p id="explain-message-text" style="font-size: 17px; max-width: 400px; line-height: 1.5; font-weight: 600;"></p>
+        <p id="explain-message-text" style="font-size: 18px; max-width: 420px; line-height: 1.5; font-weight: 600;"></p>
         <button class="btn-push" style="background:#3b82f6; box-shadow: 0 6px 0 #1d4ed8;" onclick="returnToGameLayout()">Try Again 🔄</button>
     </div>
 
+    <!-- 5. Chalkboard Classroom Story Transition Screen View -->
     <div id="screen-chalkboard" class="screen-layout overlay-screen">
         <div class="blackboard">
             <p id="chalkboard-story-txt" class="blackboard-text"></p>
@@ -378,6 +432,7 @@
         <button id="chalkboard-next-btn" class="btn-push" onclick="progressFromChalkboard()">Next Level ➔</button>
     </div>
 
+    <!-- 6. Celebration Trophy Final Screen View -->
     <div id="screen-victory" class="screen-layout overlay-screen" style="background: #1e1b4b;">
         <div style="font-size: 90px; animation: floatMove 2.5s infinite ease-in-out;">🏆</div>
         <h1 style="color: #f59e0b; font-size: 32px; font-weight: 900;">Super Eco Hero!</h1>
@@ -386,11 +441,9 @@
     </div>
 
     <script>
-        // High-Speed Active Preload Layer for Level 1 Assets
         const priorityPics = ["assets/building.png", "assets/hut.png", "assets/igloo.png"];
         priorityPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
 
-        // Background Deferred Asset Preload Loop
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const backgroundPics = [
@@ -398,13 +451,15 @@
                     "assets/throwingwaste.png", "assets/climbingladder.png", "assets/playingwithmatchbox.png"
                 ];
                 backgroundPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
-            }, 1200);
+            }, 1000);
 
-            // Auto-advance Splash view layer
-            setTimeout(() => { changeScreen('screen-welcome'); }, 4500);
+            // Exactly 5000ms delay hold logic before system boots welcome space
+            setTimeout(() => { 
+                document.getElementById('screen-splash').style.display = 'none';
+                changeScreen('screen-welcome'); 
+            }, 5000);
         });
 
-        // App Runtime Variables
         let activeLevel = 1;
         let scoreCounter = 0;
         let roundIndex = 0;
@@ -412,91 +467,84 @@
         let setList = [];
         let controlLock = false;
 
-        // Simplified Grade-1 Context Content Array Database
         const contentDataMap = {
             level1: {
-                instruction: "Read the hint. Choose the correct house!",
                 rounds: [
                     {
-                        isVisualChoice: true,
-                        prompt: "Heavy rain and strong winds hit a town. Which solid house built with bricks and cement stays strong?",
-                        choices: [
-                            { img: "assets/building.png", isCorrect: true },
-                            { img: "assets/hut.png", isCorrect: false, hint: "A village mud hut is a weak house. Strong wind can break its straw roof!" },
-                            { img: "assets/igloo.png", isCorrect: false, hint: "An igloo is built from cold blocks of ice, not for people living in towns!" }
-                        ]
-                    },
-                    {
-                        isVisualChoice: true,
-                        prompt: "It is freezing cold and snowing on a mountain. Which dome home is built out of hard blocks of white ice?",
+                        prompt: "Brrr! Look at all this mountain snow! Chiku the monkey is shivering in the freezing wind. Help him build a cozy ice-block dome before the big snowman finds him. Where should he hide?",
                         choices: [
                             { img: "assets/igloo.png", isCorrect: true },
-                            { img: "assets/building.png", isCorrect: false, hint: "Brick buildings are made for cities, not for deep freezing snow mountains!" },
-                            { img: "assets/hut.png", isCorrect: false, hint: "Mud huts would freeze completely! Snow blocks keep the inside of an igloo warm." }
+                            { img: "assets/building.png", isCorrect: false, hint: "Oh no! Mud and regular town bricks will crack and freeze in deep mountain snow. Chiku needs a special ice block home to trap the warm air inside!" },
+                            { img: "assets/hut.png", isCorrect: false, hint: "A mud hut will freeze completely! Only thick ice blocks can keep out the shivering mountain storm." }
                         ]
                     },
                     {
-                        isVisualChoice: true,
-                        prompt: "A poor village farmer wants to make a simple, low-cost Kutcha house out of natural mud and straw. What should he build?",
+                        prompt: "Beep-beep! Welcome to Mumbai city! There are thousands of cars, autos, and families here, but no free land left on the ground. Where can Raju's home stand so it touches the clouds?",
+                        choices: [
+                            { img: "assets/building.png", isCorrect: true },
+                            { img: "assets/hut.png", isCorrect: false, hint: "Think about the busy city! A village mud hut takes up too much flat ground space where cars drive. A tall building stacks homes high up into the sky so everyone fits safely!" },
+                            { img: "assets/igloo.png", isCorrect: false, hint: "An igloo is made from soft freezing snow blocks, you will not find them inside a hot, concrete town city landscape!" }
+                        ]
+                    },
+                    {
+                        prompt: "Moo! Mother Cow is walking through a beautiful green farm village. The farmer wants to build a sweet little home today using only the soft wet mud and dry straw grass under his feet. What will he make?",
                         choices: [
                             { img: "assets/hut.png", isCorrect: true },
-                            { img: "assets/building.png", isCorrect: false, hint: "Brick apartment buildings cost lots of money and require cement blocks!" },
-                            { img: "assets/igloo.png", isCorrect: false, hint: "An igloo requires blocks of frozen mountain ice, not mud fields!" }
+                            { img: "assets/building.png", isCorrect: false, hint: "Wait! There are no big cement concrete mixers or mountain ice blocks in a green farm field. The farmer must use the grass and mud to make a simple kutcha hut!" },
+                            { img: "assets/igloo.png", isCorrect: false, hint: "There is no mountain snow in a warm green farming field to carve ice block structures!" }
                         ]
                     }
                 ],
-                summary: "Houses protect us from hot sun, cold wind, rain, and wild animals! Strong houses are built with bricks. Weak huts are made with mud."
+                summary: "Houses keep us safe from the hot sun, cold wind, rain, and wild animals! Strong houses use bricks. Weak huts use mud."
             },
             level2: {
-                instruction: "Look at the room carefully!",
                 rounds: [
                     {
                         bgImage: "assets/kitchen.png",
-                        prompt: "Look at this kitchen! Someone left a soft sleeping pillow right next to the hot gas stove. Why is this wrong?",
+                        prompt: "Oh no! The Naughty Messy Monster ran into the kitchen! Mother wants to turn on the gas stove to make hot, delicious rotis, but the monster hid a bedroom object right on top of the counter! Find the wrong item!",
                         choices: [
-                            { text: "Pillows belong in the bedroom! It can catch fire near a hot stove.", isCorrect: true },
-                            { text: "A kitchen always needs a cold refrigerator to store fresh milk.", isCorrect: false, hint: "That is true, but it does not fix the dangerous sleeping pillow sitting on the hot stove!" },
-                            { text: "This is a living room where we sit and talk with guests.", isCorrect: false, hint: "Look closer! There is a cooking stove here. This is the kitchen room!" }
+                            { text: "A soft sleeping pillow is resting on the hot stove counter.", isCorrect: true },
+                            { text: "A cold refrigerator is keeping the milk fresh and chilly.", isCorrect: false, hint: "Look right next to the cooking fire! A soft pillow belongs under your head in the bedroom. If it touches the hot stove counter, it can catch fire instantly!" },
+                            { text: "A kitchen shelf is holding the small spice boxes neatly.", isCorrect: false, hint: "Spice box rows are supposed to be kept right inside cooking spaces to prepare tasty dishes!" }
                         ]
                     },
                     {
                         bgImage: "assets/bedroom.png",
-                        prompt: "Look at this bedroom! A sharp, wet kitchen knife was left on the bed blanket where you sleep. What must you do?",
+                        prompt: "Yawn! Mina is so tired after school and wants to jump onto her bed for a nice afternoon nap. But wait! The Messy Monster dropped a dangerous kitchen tool right on her soft blanket! Why must she stop?",
                         choices: [
-                            { text: "Move the sharp knife to the kitchen! It can cut you in bed.", isCorrect: true },
-                            { text: "Leave it on the blanket because bed pillows are safe.", isCorrect: false, hint: "No! A sharp knife in bed is very dangerous and can cause cuts while you sleep!" },
-                            { text: "Go take a splashy water bath inside the bathroom.", isCorrect: false, hint: "Taking a bath is nice, but it does not remove the dangerous knife from your bed sheets!" }
+                            { text: "A sharp kitchen knife is lying flat on her bed sheets.", isCorrect: true },
+                            { text: "A cozy, warm blanket is spread smoothly over the mattress.", isCorrect: false, hint: "Look right at the middle of the bed! A sharp cooking knife belongs inside a closed kitchen drawer. If Mina jumps on her bed by mistake, it will cut her hand!" },
+                            { text: "A clean glass of drinking water is sitting on the side table.", isCorrect: false, hint: "Water glasses on side tables are perfectly safe for when you wake up feeling thirsty at night." }
                         ]
                     },
                     {
                         bgImage: "assets/livingroom.png",
-                        prompt: "Look at this living room! Someone brought a bucket of soapy water here and spilled it all over the floor by the sofa. Why is this bad?",
+                        prompt: "Ding-dong! A special guest has arrived at the front door to sit on the living room sofa. But look! The Messy Monster spilled something from the washroom all over the floor! Why did the guest slip and fall?",
                         choices: [
-                            { text: "Bathwater belongs in the bathroom! Spilled water makes guests slip and fall.", isCorrect: true },
-                            { text: "Turn on the television set to watch funny cartoons.", isCorrect: false, hint: "Watching TV is fun, but someone might still step on the wet puddle and slip down!" },
-                            { text: "We must drink fresh glass water while sitting on the sofa.", isCorrect: false, hint: "This is dirty, soapy puddle water from a bucket, not clean drinking water!" }
+                            { text: "A big puddle of soapy washroom water is covering the floor tiles.", isCorrect: true },
+                            { text: "A colorful, soft rug is placed neatly under the tea table.", isCorrect: false, hint: "Look closely near the sofa legs! Soapy wash water belongs inside the bathroom bucket. Spilling it on the living room tiles makes the floor as slippery as a water slide!" },
+                            { text: "The television set is playing a quiet cartoon program.", isCorrect: false, hint: "A cartoon program on the screen cannot make your visitors slip or stumble down onto the floor surface!" }
                         ]
                     }
                 ],
-                summary: "A good home has many clean rooms. Every room has its own work. We cook in the kitchen, sleep in the bedroom, and greet guests in the living room."
+                summary: "Our home has different rooms. Every room has its own work. We cook in the kitchen, sleep in the bedroom, and welcome guests in the living room."
             },
             level3: {
                 rounds: [
-                    { target: "matches", isSafe: false, text: "A child is sitting alone and striking matches from a real box. If a tiny fire spark jumps on the cloth curtains, what will happen?", hint: "Fire grows very fast on cloth and wood. Matchboxes are tools for grown-ups, never toys for kids!" },
-                    { target: "ladder", isSafe: false, text: "A child is climbing very high up on a shaky step ladder to grab a toy. If the heavy frame tilts over, what will happen?", hint: "Falling down from high ladders onto hard floors causes bad bone hurts. Always ask a grown-up to help you get high toys!" },
-                    { target: "waste", isSafe: true, text: "A boy is walking in a green open park and carefully throws his trash inside a proper waste bin. Why is this a great habit?", hint: "Cleaning up outdoor parks and gardens keeps our world safe and stops bad flies or bugs from spreading sickness!" }
+                    { target: "matches", isSafe: false, text: "Super-Hero Alert! A little boy is sitting all alone on the carpet, striking matchsticks from a matchbox just for fun. Use your power! Is this safe or danger?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire in seconds. Matchboxes are tools for grown-ups, never toys for kids!" },
+                    { target: "ladder", isSafe: false, text: "Look up there! A little girl is standing on her tiptoes, climbing a very high, shaky wooden ladder to grab a toy from the top shelf. Quick, make your judgment!", hint: "Watch out! Shaky ladders can tip over with one small wobble. Falling from that high up onto a hard floor will break bones. She must wait and ask a grown-up for help!" },
+                    { target: "waste", isSafe: true, text: "Mission check! A good boy just finished eating his chocolate snack in the park. He picks up the empty plastic wrapper and drops it right into the green dustbin. What do you say, Hero?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from coming to spread sickness around our families." }
                 ],
-                summary: "We must throw garbage inside a covered bin to keep flies away. Never play with sharp objects, electrical sockets, or fire matchsticks, as they can hurt you!"
+                summary: "Throw trash inside a closed bin to keep bugs away. Never play with sharp knives, hot stoves, or fire matchsticks because they can hurt you!"
             }
         };
 
-        // Screen Routing Engine
         function changeScreen(id) {
             document.querySelectorAll('.screen-layout').forEach(s => s.classList.remove('active-view'));
-            document.getElementById(id).classList.add('active-view');
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active-view');
         }
 
-        // Shuffle Utility Loop
         function scramble(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -505,7 +553,6 @@
             return array;
         }
 
-        // Trigger Sound Wrapper
         function playAudioClip(id) {
             const clip = document.getElementById(id);
             if (clip) {
@@ -514,7 +561,6 @@
             }
         }
 
-        // Start Level Configuration
         function startNewLevel(lvlNum) {
             activeLevel = lvlNum;
             roundIndex = 0;
@@ -524,15 +570,12 @@
             setList = [...contentDataMap[key].rounds];
             scramble(setList);
 
-            // Toggle Layout panels depending on current level mode rules
             if (activeLevel === 3) {
                 document.getElementById('dashboard-split').style.display = "grid";
                 document.getElementById('canvas-img-frame').style.display = "none";
-                document.getElementById('wrapper-choices').style.display = "none";
-                document.getElementById('wrapper-stamps').style.style;
+                document.getElementById('wrapper-conveyor-housing').style.display = "none";
                 document.getElementById('wrapper-stamps').style.display = "grid";
                 
-                // Reset Level 3 stamp views
                 document.querySelectorAll('.scan-box').forEach(b => {
                     b.className = "scan-box";
                     b.querySelector('.stamp-overlay').style.display = "none";
@@ -540,34 +583,35 @@
             } else {
                 document.getElementById('dashboard-split').style.display = "none";
                 document.getElementById('canvas-img-frame').style.display = "flex";
-                document.getElementById('wrapper-choices').style.display = "flex";
+                document.getElementById('wrapper-conveyor-housing').style.display = "block";
                 document.getElementById('wrapper-stamps').style.display = "none";
             }
 
             loadRoundData();
         }
 
-        // Render Current Question Options
         function loadRoundData() {
             controlLock = false;
             roundItem = setList[roundIndex];
 
+            // Resume smooth conveyor motion states when reloading rounds
+            const track = document.getElementById('wrapper-choices');
+            track.style.animationPlayState = "running";
+
             if (activeLevel === 1) {
                 document.getElementById('canvas-target-pic').style.display = "none";
                 document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
-                buildVisualChoices(roundItem.choices);
+                buildVisualBeltOptions(roundItem.choices);
             } 
             else if (activeLevel === 2) {
                 const imgNode = document.getElementById('canvas-target-pic');
                 imgNode.src = roundItem.bgImage;
                 imgNode.style.display = "block";
                 document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
-                buildTextChoices(roundItem.choices);
+                buildTextBeltOptions(roundItem.choices);
             } 
             else if (activeLevel === 3) {
                 document.querySelectorAll('.scan-box').forEach(b => b.classList.remove('scan-active'));
-                
-                // Highlight corresponding scan panel block box
                 const activeBox = document.getElementById("box-" + roundItem.target);
                 if (activeBox) activeBox.classList.add('scan-active');
                 
@@ -575,14 +619,17 @@
             }
         }
 
-        // Render Level 1 Visual Image Buttons
-        function buildVisualChoices(choicesArray) {
-            const listContainer = document.getElementById('wrapper-choices');
-            listContainer.innerHTML = "";
-            let pool = [...choicesArray];
-            scramble(pool);
+        // Conveyor Belt DOM Builder logic replicates items three times for flawless infinite scrolling loops
+        function buildVisualBeltOptions(choicesArray) {
+            const track = document.getElementById('wrapper-choices');
+            track.innerHTML = "";
+            let basePool = [...choicesArray];
+            scramble(basePool);
 
-            pool.forEach(c => {
+            // Triple duplicate layout inject loop pattern
+            const finalPool = [...basePool, ...basePool, ...basePool];
+
+            finalPool.forEach(c => {
                 const btn = document.createElement('button');
                 btn.className = "choice-item-btn";
                 btn.dataset.correct = c.isCorrect;
@@ -593,18 +640,19 @@
                 btn.appendChild(img);
 
                 btn.addEventListener('click', processPlayerClick);
-                listContainer.appendChild(btn);
+                track.appendChild(btn);
             });
         }
 
-        // Render Level 2 Text Options Buttons
-        function buildTextChoices(choicesArray) {
-            const listContainer = document.getElementById('wrapper-choices');
-            listContainer.innerHTML = "";
-            let pool = [...choicesArray];
-            scramble(pool);
+        function buildTextBeltOptions(choicesArray) {
+            const track = document.getElementById('wrapper-choices');
+            track.innerHTML = "";
+            let basePool = [...choicesArray];
+            scramble(basePool);
 
-            pool.forEach(c => {
+            const finalPool = [...basePool, ...basePool, ...basePool];
+
+            finalPool.forEach(c => {
                 const btn = document.createElement('button');
                 btn.className = "choice-item-btn";
                 btn.dataset.correct = c.isCorrect;
@@ -615,28 +663,29 @@
                 btn.appendChild(txt);
 
                 btn.addEventListener('click', processPlayerClick);
-                listContainer.appendChild(btn);
+                track.appendChild(btn);
             });
         }
 
-        // Evaluate Selection Input for Levels 1 and 2
         function processPlayerClick(e) {
             if (controlLock) return;
+            controlLock = true;
+
             const btn = e.currentTarget;
             const isCorrect = btn.dataset.correct === "true";
+            const track = document.getElementById('wrapper-choices');
+            
+            // Lock conveyor belt in place immediately upon decision processing
+            track.style.animationPlayState = "paused";
 
             if (isCorrect) {
-                controlLock = true;
                 scoreCounter += 10;
                 document.getElementById('hud-score-lbl').innerText = "Points: " + scoreCounter;
                 btn.classList.add('animate-pulse');
                 playAudioClip('audio-right');
 
-                setTimeout(() => {
-                    advanceRoundIndex();
-                }, 800);
+                setTimeout(() => { advanceRoundIndex(); }, 800);
             } else {
-                controlLock = true;
                 btn.classList.add('animate-shake');
                 playAudioClip('audio-wrong');
 
@@ -647,7 +696,6 @@
             }
         }
 
-        // Evaluate Input Stamps for Level 3
         function evaluateStampInput(pressedSafeButton) {
             if (controlLock) return;
             const targetIsSafe = roundItem.isSafe;
@@ -660,22 +708,19 @@
                 document.getElementById('hud-score-lbl').innerText = "Points: " + scoreCounter;
                 playAudioClip('audio-right');
 
-                // Render Visual Stamp Overlays on target block
                 if (targetIsSafe) {
                     stampElement.innerText = "SAFE ✅";
                     stampElement.style.color = "var(--grass-green)";
-                    stampElement.style.border = "3px solid var(--grass-green)";
+                    stampElement.style.border = "4px solid var(--grass-green)";
                 } else {
                     stampElement.innerText = "DANGER 🛑";
                     stampElement.style.color = "var(--brick-red)";
-                    stampElement.style.border = "3px solid var(--brick-red)";
+                    stampElement.style.border = "4px solid var(--brick-red)";
                 }
                 stampElement.style.display = "block";
                 targetBox.classList.remove('scan-active');
 
-                setTimeout(() => {
-                    advanceRoundIndex();
-                }, 900);
+                setTimeout(() => { advanceRoundIndex(); }, 900);
             } else {
                 controlLock = true;
                 targetBox.classList.add('animate-shake');
@@ -689,7 +734,6 @@
             }
         }
 
-        // Handle Round Index Progression Logic
         function advanceRoundIndex() {
             roundIndex++;
             if (roundIndex < setList.length) {
@@ -707,13 +751,11 @@
             }
         }
 
-        // Return from help view box screen
         function returnToGameLayout() {
             changeScreen('screen-game');
-            loadRoundData(); // Shuffles layout options again automatically
+            loadRoundData();
         }
 
-        // Handle Chalkboard Navigation Buttons
         function progressFromChalkboard() {
             if (activeLevel < 3) {
                 startNewLevel(activeLevel + 1);
@@ -724,7 +766,6 @@
             }
         }
 
-        // Full App Restart
         function restartWholeApp() {
             scoreCounter = 0;
             document.getElementById('hud-score-lbl').innerText = "Points: 0";
