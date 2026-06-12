@@ -33,7 +33,6 @@
             align-items: center;
         }
 
-        /* FIXED: Added vertical scrolling so kids can push the screen up and down */
         .screen-layout {
             display: none;
             width: 100%;
@@ -52,7 +51,7 @@
             display: flex !important;
         }
 
-        /* Splash Screen (5-Second Handoff) */
+        /* 5-Second Splash Screen Handoff Framework */
         #screen-splash {
             background: #ffffff;
             position: fixed;
@@ -89,7 +88,7 @@
             animation: startLoad 4.5s forwards linear;
         }
 
-        /* Welcome Screen Space */
+        /* Menu Interface */
         #screen-welcome {
             justify-content: center;
             text-align: center;
@@ -134,7 +133,7 @@
             flex-shrink: 0;
         }
 
-        /* Question Frame Setup */
+        /* Primary Card Deck Canvas */
         .main-card {
             width: 100%;
             background: white;
@@ -150,11 +149,14 @@
         }
         .display-frame {
             width: 100%;
+            height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 16px;
             background-color: #fafafa;
+            overflow: hidden;
+            position: relative;
         }
         .display-frame img {
             width: 100%;
@@ -163,6 +165,23 @@
             max-height: 220px;
             object-fit: contain;
         }
+
+        /* Pure CSS Native Emojis Render Blocks (For Scenario 5 & 6) */
+        .native-css-canvas {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 65px;
+            gap: 10px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+        .canvas-blue {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+
         .question-bubble {
             font-size: clamp(16px, 4.2vw, 20px);
             font-weight: 700;
@@ -172,43 +191,7 @@
             white-space: pre-line;
         }
 
-        /* Level 3 Macro Item Grid Grid */
-        .multi-image-row {
-            display: none;
-            width: 100%;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-        .scan-box {
-            border: 4px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 8px;
-            background: #f8fafc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            min-height: 140px;
-        }
-        .scan-box img {
-            width: 100%;
-            height: auto;
-            max-height: 120px; 
-            object-fit: contain;
-        }
-        .stamp-overlay {
-            position: absolute;
-            font-size: 16px;
-            font-weight: 900;
-            padding: 4px 6px;
-            border-radius: 8px;
-            transform: rotate(-12deg);
-            display: none;
-            background: rgba(255,255,255,0.95);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        /* Conveyor Belt Framework Mechanics */
+        /* Swipeable Conveyor Belt Mechanical Architecture */
         .conveyor-belt-system {
             width: 100%;
             background: #475569;
@@ -231,7 +214,7 @@
             width: max-content;
             gap: 25px;
             padding: 0 20px;
-            animation: moveConveyorLoop 22s linear infinite;
+            animation: moveConveyorLoop 25s linear infinite;
         }
 
         .conveyor-belt-system:active .conveyor-track-infinite {
@@ -262,6 +245,7 @@
             object-fit: contain;
         }
 
+        /* Flashcard Double Stamp Array Framework (Level 3) */
         .stamp-row {
             display: none;
             width: 100%;
@@ -282,6 +266,21 @@
         .btn-danger { background: var(--brick-red); }
         .btn-safe { background: var(--grass-green); }
         .btn-stamp:active { transform: translateY(4px); box-shadow: 0 3px 0 rgba(0,0,0,0.25); }
+
+        .stamp-feedback-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-10deg);
+            font-size: 42px;
+            font-weight: 950;
+            padding: 10px 20px;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 10;
+        }
 
         .animate-shake { animation: shakeLeftRight 0.4s ease-in-out; border-color: var(--brick-red)!important; background: #fef2f2!important; }
         .animate-pulse { animation: pulsePop 0.4s ease-in-out; border-color: var(--grass-green)!important; background: #f0fdf4!important; }
@@ -351,14 +350,12 @@
         </div>
 
         <div class="main-card">
-            <div id="dashboard-split" class="multi-image-row">
-                <div id="box-waste" class="scan-box"><img src="assets/throwingwaste.png"><div class="stamp-overlay"></div></div>
-                <div id="box-ladder" class="scan-box"><img src="assets/climbingladder.png"><div class="stamp-overlay"></div></div>
-                <div id="box-matches" class="scan-box"><img src="assets/playingwithmatchbox.png"><div class="stamp-overlay"></div></div>
-            </div>
-
             <div id="canvas-img-frame" class="display-frame">
                 <img id="canvas-target-pic" src="">
+                
+                <div id="canvas-css-render" class="native-css-canvas" style="display:none;"></div>
+                
+                <div id="stamp-alert-overlay" class="stamp-feedback-overlay"></div>
             </div>
             
             <div id="canvas-prompt-msg" class="question-bubble">Loading...</div>
@@ -408,7 +405,7 @@
                 backgroundPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
             }, 1000);
 
-            // 5-second precise runtime handoff hold to screen-welcome
+            // Exactly 5000ms delay hold logic before booting screen-welcome
             setTimeout(() => { 
                 document.getElementById('screen-splash').style.display = 'none';
                 changeScreen('screen-welcome'); 
@@ -422,32 +419,43 @@
         let setList = [];
         let controlLock = false;
 
-        // FIXED: Every single question restricted to a crisp maximum of 2 lines
+        // Expanded Decoy Choices Pool to prevent pattern predictability and memorization tricks
+        const universalDecoyPool = {
+            level1: [
+                { img: "assets/tent_decoy.png", label: "Tent" }, 
+                { img: "assets/treehouse_decoy.png", label: "Treehouse" },
+                { img: "assets/doghouse_decoy.png", label: "Doghouse" }
+            ],
+            level2: [
+                "A clean frying pan", "A wooden toy blocks car", "A colorful story book", "A soft pair of slippers", "A metal kitchen toaster"
+            ]
+        };
+
         const contentDataMap = {
             level1: {
                 rounds: [
                     {
-                        prompt: "Brrr! Chiku the monkey is freezing in the snow! ❄️\nHelp him find a cozy house made of ice blocks.",
-                        choices: [
-                            { img: "assets/igloo.png", isCorrect: true },
-                            { img: "assets/building.png", isCorrect: false, hint: "Oh no! Mud and town bricks will crack and freeze in deep snow. Chiku needs a special ice block home to stay warm!" },
-                            { img: "assets/hut.png", isCorrect: false, hint: "A mud hut will freeze completely! Only thick ice blocks can keep out the shivering mountain storm." }
+                        prompt: "Brrr! Chiku the monkey is freezing in the mountain snow! ❄️\nWhere should he hide to stay warm?",
+                        correctChoice: { img: "assets/igloo.png" },
+                        wrongHints: [
+                            "Oh no! Mud and regular town bricks will crack and freeze in deep mountain snow. Chiku needs a special ice block dome!",
+                            "A mud hut will freeze completely! Only thick ice blocks can keep out the shivering mountain storm."
                         ]
                     },
                     {
-                        prompt: "Welcome to busy Mumbai city! 🚗\nWhich tall building stands way high up inside the clouds?",
-                        choices: [
-                            { img: "assets/building.png", isCorrect: true },
-                            { img: "assets/hut.png", isCorrect: false, hint: "Think about the busy city! A village mud hut takes up too much flat ground space. A tall building stacks homes high up so everyone fits!" },
-                            { img: "assets/igloo.png", isCorrect: false, hint: "An igloo is made from freezing snow blocks. You will not find them inside a hot town city!" }
+                        prompt: "Welcome to busy Mumbai city! There is no flat ground land left! 🚗\nWhich home stacks rooms up high into the clouds?",
+                        correctChoice: { img: "assets/building.png" },
+                        wrongHints: [
+                            "Think about the busy city! A village mud hut takes up too much ground space. A tall building stacks homes high up!",
+                            "An igloo is made from soft freezing snow blocks. You will not find them inside a hot concrete city!"
                         ]
                     },
                     {
-                        prompt: "Look at this lovely farm village! 🌾\nHelp the farmer build a simple hut using mud and straw grass.",
-                        choices: [
-                            { img: "assets/hut.png", isCorrect: true },
-                            { img: "assets/building.png", isCorrect: false, hint: "Wait! There are no big cement concrete mixers in a green farm field. The farmer must use the grass and mud to make a simple hut!" },
-                            { img: "assets/igloo.png", isCorrect: false, hint: "There is no mountain snow in a warm farming field to build ice structures!" }
+                        prompt: "Look at this lovely farm village! 🌾\nWhat can the farmer build today using only mud and straw grass?",
+                        correctChoice: { img: "assets/hut.png" },
+                        wrongHints: [
+                            "Wait! There are no big concrete mixers in a green farm field. The farmer must use the grass and mud to make a simple hut!",
+                            "There is no freezing mountain snow in a warm green farming field to build ice structures!"
                         ]
                     }
                 ],
@@ -457,39 +465,33 @@
                 rounds: [
                     {
                         bgImage: "assets/kitchen.png",
-                        prompt: "The Naughty Monster ran into the kitchen! 🍳\nFind the wrong bedroom item left on the hot cooking stove.",
-                        choices: [
-                            { text: "A sleeping pillow is on the stove counter.", isCorrect: true },
-                            { text: "A cold refrigerator holding the milk.", isCorrect: false, hint: "Look near the cooking fire! A pillow belongs in the bedroom. If it touches the hot stove, it can catch fire instantly!" },
-                            { text: "A kitchen shelf holding spice boxes.", isCorrect: false, hint: "Spice boxes are supposed to be kept right inside cooking spaces to prepare tasty dishes!" }
-                        ]
+                        prompt: "Mother is getting ready to cook delicious hot rotis. 🍳\nIdentify the bedroom object that does NOT belong on the counter:",
+                        correctText: "A soft sleeping pillow",
+                        hint: "Look near the cooking fire! A soft pillow belongs in the bedroom. If it touches the stove, it can catch fire instantly!"
                     },
                     {
                         bgImage: "assets/bedroom.png",
-                        prompt: "Mina wants to jump onto her bed for a nap! 💤\nFind the dangerous kitchen tool left flat on her blanket.",
-                        choices: [
-                            { text: "A sharp kitchen knife is on the sheets.", isCorrect: true },
-                            { text: "A cozy blanket spread over the mattress.", isCorrect: false, hint: "Look right at the middle of the bed! A sharp cooking knife belongs in a drawer. If Mina sits on it, it will cut her hand!" },
-                            { text: "A glass of water sitting on the table.", isCorrect: false, hint: "Water glasses on side tables are perfectly safe for when you wake up feeling thirsty." }
-                        ]
+                        prompt: "Mina is yawning and wants to jump straight into her cozy bed. 💤\nWhat dangerous kitchen item did the Messy Monster leave on her blanket?",
+                        correctText: "A sharp kitchen knife",
+                        hint: "Look at the middle of the bed! A sharp cooking knife belongs in a closed drawer. If Mina sits on it, it will cut her hand!"
                     },
                     {
                         bgImage: "assets/livingroom.png",
-                        prompt: "Oh no! A special guest just slipped and fell! 🚪\nFind the wet washroom item spilled all over the living room tiles.",
-                        choices: [
-                            { text: "A big pool of soapy washroom water.", isCorrect: true },
-                            { text: "A soft rug placed under the tea table.", isCorrect: false, hint: "Look closely near the sofa legs! Soapy wash water belongs in the bathroom. Spilling it here makes the floor as slippery as a slide!" },
-                            { text: "The television playing a nice cartoon.", isCorrect: false, hint: "A cartoon program playing on the screen cannot make your visitors slip or fall down!" }
-                        ]
+                        prompt: "Ding-dong! A special guest walks through the front door. 🚪\nWhich spill on the floor tiles will make them slip and fall?",
+                        correctText: "A puddle of soapy water",
+                        hint: "Look closely near the sofa! Soapy wash water belongs inside a bathroom bucket. Spilling it here makes the floor as slippery as a slide!"
                     }
                 ],
                 summary: "Our home has different rooms. We cook in the kitchen, sleep in the bedroom, and welcome guests in the living room."
             },
             level3: {
                 rounds: [
-                    { target: "matches", isSafe: false, prompt: "A little boy is sitting alone playing with sharp matches. 🔥\nUse your superhero judgment! Is this safe or danger?", hint: "Stop! A single match stick spark can catch onto curtains and cause a giant fire. Matches are tools for grown-ups, never toys!" },
-                    { target: "ladder", isSafe: false, prompt: "A little girl is climbing a very high, shaky wooden ladder. 🛑\nUse your superhero judgment! Is this safe or danger?", hint: "Watch out! Shaky ladders can tip over. Falling from high up will hurt your bones. Always ask a grown-up for help!" },
-                    { target: "waste", isSafe: true, prompt: "A good boy drops his empty chocolate wrapper into the dustbin. ✨\nUse your superhero judgment! Is this safe or danger?", hint: "This is awesome behavior! Putting waste into the dustbin stops dirty houseflies and mosquitoes from spreading sickness." }
+                    { type: "img", src: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action safe or danger?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
+                    { type: "img", src: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this is safe or danger?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
+                    { type: "img", src: "assets/throwingwaste.png", isSafe: true, prompt: "This helpful child is throwing his empty wrapper into the trash. ✨\nHow do we rate this choice—safe or danger?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from spreading sickness." },
+                    { type: "css", mode: "sharp", isSafe: false, prompt: "Oh no! Look down! This child is playing with sharp, broken plastic toys. 🧸\nIdentify this choice—is it safe or danger?", hint: "Be careful! Sharp, broken plastic edges can scratch your skin or slice your fingers open. Throw broken toys directly in the trash!" },
+                    { type: "css", mode: "wash", isSafe: true, prompt: "Someone is washing their hands with soap before eating dinner! 🧼\nWhat do you think—is this safe or danger?", hint: "Excellent health habit! Washing hands with soap kills tiny invisible dirt bugs before they ride on food into your stomach." },
+                    { type: "css", mode: "box", isSafe: true, prompt: "This great helper is putting all their toys neatly back into the box. 📦\nWhich stamp fits this action—safe or danger?", hint: "Wonderful choice! Cleaning up your floor keeps the bedroom tidy, so nobody trips over a stray block and falls down in the dark." }
                 ],
                 summary: "Throw trash inside a closed bin to keep bugs away. Never play with sharp knives, hot stoves, or matchsticks because they can hurt you!"
             }
@@ -527,18 +529,9 @@
             scramble(setList);
 
             if (activeLevel === 3) {
-                document.getElementById('dashboard-split').style.display = "grid";
-                document.getElementById('canvas-img-frame').style.display = "none";
                 document.getElementById('wrapper-conveyor-housing').style.display = "none";
                 document.getElementById('wrapper-stamps').style.display = "grid";
-                
-                document.querySelectorAll('.scan-box').forEach(b => {
-                    b.className = "scan-box";
-                    b.querySelector('.stamp-overlay').style.display = "none";
-                });
             } else {
-                document.getElementById('dashboard-split').style.display = "none";
-                document.getElementById('canvas-img-frame').style.display = "flex";
                 document.getElementById('wrapper-conveyor-housing').style.display = "block";
                 document.getElementById('wrapper-stamps').style.display = "none";
             }
@@ -550,42 +543,78 @@
             controlLock = false;
             roundItem = setList[roundIndex];
 
+            document.getElementById('stamp-alert-overlay').style.display = "none";
             const track = document.getElementById('wrapper-choices');
             track.style.animationPlayState = "running";
             document.getElementById('wrapper-conveyor-housing').scrollLeft = 0;
 
             if (activeLevel === 1) {
+                document.getElementById('canvas-css-render').style.display = "none";
                 document.getElementById('canvas-target-pic').style.display = "none";
                 document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
-                buildVisualBeltOptions(roundItem.choices);
+                buildLevel1Belt();
             } 
             else if (activeLevel === 2) {
+                document.getElementById('canvas-css-render').style.display = "none";
                 const imgNode = document.getElementById('canvas-target-pic');
                 imgNode.src = roundItem.bgImage;
                 imgNode.style.display = "block";
                 document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
-                buildTextBeltOptions(roundItem.choices);
+                buildLevel2Belt();
             } 
             else if (activeLevel === 3) {
-                // Pre-highlight borders are strictly hidden
-                document.querySelectorAll('.scan-box').forEach(b => b.classList.remove('scan-active'));
                 document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
+                
+                if (roundItem.type === "img") {
+                    document.getElementById('canvas-css-render').style.display = "none";
+                    const imgNode = document.getElementById('canvas-target-pic');
+                    imgNode.src = roundItem.src;
+                    imgNode.style.display = "block";
+                } else {
+                    document.getElementById('canvas-target-pic').style.display = "none";
+                    const cssBox = document.getElementById('canvas-css-render');
+                    cssBox.style.display = "flex";
+                    
+                    // Render custom built CSS native imagery cards matching state keys
+                    if (roundItem.mode === "sharp") {
+                        cssBox.className = "native-css-canvas";
+                        cssBox.innerHTML = "<div>🧸⚠️⚡</div><div style='font-size:18px; font-weight:bold; color:#ef4444;'>BROKEN SHARP EDGES</div>";
+                    } else if (roundItem.mode === "wash") {
+                        cssBox.className = "native-css-canvas canvas-blue";
+                        cssBox.innerHTML = "<div>🧼✨🙌</div><div style='font-size:18px; font-weight:bold; color:#2563eb;'>WASHING HANDS</div>";
+                    } else if (roundItem.mode === "box") {
+                        cssBox.className = "native-css-canvas";
+                        cssBox.innerHTML = "<div>📦🧱🧸</div><div style='font-size:18px; font-weight:bold; color:#16a34a;'>CLEANING TOY BOX</div>";
+                    }
+                }
             }
         }
 
-        function buildVisualBeltOptions(choicesArray) {
+        function buildLevel1Belt() {
             const track = document.getElementById('wrapper-choices');
             track.innerHTML = "";
-            let basePool = [...choicesArray];
-            scramble(basePool);
 
-            const finalPool = [...basePool, ...basePool];
+            let items = [];
+            // Target item injector
+            items.push({ img: roundItem.correctChoice.img, isCorrect: true, hint: "" });
+            
+            // Collect global decoys that do not match current round item asset target signature
+            let hintsCounter = 0;
+            contentDataMap.level1.rounds.forEach(r => {
+                if (r.correctChoice.img !== roundItem.correctChoice.img) {
+                    items.push({ img: r.correctChoice.img, isCorrect: false, hint: roundItem.wrongHints[hintsCounter++] });
+                }
+            });
 
-            finalPool.forEach(c => {
+            scramble(items);
+            // Double duplication loop to preserve endless scroll geometry continuity variables
+            const continuousPool = [...items, ...items];
+
+            continuousPool.forEach(c => {
                 const btn = document.createElement('button');
                 btn.className = "choice-item-btn";
                 btn.dataset.correct = c.isCorrect;
-                btn.dataset.hint = c.hint || "";
+                btn.dataset.hint = c.hint;
 
                 const img = document.createElement('img');
                 img.src = c.img;
@@ -596,19 +625,27 @@
             });
         }
 
-        function buildTextBeltOptions(choicesArray) {
+        function buildLevel2Belt() {
             const track = document.getElementById('wrapper-choices');
             track.innerHTML = "";
-            let basePool = [...choicesArray];
-            scramble(basePool);
 
-            const finalPool = [...basePool, ...basePool];
+            let items = [];
+            items.push({ text: roundItem.correctText, isCorrect: true, hint: "" });
 
-            finalPool.forEach(c => {
+            // Pull unique decoys to avoid item repetition across levels
+            let levelDecoys = [...universalDecoyPool.level2];
+            scramble(levelDecoys);
+            items.push({ text: levelDecoys[0], isCorrect: false, hint: roundItem.hint });
+            items.push({ text: levelDecoys[1], isCorrect: false, hint: roundItem.hint });
+
+            scramble(items);
+            const continuousPool = [...items, ...items];
+
+            continuousPool.forEach(c => {
                 const btn = document.createElement('button');
                 btn.className = "choice-item-btn";
                 btn.dataset.correct = c.isCorrect;
-                btn.dataset.hint = c.hint || "";
+                btn.dataset.hint = c.hint;
 
                 const txt = document.createElement('span');
                 txt.innerText = c.text;
@@ -625,9 +662,7 @@
 
             const btn = e.currentTarget;
             const isCorrect = btn.dataset.correct === "true";
-            const track = document.getElementById('wrapper-choices');
-            
-            track.style.animationPlayState = "paused";
+            document.getElementById('wrapper-choices').style.animationPlayState = "paused";
 
             if (isCorrect) {
                 scoreCounter += 10;
@@ -649,35 +684,35 @@
 
         function evaluateStampInput(pressedSafeButton) {
             if (controlLock) return;
+            controlLock = true;
+
             const targetIsSafe = roundItem.isSafe;
-            const targetBox = document.getElementById("box-" + roundItem.target);
-            const stampElement = targetBox.querySelector('.stamp-overlay');
+            const overlay = document.getElementById('stamp-alert-overlay');
+            const mainCardBox = document.querySelector('.main-card');
 
             if (pressedSafeButton === targetIsSafe) {
-                controlLock = true;
                 scoreCounter += 10;
                 document.getElementById('hud-score-lbl').innerText = "Points: " + scoreCounter;
                 playAudioClip('audio-right');
 
                 if (targetIsSafe) {
-                    stampElement.innerText = "SAFE ✅";
-                    stampElement.style.color = "var(--grass-green)";
-                    stampElement.style.border = "4px solid var(--grass-green)";
+                    overlay.innerText = "SAFE ✅";
+                    overlay.style.color = "var(--grass-green)";
+                    overlay.style.border = "6px solid var(--grass-green)";
                 } else {
-                    stampElement.innerText = "DANGER 🛑";
-                    stampElement.style.color = "var(--brick-red)";
-                    stampElement.style.border = "4px solid var(--brick-red)";
+                    overlay.innerText = "DANGER 🛑";
+                    overlay.style.color = "var(--brick-red)";
+                    overlay.style.border = "6px solid var(--brick-red)";
                 }
-                stampElement.style.display = "block";
+                overlay.style.display = "block";
 
-                setTimeout(() => { advanceRoundIndex(); }, 900);
+                setTimeout(() => { advanceRoundIndex(); }, 1200);
             } else {
-                controlLock = true;
-                targetBox.classList.add('animate-shake');
+                mainCardBox.classList.add('animate-shake');
                 playAudioClip('audio-wrong');
 
                 setTimeout(() => {
-                    targetBox.classList.remove('animate-shake');
+                    mainCardBox.classList.remove('animate-shake');
                     document.getElementById('explain-message-text').innerText = roundItem.hint;
                     changeScreen('screen-explain');
                 }, 500);
