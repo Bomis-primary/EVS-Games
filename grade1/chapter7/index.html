@@ -33,7 +33,7 @@
             align-items: center;
         }
 
-        /* Up/Down Scrollable Arena Layout Frame */
+        /* Screen Layout Wrapper (Scrollable Up and Down) */
         .screen-layout {
             display: none;
             width: 100%;
@@ -52,7 +52,7 @@
             display: flex !important;
         }
 
-        /* 5-Second Splash Screen Handoff */
+        /* 5-Second Splash Loader Screen */
         #screen-splash {
             background: #ffffff;
             position: fixed;
@@ -89,7 +89,7 @@
             animation: startLoad 4.5s forwards linear;
         }
 
-        /* Menu Interface */
+        /* Welcome Main Menu */
         #screen-welcome {
             justify-content: center;
             text-align: center;
@@ -134,7 +134,7 @@
             flex-shrink: 0;
         }
 
-        /* FIXED: Removed rigid height limits to stop empty middle blanks */
+        /* Main Game Arena Adaptive Display Card */
         .main-card {
             width: 100%;
             background: white;
@@ -176,7 +176,7 @@
             padding: 0 5px;
         }
 
-        /* Swipeable Conveyor Belt Platforms */
+        /* Touch Swipeable Conveyor Belt Track Framework */
         .conveyor-belt-system {
             width: 100%;
             background: #475569;
@@ -230,7 +230,7 @@
             object-fit: contain;
         }
 
-        /* Level 3 Safety Evaluation Stamp Button Controls */
+        /* Level 3 Habit Selection Action Button Layout */
         .stamp-row {
             display: none;
             width: 100%;
@@ -241,15 +241,15 @@
         .btn-stamp {
             border: none;
             padding: 20px 10px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
             color: white;
             border-radius: 24px;
             cursor: pointer;
             box-shadow: 0 7px 0 rgba(0,0,0,0.25);
         }
-        .btn-danger { background: var(--brick-red); }
-        .btn-safe { background: var(--grass-green); }
+        .btn-danger { background: var(--brick-red); box-shadow: 0 7px 0 #b91c1c; }
+        .btn-safe { background: var(--grass-green); box-shadow: 0 7px 0 #15803d; }
         .btn-stamp:active { transform: translateY(4px); box-shadow: 0 3px 0 rgba(0,0,0,0.25); }
 
         .stamp-feedback-overlay {
@@ -257,7 +257,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-10deg);
-            font-size: 42px;
+            font-size: 36px;
             font-weight: 950;
             padding: 10px 20px;
             border-radius: 16px;
@@ -348,8 +348,8 @@
         </div>
 
         <div id="wrapper-stamps" class="stamp-row">
-            <button class="btn-stamp btn-danger" onclick="evaluateStampInput(false)">🛑 DANGER</button>
-            <button class="btn-stamp btn-safe" onclick="evaluateStampInput(true)">💪 SAFE</button>
+            <button class="btn-stamp btn-danger" onclick="evaluateStampInput(false)">🛑 NOT SAFE</button>
+            <button class="btn-stamp btn-safe" onclick="evaluateStampInput(true)">💚 GOOD HABIT</button>
         </div>
     </div>
 
@@ -387,6 +387,7 @@
                 backgroundPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
             }, 1000);
 
+            // Firm 5000ms delay hold logic before booting screen-welcome
             setTimeout(() => { 
                 document.getElementById('screen-splash').style.display = 'none';
                 changeScreen('screen-welcome'); 
@@ -400,14 +401,6 @@
         let setList = [];
         let controlLock = false;
 
-        // Custom diversified conveyor fillers to break choice tracking predictability
-        const universalDecoyPool = {
-            level2: [
-                "A clean frying pan", "A wooden toy block", "A colorful story book", "A soft pair of slippers", "A shiny tea kettle"
-            ]
-        };
-
-        // FIXED: Clear concept explanations instead of spatial position commands
         const contentDataMap = {
             level1: {
                 rounds: [
@@ -439,34 +432,38 @@
                 summary: "Houses keep us safe from the hot sun, cold wind, rain, and wild animals! Strong houses use bricks. Weak huts use mud."
             },
             level2: {
+                // FIXED: The user choice is the ONLY intruder. The surrounding loop consists entirely of safe objects belonging to that exact room.
                 rounds: [
                     {
                         bgImage: "assets/kitchen.png",
                         prompt: "Mother is getting ready to cook delicious hot rotis. 🍳\nIdentify the bedroom object that does NOT belong on the counter:",
                         correctText: "A soft sleeping pillow",
+                        roomDecoys: ["A clean frying pan", "A metal kitchen toaster", "A shiny tea kettle", "A blending jar"],
                         hint: "A soft pillow belongs in the bedroom on your bed. If it gets near a hot cooking stove, it can catch fire instantly!"
                     },
                     {
                         bgImage: "assets/bedroom.png",
                         prompt: "Mina is yawning and wants to jump straight into her cozy bed. 💤\nWhat dangerous kitchen item did the Messy Monster leave on her blanket?",
                         correctText: "A sharp kitchen knife",
+                        roomDecoys: ["A colorful story book", "A soft teddy bear", "A cozy night lamp", "A warm winter quilt"],
                         hint: "A sharp cooking knife belongs safely inside a closed drawer. Leaving it out on a bed can accidentally cut your hand or fingers!"
                     },
                     {
                         bgImage: "assets/livingroom.png",
                         prompt: "Ding-dong! A special guest walks through the front door. 🚪\nWhich spill on the floor tiles will make them slip and fall?",
                         correctText: "A puddle of soapy water",
+                        roomDecoys: ["A soft pair of slippers", "A wooden toy block", "A remote control", "A colorful floor mat"],
                         hint: "Soapy wash water belongs inside a bathroom bucket. Spilling it where people walk makes the floor slick like ice!"
                     }
                 ],
                 summary: "Our home has different rooms. We cook in the kitchen, sleep in the bedroom, and welcome guests in the living room."
             },
             level3: {
+                // FIXED: Unique 3-round sequence using custom action buttons labels.
                 rounds: [
-                    { src: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action safe or danger?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
-                    { src: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this is safe or danger?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
-                    { src: "assets/throwingwaste.png", isSafe: true, prompt: "This helpful child is throwing his empty wrapper into the trash. ✨\nHow do we rate this choice—safe or danger?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from spreading sickness." },
-                    { src: "assets/throwingwaste.png", isSafe: true, prompt: "Another great helper cleans up the classroom floor space. 🧹\nIs keeping rooms tidy safe or danger?", hint: "Wonderful choice! Cleaning up your floor keeps rooms tidy, so nobody trips over objects and falls down in the dark." }
+                    { src: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action a good habit or not safe?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
+                    { src: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this action is a good habit or not safe?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
+                    { src: "assets/throwingwaste.png", isSafe: true, prompt: "This helpful child is throwing his empty wrapper into the trash. ✨\nHow do we rate this choice—is it a good habit or not safe?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from spreading sickness." }
                 ],
                 summary: "Throw trash inside a closed bin to keep bugs away. Never play with sharp knives, hot stoves, or matchsticks because they can hurt you!"
             }
@@ -578,12 +575,15 @@
             track.innerHTML = "";
 
             let items = [];
+            // Correct intruder item injection setup
             items.push({ text: roundItem.correctText, isCorrect: true, hint: "" });
 
-            let levelDecoys = [...universalDecoyPool.level2];
-            scramble(levelDecoys);
-            items.push({ text: levelDecoys[0], isCorrect: false, hint: roundItem.hint });
-            items.push({ text: levelDecoys[1], isCorrect: false, hint: roundItem.hint });
+            // Pull room decoys matching the room setting context
+            let safeDecoys = [...roundItem.roomDecoys];
+            scramble(safeDecoys);
+            
+            items.push({ text: safeDecoys[0], isCorrect: false, hint: roundItem.hint });
+            items.push({ text: safeDecoys[1], isCorrect: false, hint: roundItem.hint });
 
             scramble(items);
             const continuousPool = [...items, ...items];
@@ -643,11 +643,11 @@
                 playAudioClip('audio-right');
 
                 if (targetIsSafe) {
-                    overlay.innerText = "SAFE ✅";
+                    overlay.innerText = "GOOD HABIT 💚";
                     overlay.style.color = "var(--grass-green)";
                     overlay.style.border = "6px solid var(--grass-green)";
                 } else {
-                    overlay.innerText = "DANGER 🛑";
+                    overlay.innerText = "NOT SAFE 🛑";
                     overlay.style.color = "var(--brick-red)";
                     overlay.style.border = "6px solid var(--brick-red)";
                 }
