@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,11 +6,13 @@
     <title>Cosmic Climate Flip!</title>
     <style>
         :root {
-            --bg-cosmic: #1e1b4b;
-            --card-purple: #4338ca;
-            --clover-green: #22c55e;
-            --gold-accent: #f59e0b;
-            --text-dark: #0f172a;
+            --bg-pastel: #fef8e7;
+            --header-blue: #60a5fa;
+            --card-front-bg: #ffffff;
+            --card-back-bg: #93c5fd;
+            --text-main: #1e293b;
+            --success-green: #4ade80;
+            --hint-gold: #fbbf24;
         }
 
         * {
@@ -24,9 +25,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(circle at center, #2e1065, #0f052d);
-            color: white;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: var(--bg-pastel);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -34,11 +35,11 @@
             overflow: hidden;
         }
 
-        /* Responsive Layout Container (Guarantees zero cutoffs on tiny screens) */
+        /* Responsive Layout Engine */
         .screen-layout {
             display: none;
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             height: 100vh;
             padding: 16px;
             flex-direction: column;
@@ -51,7 +52,7 @@
             display: flex !important;
         }
 
-        /* 5-Second Splash Screen Loader */
+        /* Splash Screen Loader Frame */
         #screen-splash {
             background: #ffffff;
             position: fixed;
@@ -67,18 +68,17 @@
             z-index: 9999;
         }
         .splash-logo {
-            width: 65%;
-            max-width: 250px;
+            width: 60%;
+            max-width: 220px;
             animation: pulseSoft 1.5s infinite ease-in-out;
         }
         .loading-track {
-            width: 60%;
-            max-width: 220px;
-            height: 12px;
+            width: 55%;
+            max-width: 200px;
+            height: 10px;
             background: #e2e8f0;
             border-radius: 10px;
             overflow: hidden;
-            border: 1px solid #cbd5e1;
         }
         .loading-bar-fill {
             width: 100%;
@@ -91,74 +91,72 @@
         /* Welcome Dashboard Menu */
         #screen-welcome {
             justify-content: center;
-            gap: 30px;
+            gap: 25px;
             text-align: center;
         }
         .welcome-title {
-            font-size: clamp(28px, 8vw, 38px);
+            font-size: clamp(26px, 7vw, 36px);
             font-weight: 900;
-            color: #fbbf24;
-            text-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-            line-height: 1.2;
+            color: #ff7e1b;
+            line-height: 1.3;
         }
         .welcome-mascot {
-            font-size: clamp(80px, 15vh, 120px);
-            animation: bounceMascot 3s infinite ease-in-out;
+            font-size: clamp(75px, 14vh, 110px);
+            animation: bounceMascot 2.5s infinite ease-in-out;
         }
 
         .btn-push {
-            background: #f97316;
+            background: #ff7e1b;
             color: white;
             border: none;
-            padding: 16px 40px;
-            font-size: clamp(18px, 5vw, 22px);
+            padding: 14px 36px;
+            font-size: clamp(18px, 4.5vw, 22px);
             font-weight: bold;
-            border-radius: 30px;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #ea580c;
+            box-shadow: 0 6px 0 #c25e10;
             transition: transform 0.1s;
         }
         .btn-push:active {
             transform: translateY(4px);
-            box-shadow: 0 2px 0 #ea580c;
+            box-shadow: 0 2px 0 #c25e10;
         }
 
-        /* Top Status Indicator Bar */
+        /* Top HUD Row Status Indicators */
         .hud-row {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            padding: 12px 20px;
-            border-radius: 16px;
+            background: var(--header-blue);
+            padding: 10px 18px;
+            border-radius: 20px;
             font-weight: 800;
             font-size: clamp(15px, 4vw, 18px);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            margin-bottom: 10px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(96, 165, 250, 0.2);
+            margin-bottom: 8px;
         }
         .hud-badge {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             padding: 4px 12px;
-            border-radius: 20px;
-            color: #fbbf24;
+            border-radius: 15px;
         }
 
-        /* Dynamic 3 Columns x 4 Rows Responsive Grid Matrix Layout */
+        /* Strict 3x4 Matrix Responsive Cards Layout */
         .game-grid-container {
             width: 100%;
             flex-grow: 1;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: clamp(8px, 2vh, 14px);
-            padding: 5px 0;
+            gap: clamp(8px, 1.8vh, 12px);
+            padding: 4px 0;
         }
 
-        /* 3D Card Flip Mechanism Styles */
+        /* Core 3D Flip Mechanics */
         .memory-card {
-            perspective: 1000px;
+            perspective: 800px;
             cursor: pointer;
             width: 100%;
             height: 100%;
@@ -168,7 +166,7 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
         .memory-card.flipped .card-inner {
@@ -180,136 +178,104 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 16px;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            border-radius: 18px;
+            border: 3px solid #cbd5e1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        /* Card Back Cover Vector Shamrock Design matching image_1ebf38.jpg */
+        /* Refreshed Pastel Magic Star Card Back Cover Design */
         .card-back {
-            background: linear-gradient(135deg, #4f46e5, #312e81);
+            background: linear-gradient(135deg, #93c5fd, #60a5fa);
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            border-color: #ffffff;
         }
-        .clover-vector-shape {
-            width: 55%;
-            height: 55%;
-            position: relative;
-            background: var(--clover-green);
-            border-radius: 50% 50% 0 50%;
-            transform: rotate(-45deg);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .clover-vector-shape::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--clover-green);
-            border-radius: 50%;
-            top: -50%;
-            left: 0;
-        }
-        .clover-vector-shape::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--clover-green);
-            border-radius: 50%;
-            top: 0;
-            left: 50%;
-        }
-        .clover-stem {
-            position: absolute;
-            width: 6px;
-            height: 24px;
-            background: var(--clover-green);
-            bottom: 12%;
-            border-radius: 4px;
-            transform: rotate(20deg);
+        .star-vector-shape {
+            font-size: clamp(24px, 5vh, 36px);
+            color: #ffffff;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            animation: pulseSoft 2s infinite ease-in-out;
         }
 
-        /* Card Front Layout (Content Revealed) */
+        /* Front Card Cover Reveal Displays */
         .card-front {
-            background: #ffffff;
-            color: var(--text-dark);
+            background: var(--card-front-bg);
             transform: rotateY(180deg);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 6px;
-            gap: 4px;
+            padding: 4px;
+            gap: 2px;
         }
         .card-emoji {
-            font-size: clamp(28px, 6vh, 42px);
+            font-size: clamp(28px, 5.5vh, 40px);
             line-height: 1.1;
         }
         .card-label {
-            font-size: clamp(10px, 2.8vw, 13px);
-            font-weight: 800;
-            line-height: 1.2;
-            color: #334155;
+            font-size: clamp(10px, 2.6vw, 13px);
+            font-weight: bold;
+            color: #475569;
+            text-align: center;
             word-break: break-word;
-            max-width: 100%;
         }
 
-        /* Interaction States Animations */
+        /* Smart Visual Assist Glow Overlays */
         .card-match .card-front {
-            border-color: #22c55e !important;
+            border-color: var(--success-green) !important;
             background: #f0fdf4 !important;
-            animation: pulsePop 0.4s ease-in-out;
+            animation: pulsePop 0.3s ease-in-out;
         }
         .card-mismatch .card-inner {
             animation: shakeLeftRight 0.4s ease-in-out;
         }
+        .card-helper-glow .card-inner {
+            box-shadow: 0 0 14px 6px var(--hint-gold);
+            border-radius: 18px;
+        }
 
-        /* Overlay & Intermission Panels */
+        /* Overlay Classroom Blackboard Displays */
         .overlay-screen {
-            background: rgba(15, 23, 42, 0.98);
+            background: rgba(254, 248, 231, 0.98);
             justify-content: center;
             text-align: center;
-            gap: 25px;
-            padding: 24px;
+            gap: 20px;
+            padding: 20px;
         }
         .blackboard-box {
             background: #14532d;
-            border: 10px solid #b45309;
-            border-radius: 20px;
-            padding: 25px 15px;
+            border: 8px solid #b45309;
+            border-radius: 16px;
+            padding: 20px 15px;
             width: 100%;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
         }
         .blackboard-text {
-            font-size: clamp(18px, 5vw, 22px);
+            font-size: clamp(16px, 4.5vw, 20px);
             color: #f0fdf4;
-            font-weight: 700;
+            font-weight: bold;
             line-height: 1.5;
         }
 
         @keyframes startLoad { from { transform: translateX(-100%); } to { transform: translateX(0%); } }
-        @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes bounceMascot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-        @keyframes pulsePop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+        @keyframes bounceMascot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulsePop { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
         @keyframes shakeLeftRight {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            50% { transform: translateX(8px); }
-            75% { transform: translateX(-4px); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-3px); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Direct Asset Integrations according to user repository layout -->
     <audio id="audio-right" src="assets/correctanswer-1.mp3" preload="auto"></audio>
     <audio id="audio-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="audio-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
-    <!-- 5-Second Holding Splash Loader Screen -->
     <div id="screen-splash">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
         <div class="loading-track">
@@ -317,25 +283,20 @@
         </div>
     </div>
 
-    <!-- Screen Welcome Menu Dashboard -->
     <div id="screen-welcome" class="screen-layout">
-        <h1 class="welcome-title">COSMIC CLIMATE<br><span style="color: #60a5fa;">FLIP!</span></h1>
-        <div class="welcome-mascot">🌤️</div>
-        <button class="btn-push" onclick="changeScreenLayout('screen-game'); initLevelRun(1);">▶ Play Game</button>
+        <h1 class="welcome-title">COSMIC CLIMATE<br><span style="color: #3b82f6;">FLIP!</span></h1>
+        <div class="welcome-mascot">🌈</div>
+        <button class="btn-push" onclick="changeScreenLayout('screen-game'); initLevelRun(1);">Play Game ➔</button>
     </div>
 
-    <!-- Active Gameplay Grid Window View -->
     <div id="screen-game" class="screen-layout">
         <div class="hud-row">
             <span id="hud-level-lbl" class="hud-badge">Level: 1/3</span>
-            <span id="hud-score-lbl" style="color: #fbbf24;">Score: 10</span>
+            <span id="hud-score-lbl">Score: 10</span>
         </div>
-
-        <!-- Strict 3x4 Matrix Card Canvas Frame -->
         <div id="game-matrix-grid" class="game-grid-container"></div>
     </div>
 
-    <!-- Chapter Section Lesson Summary Blackboard Overlay Panel -->
     <div id="screen-summary" class="screen-layout overlay-screen">
         <div class="blackboard-box">
             <p id="summary-msg-text" class="blackboard-text"></p>
@@ -343,29 +304,28 @@
         <button id="summary-action-btn" class="btn-push" onclick="progressFromSummary()">Next Level ➔</button>
     </div>
 
-    <!-- Game Over Scoreboard Frame Overlay Screen -->
-    <div id="screen-victory" class="screen-layout overlay-screen" style="background: radial-gradient(circle, #1e1b4b, #020617);">
-        <div style="font-size: 80px; animation: pulseSoft 2s infinite;">🏆</div>
-        <h1 style="color: #fbbf24; font-size: 32px; font-weight: 900;">Super Sky Graduate!</h1>
+    <div id="screen-victory" class="screen-layout overlay-screen">
+        <div style="font-size: 70px; animation: pulseSoft 2s infinite;">🌟</div>
+        <h1 style="color: #ff7e1b; font-size: 30px; font-weight: 900;">Great Job!</h1>
         
-        <div class="blackboard-box" style="border-color: #60a5fa;">
-            <p style="font-size: 20px; font-weight: 800; color: #e2e8f0; margin-bottom: 8px;">Your Total Final Score:</p>
-            <p id="victory-final-score-lbl" style="font-size: 42px; font-weight: 950; color: #fbbf24;"></p>
+        <div class="blackboard-box" style="background: #1e3a8a; border-color: #3b82f6;">
+            <p style="font-size: 18px; color: #93c5fd; margin-bottom: 5px;">Your Total Score:</p>
+            <p id="victory-final-score-lbl" style="font-size: 38px; font-weight: 900; color: #fbbf24;"></p>
         </div>
 
         <button class="btn-push" style="background: #3b82f6; box-shadow: 0 6px 0 #1d4ed8;" onclick="resetEntireAppWorkflow()">Play Again 🔄</button>
     </div>
 
     <script>
-        // Preloading structural images via JavaScript safely
-        const coreImageAssets = ["assets/innovine-logo.png"];
-        coreImageAssets.forEach(path => { const img = new Image(); img.src = path; });
+        // Image Preloading Routines
+        const imageAssets = ["assets/innovine-logo.png"];
+        imageAssets.forEach(src => { const img = new Image(); img.src = src; });
 
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.getElementById('screen-splash').style.display = 'none';
                 changeScreenLayout('screen-welcome');
-            }, 5000); // Strict 5000ms splash delay rule matching constraints
+            }, 5000);
         });
 
         let currentActiveLevel = 1;
@@ -374,142 +334,140 @@
         let matchingDeckPool = [];
         let runningFlippedCards = [];
         let frameworkInputLock = false;
+        
+        // Tracking failed attempts to activate helper systems
+        let structuralAttemptTally = {}; 
 
         const contentDatabase = {
             level1: {
-                summary: "Weather changes everyday! We wear light cotton clothes on a sunny day, woollen coats on a cold day, and use umbrellas when it rains!",
+                summary: "Weather updates! We wear light cotton clothes on a sunny day, thick woollen clothes on a cold day, and use umbrellas when it rains heavily!",
                 pairs: [
-                    { id: 1, side: 'A', emoji: '☀️', label: "Sunny Day" },
-                    { id: 1, side: 'B', emoji: '👕', label: "Cotton Shirt" },
-                    { id: 2, side: 'A', emoji: '❄️', label: "Cold Day" },
-                    { id: 2, side: 'B', emoji: '🧥', label: "Woollen Coat" },
-                    { id: 3, side: 'A', emoji: '🌧️', label: "Rainy Day" },
-                    { id: 3, side: 'B', emoji: '☔', label: "Umbrella" },
-                    { id: 4, side: 'A', emoji: '💨', label: "Windy Day" },
-                    { id: 4, side: 'B', emoji: '🪁', label: "Flying Kite" },
-                    { id: 5, side: 'A', emoji: '🏖️', label: "Beach Seashore" },
-                    { id: 5, side: 'B', emoji: '🕶️', label: "Sunglasses" },
-                    { id: 6, side: 'A', emoji: '🏔️', label: "Snow Mountain" },
-                    { id: 6, side: 'B', emoji: '🧣', label: "Warm Scarf" }
+                    { id: 1, emoji: '☀️', label: "Sunny Day" },
+                    { id: 1, emoji: '👕', label: "Cotton Dress" },
+                    { id: 2, emoji: '❄️', label: "Cold Day" },
+                    { id: 2, emoji: '🧥', label: "Woollen Clothes" },
+                    { id: 3, emoji: '🌧️', label: "Rainy Day" },
+                    { id: 3, emoji: '☔', label: "Use Umbrella" },
+                    { id: 4, emoji: '💨', label: "Windy Day" },
+                    { id: 4, emoji: '🏠', label: "Stay Indoors" },
+                    { id: 5, emoji: '🍲', label: "Hot Soup" },
+                    { id: 5, emoji: '❤️', label: "Warm and Cozy" },
+                    { id: 6, emoji: '🌈', label: "Rain Shower" },
+                    { id: 6, emoji: '🎨', label: "Seven Colors" }
                 ]
             },
             level2: {
-                summary: "We divide the day into parts! Morning is for waking up, Afternoon is school lunch, Evening is for outdoor play, and Night is for sound sleep!",
+                summary: "Times of a day! We wake up and brush our teeth in the Morning, eat school lunch in the Afternoon, play in the Evening, and sleep at Night!",
                 pairs: [
-                    { id: 7, side: 'A', emoji: '🌅', label: "Morning" },
-                    { id: 7, side: 'B', emoji: '🪥', label: "Brushing Teeth" },
-                    { id: 8, side: 'A', emoji: '🌤️', label: "Afternoon" },
-                    { id: 8, side: 'B', emoji: '🍱', label: "Eating Lunch" },
-                    { id: 9, side: 'A', emoji: '🌆', label: "Evening" },
-                    { id: 9, side: 'B', emoji: '⚽', label: "Playing Football" },
-                    { id: 10, side: 'A', emoji: '🌙', label: "Night" },
-                    { id: 10, side: 'B', emoji: '😴', label: "Sleeping in Bed" },
-                    { id: 11, side: 'A', emoji: '🏫', label: "School Time" },
-                    { id: 11, side: 'B', emoji: '🎒', label: "Packing Bag" },
-                    { id: 12, side: 'A', emoji: '🍽️', label: "Dinner Time" },
-                    { id: 12, side: 'B', emoji: '🥛', label: "Drinking Milk" }
+                    { id: 7, emoji: '🌅', label: "Morning" },
+                    { id: 7, emoji: '🪥', label: "Brush Teeth" },
+                    { id: 8, emoji: '🌤️', label: "Afternoon" },
+                    { id: 8, emoji: '🍱', label: "School Lunch" },
+                    { id: 9, emoji: '🌆', label: "Evening" },
+                    { id: 9, emoji: '⚽', label: "Play Time" },
+                    { id: 10, emoji: '🌙', label: "Night Time" },
+                    { id: 10, emoji: '😴', label: "Sleeping Time" },
+                    { id: 11, emoji: '☀️', label: "Sun Rises" },
+                    { id: 11, emoji: '🐓', label: "Day Begins" },
+                    { id: 12, emoji: '🍽️', label: "Dinner Time" },
+                    { id: 12, emoji: '🥛', label: "Drink Milk" }
                 ]
             },
             level3: {
-                summary: "Up in the sky, the hot Sun shines during the day. The Moon changes its shape, and thousands of distant stars twinkle at night!",
+                summary: "Up in the sky! The hot Sun gives us bright heat and light during the day. The Moon changes its shape, and stars twinkle far away at night!",
                 pairs: [
-                    { id: 13, side: 'A', emoji: '🔥', label: "The Sun" },
-                    { id: 13, side: 'B', emoji: '☀️', label: "Shines in Day" },
-                    { id: 14, side: 'A', emoji: '🌙', label: "The Moon" },
-                    { id: 14, side: 'B', emoji: '✨', label: "Changes Shape" },
-                    { id: 15, side: 'A', emoji: '⭐', label: "The Stars" },
-                    { id: 15, side: 'B', emoji: '👁️', label: "Far, Far Away" },
-                    { id: 16, side: 'A', emoji: '☁️', label: "Dark Clouds" },
-                    { id: 16, side: 'B', emoji: '🌧️', label: "Brings Rain" },
-                    { id: 17, side: 'A', emoji: '🌈', label: "Rainbow" },
-                    { id: 17, side: 'B', emoji: '🎨', label: "Seven Colors" },
-                    { id: 18, side: 'A', emoji: '🌍', label: "Planet Earth" },
-                    { id: 18, side: 'B', emoji: '🌱', label: "Living Beings" }
+                    { id: 13, emoji: '🔥', label: "The Sun" },
+                    { id: 13, emoji: '☀️', label: "Hot Ball of Fire" },
+                    { id: 14, emoji: '🌙', label: "The Moon" },
+                    { id: 14, emoji: '✨', label: "Changes Shape" },
+                    { id: 15, emoji: '⭐', label: "The Stars" },
+                    { id: 15, emoji: '👁️', label: "Far, Far Away" },
+                    { id: 16, emoji: '☁️', label: "Dark Clouds" },
+                    { id: 16, emoji: '🌧️', label: "Bring the Rain" },
+                    { id: 17, emoji: '🌍', label: "Planet Earth" },
+                    { id: 17, emoji: '🌱', label: "Living Beings" },
+                    { id: 18, emoji: '⚡', label: "Lightning" },
+                    { id: 18, emoji: '👂', label: "Hear Thunder" }
                 ]
             }
         };
 
         function changeScreenLayout(id) {
             document.querySelectorAll('.screen-layout').forEach(s => s.classList.remove('active-view'));
-            const destination = document.getElementById(id);
-            if (destination) destination.classList.add('active-view');
+            const targetNode = document.getElementById(id);
+            if (targetNode) targetNode.classList.add('active-view');
         }
 
         function triggerAudioEffect(elementId) {
-            const effect = document.getElementById(elementId);
-            if (effect) {
-                effect.currentTime = 0;
-                effect.play().catch(() => {});
+            const track = document.getElementById(elementId);
+            if (track) {
+                track.currentTime = 0;
+                track.play().catch(() => {});
             }
         }
 
-        function scrambleArrayElements(array) {
-            for (let i = array.length - 1; i > 0; i--) {
+        function scrambleArrayElements(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+                [arr[i], arr[j]] = [arr[j], arr[i]];
             }
-            return array;
+            return arr;
         }
 
         function initLevelRun(lvlNo) {
             currentActiveLevel = lvlNo;
-            runningLevelScore = 10; // Start with safe level buffer point setup
+            runningLevelScore = 10; 
             runningFlippedCards = [];
             frameworkInputLock = false;
+            structuralAttemptTally = {};
 
             document.getElementById('hud-level-lbl').innerText = "Level: " + currentActiveLevel + "/3";
             document.getElementById('hud-score-lbl').innerText = "Score: " + runningLevelScore;
 
-            const referenceKey = "level" + currentActiveLevel;
-            matchingDeckPool = JSON.parse(JSON.stringify(contentDatabase[referenceKey].pairs));
+            const targetKey = "level" + currentActiveLevel;
+            matchingDeckPool = JSON.parse(JSON.stringify(contentDatabase[targetKey].pairs));
             scrambleArrayElements(matchingDeckPool);
 
-            const gridBoxContainer = document.getElementById('game-matrix-grid');
-            gridBoxContainer.innerHTML = "";
+            const gridContainer = document.getElementById('game-matrix-grid');
+            gridContainer.innerHTML = "";
 
-            // Strictly structural 12 Card Deployment (3 wide by 4 tall grid layout constraints)
             matchingDeckPool.forEach((cardMeta, index) => {
-                const cardOuterFrame = document.createElement('div');
-                cardOuterFrame.className = "memory-card";
-                cardOuterFrame.dataset.index = index;
-                cardOuterFrame.dataset.pairId = cardMeta.id;
+                const cardBox = document.createElement('div');
+                cardBox.className = "memory-card";
+                cardBox.dataset.index = index;
+                cardBox.dataset.pairId = cardMeta.id;
 
-                const cardRotatorInner = document.createElement('div');
-                cardRotatorInner.className = "card-inner";
+                const innerContainer = document.createElement('div');
+                innerContainer.className = "card-inner";
 
-                // Back Face - Vector Clover Shamrock rendering matching image_1ebf38.jpg layout
-                const cardBackFace = document.createElement('div');
-                cardBackFace.className = "card-back";
+                const backCover = document.createElement('div');
+                backCover.className = "card-back";
                 
-                const leafNode = document.createElement('div');
-                leafNode.className = "clover-vector-shape";
-                const stemNode = document.createElement('div');
-                stemNode.className = "clover-stem";
-                
-                cardBackFace.appendChild(leafNode);
-                cardBackFace.appendChild(stemNode);
+                const starNode = document.createElement('div');
+                starNode.className = "star-vector-shape";
+                starNode.innerText = "⭐";
+                backCover.appendChild(starNode);
 
-                // Front Face - Reveals structural icon definitions on click rotation
-                const cardFrontFace = document.createElement('div');
-                cardFrontFace.className = "card-front";
+                const frontCover = document.createElement('div');
+                frontCover.className = "card-front";
 
-                const emojiWrapper = document.createElement('div');
-                emojiWrapper.className = "card-emoji";
-                emojiWrapper.innerText = cardMeta.emoji;
+                const emojiNode = document.createElement('div');
+                emojiNode.className = "card-emoji";
+                emojiNode.innerText = cardMeta.emoji;
 
-                const textualWrapper = document.createElement('div');
-                textualWrapper.className = "card-label";
-                textualWrapper.innerText = cardMeta.label;
+                const labelNode = document.createElement('div');
+                labelNode.className = "card-label";
+                labelNode.innerText = cardMeta.label;
 
-                cardFrontFace.appendChild(emojiWrapper);
-                cardFrontFace.appendChild(textualWrapper);
+                frontCover.appendChild(emojiNode);
+                frontCover.appendChild(labelNode);
 
-                cardRotatorInner.appendChild(cardBackFace);
-                cardRotatorInner.appendChild(cardFrontFace);
-                cardOuterFrame.appendChild(cardRotatorInner);
+                innerContainer.appendChild(backCover);
+                innerContainer.appendChild(frontCover);
+                cardBox.appendChild(innerContainer);
 
-                cardOuterFrame.addEventListener('click', handleCardSelectionTrigger);
-                gridBoxContainer.appendChild(cardOuterFrame);
+                cardBox.addEventListener('click', handleCardSelectionTrigger);
+                gridContainer.appendChild(cardBox);
             });
         }
 
@@ -517,7 +475,6 @@
             if (frameworkInputLock) return;
             const chosenCard = event.currentTarget;
 
-            // Reject click processing if card is already revealed or fully matched
             if (chosenCard.classList.contains('flipped') || chosenCard.classList.contains('card-match')) {
                 return;
             }
@@ -525,6 +482,7 @@
             chosenCard.classList.add('flipped');
             runningFlippedCards.push(chosenCard);
 
+            // Once 2 cards are flipped, evaluation begins immediately
             if (runningFlippedCards.length === 2) {
                 frameworkInputLock = true;
                 evaluateFlippedCardsMatch();
@@ -532,16 +490,25 @@
         }
 
         function evaluateFlippedCardsMatch() {
-            const firstCard = runningFlippedCards[0];
-            const secondCard = runningFlippedCards[1];
+            const c1 = runningFlippedCards[0];
+            const c2 = runningFlippedCards[1];
+            const pId = c1.dataset.pairId;
 
-            const matchVerified = firstCard.dataset.pairId === secondCard.dataset.pairId;
+            const isMatch = c1.dataset.pairId === c2.dataset.pairId;
 
-            if (matchVerified) {
-                // Correct match logic routines
+            // Track attempts specifically for this target key pairing group
+            if (!structuralAttemptTally[pId]) {
+                structuralAttemptTally[pId] = 0;
+            }
+            structuralAttemptTally[pId]++;
+
+            if (isMatch) {
                 setTimeout(() => {
-                    firstCard.classList.add('card-match');
-                    secondCard.classList.add('card-match');
+                    c1.classList.add('card-match');
+                    c2.classList.add('card-match');
+                    c1.classList.remove('card-helper-glow');
+                    c2.classList.remove('card-helper-glow');
+                    
                     triggerAudioEffect('audio-right');
 
                     runningLevelScore += 10;
@@ -551,50 +518,60 @@
                     frameworkInputLock = false;
 
                     verifyLevelBoardCompletion();
-                }, 300);
+                }, 400);
             } else {
-                // Mismatch penalty and automatic card reset loop execution
+                // Mismatch handling: Cards stay face-up for 1.5s so kids can read them
                 setTimeout(() => {
-                    firstCard.classList.add('card-mismatch');
-                    secondCard.classList.add('card-mismatch');
+                    c1.classList.add('card-mismatch');
+                    c2.classList.add('card-mismatch');
                     triggerAudioEffect('audio-wrong');
-
-                    // Deduct 2 points for mistake loop, cap out floor baseline at zero safely
-                    runningLevelScore = Math.max(0, runningLevelScore - 2);
-                    document.getElementById('hud-score-lbl').innerText = "Score: " + runningLevelScore;
                 }, 200);
 
                 setTimeout(() => {
-                    firstCard.classList.remove('flipped', 'card-mismatch');
-                    secondCard.classList.remove('flipped', 'card-mismatch');
+                    c1.classList.remove('flipped', 'card-mismatch');
+                    c2.classList.remove('flipped', 'card-mismatch');
+
+                    // If they fail 4 times on this pair, trigger a gentle highlight
+                    if (structuralAttemptTally[pId] >= 4) {
+                        applySmartVisualAssistGlow(pId);
+                    }
 
                     runningFlippedCards = [];
                     frameworkInputLock = false;
-                }, 1200); // 1-second dynamic retention layout pause before flipping back
+                }, 1500); // 1500ms delay window to review layout details completely
             }
         }
 
+        function applySmartVisualAssistGlow(pairId) {
+            const allTargetCards = document.querySelectorAll('.memory-card');
+            allTargetCards.forEach(card => {
+                if (card.dataset.pairId === pairId && !card.classList.contains('card-match')) {
+                    card.classList.add('card-helper-glow');
+                }
+            });
+            // Minor point deduction applied ONLY when safety helper engages
+            runningLevelScore = Math.max(0, runningLevelScore - 1);
+            document.getElementById('hud-score-lbl').innerText = "Score: " + runningLevelScore;
+        }
+
         function verifyLevelBoardCompletion() {
-            const allMatchedElements = document.querySelectorAll('.card-match');
-            if (allMatchedElements.length === 12) {
+            const totalMatchesFound = document.querySelectorAll('.card-match').length;
+            if (totalMatchesFound === 12) {
                 frameworkInputLock = true;
                 systemCumulativeScore += runningLevelScore;
 
-                // Fire clapping sequence ONLY upon full chapter blackboard screen loads
                 setTimeout(() => {
                     triggerAudioEffect('audio-claps');
-                    
-                    const referenceKey = "level" + currentActiveLevel;
-                    document.getElementById('summary-msg-text').innerText = contentDatabase[referenceKey].summary;
+                    const targetKey = "level" + currentActiveLevel;
+                    document.getElementById('summary-msg-text').innerText = contentDatabase[targetKey].summary;
                     
                     if (currentActiveLevel === 3) {
                         document.getElementById('summary-action-btn').innerText = "Finish Adventure 🏆";
                     } else {
                         document.getElementById('summary-action-btn').innerText = "Next Level ➔";
                     }
-                    
                     changeScreenLayout('screen-summary');
-                }, 1000);
+                }, 800);
             }
         }
 
@@ -603,9 +580,9 @@
                 initLevelRun(currentActiveLevel + 1);
                 changeScreenLayout('screen-game');
             } else {
-                // Compile grade specific evaluation matrix logic cap bounds (Max: 90)
-                const finalBoundedScore = Math.min(90, systemCumulativeScore);
-                document.getElementById('victory-final-score-lbl').innerText = finalBoundedScore + " / 90";
+                // Dynamic capped upper bound scoring limits under 100
+                const computedFinalScore = Math.min(90, systemCumulativeScore);
+                document.getElementById('victory-final-score-lbl').innerText = computedFinalScore + " / 90";
                 changeScreenLayout('screen-victory');
             }
         }
