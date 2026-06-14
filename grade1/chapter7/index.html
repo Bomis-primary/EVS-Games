@@ -33,6 +33,7 @@
             align-items: center;
         }
 
+        /* Up/Down Scrollable Arena Layout Frame */
         .screen-layout {
             display: none;
             width: 100%;
@@ -51,7 +52,7 @@
             display: flex !important;
         }
 
-        /* 5-Second Splash Screen Handoff Framework */
+        /* 5-Second Splash Screen Handoff */
         #screen-splash {
             background: #ffffff;
             position: fixed;
@@ -133,7 +134,7 @@
             flex-shrink: 0;
         }
 
-        /* Primary Card Deck Canvas */
+        /* FIXED: Removed rigid height limits to stop empty middle blanks */
         .main-card {
             width: 100%;
             background: white;
@@ -144,18 +145,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
             flex-shrink: 0;
         }
         .display-frame {
             width: 100%;
-            height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 16px;
             background-color: #fafafa;
-            overflow: hidden;
             position: relative;
         }
         .display-frame img {
@@ -164,22 +163,7 @@
             height: auto;
             max-height: 220px;
             object-fit: contain;
-        }
-
-        /* Pure CSS Native Emojis Render Blocks (For Scenario 5 & 6) */
-        .native-css-canvas {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 65px;
-            gap: 10px;
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        }
-        .canvas-blue {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
         }
 
         .question-bubble {
@@ -189,9 +173,10 @@
             color: #0369a1;
             line-height: 1.4;
             white-space: pre-line;
+            padding: 0 5px;
         }
 
-        /* Swipeable Conveyor Belt Mechanical Architecture */
+        /* Swipeable Conveyor Belt Platforms */
         .conveyor-belt-system {
             width: 100%;
             background: #475569;
@@ -245,7 +230,7 @@
             object-fit: contain;
         }
 
-        /* Flashcard Double Stamp Array Framework (Level 3) */
+        /* Level 3 Safety Evaluation Stamp Button Controls */
         .stamp-row {
             display: none;
             width: 100%;
@@ -352,9 +337,6 @@
         <div class="main-card">
             <div id="canvas-img-frame" class="display-frame">
                 <img id="canvas-target-pic" src="">
-                
-                <div id="canvas-css-render" class="native-css-canvas" style="display:none;"></div>
-                
                 <div id="stamp-alert-overlay" class="stamp-feedback-overlay"></div>
             </div>
             
@@ -405,7 +387,6 @@
                 backgroundPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
             }, 1000);
 
-            // Exactly 5000ms delay hold logic before booting screen-welcome
             setTimeout(() => { 
                 document.getElementById('screen-splash').style.display = 'none';
                 changeScreen('screen-welcome'); 
@@ -419,18 +400,14 @@
         let setList = [];
         let controlLock = false;
 
-        // Expanded Decoy Choices Pool to prevent pattern predictability and memorization tricks
+        // Custom diversified conveyor fillers to break choice tracking predictability
         const universalDecoyPool = {
-            level1: [
-                { img: "assets/tent_decoy.png", label: "Tent" }, 
-                { img: "assets/treehouse_decoy.png", label: "Treehouse" },
-                { img: "assets/doghouse_decoy.png", label: "Doghouse" }
-            ],
             level2: [
-                "A clean frying pan", "A wooden toy blocks car", "A colorful story book", "A soft pair of slippers", "A metal kitchen toaster"
+                "A clean frying pan", "A wooden toy block", "A colorful story book", "A soft pair of slippers", "A shiny tea kettle"
             ]
         };
 
+        // FIXED: Clear concept explanations instead of spatial position commands
         const contentDataMap = {
             level1: {
                 rounds: [
@@ -467,31 +444,29 @@
                         bgImage: "assets/kitchen.png",
                         prompt: "Mother is getting ready to cook delicious hot rotis. 🍳\nIdentify the bedroom object that does NOT belong on the counter:",
                         correctText: "A soft sleeping pillow",
-                        hint: "Look near the cooking fire! A soft pillow belongs in the bedroom. If it touches the stove, it can catch fire instantly!"
+                        hint: "A soft pillow belongs in the bedroom on your bed. If it gets near a hot cooking stove, it can catch fire instantly!"
                     },
                     {
                         bgImage: "assets/bedroom.png",
                         prompt: "Mina is yawning and wants to jump straight into her cozy bed. 💤\nWhat dangerous kitchen item did the Messy Monster leave on her blanket?",
                         correctText: "A sharp kitchen knife",
-                        hint: "Look at the middle of the bed! A sharp cooking knife belongs in a closed drawer. If Mina sits on it, it will cut her hand!"
+                        hint: "A sharp cooking knife belongs safely inside a closed drawer. Leaving it out on a bed can accidentally cut your hand or fingers!"
                     },
                     {
                         bgImage: "assets/livingroom.png",
                         prompt: "Ding-dong! A special guest walks through the front door. 🚪\nWhich spill on the floor tiles will make them slip and fall?",
                         correctText: "A puddle of soapy water",
-                        hint: "Look closely near the sofa! Soapy wash water belongs inside a bathroom bucket. Spilling it here makes the floor as slippery as a slide!"
+                        hint: "Soapy wash water belongs inside a bathroom bucket. Spilling it where people walk makes the floor slick like ice!"
                     }
                 ],
                 summary: "Our home has different rooms. We cook in the kitchen, sleep in the bedroom, and welcome guests in the living room."
             },
             level3: {
                 rounds: [
-                    { type: "img", src: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action safe or danger?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
-                    { type: "img", src: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this is safe or danger?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
-                    { type: "img", src: "assets/throwingwaste.png", isSafe: true, prompt: "This helpful child is throwing his empty wrapper into the trash. ✨\nHow do we rate this choice—safe or danger?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from spreading sickness." },
-                    { type: "css", mode: "sharp", isSafe: false, prompt: "Oh no! Look down! This child is playing with sharp, broken plastic toys. 🧸\nIdentify this choice—is it safe or danger?", hint: "Be careful! Sharp, broken plastic edges can scratch your skin or slice your fingers open. Throw broken toys directly in the trash!" },
-                    { type: "css", mode: "wash", isSafe: true, prompt: "Someone is washing their hands with soap before eating dinner! 🧼\nWhat do you think—is this safe or danger?", hint: "Excellent health habit! Washing hands with soap kills tiny invisible dirt bugs before they ride on food into your stomach." },
-                    { type: "css", mode: "box", isSafe: true, prompt: "This great helper is putting all their toys neatly back into the box. 📦\nWhich stamp fits this action—safe or danger?", hint: "Wonderful choice! Cleaning up your floor keeps the bedroom tidy, so nobody trips over a stray block and falls down in the dark." }
+                    { src: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action safe or danger?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
+                    { src: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this is safe or danger?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
+                    { src: "assets/throwingwaste.png", isSafe: true, prompt: "This helpful child is throwing his empty wrapper into the trash. ✨\nHow do we rate this choice—safe or danger?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from spreading sickness." },
+                    { src: "assets/throwingwaste.png", isSafe: true, prompt: "Another great helper cleans up the classroom floor space. 🧹\nIs keeping rooms tidy safe or danger?", hint: "Wonderful choice! Cleaning up your floor keeps rooms tidy, so nobody trips over objects and falls down in the dark." }
                 ],
                 summary: "Throw trash inside a closed bin to keep bugs away. Never play with sharp knives, hot stoves, or matchsticks because they can hurt you!"
             }
@@ -548,45 +523,21 @@
             track.style.animationPlayState = "running";
             document.getElementById('wrapper-conveyor-housing').scrollLeft = 0;
 
+            const imgNode = document.getElementById('canvas-target-pic');
+            document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
+
             if (activeLevel === 1) {
-                document.getElementById('canvas-css-render').style.display = "none";
-                document.getElementById('canvas-target-pic').style.display = "none";
-                document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
+                imgNode.style.display = "none";
                 buildLevel1Belt();
             } 
             else if (activeLevel === 2) {
-                document.getElementById('canvas-css-render').style.display = "none";
-                const imgNode = document.getElementById('canvas-target-pic');
                 imgNode.src = roundItem.bgImage;
                 imgNode.style.display = "block";
-                document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
                 buildLevel2Belt();
             } 
             else if (activeLevel === 3) {
-                document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
-                
-                if (roundItem.type === "img") {
-                    document.getElementById('canvas-css-render').style.display = "none";
-                    const imgNode = document.getElementById('canvas-target-pic');
-                    imgNode.src = roundItem.src;
-                    imgNode.style.display = "block";
-                } else {
-                    document.getElementById('canvas-target-pic').style.display = "none";
-                    const cssBox = document.getElementById('canvas-css-render');
-                    cssBox.style.display = "flex";
-                    
-                    // Render custom built CSS native imagery cards matching state keys
-                    if (roundItem.mode === "sharp") {
-                        cssBox.className = "native-css-canvas";
-                        cssBox.innerHTML = "<div>🧸⚠️⚡</div><div style='font-size:18px; font-weight:bold; color:#ef4444;'>BROKEN SHARP EDGES</div>";
-                    } else if (roundItem.mode === "wash") {
-                        cssBox.className = "native-css-canvas canvas-blue";
-                        cssBox.innerHTML = "<div>🧼✨🙌</div><div style='font-size:18px; font-weight:bold; color:#2563eb;'>WASHING HANDS</div>";
-                    } else if (roundItem.mode === "box") {
-                        cssBox.className = "native-css-canvas";
-                        cssBox.innerHTML = "<div>📦🧱🧸</div><div style='font-size:18px; font-weight:bold; color:#16a34a;'>CLEANING TOY BOX</div>";
-                    }
-                }
+                imgNode.src = roundItem.src;
+                imgNode.style.display = "block";
             }
         }
 
@@ -595,10 +546,8 @@
             track.innerHTML = "";
 
             let items = [];
-            // Target item injector
             items.push({ img: roundItem.correctChoice.img, isCorrect: true, hint: "" });
             
-            // Collect global decoys that do not match current round item asset target signature
             let hintsCounter = 0;
             contentDataMap.level1.rounds.forEach(r => {
                 if (r.correctChoice.img !== roundItem.correctChoice.img) {
@@ -607,7 +556,6 @@
             });
 
             scramble(items);
-            // Double duplication loop to preserve endless scroll geometry continuity variables
             const continuousPool = [...items, ...items];
 
             continuousPool.forEach(c => {
@@ -632,7 +580,6 @@
             let items = [];
             items.push({ text: roundItem.correctText, isCorrect: true, hint: "" });
 
-            // Pull unique decoys to avoid item repetition across levels
             let levelDecoys = [...universalDecoyPool.level2];
             scramble(levelDecoys);
             items.push({ text: levelDecoys[0], isCorrect: false, hint: roundItem.hint });
