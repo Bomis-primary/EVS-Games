@@ -183,7 +183,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        /* Refreshed Pastel Magic Star Card Back Cover Design */
+        /* Pastel Magic Star Card Back Cover Design */
         .card-back {
             background: linear-gradient(135deg, #93c5fd, #60a5fa);
             display: flex;
@@ -352,7 +352,7 @@
                     { id: 4, emoji: '🏠', label: "Stay Indoors" },
                     { id: 5, emoji: '🍲', label: "Hot Soup" },
                     { id: 5, emoji: '❤️', label: "Warm and Cozy" },
-                    { id: 6, emoji: '🌈', label: "Rain Shower" },
+                    { id: 6, emoji: '🌈', label: "Beautiful Rainbow" },
                     { id: 6, emoji: '🎨', label: "Seven Colors" }
                 ]
             },
@@ -482,7 +482,6 @@
             chosenCard.classList.add('flipped');
             runningFlippedCards.push(chosenCard);
 
-            // Once 2 cards are flipped, evaluation begins immediately
             if (runningFlippedCards.length === 2) {
                 frameworkInputLock = true;
                 evaluateFlippedCardsMatch();
@@ -496,7 +495,6 @@
 
             const isMatch = c1.dataset.pairId === c2.dataset.pairId;
 
-            // Track attempts specifically for this target key pairing group
             if (!structuralAttemptTally[pId]) {
                 structuralAttemptTally[pId] = 0;
             }
@@ -520,7 +518,7 @@
                     verifyLevelBoardCompletion();
                 }, 400);
             } else {
-                // Mismatch handling: Cards stay face-up for 1.5s so kids can read them
+                // Mismatch handling: Cards now stay flipped open for 3 FULL SECONDS so students can process them
                 setTimeout(() => {
                     c1.classList.add('card-mismatch');
                     c2.classList.add('card-mismatch');
@@ -531,14 +529,14 @@
                     c1.classList.remove('flipped', 'card-mismatch');
                     c2.classList.remove('flipped', 'card-mismatch');
 
-                    // If they fail 4 times on this pair, trigger a gentle highlight
+                    // Activate hint assistance system if they miss a specific pair 4 times
                     if (structuralAttemptTally[pId] >= 4) {
                         applySmartVisualAssistGlow(pId);
                     }
 
                     runningFlippedCards = [];
                     frameworkInputLock = false;
-                }, 1500); // 1500ms delay window to review layout details completely
+                }, 3000); // 3-second display rule implemented
             }
         }
 
@@ -549,7 +547,7 @@
                     card.classList.add('card-helper-glow');
                 }
             });
-            // Minor point deduction applied ONLY when safety helper engages
+            // Point penalty applied only when the visual help framework activates
             runningLevelScore = Math.max(0, runningLevelScore - 1);
             document.getElementById('hud-score-lbl').innerText = "Score: " + runningLevelScore;
         }
@@ -580,7 +578,6 @@
                 initLevelRun(currentActiveLevel + 1);
                 changeScreenLayout('screen-game');
             } else {
-                // Dynamic capped upper bound scoring limits under 100
                 const computedFinalScore = Math.min(90, systemCumulativeScore);
                 document.getElementById('victory-final-score-lbl').innerText = computedFinalScore + " / 90";
                 changeScreenLayout('screen-victory');
