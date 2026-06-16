@@ -33,28 +33,39 @@
             font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
         }
 
-        /* RESPONSIVE SCALING VIEWPORT FIX */
+        /* CABINET WITH BUILT-IN SCROLL SUPPORT FOR SMALL MONITORS */
         .game-cabinet-stage {
             width: 500px;
-            height: 800px;
+            height: 850px;
+            max-height: 95vh;
             background: linear-gradient(180deg, var(--bg-sky) 0%, #e0f2fe 100%);
             border: 8px solid #38bdf8;
             border-radius: 24px;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto; /* Enables custom scrolling if monitor height cuts off view */
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            transform-origin: center center;
-            flex-shrink: 0;
+        }
+
+        /* Custom Kid-Friendly Scrollbar Styling */
+        .game-cabinet-stage::-webkit-scrollbar {
+            width: 10px;
+        }
+        .game-cabinet-stage::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        .game-cabinet-stage::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 10px;
         }
 
         .screen-view {
             display: none;
             width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+            min-height: 100%;
+            padding: 16px;
             flex-direction: column;
+            position: relative;
         }
 
         .active-view {
@@ -65,7 +76,6 @@
             background: #ffffff;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
         }
 
         .intro-logo-graphic {
@@ -77,7 +87,7 @@
         #screen-welcome {
             background: url('assets/startscreenimage.png') no-repeat center center;
             background-size: cover;
-            position: relative;
+            min-height: 834px;
         }
 
         .native-play-hotspot {
@@ -90,21 +100,18 @@
             cursor: pointer;
             background: rgba(255, 255, 255, 0.01);
             border-radius: 40px;
-            z-index: 9999;
         }
 
         #screen-game {
-            padding: 16px;
-            flex-direction: column;
-            gap: 10px;
-            justify-content: space-between;
+            gap: 12px;
+            justify-content: flex-start;
         }
 
         .btn-kids-action {
             background: linear-gradient(180deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
             color: white;
             border: 4px solid #fff;
-            padding: 10px 40px;
+            padding: 12px 40px;
             font-size: 24px;
             font-weight: 900;
             border-radius: 50px;
@@ -113,6 +120,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
             text-transform: uppercase;
             align-self: center;
+            transition: transform 0.1s;
         }
         .btn-kids-action:active {
             transform: translateY(3px);
@@ -127,20 +135,15 @@
             align-items: center;
             background: #ffffff;
             border: 4px solid #38bdf8;
-            padding: 0 14px;
+            padding: 0 16px;
             border-radius: 18px;
             font-weight: 900;
-            font-size: 16px;
-        }
-
-        .hud-logo {
-            height: 30px;
-            object-fit: contain;
+            font-size: 18px;
         }
 
         .stars-container {
             color: #facc15;
-            font-size: 20px;
+            font-size: 22px;
         }
 
         .task-instruction-banner {
@@ -148,12 +151,12 @@
             background: #fef08a;
             border: 4px dashed #eab308;
             border-radius: 14px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 900;
             color: #713f12;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .grid-box-wrapper {
@@ -190,12 +193,9 @@
             border: 3px dashed #22c55e;
             cursor: pointer;
         }
-        .tile-empty.highlight-hint {
-            animation: hintGlow 1s infinite ease-in-out;
-        }
         .tile-obstacle {
             background: #4ade80;
-            font-size: 42px; /* Increased graphic asset sizing */
+            font-size: 42px;
         }
         .tile-road-lane {
             background: var(--road-asphalt);
@@ -209,11 +209,11 @@
             position: relative;
         }
         .anchor-tag-lbl {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 900;
             color: #1e3a8a;
             background: white;
-            padding: 1px 4px;
+            padding: 1px 5px;
             border-radius: 5px;
             border: 1px solid #2563eb;
             position: absolute;
@@ -221,9 +221,8 @@
             z-index: 5;
         }
 
-        /* INCREASED INNER GRAPHICS SIZES */
-        .placed-footpath-block { background: var(--sidewalk-gray); border: 3px solid #94a3b8; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 46px; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .placed-zebra-block { background: linear-gradient(90deg, var(--road-asphalt) 15%, #fff 15%, #fff 35%, var(--road-asphalt) 35%, var(--road-asphalt) 65%, #fff 65%, #fff 85%, var(--road-asphalt) 85%); border: 3px solid white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 46px; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .placed-footpath-block { background: var(--sidewalk-gray); border: 3px solid #94a3b8; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 46px; }
+        .placed-zebra-block { background: linear-gradient(90deg, var(--road-asphalt) 15%, #fff 15%, #fff 35%, var(--road-asphalt) 35%, var(--road-asphalt) 65%, #fff 65%, #fff 85%, var(--road-asphalt) 85%); border: 3px solid white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 46px; }
         
         .placed-signal-block { background: #334155; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 3px solid #64748b; }
         .signal-bulb { width: 14px; height: 14px; border-radius: 50%; background: #475569; border: 1px solid #000; }
@@ -243,7 +242,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1), top 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             pointer-events: none;
         }
         #sam-player-token img {
@@ -263,7 +262,7 @@
             flex: 1;
             background: #ffffff;
             border: 3px solid #cbd5e1;
-            padding: 8px;
+            padding: 10px;
             font-weight: 900;
             border-radius: 12px;
             cursor: pointer;
@@ -271,7 +270,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            font-size: 14px;
+            font-size: 15px;
             color: #475569;
             box-shadow: 0 4px 0 #cbd5e1;
         }
@@ -281,15 +280,15 @@
             background: #ffffff;
             border: 4px solid #fcd34d;
             border-radius: 18px;
-            padding: 8px;
+            padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
         .tool-card {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             border-radius: 14px;
             cursor: pointer;
             display: flex;
@@ -305,8 +304,8 @@
             right: -5px;
             background: #ef4444;
             color: white;
-            font-size: 10px;
-            padding: 1px 6px;
+            font-size: 11px;
+            padding: 2px 7px;
             border-radius: 10px;
             border: 2px solid white;
         }
@@ -316,7 +315,7 @@
 
         .game-speech-bubble {
             position: absolute;
-            bottom: 130px;
+            bottom: 140px;
             left: 5%;
             width: 90%;
             background: #ffffff;
@@ -325,7 +324,7 @@
             padding: 12px;
             text-align: center;
             font-weight: 900;
-            font-size: 15px;
+            font-size: 16px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
             display: none;
             z-index: 200;
@@ -347,7 +346,6 @@
             padding: 24px 16px;
             color: var(--text-dark);
             width: 100%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
         /* LIVE OVERLAY POPUP MODAL FOR QUIZ */
@@ -369,14 +367,14 @@
             background: #ffffff;
             border: 6px solid #eab308;
             border-radius: 20px;
-            padding: 18px;
+            padding: 20px;
             text-align: center;
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popIn 0.3s ease-out;
         }
         .quiz-popup-question {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 900;
             color: #1e3a8a;
             margin-bottom: 16px;
@@ -385,20 +383,31 @@
         .quiz-popup-options-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             width: 100%;
         }
         .quiz-popup-btn {
             width: 100%;
             background: #f8fafc;
             border: 3px solid #cbd5e1;
-            padding: 12px;
+            padding: 14px;
             border-radius: 14px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 900;
             color: #334155;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.1s;
+        }
+        .quiz-hint-text {
+            color: #ea580c;
+            font-size: 14px;
+            font-weight: 900;
+            margin-top: 12px;
+            display: none;
+            background: #fff7ed;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px dashed #fdba74;
         }
 
         #confetti-canvas {
@@ -411,8 +420,12 @@
             z-index: 150;
         }
 
-        @keyframes popIn { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes hintGlow { 0%, 100% { border-color: #eab308; background: #fef08a; } 50% { border-color: #ea580c; background: #fed7aa; } }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
     </style>
 </head>
 <body>
@@ -424,17 +437,14 @@
     <div class="game-cabinet-stage" id="master-game-stage">
         <canvas id="confetti-canvas"></canvas>
 
-        <!-- 1. BRAND INTRO SCREEN -->
         <div id="screen-brand-intro" class="screen-view active-view">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="intro-logo-graphic">
         </div>
 
-        <!-- 2. GAME START SPLASH SCREEN -->
         <div id="screen-welcome" class="screen-view">
             <div class="native-play-hotspot" onclick="initializePreLevelBriefing(1)"></div>
         </div>
 
-        <!-- 3. INTERACTIVE BRIEFING OVERLAY SCREEN -->
         <div id="screen-briefing" class="screen-view briefing-overlay">
             <h2 id="briefing-title-lbl" style="color: #facc15; font-size: 34px; font-weight: 900;">LEVEL 1</h2>
             <div class="briefing-card">
@@ -444,20 +454,18 @@
             <button class="btn-kids-action" onclick="loadActiveLevelSandboxState()">START ▶️</button>
         </div>
 
-        <!-- 4. CORE SANDBOX WORKSPACE MAP SCREEN PANEL VIEW -->
         <div id="screen-game" class="screen-view">
-            <!-- POPUP LIVE QUIZ CARD LAYER -->
             <div id="live-quiz-modal" class="midway-quiz-overlay">
-                <div class="quiz-popup-card">
-                    <p style="color: #fb923c; font-size: 13px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase;">Traffic Quiz! 🚦</p>
+                <div class="quiz-popup-card" id="quiz-card-frame">
+                    <p style="color: #fb923c; font-size: 14px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase;">Traffic Quiz! 🚦</p>
                     <div id="quiz-modal-q-text" class="quiz-popup-question"></div>
                     <div id="quiz-modal-options-box" class="quiz-popup-options-list"></div>
+                    <div id="quiz-modal-hint" class="quiz-hint-text"></div>
                 </div>
             </div>
 
             <div class="kids-hud">
                 <span id="hud-level-tag" style="color: #0284c7;">LEVEL: 1/3</span>
-                <img src="assets/innovine-logo.png" alt="Innovine Logo" class="hud-logo">
                 <span id="hud-stars-tag" class="stars-container">⭐⭐⭐</span>
             </div>
 
@@ -480,11 +488,9 @@
 
             <div id="inventory-dock" class="inventory-tray"></div>
 
-            <!-- GUARANTEED VISIBLE WALK TRIGGER BUTTON -->
-            <button id="btn-action-trigger" class="btn-kids-action" style="width: 100%; background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%); box-shadow: 0 6px 0 #15803d; font-size:22px; padding:10px;" onclick="beginRouteVerificationWalk()">GO HOME! 🏃‍♂️</button>
+            <button id="btn-action-trigger" class="btn-kids-action" style="width: 100%; background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%); box-shadow: 0 6px 0 #15803d; font-size:24px; padding:12px; margin-top: 5px;" onclick="beginRouteVerificationWalk()">GO HOME! 🏃‍♂️</button>
         </div>
 
-        <!-- 5. FINAL PERFORMANCE VICTORY METRICS OVERLAY VIEW PANEL -->
         <div id="screen-victory" class="screen-view briefing-overlay" style="justify-content:center; gap:20px; background: rgba(224, 242, 254, 0.98);">
             <div style="font-size: 60px; line-height:1;">🏆</div>
             <h1 style="color: #16a34a; font-size: 30px; font-weight: 900;">MISSION CLEAR!</h1>
@@ -499,30 +505,15 @@
     </div>
 
     <script>
-        function adjustDeviceResponsiveScaling() {
-            const blockStage = document.getElementById('master-game-stage');
-            const targetWidth = 500;
-            const targetHeight = 800;
-
-            const viewportW = window.innerWidth;
-            const viewportH = window.innerHeight;
-
-            const scalingFactor = Math.min((viewportW - 10) / targetWidth, (viewportH - 10) / targetHeight);
-            blockStage.style.transform = `scale(${scalingFactor})`;
-        }
-
-        window.addEventListener('resize', adjustDeviceResponsiveScaling);
-        window.addEventListener('DOMContentLoaded', () => {
-            adjustDeviceResponsiveScaling();
-            setTimeout(() => {
-                switchScreenLayout('screen-welcome');
-            }, 3000);
-        });
+        setTimeout(() => {
+            switchScreenLayout('screen-welcome');
+        }, 3000);
 
         function switchScreenLayout(id) {
             document.querySelectorAll('.screen-view').forEach(view => view.classList.remove('active-view'));
             const node = document.getElementById(id);
             if (node) node.classList.add('active-view');
+            document.getElementById('master-game-stage').scrollTop = 0;
         }
 
         let activeLevelIdx = 1;
@@ -536,12 +527,10 @@
         let lightSignalState = "red";
         let autoSignalTimerClock = null;
         let routeSimulationLockFlag = false;
-        let inactivityTimerClock = null;
         
         let confettiIntervalClock = null;
         let confettiParticlesCollection = [];
 
-        /* SIMPLIFIED 3 QUESTIONS PER LEVEL LINKED TO LANDMARKS */
         const mapsDatabase = {
             level1: {
                 shortBrief: "Build a safe path from School to Home! Stay off the green grass!",
@@ -556,22 +545,25 @@
                     ['obstacle', 'obstacle', 'obstacle', 'home']
                 ],
                 milestoneQuizzes: {
-                    "0,1": {
+                    "0,2": {
                         q: "Where is the safest place for Sam to walk?",
+                        hint: "Hint: Roads and grass are dangerous! Walk on paths made of bricks.",
                         options: [
                             { text: "On the Footpath! 🧱", correct: true },
-                            { text: "On the grass lane. 🌳", correct: false }
+                            { text: "On the green grass. 🌳", correct: false }
                         ]
                     },
                     "1,3": {
                         q: "Should we run or play games on the footpath?",
+                        hint: "Hint: Footpaths are for walking carefully to stay safe!",
                         options: [
                             { text: "No, stay safe! 🛑", correct: true },
-                            { text: "Yes, let's play run! 🏃‍♂️", correct: false }
+                            { text: "Yes, let's run! 🏃‍♂️", correct: false }
                         ]
                     },
                     "2,3": {
-                        q: "Is it safe to play near fast moving cars?",
+                        q: "Is it safe to play near streets where cars travel?",
+                        hint: "Hint: Cars move very fast and might not see you!",
                         options: [
                             { text: "No, it is dangerous! 🙅‍♂️", correct: true },
                             { text: "Yes, it is perfectly fine.", correct: false }
@@ -580,8 +572,8 @@
                 }
             },
             level2: {
-                shortBrief: "Build a safe path across the road using a Zebra Crossing lines!",
-                task: "Help Sam walk down and cross the busy highway using a Zebra Crossing!",
+                shortBrief: "Build a safe path across the road using a Zebra Crossing!",
+                task: "Help Sam walk down and cross the busy road using a Zebra Crossing!",
                 inventory: { footpath: 4, zebra: 1 },
                 start: { r: 0, c: 0 },
                 end: { r: 3, c: 3 },
@@ -594,20 +586,23 @@
                 milestoneQuizzes: {
                     "1,1": {
                         q: "What are the white stripes on the road called?",
+                        hint: "Hint: They are named after a striped black-and-white animal!",
                         options: [
                             { text: "Zebra Crossing! 🏁", correct: true },
-                            { text: "Tiger Crossing Line. 🐅", correct: false }
+                            { text: "Tiger Lines. 🐅", correct: false }
                         ]
                     },
                     "2,1": {
-                        q: "What do we do right before crossing the road?",
+                        q: "What do we do right before crossing any street?",
+                        hint: "Hint: Use your eyes to check left and right for vehicles!",
                         options: [
                             { text: "Stop and look both ways! 👀", correct: true },
-                            { text: "Run across without looking!", correct: false }
+                            { text: "Run as fast as you can!", correct: false }
                         ]
                     },
                     "3,1": {
                         q: "Zebra lines help walkers cross roads safely. True or False?",
+                        hint: "Hint: Drivers always look out for people on these special white lines.",
                         options: [
                             { text: "True! 👍", correct: true },
                             { text: "False! 👎", correct: false }
@@ -630,20 +625,23 @@
                 milestoneQuizzes: {
                     "1,1": {
                         q: "What does a RED traffic light tell cars to do?",
+                        hint: "Hint: Red means danger! Vehicles must stop immediately.",
                         options: [
                             { text: "Stop completely! 🛑", correct: true },
-                            { text: "Go faster! 🚗", correct: false }
+                            { text: "Drive faster! 🚗", correct: false }
                         ]
                     },
                     "2,1": {
-                        q: "Which light color means it is safe for us to cross?",
+                        q: "Which light color tells walkers it is safe to cross?",
+                        hint: "Hint: This color means 'Go ahead safely'!",
                         options: [
                             { text: "Green! 🟢", correct: true },
                             { text: "Red! 🔴", correct: false }
                         ]
                     },
                     "3,1": {
-                        q: "We should always listen to traffic safety rules. True or False?",
+                        q: "We should always follow traffic safety rules. True or False?",
+                        hint: "Hint: Traffic rules keep everybody, including you, perfectly safe!",
                         options: [
                             { text: "True! ✅", correct: true },
                             { text: "False! ❌", correct: false }
@@ -664,17 +662,6 @@
         function loadActiveLevelSandboxState() {
             switchScreenLayout('screen-game');
             buildMapLevelRun(activeLevelIdx);
-        }
-
-        function resetInactivityTimeoutEngine() {
-            clearTimeout(inactivityTimerClock);
-            document.querySelectorAll('.tile-empty').forEach(el => el.classList.remove('highlight-hint'));
-            if (routeSimulationLockFlag) return;
-
-            inactivityTimerClock = setTimeout(() => {
-                const firstEmptyCell = document.querySelector('.tile-empty');
-                if (firstEmptyCell) firstEmptyCell.classList.add('highlight-hint');
-            }, 10000);
         }
 
         function buildMapLevelRun(lvlNum) {
@@ -731,7 +718,6 @@
 
             setTimeout(() => { placeSamCharacterPawnCoordinates(specBlueprint.start.r, specBlueprint.start.c); }, 70);
             renderInventoryTrayUI();
-            resetInactivityTimeoutEngine();
 
             if (activeLevelIdx >= 2) {
                 deployDynamicLaneTrafficEngine();
@@ -742,7 +728,7 @@
         function updateStarsDisplayUI() {
             let starsStr = "";
             for (let i = 0; i < 3; i++) {
-                starsStr += (i < runningLevelStarsCount) ? "⭐" : "💀";
+                starsStr += (i < runningLevelStarsCount) ? "⭐" : "⚫";
             }
             document.getElementById('hud-stars-tag').innerText = starsStr;
         }
@@ -775,7 +761,6 @@
                     currentlySelectedToolType = key;
                     document.querySelectorAll('.tool-card').forEach(c => c.style.outline = "none");
                     blockCard.style.outline = "5px solid #ea580c";
-                    resetInactivityTimeoutEngine();
                 });
 
                 dock.appendChild(blockCard);
@@ -784,20 +769,12 @@
 
         function executeDirectTapPlacementBlock(targetTileNode) {
             if (routeSimulationLockFlag) return;
-            resetInactivityTimeoutEngine();
 
             const r = parseInt(targetTileNode.dataset.row);
             const c = parseInt(targetTileNode.dataset.col);
             const initialIdentityState = fieldMatrixConfiguration[r][c];
 
-            /* TESTING SHORTCUT: IF CLICKED TILE HAS A QUIZ PROJECTED AND NO TOOL CHOSEN, POP IT INSTANTLY */
             if (!currentlySelectedToolType) {
-                const blueprintMeta = mapsDatabase["level" + activeLevelIdx];
-                const key = `${r},${c}`;
-                if (blueprintMeta.milestoneQuizzes && blueprintMeta.milestoneQuizzes[key]) {
-                    triggerMidwayQuizInterceptAsync(blueprintMeta.milestoneQuizzes[key]);
-                    return;
-                }
                 if (initialIdentityState === 'school' || initialIdentityState === 'home') return;
                 displayKidsSpeechBubble("Tap a tool card from the tray first! 🎒");
                 return;
@@ -806,13 +783,13 @@
             let wasPlacementSuccessful = false;
 
             if (currentlySelectedToolType === 'zebra') {
-                if (initialIdentityState === 'road_lane_left' || initialIdentityState === 'road_lane_right' || initialIdentityState === 'empty') {
+                if (initialIdentityState === 'road_lane_left' || initialIdentityState === 'road_lane_right') {
                     targetTileNode.innerHTML = `<div class="placed-zebra-block">🏁</div>`;
                     fieldMatrixConfiguration[r][c] = 'paved_zebra';
                     wasPlacementSuccessful = true;
                 } else {
                     triggerTactileFlashFeedback(targetTileNode, "placement-invalid-glow");
-                    displayKidsSpeechBubble("Place the Zebra Crossing directly on the road! 🏁");
+                    displayKidsSpeechBubble("Place the Zebra Crossing directly on the dark road! 🏁");
                 }
             } 
             else if (currentlySelectedToolType === 'trafficlight') {
@@ -833,7 +810,7 @@
                     wasPlacementSuccessful = true;
                 } else {
                     triggerTactileFlashFeedback(targetTileNode, "placement-invalid-glow");
-                    displayKidsSpeechBubble("Place Footpaths on the green grass paths! 🧱");
+                    displayKidsSpeechBubble("Place Footpaths on the dotted green grass boxes! 🧱");
                 }
             }
 
@@ -873,7 +850,6 @@
             runningInventoryPoolMap[lastStep.toolType]++;
             currentlySelectedToolType = null;
             renderInventoryTrayUI();
-            resetInactivityTimeoutEngine();
         }
 
         function resetCurrentLevelMatrixState() {
@@ -894,8 +870,8 @@
         }
 
         function deployDynamicLaneTrafficEngine() {
-            spawnIndependentLaneVehicle(2, "🚗", 3.2, "left");
-            spawnIndependentLaneVehicle(2, "🚌", 2.2, "right");
+            spawnIndependentLaneVehicle(2, "🚗", 3.5, "left");
+            spawnIndependentLaneVehicle(2, "🚌", 2.5, "right");
         }
 
         function spawnIndependentLaneVehicle(targetRow, spriteSymbol, movementVelocity, directionPathStr) {
@@ -915,7 +891,7 @@
             vehicleNode.style.left = calculatedCoordinateX + "px";
 
             const operationalClockTimer = setInterval(() => {
-                if (activeLevelIdx === 3 && lightSignalState === "red" && calculatedCoordinateX >= (meshCanvas.clientWidth * 0.35) && calculatedCoordinateX <= (meshCanvas.clientWidth * 0.55)) {
+                if (activeLevelIdx === 3 && lightSignalState === "red" && calculatedCoordinateX >= (meshCanvas.clientWidth * 0.30) && calculatedCoordinateX <= (meshCanvas.clientWidth * 0.60)) {
                     return;
                 }
 
@@ -965,20 +941,24 @@
             activeLanesVehiclesCollection.forEach(obj => { obj.element.remove(); clearInterval(obj.clock); });
             activeLanesVehiclesCollection = [];
             if (autoSignalTimerClock) { clearInterval(autoSignalTimerClock); autoSignalTimerClock = null; }
-            clearTimeout(inactivityTimerClock);
         }
 
         function displayKidsSpeechBubble(msg) {
             const bubbleNode = document.getElementById('speech-bubble-prompt');
             bubbleNode.innerText = msg;
             bubbleNode.style.display = "block";
-            setTimeout(() => { bubbleNode.style.display = "none"; }, 4000);
+            setTimeout(() => { bubbleNode.style.display = "none"; }, 4500);
         }
 
         function triggerMidwayQuizInterceptAsync(quizPayload) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('live-quiz-modal');
+                const hintNode = document.getElementById('quiz-modal-hint');
+                const cardFrame = document.getElementById('quiz-card-frame');
+                
                 document.getElementById('quiz-modal-q-text').innerText = quizPayload.q;
+                hintNode.style.display = "none";
+                hintNode.innerText = quizPayload.hint || "";
                 
                 const optContainer = document.getElementById('quiz-modal-options-box');
                 optContainer.innerHTML = "";
@@ -998,11 +978,21 @@
                             setTimeout(() => {
                                 modal.style.display = "none";
                                 resolve(); 
-                            }, 1000);
+                            }, 1200);
                         } else {
                             btn.style.background = "#ef4444";
                             btn.style.color = "#ffffff";
                             triggerAudioOutputEffect('audio-wrong');
+                            
+                            // Visual Shake Notification
+                            cardFrame.style.animation = "none";
+                            setTimeout(() => { cardFrame.style.animation = "shake 0.3s ease-in-out"; }, 10);
+                            
+                            // Display Helpful Contextual Hint
+                            if (quizPayload.hint) {
+                                hintNode.style.display = "block";
+                            }
+                            
                             runningLevelStarsCount = Math.max(1, runningLevelStarsCount - 1);
                             updateStarsDisplayUI();
                         }
@@ -1012,10 +1002,10 @@
             });
         }
 
+        /* DYNAMIC PATHTRACKING RUNTIME MATRIX SEARCH SYSTEM */
         async function beginRouteVerificationWalk() {
             if (routeSimulationLockFlag) return;
             routeSimulationLockFlag = true;
-            clearTimeout(inactivityTimerClock);
 
             const blueprintMeta = mapsDatabase["level" + activeLevelIdx];
             let currentR = blueprintMeta.start.r;
@@ -1023,65 +1013,58 @@
             const finalDestinationRow = blueprintMeta.end.r;
             const finalDestinationCol = blueprintMeta.end.c;
 
-            let structuralHistoryLogsMap = {};
+            let pathTraversedRegistry = {};
 
             while (currentR !== finalDestinationRow || currentC !== finalDestinationCol) {
-                structuralHistoryLogsMap[`${currentR},${currentC}`] = true;
+                pathTraversedRegistry[`${currentR},${currentC}`] = true;
 
-                let spatialDirectionalMatrices = [
+                // Priority Sequence: Right, Down, Left, Up
+                let spatialDirections = [
                     { r: currentR, c: currentC + 1 }, 
                     { r: currentR + 1, c: currentC }, 
                     { r: currentR, c: currentC - 1 }, 
                     { r: currentR - 1, c: currentC }  
                 ];
 
-                let chosenNextStepNode = null;
+                let targetNextStep = null;
 
-                for (let coordinateOption of spatialDirectionalMatrices) {
-                    if (coordinateOption.r >= 0 && coordinateOption.r < 4 && coordinateOption.c >= 0 && coordinateOption.c < 4) {
-                        if (structuralHistoryLogsMap[`${coordinateOption.r},${coordinateOption.c}`]) continue;
+                for (let step of spatialDirections) {
+                    if (step.r >= 0 && step.r < 4 && step.c >= 0 && step.c < 4) {
+                        if (pathTraversedRegistry[`${step.r},${step.c}`]) continue;
 
-                        const cellIdentityStr = fieldMatrixConfiguration[coordinateOption.r][coordinateOption.c];
+                        const tileState = fieldMatrixConfiguration[step.r][step.c];
 
-                        if (cellIdentityStr === 'paved_footpath' || cellIdentityStr === 'paved_zebra' || 
-                            cellIdentityStr === 'road_lane_left' || cellIdentityStr === 'road_lane_right' || 
-                            cellIdentityStr === 'paved_signal' || cellIdentityStr === 'home') {
-                            chosenNextStepNode = coordinateOption;
+                        // Sam will strictly move across placed blocks or target landmarks
+                        if (tileState === 'paved_footpath' || tileState === 'paved_zebra' || 
+                            tileState === 'paved_signal' || tileState === 'home') {
+                            targetNextStep = step;
                             break;
                         }
                     }
                 }
 
-                if (!chosenNextStepNode) {
+                if (!targetNextStep) {
                     triggerAudioOutputEffect('audio-wrong');
-                    displayKidsSpeechBubble("Oops! The path breaks here. Try another way! 🌳");
+                    displayKidsSpeechBubble("Oops! The safety path breaks here. Add more tiles to finish the path! 🧱");
                     penalizeAttemptLogs();
                     return;
                 }
 
-                currentR = chosenNextStepNode.r;
-                currentC = chosenNextStepNode.c;
+                currentR = targetNextStep.r;
+                currentC = targetNextStep.c;
                 placeSamCharacterPawnCoordinates(currentR, currentC);
-                await executeAsyncSleepTimer(400);
+                await executeAsyncSleepTimer(500);
 
-                /* POP QUESTIONS DYNAMICALLY ON PROGRESSION MILESTONES */
+                // Open contextual safety quiz if row/col matches a challenge spot
                 const positionCoordKey = `${currentR},${currentC}`;
                 if (blueprintMeta.milestoneQuizzes && blueprintMeta.milestoneQuizzes[positionCoordKey]) {
                     await triggerMidwayQuizInterceptAsync(blueprintMeta.milestoneQuizzes[positionCoordKey]);
                 }
 
-                const realTimeEvaluatedIdentityType = fieldMatrixConfiguration[currentR][currentC];
-
-                if (realTimeEvaluatedIdentityType === 'road_lane_left' || realTimeEvaluatedIdentityType === 'road_lane_right') {
+                // Traffic enforcement checks
+                if (activeLevelIdx === 3 && fieldMatrixConfiguration[currentR][currentC] === 'paved_zebra' && lightSignalState === 'red') {
                     triggerAudioOutputEffect('audio-wrong');
-                    displayKidsSpeechBubble("Be careful, Sam! Walking on the road without a crosswalk is unsafe! 🛑");
-                    penalizeAttemptLogs();
-                    return;
-                }
-
-                if (activeLevelIdx === 3 && realTimeEvaluatedIdentityType === 'paved_zebra' && lightSignalState === 'red') {
-                    triggerAudioOutputEffect('audio-wrong');
-                    displayKidsSpeechBubble("Wait, Sam! The traffic light is RED! Wait for the light to turn GREEN! 🚦");
+                    displayKidsSpeechBubble("Wait, Sam! The traffic light is RED! Wait for it to turn GREEN! 🚦");
                     penalizeAttemptLogs();
                     return;
                 }
@@ -1093,13 +1076,13 @@
 
             setTimeout(() => {
                 advanceToNextLevel();
-            }, 1500);
+            }, 2000);
         }
 
         function penalizeAttemptLogs() {
             runningLevelStarsCount = Math.max(1, runningLevelStarsCount - 1);
             updateStarsDisplayUI();
-            setTimeout(() => { buildMapLevelRun(activeLevelIdx); }, 3500);
+            setTimeout(() => { buildMapLevelRun(activeLevelIdx); }, 4000);
         }
 
         function advanceToNextLevel() {
@@ -1108,7 +1091,7 @@
             } else {
                 let ratingStars = "";
                 let calculatedAverage = Math.round(cumulativeStarsEarned / 3);
-                for(let i=0; i<3; i++) ratingStars += (i < calculatedAverage) ? "⭐" : "💀";
+                for(let i=0; i<3; i++) ratingStars += (i < calculatedAverage) ? "⭐" : "⚫";
                 
                 document.getElementById('victory-stars-lbl').innerText = ratingStars;
                 switchScreenLayout('screen-victory');
@@ -1134,7 +1117,7 @@
             const ctx = canvas.getContext('2d');
             
             canvas.width = 500;
-            canvas.height = 800;
+            canvas.height = 850;
             
             confettiParticlesCollection = [];
             const colorPalettes = ['#facc15', '#f43f5e', '#3b82f6', '#10b981', '#a855f7', '#fb923c'];
