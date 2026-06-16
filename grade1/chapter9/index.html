@@ -81,21 +81,21 @@
         #screen-welcome {
             background: url('assets/startscreenimage.png') no-repeat center center;
             background-size: cover;
-            display: none;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 55px; /* Safely aligns layout target with the native background button */
+            position: relative; /* Crucial for tracking absolute coordinates */
         }
 
-        /* Perfect Click Hotspot Block Box Over Native Graphic Button (Uses 0.01 alpha layer transparency trick) */
+        /* FIXED ABSOLUTE HITBOX: This locks the invisible element right over the graphic permanently */
         .native-play-hotspot {
+            position: absolute;
+            bottom: 24%; /* Positions precisely above the bottom frame */
+            left: 50%;
+            transform: translateX(-50%);
             width: 260px;
             height: 75px;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.01); /* Subtle opacity so browser engine builds a structural touch canvas hitbox */
+            background: rgba(255, 255, 255, 0.01); /* Prevents browser click dropping bugs */
             border-radius: 40px;
-            z-index: 999;
+            z-index: 9999;
             pointer-events: auto;
         }
 
@@ -500,17 +500,14 @@
             const viewportW = window.innerWidth;
             const viewportH = window.innerHeight;
 
-            // Calculate the absolute tightest scale fit factor
             const scalingFactor = Math.min(viewportW / targetWidth, viewportH / targetHeight);
-
-            // Apply neat 2D CSS Transform centering matrix execution
             blockStage.style.transform = `scale(${scalingFactor})`;
         }
 
         window.addEventListener('resize', adjustDeviceResponsiveScaling);
         window.addEventListener('DOMContentLoaded', () => {
             adjustDeviceResponsiveScaling();
-            // Fire the 5-second branding loop countdown transition automatically
+            // Core timer to handle branding transition automatically
             setTimeout(() => {
                 switchScreenLayout('screen-welcome');
             }, 5000);
