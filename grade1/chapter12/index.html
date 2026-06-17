@@ -15,7 +15,7 @@
         #logoScreen { background-color: #ffffff; z-index: 100; }
         #logoScreen img { max-width: 60%; max-height: 40%; object-fit: contain; }
         
-        /* Screen 2: Title Menu Screen - Energetic high-contrast design */
+        /* Screen 2: Title Menu Screen */
         #titleScreen { background: linear-gradient(to bottom, #70c5ff 0%, #fef3c7 100%); z-index: 90; display: none; }
         #titleScreen h1 { color: #1e3a8a; font-size: 44px; margin-bottom: 25px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 4px 10px rgba(0,0,0,0.15); line-height: 1.2; font-weight: 900; }
         
@@ -57,18 +57,15 @@
 <body>
 
 <div id="gameContainer">
-    <!-- Screen 1: Brand Logo (Pure white background) -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
-    <!-- Screen 2: High Contrast Title Screen -->
     <div id="titleScreen" class="screen">
         <h1>FLAPPY EARTH<br>FLYER!</h1>
         <button class="btn" style="background: #fef3c7; color: #1e3a8a; box-shadow: 0 8px #f59e0b; border: 3px solid #1e3a8a;" onclick="showInstructions()">Let's Start! ➔</button>
     </div>
 
-    <!-- Screen 3: Interactive Guide Guidelines -->
     <div id="instructionScreen" class="screen">
         <div class="big-bold-text" style="color: #1e3a8a; font-size: 28px;">Your Flying Eco-Mission!</div>
         <div class="big-bold-text" style="font-size: 18px; background: #e0f2fe; padding: 10px; border-radius: 12px;">The game will move slowly so you can read every habit clearly!</div>
@@ -77,7 +74,6 @@
         <button class="btn" style="background: #10b981; box-shadow: 0 8px #059669;" onclick="startGame()">Fly Now! 🚀</button>
     </div>
 
-    <!-- Interactive Habits HUD Dashboard -->
     <div id="uiOverlay">
         <div class="hud-row">
             <div id="scoreLabel" class="ui-element">Score: 0 / 12</div>
@@ -86,19 +82,16 @@
         <div id="trackerBar"></div>
     </div>
     
-    <!-- Interactive Lesson Dialogue & Character Feedback Panel -->
     <div id="lessonOverlay">
         <div id="lessonText">Lesson details pop up dynamically here...</div>
         <button class="continue-btn" onclick="closeLesson()">Keep Flying ➔</button>
     </div>
     
-    <!-- Steering Controls -->
     <div id="controlPanel">
         <button id="btnUp" class="control-btn">🔼 FLY UP</button>
         <button id="btnDown" class="control-btn">🔽 DIVE DOWN</button>
     </div>
 
-    <!-- End Game Performance Summary -->
     <div id="completionScreen" class="screen">
         <h1 style="color: #065f46; font-size: 44px; margin-bottom: 15px; text-shadow: none;">Fantastic Job!</h1>
         <p style="font-size: 22px; margin-bottom: 25px; font-weight: bold; color: #374151;">You are officially an Earth Protector!</p>
@@ -135,14 +128,14 @@
     let speechBubbleColor = "#10b981";
     let trackerHistory = [];
     
-    // Bird object with tracking variables for structural flapping frames
+    // Bird configuration with explicitly defined flapping cycle properties
     let bird = { 
         x: 100, 
         y: 350, 
         radius: 20, 
         speed: 4.2,
-        wingFrame: 0,
-        wingDirection: 1
+        wingAngle: 0,       // Tracks the running visual wave degree
+        wingFlapSpeed: 0.15 // Standard visual frame tick speed
     };
     
     let landscapeClouds = [];
@@ -347,15 +340,8 @@
     function update() {
         if (!gameActive || interactivePaused) return;
 
-        // Dynamic wing mechanical cycle update logic based on input or gliding frames
-        if (controlUpActive || controlDownActive) {
-            bird.wingFrame += 0.4 * bird.wingDirection;
-        } else {
-            bird.wingFrame += 0.15 * bird.wingDirection; // Normal beautiful glide speed
-        }
-        if (bird.wingFrame > 1 || bird.wingFrame < -1) {
-            bird.wingDirection *= -1;
-        }
+        // Continuous sinewave wing animation loops smoothly on every frame tick
+        bird.wingAngle += (controlUpActive || controlDownActive) ? 0.3 : bird.wingFlapSpeed;
 
         if (controlUpActive) {
             bird.y -= bird.speed;
@@ -444,17 +430,24 @@
         ctx.fill();
         ctx.stroke();
 
-        // DYNAMIC WING FLAP: Calculates real-time vector transformations for bird flight physics
-        ctx.fillStyle = "#ffffff";
+        // HIGH VISIBILITY CARTOON WING FLAP: Cycles a deep rotation matrix to flap completely up and down
         ctx.save();
-        ctx.translate(cx - 6, cy + 2);
-        // Scaling Y with wingFrame simulates beautiful clean canvas up/down flapping action
-        ctx.scale(1, bird.wingFrame); 
-        ctx.beginPath();
-        ctx.arc(0, 0, 9, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.lineWidth = 2.5;
+        ctx.translate(cx - 5, cy + 1); // Anchor wing to middle-back of bird
+        
+        // Map the running wing angle into a clear -45 to +45 degree swing
+        let flapOffset = Math.sin(bird.wingAngle) * 0.8; 
+        ctx.rotate(flapOffset);
+
+        ctx.fillStyle = "#ffffff";
         ctx.strokeStyle = "#1e3a8a";
+        ctx.lineWidth = 3;
+        
+        // Draw an elongated wing teardrop that sweeps up and down dramatically
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-15, -18, 5, -24, 2, 2);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
         ctx.restore();
 
