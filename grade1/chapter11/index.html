@@ -1,1 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Star Burst: Festive Fun!</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #2c1654; font-family: 'Comic Sans MS', sans-serif; }
+        #gameContainer { position: relative; width: 100%; height: 100%; max-width: 600px; max-height: 900px; margin: 0 auto; background: #3d1e75; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        canvas { display: block; width: 100%; height: 100%; background: radial-gradient(circle, #4c2692 0%, #230f41 100%); }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; text-align: center; color: white; }
+        #logoScreen { background-color: #230f41; z-index: 100; }
+        #logoScreen img { max-width: 60%; max-height: 40%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+        #instructionScreen { background: rgba(35, 15, 65, 0.95); z-index: 90; display: none; }
+        .btn { background: #ffaa00; color: #fff; border: none; padding: 15px 40px; font-size: 24px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 6px #cc8800; text-transform: uppercase; transition: all 0.1s ease; margin-top: 20px; }
+        .btn:active { box-shadow: 0 2px #cc8800; transform: translateY(4px); }
+        #factPopup { position: absolute; bottom: 15%; left: 5%; width: 90%; background: #ffea75; border: 4px solid #ffaa00; border-radius: 20px; padding: 20px; color: #431f00; font-size: 18px; line-height: 1.4; box-shadow: 0 10px 0 rgba(0,0,0,0.3); z-index: 50; display: none; animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #hintBox { position: absolute; top: 120px; left: 5%; width: 90%; background: #ffdddd; border: 3px solid #ff5555; border-radius: 12px; padding: 10px; color: #770000; font-size: 16px; font-weight: bold; z-index: 40; display: none; text-align: center; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 20; color: white; pointer-events: none; }
+        .ui-element { background: rgba(0,0,0,0.4); padding: 8px 16px; border-radius: 20px; font-size: 18px; font-weight: bold; border: 2px solid rgba(255,255,255,0.2); }
+        #completionScreen { background: radial-gradient(circle, #5b2fa6 0%, #1a0a33 100%); display: none; z-index: 80; }
+        @keyframes popUp { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
 
+<div id="gameContainer">
+    <!-- Branding Screen -->
+    <div id="logoScreen" class="screen">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+    </div>
+
+    <!-- Instructions Screen -->
+    <div id="instructionScreen" class="screen">
+        <h1 style="color: #ffaa00; font-size: 32px; margin-bottom: 20px; text-shadow: 2px 2px #000;">STAR BURST: FESTIVE FUN!</h1>
+        <p style="font-size: 18px; margin-bottom: 15px; line-height: 1.5;">Help your glowing star bounce high in the sky!</p>
+        <p style="font-size: 16px; color: #ddd; margin-bottom: 25px;">Move left or right to burst only the 3 correct items matching the festival prompt. Avoid the distractors!</p>
+        <button class="btn" onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- In-Game UI Overlays -->
+    <div id="uiOverlay">
+        <div id="scoreLabel" class="ui-element">Score: 0/15</div>
+        <div id="roundLabel" class="ui-element" style="color: #ffaa00;">Round 1/5</div>
+    </div>
+    
+    <div id="hintBox"></div>
+    
+    <div id="factPopup">
+        <h3 style="margin-bottom: 8px; color: #cc5500; font-size: 20px;">🎉 Round Complete!</h3>
+        <p id="factText"></p>
+        <button class="btn" style="font-size: 18px; padding: 10px 25px; box-shadow: 0 4px #cc8800;" onclick="nextRound()">Continue</button>
+    </div>
+
+    <!-- Completion / Game Over Screen -->
+    <div id="completionScreen" class="screen">
+        <h1 style="color: #00ffcc; font-size: 36px; margin-bottom: 10px; text-shadow: 2px 2px #000;">Fantastic Job!</h1>
+        <p style="font-size: 22px; margin-bottom: 20px;">You explored India's vibrant festivals!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 28px; padding: 15px 30px; background: rgba(255,255,255,0.1); border-color: #ffaa00; color: #ffaa00;">Final Score: 0/15</div>
+        <button class="btn" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Audio Configuration
+    const sndCorrect = new Audio('assets/correct-answer-sparklesound.mp3');
+    const sndWrong = new Audio('assets/wrong.mp3');
+    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
+    const sndFanfare = new Audio('assets/celebratorysong.mp3');
+
+    // Setup Dimensions
+    function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Game variables
+    let currentRound = 0;
+    let score = 0;
+    let attemptsThisRound = 0;
+    let collectedThisRound = 0;
+    let gameActive = false;
+    let showRoundEnd = false;
+
+    // Entity Objects
+    let star = { x: 0, y: 0, r: 24, vx: 0, vy: 0, color: '#ff00aa', glowColor: 'rgba(255, 0, 170, 0.6)' };
+    let trampoline = { x: 0, y: 0, w: 140, h: 16, targetY: 0, currentY: 0 };
+    let floatingItems = [];
+    let particles = [];
+
+    // Curriculum Data Structure
+    const roundsData = [
+        {
+            prompt: "Collect 3 items associated with HOLI",
+            starColor: "#ff00aa", glow: "rgba(255,0,170,0.6)",
+            hint: "Psst! Look for words like Gulaal and Gujiya!",
+            fact: "Holi is the festival of colours celebrated mostly in the month of March, where a delicious special sweet called Gujiya is served to guests!",
+            items: [
+                { text: "Gulaal", correct: true }, { text: "Gujiya", correct: true }, { text: "Pichkaris", correct: true },
+                { text: "Langar", correct: false }, { text: "Diyas", correct: false }, { text: "Santa Claus", correct: false }
+            ]
+        },
+        {
+            prompt: "Collect 3 items associated with DIWALI",
+            starColor: "#ffaa00", glow: "rgba(255,170,0,0.6)",
+            hint: "Look closely! We light Clay Diyas and make beautiful Rangoli for Diwali!",
+            fact: "On Diwali, homes are decorated with beautiful rangolis and clay diyas to offer a special prayer to Goddess Lakshmi and Lord Ganesha!",
+            items: [
+                { text: "Rangoli", correct: true }, { text: "Goddess Lakshmi", correct: true }, { text: "Clay Diyas", correct: true },
+                { text: "Sewaiyan", correct: false }, { text: "Tiranga", correct: false }, { text: "Buckets of water", correct: false }
+            ]
+        },
+        {
+            prompt: "Collect 3 items associated with CHRISTMAS",
+            starColor: "#00cc66", glow: "rgba(0,204,102,0.6)",
+            hint: "Think of December 25th, Santa, and Christmas Trees!",
+            fact: "Christmas is celebrated on 25th December every year as the birthday of Lord Jesus Christ, and children love getting gifts from Santa Claus!",
+            items: [
+                { text: "25th December", correct: true }, { text: "Bells and Stars", correct: true }, { text: "Lord Jesus Christ", correct: true },
+                { text: "Mosque", correct: false }, { text: "Gulaal", correct: false }, { text: "Guru Nanak Devji", correct: false }
+            ]
+        },
+        {
+            prompt: "Collect 3 items associated with EID / GURPURAB",
+            starColor: "#0099ff", glow: "rgba(0,153,255,0.6)",
+            hint: "Look for delicious Sewaiyan or a community Langar lunch!",
+            fact: "On Eid, families prepare a sweet dish called sewaiyan, and on Gurpurab, a wonderful community lunch called langar is organized by gurudwaras!",
+            items: [
+                { text: "Sewaiyan", correct: true }, { text: "Langar", correct: true }, { text: "Guru Nanak Devji", correct: true },
+                { text: "Firecrackers", correct: false }, { text: "Christmas tree", correct: false }, { text: "Pichkaris", correct: false }
+            ]
+        },
+        {
+            prompt: "Collect 3 items associated with INDEPENDENCE DAY",
+            starColor: "#ff6600", glow: "rgba(255,102,0,0.6)",
+            hint: "Remember 15th August and hoisting our National Flag, the Tiranga!",
+            fact: "India got freedom from British rule on 15th August, 1947! Every year, the Prime Minister hoists our National Flag, the Tiranga, at the Red Fort!",
+            items: [
+                { text: "15th August 1947", correct: true }, { text: "Tiranga", correct: true }, { text: "Red Fort Speech", correct: true },
+                { text: "Gujiya", correct: false }, { text: "Lord Ganesha", correct: false }, { text: "Santa Claus", correct: false }
+            ]
+        }
+    ];
+
+    // Initial 5-Second Branding Sequence
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+    }, 5000);
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        currentRound = 0;
+        score = 0;
+        initRound();
+        gameActive = true;
+    }
+
+    function initRound() {
+        attemptsThisRound = 0;
+        collectedThisRound = 0;
+        showRoundEnd = false;
+        document.getElementById('hintBox').style.display = 'none';
+        document.getElementById('factPopup').style.display = 'none';
+        document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
+        document.getElementById('roundLabel').innerText = `Round ${currentRound + 1}/5`;
+
+        const rData = roundsData[currentRound];
+        star.color = rData.starColor;
+        star.glowColor = rData.glow;
+        star.x = canvas.width / 2;
+        star.y = canvas.height * 0.5;
+        star.vx = 0;
+        star.vy = 2;
+
+        trampoline.w = 140;
+        trampoline.x = (canvas.width - trampoline.w) / 2;
+        trampoline.targetY = canvas.height - 40;
+        trampoline.currentY = trampoline.targetY;
+
+        // Generate Items with randomized spacing
+        floatingItems = [];
+        rData.items.forEach((item, index) => {
+            floatingItems.push({
+                text: item.text,
+                correct: item.correct,
+                x: Math.random() * (canvas.width - 120) + 60,
+                y: 160 + (index * 70),
+                vx: (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 1),
+                w: 130,
+                h: 40,
+                active: true
+            });
+        });
+    }
+
+    // Input Controllers (Touch & Mouse)
+    window.addEventListener('mousemove', (e) => { handleMove(e.clientX); });
+    window.addEventListener('touchmove', (e) => { if(e.touches.length > 0) handleMove(e.touches[0].clientX); });
+
+    function handleMove(clientX) {
+        if (!gameActive || showRoundEnd) return;
+        const rect = canvas.getBoundingClientRect();
+        const rootX = clientX - rect.left;
+        trampoline.x = rootX - trampoline.w / 2;
+        // Keep inside bounds
+        if (trampoline.x < 0) trampoline.x = 0;
+        if (trampoline.x + trampoline.w > canvas.width) trampoline.x = canvas.width - trampoline.w;
+    }
+
+    function createBurst(x, y, color) {
+        for(let i=0; i<15; i++) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                r: Math.random() * 4 + 2,
+                alpha: 1,
+                color: color
+            });
+        }
+    }
+
+    function evaluateWrongAttempt() {
+        attemptsThisRound++;
+        sndWrong.play().catch(()=>{});
+        if (attemptsThisRound >= 2) {
+            // Adaptive Loop: Filter out remaining distractors, display hint
+            document.getElementById('hintBox').innerText = roundsData[currentRound].hint;
+            document.getElementById('hintBox').style.display = 'block';
+            floatingItems.forEach(item => {
+                if(!item.correct) {
+                    createBurst(item.x, item.y, '#ff4444');
+                    item.active = false;
+                }
+            });
+        }
+    }
+
+    function finishRound() {
+        showRoundEnd = true;
+        sndClap.play().catch(()=>{});
+        document.getElementById('factText').innerText = roundsData[currentRound].fact;
+        document.getElementById('factPopup').style.display = 'block';
+    }
+
+    function nextRound() {
+        currentRound++;
+        if (currentRound < roundsData.length) {
+            initRound();
+        } else {
+            gameActive = false;
+            sndFanfare.play().catch(()=>{});
+            document.getElementById('finalScore').innerText = `Final Score: ${score}/15`;
+            document.getElementById('completionScreen').style.display = 'flex';
+        }
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    // Engine Core Logic Loops
+    function update() {
+        if (!gameActive) return;
+
+        if (!showRoundEnd) {
+            // Star Physics
+            star.x += star.vx;
+            star.y += star.vy;
+            star.vy += 0.25; // Simulated gravity acceleration
+
+            // Side wall elastic collisions
+            if (star.x - star.r < 0) { star.x = star.r; star.vx *= -1; }
+            if (star.x + star.r > canvas.width) { star.x = canvas.width - star.r; star.vx *= -1; }
+
+            // Ceiling Bounce
+            if (star.y - star.r < 0) { star.y = star.r; star.vy *= -0.8; }
+
+            // Trampoline Bounce Interaction
+            if (star.vy > 0 && 
+                star.x >= trampoline.x && 
+                star.x <= trampoline.x + trampoline.w && 
+                star.y + star.r >= trampoline.currentY && 
+                star.y - star.r <= trampoline.currentY + trampoline.h) {
+                
+                star.vy = -11; // Bounce velocity kick
+                star.vx = ((star.x - (trampoline.x + trampoline.w / 2)) / (trampoline.w / 2)) * 5;
+                trampoline.currentY = trampoline.targetY + 12; // Bounce elasticity deformation
+            }
+
+            // Trampoline spring simulation
+            trampoline.currentY += (trampoline.targetY - trampoline.currentY) * 0.15;
+
+            // Handle bottom bounds reset safely
+            if (star.y - star.r > canvas.height) {
+                star.x = canvas.width / 2;
+                star.y = canvas.height * 0.4;
+                star.vy = 2;
+                star.vx = 0;
+            }
+
+            // Update & Collision check blocks
+            floatingItems.forEach(item => {
+                if (!item.active) return;
+
+                item.x += item.vx;
+                if (item.x <= 0 || item.x + item.w >= canvas.width) item.vx *= -1;
+
+                // Box-to-circle Collision Check
+                let closestX = Math.max(item.x, Math.min(star.x, item.x + item.w));
+                let closestY = Math.max(item.y, Math.min(star.y, item.y + item.h));
+                let distanceX = star.x - closestX;
+                let distanceY = star.y - closestY;
+                let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+
+                if (distanceSquared < (star.r * star.r)) {
+                    item.active = false;
+                    if (item.correct) {
+                        score++;
+                        collectedThisRound++;
+                        sndCorrect.currentTime = 0;
+                        sndCorrect.play().catch(()=>{});
+                        createBurst(item.x + item.w/2, item.y + item.h/2, star.color);
+                        document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
+                        star.vy = -8; // Minor rebound boost on catch
+
+                        if (collectedThisRound >= 3) {
+                            finishRound();
+                        }
+                    } else {
+                        createBurst(item.x + item.w/2, item.y + item.h/2, '#ff3333');
+                        evaluateWrongAttempt();
+                    }
+                }
+            });
+        }
+
+        // Particle System Handler
+        particles.forEach((p, idx) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.02;
+            if (p.alpha <= 0) particles.splice(idx, 1);
+        });
+    }
+
+    // Draw Vector Assets Contextually
+    function drawStar(cx, cy, spikes, outerRadius, innerRadius, color, glow) {
+        ctx.save();
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = glow;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        let rot = Math.PI / 2 * 3;
+        let x = cx, y = cy;
+        let step = Math.PI / spikes;
+
+        for (let i = 0; i < spikes; i++) {
+            x = cx + Math.cos(rot) * outerRadius;
+            y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+        }
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        // Render upper prompt bar background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(0, 70, canvas.width, 45);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px "Comic Sans MS"';
+        ctx.textAlign = 'center';
+        ctx.fillText(roundsData[currentRound].prompt, canvas.width / 2, 98);
+
+        // Render Floating Content Items
+        floatingItems.forEach(item => {
+            if (!item.active) return;
+            ctx.fillStyle = item.correct ? '#4a2574' : '#5a348c';
+            ctx.strokeStyle = item.correct ? '#00ffcc' : '#ff5577';
+            ctx.lineWidth = 3;
+
+            // Rounded rectangles for child theme aesthetics
+            ctx.beginPath();
+            ctx.roundRect(item.x, item.y, item.w, item.h, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.text, item.x + item.w / 2, item.y + item.h / 2);
+        });
+
+        // Render Elastic Trampoline Line
+        ctx.fillStyle = '#ffaa00';
+        ctx.beginPath();
+        ctx.roundRect(trampoline.x, trampoline.currentY, trampoline.w, trampoline.h, 8);
+        ctx.fill();
+        // Support Bases
+        ctx.fillStyle = '#cc8800';
+        ctx.fillRect(trampoline.x + 10, trampoline.currentY + trampoline.h, 15, canvas.height);
+        ctx.fillRect(trampoline.x + trampoline.w - 25, trampoline.currentY + trampoline.h, 15, canvas.height);
+
+        // Render Particles
+        particles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // Render The Main Player Glowing Star
+        if (!showRoundEnd) {
+            drawStar(star.x, star.y, 5, star.r, star.r / 2, star.color, star.glowColor);
+        }
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
+    
+    mainLoop();
+</script>
+</body>
+</html>
