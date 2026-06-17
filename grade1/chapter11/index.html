@@ -39,16 +39,19 @@
 <body>
 
 <div id="gameContainer">
+    <!-- Screen 1: Branding Logo Locked for 5 seconds -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
+    <!-- Screen 2: Title Menu Screen with Catchy Tagline -->
     <div id="titleScreen" class="screen">
         <h1 style="color: #ffaa00; font-size: 42px; margin-bottom: 10px; text-shadow: 3px 3px #000; letter-spacing: 1px;">STAR BURST:<br>FESTIVE FUN!</h1>
         <p style="font-size: 22px; color: #00ffcc; font-weight: bold; margin-bottom: 40px; text-shadow: 2px 2px #000; padding: 0 10px;">✨ Bounce into India's Magic Celebrations! ✨</p>
         <button class="btn" onclick="showInstructions()">Play</button>
     </div>
 
+    <!-- Screen 3: Clear Bold Simplified Instructions for Grade 1 -->
     <div id="instructionScreen" class="screen">
         <div class="big-bold-text" style="color: #ff00aa;">HOW TO PLAY:</div>
         <div class="big-bold-text">1. Move the slider to move the <span style="color: #ffaa00;">Trampoline</span>!</div>
@@ -57,18 +60,21 @@
         <button class="btn" style="background: #00cc66; box-shadow: 0 8px #008844;" onclick="startGame()">Got It!</button>
     </div>
 
+    <!-- In-Game Status UI Overlays -->
     <div id="uiOverlay">
         <div id="scoreLabel" class="ui-element">Score: 0/15</div>
         <div id="attemptsLabel" class="ui-element" style="color: #ff5555;">Attempts: 2 Left</div>
         <div id="roundLabel" class="ui-element" style="color: #ffaa00;">Round 1/5</div>
     </div>
     
+    <!-- End of Round Fact Popups -->
     <div id="factPopup">
         <h3 style="margin-bottom: 12px; color: #cc5500; font-size: 24px;">🎉 Fantastic Job!</h3>
         <p id="factText" style="margin-bottom: 15px;"></p>
         <button class="btn" style="font-size: 20px; padding: 12px 30px; box-shadow: 0 4px #cc8800; margin-top: 5px;" onclick="nextRound()">Next Round ➔</button>
     </div>
 
+    <!-- Final Results Summary Screen -->
     <div id="completionScreen" class="screen">
         <h1 style="color: #00ffcc; font-size: 42px; margin-bottom: 15px; text-shadow: 3px 3px #000;">Superstar Winner!</h1>
         <p style="font-size: 24px; margin-bottom: 30px; font-weight: bold;">You completed all festival rounds!</p>
@@ -103,7 +109,7 @@
     let collectedThisRound = 0;
     let gameActive = false;
     let showRoundEnd = false;
-    let waitingForFirstTap = true; // Wait for tap logic implemented
+    let waitingForFirstTap = true;
 
     let star = { x: 0, y: 0, r: 22, vx: 0, vy: 0, color: '#ff00aa', glowColor: 'rgba(255, 0, 170, 0.6)' };
     let trampoline = { x: 0, y: 0, w: 150, h: 20, targetY: 0, currentY: 0 };
@@ -115,7 +121,7 @@
         {
             prompt: "Find 3 words for: HOLI",
             starColor: "#ff00aa", glow: "rgba(255,0,170,0.6)",
-            baseSpeed: 0.8, // Slow gentle pace for Grade 1
+            baseSpeed: 0.8,
             fact: "Holi is the festival of colours celebrated in March! A delicious sweet called Gujiya is shared with all our guests!",
             items: [
                 { text: "Gulaal", correct: true }, { text: "Gujiya", correct: true }, { text: "Pichkaris", correct: true },
@@ -145,7 +151,7 @@
         {
             prompt: "Find 3 words for: EID & GURPURAB",
             starColor: "#0099ff", glow: "rgba(0,153,255,0.6)",
-            baseSpeed: 1.4, // Lightly progressive speed jump for Round 4
+            baseSpeed: 1.4,
             fact: "On Eid, we prepare sweet sewaiyan! On Gurpurab, a wonderful free community meal called langar is served at gurudwaras!",
             items: [
                 { text: "Sewaiyan", correct: true }, { text: "Langar", correct: true }, { text: "Guru Nanak", correct: true },
@@ -155,7 +161,7 @@
         {
             prompt: "Find 3 words for: INDEPENDENCE DAY",
             starColor: "#ff6600", glow: "rgba(255,102,0,0.6)",
-            baseSpeed: 1.7, // Top tier challenge speed setting
+            baseSpeed: 1.7,
             fact: "India became independent on 15th August 1947! Every year, our Prime Minister proudly hoists the Tiranga flag at the Red Fort!",
             items: [
                 { text: "15th August", correct: true }, { text: "Tiranga", correct: true }, { text: "Red Fort Speech", correct: true },
@@ -188,7 +194,7 @@
         attemptsLeft = 2;
         collectedThisRound = 0;
         showRoundEnd = false;
-        waitingForFirstTap = true; // Block physics engine updates until trampoline interaction triggers
+        waitingForFirstTap = true;
         
         document.getElementById('factPopup').style.display = 'none';
         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
@@ -200,7 +206,6 @@
         star.color = rData.starColor;
         star.glowColor = rData.glow;
         
-        // Balanced center-point starting position
         star.x = canvas.width / 2;
         star.y = canvas.height - 80;
         star.vx = 0;
@@ -211,21 +216,27 @@
         trampoline.targetY = canvas.height - 50;
         trampoline.currentY = trampoline.targetY;
 
-        // Controlled vertical ceiling bounds layout to comfortably fit the star jump trajectory curves
+        // Clean Interleaving Fix: Alternates correct answers and distractors row by row
         floatingItems = [];
-        let itemsPool = [...rData.items];
-        // Shuffle layout placements
-        itemsPool.sort(() => Math.random() - 0.5);
+        let corrects = rData.items.filter(i => i.correct);
+        let wrongs = rData.items.filter(i => !i.correct);
+        
+        let balancedPool = [];
+        for(let i = 0; i < 3; i++) {
+            balancedPool.push(corrects[i]);
+            balancedPool.push(wrongs[i]);
+        }
 
-        itemsPool.forEach((item, index) => {
-            let row = Math.floor(index / 2); // 2 items per vertical row block
+        // Brought vertical grid layout further down from the ceiling into safe bounce reach
+        balancedPool.forEach((item, index) => {
+            let row = Math.floor(index / 2); 
             let col = index % 2;
             floatingItems.push({
                 text: item.text,
                 correct: item.correct,
-                x: col == 0 ? (Math.random() * 40 + 30) : (canvas.width - 180 - Math.random() * 40),
-                y: 130 + (row * 75), // Perfectly placed inside max vertical physics reach limits
-                vx: (Math.random() > 0.5 ? 1 : -1) * rData.baseSpeed,
+                x: col == 0 ? (Math.random() * 30 + 30) : (canvas.width - 180 - Math.random() * 30),
+                y: 160 + (row * 75), // Perfectly centered inside maximum height arcs
+                vx: (col == 0 ? 1 : -1) * rData.baseSpeed,
                 w: 140,
                 h: 42,
                 active: true
@@ -233,11 +244,9 @@
         });
     }
 
-    // Touch and Tracking Input Processors
     window.addEventListener('mousemove', (e) => { handleMove(e.clientX); });
     window.addEventListener('touchmove', (e) => { if(e.touches.length > 0) handleMove(e.touches[0].clientX); });
     
-    // Tap to kick off trampoline jump sequence
     window.addEventListener('mousedown', () => { if (waitingForFirstTap && gameActive && !showRoundEnd) launchStar(); });
     window.addEventListener('touchstart', () => { if (waitingForFirstTap && gameActive && !showRoundEnd) launchStar(); });
 
@@ -249,7 +258,6 @@
         if (trampoline.x < 0) trampoline.x = 0;
         if (trampoline.x + trampoline.w > canvas.width) trampoline.x = canvas.width - trampoline.w;
         
-        // If static state waiting for tap, align star to anchor on center trampoline panel cleanly
         if(waitingForFirstTap) {
             star.x = trampoline.x + trampoline.w / 2;
         }
@@ -257,7 +265,7 @@
 
     function launchStar() {
         waitingForFirstTap = false;
-        star.vy = -10.5; // Balanced low upward velocity limit
+        star.vy = -11; 
         trampoline.currentY = trampoline.targetY + 15;
     }
 
@@ -283,7 +291,6 @@
         if (attemptsLeft <= 0) {
             document.getElementById('attemptsLabel').innerText = `Revealing!`;
             document.getElementById('attemptsLabel').style.color = "#00ffcc";
-            // Clear remaining distractors immediately to guide the child directly to victory options
             floatingItems.forEach(item => {
                 if(!item.correct && item.active) {
                     createBurst(item.x + item.w/2, item.y + item.h/2, '#ff3333');
@@ -318,35 +325,31 @@
         startGame();
     }
 
-    // Mathematical Engine Logic Vectors
     function update() {
         if (!gameActive) return;
 
         if (!showRoundEnd && !waitingForFirstTap) {
-            // Star movement vector physics limits
             star.x += star.vx;
             star.y += star.vy;
-            star.vy += 0.22; // Low gentle gravity curve downscale
+            star.vy += 0.22; 
 
             if (star.x - star.r < 0) { star.x = star.r; star.vx *= -1; }
             if (star.x + star.r > canvas.width) { star.x = canvas.width - star.r; star.vx *= -1; }
             if (star.y - star.r < 0) { star.y = star.r; star.vy *= -0.7; }
 
-            // Extended precision target boundary trampoline mechanics
             if (star.vy > 0 && 
-                star.x >= trampoline.x - 10 && 
-                star.x <= trampoline.x + trampoline.w + 10 && 
+                star.x >= trampoline.x - 12 && 
+                star.x <= trampoline.x + trampoline.w + 12 && 
                 star.y + star.r >= trampoline.currentY - 5 && 
                 star.y - star.r <= trampoline.currentY + trampoline.h) {
                 
-                star.vy = -10.5; // Rebound velocity kick ceiling ceiling matched
+                star.vy = -11; 
                 star.vx = ((star.x - (trampoline.x + trampoline.w / 2)) / (trampoline.w / 2)) * 4;
                 trampoline.currentY = trampoline.targetY + 15;
             }
 
             trampoline.currentY += (trampoline.targetY - trampoline.currentY) * 0.15;
 
-            // If player misses trampoline completely, safely anchor cleanly back onto tracking frame
             if (star.y - star.r > canvas.height) {
                 waitingForFirstTap = true;
                 star.x = trampoline.x + trampoline.w / 2;
@@ -355,21 +358,19 @@
                 star.vy = 0;
             }
 
-            // Word Elements collision detection limits loops
             floatingItems.forEach(item => {
                 if (!item.active) return;
 
                 item.x += item.vx;
                 if (item.x <= 5 || item.x + item.w >= canvas.width - 5) item.vx *= -1;
 
-                // Circular coordinate layout calculations checking
                 let closestX = Math.max(item.x, Math.min(star.x, item.x + item.w));
                 let closestY = Math.max(item.y, Math.min(star.y, item.y + item.h));
                 let distanceX = star.x - closestX;
                 let distanceY = star.y - closestY;
                 let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
 
-                if (distanceSquared < ((star.r + 4) * (star.r + 4))) { // Generous kid-friendly collision footprint expanded
+                if (distanceSquared < ((star.r + 5) * (star.r + 5))) { 
                     item.active = false;
                     if (item.correct) {
                         score++;
@@ -378,7 +379,7 @@
                         sndCorrect.play().catch(()=>{});
                         createBurst(item.x + item.w/2, item.y + item.h/2, star.color);
                         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
-                        star.vy = -7; // Soft bounce kick up upon catching successfully
+                        star.vy = -7.5; 
 
                         if (collectedThisRound >= 3) {
                             finishRound();
@@ -391,7 +392,6 @@
             });
         }
 
-        // Processing particle physics frame metrics arrays
         particles.forEach((p, idx) => {
             p.x += p.vx;
             p.y += p.vy;
@@ -400,7 +400,6 @@
         });
     }
 
-    // Mathematical Canvas Drawing Core
     function drawStar(cx, cy, spikes, outerRadius, innerRadius, color, glow) {
         ctx.save();
         ctx.shadowBlur = 15;
@@ -432,7 +431,6 @@
 
         if (!gameActive) return;
 
-        // Draw Prompts Title bar block framework
         ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
         ctx.fillRect(0, 75, canvas.width, 48);
         ctx.fillStyle = '#ffffff';
@@ -440,14 +438,12 @@
         ctx.textAlign = 'center';
         ctx.fillText(roundsData[currentRound].prompt, canvas.width / 2, 105);
 
-        // Tap instructions overlay layout text indicators
         if(waitingForFirstTap && !showRoundEnd) {
             ctx.fillStyle = 'rgba(255,255,255,0.85)';
             ctx.font = 'bold 22px "Comic Sans MS"';
             ctx.fillText("👇 TAP ANYWHERE TO JUMP! 👇", canvas.width / 2, canvas.height / 2 + 50);
         }
 
-        // Draw Interactive Elements cards blocks
         floatingItems.forEach(item => {
             if (!item.active) return;
             ctx.fillStyle = '#4a2574';
@@ -466,7 +462,6 @@
             ctx.fillText(item.text, item.x + item.w / 2, item.y + item.h / 2);
         });
 
-        // Draw Trampoline platform engine tracks visuals
         ctx.fillStyle = '#ffaa00';
         ctx.beginPath();
         ctx.roundRect(trampoline.x, trampoline.currentY, trampoline.w, trampoline.h, 8);
@@ -476,7 +471,6 @@
         ctx.fillRect(trampoline.x + 12, trampoline.currentY + trampoline.h, 14, canvas.height);
         ctx.fillRect(trampoline.x + trampoline.w - 26, trampoline.currentY + trampoline.h, 14, canvas.height);
 
-        // Draw active vector bursts engine loops
         particles.forEach(p => {
             ctx.save();
             ctx.globalAlpha = p.alpha;
@@ -487,7 +481,6 @@
             ctx.restore();
         });
 
-        // Frame update rendering player object
         if (!showRoundEnd) {
             drawStar(star.x, star.y, 5, star.r, star.r / 2, star.color, star.glowColor);
         }
