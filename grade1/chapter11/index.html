@@ -39,19 +39,16 @@
 <body>
 
 <div id="gameContainer">
-    <!-- Screen 1: Branding Logo Locked for 5 seconds -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
-    <!-- Screen 2: Title Menu Screen -->
     <div id="titleScreen" class="screen">
         <h1 style="color: #ffaa00; font-size: 42px; margin-bottom: 10px; text-shadow: 3px 3px #000; letter-spacing: 1px;">STAR BURST:<br>FESTIVE FUN!</h1>
         <p style="font-size: 22px; color: #00ffcc; font-weight: bold; margin-bottom: 40px; text-shadow: 2px 2px #000; padding: 0 10px;">✨ Bounce into India's Magic Celebrations! ✨</p>
         <button class="btn" onclick="showInstructions()">Play</button>
     </div>
 
-    <!-- Screen 3: Instructions Screen -->
     <div id="instructionScreen" class="screen">
         <div class="big-bold-text" style="color: #ff00aa;">HOW TO PLAY:</div>
         <div class="big-bold-text">1. Look at the <span style="color: #ffaa00;">Two Choice Boxes</span> carefully!</div>
@@ -60,21 +57,18 @@
         <button class="btn" style="background: #00cc66; box-shadow: 0 8px #008844;" onclick="startGame()">Got It!</button>
     </div>
 
-    <!-- In-Game Status UI Overlays -->
     <div id="uiOverlay">
         <div id="scoreLabel" class="ui-element">Score: 0/15</div>
         <div id="attemptsLabel" class="ui-element" style="color: #ff5555;">Attempts: 2 Left</div>
         <div id="roundLabel" class="ui-element" style="color: #ffaa00;">Round 1/5</div>
     </div>
     
-    <!-- End of Round Fact Popups -->
     <div id="factPopup">
         <h3 style="margin-bottom: 12px; color: #cc5500; font-size: 24px;">🎉 Fantastic Job!</h3>
         <p id="factText" style="margin-bottom: 15px;"></p>
         <button class="btn" style="font-size: 20px; padding: 12px 30px; box-shadow: 0 4px #cc8800; margin-top: 5px;" onclick="nextRound()">Next Round ➔</button>
     </div>
 
-    <!-- Final Results Summary Screen -->
     <div id="completionScreen" class="screen">
         <h1 style="color: #00ffcc; font-size: 42px; margin-bottom: 15px; text-shadow: 3px 3px #000;">Superstar Winner!</h1>
         <p style="font-size: 24px; margin-bottom: 30px; font-weight: bold;">You completed all festival rounds!</p>
@@ -111,10 +105,9 @@
 
     let star = { x: 0, y: 0, r: 22, vx: 0, vy: 0, color: '#ff00aa', glowColor: 'rgba(255, 0, 170, 0.6)' };
     let trampoline = { x: 0, y: 0, w: 150, h: 20, targetY: 0, currentY: 0 };
-    let activePair = []; // Only holds the current pair being looked at
+    let activePair = []; 
     let particles = [];
     
-    // Internal pair tracking variables
     let itemPairsPool = [];
     let currentPairIndex = 0;
 
@@ -207,14 +200,12 @@
         trampoline.targetY = canvas.height - 50;
         trampoline.currentY = trampoline.targetY;
 
-        // Structure clean sorted 1-to-1 challenge pairs
         itemPairsPool = [];
         for (let i = 0; i < 3; i++) {
             let pair = [
                 { text: rData.correctItems[i], correct: true },
                 { text: rData.wrongItems[i], correct: false }
             ];
-            // Randomly flip left vs right position inside the pair
             pair.sort(() => Math.random() - 0.5);
             itemPairsPool.push(pair);
         }
@@ -232,13 +223,12 @@
         const rawPair = itemPairsPool[currentPairIndex];
         activePair = [];
 
-        // Spawn both elements sitting perfectly at a comfortable mid-height position
         rawPair.forEach((item, index) => {
             activePair.push({
                 text: item.text,
                 correct: item.correct,
                 x: index === 0 ? (canvas.width * 0.15) : (canvas.width * 0.55),
-                y: 180, // Moved lower down so it's beautifully within the star's vertical reach
+                y: 250, // FIX: Brought significantly lower down into safe, natural jump reach
                 vx: rData.baseSpeed * (index === 0 ? 1 : -1),
                 w: 140,
                 h: 45,
@@ -268,7 +258,7 @@
 
     function launchStar() {
         waitingForFirstTap = false;
-        star.vy = -11; 
+        star.vy = -13; // FIX: Added extra upward power to easily hit target cards
         trampoline.currentY = trampoline.targetY + 15;
     }
 
@@ -294,7 +284,6 @@
         if (attemptsLeft <= 0) {
             document.getElementById('attemptsLabel').innerText = `Revealing!`;
             document.getElementById('attemptsLabel').style.color = "#00ffcc";
-            // Instantly eliminate the distractor item to highlight the right option
             activePair.forEach(item => {
                 if(!item.correct) item.active = false;
             });
@@ -344,7 +333,7 @@
                 star.y + star.r >= trampoline.currentY - 5 && 
                 star.y - star.r <= trampoline.currentY + trampoline.h) {
                 
-                star.vy = -11; 
+                star.vy = -13; // FIX: Applied matching launch velocity boost on bounce triggers
                 star.vx = ((star.x - (trampoline.x + trampoline.w / 2)) / (trampoline.w / 2)) * 4;
                 trampoline.currentY = trampoline.targetY + 15;
             }
@@ -359,12 +348,10 @@
                 star.vy = 0;
             }
 
-            // Verify active single-pair collisions
             activePair.forEach(item => {
                 if (!item.active) return;
 
                 item.x += item.vx;
-                // Keep moving side-by-side but bounce off inner walls gently
                 if (item.x <= 5 || item.x + item.w >= canvas.width - 5) item.vx *= -1;
 
                 let closestX = Math.max(item.x, Math.min(star.x, item.x + item.w));
@@ -384,11 +371,9 @@
                         sndCorrect.play().catch(()=>{});
                         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
                         
-                        // Push next pair cleanly down into focus view
                         currentPairIndex++;
                         spawnNextPair();
                         
-                        // Reset star down smoothly to let child process choices again
                         waitingForFirstTap = true;
                         star.x = trampoline.x + trampoline.w / 2;
                         star.y = trampoline.targetY - star.r;
@@ -397,7 +382,7 @@
                     } else {
                         item.active = false;
                         handleWrongCollision();
-                        star.vy = -6; // Small knockback bounce off wrong items
+                        star.vy = -6; 
                     }
                 }
             });
@@ -455,11 +440,10 @@
             ctx.fillText("👇 READ & TAP TO BOUNCE! 👇", canvas.width / 2, canvas.height / 2 + 70);
         }
 
-        // Draw current side-by-side decision blocks
         activePair.forEach(item => {
             if (!item.active) return;
             ctx.fillStyle = '#4a2574';
-            ctx.strokeStyle = '#ffaa00'; // Neutral framing so they look identical until selected
+            ctx.strokeStyle = '#ffaa00'; 
             ctx.lineWidth = 3.5;
 
             ctx.beginPath();
