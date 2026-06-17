@@ -44,19 +44,19 @@
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
-    <!-- Screen 2: Title Menu Screen with Catchy Tagline -->
+    <!-- Screen 2: Title Menu Screen -->
     <div id="titleScreen" class="screen">
         <h1 style="color: #ffaa00; font-size: 42px; margin-bottom: 10px; text-shadow: 3px 3px #000; letter-spacing: 1px;">STAR BURST:<br>FESTIVE FUN!</h1>
         <p style="font-size: 22px; color: #00ffcc; font-weight: bold; margin-bottom: 40px; text-shadow: 2px 2px #000; padding: 0 10px;">✨ Bounce into India's Magic Celebrations! ✨</p>
         <button class="btn" onclick="showInstructions()">Play</button>
     </div>
 
-    <!-- Screen 3: Clear Bold Simplified Instructions for Grade 1 -->
+    <!-- Screen 3: Instructions Screen -->
     <div id="instructionScreen" class="screen">
         <div class="big-bold-text" style="color: #ff00aa;">HOW TO PLAY:</div>
-        <div class="big-bold-text">1. Move the slider to move the <span style="color: #ffaa00;">Trampoline</span>!</div>
-        <div class="big-bold-text">2. The bright <span style="color: #00ffcc;">Star</span> will jump up high when it hits it!</div>
-        <div class="big-bold-text">3. Catch only the <span style="color: #ffaa00;">3 Correct Words</span> for each festival!</div>
+        <div class="big-bold-text">1. Look at the <span style="color: #ffaa00;">Two Choice Boxes</span> carefully!</div>
+        <div class="big-bold-text">2. Move the trampoline to bounce the star into the <span style="color: #00ffcc;">Right Word</span>!</div>
+        <div class="big-bold-text">3. Find all 3 correct words to clear the festival!</div>
         <button class="btn" style="background: #00cc66; box-shadow: 0 8px #008844;" onclick="startGame()">Got It!</button>
     </div>
 
@@ -89,7 +89,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // Core Audio Engines
     const sndCorrect = new Audio('assets/correct-answer-sparklesound.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
@@ -102,7 +101,6 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Variable State Tracking
     let currentRound = 0;
     let score = 0;
     let attemptsLeft = 2;
@@ -113,64 +111,56 @@
 
     let star = { x: 0, y: 0, r: 22, vx: 0, vy: 0, color: '#ff00aa', glowColor: 'rgba(255, 0, 170, 0.6)' };
     let trampoline = { x: 0, y: 0, w: 150, h: 20, targetY: 0, currentY: 0 };
-    let floatingItems = [];
+    let activePair = []; // Only holds the current pair being looked at
     let particles = [];
+    
+    // Internal pair tracking variables
+    let itemPairsPool = [];
+    let currentPairIndex = 0;
 
-    // Curriculum Data Matrix
     const roundsData = [
         {
             prompt: "Find 3 words for: HOLI",
             starColor: "#ff00aa", glow: "rgba(255,0,170,0.6)",
             baseSpeed: 0.8,
             fact: "Holi is the festival of colours celebrated in March! A delicious sweet called Gujiya is shared with all our guests!",
-            items: [
-                { text: "Gulaal", correct: true }, { text: "Gujiya", correct: true }, { text: "Pichkaris", correct: true },
-                { text: "Langar", correct: false }, { text: "Diyas", correct: false }, { text: "Santa Claus", correct: false }
-            ]
+            correctItems: ["Gulaal", "Gujiya", "Pichkaris"],
+            wrongItems: ["Langar", "Diyas", "Santa Claus"]
         },
         {
             prompt: "Find 3 words for: DIWALI",
             starColor: "#ffaa00", glow: "rgba(255,170,0,0.6)",
             baseSpeed: 0.9,
             fact: "On Diwali, we light clay diyas and make colorful floor patterns called rangoli to decorate our lovely homes!",
-            items: [
-                { text: "Rangoli", correct: true }, { text: "Goddess Lakshmi", correct: true }, { text: "Clay Diyas", correct: true },
-                { text: "Sewaiyan", correct: false }, { text: "Tiranga", correct: false }, { text: "Buckets of water", correct: false }
-            ]
+            correctItems: ["Rangoli", "Goddess Lakshmi", "Clay Diyas"],
+            wrongItems: ["Sewaiyan", "Tiranga", "Buckets of water"]
         },
         {
             prompt: "Find 3 words for: CHRISTMAS",
             starColor: "#00cc66", glow: "rgba(0,204,102,0.6)",
             baseSpeed: 1.0,
             fact: "Christmas is celebrated on 25th December as the birthday of Lord Jesus Christ. Children love gifts from Santa!",
-            items: [
-                { text: "25th December", correct: true }, { text: "Bells and Stars", correct: true }, { text: "Jesus Christ", correct: true },
-                { text: "Mosque", correct: false }, { text: "Gulaal", correct: false }, { text: "Guru Nanak Devji", correct: false }
-            ]
+            correctItems: ["25th December", "Bells and Stars", "Jesus Christ"],
+            wrongItems: ["Mosque", "Gulaal", "Guru Nanak Devji"]
         },
         {
             prompt: "Find 3 words for: EID & GURPURAB",
             starColor: "#0099ff", glow: "rgba(0,153,255,0.6)",
-            baseSpeed: 1.4,
+            baseSpeed: 1.3,
             fact: "On Eid, we prepare sweet sewaiyan! On Gurpurab, a wonderful free community meal called langar is served at gurudwaras!",
-            items: [
-                { text: "Sewaiyan", correct: true }, { text: "Langar", correct: true }, { text: "Guru Nanak", correct: true },
-                { text: "Firecrackers", correct: false }, { text: "Xmas Tree", correct: false }, { text: "Water balloons", correct: false }
-            ]
+            correctItems: ["Sewaiyan", "Langar", "Guru Nanak"],
+            wrongItems: ["Firecrackers", "Xmas Tree", "Water balloons"]
         },
         {
             prompt: "Find 3 words for: INDEPENDENCE DAY",
             starColor: "#ff6600", glow: "rgba(255,102,0,0.6)",
-            baseSpeed: 1.7,
+            baseSpeed: 1.6,
             fact: "India became independent on 15th August 1947! Every year, our Prime Minister proudly hoists the Tiranga flag at the Red Fort!",
-            items: [
-                { text: "15th August", correct: true }, { text: "Tiranga", correct: true }, { text: "Red Fort Speech", correct: true },
-                { text: "Gujiya", correct: false }, { text: "Lord Ganesha", correct: false }, { text: "Santa Claus", correct: false }
-            ]
+            correctItems: ["15th August", "Tiranga", "Red Fort Speech"],
+            wrongItems: ["Gujiya", "Lord Ganesha", "Santa Claus"]
         }
     ];
 
-    // Screen 1: Forced Branding Sequence Timing (5 seconds)
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
@@ -195,6 +185,7 @@
         collectedThisRound = 0;
         showRoundEnd = false;
         waitingForFirstTap = true;
+        currentPairIndex = 0;
         
         document.getElementById('factPopup').style.display = 'none';
         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
@@ -216,29 +207,41 @@
         trampoline.targetY = canvas.height - 50;
         trampoline.currentY = trampoline.targetY;
 
-        // Clean Interleaving Fix: Alternates correct answers and distractors row by row
-        floatingItems = [];
-        let corrects = rData.items.filter(i => i.correct);
-        let wrongs = rData.items.filter(i => !i.correct);
-        
-        let balancedPool = [];
-        for(let i = 0; i < 3; i++) {
-            balancedPool.push(corrects[i]);
-            balancedPool.push(wrongs[i]);
+        // Structure clean sorted 1-to-1 challenge pairs
+        itemPairsPool = [];
+        for (let i = 0; i < 3; i++) {
+            let pair = [
+                { text: rData.correctItems[i], correct: true },
+                { text: rData.wrongItems[i], correct: false }
+            ];
+            // Randomly flip left vs right position inside the pair
+            pair.sort(() => Math.random() - 0.5);
+            itemPairsPool.push(pair);
         }
 
-        // Brought vertical grid layout further down from the ceiling into safe bounce reach
-        balancedPool.forEach((item, index) => {
-            let row = Math.floor(index / 2); 
-            let col = index % 2;
-            floatingItems.push({
+        spawnNextPair();
+    }
+
+    function spawnNextPair() {
+        if (currentPairIndex >= itemPairsPool.length) {
+            finishRound();
+            return;
+        }
+
+        const rData = roundsData[currentRound];
+        const rawPair = itemPairsPool[currentPairIndex];
+        activePair = [];
+
+        // Spawn both elements sitting perfectly at a comfortable mid-height position
+        rawPair.forEach((item, index) => {
+            activePair.push({
                 text: item.text,
                 correct: item.correct,
-                x: col == 0 ? (Math.random() * 30 + 30) : (canvas.width - 180 - Math.random() * 30),
-                y: 160 + (row * 75), // Perfectly centered inside maximum height arcs
-                vx: (col == 0 ? 1 : -1) * rData.baseSpeed,
+                x: index === 0 ? (canvas.width * 0.15) : (canvas.width * 0.55),
+                y: 180, // Moved lower down so it's beautifully within the star's vertical reach
+                vx: rData.baseSpeed * (index === 0 ? 1 : -1),
                 w: 140,
-                h: 42,
+                h: 45,
                 active: true
             });
         });
@@ -291,11 +294,9 @@
         if (attemptsLeft <= 0) {
             document.getElementById('attemptsLabel').innerText = `Revealing!`;
             document.getElementById('attemptsLabel').style.color = "#00ffcc";
-            floatingItems.forEach(item => {
-                if(!item.correct && item.active) {
-                    createBurst(item.x + item.w/2, item.y + item.h/2, '#ff3333');
-                    item.active = false;
-                }
+            // Instantly eliminate the distractor item to highlight the right option
+            activePair.forEach(item => {
+                if(!item.correct) item.active = false;
             });
         }
     }
@@ -358,10 +359,12 @@
                 star.vy = 0;
             }
 
-            floatingItems.forEach(item => {
+            // Verify active single-pair collisions
+            activePair.forEach(item => {
                 if (!item.active) return;
 
                 item.x += item.vx;
+                // Keep moving side-by-side but bounce off inner walls gently
                 if (item.x <= 5 || item.x + item.w >= canvas.width - 5) item.vx *= -1;
 
                 let closestX = Math.max(item.x, Math.min(star.x, item.x + item.w));
@@ -371,22 +374,30 @@
                 let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
 
                 if (distanceSquared < ((star.r + 5) * (star.r + 5))) { 
-                    item.active = false;
+                    createBurst(item.x + item.w/2, item.y + item.h/2, item.correct ? star.color : '#ff3333');
+                    
                     if (item.correct) {
+                        item.active = false;
                         score++;
                         collectedThisRound++;
                         sndCorrect.currentTime = 0;
                         sndCorrect.play().catch(()=>{});
-                        createBurst(item.x + item.w/2, item.y + item.h/2, star.color);
                         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
-                        star.vy = -7.5; 
-
-                        if (collectedThisRound >= 3) {
-                            finishRound();
-                        }
+                        
+                        // Push next pair cleanly down into focus view
+                        currentPairIndex++;
+                        spawnNextPair();
+                        
+                        // Reset star down smoothly to let child process choices again
+                        waitingForFirstTap = true;
+                        star.x = trampoline.x + trampoline.w / 2;
+                        star.y = trampoline.targetY - star.r;
+                        star.vx = 0;
+                        star.vy = 0;
                     } else {
-                        createBurst(item.x + item.w/2, item.y + item.h/2, '#ff3333');
+                        item.active = false;
                         handleWrongCollision();
+                        star.vy = -6; // Small knockback bounce off wrong items
                     }
                 }
             });
@@ -441,13 +452,14 @@
         if(waitingForFirstTap && !showRoundEnd) {
             ctx.fillStyle = 'rgba(255,255,255,0.85)';
             ctx.font = 'bold 22px "Comic Sans MS"';
-            ctx.fillText("👇 TAP ANYWHERE TO JUMP! 👇", canvas.width / 2, canvas.height / 2 + 50);
+            ctx.fillText("👇 READ & TAP TO BOUNCE! 👇", canvas.width / 2, canvas.height / 2 + 70);
         }
 
-        floatingItems.forEach(item => {
+        // Draw current side-by-side decision blocks
+        activePair.forEach(item => {
             if (!item.active) return;
             ctx.fillStyle = '#4a2574';
-            ctx.strokeStyle = item.correct ? '#00ffcc' : '#ff5577';
+            ctx.strokeStyle = '#ffaa00'; // Neutral framing so they look identical until selected
             ctx.lineWidth = 3.5;
 
             ctx.beginPath();
@@ -456,7 +468,7 @@
             ctx.stroke();
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 14px Arial';
+            ctx.font = 'bold 15px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(item.text, item.x + item.w / 2, item.y + item.h / 2);
