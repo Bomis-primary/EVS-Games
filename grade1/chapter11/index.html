@@ -110,6 +110,7 @@
     
     let itemPairsPool = [];
     let currentPairIndex = 0;
+    let freezeTimer = 0; // Pauses physics temporarily during visual coloring transition
 
     const roundsData = [
         {
@@ -179,6 +180,7 @@
         showRoundEnd = false;
         waitingForFirstTap = true;
         currentPairIndex = 0;
+        freezeTimer = 0;
         
         document.getElementById('factPopup').style.display = 'none';
         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
@@ -228,11 +230,12 @@
                 text: item.text,
                 correct: item.correct,
                 x: index === 0 ? (canvas.width * 0.15) : (canvas.width * 0.55),
-                y: 250, // FIX: Brought significantly lower down into safe, natural jump reach
+                y: 250, 
                 vx: rData.baseSpeed * (index === 0 ? 1 : -1),
                 w: 140,
                 h: 45,
-                active: true
+                active: true,
+                statusColor: null // Tracks local state color change ('green' or 'red')
             });
         });
     }
@@ -240,8 +243,8 @@
     window.addEventListener('mousemove', (e) => { handleMove(e.clientX); });
     window.addEventListener('touchmove', (e) => { if(e.touches.length > 0) handleMove(e.touches[0].clientX); });
     
-    window.addEventListener('mousedown', () => { if (waitingForFirstTap && gameActive && !showRoundEnd) launchStar(); });
-    window.addEventListener('touchstart', () => { if (waitingForFirstTap && gameActive && !showRoundEnd) launchStar(); });
+    window.addEventListener('mousedown', () => { if (waitingForFirstTap && gameActive && !showRoundEnd && freezeTimer <= 0) launchStar(); });
+    window.addEventListener('touchstart', () => { if (waitingForFirstTap && gameActive && !showRoundEnd && freezeTimer <= 0) launchStar(); });
 
     function handleMove(clientX) {
         if (!gameActive || showRoundEnd) return;
@@ -258,7 +261,7 @@
 
     function launchStar() {
         waitingForFirstTap = false;
-        star.vy = -13; // FIX: Added extra upward power to easily hit target cards
+        star.vy = -11.5; // Balanced natural jumping power challenge
         trampoline.currentY = trampoline.targetY + 15;
     }
 
@@ -318,6 +321,31 @@
     function update() {
         if (!gameActive) return;
 
+        // Manage state change coloring delay frame freezes
+        if (freezeTimer > 0) {
+            freezeTimer--;
+            if (freezeTimer <= 0) {
+                // Once visual feedback ends, resolve layout changes safely
+                let hitCorrect = false;
+                activePair.forEach(item => {
+                    if (item.statusColor === 'green') hitCorrect = true;
+                });
+
+                if (hitCorrect) {
+                    currentPairIndex++;
+                    spawnNextPair();
+                }
+                
+                // Return star safely down to trampoline deck
+                waitingForFirstTap = true;
+                star.x = trampoline.x + trampoline.w / 2;
+                star.y = trampoline.targetY - star.r;
+                star.vx = 0;
+                star.vy = 0;
+            }
+            return;
+        }
+
         if (!showRoundEnd && !waitingForFirstTap) {
             star.x += star.vx;
             star.y += star.vy;
@@ -333,7 +361,7 @@
                 star.y + star.r >= trampoline.currentY - 5 && 
                 star.y - star.r <= trampoline.currentY + trampoline.h) {
                 
-                star.vy = -13; // FIX: Applied matching launch velocity boost on bounce triggers
+                star.vy = -11.5; 
                 star.vx = ((star.x - (trampoline.x + trampoline.w / 2)) / (trampoline.w / 2)) * 4;
                 trampoline.currentY = trampoline.targetY + 15;
             }
@@ -349,7 +377,7 @@
             }
 
             activePair.forEach(item => {
-                if (!item.active) return;
+                if (!item.active || item.statusColor !== null) return;
 
                 item.x += item.vx;
                 if (item.x <= 5 || item.x + item.w >= canvas.width - 5) item.vx *= -1;
@@ -361,28 +389,20 @@
                 let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
 
                 if (distanceSquared < ((star.r + 5) * (star.r + 5))) { 
-                    createBurst(item.x + item.w/2, item.y + item.h/2, item.correct ? star.color : '#ff3333');
+                    createBurst(item.x + item.w/2, item.y + item.h/2, item.correct ? '#00ffcc' : '#ff3333');
                     
                     if (item.correct) {
-                        item.active = false;
+                        item.statusColor = 'green'; // Turn box color to green!
                         score++;
                         collectedThisRound++;
                         sndCorrect.currentTime = 0;
                         sndCorrect.play().catch(()=>{});
                         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
-                        
-                        currentPairIndex++;
-                        spawnNextPair();
-                        
-                        waitingForFirstTap = true;
-                        star.x = trampoline.x + trampoline.w / 2;
-                        star.y = trampoline.targetY - star.r;
-                        star.vx = 0;
-                        star.vy = 0;
+                        freezeTimer = 45; // Hold view frame for visual update celebration
                     } else {
-                        item.active = false;
+                        item.statusColor = 'red'; // Turn box color to red!
                         handleWrongCollision();
-                        star.vy = -6; 
+                        freezeTimer = 45; // Hold view frame to display color indicator warning
                     }
                 }
             });
@@ -434,7 +454,7 @@
         ctx.textAlign = 'center';
         ctx.fillText(roundsData[currentRound].prompt, canvas.width / 2, 105);
 
-        if(waitingForFirstTap && !showRoundEnd) {
+        if(waitingForFirstTap && !showRoundEnd && freezeTimer <= 0) {
             ctx.fillStyle = 'rgba(255,255,255,0.85)';
             ctx.font = 'bold 22px "Comic Sans MS"';
             ctx.fillText("👇 READ & TAP TO BOUNCE! 👇", canvas.width / 2, canvas.height / 2 + 70);
@@ -442,10 +462,20 @@
 
         activePair.forEach(item => {
             if (!item.active) return;
-            ctx.fillStyle = '#4a2574';
-            ctx.strokeStyle = '#ffaa00'; 
-            ctx.lineWidth = 3.5;
-
+            
+            // Dynamic theme fill state switcher
+            if (item.statusColor === 'green') {
+                ctx.fillStyle = '#00aa66';
+                ctx.strokeStyle = '#00ffcc';
+            } else if (item.statusColor === 'red') {
+                ctx.fillStyle = '#cc2244';
+                ctx.strokeStyle = '#ff5577';
+            } else {
+                ctx.fillStyle = '#4a2574';
+                ctx.strokeStyle = '#ffaa00';
+            }
+            
+            ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.roundRect(item.x, item.y, item.w, item.h, 12);
             ctx.fill();
@@ -477,7 +507,7 @@
             ctx.restore();
         });
 
-        if (!showRoundEnd) {
+        if (!showRoundEnd && freezeTimer <= 0) {
             drawStar(star.x, star.y, 5, star.r, star.r / 2, star.color, star.glowColor);
         }
     }
