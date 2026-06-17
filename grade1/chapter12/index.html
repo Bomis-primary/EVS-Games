@@ -11,7 +11,7 @@
         canvas { display: block; width: 100%; height: 100%; }
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 30px; text-align: center; color: #2c3e50; }
         
-        /* Screen 1: Brand Logo - Now pure bright white background */
+        /* Screen 1: Brand Logo - Pure bright white background */
         #logoScreen { background-color: #ffffff; z-index: 100; }
         #logoScreen img { max-width: 60%; max-height: 40%; object-fit: contain; }
         
@@ -57,15 +57,18 @@
 <body>
 
 <div id="gameContainer">
+    <!-- Screen 1: Brand Logo (Pure white background) -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
+    <!-- Screen 2: High Contrast Title Screen -->
     <div id="titleScreen" class="screen">
         <h1>FLAPPY EARTH<br>FLYER!</h1>
         <button class="btn" style="background: #fef3c7; color: #1e3a8a; box-shadow: 0 8px #f59e0b; border: 3px solid #1e3a8a;" onclick="showInstructions()">Let's Start! ➔</button>
     </div>
 
+    <!-- Screen 3: Interactive Guide Guidelines -->
     <div id="instructionScreen" class="screen">
         <div class="big-bold-text" style="color: #1e3a8a; font-size: 28px;">Your Flying Eco-Mission!</div>
         <div class="big-bold-text" style="font-size: 18px; background: #e0f2fe; padding: 10px; border-radius: 12px;">The game will move slowly so you can read every habit clearly!</div>
@@ -74,6 +77,7 @@
         <button class="btn" style="background: #10b981; box-shadow: 0 8px #059669;" onclick="startGame()">Fly Now! 🚀</button>
     </div>
 
+    <!-- Interactive Habits HUD Dashboard -->
     <div id="uiOverlay">
         <div class="hud-row">
             <div id="scoreLabel" class="ui-element">Score: 0 / 12</div>
@@ -82,16 +86,19 @@
         <div id="trackerBar"></div>
     </div>
     
+    <!-- Interactive Lesson Dialogue & Character Feedback Panel -->
     <div id="lessonOverlay">
         <div id="lessonText">Lesson details pop up dynamically here...</div>
         <button class="continue-btn" onclick="closeLesson()">Keep Flying ➔</button>
     </div>
     
+    <!-- Steering Controls -->
     <div id="controlPanel">
         <button id="btnUp" class="control-btn">🔼 FLY UP</button>
         <button id="btnDown" class="control-btn">🔽 DIVE DOWN</button>
     </div>
 
+    <!-- End Game Performance Summary -->
     <div id="completionScreen" class="screen">
         <h1 style="color: #065f46; font-size: 44px; margin-bottom: 15px; text-shadow: none;">Fantastic Job!</h1>
         <p style="font-size: 22px; margin-bottom: 25px; font-weight: bold; color: #374151;">You are officially an Earth Protector!</p>
@@ -128,7 +135,16 @@
     let speechBubbleColor = "#10b981";
     let trackerHistory = [];
     
-    let bird = { x: 100, y: 350, radius: 20, speed: 4.2 };
+    // Bird object with tracking variables for structural flapping frames
+    let bird = { 
+        x: 100, 
+        y: 350, 
+        radius: 20, 
+        speed: 4.2,
+        wingFrame: 0,
+        wingDirection: 1
+    };
+    
     let landscapeClouds = [];
     let environmentPool = [];
     let currentTaskIndex = 0;
@@ -141,7 +157,7 @@
         { eco: "Planting more trees", dirty: "Cutting down trees", correctMsg: "🎉 Perfect! Planting trees gives animals homes and fills our world with fresh, clean oxygen!", wrongMsg: "❌ Oh no! Cutting down trees takes away clean air and nesting spaces for birds!", bubbleGood: "Yay for green leaves! 🌲", bubbleBad: "Oh no! The poor birds! 😟" },
         { eco: "Using a covered dustbin", dirty: "Throwing garbage on road", correctMsg: "🎉 Awesome! Covered dustbins safely lock away germs, flies, and bad smells!", wrongMsg: "❌ Oh no! Throwing trash on the street attracts flies and spreads nasty sickness!", bubbleGood: "Keep germs locked up! 🗑️", bubbleBad: "Yuck! Watch out! 🪰" },
         { eco: "Riding a bicycle nearby", dirty: "Driving cars everywhere", correctMsg: "🎉 Yes! Riding a bike keeps your body strong and keeps the air clean and smoke-free!", wrongMsg: "❌ Oh no! Driving cars for tiny trips pumps thick dark smoke into the sky!", bubbleGood: "Zooming cleanly! 🚲", bubbleBad: "Too much smoke! 💨" },
-        { eco: "Carrying cloth bags", dirty: "Using plastic bags", correctMsg: "🎉 Beautiful! Cloth bags can be washed and reused for years without creating waste!", wrongMsg: "❌ Oh no! Plastic bags stay in the dirt forever and hurt curious animals!", bubbleGood: "My reusable bag! 🛍️", bubbleBad: "Plastic lasts too long! 🚫" },
+        { eco: "Carrying cloth bags", dirty: "Using plastic bags", correctMsg: "🎉 Beautiful! Cloth bags can be used again and again without creating waste!", wrongMsg: "❌ Oh no! Plastic bags stay in the dirt forever and hurt curious animals!", bubbleGood: "My reusable bag! 🛍️", bubbleBad: "Plastic lasts too long! 🚫" },
         { eco: "Switching off lights", dirty: "Leaving lights & TVs on", correctMsg: "🎉 Great! Turning off appliances when you leave a room saves valuable electricity!", wrongMsg: "❌ Oh no! Leaving televisions running empty wastes Earth's power resources!", bubbleGood: "Saving power! 💡", bubbleBad: "No one is watching! 📺" },
         { eco: "Walking to nearby places", dirty: "Spitting in open spaces", correctMsg: "🎉 Yes! Walking short distances exercises your legs and protects our paths!", wrongMsg: "❌ Oh no! Spitting on open walkways spreads germs into the air we breathe!", bubbleGood: "Healthy footsteps! 🚶", bubbleBad: "That spreads germs! 🦠" },
         { eco: "Keeping surroundings neat", dirty: "Bursting loud firecrackers", correctMsg: "🎉 Wonderful! Keeping our common neighborhoods clean makes them safe for everyone!", wrongMsg: "❌ Oh no! Loud firecrackers pollute the night air and terrify outdoor pets!", bubbleGood: "Peaceful and tidy! ✨", bubbleBad: "Too loud for ears! 🎆" },
@@ -222,19 +238,18 @@
 
         let currentData = environmentPool[currentTaskIndex];
         
-        // Interactive Flow Structure: Elements emerge sequentially in slow-motion
         activePipe = {
             text: currentData.dirty,
             x: canvas.width + 50,
             y: Math.random() > 0.5 ? 0 : (canvas.height - 350),
             w: 170,
             h: 240,
-            speed: 1.5 // Relaxed speed allows reading time
+            speed: 1.5
         };
 
         activeCloud = {
             text: currentData.eco,
-            x: canvas.width + 420, // Delayed position introduces objects one at a time
+            x: canvas.width + 420, 
             y: 200 + Math.random()*120,
             w: 185,
             h: 75,
@@ -290,14 +305,16 @@
         document.getElementById('scoreLabel').innerText = `Score: ${score} / 12`;
         document.getElementById('attemptsLabel').innerText = `Hearts: ${attemptsLeft} Left`;
         
+        // Exactly 2 seconds pause for the speech bubble before sliding in the interactive window
         setTimeout(() => {
-            overlay.style.display = "block";
-        }, 400);
+            if (gameActive) {
+                overlay.style.display = "block";
+            }
+        }, 2000);
     }
 
     function closeLesson() {
         if (attemptsLeft <= 0) {
-            // Game Over parameter reset: Returns player back to the very first scenario
             score = 0;
             currentTaskIndex = 0;
             attemptsLeft = 2;
@@ -329,6 +346,16 @@
 
     function update() {
         if (!gameActive || interactivePaused) return;
+
+        // Dynamic wing mechanical cycle update logic based on input or gliding frames
+        if (controlUpActive || controlDownActive) {
+            bird.wingFrame += 0.4 * bird.wingDirection;
+        } else {
+            bird.wingFrame += 0.15 * bird.wingDirection; // Normal beautiful glide speed
+        }
+        if (bird.wingFrame > 1 || bird.wingFrame < -1) {
+            bird.wingDirection *= -1;
+        }
 
         if (controlUpActive) {
             bird.y -= bird.speed;
@@ -376,6 +403,7 @@
 
     function drawClassicBird(cx, cy, radius) {
         ctx.save();
+        // Main round bird body
         ctx.fillStyle = "#ffcc00";
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
@@ -384,6 +412,7 @@
         ctx.strokeStyle = "#1e3a8a";
         ctx.stroke();
 
+        // Big friendly cartoon eye
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
         ctx.arc(cx + 6, cy - 5, 6, 0, Math.PI * 2);
@@ -395,6 +424,7 @@
         ctx.arc(cx + 8, cy - 5, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
+        // Beak
         ctx.fillStyle = "#ff6600";
         ctx.beginPath();
         ctx.moveTo(cx + 14, cy - 2);
@@ -404,11 +434,29 @@
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = "#ffffff";
+        // Tail feathers
+        ctx.fillStyle = "#ffaa00";
         ctx.beginPath();
-        ctx.arc(cx - 8, cy + 2, 7, 0, Math.PI * 2);
+        ctx.moveTo(cx - 18, cy - 2);
+        ctx.lineTo(cx - 28, cy - 10);
+        ctx.lineTo(cx - 25, cy + 5);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
+
+        // DYNAMIC WING FLAP: Calculates real-time vector transformations for bird flight physics
+        ctx.fillStyle = "#ffffff";
+        ctx.save();
+        ctx.translate(cx - 6, cy + 2);
+        // Scaling Y with wingFrame simulates beautiful clean canvas up/down flapping action
+        ctx.scale(1, bird.wingFrame); 
+        ctx.beginPath();
+        ctx.arc(0, 0, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "#1e3a8a";
+        ctx.stroke();
+        ctx.restore();
 
         // Dialogue Speech Bubble Render Anchor
         if (speechBubbleMsg !== "") {
@@ -417,14 +465,14 @@
             ctx.lineWidth = 2;
             
             ctx.beginPath();
-            ctx.roundRect(cx - 50, cy - 65, 160, 32, 10);
+            ctx.roundRect(cx - 50, cy - 65, 175, 34, 10);
             ctx.fill();
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(cx, cy - 33);
-            ctx.lineTo(cx - 8, cy - 20);
-            ctx.lineTo(cx + 8, cy - 33);
+            ctx.moveTo(cx, cy - 31);
+            ctx.lineTo(cx - 8, cy - 18);
+            ctx.lineTo(cx + 8, cy - 31);
             ctx.closePath();
             ctx.fillStyle = speechBubbleColor;
             ctx.fill();
@@ -432,7 +480,7 @@
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 12px 'Comic Sans MS'";
             ctx.textAlign = "center";
-            ctx.fillText(speechBubbleMsg, cx + 30, cy - 45);
+            ctx.fillText(speechBubbleMsg, cx + 37, cy - 44);
         }
         ctx.restore();
     }
