@@ -1,1 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Little Helper's Maze Mission</title>
+    <style>
+        :root {
+            --bg-pastel: #e0f2fe; /* Playful soft sky blue */
+            --track-color: #cbd5e1; /* Smooth sand/chalkboard gray road */
+            --track-active: #22c55e; /* Vibrant success path green */
+            --panel-bg: #ffffff;
+            --text-main: #1e293b;
+            --accent-orange: #f59e0b;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-pastel);
+            color: var(--text-main);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* SCREEN 1: STRICT BRANDING LOGO SCREEN (5 SECONDS) */
+        #screen-logo {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #ffffff;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        #screen-logo img {
+            max-width: 350px;
+            width: 80%;
+            height: auto;
+        }
+
+        /* SCREEN 2: GAME TITLE SCREEN (WITH ACTIVE PLAY BUTTON) */
+        #screen-title {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-pastel);
+            z-index: 995;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+        }
+        .title-banner {
+            max-width: 450px;
+            width: 85%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .btn-play {
+            background-color: #22c55e;
+            color: white;
+            border: 4px solid #ffffff;
+            padding: 16px 45px;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.4);
+            animation: pulseBtn 1.5s infinite alternate;
+        }
+
+        /* SCREEN 3: DEDICATED INSTRUCTIONS SCREEN */
+        #screen-instructions {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(224, 242, 254, 0.98);
+            z-index: 990;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .instruction-card {
+            background: white;
+            border: 5px solid #38bdf8;
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 550px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+        }
+        .instruction-card h2 {
+            color: #0284c7;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .instruction-card p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #475569;
+        }
+        .btn-start {
+            background-color: #38bdf8;
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4);
+        }
+
+        /* MAIN SYSTEM CONSOLE CONTAINER */
+        .game-container {
+            width: 1024px;
+            height: 680px;
+            max-width: 98vw;
+            max-height: 96vh;
+            background: #ffffff;
+            border: 6px solid #bae6fd;
+            border-radius: 32px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+        /* STATUS TOP CONTAINER HEADER */
+        .game-header {
+            height: 65px;
+            background-color: #f0f9ff;
+            border-bottom: 4px solid #e0f2fe;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+        }
+        .game-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0369a1;
+        }
+        .score-capsule {
+            background: #38bdf8;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* SIDE-BY-SIDE SPLIT WORKSPACE */
+        .workspace-split {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        @media (max-width: 768px) {
+            .workspace-split { flex-direction: column; }
+        }
+
+        /* MAZE MAP WORKSPACE BOX */
+        .maze-pane {
+            flex: 1.2;
+            background-color: var(--bg-pastel);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        .svg-viewport {
+            width: 100%;
+            height: 100%;
+            max-width: 460px;
+            max-height: 460px;
+        }
+
+        /* MAZE STRUCTURAL GRAPHICS */
+        .track-bg {
+            fill: none;
+            stroke: var(--track-color);
+            stroke-width: 28;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .track-fill {
+            fill: none;
+            stroke: #f1f5f9;
+            stroke-width: 16;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.4s ease;
+        }
+        .track-active-glow {
+            stroke: var(--track-active) !important;
+        }
+        .node-landmark {
+            transition: transform 0.3s ease;
+        }
+        .node-active-pulse {
+            transform: scale(1.2);
+        }
+
+        /* CONTROL / CONSOLE ACTION BOX */
+        .console-pane {
+            flex: 0.9;
+            background: #ffffff;
+            border-left: 4px solid #f0f9ff;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .status-badge-row {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .attempt-indicator {
+            color: var(--accent-orange);
+        }
+        .question-card {
+            background: #f8fafc;
+            border: 3px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .question-text {
+            font-size: 18px;
+            line-height: 1.5;
+            color: #334155;
+            font-weight: bold;
+        }
+        .hint-text-box {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #fffbeb;
+            border-left: 4px solid var(--accent-orange);
+            border-radius: 4px;
+            color: #b45309;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+        }
+        .options-vertical-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn-choice {
+            background: #f1f5f9;
+            border: 3px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: left;
+            font-size: 16px;
+            font-weight: bold;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-choice:hover {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+        }
+
+        /* SCREEN 5: FINAL COMPLETE REPORT PAGE */
+        .summary-pane {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            background: white;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .grid-summary {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 25px 0;
+            width: 100%;
+            max-width: 750px;
+        }
+        .summary-card {
+            background: #f0f9ff;
+            border: 2px solid #bae6fd;
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .summary-card img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 6px;
+        }
+        .btn-replay {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(34,197,94,0.3);
+        }
+
+        /* AUDIO PRELOAD CONTAINER BIN */
+        #audio-vault { display: none; }
+
+        /* ANIMATIONS ENGINE */
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.06); }
+        }
+        .shake-element { animation: shakeAction 0.4s ease-in-out; }
+        @keyframes shakeAction {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO CORE BIN -->
+    <div id="audio-vault">
+        <audio id="snd-bg" src="assets/acousticmusic.mp3" loop></audio>
+        <audio id="snd-correct" src="assets/correct.mp3"></audio>
+        <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
+    </div>
+
+    <!-- SCREEN 1: BRANDING LOADING SCREEN -->
+    <div id="screen-logo">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+    </div>
+
+    <!-- SCREEN 2: LITTLE HELPER MAZE MISSION SCREEN -->
+    <div id="screen-title">
+        <img src="assets/startscreenimage.png" class="title-banner" alt="Little Helper's Maze Mission">
+        <button class="btn-play" onclick="transitionToInstructions()">PLAY</button>
+    </div>
+
+    <!-- SCREEN 3: INDEPENDENT INSTRUCTION SCREEN -->
+    <div id="screen-instructions">
+        <div class="instruction-card">
+            <h2>🏡 Let's Help Our Town!</h2>
+            <p>Our friendly neighbors need your help! Read the question on the right side box, pick the right answer, and watch your player move through the maze lanes!</p>
+            <button class="btn-start" onclick="launchActiveGameplay()">START MISSION</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: ACTIVE PLAY CONSOLE -->
+    <div class="game-container">
+        <!-- HEADER MODULE -->
+        <header class="game-header">
+            <div class="game-title">🏡 Little Helper's Maze Mission</div>
+            <div class="score-capsule" id="score-counter-text">SCORE: 0 / 10</div>
+        </header>
+
+        <!-- SPLIT INTERACTION BODY CONTAINER -->
+        <div class="workspace-split" id="main-play-arena">
+            
+            <!-- LEFT GRAPHIC CONTAINER (PASTEL BLENDED MAP) -->
+            <div class="maze-pane">
+                <svg class="svg-viewport" viewBox="0 0 400 400">
+                    <!-- ROADS TRACK LAYER -->
+                    <g>
+                        <path class="track-bg" d="M 50,50 L 200,50 L 200,150 L 80,150 L 80,250 L 230,250 L 230,350 L 350,350"/>
+                        <path class="track-bg" d="M 200,50 L 350,50 L 350,150 L 230,150 L 230,250"/>
+                        <path class="track-bg" d="M 80,250 L 80,350 L 230,350"/>
+                    </g>
+                    <g>
+                        <path id="path-seg-1" class="track-fill" d="M 50,50 L 200,50"/>
+                        <path id="path-seg-2" class="track-fill" d="M 200,50 L 200,150 L 80,150"/>
+                        <path id="path-seg-3" class="track-fill" d="M 80,150 L 80,250 L 230,250"/>
+                        <path id="path-seg-4" class="track-fill" d="M 230,250 L 230,350 L 350,350"/>
+                    </g>
+
+                    <!-- IMAGE LANDMARK NODES -->
+                    <g id="node-market" class="node-landmark"><image href="assets/market.png" x="180" y="30" width="40" height="40"/></g>
+                    <g id="node-hospital" class="node-landmark"><image href="assets/hospital.png" x="330" y="30" width="40" height="40"/></g>
+                    <g id="node-school" class="node-landmark"><image href="assets/school.png" x="60" y="130" width="40" height="40"/></g>
+                    <g id="node-fire" class="node-landmark"><image href="assets/firestation.png" x="210" y="230" width="40" height="40"/></g>
+                    <g id="node-sweeper" class="node-landmark"><image href="assets/cheerfulboy.png" x="330" y="130" width="40" height="40"/></g>
+                    <g id="node-plumber" class="node-landmark"><image href="assets/plumber.png" x="60" y="230" width="40" height="40"/></g>
+                    <g id="node-electrician" class="node-landmark"><image href="assets/electrician.png" x="60" y="330" width="40" height="40"/></g>
+                    <g id="node-greengrocer" class="node-landmark"><image href="assets/greengrocer.png" x="330" y="330" width="40" height="40"/></g>
+                    <g id="node-police" class="node-landmark"><image href="assets/policestation.png" x="180" y="130" width="40" height="40"/></g>
+                    <g id="node-postoffice" class="node-landmark"><image href="assets/postoffice.png" x="210" y="130" width="40" height="40"/></g>
+
+                    <!-- RESPONSIVE RUNNING CHILD MAP PIECE -->
+                    <g id="player-token" style="transition: transform 0.6s ease-in-out;" transform="translate(50,50)">
+                        <image href="assets/cheerfulboy.png" x="-20" y="-20" width="40" height="40"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- RIGHT SYSTEM TEXT CONSOLE INTERFACE -->
+            <div class="console-pane">
+                <div class="status-badge-row">
+                    <span id="label-progress">QUESTION: 1 / 10</span>
+                    <span class="attempt-indicator" id="label-attempts">ATTEMPTS LEFT: 2</span>
+                </div>
+
+                <div class="question-card" id="q-frame-box">
+                    <p class="question-text" id="q-text-field">Loading question data packet...</p>
+                    <div class="hint-text-box" id="hint-display-el">Look closely at the helpers or tools!</div>
+                </div>
+
+                <div class="options-vertical-stack" id="options-btn-group"></div>
+            </div>
+        </div>
+
+        <!-- FINAL COMPLETION STATE MATRIX REPORT -->
+        <div class="summary-pane" id="summary-report-screen">
+            <h2 style="color: #22c55e; font-size: 32px;">🌟 MISSION COMPLETE! 🌟</h2>
+            <p style="color: #64748b; font-size: 18px; margin-top: 5px;">You successfully helped all our neighborhood friends!</p>
+            
+            <h3 id="final-score-field" style="font-size: 42px; margin: 15px 0; color: #0284c7;">SCORE: 0 / 10</h3>
+
+            <div class="grid-summary">
+                <div class="summary-card"><img src="assets/school.png"><span>School</span></div>
+                <div class="summary-card"><img src="assets/market.png"><span>Market</span></div>
+                <div class="summary-card"><img src="assets/hospital.png"><span>Hospital</span></div>
+                <div class="summary-card"><img src="assets/firestation.png"><span>Fire Station</span></div>
+                <div class="summary-card"><img src="assets/policestation.png"><span>Police</span></div>
+                <div class="summary-card"><img src="assets/postoffice.png"><span>Post Office</span></div>
+                <div class="summary-card"><img src="assets/plumber.png"><span>Plumber</span></div>
+                <div class="summary-card"><img src="assets/electrician.png"><span>Electrician</span></div>
+                <div class="summary-card"><img src="assets/greengrocer.png"><span>Greengrocer</span></div>
+                <div class="summary-card"><img src="assets/cheerfulboy.png"><span>Sweeper</span></div>
+            </div>
+
+            <button class="btn-replay" onclick="resetAndRestartMission()">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        // GRADE 1 SIMPLIFIED CURRICULUM SCENARIO MASTER DECK
+        const scenariosDeck = [
+            { q: "We need to buy fresh milk, eggs, and bread for breakfast. Where do we go?", h: "Look for shops selling yummy food!", o: [{t:"Go to the Market 🛒", c:true, n:"node-market", x:200, y:50}, {t:"Go to the Fire Station 🚒", c:false}], p: "path-seg-1" },
+            { q: "Your little brother has a hot fever and needs a doctor. Where should he go?", h: "Look for the place with doctors and nurses.", o: [{t:"Go to the School 🏫", c:false}, {t:"Go to the Hospital 🏥", c:true, n:"node-hospital", x:350, y:50}], p: "path-seg-1" },
+            { q: "Where do you go every morning to read books and talk to your teacher?", h: "Look for your favorite classroom!", o: [{t:"Go to the School 🏫", c:true, n:"node-school", x:80, y:150}, {t:"Go to the Police Station 👮", c:false}], p: "path-seg-2" },
+            { q: "Oh no! There is hot smoke and a fire in a building! Who should we call?", h: "Look for the big red trucks with water!", o: [{t:"Call the Post Office 📬", c:false}, {t:"Call the Fire Station 🚒", c:true, n:"node-fire", x:230, y:250}], p: "path-seg-3" },
+            { q: "A person lost their wallet on the street. Who keeps our neighborhood safe?", h: "Look for helpers in uniforms who catch bad guys.", o: [{t:"Ask the Doctors 🏥", c:false}, {t:"Ask the Police Officers 👮", c:true, n:"node-police", x:200, y:150}], p: "path-seg-2" },
+            { q: "You wrote a beautiful holiday letter to your grandmother. Where do you drop it?", h: "Look for where letters and stamps live.", o: [{t:"The Post Office Box 📬", c:true, n:"node-postoffice", x:230, y:150}, {t:"The Market Stalls 🛒", c:false}], p: "path-seg-2" },
+            { q: "The road is covered in dirty dust and dry leaves. Who cleans it with a big broom?", h: "Find the helper who sweeps the streets clean.", o: [{t:"The Sweeper 🧹", c:true, n:"node-sweeper", x:350, y:150}, {t:"The Plumber 🔧", c:false}], p: "path-seg-2" },
+            { q: "The water pipe is broken and leaking water all over the kitchen floor! Who can fix it?", h: "Find the helper who fixes water taps and tubes.", o: [{t:"The Electrician ⚡", c:false}, {t:"The Plumber 🔧", c:true, n:"node-plumber", x:80, y:250}], p: "path-seg-3" },
+            { q: "The bedroom light and fan stopped working because a wire broke. Who can fix it?", h: "Find the helper who fixes wires and power plugs safely.", o: [{t:"The Electrician ⚡", c:true, n:"node-electrician", x:80, y:350}, {t:"The Greengrocer 🍏", c:false}], p: "path-seg-4" },
+            { q: "Mother wants to make a yummy vegetable soup. Who should we buy carrots from?", h: "Find the helper who sells fresh fruits and veggies.", o: [{t:"The Greengrocer 🍏", c:true, n:"node-greengrocer", x:350, y:350}, {t:"The Firefighter 🚒", c:false}], p: "path-seg-4" }
+        ];
+
+        let playDeck = [];
+        let cursorIndex = 0;
+        let scoreCounter = 0;
+        let remainingAttempts = 2;
+
+        // TIMED PIPELINE CONTROLLER
+        window.addEventListener('DOMContentLoaded', () => {
+            // Strict 5-Second Parameter Branding Lock
+            setTimeout(() => {
+                document.getElementById('screen-logo').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('screen-logo').style.display = 'none';
+                    document.getElementById('screen-title').style.display = 'flex';
+                }, 500);
+            }, 5000);
+        });
+
+        function transitionToInstructions() {
+            // Safe Background Audio Ignition triggered directly on play click
+            try { document.getElementById('snd-bg').play(); } catch(e){}
+            document.getElementById('screen-title').style.display = 'none';
+            document.getElementById('screen-instructions').style.display = 'flex';
+        }
+
+        function launchActiveGameplay() {
+            document.getElementById('screen-instructions').style.display = 'none';
+            scenariosDeck.sort(() => Math.random() - 0.5); // Randomize items to avoid repetitive loops
+            playDeck = [...scenariosDeck];
+            cursorIndex = 0;
+            scoreCounter = 0;
+            resetMapVisualization();
+            renderActiveCard();
+        }
+
+        function renderActiveCard() {
+            if(cursorIndex >= playDeck.length) {
+                concludeMission();
+                return;
+            }
+
+            remainingAttempts = 2;
+            document.getElementById('label-attempts').innerText = `ATTEMPTS LEFT: ${remainingAttempts}`;
+            document.getElementById('hint-display-el').style.display = "none";
+
+            const data = playDeck[cursorIndex];
+            document.getElementById('label-progress').innerText = `QUESTION: ${cursorIndex + 1} / ${playDeck.length}`;
+            document.getElementById('q-text-field').innerText = data.q;
+            document.getElementById('hint-display-el').innerText = `HINT: ${data.h}`;
+
+            const stack = document.getElementById('options-btn-group');
+            stack.innerHTML = "";
+            
+            data.o.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = "btn-choice";
+                btn.innerText = option.t;
+                btn.onclick = () => parseAnswerSelection(option, btn);
+                stack.appendChild(btn);
+            });
+        }
+
+        function parseAnswerSelection(opt, targetBtn) {
+            const data = playDeck[cursorIndex];
+
+            if(opt.c) {
+                // Correct Path Node Routine
+                try { document.getElementById('snd-correct').play(); } catch(e){}
+                scoreCounter++;
+                document.getElementById('score-counter-text').innerText = `SCORE: ${scoreCounter} / 10`;
+
+                // Update Visual Track Glow and Position Nodes
+                if(opt.n) document.getElementById(opt.n).classList.add('node-active-pulse');
+                if(data.p) document.getElementById(data.p).classList.add('track-active-glow');
+                document.getElementById('player-token').style.transform = `translate(${opt.x}px, ${opt.y}px)`;
+
+                targetBtn.style.backgroundColor = "#bbf7d0";
+                targetBtn.style.borderColor = "#22c55e";
+                document.querySelectorAll('.btn-choice').forEach(b => b.removeAttribute('onclick'));
+
+                setTimeout(() => {
+                    cursorIndex++;
+                    renderActiveCard();
+                }, 1200);
+            } else {
+                // Incorrect Path Routine
+                try { document.getElementById('snd-wrong').play(); } catch(e){}
+                remainingAttempts--;
+                document.getElementById('label-attempts').innerText = `ATTEMPTS LEFT: ${remainingAttempts}`;
+                
+                const card = document.getElementById('q-frame-box');
+                card.classList.remove('shake-element');
+                void card.offsetWidth; // Force layout recalculation to refire shake animation
+                card.classList.add('shake-element');
+
+                targetBtn.style.backgroundColor = "#fecaca";
+                targetBtn.style.borderColor = "#ef4444";
+
+                if(remainingAttempts <= 0) {
+                    document.getElementById('hint-display-el').style.display = "block";
+                }
+            }
+        }
+
+        function concludeMission() {
+            document.getElementById('main-play-arena').style.display = "none";
+            document.getElementById('final-score-field').innerText = `SCORE: ${scoreCounter} / 10`;
+            document.getElementById('summary-report-screen').style.display = "flex";
+        }
+
+        function resetMapVisualization() {
+            document.getElementById('main-play-arena').style.display = "flex";
+            document.getElementById('summary-report-screen').style.display = "none";
+            document.getElementById('score-counter-text').innerText = `SCORE: ${scoreCounter} / 10`;
+            document.getElementById('player-token').style.transform = "translate(50px, 50px)";
+            document.querySelectorAll('.track-fill').forEach(p => p.classList.remove('track-active-glow'));
+            document.querySelectorAll('.node-landmark').forEach(n => n.classList.remove('node-active-pulse'));
+        }
+
+        function resetAndRestartMission() {
+            launchActiveGameplay();
+        }
+    </script>
+</body>
+</html>
