@@ -39,16 +39,19 @@
 <body>
 
 <div id="gameContainer">
+    <!-- Screen 1: Branding Logo Locked for 5 seconds -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
+    <!-- Screen 2: Title Menu Screen -->
     <div id="titleScreen" class="screen">
         <h1 style="color: #ffaa00; font-size: 42px; margin-bottom: 10px; text-shadow: 3px 3px #000; letter-spacing: 1px;">STAR BURST:<br>FESTIVE FUN!</h1>
         <p style="font-size: 22px; color: #00ffcc; font-weight: bold; margin-bottom: 40px; text-shadow: 2px 2px #000; padding: 0 10px;">✨ Bounce into India's Magic Celebrations! ✨</p>
         <button class="btn" onclick="showInstructions()">Play</button>
     </div>
 
+    <!-- Screen 3: Instructions Screen -->
     <div id="instructionScreen" class="screen">
         <div class="big-bold-text" style="color: #ff00aa;">HOW TO PLAY:</div>
         <div class="big-bold-text">1. Look at the <span style="color: #ffaa00;">Two Choice Boxes</span> carefully!</div>
@@ -57,18 +60,21 @@
         <button class="btn" style="background: #00cc66; box-shadow: 0 8px #008844;" onclick="startGame()">Got It!</button>
     </div>
 
+    <!-- In-Game Status UI Overlays -->
     <div id="uiOverlay">
         <div id="scoreLabel" class="ui-element">Score: 0/15</div>
         <div id="attemptsLabel" class="ui-element" style="color: #ff5555;">Attempts: 2 Left</div>
         <div id="roundLabel" class="ui-element" style="color: #ffaa00;">Round 1/5</div>
     </div>
     
+    <!-- End of Round Fact Popups -->
     <div id="factPopup">
         <h3 style="margin-bottom: 12px; color: #cc5500; font-size: 24px;">🎉 Fantastic Job!</h3>
         <p id="factText" style="margin-bottom: 15px;"></p>
         <button class="btn" style="font-size: 20px; padding: 12px 30px; box-shadow: 0 4px #cc8800; margin-top: 5px;" onclick="nextRound()">Next Round ➔</button>
     </div>
 
+    <!-- Final Results Summary Screen -->
     <div id="completionScreen" class="screen">
         <h1 style="color: #00ffcc; font-size: 42px; margin-bottom: 15px; text-shadow: 3px 3px #000;">Superstar Winner!</h1>
         <p style="font-size: 24px; margin-bottom: 30px; font-weight: bold;">You completed all festival rounds!</p>
@@ -102,6 +108,7 @@
     let gameActive = false;
     let showRoundEnd = false;
     let waitingForFirstTap = true;
+    let firstTapEverDone = false; // Tracks if instruction helper overlay has been cleared
 
     let star = { x: 0, y: 0, r: 22, vx: 0, vy: 0, color: '#ff00aa', glowColor: 'rgba(255, 0, 170, 0.6)' };
     let trampoline = { x: 0, y: 0, w: 150, h: 20, targetY: 0, currentY: 0 };
@@ -110,11 +117,11 @@
     
     let itemPairsPool = [];
     let currentPairIndex = 0;
-    let freezeTimer = 0; // Pauses physics temporarily during visual coloring transition
+    let freezeTimer = 0; 
 
     const roundsData = [
         {
-            prompt: "Find 3 words for: HOLI",
+            name: "HOLI",
             starColor: "#ff00aa", glow: "rgba(255,0,170,0.6)",
             baseSpeed: 0.8,
             fact: "Holi is the festival of colours celebrated in March! A delicious sweet called Gujiya is shared with all our guests!",
@@ -122,7 +129,7 @@
             wrongItems: ["Langar", "Diyas", "Santa Claus"]
         },
         {
-            prompt: "Find 3 words for: DIWALI",
+            name: "DIWALI",
             starColor: "#ffaa00", glow: "rgba(255,170,0,0.6)",
             baseSpeed: 0.9,
             fact: "On Diwali, we light clay diyas and make colorful floor patterns called rangoli to decorate our lovely homes!",
@@ -130,7 +137,7 @@
             wrongItems: ["Sewaiyan", "Tiranga", "Buckets of water"]
         },
         {
-            prompt: "Find 3 words for: CHRISTMAS",
+            name: "CHRISTMAS",
             starColor: "#00cc66", glow: "rgba(0,204,102,0.6)",
             baseSpeed: 1.0,
             fact: "Christmas is celebrated on 25th December as the birthday of Lord Jesus Christ. Children love gifts from Santa!",
@@ -138,7 +145,7 @@
             wrongItems: ["Mosque", "Gulaal", "Guru Nanak Devji"]
         },
         {
-            prompt: "Find 3 words for: EID & GURPURAB",
+            name: "EID & GURPURAB",
             starColor: "#0099ff", glow: "rgba(0,153,255,0.6)",
             baseSpeed: 1.3,
             fact: "On Eid, we prepare sweet sewaiyan! On Gurpurab, a wonderful free community meal called langar is served at gurudwaras!",
@@ -146,7 +153,7 @@
             wrongItems: ["Firecrackers", "Xmas Tree", "Water balloons"]
         },
         {
-            prompt: "Find 3 words for: INDEPENDENCE DAY",
+            name: "INDEPENDENCE DAY",
             starColor: "#ff6600", glow: "rgba(255,102,0,0.6)",
             baseSpeed: 1.6,
             fact: "India became independent on 15th August 1947! Every year, our Prime Minister proudly hoists the Tiranga flag at the Red Fort!",
@@ -170,6 +177,7 @@
         document.getElementById('uiOverlay').style.display = 'flex';
         currentRound = 0;
         score = 0;
+        firstTapEverDone = false; // Reset instruction display flags
         initRound();
         gameActive = true;
     }
@@ -230,12 +238,12 @@
                 text: item.text,
                 correct: item.correct,
                 x: index === 0 ? (canvas.width * 0.15) : (canvas.width * 0.55),
-                y: 250, 
+                y: 180, // Choice boxes kept high up as requested
                 vx: rData.baseSpeed * (index === 0 ? 1 : -1),
                 w: 140,
                 h: 45,
                 active: true,
-                statusColor: null // Tracks local state color change ('green' or 'red')
+                statusColor: null 
             });
         });
     }
@@ -261,7 +269,8 @@
 
     function launchStar() {
         waitingForFirstTap = false;
-        star.vy = -11.5; // Balanced natural jumping power challenge
+        firstTapEverDone = true; // Permanently clear the overlay message
+        star.vy = -13; // Boosted Jump Impulse as requested
         trampoline.currentY = trampoline.targetY + 15;
     }
 
@@ -321,11 +330,9 @@
     function update() {
         if (!gameActive) return;
 
-        // Manage state change coloring delay frame freezes
         if (freezeTimer > 0) {
             freezeTimer--;
             if (freezeTimer <= 0) {
-                // Once visual feedback ends, resolve layout changes safely
                 let hitCorrect = false;
                 activePair.forEach(item => {
                     if (item.statusColor === 'green') hitCorrect = true;
@@ -336,7 +343,6 @@
                     spawnNextPair();
                 }
                 
-                // Return star safely down to trampoline deck
                 waitingForFirstTap = true;
                 star.x = trampoline.x + trampoline.w / 2;
                 star.y = trampoline.targetY - star.r;
@@ -361,7 +367,7 @@
                 star.y + star.r >= trampoline.currentY - 5 && 
                 star.y - star.r <= trampoline.currentY + trampoline.h) {
                 
-                star.vy = -11.5; 
+                star.vy = -13; // Boosted Jump Impulse on normal bounces
                 star.vx = ((star.x - (trampoline.x + trampoline.w / 2)) / (trampoline.w / 2)) * 4;
                 trampoline.currentY = trampoline.targetY + 15;
             }
@@ -392,17 +398,17 @@
                     createBurst(item.x + item.w/2, item.y + item.h/2, item.correct ? '#00ffcc' : '#ff3333');
                     
                     if (item.correct) {
-                        item.statusColor = 'green'; // Turn box color to green!
+                        item.statusColor = 'green'; 
                         score++;
                         collectedThisRound++;
                         sndCorrect.currentTime = 0;
                         sndCorrect.play().catch(()=>{});
                         document.getElementById('scoreLabel').innerText = `Score: ${score}/15`;
-                        freezeTimer = 45; // Hold view frame for visual update celebration
+                        freezeTimer = 45; 
                     } else {
-                        item.statusColor = 'red'; // Turn box color to red!
+                        item.statusColor = 'red'; 
                         handleWrongCollision();
-                        freezeTimer = 45; // Hold view frame to display color indicator warning
+                        freezeTimer = 45; 
                     }
                 }
             });
@@ -447,14 +453,19 @@
 
         if (!gameActive) return;
 
+        // Dynamic Header Updates depending on items left (3 -> 2 -> 1)
+        let wordsLeft = 3 - collectedThisRound;
+        let dynamicPrompt = `Find ${wordsLeft} word${wordsLeft > 1 ? 's' : ''} for: ${roundsData[currentRound].name}`;
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
         ctx.fillRect(0, 75, canvas.width, 48);
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 18px "Comic Sans MS"';
         ctx.textAlign = 'center';
-        ctx.fillText(roundsData[currentRound].prompt, canvas.width / 2, 105);
+        ctx.fillText(dynamicPrompt, canvas.width / 2, 105);
 
-        if(waitingForFirstTap && !showRoundEnd && freezeTimer <= 0) {
+        // Instruction helper now checks if firstTapEverDone is false
+        if(waitingForFirstTap && !showRoundEnd && freezeTimer <= 0 && !firstTapEverDone) {
             ctx.fillStyle = 'rgba(255,255,255,0.85)';
             ctx.font = 'bold 22px "Comic Sans MS"';
             ctx.fillText("👇 READ & TAP TO BOUNCE! 👇", canvas.width / 2, canvas.height / 2 + 70);
@@ -463,7 +474,6 @@
         activePair.forEach(item => {
             if (!item.active) return;
             
-            // Dynamic theme fill state switcher
             if (item.statusColor === 'green') {
                 ctx.fillStyle = '#00aa66';
                 ctx.strokeStyle = '#00ffcc';
