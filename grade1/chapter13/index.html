@@ -1,1 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Great Balloon Burst!</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #bae1ff; font-family: 'Comic Sans MS', sans-serif; }
+        #gameContainer { position: relative; width: 100%; height: 100%; max-width: 600px; max-height: 900px; margin: 0 auto; background: #bae1ff; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 30px; text-align: center; }
+        
+        /* Screen 1: Brand Logo - Pure Bright White Background */
+        #logoScreen { background-color: #ffffff; z-index: 100; }
+        #logoScreen img { max-width: 70%; max-height: 40%; object-fit: contain; }
+        
+        /* Screen 2: Game Title Splash Menu */
+        #titleScreen { background: linear-gradient(to bottom, #70c5ff 0%, #baffc9 100%); z-index: 90; display: none; }
+        #titleScreen h1 { color: #1e3a8a; font-size: 46px; margin-bottom: 30px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 5px 10px rgba(0,0,0,0.15); line-height: 1.2; font-weight: 900; }
+        
+        /* Screen 3: Interactive Mission Instructions */
+        #instructionScreen { background: #fffef0; z-index: 85; display: none; border: 8px solid #ffb3ba; border-radius: 24px; color: #1e3a8a; }
+        
+        .btn { background: #ff6b6b; color: #fff; border: 3px solid #1e3a8a; padding: 16px 44px; font-size: 26px; font-weight: bold; border-radius: 40px; cursor: pointer; box-shadow: 0 8px #c94c4c; text-transform: uppercase; transition: all 0.1s ease; margin-top: 25px; text-shadow: 1px 1px rgba(0,0,0,0.2); }
+        .btn:active { box-shadow: 0 2px #c94c4c; transform: translateY(6px); }
+        
+        .big-bold-text { font-size: 24px; font-weight: 900; line-height: 1.5; margin-bottom: 20px; color: #2c3e50; }
+        
+        /* HUD Dashboard Dashboard Layout Overlay */
+        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 20; pointer-events: none; display: none; }
+        .hud-row { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .ui-element { background: rgba(255, 255, 255, 0.96); color: #1e3a8a; padding: 10px 20px; border-radius: 20px; font-size: 18px; font-weight: bold; border: 3px solid #93c5fd; box-shadow: 0 4px rgba(0,0,0,0.05); }
+        
+        /* High-Contrast Target Directive Banner */
+        #targetBanner { width: 100%; background: #fef3c7; border: 4px solid #f59e0b; padding: 14px; border-radius: 16px; text-align: center; font-size: 22px; font-weight: 900; color: #b45309; box-shadow: 0 5px rgba(0,0,0,0.08); text-transform: uppercase; }
+        #trackerBar { background: rgba(255, 255, 255, 0.9); width: 100%; padding: 8px; border-radius: 14px; display: flex; gap: 6px; justify-content: center; font-size: 22px; border: 2px dashed #93c5fd; }
+        
+        /* Completion Performance Screen */
+        #completionScreen { background: linear-gradient(to bottom, #fef3c7 0%, #d1fae5 100%); display: none; z-index: 80; color: #1e3a8a; }
+    </style>
+</head>
+<body>
 
+<div id="gameContainer">
+    <!-- Screen 1: Brand Logo (Exactly 5 seconds duration constraint) -->
+    <div id="logoScreen" class="screen">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+    </div>
+
+    <!-- Screen 2: Game Title Splash Menu -->
+    <div id="titleScreen" class="screen">
+        <h1>THE GREAT<br>BALLOON BURST! 🎈</h1>
+        <button class="btn" onclick="showInstructions()">Play ➔</button>
+    </div>
+
+    <!-- Screen 3: Interactive Mission Instructions -->
+    <div id="instructionScreen" class="screen">
+        <div class="big-bold-text" style="color: #1e3a8a; font-size: 32px; margin-bottom: 25px;">How to Play! 💥</div>
+        <div class="big-bold-text" style="font-size: 20px; background: #e0f2fe; padding: 14px; border-radius: 14px;">Look at the golden banner at the top of your screen!</div>
+        <div class="big-bold-text" style="font-size: 22px; margin-top: 10px;">🎈 Tap only the matching target balloons!</div>
+        <div class="big-bold-text" style="font-size: 22px; color: #b91c1c;">⚠️ Wrong balloons will shake!</div>
+        <button class="btn" style="background: #10b981; box-shadow: 0 8px #059669;" onclick="startGame()">Start Game 🚀</button>
+    </div>
+
+    <!-- HUD Dashboard Dashboard Overlays -->
+    <div id="uiOverlay">
+        <div id="targetBanner">LOADING MISSION...</div>
+        <div class="hud-row">
+            <div id="scoreLabel" class="ui-element">Score: 0 / 11</div>
+            <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
+        </div>
+        <div id="trackerBar"></div>
+    </div>
+    
+    <!-- Screen 5: Final Performance Summary Evaluation Card -->
+    <div id="completionScreen" class="screen">
+        <h1 id="completionTitle" style="font-size: 44px; margin-bottom: 15px; font-weight: 900;">Fantastic! 🏆</h1>
+        <p style="font-size: 22px; margin-bottom: 25px; font-weight: bold; color: #4b5563;">You sorted all activities perfectly!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 32px; padding: 18px 40px; border-color: #10b981; background: white; margin-bottom: 30px; font-weight: 900;">Final Score: 0/11</div>
+        <button class="btn" style="background: #fcd34d; color: #78350f; box-shadow: 0 8px #d97706;" onclick="restartGame()">Play Again 🔄</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Core External Audio Assets Registry Pipeline
+    const sndCorrect = new Audio('assets/correct.mp3');
+    const sndWrong = new Audio('assets/wrong.mp3');
+    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
+    const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
+    sndBgm.loop = true;
+
+    function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Core State Parameters Mappings
+    let score = 0;
+    let hearts = 3;
+    let gameActive = false;
+    let freezeTimerActive = false;
+    let trackerHistory = [];
+    let currentLevelIndex = 0; 
+    let activeBalloons = [];
+
+    // Animated Pin Mascot and Speech Bubble states mapping
+    let speechBubble = { x: 0, y: 0, text: "", color: "#10b981", visible: false };
+    let pinMascot = { x: 80, y: 0, targetY: 0, frame: 0 };
+
+    // Explicit 3-Stage Grade 1 Chapter 13 Content Database Layout
+    const levelsDataset = [
+        {
+            directive: "Pop the Outdoor Games! ☀️",
+            correctItems: [
+                { text: "Football ⚽", bubble: "Outdoor Game! ⚽" },
+                { text: "Cricket 🏏", bubble: "Outdoor Game! 🏏" },
+                { text: "Tennis 🎾", bubble: "Outdoor Game! 🎾" },
+                { text: "Hide-&-Seek 🏃", bubble: "Outdoor Game! 🏃" }
+            ],
+            wrongItems: [
+                { text: "Chess ♟️", bubble: "No, Chess is Indoor! ♟️" },
+                { text: "Reading 📚", bubble: "No, Reading is Indoor! 📚" }
+            ]
+        },
+        {
+            directive: "Pop the Cozy Indoor Fun! 🏡",
+            correctItems: [
+                { text: "Chess ♟️", bubble: "Indoor Activity! ♟️" },
+                { text: "Drawing 🎨", bubble: "Indoor Activity! 🎨" },
+                { text: "Reading 📚", bubble: "Indoor Activity! 📚" },
+                { text: "Origami ✂️", bubble: "Indoor Activity! ✂️" }
+            ],
+            wrongItems: [
+                { text: "Football ⚽", bubble: "No, Football is Outdoor! ⚽" },
+                { text: "Cricket 🏏", bubble: "No, Cricket is Outdoor! 🏏" }
+            ]
+        },
+        {
+            directive: "Pop the Fair Play Rules! 🤝",
+            correctItems: [
+                { text: "Follow Rules 📝", bubble: "Fair Play Rule! 📝" },
+                { text: "Share Toys 🧸", bubble: "Fair Play Rule! 🧸" },
+                { text: "Say 'Good Game' 🤝", bubble: "Fair Play Rule! 🤝" }
+            ],
+            wrongItems: [
+                { text: "Pushing Others ❌", bubble: "No! Pushing is wrong! ❌" },
+                { text: "Shouting 😢", bubble: "No! Shouting is wrong! 😢" },
+                { text: "Breaking Rules 🚫", bubble: "No! Breaking rules is wrong! 🚫" }
+            ]
+        }
+    ];
+
+    // Screen 1 Initialization: Logo display restricted to exactly 5 seconds
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }, 5000);
+
+    function showInstructions() {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+        // Background audio initializes natively upon explicit interactive user splash trigger
+        sndBgm.currentTime = 0;
+        sndBgm.play().catch(()=>{});
+    }
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        score = 0;
+        hearts = 3;
+        currentLevelIndex = 0;
+        trackerHistory = [];
+        freezeTimerActive = false;
+        speechBubble.visible = false;
+        pinMascot.y = canvas.height + 100;
+        pinMascot.targetY = canvas.height - 120;
+
+        renderTrackerBar();
+        initLevelGrid();
+        gameActive = true;
+    }
+
+    function renderTrackerBar() {
+        const bar = document.getElementById('trackerBar');
+        bar.innerHTML = "";
+        for(let i = 0; i < 11; i++) {
+            const slot = document.createElement('span');
+            if(trackerHistory[i] === 'win') slot.innerText = "🎈";
+            else if(trackerHistory[i] === 'loss') slot.innerText = "❌";
+            else slot.innerText = "⚪";
+            bar.appendChild(slot);
+        }
+    }
+
+    function initLevelGrid() {
+        activeBalloons = [];
+        const data = levelsDataset[currentLevelIndex];
+        
+        // Assemble pool matching strict unique non-repetitive requirements mapping
+        let pool = [];
+        data.correctItems.forEach(item => pool.push({ data: item, isCorrect: true }));
+        data.wrongItems.forEach(item => pool.push({ data: item, isCorrect: false }));
+        
+        // Comprehensive random shuffling arrangement algorithm setup
+        pool.sort(() => Math.random() - 0.5);
+
+        // Constrain matrix layout exactly to 6 grid locations
+        const cols = 2;
+        const rows = 3;
+        const startX = canvas.width / 4;
+        const spacingX = canvas.width / 2;
+        const startY = 240;
+        const spacingY = 125;
+
+        let index = 0;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if(index >= 6) break;
+                
+                let bX = startX + (c * spacingX);
+                let bY = startY + (r * spacingY);
+                
+                const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#55efc4", "#fd79a8", "#a29bfe"];
+                
+                activeBalloons.push({
+                    x: bX,
+                    y: bY,
+                    radius: 44,
+                    color: colors[index % colors.length],
+                    item: pool[index].data,
+                    isCorrect: pool[index].isCorrect,
+                    isPopped: false,
+                    shakeOffset: 0,
+                    shakeTimer: 0
+                });
+                index++;
+            }
+        }
+
+        document.getElementById('targetBanner').innerText = data.directive;
+        updateHUD();
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreLabel').innerText = `Score: ${score} / 11`;
+        let heartStr = "Hearts: ";
+        for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
+        document.getElementById('heartsLabel').innerText = heartStr;
+    }
+
+    // Direct Mobile-Responsive Vector Point Tap Bounds Translation Pipeline
+    window.addEventListener('mousedown', (e) => { handleCoordinatesTap(e.clientX, e.clientY); });
+    window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 0) {
+            handleCoordinatesTap(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    });
+
+    function handleCoordinatesTap(clientX, clientY) {
+        if (!gameActive || freezeTimerActive) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const tapX = clientX - rect.left;
+        const tapY = clientY - rect.top;
+
+        for (let i = 0; i < activeBalloons.length; i++) {
+            let b = activeBalloons[i];
+            if (b.isPopped) continue;
+
+            let dx = tapX - b.x;
+            let dy = tapY - b.y;
+            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 15) { 
+                evaluateBalloonHit(b);
+                break;
+            }
+        }
+    }
+
+    function evaluateBalloonHit(b) {
+        if(b.isCorrect) {
+            // Target Matched Sequence Strategy Loop
+            b.isPopped = true;
+            score++;
+            trackerHistory.push('win');
+            
+            speechBubble.x = b.x;
+            speechBubble.y = b.y;
+            speechBubble.text = b.item.bubble;
+            speechBubble.color = "#10b981";
+            speechBubble.visible = true;
+
+            sndCorrect.currentTime = 0;
+            sndCorrect.play().catch(()=>{});
+            
+            triggerFreezeTimeout(true);
+        } else {
+            // Error Handling Strategy Layout Mapping
+            b.shakeTimer = 30; // Triggers visible layout wiggle sequence
+            hearts--;
+            trackerHistory.push('loss');
+            
+            speechBubble.x = b.x;
+            speechBubble.y = b.y;
+            speechBubble.text = b.item.bubble;
+            speechBubble.color = "#ef4444";
+            speechBubble.visible = true;
+
+            sndWrong.currentTime = 0;
+            sndWrong.play().catch(()=>{});
+
+            triggerFreezeTimeout(false);
+        }
+
+        renderTrackerBar();
+        updateHUD();
+    }
+
+    function triggerFreezeTimeout(wasCorrect) {
+        freezeTimerActive = true;
+        
+        // Exact 2 seconds execution delay window for children processing feedback loop safely
+        setTimeout(() => {
+            speechBubble.visible = false;
+            freezeTimerActive = false;
+
+            if (hearts <= 0 || trackerHistory.length >= 11) {
+                endGameSummary();
+                return;
+            }
+
+            // Verify if all remaining correct targets within active layout are cleared out completely
+            let remainingTargets = activeBalloons.filter(balloon => balloon.isCorrect && !balloon.isPopped);
+            if (remainingTargets.length === 0) {
+                currentLevelIndex++;
+                if (currentLevelIndex < levelsDataset.length) {
+                    initLevelGrid();
+                } else {
+                    endGameSummary();
+                }
+            }
+        }, 2000);
+    }
+
+    function endGameSummary() {
+        gameActive = false;
+        sndBgm.pause();
+        
+        document.getElementById('uiOverlay').style.display = 'none';
+        document.getElementById('finalScore').innerText = `Final Score: ${score} / 11`;
+        
+        const title = document.getElementById('completionTitle');
+        if (hearts <= 0) {
+            title.innerText = "Try Again! 👍";
+            title.style.color = "#dc2626";
+        } else {
+            title.innerText = "Super Popper! 🏆";
+            title.style.color = "#047857";
+            sndClap.currentTime = 0;
+            sndClap.play().catch(()=>{});
+        }
+        
+        document.getElementById('completionScreen').style.display = 'flex';
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        // Smooth Pin Mascot floating interpolation coordinates math calculations
+        pinMascot.y += (pinMascot.targetY - pinMascot.y) * 0.08;
+        pinMascot.frame += 0.05;
+
+        // Processing independent active shake matrix translations layout mappings loop
+        activeBalloons.forEach(b => {
+            if (b.shakeTimer > 0) {
+                b.shakeTimer--;
+                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 6;
+            } else {
+                b.shakeOffset = 0;
+            }
+        });
+    }
+
+    function drawMascotPin(ctx, mx, my) {
+        ctx.save();
+        ctx.translate(mx, my + Math.sin(pinMascot.frame) * 4);
+        
+        // Glossy red spherical needle pin top head vector configuration mapping
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.arc(0, -40, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#1e3a8a";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // High gloss 3D vector shading sphere overlay layout
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.beginPath();
+        ctx.arc(-7, -47, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Metallic shiny silver core needle sharp point shaft context mapping
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(0, -18);
+        ctx.lineTo(0, 20);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#1e3a8a";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(3, -18);
+        ctx.lineTo(3, 20);
+        ctx.stroke();
+
+        // Animated big friendly googly eyes layout logic elements configurations
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(-7, -40, 6, 0, Math.PI * 2);
+        ctx.arc(7, -40, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#1e3a8a";
+        ctx.beginPath();
+        ctx.arc(-6, -40, 2.5, 0, Math.PI * 2);
+        ctx.arc(6, -40, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cute smiling mouth line
+        ctx.strokeStyle = "#1e3a8a";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, -32, 5, 0, Math.PI);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawFeedbackBubble(bx, by, text, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+        
+        let bW = 210;
+        let bH = 46;
+        let tX = bx - bW / 2;
+        let tY = by - 85;
+
+        if (tX < 12) tX = 12;
+        if (tX + bW > canvas.width) tX = canvas.width - bW - 12;
+
+        ctx.beginPath();
+        ctx.roundRect(tX, tY, bW, bH, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(bx, tY + bH);
+        ctx.lineTo(bx - 12, tY + bH + 12);
+        ctx.lineTo(bx + 12, tY + bH);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 15px 'Comic Sans MS'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, tX + bW / 2, tY + bH / 2);
+        ctx.restore();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        // Custom Sky Linear Gradient Canvas Painting Architecture Context
+        let parkBg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        parkBg.addColorStop(0, "#bae1ff");
+        parkBg.addColorStop(0.7, "#e0f2fe");
+        parkBg.addColorStop(1, "#baffc9");
+        ctx.fillStyle = parkBg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Vector Painted Natural Park Foliage Sides Framework Layout
+        ctx.fillStyle = "#15803d";
+        ctx.beginPath();
+        ctx.arc(-20, canvas.height / 2, 120, 0, Math.PI * 2);
+        ctx.arc(canvas.width + 20, canvas.height / 2.2, 130, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bottom Ground Grass Context Layer Structure Setup Mappings
+        ctx.fillStyle = "#22c55e";
+        ctx.beginPath();
+        ctx.arc(160, canvas.height + 120, 280, 0, Math.PI * 2);
+        ctx.arc(canvas.width - 120, canvas.height + 140, 310, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Rendering Grid Matrix Balloons Setup
+        activeBalloons.forEach(b => {
+            if (b.isPopped) return;
+
+            ctx.save();
+            ctx.translate(b.x + b.shakeOffset, b.y);
+
+            // Hanging balloon line dangling configuration
+            ctx.strokeStyle = "rgba(71, 85, 105, 0.5)";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(0, b.radius);
+            ctx.lineTo(0, b.radius + 25);
+            ctx.stroke();
+
+            // Mathematically precise elliptical clean balloon rendering shape setup mapping
+            ctx.fillStyle = b.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, b.radius * 0.86, b.radius, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#1e3a8a";
+            ctx.lineWidth = 3.5;
+            ctx.stroke();
+
+            // Inner high-contrast textual identification banner configuration anchors
+            ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+            ctx.beginPath();
+            ctx.roundRect(-b.radius * 0.95, -13, b.radius * 1.9, 26, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#1e3a8a";
+            ctx.font = "bold 12px 'Comic Sans MS'";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(b.item.text, 0, 1);
+
+            ctx.restore();
+        });
+
+        // Drawing system elements
+        drawMascotPin(ctx, pinMascot.x, pinMascot.y);
+
+        if (speechBubble.visible) {
+            drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
+        }
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
+    
+    mainLoop();
+</script>
+</body>
+</html>
