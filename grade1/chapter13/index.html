@@ -6,45 +6,44 @@
     <title>The Great Balloon Burst!</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #bae1ff; font-family: 'Comic Sans MS', sans-serif; }
-        #gameContainer { position: relative; width: 100%; height: 100%; max-width: 600px; max-height: 900px; margin: 0 auto; background: #bae1ff; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #e0f2fe; font-family: 'Comic Sans MS', sans-serif; }
+        #gameContainer { position: relative; width: 100%; height: 100%; max-width: 600px; max-height: 900px; margin: 0 auto; background: #e0f2fe; overflow: hidden; box-shadow: 0 0 25px rgba(0,0,0,0.15); }
         canvas { display: block; width: 100%; height: 100%; }
         
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 30px; text-align: center; }
         
-        /* Screen 1: Brand Logo - Pure Bright White Background */
+        /* Screen 1: Brand Logo - Pure White */
         #logoScreen { background-color: #ffffff; z-index: 100; }
         #logoScreen img { max-width: 70%; max-height: 40%; object-fit: contain; }
         
         /* Screen 2: Game Title Splash Menu */
-        #titleScreen { background: linear-gradient(to bottom, #70c5ff 0%, #baffc9 100%); z-index: 90; display: none; }
-        #titleScreen h1 { color: #1e3a8a; font-size: 46px; margin-bottom: 30px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 5px 10px rgba(0,0,0,0.15); line-height: 1.2; font-weight: 900; }
+        #titleScreen { background: linear-gradient(to bottom, #bae1ff 0%, #ffdfba 100%); z-index: 90; display: none; }
+        #titleScreen h1 { color: #ff6b6b; font-size: 44px; margin-bottom: 30px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 8px 15px rgba(255,107,107,0.2); line-height: 1.2; font-weight: 900; }
         
         /* Screen 3: Interactive Mission Instructions */
-        #instructionScreen { background: #fffef0; z-index: 85; display: none; border: 8px solid #ffb3ba; border-radius: 24px; color: #1e3a8a; }
+        #instructionScreen { background: #fffef0; z-index: 85; display: none; border: 8px solid #baffc9; border-radius: 32px; color: #2c3e50; }
         
-        .btn { background: #ff6b6b; color: #fff; border: 3px solid #1e3a8a; padding: 16px 44px; font-size: 26px; font-weight: bold; border-radius: 40px; cursor: pointer; box-shadow: 0 8px #c94c4c; text-transform: uppercase; transition: all 0.1s ease; margin-top: 25px; text-shadow: 1px 1px rgba(0,0,0,0.2); }
-        .btn:active { box-shadow: 0 2px #c94c4c; transform: translateY(6px); }
+        .btn { background: #ff8b94; color: #fff; border: 3px solid #ff5252; padding: 16px 44px; font-size: 26px; font-weight: bold; border-radius: 40px; cursor: pointer; box-shadow: 0 8px #ff5252; text-transform: uppercase; transition: all 0.1s ease; margin-top: 25px; }
+        .btn:active { box-shadow: 0 2px #ff5252; transform: translateY(6px); }
         
-        .big-bold-text { font-size: 24px; font-weight: 900; line-height: 1.5; margin-bottom: 20px; color: #2c3e50; }
+        .big-bold-text { font-size: 22px; font-weight: 900; line-height: 1.5; margin-bottom: 20px; color: #4a5568; }
         
-        /* HUD Dashboard Dashboard Layout Overlay */
-        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 20; pointer-events: none; display: none; }
-        .hud-row { display: flex; justify-content: space-between; width: 100%; align-items: center; }
-        .ui-element { background: rgba(255, 255, 255, 0.96); color: #1e3a8a; padding: 10px 20px; border-radius: 20px; font-size: 18px; font-weight: bold; border: 3px solid #93c5fd; box-shadow: 0 4px rgba(0,0,0,0.05); }
+        /* HUD Top Dashboard Area Overlay */
+        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 20; pointer-events: none; display: none; align-items: center; }
+        #targetPrompt { font-size: 24px; font-weight: 900; color: #2563eb; text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff; text-align: center; margin-top: 5px; }
+        #progressText { font-size: 20px; font-weight: 900; color: #db2777; background: rgba(255, 255, 255, 0.9); padding: 4px 16px; border-radius: 12px; border: 2px solid #fbcfe8; display: inline-block; margin-top: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
-        /* High-Contrast Target Directive Banner */
-        #targetBanner { width: 100%; background: #fef3c7; border: 4px solid #f59e0b; padding: 14px; border-radius: 16px; text-align: center; font-size: 22px; font-weight: 900; color: #b45309; box-shadow: 0 5px rgba(0,0,0,0.08); text-transform: uppercase; }
-        #trackerBar { background: rgba(255, 255, 255, 0.9); width: 100%; padding: 8px; border-radius: 14px; display: flex; gap: 6px; justify-content: center; font-size: 22px; border: 2px dashed #93c5fd; }
+        .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 5px; }
+        .ui-element { background: rgba(255, 255, 255, 0.95); color: #1e3a8a; padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: bold; border: 3px solid #bfdbfe; }
         
-        /* Completion Performance Screen */
-        #completionScreen { background: linear-gradient(to bottom, #fef3c7 0%, #d1fae5 100%); display: none; z-index: 80; color: #1e3a8a; }
+        /* Completion Performance Card */
+        #completionScreen { background: linear-gradient(to bottom, #fffex0 0%, #e0f2fe 100%); display: none; z-index: 80; color: #1e3a8a; }
     </style>
 </head>
 <body>
 
 <div id="gameContainer">
-    <!-- Screen 1: Brand Logo (Exactly 5 seconds duration constraint) -->
+    <!-- Screen 1: Brand Logo (Exactly 5 seconds constraint) -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
@@ -57,29 +56,29 @@
 
     <!-- Screen 3: Interactive Mission Instructions -->
     <div id="instructionScreen" class="screen">
-        <div class="big-bold-text" style="color: #1e3a8a; font-size: 32px; margin-bottom: 25px;">How to Play! 💥</div>
-        <div class="big-bold-text" style="font-size: 20px; background: #e0f2fe; padding: 14px; border-radius: 14px;">Look at the golden banner at the top of your screen!</div>
-        <div class="big-bold-text" style="font-size: 22px; margin-top: 10px;">🎈 Tap only the matching target balloons!</div>
-        <div class="big-bold-text" style="font-size: 22px; color: #b91c1c;">⚠️ Wrong balloons will shake!</div>
-        <button class="btn" style="background: #10b981; box-shadow: 0 8px #059669;" onclick="startGame()">Start Game 🚀</button>
+        <div class="big-bold-text" style="color: #ff6b6b; font-size: 34px; margin-bottom: 20px;">Let's Play! ✨</div>
+        <div class="big-bold-text" style="font-size: 20px; background: #f0fdf4; padding: 16px; border-radius: 20px; border: 2px dashed #4ade80;">Read the mission prompt at the top of the screen!</div>
+        <div class="big-bold-text" style="margin-top: 15px;">📍 Watch your cute Pin friend fly out to pop the balloons!</div>
+        <div class="big-bold-text" style="color: #ea580c;">🎈 Watch out for empty trick balloons!</div>
+        <button class="btn" style="background: #4ade80; box-shadow: 0 8px #22c55e; border-color: #22c55e;" onclick="startGame()">Start Game 🚀</button>
     </div>
 
-    <!-- HUD Dashboard Dashboard Overlays -->
+    <!-- HUD Dashboard Overlays -->
     <div id="uiOverlay">
-        <div id="targetBanner">LOADING MISSION...</div>
+        <div id="targetPrompt">LOADING MISSION...</div>
+        <div id="progressText">Balloons Bursted: 0 / 0</div>
         <div class="hud-row">
             <div id="scoreLabel" class="ui-element">Score: 0 / 11</div>
             <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
         </div>
-        <div id="trackerBar"></div>
     </div>
     
-    <!-- Screen 5: Final Performance Summary Evaluation Card -->
+    <!-- Screen 5: Final Evaluation Card -->
     <div id="completionScreen" class="screen">
-        <h1 id="completionTitle" style="font-size: 44px; margin-bottom: 15px; font-weight: 900;">Fantastic! 🏆</h1>
-        <p style="font-size: 22px; margin-bottom: 25px; font-weight: bold; color: #4b5563;">You sorted all activities perfectly!</p>
-        <div class="ui-element" id="finalScore" style="font-size: 32px; padding: 18px 40px; border-color: #10b981; background: white; margin-bottom: 30px; font-weight: 900;">Final Score: 0/11</div>
-        <button class="btn" style="background: #fcd34d; color: #78350f; box-shadow: 0 8px #d97706;" onclick="restartGame()">Play Again 🔄</button>
+        <h1 id="completionTitle" style="font-size: 42px; margin-bottom: 15px; font-weight: 900;">Awesome! 🎉</h1>
+        <p style="font-size: 20px; margin-bottom: 25px; font-weight: bold; color: #4b5563;">You sorted everything beautifully!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 28px; padding: 14px 35px; border-color: #34d399; background: white; margin-bottom: 35px; font-weight: 900;">Final Score: 0/11</div>
+        <button class="btn" style="background: #fbbf24; color: #78350f; box-shadow: 0 8px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -89,7 +88,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // Core External Audio Assets Registry Pipeline
+    // Core Audio Assets
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
@@ -103,20 +102,33 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Core State Parameters Mappings
+    // Game States
     let score = 0;
     let hearts = 3;
     let gameActive = false;
     let freezeTimerActive = false;
-    let trackerHistory = [];
     let currentLevelIndex = 0; 
     let activeBalloons = [];
+    let targetCountForLevel = 0;
+    let poppedCountForLevel = 0;
 
-    // Animated Pin Mascot and Speech Bubble states mapping
+    // Feedback speech bubbles
     let speechBubble = { x: 0, y: 0, text: "", color: "#10b981", visible: false };
-    let pinMascot = { x: 80, y: 0, targetY: 0, frame: 0 };
+    
+    // Cute Pin Character with dynamic Action-state variables
+    let pinMascot = { 
+        homeX: 65, 
+        homeY: 0, 
+        x: 65, 
+        y: 0, 
+        targetX: 65, 
+        targetY: 0, 
+        state: "idle", // idle, flying, returning
+        rotation: 0,
+        frame: 0,
+        assignedBalloon: null
+    };
 
-    // Explicit 3-Stage Grade 1 Chapter 13 Content Database Layout
     const levelsDataset = [
         {
             directive: "Pop the Outdoor Games! ☀️",
@@ -159,7 +171,6 @@
         }
     ];
 
-    // Screen 1 Initialization: Logo display restricted to exactly 5 seconds
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
@@ -168,7 +179,6 @@
     function showInstructions() {
         document.getElementById('titleScreen').style.display = 'none';
         document.getElementById('instructionScreen').style.display = 'flex';
-        // Background audio initializes natively upon explicit interactive user splash trigger
         sndBgm.currentTime = 0;
         sndBgm.play().catch(()=>{});
     }
@@ -180,66 +190,67 @@
         score = 0;
         hearts = 3;
         currentLevelIndex = 0;
-        trackerHistory = [];
         freezeTimerActive = false;
         speechBubble.visible = false;
-        pinMascot.y = canvas.height + 100;
-        pinMascot.targetY = canvas.height - 120;
+        
+        pinMascot.homeY = canvas.height - 100;
+        pinMascot.x = pinMascot.homeX;
+        pinMascot.y = pinMascot.homeY;
+        pinMascot.targetX = pinMascot.homeX;
+        pinMascot.targetY = pinMascot.homeY;
+        pinMascot.state = "idle";
+        pinMascot.rotation = 0;
 
-        renderTrackerBar();
         initLevelGrid();
         gameActive = true;
     }
 
-    function renderTrackerBar() {
-        const bar = document.getElementById('trackerBar');
-        bar.innerHTML = "";
-        for(let i = 0; i < 11; i++) {
-            const slot = document.createElement('span');
-            if(trackerHistory[i] === 'win') slot.innerText = "🎈";
-            else if(trackerHistory[i] === 'loss') slot.innerText = "❌";
-            else slot.innerText = "⚪";
-            bar.appendChild(slot);
-        }
-    }
-
     function initLevelGrid() {
         activeBalloons = [];
+        poppedCountForLevel = 0;
         const data = levelsDataset[currentLevelIndex];
         
-        // Assemble pool matching strict unique non-repetitive requirements mapping
         let pool = [];
-        data.correctItems.forEach(item => pool.push({ data: item, isCorrect: true }));
-        data.wrongItems.forEach(item => pool.push({ data: item, isCorrect: false }));
+        data.correctItems.forEach(item => pool.push({ data: item, isCorrect: true, isBlank: false }));
+        data.wrongItems.forEach(item => pool.push({ data: item, isCorrect: false, isBlank: false }));
         
-        // Comprehensive random shuffling arrangement algorithm setup
+        // Add exactly 3 blank distractor balloons with no words inside
+        for(let i = 0; i < 3; i++) {
+            pool.push({ data: { text: "", bubble: "Oops! Empty Balloon! 🎈" }, isCorrect: false, isBlank: true });
+        }
+        
+        // Mix everything together randomly
         pool.sort(() => Math.random() - 0.5);
+        targetCountForLevel = data.correctItems.length;
 
-        // Constrain matrix layout exactly to 6 grid locations
-        const cols = 2;
+        // Clean 3x3 layout alignment matrix for 9 items
+        const cols = 3;
         const rows = 3;
-        const startX = canvas.width / 4;
-        const spacingX = canvas.width / 2;
-        const startY = 240;
+        const paddingX = 40;
+        const availableWidth = canvas.width - (paddingX * 2);
+        const colWidth = availableWidth / (cols - 1);
+        
+        const startY = 250;
         const spacingY = 125;
 
         let index = 0;
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
-                if(index >= 6) break;
+                if(index >= pool.length || index >= 9) break;
                 
-                let bX = startX + (c * spacingX);
+                let bX = paddingX + (c * colWidth);
                 let bY = startY + (r * spacingY);
                 
-                const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#55efc4", "#fd79a8", "#a29bfe"];
+                const colors = ["#ff9aa2", "#ffb7b2", "#ffdac1", "#e2f0cb", "#b5ead7", "#c7ceea", "#ffc6ff", "#e8aeff", "#9bf6ff"];
                 
                 activeBalloons.push({
                     x: bX,
                     y: bY,
-                    radius: 44,
+                    radius: 35, // Balanced dimension scaling
                     color: colors[index % colors.length],
                     item: pool[index].data,
                     isCorrect: pool[index].isCorrect,
+                    isBlank: pool[index].isBlank,
                     isPopped: false,
                     shakeOffset: 0,
                     shakeTimer: 0
@@ -248,27 +259,25 @@
             }
         }
 
-        document.getElementById('targetBanner').innerText = data.directive;
+        document.getElementById('targetPrompt').innerText = data.directive;
         updateHUD();
     }
 
     function updateHUD() {
         document.getElementById('scoreLabel').innerText = `Score: ${score} / 11`;
+        document.getElementById('progressText').innerText = `Balloons Bursted: ${poppedCountForLevel} / ${targetCountForLevel}`;
         let heartStr = "Hearts: ";
         for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
         document.getElementById('heartsLabel').innerText = heartStr;
     }
 
-    // Direct Mobile-Responsive Vector Point Tap Bounds Translation Pipeline
     window.addEventListener('mousedown', (e) => { handleCoordinatesTap(e.clientX, e.clientY); });
     window.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 0) {
-            handleCoordinatesTap(e.touches[0].clientX, e.touches[0].clientY);
-        }
+        if(e.touches.length > 0) handleCoordinatesTap(e.touches[0].clientX, e.touches[0].clientY);
     });
 
     function handleCoordinatesTap(clientX, clientY) {
-        if (!gameActive || freezeTimerActive) return;
+        if (!gameActive || freezeTimerActive || pinMascot.state !== "idle") return;
 
         const rect = canvas.getBoundingClientRect();
         const tapX = clientX - rect.left;
@@ -281,18 +290,22 @@
             let dx = tapX - b.x;
             let dy = tapY - b.y;
             if (Math.sqrt(dx * dx + dy * dy) < b.radius + 15) { 
-                evaluateBalloonHit(b);
+                // Direct the pin mascot to fly out to the clicked balloon!
+                pinMascot.targetX = b.x;
+                pinMascot.targetY = b.y;
+                pinMascot.state = "flying";
+                pinMascot.assignedBalloon = b;
+                freezeTimerActive = true; 
                 break;
             }
         }
     }
 
-    function evaluateBalloonHit(b) {
+    function processBalloonInteraction(b) {
         if(b.isCorrect) {
-            // Target Matched Sequence Strategy Loop
             b.isPopped = true;
             score++;
-            trackerHistory.push('win');
+            poppedCountForLevel++;
             
             speechBubble.x = b.x;
             speechBubble.y = b.y;
@@ -302,13 +315,9 @@
 
             sndCorrect.currentTime = 0;
             sndCorrect.play().catch(()=>{});
-            
-            triggerFreezeTimeout(true);
         } else {
-            // Error Handling Strategy Layout Mapping
-            b.shakeTimer = 30; // Triggers visible layout wiggle sequence
+            b.shakeTimer = 30;
             hearts--;
-            trackerHistory.push('loss');
             
             speechBubble.x = b.x;
             speechBubble.y = b.y;
@@ -318,38 +327,35 @@
 
             sndWrong.currentTime = 0;
             sndWrong.play().catch(()=>{});
-
-            triggerFreezeTimeout(false);
         }
 
-        renderTrackerBar();
         updateHUD();
-    }
 
-    function triggerFreezeTimeout(wasCorrect) {
-        freezeTimerActive = true;
-        
-        // Exact 2 seconds execution delay window for children processing feedback loop safely
+        // 2-second feedback timer before the pin goes back
         setTimeout(() => {
             speechBubble.visible = false;
-            freezeTimerActive = false;
-
-            if (hearts <= 0 || trackerHistory.length >= 11) {
-                endGameSummary();
-                return;
-            }
-
-            // Verify if all remaining correct targets within active layout are cleared out completely
-            let remainingTargets = activeBalloons.filter(balloon => balloon.isCorrect && !balloon.isPopped);
-            if (remainingTargets.length === 0) {
-                currentLevelIndex++;
-                if (currentLevelIndex < levelsDataset.length) {
-                    initLevelGrid();
-                } else {
-                    endGameSummary();
-                }
-            }
+            pinMascot.targetX = pinMascot.homeX;
+            pinMascot.targetY = pinMascot.homeY;
+            pinMascot.state = "returning";
         }, 2000);
+    }
+
+    function evaluateProgressionNextStep() {
+        freezeTimerActive = false;
+        
+        if (hearts <= 0) {
+            endGameSummary();
+            return;
+        }
+
+        if (poppedCountForLevel >= targetCountForLevel) {
+            currentLevelIndex++;
+            if (currentLevelIndex < levelsDataset.length) {
+                initLevelGrid();
+            } else {
+                endGameSummary();
+            }
+        }
     }
 
     function endGameSummary() {
@@ -365,7 +371,7 @@
             title.style.color = "#dc2626";
         } else {
             title.innerText = "Super Popper! 🏆";
-            title.style.color = "#047857";
+            title.style.color = "#059669";
             sndClap.currentTime = 0;
             sndClap.play().catch(()=>{});
         }
@@ -381,76 +387,128 @@
     function update() {
         if (!gameActive) return;
 
-        // Smooth Pin Mascot floating interpolation coordinates math calculations
-        pinMascot.y += (pinMascot.targetY - pinMascot.y) * 0.08;
         pinMascot.frame += 0.05;
 
-        // Processing independent active shake matrix translations layout mappings loop
+        // Flying / Popping State Controller
+        if (pinMascot.state === "flying") {
+            let dx = pinMascot.targetX - pinMascot.x;
+            let dy = pinMascot.targetY - pinMascot.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            // Turn toward the target balloon
+            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
+
+            if (dist > 10) {
+                pinMascot.x += dx * 0.18;
+                pinMascot.y += dy * 0.18;
+            } else {
+                pinMascot.x = pinMascot.targetX;
+                pinMascot.y = pinMascot.targetY;
+                pinMascot.state = "popping";
+                processBalloonInteraction(pinMascot.assignedBalloon);
+            }
+        } else if (pinMascot.state === "returning") {
+            let dx = pinMascot.targetX - pinMascot.x;
+            let dy = pinMascot.targetY - pinMascot.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
+
+            if (dist > 10) {
+                pinMascot.x += dx * 0.15;
+                pinMascot.y += dy * 0.15;
+            } else {
+                pinMascot.x = pinMascot.homeX;
+                pinMascot.y = pinMascot.homeY;
+                pinMascot.rotation = 0;
+                pinMascot.state = "idle";
+                evaluateProgressionNextStep();
+            }
+        } else if (pinMascot.state === "idle") {
+            pinMascot.rotation = 0;
+            pinMascot.y += (pinMascot.homeY - pinMascot.y) * 0.1;
+        }
+
+        // Handle Balloon Wiggle Animations
         activeBalloons.forEach(b => {
             if (b.shakeTimer > 0) {
                 b.shakeTimer--;
-                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 6;
+                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 5;
             } else {
                 b.shakeOffset = 0;
             }
         });
     }
 
-    function drawMascotPin(ctx, mx, my) {
+    function drawMascotPin(ctx, mx, my, rotation) {
         ctx.save();
-        ctx.translate(mx, my + Math.sin(pinMascot.frame) * 4);
+        ctx.translate(mx, my);
+        ctx.rotate(rotation);
         
-        // Glossy red spherical needle pin top head vector configuration mapping
-        ctx.fillStyle = "#ef4444";
+        // Float slightly if sitting idle at home base
+        let hoverY = (pinMascot.state === "idle") ? Math.sin(pinMascot.frame) * 4 : 0;
+        ctx.translate(0, hoverY);
+        
+        // Super Cute Blush Head Ring
+        ctx.fillStyle = "#ff6b6b";
         ctx.beginPath();
-        ctx.arc(0, -40, 22, 0, Math.PI * 2);
+        ctx.arc(0, -35, 20, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = "#1e3a8a";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 3.5;
         ctx.stroke();
 
-        // High gloss 3D vector shading sphere overlay layout
-        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        // 3D Glossy Light Reflection Spot
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
         ctx.beginPath();
-        ctx.arc(-7, -47, 6, 0, Math.PI * 2);
+        ctx.arc(-6, -41, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Metallic shiny silver core needle sharp point shaft context mapping
-        ctx.strokeStyle = "#94a3b8";
+        // Pin Point Shaft Needle
+        ctx.strokeStyle = "#cbd5e1";
         ctx.lineWidth = 6;
         ctx.lineCap = "round";
         ctx.beginPath();
-        ctx.moveTo(0, -18);
+        ctx.moveTo(0, -15);
         ctx.lineTo(0, 20);
         ctx.stroke();
 
         ctx.strokeStyle = "#1e3a8a";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(3, -18);
-        ctx.lineTo(3, 20);
+        ctx.moveTo(2, -15);
+        ctx.lineTo(2, 20);
         ctx.stroke();
 
-        // Animated big friendly googly eyes layout logic elements configurations
+        // Extra Big Cute Googly Eyes
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(-7, -40, 6, 0, Math.PI * 2);
-        ctx.arc(7, -40, 6, 0, Math.PI * 2);
+        ctx.arc(-6, -36, 6, 0, Math.PI * 2);
+        ctx.arc(6, -36, 6, 0, Math.PI * 2);
         ctx.fill();
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = "#1e3a8a";
         ctx.beginPath();
-        ctx.arc(-6, -40, 2.5, 0, Math.PI * 2);
-        ctx.arc(6, -40, 2.5, 0, Math.PI * 2);
+        ctx.arc(-5.5, -36, 2.5, 0, Math.PI * 2);
+        ctx.arc(5.5, -36, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Cute smiling mouth line
+        // Rosy Pink Cheeks
+        ctx.fillStyle = "rgba(244,63,94,0.4)";
+        ctx.beginPath();
+        ctx.arc(-11, -30, 3, 0, Math.PI * 2);
+        ctx.arc(11, -30, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Happy Smile Line
         ctx.strokeStyle = "#1e3a8a";
         ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.arc(0, -32, 5, 0, Math.PI);
+        ctx.arc(0, -30, 4, 0, Math.PI);
         ctx.stroke();
+        
         ctx.restore();
     }
 
@@ -460,7 +518,7 @@
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 4;
         
-        let bW = 210;
+        let bW = 200;
         let bH = 46;
         let tX = bx - bW / 2;
         let tY = by - 85;
@@ -469,21 +527,21 @@
         if (tX + bW > canvas.width) tX = canvas.width - bW - 12;
 
         ctx.beginPath();
-        ctx.roundRect(tX, tY, bW, bH, 14);
+        ctx.roundRect(tX, tY, bW, bH, 16);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
         ctx.moveTo(bx, tY + bH);
-        ctx.lineTo(bx - 12, tY + bH + 12);
-        ctx.lineTo(bx + 12, tY + bH);
+        ctx.lineTo(bx - 10, tY + bH + 10);
+        ctx.lineTo(bx + 10, tY + bH);
         ctx.closePath();
         ctx.fillStyle = color;
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 15px 'Comic Sans MS'";
+        ctx.font = "bold 14px 'Comic Sans MS'";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(text, tX + bW / 2, tY + bH / 2);
@@ -495,70 +553,73 @@
 
         if (!gameActive) return;
 
-        // Custom Sky Linear Gradient Canvas Painting Architecture Context
+        // Soft sky backdrop gradient
         let parkBg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        parkBg.addColorStop(0, "#bae1ff");
-        parkBg.addColorStop(0.7, "#e0f2fe");
+        parkBg.addColorStop(0, "#e0f2fe");
+        parkBg.addColorStop(0.6, "#f0fdf4");
         parkBg.addColorStop(1, "#baffc9");
         ctx.fillStyle = parkBg;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Vector Painted Natural Park Foliage Sides Framework Layout
-        ctx.fillStyle = "#15803d";
-        ctx.beginPath();
-        ctx.arc(-20, canvas.height / 2, 120, 0, Math.PI * 2);
-        ctx.arc(canvas.width + 20, canvas.height / 2.2, 130, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bottom Ground Grass Context Layer Structure Setup Mappings
+        // Natural soft green field vectors
         ctx.fillStyle = "#22c55e";
         ctx.beginPath();
-        ctx.arc(160, canvas.height + 120, 280, 0, Math.PI * 2);
-        ctx.arc(canvas.width - 120, canvas.height + 140, 310, 0, Math.PI * 2);
+        ctx.arc(120, canvas.height + 150, 260, 0, Math.PI * 2);
+        ctx.arc(canvas.width - 80, canvas.height + 180, 290, 0, Math.PI * 2);
         ctx.fill();
 
-        // Rendering Grid Matrix Balloons Setup
+        // Draw 9-Grid Balloons
         activeBalloons.forEach(b => {
             if (b.isPopped) return;
 
             ctx.save();
             ctx.translate(b.x + b.shakeOffset, b.y);
 
-            // Hanging balloon line dangling configuration
-            ctx.strokeStyle = "rgba(71, 85, 105, 0.5)";
-            ctx.lineWidth = 2.5;
+            // Balloon string hanging down
+            ctx.strokeStyle = "rgba(100, 116, 139, 0.4)";
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(0, b.radius);
-            ctx.lineTo(0, b.radius + 25);
+            ctx.lineTo(0, b.radius + 20);
             ctx.stroke();
 
-            // Mathematically precise elliptical clean balloon rendering shape setup mapping
+            // Render balloon shape
             ctx.fillStyle = b.color;
             ctx.beginPath();
-            ctx.ellipse(0, 0, b.radius * 0.86, b.radius, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, 0, b.radius * 0.88, b.radius, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.strokeStyle = "#1e3a8a";
-            ctx.lineWidth = 3.5;
+            ctx.lineWidth = 3;
             ctx.stroke();
 
-            // Inner high-contrast textual identification banner configuration anchors
-            ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
-            ctx.beginPath();
-            ctx.roundRect(-b.radius * 0.95, -13, b.radius * 1.9, 26, 6);
-            ctx.fill();
-            ctx.stroke();
+            // Text Banner inside the balloon (only if it's NOT a blank distractor)
+            if (!b.isBlank) {
+                // Auto-sizing safe badge boundary box to prevent any word spillages
+                let maxLabelWidth = b.radius * 1.7;
+                ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+                ctx.beginPath();
+                ctx.roundRect(-maxLabelWidth / 2, -11, maxLabelWidth, 22, 6);
+                ctx.fill();
+                ctx.stroke();
 
-            ctx.fillStyle = "#1e3a8a";
-            ctx.font = "bold 12px 'Comic Sans MS'";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(b.item.text, 0, 1);
+                ctx.fillStyle = "#1e3a8a";
+                // Smaller, tighter font scaling to wrap safely within the boundary
+                ctx.font = "bold 11px 'Comic Sans MS'";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(b.item.text, 0, 0);
+            } else {
+                // Add tiny cute decorative sparkles on blank mystery balloons
+                ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+                ctx.font = "bold 16px 'Comic Sans MS'";
+                ctx.fillText("✨", -8, -10);
+            }
 
             ctx.restore();
         });
 
-        // Drawing system elements
-        drawMascotPin(ctx, pinMascot.x, pinMascot.y);
+        // Draw active flying pin mascot
+        drawMascotPin(ctx, pinMascot.x, pinMascot.y, pinMascot.rotation);
 
         if (speechBubble.visible) {
             drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
