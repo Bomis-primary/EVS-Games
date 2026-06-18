@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Super Body Quest</title>
     <style>
+        /* CSS Reset for Global Device Consistency */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #f7fff7; font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #eef7ff; font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif; }
         
-        /* Bright, cute, pastel background layout */
+        /* Performance Optimised Layout Shell */
         #gameContainer { 
             width: 100vw; 
             height: 100vh; 
@@ -17,74 +18,70 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 20px;
+            padding: 15px;
+            position: relative;
         }
 
         #topHUD {
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             display: flex;
             justify-content: space-between;
             color: #4a5568;
             font-size: clamp(16px, 5vw, 22px);
             font-weight: bold;
+            padding: 5px 10px;
         }
 
         /* Center Table Area */
         #tableCenter {
             flex-grow: 1;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 10px;
         }
 
-        /* Cute Rounded Riddle Card inspired by image_e41c20.png mechanics */
+        /* Cute Rounded Riddle Card - No Top Headers */
         .riddle-card {
-            width: 90%;
+            width: 95%;
+            max-width: 420px;
             aspect-ratio: 4/3;
             background: #ffffff;
             border: 8px solid #ffccd5;
             border-radius: 24px;
-            box-shadow: 0 8px 24px rgba(165, 180, 200, 0.3);
+            box-shadow: 0 8px 24px rgba(165, 180, 200, 0.25);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
             position: relative;
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .card-header-tag {
-            font-size: clamp(14px, 4vw, 18px);
-            font-weight: 900;
-            color: #ff6b8b;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
+            transform: translateZ(0); /* Hardware Acceleration */
+            will-change: transform, opacity;
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
         }
 
         .card-text {
             color: #2d3748;
-            font-size: clamp(15px, 4.2vw, 20px);
+            font-size: clamp(15px, 4.5vw, 21px);
             line-height: 1.5;
             font-weight: bold;
         }
 
-        /* The Player's Choice Hand */
+        /* Hand Choices Wrapper */
         #playerHand {
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            padding-bottom: 15px;
+            padding-bottom: env(safe-area-inset-bottom, 15px);
         }
 
-        /* Cute, Text-Only Colorful Choice Cards */
+        /* Responsive Text-Only Cards */
         .choice-card {
             aspect-ratio: 2/3;
             border: 6px solid #ffffff;
@@ -93,33 +90,34 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
             font-weight: 900;
-            font-size: clamp(14px, 3.8vw, 18px);
+            font-size: clamp(13px, 3.8vw, 18px);
             cursor: pointer;
-            box-shadow: 0 6px 16px rgba(165, 180, 200, 0.4);
-            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 6px 16px rgba(165, 180, 200, 0.35);
+            transform: translateZ(0);
+            transition: transform 0.1s ease-out;
         }
-        .choice-card:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(165, 180, 200, 0.2); }
+        .choice-card:active { transform: scale(0.94); }
 
-        /* Bright Pastel Colors */
+        /* Bright Soft Color Palettes */
         .color-red { background-color: #ff6b6b; }
         .color-orange { background-color: #ffa048; }
         .color-green { background-color: #4ed964; }
 
         @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
+            0% { transform: scale(0.85); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Cute Message Banner Overlays */
+        /* Overlay Banners */
         #feedbackOverlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80%;
+            width: 85%;
             max-width: 380px;
             background: #ffffff;
             border: 6px solid #4ed964;
@@ -127,62 +125,60 @@
             color: #2d3748;
             padding: 25px;
             text-align: center;
-            font-size: 24px;
+            font-size: clamp(20px, 6vw, 24px);
             font-weight: bold;
             display: none;
             z-index: 50;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
 
-        /* Main Screen Menus */
+        /* Overlay Screen Structures */
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; text-align: center; background: #eef7ff; color: #2d3748; }
         #logoScreen { background-color: #ffffff; z-index: 200; }
-        #logoScreen img { max-width: 75%; max-height: 45%; object-fit: contain; }
+        #logoScreen img { max-width: 70%; max-height: 40%; object-fit: contain; }
         
-        .btn { background: #ff6b8b; color: white; border: none; padding: 16px 50px; font-size: clamp(18px, 5vw, 24px); font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 30px; box-shadow: 0 6px 0 #d94e6d; }
+        .btn { background: #ff6b8b; color: white; border: none; padding: 16px 50px; font-size: clamp(18px, 5vw, 24px); font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 30px; box-shadow: 0 6px 0 #d94e6d; -webkit-tap-highlight-color: transparent; }
         .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #d94e6d; }
     </style>
 </head>
 <body>
 
 <div id="gameContainer">
-    <!-- Brand Entry Screen -->
+    <!-- Brand Splash Screen -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
-    <!-- Title Screen -->
+    <!-- Clean Title Screen -->
     <div id="titleScreen" class="screen">
-        <h1 style="font-size: clamp(36px, 11vw, 48px); color: #ff6b8b; font-weight: 900; line-height: 1.2;">Super Body<br><span style="color: #ffa048;">Quest</span></h1>
-        <p style="font-size: 18px; margin-top: 10px; color: #718096;">Fun Card Riddles!</p>
+        <h1 style="font-size: clamp(38px, 11vw, 54px); color: #ff6b8b; font-weight: 900; line-height: 1.2;">Super Body<br><span style="color: #ffa048;">Quest</span></h1>
         <button class="btn" onclick="startGame()">START ▶</button>
     </div>
 
-    <!-- Live Score Dashboard -->
+    <!-- HUD Layout Area -->
     <div id="topHUD" style="visibility: hidden;">
         <span id="txtScore">⭐ SCORE: 0</span>
-        <span id="txtLives">💙 ❤️ ❤️ ❤️</span>
+        <span id="txtLives">❤️ ❤️ ❤️</span>
     </div>
 
-    <!-- Center Card Station -->
+    <!-- Central Interactive Discard Pile Frame -->
     <div id="tableCenter" style="visibility: hidden;">
         <div class="riddle-card" id="mainDeckCard">
-            <div class="card-header-tag" id="cardBorderTag">💛 BODY RIDDLE</div>
-            <div class="card-text" id="riddleDisplayText">Preparing question card...</div>
+            <div class="card-text" id="riddleDisplayText">Loading Quest Card...</div>
         </div>
     </div>
 
-    <!-- Pop-up Feedback Banner -->
+    <!-- Notifications Hub Overlay -->
     <div id="feedbackOverlay">GREAT JOB!</div>
 
-    <!-- Hand Cards Control Row (Dynamically Shuffled) -->
+    <!-- Choice Action Hand Matrix Layout -->
     <div id="playerHand" style="visibility: hidden;">
-        <div class="choice-card color-red" id="card0" onclick="submitAnswer(0)">ORGAN</div>
-        <div class="choice-card color-orange" id="card1" onclick="submitAnswer(1)">ORGAN</div>
-        <div class="choice-card color-green" id="card2" onclick="submitAnswer(2)">ORGAN</div>
+        <div class="choice-card color-red" id="card0" onclick="submitAnswer(0)">...</div>
+        <div class="choice-card color-orange" id="card1" onclick="submitAnswer(1)">...</div>
+        <div class="choice-card color-green" id="card2" onclick="submitAnswer(2)">...</div>
     </div>
 
-    <!-- Game End Scoreboard -->
+    <!-- Scoreboards Target Frame -->
     <div id="endScreen" class="screen" style="display: none;">
         <h1 id="endTitle" style="font-size: 36px; color: #ff6b8b;">YOU DID IT!</h1>
         <div id="finalScore" style="font-size: 24px; margin: 20px 0; font-weight: bold;">FINAL SCORE: 0</div>
@@ -191,35 +187,37 @@
 </div>
 
 <script>
-    // Audio Components Map
+    // Asset Pipeline Management
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
     const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
     sndBgm.loop = true;
 
-    // Game Running Configurations
+    // Local Storage Variable Maps
     let score = 0;
     let lives = 3;
     let currentIdx = 0;
     let acceptInput = true;
     let currentChoices = [];
 
-    // The Complete 10 Unique Grade 2 Questions Pool
+    // Comprehensive 12 Target System Question Arrays 
     const questions = [
         { q: "Thump-thump! I am a muscle inside your chest that pumps blood all the way to your toes. Who am I?", name: "HEART" },
         { q: "I live inside your head and do all your thinking, dreaming, and remembering. Who am I?", name: "BRAIN" },
         { q: "Gurgle! When you swallow your yummy lunch, it drops down into me so I can break it down. Who am I?", name: "STOMACH" },
         { q: "We fill up with air like two bouncy balloons every single time you breathe in fresh oxygen. What are we?", name: "LUNGS" },
+        { q: "I filter your blood and turn waste into pee to keep your body clean inside. What am I?", name: "KIDNEYS" },
         { q: "Blink, blink! Look in the mirror—we help you see colors, books, shapes, and all your friends. What are we?", name: "EYES" },
         { q: "I am like a magic outer jacket that covers your whole body from head to toe to protect you. What am I?", name: "SKIN" },
         { q: "Sniff, sniff! I sit right in the middle of your face to help you smell flowers and warm cookies. What am I?", name: "NOSE" },
         { q: "We sit safely on the sides of your head so you can listen to music, stories, and teacher's voice. What are we?", name: "EARS" },
         { q: "We are super hard, strong, and white. We join together to make your skeleton frame so you can stand tall! What are we?", name: "BONES" },
-        { q: "We are stretchy like rubber bands. We cover your bones and pack power to let you run, pull, and jump! What are we?", name: "MUSCLES" }
+        { q: "We are stretchy like rubber bands. We cover your bones and pack power to let you run, pull, and jump! What are we?", name: "MUSCLES" },
+        { q: "Bend and snap! I am the magic spot where two bones meet, like your elbow, shoulder, or your knee. What am I?", name: "JOINT" }
     ];
 
-    // Auto Dismiss Splash Loading Screen after 5 seconds
+    // Delayed Splash Navigation
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
     }, 5000);
@@ -259,18 +257,17 @@
 
         let currentItem = questions[currentIdx];
         
-        // Dynamic animation reset
+        // Element Redraw Initialization Optimization 
         let cardFrame = document.getElementById('mainDeckCard');
         cardFrame.style.animation = 'none';
         cardFrame.offsetHeight; 
-        cardFrame.style.animation = 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        cardFrame.style.animation = 'popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
 
         document.getElementById('riddleDisplayText').innerText = currentItem.q;
 
-        // Generate Answer Cards Array & Shuffling Before Presentation
+        // Choice Generator Engine - Shuffles Options Fully Before Presentation
         currentChoices = [currentItem.name];
         
-        // Grab two random decoy wrong options from remaining items
         let fullNamesList = questions.map(item => item.name);
         let optionsPool = fullNamesList.filter(name => name !== currentItem.name);
         shuffle(optionsPool);
@@ -278,7 +275,7 @@
         currentChoices.push(optionsPool[0], optionsPool[1]);
         shuffle(currentChoices);
 
-        // Assign strings directly to cards with zero symbols/emojis
+        // Map strings straight to targets
         for (let i = 0; i < 3; i++) {
             document.getElementById(`card${i}`).innerText = currentChoices[i];
         }
