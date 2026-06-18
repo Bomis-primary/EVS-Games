@@ -29,32 +29,29 @@
         .big-bold-text { font-size: 22px; font-weight: 900; line-height: 1.5; margin-bottom: 20px; color: #4a5568; }
         
         /* HUD Top Dashboard Area Overlay */
-        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 20; pointer-events: none; display: none; align-items: center; }
+        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 4px; z-index: 20; pointer-events: none; display: none; align-items: center; }
         #targetPrompt { font-size: 24px; font-weight: 900; color: #2563eb; text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff; text-align: center; margin-top: 5px; }
-        #progressText { font-size: 20px; font-weight: 900; color: #db2777; background: rgba(255, 255, 255, 0.9); padding: 4px 16px; border-radius: 12px; border: 2px solid #fbcfe8; display: inline-block; margin-top: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        #progressText { font-size: 19px; font-weight: 900; color: #db2777; background: rgba(255, 255, 255, 0.94); padding: 6px 20px; border-radius: 14px; border: 2.5px solid #fbcfe8; display: inline-block; margin-top: 6px; box-shadow: 0 6px 10px rgba(0,0,0,0.06); }
         
-        .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 5px; }
+        .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 6px; pointer-events: none; }
         .ui-element { background: rgba(255, 255, 255, 0.95); color: #1e3a8a; padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: bold; border: 3px solid #bfdbfe; }
         
         /* Completion Performance Card */
-        #completionScreen { background: linear-gradient(to bottom, #fffex0 0%, #e0f2fe 100%); display: none; z-index: 80; color: #1e3a8a; }
+        #completionScreen { background: linear-gradient(to bottom, #fffef0 0%, #e0f2fe 100%); display: none; z-index: 80; color: #1e3a8a; }
     </style>
 </head>
 <body>
 
 <div id="gameContainer">
-    <!-- Screen 1: Brand Logo (Exactly 5 seconds constraint) -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
-    <!-- Screen 2: Game Title Splash Menu -->
     <div id="titleScreen" class="screen">
         <h1>THE GREAT<br>BALLOON BURST! 🎈</h1>
         <button class="btn" onclick="showInstructions()">Play ➔</button>
     </div>
 
-    <!-- Screen 3: Interactive Mission Instructions -->
     <div id="instructionScreen" class="screen">
         <div class="big-bold-text" style="color: #ff6b6b; font-size: 34px; margin-bottom: 20px;">Let's Play! ✨</div>
         <div class="big-bold-text" style="font-size: 20px; background: #f0fdf4; padding: 16px; border-radius: 20px; border: 2px dashed #4ade80;">Read the mission prompt at the top of the screen!</div>
@@ -63,7 +60,6 @@
         <button class="btn" style="background: #4ade80; box-shadow: 0 8px #22c55e; border-color: #22c55e;" onclick="startGame()">Start Game 🚀</button>
     </div>
 
-    <!-- HUD Dashboard Overlays -->
     <div id="uiOverlay">
         <div id="targetPrompt">LOADING MISSION...</div>
         <div id="progressText">Balloons Bursted: 0 / 0</div>
@@ -73,7 +69,6 @@
         </div>
     </div>
     
-    <!-- Screen 5: Final Evaluation Card -->
     <div id="completionScreen" class="screen">
         <h1 id="completionTitle" style="font-size: 42px; margin-bottom: 15px; font-weight: 900;">Awesome! 🎉</h1>
         <p style="font-size: 20px; margin-bottom: 25px; font-weight: bold; color: #4b5563;">You sorted everything beautifully!</p>
@@ -115,13 +110,13 @@
     // Feedback speech bubbles
     let speechBubble = { x: 0, y: 0, text: "", color: "#10b981", visible: false };
     
-    // Cute Pin Character with dynamic Action-state variables
+    // Cute Pin Character with dynamic Launcher-state mechanics
     let pinMascot = { 
-        homeX: 65, 
+        homeX: 0, 
         homeY: 0, 
-        x: 65, 
+        x: 0, 
         y: 0, 
-        targetX: 65, 
+        targetX: 0, 
         targetY: 0, 
         state: "idle", // idle, flying, returning
         rotation: 0,
@@ -193,7 +188,9 @@
         freezeTimerActive = false;
         speechBubble.visible = false;
         
-        pinMascot.homeY = canvas.height - 100;
+        // Pin is launched from bottom center 
+        pinMascot.homeX = canvas.width / 2;
+        pinMascot.homeY = canvas.height - 85;
         pinMascot.x = pinMascot.homeX;
         pinMascot.y = pinMascot.homeY;
         pinMascot.targetX = pinMascot.homeX;
@@ -214,39 +211,46 @@
         data.correctItems.forEach(item => pool.push({ data: item, isCorrect: true, isBlank: false }));
         data.wrongItems.forEach(item => pool.push({ data: item, isCorrect: false, isBlank: false }));
         
-        // Add exactly 3 blank distractor balloons with no words inside
+        // Inject 3 completely blank mystery balloons
         for(let i = 0; i < 3; i++) {
             pool.push({ data: { text: "", bubble: "Oops! Empty Balloon! 🎈" }, isCorrect: false, isBlank: true });
         }
         
-        // Mix everything together randomly
+        // Randomly scatter contents inside pool layout 
         pool.sort(() => Math.random() - 0.5);
         targetCountForLevel = data.correctItems.length;
 
-        // Clean 3x3 layout alignment matrix for 9 items
-        const cols = 3;
-        const rows = 3;
-        const paddingX = 40;
-        const availableWidth = canvas.width - (paddingX * 2);
-        const colWidth = availableWidth / (cols - 1);
+        // Arcade Honeycomb Staggered Hex-Matrix Placement 
+        const bRadius = 48; // Upgraded thickness
+        const centerX = canvas.width / 2;
+        const startY = 250; 
         
-        const startY = 250;
-        const spacingY = 125;
+        // Precise math offsets matching image_fc3086 layout structures
+        const rowHeight = bRadius * 1.55; 
+        const hSpacing = bRadius * 1.85;  
+
+        // Precalculated rows structure for 9 puzzle elements (Row 1: 3, Row 2: 3 staggered, Row 3: 3)
+        const matrixSchema = [
+            { r: 0, cCount: 3, xOffsets: [-1, 0, 1] },
+            { r: 1, cCount: 3, xOffsets: [-0.5, 0.5, 1.5] }, // Staggered layout shift
+            { r: 2, cCount: 3, xOffsets: [-1, 0, 1] }
+        ];
 
         let index = 0;
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                if(index >= pool.length || index >= 9) break;
-                
-                let bX = paddingX + (c * colWidth);
-                let bY = startY + (r * spacingY);
-                
-                const colors = ["#ff9aa2", "#ffb7b2", "#ffdac1", "#e2f0cb", "#b5ead7", "#c7ceea", "#ffc6ff", "#e8aeff", "#9bf6ff"];
-                
+        for (let i = 0; i < matrixSchema.length; i++) {
+            let config = matrixSchema[i];
+            for (let j = 0; j < config.cCount; j++) {
+                if (index >= pool.length) break;
+
+                let bX = centerX + (config.xOffsets[j] * hSpacing);
+                let bY = startY + (config.r * rowHeight);
+
+                const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#55efc4", "#fd79a8", "#a29bfe", "#fdcb6e", "#e17055", "#00cec9"];
+
                 activeBalloons.push({
                     x: bX,
                     y: bY,
-                    radius: 35, // Balanced dimension scaling
+                    radius: bRadius,
                     color: colors[index % colors.length],
                     item: pool[index].data,
                     isCorrect: pool[index].isCorrect,
@@ -289,10 +293,9 @@
 
             let dx = tapX - b.x;
             let dy = tapY - b.y;
-            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 15) { 
-                // Direct the pin mascot to fly out to the clicked balloon!
+            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 10) { 
                 pinMascot.targetX = b.x;
-                pinMascot.targetY = b.y;
+                pinMascot.targetY = b.y + 15; // Flight calibration targeting needle tip
                 pinMascot.state = "flying";
                 pinMascot.assignedBalloon = b;
                 freezeTimerActive = true; 
@@ -331,13 +334,12 @@
 
         updateHUD();
 
-        // 2-second feedback timer before the pin goes back
         setTimeout(() => {
             speechBubble.visible = false;
             pinMascot.targetX = pinMascot.homeX;
             pinMascot.targetY = pinMascot.homeY;
             pinMascot.state = "returning";
-        }, 2000);
+        }, 1800);
     }
 
     function evaluateProgressionNextStep() {
@@ -389,18 +391,17 @@
 
         pinMascot.frame += 0.05;
 
-        // Flying / Popping State Controller
         if (pinMascot.state === "flying") {
             let dx = pinMascot.targetX - pinMascot.x;
             let dy = pinMascot.targetY - pinMascot.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
             
-            // Turn toward the target balloon
+            // Spin vector matching target heading angle
             pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
 
-            if (dist > 10) {
-                pinMascot.x += dx * 0.18;
-                pinMascot.y += dy * 0.18;
+            if (dist > 12) {
+                pinMascot.x += dx * 0.22;
+                pinMascot.y += dy * 0.22;
             } else {
                 pinMascot.x = pinMascot.targetX;
                 pinMascot.y = pinMascot.targetY;
@@ -414,9 +415,9 @@
             
             pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
 
-            if (dist > 10) {
-                pinMascot.x += dx * 0.15;
-                pinMascot.y += dy * 0.15;
+            if (dist > 12) {
+                pinMascot.x += dx * 0.18;
+                pinMascot.y += dy * 0.18;
             } else {
                 pinMascot.x = pinMascot.homeX;
                 pinMascot.y = pinMascot.homeY;
@@ -426,10 +427,10 @@
             }
         } else if (pinMascot.state === "idle") {
             pinMascot.rotation = 0;
+            pinMascot.x += (pinMascot.homeX - pinMascot.x) * 0.1;
             pinMascot.y += (pinMascot.homeY - pinMascot.y) * 0.1;
         }
 
-        // Handle Balloon Wiggle Animations
         activeBalloons.forEach(b => {
             if (b.shakeTimer > 0) {
                 b.shakeTimer--;
@@ -445,71 +446,95 @@
         ctx.translate(mx, my);
         ctx.rotate(rotation);
         
-        // Float slightly if sitting idle at home base
         let hoverY = (pinMascot.state === "idle") ? Math.sin(pinMascot.frame) * 4 : 0;
         ctx.translate(0, hoverY);
         
-        // Super Cute Blush Head Ring
+        // Red Spherical Blush Ball
         ctx.fillStyle = "#ff6b6b";
         ctx.beginPath();
-        ctx.arc(0, -35, 20, 0, Math.PI * 2);
+        ctx.arc(0, -35, 22, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = "#1e3a8a";
         ctx.lineWidth = 3.5;
         ctx.stroke();
 
-        // 3D Glossy Light Reflection Spot
-        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        // Shiny reflection flare
+        ctx.fillStyle = "rgba(255,255,255,0.6)";
         ctx.beginPath();
-        ctx.arc(-6, -41, 5, 0, Math.PI * 2);
+        ctx.arc(-7, -42, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Pin Point Shaft Needle
+        // Pointy steel shaft needle
         ctx.strokeStyle = "#cbd5e1";
         ctx.lineWidth = 6;
         ctx.lineCap = "round";
         ctx.beginPath();
         ctx.moveTo(0, -15);
-        ctx.lineTo(0, 20);
+        ctx.lineTo(0, 22);
         ctx.stroke();
 
         ctx.strokeStyle = "#1e3a8a";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(2, -15);
-        ctx.lineTo(2, 20);
+        ctx.lineTo(2, 22);
         ctx.stroke();
 
-        // Extra Big Cute Googly Eyes
+        // Big friendly anime eyes
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(-6, -36, 6, 0, Math.PI * 2);
-        ctx.arc(6, -36, 6, 0, Math.PI * 2);
+        ctx.arc(-6, -35, 6.5, 0, Math.PI * 2);
+        ctx.arc(6, -35, 6.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = "#1e3a8a";
         ctx.beginPath();
-        ctx.arc(-5.5, -36, 2.5, 0, Math.PI * 2);
-        ctx.arc(5.5, -36, 2.5, 0, Math.PI * 2);
+        ctx.arc(-5.5, -35, 2.5, 0, Math.PI * 2);
+        ctx.arc(5.5, -35, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Rosy Pink Cheeks
-        ctx.fillStyle = "rgba(244,63,94,0.4)";
+        // Chubby pink blush marks
+        ctx.fillStyle = "rgba(244,63,94,0.45)";
         ctx.beginPath();
-        ctx.arc(-11, -30, 3, 0, Math.PI * 2);
-        ctx.arc(11, -30, 3, 0, Math.PI * 2);
+        ctx.arc(-12, -28, 3.5, 0, Math.PI * 2);
+        ctx.arc(12, -28, 3.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Happy Smile Line
+        // Smile line
         ctx.strokeStyle = "#1e3a8a";
         ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.arc(0, -30, 4, 0, Math.PI);
+        ctx.arc(0, -29, 4, 0, Math.PI);
         ctx.stroke();
         
         ctx.restore();
+    }
+
+    // Auto line wrapper utility to eliminate text overflows
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            let word = words[i];
+            let width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+
+        // Center rendering computation base
+        let startY = y - ((lines.length - 1) * lineHeight) / 2;
+        for (let j = 0; j < lines.length; j++) {
+            ctx.fillText(lines[j], x, startY + (j * lineHeight));
+        }
     }
 
     function drawFeedbackBubble(bx, by, text, color) {
@@ -521,7 +546,7 @@
         let bW = 200;
         let bH = 46;
         let tX = bx - bW / 2;
-        let tY = by - 85;
+        let tY = by - 95;
 
         if (tX < 12) tX = 12;
         if (tX + bW > canvas.width) tX = canvas.width - bW - 12;
@@ -553,72 +578,81 @@
 
         if (!gameActive) return;
 
-        // Soft sky backdrop gradient
+        // Custom linear cartoon background paint layer
         let parkBg = ctx.createLinearGradient(0, 0, 0, canvas.height);
         parkBg.addColorStop(0, "#e0f2fe");
-        parkBg.addColorStop(0.6, "#f0fdf4");
+        parkBg.addColorStop(0.55, "#f0fdf4");
         parkBg.addColorStop(1, "#baffc9");
         ctx.fillStyle = parkBg;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Natural soft green field vectors
+        // Clean natural park grass hill layers
         ctx.fillStyle = "#22c55e";
         ctx.beginPath();
-        ctx.arc(120, canvas.height + 150, 260, 0, Math.PI * 2);
-        ctx.arc(canvas.width - 80, canvas.height + 180, 290, 0, Math.PI * 2);
+        ctx.arc(100, canvas.height + 180, 280, 0, Math.PI * 2);
+        ctx.arc(canvas.width - 60, canvas.height + 210, 310, 0, Math.PI * 2);
         ctx.fill();
 
-        // Draw 9-Grid Balloons
+        // Draw Interlocking Honeycomb Balloons Cluster
         activeBalloons.forEach(b => {
             if (b.isPopped) return;
 
             ctx.save();
             ctx.translate(b.x + b.shakeOffset, b.y);
 
-            // Balloon string hanging down
-            ctx.strokeStyle = "rgba(100, 116, 139, 0.4)";
+            // Dangling line paths
+            ctx.strokeStyle = "rgba(100, 116, 139, 0.35)";
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(0, b.radius);
-            ctx.lineTo(0, b.radius + 20);
+            ctx.lineTo(0, b.radius + 15);
             ctx.stroke();
 
-            // Render balloon shape
+            // Render balloon base shape
             ctx.fillStyle = b.color;
             ctx.beginPath();
             ctx.ellipse(0, 0, b.radius * 0.88, b.radius, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.strokeStyle = "#1e3a8a";
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 3.5;
             ctx.stroke();
 
-            // Text Banner inside the balloon (only if it's NOT a blank distractor)
+            // Custom balloon highlight sheen vector
+            ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+            ctx.beginPath();
+            ctx.ellipse(-b.radius * 0.35, -b.radius * 0.45, b.radius * 0.15, b.radius * 0.25, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Internal Content Text Banner Tag
             if (!b.isBlank) {
-                // Auto-sizing safe badge boundary box to prevent any word spillages
-                let maxLabelWidth = b.radius * 1.7;
-                ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+                let badgeW = b.radius * 1.7; 
+                let badgeH = 30; // Height padding optimization
+                ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
                 ctx.beginPath();
-                ctx.roundRect(-maxLabelWidth / 2, -11, maxLabelWidth, 22, 6);
+                ctx.roundRect(-badgeW / 2, -badgeH / 2, badgeW, badgeH, 8);
                 ctx.fill();
                 ctx.stroke();
 
                 ctx.fillStyle = "#1e3a8a";
-                // Smaller, tighter font scaling to wrap safely within the boundary
-                ctx.font = "bold 11px 'Comic Sans MS'";
+                ctx.font = "bold 10px 'Comic Sans MS'"; 
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText(b.item.text, 0, 0);
+                
+                // Execute advanced safe line wrapping algorithm to eliminate layout breaking
+                drawWrappedText(ctx, b.item.text, 0, 0, badgeW - 6, 11);
             } else {
-                // Add tiny cute decorative sparkles on blank mystery balloons
-                ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-                ctx.font = "bold 16px 'Comic Sans MS'";
-                ctx.fillText("✨", -8, -10);
+                // Sparkles design over mystery elements
+                ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+                ctx.font = "bold 18px 'Comic Sans MS'";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("✨", 0, -2);
             }
 
             ctx.restore();
         });
 
-        // Draw active flying pin mascot
+        // Draw active tracking launcher pin mascot
         drawMascotPin(ctx, pinMascot.x, pinMascot.y, pinMascot.rotation);
 
         if (speechBubble.visible) {
