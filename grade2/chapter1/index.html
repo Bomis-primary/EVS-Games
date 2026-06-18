@@ -1,57 +1,53 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Magic Body Scanner - EVS Grade 2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Anatomy Pac-Man Arcade - Grade 2 EVS</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #f0fdf4; font-family: 'Comic Sans MS', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; touch-action: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000000; font-family: 'Courier New', Courier, monospace; }
         
         #gameContainer { 
             position: relative; 
-            width: 100%; 
-            height: 100%; 
-            max-width: 600px; 
-            max-height: 1000px; 
-            margin: 0 auto; 
-            background: #f0fdf4; 
+            width: 100vw; 
+            height: 100vh; 
+            background: #000000; 
             overflow: hidden; 
-            box-shadow: 0 0 25px rgba(0,0,0,0.15); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        canvas { display: block; width: 100%; height: 100%; cursor: none; }
+        canvas { display: block; max-width: 100%; max-height: 100%; object-fit: contain; background: #000000; }
         
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 30px; text-align: center; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; text-align: center; box-sizing: border-box; }
         
-        /* Screen 1: Brand Logo - Pure White Background */
+        /* Screen 1: Brand Logo - Pure White */
         #logoScreen { background-color: #ffffff; z-index: 100; }
         #logoScreen img { max-width: 75%; max-height: 45%; object-fit: contain; }
         
         /* Screen 2: Game Title Splash Screen */
-        #titleScreen { background: linear-gradient(to bottom, #bae1ff 0%, #e8ffdb 100%); z-index: 90; display: none; }
-        #titleScreen h1 { color: #16a34a; font-size: 44px; margin-bottom: 35px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 8px 15px rgba(22,163,74,0.25); line-height: 1.2; font-weight: 900; }
+        #titleScreen { background: #000000; z-index: 90; display: none; }
+        #titleScreen h1 { color: #ffb8ae; font-size: clamp(24px, 6vw, 38px); margin-bottom: 30px; letter-spacing: 2px; line-height: 1.3; }
+        .yellow-text { color: #ffff00; }
         
         /* Screen 3: Interactive Mission Instructions */
-        #instructionScreen { background: #fffef0; z-index: 85; display: none; border: 8px solid #baffc9; border-radius: 32px; color: #2c3e50; }
+        #instructionScreen { background: #000000; z-index: 85; display: none; border: 4px double #3333ff; color: #ffffff; }
         
-        .btn { background: #22c55e; color: #fff; border: 3.5px solid #15803d; padding: 16px 44px; font-size: 24px; font-weight: bold; border-radius: 40px; cursor: pointer; box-shadow: 0 8px #15803d; text-transform: uppercase; transition: all 0.1s ease; margin-top: 25px; }
-        .btn:active { box-shadow: 0 2px #15803d; transform: translateY(6px); }
+        .btn { background: #000000; color: #ffff00; border: 3px solid #3333ff; padding: 12px 36px; font-size: clamp(16px, 4vw, 22px); font-weight: bold; font-family: 'Courier New', monospace; cursor: pointer; text-transform: uppercase; margin-top: 20px; letter-spacing: 1px; }
+        .btn:hover { background: #111133; }
         
-        .instruction-box { font-size: 18px; font-weight: bold; line-height: 1.6; color: #1e293b; background: rgba(255,255,255,0.95); padding: 22px; border-radius: 24px; border: 3px dashed #22c55e; max-width: 95%; text-align: left; }
+        .instruction-box { font-size: clamp(13px, 3.5vw, 16px); line-height: 1.5; color: #ffffff; padding: 15px; border: 2px dashed #ffff00; max-width: 500px; text-align: left; }
         .instruction-box p { margin-bottom: 10px; }
         
-        /* HUD Top Area Controls - Screen 4 Gameplay Overlays */
-        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 20; pointer-events: none; display: none; align-items: center; }
-        #promptBox { width: 100%; background: #ffffff; border: 3.5px solid #22c55e; border-radius: 20px; padding: 14px; text-align: center; box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
-        #targetPrompt { font-size: 19px; font-weight: 900; color: #1e293b; line-height: 1.4; }
-        #hintPrompt { font-size: 15px; font-weight: bold; color: #ea580c; margin-top: 6px; display: none; }
+        /* HUD Layout Dashboard Panels Overlay (Managed by Canvas Engine coordinates internally) */
+        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; display: none; }
         
-        .hud-row { display: flex; justify-content: space-between; width: 100%; pointer-events: none; padding: 0 4px; }
-        .ui-element { background: rgba(255, 255, 255, 0.96); color: #16a34a; padding: 6px 14px; border-radius: 16px; font-size: 15px; font-weight: 900; border: 2.5px solid #bbf7d0; box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
-        
-        /* Final Scoreboard Completion Screen Evaluation Card */
-        #completionScreen { background: linear-gradient(to bottom, #fff 0%, #dcfce7 100%); display: none; z-index: 80; color: #1e293b; }
+        /* Interactive Invisible Mobile Touchpad Control Layer */
+        #touchOverlayZone { position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; z-index: 6; display: none; }
+
+        /* Screen 5: Final Scoreboard Completion Screen */
+        #completionScreen { background: #000000; display: none; z-index: 80; color: #ffffff; border: 4px double #3333ff; }
     </style>
 </head>
 <body>
@@ -62,120 +58,120 @@
     </div>
 
     <div id="titleScreen" class="screen">
-        <h1>MAGIC BODY<br>SCANNER! 🧬</h1>
-        <button class="btn" style="background: #3b82f6; border-color: #1d4ed8; box-shadow: 0 8px #1d4ed8;" onclick="showInstructions()">Next ➔</button>
+        <h1>ANATOMY <span class="yellow-text">PAC-MAN</span><br>ARCADE</h1>
+        <button class="btn" onclick="showInstructions()">1 PLAYER START</button>
     </div>
 
     <div id="instructionScreen" class="screen">
-        <div style="color: #16a34a; font-size: 34px; margin-bottom: 15px; font-weight: 900;">How to Play! ✨</div>
+        <div class="yellow-text" style="font-size: clamp(20px, 5vw, 28px); margin-bottom: 15px; font-weight: bold;">MISSION BRIEFING</div>
         <div class="instruction-box">
-            <p style="color: #2563eb; font-size: 20px; text-align: center; margin-bottom: 14px;">🎒 Topic: Our Internal & External Organs</p>
-            <p>🤔 1. Read the clever body riddle at the top of the screen!</p>
-            <p>🔎 2. Drag the <b>Magic Scanner</b> lens over the body to look inside.</p>
-            <p style="color: #ea580c;">🎯 3. Find the matching organ and release your hold to scan it!</p>
+            <p>1. Read the body riddle in the top box.</p>
+            <p class="yellow-text">2. Desktop: Use ARROW KEYS to move.<br>Mobile: SWIPE on the screen to move.</p>
+            <p>3. Chomp through yellow dots to earn score points.</p>
+            <p style="color: #00ffff;">4. Eat the flashing TARGET FRUIT matching the question category to solve it!</p>
+            <p style="color: #ff0000;">⚠️ Avoid the 3 chasing ghosts! If they catch you, you lose a life.</p>
         </div>
-        <button class="btn" onclick="startGame()">Start Game 🚀</button>
+        <button class="btn" onclick="startGame()">LAUNCH MAZE 🚀</button>
     </div>
 
-    <div id="uiOverlay">
-        <div id="promptBox">
-            <div id="targetPrompt">Loading Question...</div>
-            <div id="hintPrompt">💡 Hint: Try looking around the chest area!</div>
-        </div>
-        <div class="hud-row">
-            <div id="scoreLabel" class="ui-element">Score: 0 / 15</div>
-            <div id="attemptsLabel" class="ui-element" style="color: #dc2626; border-color: #fecaca; background: #fef2f2;">Attempts Left: 2</div>
-        </div>
-    </div>
+    <div id="touchOverlayZone"></div>
     
     <div id="completionScreen" class="screen">
-        <h1 style="font-size: 38px; margin-bottom: 10px; font-weight: 900; color: #16a34a;">🎈 BODY EXPERT! 👑</h1>
-        <p style="font-size: 19px; margin-bottom: 25px; font-weight: bold; color: #475569;">You know your body systems inside and out!</p>
-        <div class="ui-element" id="finalScore" style="font-size: 26px; padding: 12px 30px; border-color: #4ade80; background: white; margin-bottom: 30px;">Final Score: 0/15</div>
-        <button class="btn" style="background: #eab308; box-shadow: 0 8px #ca8a04; border-color: #ca8a04;" onclick="restartGame()">Play Again 🔄</button>
+        <h1 id="endTitle" style="font-size: clamp(26px, 6vw, 34px); margin-bottom: 15px; color: #ffff00;">GAME OVER</h1>
+        <p style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 25px; color: #ffffff;" id="endMessage">The ghosts caught you!</p>
+        <div id="finalScore" style="font-size: clamp(18px, 5vw, 24px); color: #00ffff; margin-bottom: 35px;">FINAL SCORE: 0</div>
+        <button class="btn" onclick="restartGame()">TRY AGAIN 🔄</button>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas" width="600" height="950"></canvas>
 </div>
 
 <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // Core Audio Setup (Matching your absolute asset paths)
+    // Game Audio Assets Map
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
     const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
     sndBgm.loop = true;
 
-    // Cross-Device Layout Configuration Matrix
+    // Fixed Virtual Screen Resolution Matrices
     const BASE_WIDTH = 600;
-    const BASE_HEIGHT = 900;
-    let scaleFactor = 1;
+    const BASE_HEIGHT = 950;
 
-    function resize() {
-        const container = canvas.parentElement;
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // Game Dynamic Variables
+    // State Variables
     let score = 0;
     let currentQuestionIndex = 0;
-    let attemptsLeft = 2;
+    let lives = 3;
     let gameActive = false;
     let feedbackTimer = 0;
     let feedbackText = "";
-    let feedbackColor = "#16a34a";
+    let feedbackColor = "#ffff00";
+    let dotsLeft = 0;
 
-    let scanner = { x: BASE_WIDTH / 2, y: BASE_HEIGHT / 2 - 40, radius: 85, isDragging: false };
+    const TILE_SIZE = 36;
+    const offsetX = (BASE_WIDTH - (15 * TILE_SIZE)) / 2;
+    const offsetY = 180; 
 
-    const bodyX = 300;
-    const bodyY = 460;
-
-    // Organ Reference Hitboxes Map Matrices
-    const organs = {
-        brain:      { x: 300, y: 205, radius: 30, name: "Brain 🧠", hint: "Look inside the upper head region!" },
-        heart:      { x: 285, y: 310, radius: 20, name: "Heart ❤️", hint: "Look on the left side inside the upper chest!" },
-        lungs:      { x: 315, y: 305, radius: 34, name: "Lungs 🫁", hint: "Scan the respiratory chest cage area!" },
-        stomach:    { x: 285, y: 385, radius: 24, name: "Stomach 胃", hint: "Look on the left side right beneath the rib cage area!" },
-        liver:      { x: 320, y: 380, radius: 24, name: "Liver 🪵", hint: "Look directly beside the stomach on the right side!" },
-        kidneys:    { x: 300, y: 440, radius: 22, name: "Kidneys 🥔", hint: "Scan the middle abdomen background frame!" },
-        intestines: { x: 300, y: 495, radius: 28, name: "Intestines 🌀", hint: "Look near the lower belly region!" },
-        bones:      { x: 245, y: 360, radius: 22, name: "Bones 🦴", hint: "Scan the skeletal support frame in the arms or spine!" },
-        muscles:    { x: 355, y: 360, radius: 25, name: "Muscles 💪", hint: "Scan the outer shoulder or strong arm tracking layer!" },
-        joints:     { x: 240, y: 410, radius: 18, name: "Joints 🟢", hint: "Look closely at the bending junction of the elbow!" },
-        eyes:       { x: 288, y: 225, radius: 15, name: "Eyes 👀", hint: "Scan the facial area used for seeing things!" },
-        ears:       { x: 342, y: 235, radius: 16, name: "Ears 👂", hint: "Check out the side edges of the head region!" },
-        skin:       { x: 300, y: 640, radius: 25, name: "Skin 🤚", hint: "Scan down around the uncovered ankle/foot surface!" },
-        nose:       { x: 305, y: 232, radius: 12, name: "Nose 👃", hint: "Look right in the center of the face!" },
-        tongue:     { x: 300, y: 248, radius: 12, name: "Tongue 👅", hint: "Look right inside the open smiling mouth!" }
-    };
-
-    // Grade 2 Curriculum Riddle Pipeline
-    const curriculumTasks = [
-        { q: "Thump-thump! I am working even when you sleep, pumping blood down to your toes. Find me! ❤️", target: "heart" },
-        { q: "We take in fresh air when you run or practice deep breathing exercises! Scan us! 🫁", target: "lungs" },
-        { q: "I help you solve math puzzles, remember names, and tell your body how to move. Find me! 🧠", target: "brain" },
-        { q: "The yummy food you eat lands here to be broken down into energy. Scan this food pouch! 胃", target: "stomach" },
-        { q: "I store energy nutrients and keep your blood clean like a tiny body superhero. Find my shape! 🪵", target: "liver" },
-        { q: "We look like two tiny dark beans and wash out all waste liquid fluids from your body. Find us! 🥔", target: "kidneys" },
-        { q: "We are long, winding tubes that absorb the good nutrients from your digested meals. Find us! 🌀", target: "intestines" },
-        { q: "Without us, your body would be floppy like jelly! We form the hard skeleton frame. Scan us! 🦴", target: "bones" },
-        { q: "We cover your bones and grow strong when you run, swim, or lift weights! Scan us! 💪", target: "muscles" },
-        { q: "I am the magic junction like your elbow or knee that lets you bend and fold your limbs. Find me! 🟢", target: "joints" },
-        { q: "We help you read text boxes, spot colorful floating balloons, and look at the world. Scan us! 👀", target: "eyes" },
-        { q: "We let you hear your teacher's voice and enjoy the happy cartoon background music. Scan us! 👂", target: "ears" },
-        { q: "I cover your whole body from head to toe to feel if an ice cube is hot or cold! Scan me! 🤚", target: "skin" },
-        { q: "I am hidden inside your mouth to let you taste if a juicy lemon is sour or sweet! Scan me! 👅", target: "tongue" },
-        { q: "I can catch the sweet scent of pretty flowers or tell if food smells bad. Scan me! 👃", target: "nose" }
+    // Grid Symmetrical Target Map Scheme
+    let mapGrid = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,2,2,2,2,2,1,2,2,2,2,2,2,2,1],
+        [1,2,1,1,1,2,1,2,1,1,1,1,1,2,1],
+        [1,2,1,2,2,2,2,2,2,2,1,2,2,2,1],
+        [1,2,1,2,1,1,1,1,1,2,1,2,1,2,1],
+        [1,2,2,2,2,2,1,2,2,2,2,2,1,2,1],
+        [1,1,1,1,1,2,1,2,1,1,1,1,1,2,1],
+        [1,0,0,0,1,2,2,2,1,0,0,0,0,2,1],
+        [1,1,1,2,1,1,1,1,1,2,1,1,1,2,1],
+        [1,2,2,2,2,2,1,2,2,2,2,2,1,2,1],
+        [1,2,1,1,1,2,1,2,1,1,1,2,1,2,1],
+        [1,2,2,2,1,2,2,2,1,2,2,2,2,2,1],
+        [1,1,1,2,1,1,1,2,1,2,1,1,1,1,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
-    // Screen 1: Displays Brand Logo for exactly 5 seconds, then advances to Screen 2
+    let currentMap = [];
+
+    // Pacman Parameters
+    let player = { x: 1, y: 1, px: 0, py: 0, dx: 0, dy: 0, nextDx: 0, nextDy: 0, speed: 2, mouthAngle: 0, mouthDir: 0.08 };
+
+    // 3 Kid-Friendly Ghost Nodes
+    let ghosts = [
+        { name: "Blinky", color: "#ff0000", x: 7, y: 7, px: 0, py: 0, dx: 1, dy: 0, speed: 1.5 },
+        { name: "Pinky", color: "#ffb8ff", x: 6, y: 7, px: 0, py: 0, dx: -1, dy: 0, speed: 1.5 },
+        { name: "Inky", color: "#00ffff", x: 8, y: 7, px: 0, py: 0, dx: 0, dy: -1, speed: 1.5 }
+    ];
+
+    // Category Target Fruits Mapping Data
+    let fruits = [
+        { type: "internal", x: 1, y: 13, color: "#ff3333", symbol: "🍒", label: "INTERNAL" },
+        { type: "external", x: 13, y: 1, color: "#ffb800", symbol: "🍊", label: "EXTERNAL" },
+        { type: "frame", x: 13, y: 13, color: "#33ff33", symbol: "🍏", label: "BODY FRAME" }
+    ];
+
+    // Master Curriculum Random Question Pool
+    const questionPool = [
+        { q: "I am inside your head. I help you think, learn, and remember things! Chomp the INTERNAL fruit!", target: "internal" },
+        { q: "Thump-thump! I am in your chest pumping blood to your whole body! Chomp the INTERNAL fruit!", target: "internal" },
+        { q: "We fill up with air like balloons when you breathe in fresh oxygen! Chomp the INTERNAL fruit!", target: "internal" },
+        { q: "The yummy food you eat goes down into this pouch to be broken down! Chomp the INTERNAL fruit!", target: "internal" },
+        { q: "We look like two tiny beans that clean your body's liquid waste! Chomp the INTERNAL fruit!", target: "internal" },
+        { q: "We are on your face and help you see colors, books, and friends! Chomp the EXTERNAL fruit!", target: "external" },
+        { q: "We sit on the sides of your head to let you hear music and voices! Chomp the EXTERNAL fruit!", target: "external" },
+        { q: "I am right in the middle of your face. I help you smell flowers! Chomp the EXTERNAL fruit!", target: "external" },
+        { q: "I cover your entire body from head to toe to protect you! Chomp the EXTERNAL fruit!", target: "external" },
+        { q: "We are hard and make up your skeleton frame so you can stand tall! Chomp the BODY FRAME fruit!", target: "frame" },
+        { q: "We cover your bones and help your arms and legs pull and run! Chomp the BODY FRAME fruit!", target: "frame" },
+        { q: "I am the place where two bones meet, like your elbow or knee! Chomp the BODY FRAME fruit!", target: "frame" }
+    ];
+
+    let currentSessionQuestions = [];
+
+    // Screen 1 Layout Auto Timer
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
@@ -188,16 +184,26 @@
 
     function startGame() {
         document.getElementById('instructionScreen').style.display = 'none';
-        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        // Auto display responsive cross touch controller layout configurations
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            document.getElementById('touchOverlayZone').style.display = 'block';
+        }
         
         score = 0;
+        lives = 3;
         currentQuestionIndex = 0;
-        shuffleArray(curriculumTasks);
+        
+        currentSessionQuestions = [...questionPool];
+        shuffleArray(currentSessionQuestions);
+        
+        initMapState();
         gameActive = true;
         
         sndBgm.currentTime = 0;
         sndBgm.play().catch(()=>{});
 
+        resetPositions();
         loadQuestion();
     }
 
@@ -208,116 +214,227 @@
         }
     }
 
-    function loadQuestion() {
-        attemptsLeft = 2;
-        feedbackTimer = 0;
-        document.getElementById('hintPrompt').style.display = "none";
-        updateHUD();
-        document.getElementById('targetPrompt').innerText = curriculumTasks[currentQuestionIndex].q;
-    }
-
-    function updateHUD() {
-        document.getElementById('scoreLabel').innerText = `Score: ${score} / 15`;
-        document.getElementById('attemptsLabel').innerText = `Attempts Left: ${attemptsLeft}`;
-    }
-
-    function getCanvasCoords(clientX, clientY) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: (clientX - rect.left) / scaleFactor,
-            y: (clientY - rect.top) / scaleFactor
-        };
-    }
-
-    function handleStart(clientX, clientY) {
-        if (!gameActive || feedbackTimer > 0) return;
-        const coords = getCanvasCoords(clientX, clientY);
-        let dist = Math.sqrt((coords.x - scanner.x) ** 2 + (coords.y - scanner.y) ** 2);
-        
-        if (dist < scanner.radius + 25) {
-            scanner.isDragging = true;
-            scanner.x = coords.x;
-            scanner.y = coords.y;
+    function initMapState() {
+        dotsLeft = 0;
+        currentMap = JSON.parse(JSON.stringify(mapGrid));
+        for (let r = 0; r < currentMap.length; r++) {
+            for (let c = 0; c < currentMap[r].length; c++) {
+                if (currentMap[r][c] === 2) dotsLeft++;
+            }
         }
     }
 
-    function handleMove(clientX, clientY) {
-        if (!scanner.isDragging) return;
-        const coords = getCanvasCoords(clientX, clientY);
-        scanner.x = Math.max(scanner.radius, Math.min(BASE_WIDTH - scanner.radius, coords.x));
-        scanner.y = Math.max(scanner.radius + 80, Math.min(BASE_HEIGHT - scanner.radius - 40, coords.y));
+    function loadQuestion() {
+        feedbackTimer = 0;
     }
 
-    function handleEnd() {
-        if (!scanner.isDragging) return;
-        scanner.isDragging = false;
-        evaluateScanSelection();
+    function resetPositions() {
+        player.x = 1; player.y = 1;
+        player.px = offsetX + player.x * TILE_SIZE + TILE_SIZE / 2;
+        player.py = offsetY + player.y * TILE_SIZE + TILE_SIZE / 2;
+        player.dx = 0; player.dy = 0;
+        player.nextDx = 0; player.nextDy = 0;
+
+        ghosts.forEach((gh, idx) => {
+            gh.x = 7 + (idx - 1);
+            gh.y = 7;
+            gh.px = offsetX + gh.x * TILE_SIZE + TILE_SIZE / 2;
+            gh.py = offsetY + gh.y * TILE_SIZE + TILE_SIZE / 2;
+            gh.dx = idx === 0 ? 1 : -1;
+            gh.dy = 0;
+        });
     }
 
-    window.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
-    window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
-    window.addEventListener('mouseup', handleEnd);
+    // Desktop Hardware Keyboard Key Handlers
+    window.addEventListener('keydown', (e) => {
+        if (!gameActive || feedbackTimer > 0) return;
+        if (e.key === "ArrowUp") changeDirection(0, -1);
+        if (e.key === "ArrowDown") changeDirection(0, 1);
+        if (e.key === "ArrowLeft") changeDirection(-1, 0);
+        if (e.key === "ArrowRight") changeDirection(1, 0);
+    });
 
-    window.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 0) handleStart(e.touches[0].clientX, e.touches[0].clientY);
+    // Mobile Dynamic Smart Touch Gesture Engine Matrix
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const touchZone = document.getElementById('touchOverlayZone');
+
+    touchZone.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
     }, { passive: true });
-    window.addEventListener('touchmove', (e) => {
-        if(e.touches.length > 0) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+
+    touchZone.addEventListener('touchmove', (e) => {
+        if (!gameActive || feedbackTimer > 0) return;
+        
+        let diffX = e.touches[0].clientX - touchStartX;
+        let diffY = e.touches[0].clientY - touchStartY;
+        
+        // Threshold minimum motion gap step check rule
+        if (Math.max(Math.abs(diffX), Math.abs(diffY)) > 25) {
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                changeDirection(diffX > 0 ? 1 : -1, 0);
+            } else {
+                changeDirection(0, diffY > 0 ? 1 : -1);
+            }
+            // Reset reference anchors
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
     }, { passive: true });
-    window.addEventListener('touchend', handleEnd);
 
-    function evaluateScanSelection() {
-        let currentTargetKey = curriculumTasks[currentQuestionIndex].target;
-        let targetOrgan = organs[currentTargetKey];
+    function changeDirection(nx, ny) {
+        player.nextDx = nx;
+        player.nextDy = ny;
+    }
 
-        let scanDistance = Math.sqrt((scanner.x - targetOrgan.x) ** 2 + (scanner.y - targetOrgan.y) ** 2);
+    function updateGameLogic() {
+        if (feedbackTimer > 0) return;
 
-        if (scanDistance < targetOrgan.radius + 30) {
-            score++;
-            feedbackText = `✨ CORRECT! Found: ${targetOrgan.name} ✨`;
-            feedbackColor = "#16a34a";
-            feedbackTimer = 90; 
+        player.mouthAngle += player.mouthDir;
+        if (player.mouthAngle > 0.4 || player.mouthAngle < 0) player.mouthDir *= -1;
+
+        let currTargetX = offsetX + player.x * TILE_SIZE + TILE_SIZE / 2;
+        let currTargetY = offsetY + player.y * TILE_SIZE + TILE_SIZE / 2;
+
+        if (Math.abs(player.px - currTargetX) < player.speed && Math.abs(player.py - currTargetY) < player.speed) {
+            player.px = currTargetX;
+            player.py = currTargetY;
+
+            if (currentMap[player.y][player.x] === 2) {
+                currentMap[player.y][player.x] = 0;
+                score += 10;
+                dotsLeft--;
+                if (dotsLeft <= 0) initMapState();
+            }
+
+            fruits.forEach(fr => {
+                if (player.x === fr.x && player.y === fr.y) {
+                    evaluateFruitChomp(fr.type);
+                }
+            });
+
+            if (currentMap[player.y + player.nextDy]?.[player.x + player.nextDx] !== 1) {
+                player.dx = player.nextDx;
+                player.dy = player.nextDy;
+            } else if (currentMap[player.y + player.dy]?.[player.x + player.dx] === 1) {
+                player.dx = 0;
+                player.dy = 0;
+            }
+            
+            player.x += player.dx;
+            player.y += player.dy;
+        }
+
+        player.px += player.dx * player.speed;
+        player.py += player.dy * player.speed;
+
+        // Ghost Tracker Logic
+        ghosts.forEach(gh => {
+            let gTargetX = offsetX + gh.x * TILE_SIZE + TILE_SIZE / 2;
+            let gTargetY = offsetY + gh.y * TILE_SIZE + TILE_SIZE / 2;
+
+            if (Math.abs(gh.px - gTargetX) < gh.speed && Math.abs(gh.py - gTargetY) < gh.speed) {
+                gh.px = gTargetX;
+                gh.py = gTargetY;
+
+                let validMoves = [];
+                let dirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}];
+                
+                dirs.forEach(d => {
+                    if (d.x === -gh.dx && d.y === -gh.dy) return;
+                    if (currentMap[gh.y + d.y]?.[gh.x + d.x] !== 1) {
+                        validMoves.push(d);
+                    }
+                });
+
+                if (validMoves.length === 0) {
+                    gh.dx = -gh.dx; gh.dy = -gh.dy;
+                } else {
+                    let chosen = validMoves[Math.floor(Math.random() * validMoves.length)];
+                    gh.dx = chosen.x;
+                    gh.dy = chosen.y;
+                }
+
+                gh.x += gh.dx;
+                gh.y += gh.dy;
+            }
+            gh.px += gh.dx * gh.speed;
+            gh.py += gh.dy * gh.speed;
+
+            let distance = Math.sqrt((player.px - gh.px) ** 2 + (player.py - gh.py) ** 2);
+            if (distance < TILE_SIZE - 8) {
+                handleGhostCatch();
+            }
+        });
+    }
+
+    function evaluateFruitChomp(fruitType) {
+        let correctTarget = currentSessionQuestions[currentQuestionIndex].target;
+
+        if (fruitType === correctTarget) {
+            score += 100;
+            feedbackText = "✨ CORRECT! FANTASTIC CHOMP! ✨";
+            feedbackColor = "#00ff00";
+            feedbackTimer = 90;
             sndCorrect.currentTime = 0;
             sndCorrect.play().catch(()=>{});
-            updateHUD();
         } else {
-            attemptsLeft--;
+            feedbackText = "❌ WRONG FRUIT! TRY AGAIN! ❌";
+            feedbackColor = "#ff0000";
+            feedbackTimer = 60;
             sndWrong.currentTime = 0;
             sndWrong.play().catch(()=>{});
-            
-            if (attemptsLeft > 0) {
-                feedbackText = "❌ Try Again! Move the scanner lens! ❌";
-                feedbackColor = "#dc2626";
-                feedbackTimer = 60;
-                updateHUD();
-            } else {
-                feedbackText = "💡 Check out the Hint box above! 💡";
-                feedbackColor = "#ca8a04";
-                feedbackTimer = 90;
-                document.getElementById('hintPrompt').innerText = `💡 Hint: ${targetOrgan.hint}`;
-                document.getElementById('hintPrompt').style.display = "block";
-                updateHUD();
-            }
+        }
+    }
+
+    function handleGhostCatch() {
+        lives--;
+        sndWrong.currentTime = 0;
+        sndWrong.play().catch(()=>{});
+        
+        if (lives > 0) {
+            feedbackText = `❌ CAUGHT! LIVES LEFT: ${lives} ❌`;
+            feedbackColor = "#ff0000";
+            feedbackTimer = 60;
+            resetPositions();
+        } else {
+            endGame(false);
         }
     }
 
     function progressNextStep() {
         currentQuestionIndex++;
-        if (currentQuestionIndex < curriculumTasks.length) {
+        if (currentQuestionIndex < currentSessionQuestions.length) {
+            resetPositions();
             loadQuestion();
         } else {
-            endGameSummary();
+            endGame(true);
         }
     }
 
-    function endGameSummary() {
+    function endGame(isWin) {
         gameActive = false;
         sndBgm.pause();
-        sndClap.currentTime = 0;
-        sndClap.play().catch(()=>{});
         
-        document.getElementById('uiOverlay').style.display = 'none';
-        document.getElementById('finalScore').innerText = `Final Score: ${score} / 15`;
+        document.getElementById('touchOverlayZone').style.display = 'none';
+        
+        const title = document.getElementById('endTitle');
+        const msg = document.getElementById('endMessage');
+        
+        if (isWin) {
+            title.innerText = "🏆 WINNER! 🏆";
+            title.style.color = "#ffff00";
+            msg.innerText = "Splendid job! You solved all anatomy riddles!";
+            sndClap.currentTime = 0;
+            sndClap.play().catch(()=>{});
+        } else {
+            title.innerText = "GAME OVER";
+            title.style.color = "#ff0000";
+            msg.innerText = "The ghosts caught you! Better luck next time!";
+        }
+        
+        document.getElementById('finalScore').innerText = `FINAL SCORE: ${score}`;
         document.getElementById('completionScreen').style.display = 'flex';
     }
 
@@ -326,289 +443,200 @@
         startGame();
     }
 
-    function drawKidVector(ctx, maskMode) {
-        ctx.save();
-        
-        if (!maskMode) {
-            ctx.fillStyle = "#ffedd5"; 
-            ctx.strokeStyle = "#475569";
-            ctx.lineWidth = 4;
-        } else {
-            ctx.fillStyle = "#334155";
-            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-            ctx.fillStyle = "rgba(51, 65, 85, 0.9)";
+    // Text Wrap Engine Function for Question Prompts inside Canvas Context
+    function drawWrappedText(context, text, x, y, maxWidth, lineHeight) {
+        let words = text.split(' ');
+        let line = '';
+        let currentY = y;
+
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            let metrics = context.measureText(testLine);
+            let testWidth = metrics.width;
+            if (testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, currentY);
+                line = words[n] + ' ';
+                currentY += lineHeight;
+            } else {
+                line = testLine;
+            }
         }
-
-        // Head
-        ctx.beginPath();
-        ctx.arc(bodyX, bodyY - 240, 55, 0, Math.PI * 2);
-        if(!maskMode) ctx.fill();
-        if(!maskMode) ctx.stroke();
-
-        // Ears
-        ctx.beginPath();
-        ctx.arc(bodyX - 58, bodyY - 235, 12, 0, Math.PI * 2);
-        ctx.arc(bodyX + 58, bodyY - 235, 12, 0, Math.PI * 2);
-        if(!maskMode) { ctx.fill(); ctx.stroke(); }
-
-        // Neck
-        if(!maskMode) ctx.fillRect(bodyX - 16, bodyY - 190, 32, 25);
-
-        // Chest/Torso Outfit
-        ctx.beginPath();
-        ctx.roundRect(bodyX - 60, bodyY - 165, 120, 210, 20);
-        if(!maskMode) {
-            ctx.fillStyle = "#bae6fd"; 
-            ctx.fill();
-            ctx.stroke();
-        }
-
-        // Left Arm
-        ctx.save();
-        ctx.translate(bodyX - 60, bodyY - 155);
-        ctx.rotate(0.3);
-        ctx.beginPath();
-        ctx.roundRect(-24, 0, 28, 120, 12);
-        if(!maskMode) { ctx.fillStyle = "#ffedd5"; ctx.fill(); ctx.stroke(); }
-        ctx.restore();
-
-        // Right Arm
-        ctx.save();
-        ctx.translate(bodyX + 60, bodyY - 155);
-        ctx.rotate(-0.3);
-        ctx.beginPath();
-        ctx.roundRect(-4, 0, 28, 120, 12);
-        if(!maskMode) { ctx.fillStyle = "#ffedd5"; ctx.fill(); ctx.stroke(); }
-        ctx.restore();
-
-        // Left Leg
-        ctx.beginPath();
-        ctx.roundRect(bodyX - 50, bodyY + 40, 34, 180, 12);
-        if(!maskMode) { ctx.fillStyle = "#fef08a"; ctx.fill(); ctx.stroke(); } 
-
-        // Right Leg
-        ctx.beginPath();
-        ctx.roundRect(bodyX + 16, bodyY + 40, 34, 180, 12);
-        if(!maskMode) { ctx.fillStyle = "#fef08a"; ctx.fill(); ctx.stroke(); }
-
-        // External Facial Features (Only drawn outside the X-Ray lens)
-        if (!maskMode) {
-            // Eyes
-            ctx.fillStyle = "#1e3a8a";
-            ctx.beginPath();
-            ctx.arc(bodyX - 18, bodyY - 240, 6, 0, Math.PI * 2);
-            ctx.arc(bodyX + 18, bodyY - 240, 6, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Nose
-            ctx.fillStyle = "#fdba74";
-            ctx.beginPath();
-            ctx.arc(bodyX, bodyY - 228, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Smile Mouth / Tongue Area
-            ctx.strokeStyle = "#dc2626";
-            ctx.lineWidth = 3.5;
-            ctx.beginPath();
-            ctx.arc(bodyX, bodyY - 215, 14, 0, Math.PI);
-            ctx.stroke();
-        }
-
-        ctx.restore();
-    }
-
-    function drawInternalOrgans(ctx) {
-        // Skeletal Framework Layers
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 6;
-        ctx.lineCap = "round";
-        
-        ctx.beginPath();
-        ctx.moveTo(bodyX, bodyY - 165);
-        ctx.lineTo(bodyX, bodyY + 40);
-        ctx.stroke();
-
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(bodyX - 60, bodyY - 150);
-        ctx.lineTo(bodyX - 85, bodyY - 40);
-        ctx.moveTo(bodyX + 60, bodyY - 150);
-        ctx.lineTo(bodyX + 85, bodyY - 40);
-        ctx.moveTo(bodyX - 33, bodyY + 40);
-        ctx.lineTo(bodyX - 33, bodyY + 200);
-        ctx.moveTo(bodyX + 33, bodyY + 40);
-        ctx.lineTo(bodyX + 33, bodyY + 200);
-        ctx.stroke();
-
-        // Muscles Layer
-        ctx.fillStyle = "rgba(239, 68, 68, 0.75)";
-        ctx.beginPath();
-        ctx.ellipse(bodyX + 75, bodyY - 100, 14, 30, -0.3, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Joint Turning Pin
-        ctx.fillStyle = "#22c55e";
-        ctx.beginPath();
-        ctx.arc(bodyX - 73, bodyY - 95, 8, 0, Math.PI * 2); 
-        ctx.fill();
-
-        // Brain
-        ctx.fillStyle = "#fbcfe8";
-        ctx.beginPath();
-        ctx.arc(bodyX, bodyY - 245, 28, 0, Math.PI * 2);
-        ctx.arc(bodyX - 15, bodyY - 240, 20, 0, Math.PI * 2);
-        ctx.arc(bodyX + 15, bodyY - 240, 20, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Nose Core Location
-        ctx.fillStyle = "#f43f5e";
-        ctx.beginPath();
-        ctx.arc(organs.nose.x, organs.nose.y, 6, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Tongue Vector Node
-        ctx.fillStyle = "#fda4af";
-        ctx.beginPath();
-        ctx.ellipse(organs.tongue.x, organs.tongue.y, 8, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Lungs
-        ctx.fillStyle = "#fca5a5";
-        ctx.beginPath();
-        ctx.ellipse(bodyX - 24, bodyY - 125, 20, 38, 0.1, 0, Math.PI * 2);
-        ctx.ellipse(bodyX + 24, bodyY - 125, 20, 38, -0.1, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Heart
-        ctx.fillStyle = "#dc2626";
-        ctx.beginPath();
-        ctx.moveTo(bodyX - 12, bodyY - 125);
-        ctx.bezierCurveTo(bodyX - 24, bodyY - 140, bodyX - 28, bodyY - 110, bodyX - 12, bodyY - 98);
-        ctx.bezierCurveTo(bodyX + 4, bodyY - 110, bodyX, bodyY - 140, bodyX - 12, bodyY - 125);
-        ctx.fill();
-
-        // Liver
-        ctx.fillStyle = "#b45309";
-        ctx.beginPath();
-        ctx.moveTo(bodyX + 8, bodyY - 80);
-        ctx.lineTo(bodyX + 44, bodyY - 75);
-        ctx.lineTo(bodyX + 36, bodyY - 50);
-        ctx.closePath();
-        ctx.fill();
-
-        // Stomach
-        ctx.fillStyle = "#fdba74";
-        ctx.beginPath();
-        ctx.ellipse(bodyX - 20, bodyY - 65, 18, 24, Math.PI / 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Kidneys
-        ctx.fillStyle = "#991b1b";
-        ctx.beginPath();
-        ctx.ellipse(bodyX - 16, bodyY - 20, 7, 12, 0.1, 0, Math.PI * 2);
-        ctx.ellipse(bodyX + 16, bodyY - 20, 7, 12, -0.1, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Intestines Tube System
-        ctx.fillStyle = "#fef08a";
-        ctx.strokeStyle = "#eab308";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.roundRect(bodyX - 28, bodyY + 10, 56, 40, 10);
-        ctx.fill();
-        ctx.stroke();
+        context.fillText(line, x, currentY);
     }
 
     function render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Background Board Fill
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         if (!gameActive) return;
 
+        // Render Pure Canvas Emulated Arcade Text HUD Headers (Solves cross mobile layout text alignments issues)
         ctx.save();
-        ctx.scale(scaleFactor, scaleFactor);
-
-        let bgGrad = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
-        bgGrad.addColorStop(0, "#f0fdf4");
-        bgGrad.addColorStop(0.7, "#bbf7d0");
-        bgGrad.addColorStop(1, "#86efac");
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-
-        // Render External Base Character Layer
-        drawKidVector(ctx, false);
-
-        // Magic Lens Lens Mask Engine Implementation
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(scanner.x, scanner.y, scanner.radius, 0, Math.PI * 2);
-        ctx.clip(); 
-
-        drawKidVector(ctx, true);
-        drawInternalOrgans(ctx);
-        ctx.restore();
-
-        // Handle Bar Control Ring Frame Overlay
-        ctx.save();
-        ctx.strokeStyle = "#475569";
-        ctx.lineWidth = 14;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(scanner.x + Math.cos(Math.PI/4) * scanner.radius, scanner.y + Math.sin(Math.PI/4) * scanner.radius);
-        ctx.lineTo(scanner.x + Math.cos(Math.PI/4) * (scanner.radius + 50), scanner.y + Math.sin(Math.PI/4) * (scanner.radius + 50));
-        ctx.stroke();
-
-        ctx.strokeStyle = "#0284c7";
-        ctx.lineWidth = 7;
-        ctx.beginPath();
-        ctx.arc(scanner.x, scanner.y, scanner.radius, 0, Math.PI * 2);
-        ctx.stroke();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 18px 'Courier New'";
+        ctx.textAlign = "left";
+        ctx.fillText(`SCORE: ${score}`, 30, 40);
+        ctx.textAlign = "right";
+        ctx.fillText("HIGH SCORE: 12760", BASE_WIDTH - 30, 40);
         
-        ctx.strokeStyle = "#bae6fd";
+        // Render Riddle Outer Frame Card
+        ctx.strokeStyle = "#3333ff";
         ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(scanner.x, scanner.y, scanner.radius - 4, 0, Math.PI * 2);
-        ctx.stroke();
+        ctx.strokeRect(25, 65, BASE_WIDTH - 50, 95);
+        
+        ctx.fillStyle = "#ffff00";
+        ctx.font = "bold 14px 'Courier New'";
+        ctx.textAlign = "center";
+        let activeQuestionStr = `Q${currentQuestionIndex + 1}: ${currentSessionQuestions[currentQuestionIndex].q}`;
+        drawWrappedText(ctx, activeQuestionStr, BASE_WIDTH / 2, 88, BASE_WIDTH - 80, 20);
         ctx.restore();
 
-        // Animated Correct/Wrong Status Feedback Banner Card
+        // Render Symmetrical Blue Wall Labyrinths 
+        for (let r = 0; r < currentMap.length; r++) {
+            for (let c = 0; c < currentMap[r].length; c++) {
+                let xPos = offsetX + c * TILE_SIZE;
+                let yPos = offsetY + r * TILE_SIZE;
+
+                if (currentMap[r][c] === 1) {
+                    ctx.strokeStyle = "#0000ff";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(xPos + 3, yPos + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+                } else if (currentMap[r][c] === 2) {
+                    ctx.fillStyle = "#ffff00";
+                    ctx.beginPath();
+                    ctx.arc(xPos + TILE_SIZE/2, yPos + TILE_SIZE/2, 3.5, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Render Target Node Fruits
+        fruits.forEach(fr => {
+            let fx = offsetX + fr.x * TILE_SIZE + TILE_SIZE / 2;
+            let fy = offsetY + fr.y * TILE_SIZE + TILE_SIZE / 2;
+            
+            ctx.save();
+            if (Math.floor(Date.now() / 200) % 2 === 0) {
+                ctx.strokeStyle = fr.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(fx - TILE_SIZE/2 + 2, fy - TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            }
+            
+            ctx.font = "20px 'Courier New'";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(fr.symbol, fx, fy + 2);
+
+            ctx.font = "9px 'Courier New'";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(fr.label, fx, fy - TILE_SIZE/2 - 4);
+            ctx.restore();
+        });
+
+        // Draw Player vector frame
+        ctx.save();
+        ctx.translate(player.px, player.py);
+        
+        let rotationAngle = 0;
+        if (player.dx === 1) rotationAngle = 0;
+        if (player.dx === -1) rotationAngle = Math.PI;
+        if (player.dy === 1) rotationAngle = Math.PI / 2;
+        if (player.dy === -1) rotationAngle = Math.PI * 1.5;
+        ctx.rotate(rotationAngle);
+
+        ctx.fillStyle = "#ffff00";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, TILE_SIZE / 2 - 2, player.mouthAngle, Math.PI * 2 - player.mouthAngle);
+        ctx.lineTo(0, 0);
+        ctx.fill();
+        ctx.restore();
+
+        // Render 3 Ghost Vectors
+        ghosts.forEach(gh => {
+            ctx.save();
+            ctx.translate(gh.px, gh.py);
+
+            ctx.fillStyle = gh.color;
+            ctx.beginPath();
+            ctx.arc(0, -2, TILE_SIZE/2 - 3, Math.PI, 0, false);
+            ctx.lineTo(TILE_SIZE/2 - 3, TILE_SIZE/2 - 2);
+            
+            let waves = 3;
+            let wWidth = (TILE_SIZE - 6) / waves;
+            for (let i = 0; i < waves; i++) {
+                ctx.lineTo((TILE_SIZE/2 - 3) - i * wWidth - wWidth/2, TILE_SIZE/2 - 6);
+                ctx.lineTo((TILE_SIZE/2 - 3) - (i + 1) * wWidth, TILE_SIZE/2 - 2);
+            }
+            ctx.lineTo(-(TILE_SIZE/2 - 3), TILE_SIZE/2 - 2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(-5, -3, 4, 0, Math.PI * 2);
+            ctx.arc(5, -3, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#0000ff";
+            ctx.beginPath();
+            ctx.arc(-5 + gh.dx * 2, -3 + gh.dy * 2, 2, 0, Math.PI * 2);
+            ctx.arc(5 + gh.dx * 2, -3 + gh.dy * 2, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        });
+
+        // Lower Footer Status Life Counters
+        ctx.save();
+        ctx.fillStyle = "#ffff00";
+        ctx.font = "bold 16px 'Courier New'";
+        ctx.fillText("LIVES: ", offsetX, BASE_HEIGHT - 130);
+        for (let i = 0; i < lives; i++) {
+            ctx.beginPath();
+            ctx.arc(offsetX + 80 + i * 28, BASE_HEIGHT - 136, 9, 0.2, Math.PI * 2 - 0.2);
+            ctx.lineTo(offsetX + 80 + i * 28, BASE_HEIGHT - 136);
+            ctx.fill();
+        }
+        ctx.restore();
+
+        // Overlay Interactive Feedback Alerts
         if (feedbackTimer > 0) {
             feedbackTimer--;
             
             ctx.save();
-            ctx.fillStyle = feedbackColor;
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 5;
+            ctx.fillStyle = "#000000";
+            ctx.strokeStyle = feedbackColor;
+            ctx.lineWidth = 3;
             
-            let cardW = 460;
-            let cardH = 55;
-            let cardX = (BASE_WIDTH - cardW) / 2;
-            let cardY = BASE_HEIGHT - 120;
-            
-            ctx.beginPath();
-            ctx.roundRect(cardX, cardY, cardW, cardH, 18);
-            ctx.fill();
-            ctx.stroke();
+            let bW = 460;
+            let bH = 50;
+            ctx.fillRect((BASE_WIDTH - bW)/2, offsetY + 180, bW, bH);
+            ctx.strokeRect((BASE_WIDTH - bW)/2, offsetY + 180, bW, bH);
             
             ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 18px 'Comic Sans MS'";
+            ctx.font = "bold 15px 'Courier New'";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(feedbackText, BASE_WIDTH / 2, cardY + cardH / 2);
+            ctx.fillText(feedbackText, BASE_WIDTH / 2, offsetY + 205);
             ctx.restore();
 
-            if (feedbackTimer === 0 && feedbackColor === "#16a34a") {
+            if (feedbackTimer === 0 && feedbackColor === "#00ff00") {
                 progressNextStep();
             }
         }
-
-        ctx.restore();
     }
 
-    function mainAnimationLoop() {
+    function mainLoop() {
+        if (gameActive) updateGameLogic();
         render();
-        requestAnimationFrame(mainAnimationLoop);
+        requestAnimationFrame(mainLoop);
     }
     
-    mainAnimationLoop();
+    mainLoop();
 </script>
 </body>
 </html>
