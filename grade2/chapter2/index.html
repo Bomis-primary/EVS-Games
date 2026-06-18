@@ -150,38 +150,30 @@
         .action-btn:active { transform: translateY(4px); box-shadow: none; }
 
         .popup-card { background: white; border: 4px solid #ff8fa3; border-radius: 28px; padding: 25px; width: 92%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .rule-line { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: bold; text-align: left; margin-bottom: 14px; color: #4a5568; }
+        .rule-line { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: bold; text-align: left; margin-bottom: 14px; color: #4a5568; line-height: 1.4; }
     </style>
 </head>
 <body>
 
 <div id="gameWrapper">
-    <!-- Screen 1: Innovine Splash -->
     <div id="screenLogo" class="layer">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
-    <!-- Screen 2: Food Crush Title Screen -->
     <div id="screenTitle" class="layer">
         <h1 class="game-title">Food<br><span style="color: #ff7b93;">Crush</span></h1>
-        <button class="action-btn" onclick="showInstructions()">PLAY ▶</button>
+        <button class="action-btn" onclick="showFirstInstructions()">PLAY ▶</button>
     </div>
 
-    <!-- Screen 3: Interactive Instruction Board -->
     <div id="screenIntro" class="layer">
         <div class="popup-card">
-            <h2 style="color: #ff477e; margin-bottom: 15px;" id="introHeading">Your Mission!</h2>
+            <h2 style="color: #ff477e; margin-bottom: 15px;" id="introHeading">Level 1 Setup!</h2>
             <div id="introRules">
-                <div class="rule-line"><span>🌱</span><span>Level 1: Match foods from Plants!</span></div>
-                <div class="rule-line"><span>🥛</span><span>Level 2: Match foods from Animals!</span></div>
-                <div class="rule-line"><span>🍏</span><span>Level 3: Match Healthy items to drop Junk items!</span></div>
-                <div class="rule-line"><span>💪</span><span>Level 4: Match Body-Building & Protective items!</span></div>
-            </div>
-            <button class="action-btn" onclick="startCurrentLevel()">CRUSH IT! 🚀</button>
+                </div>
+            <button class="action-btn" onclick="startCurrentLevel()">START LEVEL 🚀</button>
         </div>
     </div>
 
-    <!-- Screen 4: Situational Riddle Quiz Overlay Box -->
     <div id="screenQuiz" class="layer">
         <div class="quiz-card">
             <h3 style="color:#ff477e; margin-bottom: 8px; font-size: 14px;" id="quizProgress">BONUS RIDDLE!</h3>
@@ -190,29 +182,24 @@
         </div>
     </div>
 
-    <!-- Levels Title Dynamic Track -->
     <div id="levelBanner">
         <div id="levelTitle">Level 1: Plant Power</div>
-        <div id="levelTask">Match Apple or Banana items!</div>
+        <div id="levelTask">Make matches to drop items and win!</div>
     </div>
 
-    <!-- Live Performance Indicators -->
     <div id="statsBar">
         <div class="stat-pill" id="lblScore">⭐ 0</div>
         <div class="stat-pill" style="background:#ff477e; color:white; border-color:white;" id="lblTarget">Matches Left: 8</div>
     </div>
 
-    <!-- Round Candy Grid Matrix Box -->
     <div id="boardContainer">
         <div id="gridBoard"></div>
     </div>
 
-    <!-- Controls Row Panel -->
     <div id="controlRow">
         <button class="util-btn" onclick="triggerUndo()">↩️ UNDO SWAP</button>
     </div>
 
-    <!-- Screen 5: Completion Screen -->
     <div id="screenEnd" class="layer">
         <h1 class="game-title" style="color: #2e7d32;">WINNER! 🏆</h1>
         <div class="popup-card" style="border-color: #a1c4fd; margin-bottom: 20px;">
@@ -267,28 +254,74 @@
     let currentLevel = 1;
     let score = 0;
     let totalLevelCorrectMatches = 0;
-    let levelTargetCount = 8; // Complete level requires 8 valid matches total
+    let levelTargetCount = 8; 
     let boardState = [];
     let activeSelection = null;
     let lockControls = false;
     let lastExecutedSwap = null;
 
-    // Quiz Control Tracking Parameters
     let currentQuizIndex = 0;
     let activeQuizBatchCount = 0;
 
     // Splash Timer Setup
     setTimeout(() => { document.getElementById('screenLogo').style.display = 'none'; }, 5000);
 
-    function showInstructions() { document.getElementById('screenTitle').style.display = 'none'; }
+    function showFirstInstructions() {
+        document.getElementById('screenTitle').style.display = 'none';
+        displayLevelInstructionCard();
+    }
+
+    // New logic: Isolate instructions and trigger only one card layout before each specific level
+    function displayLevelInstructionCard() {
+        const heading = document.getElementById('introHeading');
+        const rules = document.getElementById('introRules');
+        
+        heading.innerText = `Level ${currentLevel} Mission!`;
+
+        if (currentLevel === 1) {
+            rules.innerHTML = `
+                <div class="rule-line"><span>🌱</span><span><b>Topic: Plant Power!</b></span></div>
+                <div class="rule-line"><span>🎮</span><span>Match ANY 3 food items in a line to drop pieces.</span></div>
+                <div class="rule-line"><span>🧠</span><span>Every 2 matches unlocks bonus riddles about Plant Foods!</span></div>
+            `;
+        } else if (currentLevel === 2) {
+            rules.innerHTML = `
+                <div class="rule-line"><span>🥛</span><span><b>Topic: Animal Treats!</b></span></div>
+                <div class="rule-line"><span>🎮</span><span>Keep matching rows to score!</span></div>
+                <div class="rule-line"><span>🧠</span><span>Bonus puzzles will test you on foods we get from animals!</span></div>
+            `;
+        } else if (currentLevel === 3) {
+            rules.innerHTML = `
+                <div class="rule-line"><span>🍏</span><span><b>Topic: Healthy Plates!</b></span></div>
+                <div class="rule-line"><span>🎮</span><span>Swap foods to clear rows.</span></div>
+                <div class="rule-line"><span>🧠</span><span>Answer bonus questions to find what happens if we eat dirty street junk food!</span></div>
+            `;
+        } else if (currentLevel === 4) {
+            rules.innerHTML = `
+                <div class="rule-line"><span>💪</span><span><b>Topic: Muscle & Shield!</b></span></div>
+                <div class="rule-line"><span>🎮</span><span>The final level grid challenge!</span></div>
+                <div class="rule-line"><span>🧠</span><span>Riddles will ask about Body-Building foods vs Protective fruits!</span></div>
+            `;
+        }
+
+        document.getElementById('screenIntro').style.display = "flex";
+    }
     
     function startCurrentLevel() {
         document.getElementById('screenIntro').style.display = 'none';
         totalLevelCorrectMatches = 0;
         levelTargetCount = 8;
+        
+        // Dynamic display update
+        const titleText = document.getElementById('levelTitle');
+        if (currentLevel === 1) titleText.innerText = "Level 1: Plant Power";
+        if (currentLevel === 2) titleText.innerText = "Level 2: Animal Treats";
+        if (currentLevel === 3) titleText.innerText = "Level 3: Clean Plate";
+        if (currentLevel === 4) titleText.innerText = "Level 4: Muscle & Shield";
+
         updateHUDView();
         buildCandyBoard();
-        if(currentLevel === 1) { sndBgm.currentTime = 0; sndBgm.play().catch(()=>{}); }
+        if (currentLevel === 1) { sndBgm.currentTime = 0; sndBgm.play().catch(()=>{}); }
     }
 
     function buildCandyBoard() {
@@ -401,7 +434,7 @@
             for (let r = 0; r < GRID_SIZE - 2; r++) {
                 if (boardState[r][c] && boardState[r+1][c] && boardState[r+2][c] &&
                     boardState[r][c].symbol === boardState[r+1][c].symbol && boardState[r][c].symbol === boardState[r+2][c].symbol) {
-                    matchedSet.add(`${r},${c}`); matchedSet.add(`${r+1+c}`); matchedSet.add(`${r+2},${c}`);
+                    matchedSet.add(`${r},${c}`); matchedSet.add(`${r+1},${c}`); matchedSet.add(`${r+2},${c}`);
                 }
             }
         }
@@ -409,21 +442,16 @@
     }
 
     async function resolveGridCascades(matches) {
-        let validLevelMatchCleared = false;
+        let accurateMatchesFound = false;
 
         matches.forEach(coord => {
             let item = boardState[coord.r][coord.c];
             if (!item) return;
-
-            if (currentLevel === 1 && item.type === "plant") validLevelMatchCleared = true;
-            if (currentLevel === 2 && item.type === "animal") validLevelMatchCleared = true;
-            if (currentLevel === 3 && item.type !== "junk") validLevelMatchCleared = true;
-            if (currentLevel === 4 && (item.group === "bodybuilding" || item.group === "protective")) validLevelMatchCleared = true;
-
+            accurateMatchesFound = true; // Any complete aligned line is a valid match!
             document.getElementById(`tile-${coord.r}-${coord.c}`).classList.add('pop-anim');
         });
 
-        if (validLevelMatchCleared) {
+        if (accurateMatchesFound) {
             score += 10;
             totalLevelCorrectMatches++;
             levelTargetCount = Math.max(0, levelTargetCount - 1);
@@ -436,8 +464,8 @@
         executeBoardGravityDrop();
         refillBoardSpaces();
 
-        // Check if a riddle milestone has been breached (Every 2 Correct Matches)
-        if (validLevelMatchCleared && totalLevelCorrectMatches % 2 === 0 && totalLevelCorrectMatches <= 8) {
+        // Check if a riddle break is hit (Every 2 Correct Matches)
+        if (accurateMatchesFound && totalLevelCorrectMatches % 2 === 0 && totalLevelCorrectMatches <= 8) {
             activeQuizBatchCount = 0; 
             setTimeout(launchQuizRiddleOverlay, 300);
             return;
@@ -481,7 +509,7 @@
 
     function launchQuizRiddleOverlay() {
         if (currentQuizIndex >= quizBank.length) {
-            currentQuizIndex = 0; // Loop questions safe guard
+            currentQuizIndex = 0; 
         }
         
         lockControls = true;
@@ -558,29 +586,7 @@
     function advanceNextLevelStructure() {
         if (currentLevel < 4) {
             currentLevel++;
-            const banner = document.getElementById('levelBanner');
-            const title = document.getElementById('levelTitle');
-            const task = document.getElementById('levelTask');
-            const intro = document.getElementById('screenIntro');
-            const heading = document.getElementById('introHeading');
-            const rules = document.getElementById('introRules');
-
-            heading.innerText = `Level ${currentLevel} Unlocked!`;
-
-            if (currentLevel === 2) {
-                title.innerText = "Level 2: Animal Treats";
-                task.innerText = "Match Milk, Eggs, or Cheese items!";
-                rules.innerHTML = '<div class="rule-line"><span>🥛</span><span>Now collect items sourced from Animals to complete your targets!</span></div>';
-            } else if (currentLevel === 3) {
-                title.innerText = "Level 3: Clean Plate";
-                task.innerText = "Match healthy food items!";
-                rules.innerHTML = '<div class="rule-line"><span>🍏</span><span>Clear your plate! Avoid matches containing Junk foods!</span></div>';
-            } else if (currentLevel === 4) {
-                title.innerText = "Level 4: Muscle & Shield";
-                task.innerText = "Match Body-Building or Protective foods!";
-                rules.innerHTML = '<div class="rule-line"><span>💪</span><span>Final Quest! Match Body-Building (Eggs/Milk) or Protective (Fruits) foods!</span></div>';
-            }
-            intro.style.display = "flex";
+            displayLevelInstructionCard();
         } else {
             sndBgm.pause(); sndClap.play().catch(()=>{});
             document.getElementById('lblFinalScore').innerText = `Final Score: ${score}`;
