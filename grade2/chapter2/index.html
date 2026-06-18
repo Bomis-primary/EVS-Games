@@ -356,10 +356,10 @@
 
         let matchedCoordinates = evaluateBoardMatches();
         if (matchedCoordinates.length > 0) {
-            // Run all nested board cascades sequentially to protect grid arrays
+            // Wait completely for all sequences of cascades to finish executing
             await runFullCascadeLoop(matchedCoordinates);
-            // Launch the overlay safely after cascade resolution
-            setTimeout(launchQuizRiddleOverlay, 350);
+            // Launch overlay securely after board resolution is completely calm
+            setTimeout(launchQuizRiddleOverlay, 150);
         } else {
             if (recordHistory) {
                 let t2 = boardState[r1][c1];
@@ -406,11 +406,12 @@
     async function runFullCascadeLoop(initialMatches) {
         let activeMatches = initialMatches;
         while(activeMatches.length > 0) {
-            activeMatches.forEach(coord => {
+            // Restructured into standard for...of loop to work seamlessly with async/await commands
+            for (const coord of activeMatches) {
                 if(boardState[coord.r][coord.c]) {
                     document.getElementById(`tile-${coord.r}-${coord.c}`).classList.add('pop-anim');
                 }
-            });
+            }
             sndCorrect.currentTime = 0; sndCorrect.play().catch(()=>{});
             await new Promise(res => setTimeout(res, 250));
 
@@ -472,6 +473,10 @@
     }
 
     function evaluateQuizAnswer(selectedText, buttonElement, correctText) {
+        // Deactivate all optional click interactions during grading to prevent multiple submission events
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(b => b.onclick = null);
+
         if (selectedText === correctText) {
             score += 10;
             updateHUDView();
@@ -502,6 +507,15 @@
                     prepareLevelRiddles(); 
                     initiateLevelDataLoad(); 
                     lockControls = false;
+                }, 1000);
+            } else {
+                // If they still have lives, re-allow them to pick another option
+                setTimeout(() => {
+                    buttons.forEach(b => {
+                        if (b !== buttonElement) {
+                            b.onclick = () => evaluateQuizAnswer(b.innerText, b, correctText);
+                        }
+                    });
                 }, 1000);
             }
         }
