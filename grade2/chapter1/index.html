@@ -44,7 +44,7 @@
             padding: 10px;
         }
 
-        /* Cute Rounded Riddle Card - No Top Headers */
+        /* Cute Rounded Riddle Card */
         .riddle-card {
             width: 95%;
             max-width: 420px;
@@ -59,7 +59,7 @@
             padding: 24px;
             text-align: center;
             position: relative;
-            transform: translateZ(0); /* Hardware Acceleration */
+            transform: translateZ(0);
             will-change: transform, opacity;
             animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
         }
@@ -79,9 +79,10 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             padding-bottom: env(safe-area-inset-bottom, 15px);
+            perspective: 800px; /* Gives 3D depth to the shuffling spin */
         }
 
-        /* Responsive Text-Only Cards */
+        /* Responsive Text-Only Cards with Shuffling Animation Frame support */
         .choice-card {
             aspect-ratio: 2/3;
             border: 6px solid #ffffff;
@@ -98,8 +99,14 @@
             box-shadow: 0 6px 16px rgba(165, 180, 200, 0.35);
             transform: translateZ(0);
             transition: transform 0.1s ease-out;
+            backface-visibility: hidden;
         }
         .choice-card:active { transform: scale(0.94); }
+
+        /* Shuffling Card Animation Styles */
+        .shuffle-spin {
+            animation: cardShuffle 0.5s ease-in-out;
+        }
 
         /* Bright Soft Color Palettes */
         .color-red { background-color: #ff6b6b; }
@@ -109,6 +116,12 @@
         @keyframes popIn {
             0% { transform: scale(0.85); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes cardShuffle {
+            0% { transform: scale(1) rotateY(0deg); opacity: 1; }
+            50% { transform: scale(0.8) rotateY(90deg); opacity: 0.4; }
+            100% { transform: scale(1) rotateY(0deg); opacity: 1; }
         }
 
         /* Overlay Banners */
@@ -214,7 +227,7 @@
         { q: "We sit safely on the sides of your head so you can listen to music, stories, and teacher's voice. What are we?", name: "EARS" },
         { q: "We are super hard, strong, and white. We join together to make your skeleton frame so you can stand tall! What are we?", name: "BONES" },
         { q: "We are stretchy like rubber bands. We cover your bones and pack power to let you run, pull, and jump! What are we?", name: "MUSCLES" },
-        { q: "Bend and snap! I am the magic spot where two bones meet, like your elbow, shoulder, or your knee. What am I?", name: "JOINT" }
+        { q: "Bend and snap! I am the magic spot where two bones meet, like your elbow, shoulder, or your knee. What am I?", name: "JOINTS" }
     ];
 
     // Delayed Splash Navigation
@@ -275,9 +288,16 @@
         currentChoices.push(optionsPool[0], optionsPool[1]);
         shuffle(currentChoices);
 
-        // Map strings straight to targets
+        // Map strings straight to targets and fire the card shuffling flip animation
         for (let i = 0; i < 3; i++) {
-            document.getElementById(`card${i}`).innerText = currentChoices[i];
+            let cardElement = document.getElementById(`card${i}`);
+            
+            // Re-trigger the shuffle spin styling safely
+            cardElement.classList.remove('shuffle-spin');
+            cardElement.offsetHeight; 
+            cardElement.classList.add('shuffle-spin');
+            
+            cardElement.innerText = currentChoices[i];
         }
 
         acceptInput = true;
@@ -292,7 +312,8 @@
         let overlay = document.getElementById('feedbackOverlay');
 
         if(selectedAnswer === correctAnswer) {
-            score += 100;
+            score += 10;
+            document.getElementById('txtScore').innerText = `⭐ SCORE: ${score}`;
             overlay.innerText = "✨ YES! YOU GOT IT! ✨";
             overlay.style.borderColor = "#4ed964";
             sndCorrect.currentTime = 0;
