@@ -212,6 +212,7 @@
         soda:   { symbol: "🥤" }
     };
 
+    // Explicit structural normalization across questions, options, and matching answers
     const sourceQuestions = [
         { q: "Rohan is looking inside a fruit basket. He finds a yellow fruit that monkeys absolutely love to eat! Help Rohan guess what it is!", ops: ["🍎 Apple", "🍌 Banana", "🥛 Milk"], ans: "🍌 Banana" },
         { q: "Simran is eating hot kheer. Her mother says the rice in the kheer comes from a plant. Where does the milk in the kheer come from?", ops: ["🌱 Plant", "🐮 Animal", "🏪 Shop only"], ans: "🐮 Animal" },
@@ -238,21 +239,22 @@
     let activeQuizIndex = 0;
 
     function shuffleArray(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
+        let copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[arr[j]]] = [arr[j], arr[i]];
+            [copy[i], copy[j]] = [copy[j], copy[i]];
         }
-        return arr;
+        return copy;
     }
 
     function prepareLevelRiddles() {
-        let shuffledPool = shuffleArray([...sourceQuestions]);
+        let shuffledPool = shuffleArray(sourceQuestions);
         let selectedThree = shuffledPool.slice(0, 3);
         
         currentLevelQuestions = selectedThree.map(item => {
             return {
                 q: item.q,
-                ops: shuffleArray([...item.ops]),
+                ops: shuffleArray(item.ops), 
                 ans: item.ans
             };
         });
@@ -356,10 +358,8 @@
 
         let matchedCoordinates = evaluateBoardMatches();
         if (matchedCoordinates.length > 0) {
-            // Wait completely for all sequences of cascades to finish executing
             await runFullCascadeLoop(matchedCoordinates);
-            // Launch overlay securely after board resolution is completely calm
-            setTimeout(launchQuizRiddleOverlay, 150);
+            setTimeout(launchQuizRiddleOverlay, 350);
         } else {
             if (recordHistory) {
                 let t2 = boardState[r1][c1];
@@ -406,12 +406,11 @@
     async function runFullCascadeLoop(initialMatches) {
         let activeMatches = initialMatches;
         while(activeMatches.length > 0) {
-            // Restructured into standard for...of loop to work seamlessly with async/await commands
-            for (const coord of activeMatches) {
+            activeMatches.forEach(coord => {
                 if(boardState[coord.r][coord.c]) {
                     document.getElementById(`tile-${coord.r}-${coord.c}`).classList.add('pop-anim');
                 }
-            }
+            });
             sndCorrect.currentTime = 0; sndCorrect.play().catch(()=>{});
             await new Promise(res => setTimeout(res, 250));
 
@@ -473,11 +472,8 @@
     }
 
     function evaluateQuizAnswer(selectedText, buttonElement, correctText) {
-        // Deactivate all optional click interactions during grading to prevent multiple submission events
-        const buttons = document.querySelectorAll('.option-btn');
-        buttons.forEach(b => b.onclick = null);
-
-        if (selectedText === correctText) {
+        // Safe check using trimmed comparison to prevent hidden spacing or emoji breaks
+        if (selectedText.trim() === correctText.trim()) {
             score += 10;
             updateHUDView();
             buttonElement.style.background = "#c8e6c9";
@@ -507,15 +503,6 @@
                     prepareLevelRiddles(); 
                     initiateLevelDataLoad(); 
                     lockControls = false;
-                }, 1000);
-            } else {
-                // If they still have lives, re-allow them to pick another option
-                setTimeout(() => {
-                    buttons.forEach(b => {
-                        if (b !== buttonElement) {
-                            b.onclick = () => evaluateQuizAnswer(b.innerText, b, correctText);
-                        }
-                    });
                 }, 1000);
             }
         }
@@ -561,4 +548,4 @@
     }
 </script>
 </body>
-</html>
+</html> 
