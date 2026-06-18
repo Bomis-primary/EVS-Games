@@ -1,1 +1,614 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magic Body Scanner - EVS Grade 2</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #f0fdf4; font-family: 'Comic Sans MS', sans-serif; }
+        
+        #gameContainer { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            max-width: 600px; 
+            max-height: 1000px; 
+            margin: 0 auto; 
+            background: #f0fdf4; 
+            overflow: hidden; 
+            box-shadow: 0 0 25px rgba(0,0,0,0.15); 
+        }
+        canvas { display: block; width: 100%; height: 100%; cursor: none; }
+        
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 30px; text-align: center; }
+        
+        /* Screen 1: Brand Logo - Pure White Background */
+        #logoScreen { background-color: #ffffff; z-index: 100; }
+        #logoScreen img { max-width: 75%; max-height: 45%; object-fit: contain; }
+        
+        /* Screen 2: Game Title Splash Screen */
+        #titleScreen { background: linear-gradient(to bottom, #bae1ff 0%, #e8ffdb 100%); z-index: 90; display: none; }
+        #titleScreen h1 { color: #16a34a; font-size: 44px; margin-bottom: 35px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 8px 15px rgba(22,163,74,0.25); line-height: 1.2; font-weight: 900; }
+        
+        /* Screen 3: Interactive Mission Instructions */
+        #instructionScreen { background: #fffef0; z-index: 85; display: none; border: 8px solid #baffc9; border-radius: 32px; color: #2c3e50; }
+        
+        .btn { background: #22c55e; color: #fff; border: 3.5px solid #15803d; padding: 16px 44px; font-size: 24px; font-weight: bold; border-radius: 40px; cursor: pointer; box-shadow: 0 8px #15803d; text-transform: uppercase; transition: all 0.1s ease; margin-top: 25px; }
+        .btn:active { box-shadow: 0 2px #15803d; transform: translateY(6px); }
+        
+        .instruction-box { font-size: 18px; font-weight: bold; line-height: 1.6; color: #1e293b; background: rgba(255,255,255,0.95); padding: 22px; border-radius: 24px; border: 3px dashed #22c55e; max-width: 95%; text-align: left; }
+        .instruction-box p { margin-bottom: 10px; }
+        
+        /* HUD Top Area Controls - Screen 4 Gameplay Overlays */
+        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 20; pointer-events: none; display: none; align-items: center; }
+        #promptBox { width: 100%; background: #ffffff; border: 3.5px solid #22c55e; border-radius: 20px; padding: 14px; text-align: center; box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
+        #targetPrompt { font-size: 19px; font-weight: 900; color: #1e293b; line-height: 1.4; }
+        #hintPrompt { font-size: 15px; font-weight: bold; color: #ea580c; margin-top: 6px; display: none; }
+        
+        .hud-row { display: flex; justify-content: space-between; width: 100%; pointer-events: none; padding: 0 4px; }
+        .ui-element { background: rgba(255, 255, 255, 0.96); color: #16a34a; padding: 6px 14px; border-radius: 16px; font-size: 15px; font-weight: 900; border: 2.5px solid #bbf7d0; box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
+        
+        /* Final Scoreboard Completion Screen Evaluation Card */
+        #completionScreen { background: linear-gradient(to bottom, #fff 0%, #dcfce7 100%); display: none; z-index: 80; color: #1e293b; }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <div id="logoScreen" class="screen">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+    </div>
+
+    <div id="titleScreen" class="screen">
+        <h1>MAGIC BODY<br>SCANNER! 🧬</h1>
+        <button class="btn" style="background: #3b82f6; border-color: #1d4ed8; box-shadow: 0 8px #1d4ed8;" onclick="showInstructions()">Next ➔</button>
+    </div>
+
+    <div id="instructionScreen" class="screen">
+        <div style="color: #16a34a; font-size: 34px; margin-bottom: 15px; font-weight: 900;">How to Play! ✨</div>
+        <div class="instruction-box">
+            <p style="color: #2563eb; font-size: 20px; text-align: center; margin-bottom: 14px;">🎒 Topic: Our Internal & External Organs</p>
+            <p>🤔 1. Read the clever body riddle at the top of the screen!</p>
+            <p>🔎 2. Drag the <b>Magic Scanner</b> lens over the body to look inside.</p>
+            <p style="color: #ea580c;">🎯 3. Find the matching organ and release your hold to scan it!</p>
+        </div>
+        <button class="btn" onclick="startGame()">Start Game 🚀</button>
+    </div>
+
+    <div id="uiOverlay">
+        <div id="promptBox">
+            <div id="targetPrompt">Loading Question...</div>
+            <div id="hintPrompt">💡 Hint: Try looking around the chest area!</div>
+        </div>
+        <div class="hud-row">
+            <div id="scoreLabel" class="ui-element">Score: 0 / 15</div>
+            <div id="attemptsLabel" class="ui-element" style="color: #dc2626; border-color: #fecaca; background: #fef2f2;">Attempts Left: 2</div>
+        </div>
+    </div>
+    
+    <div id="completionScreen" class="screen">
+        <h1 style="font-size: 38px; margin-bottom: 10px; font-weight: 900; color: #16a34a;">🎈 BODY EXPERT! 👑</h1>
+        <p style="font-size: 19px; margin-bottom: 25px; font-weight: bold; color: #475569;">You know your body systems inside and out!</p>
+        <div class="ui-element" id="finalScore" style="font-size: 26px; padding: 12px 30px; border-color: #4ade80; background: white; margin-bottom: 30px;">Final Score: 0/15</div>
+        <button class="btn" style="background: #eab308; box-shadow: 0 8px #ca8a04; border-color: #ca8a04;" onclick="restartGame()">Play Again 🔄</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Core Audio Setup (Matching your absolute asset paths)
+    const sndCorrect = new Audio('assets/correct.mp3');
+    const sndWrong = new Audio('assets/wrong.mp3');
+    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
+    const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
+    sndBgm.loop = true;
+
+    // Cross-Device Layout Configuration Matrix
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 900;
+    let scaleFactor = 1;
+
+    function resize() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Game Dynamic Variables
+    let score = 0;
+    let currentQuestionIndex = 0;
+    let attemptsLeft = 2;
+    let gameActive = false;
+    let feedbackTimer = 0;
+    let feedbackText = "";
+    let feedbackColor = "#16a34a";
+
+    let scanner = { x: BASE_WIDTH / 2, y: BASE_HEIGHT / 2 - 40, radius: 85, isDragging: false };
+
+    const bodyX = 300;
+    const bodyY = 460;
+
+    // Organ Reference Hitboxes Map Matrices
+    const organs = {
+        brain:      { x: 300, y: 205, radius: 30, name: "Brain 🧠", hint: "Look inside the upper head region!" },
+        heart:      { x: 285, y: 310, radius: 20, name: "Heart ❤️", hint: "Look on the left side inside the upper chest!" },
+        lungs:      { x: 315, y: 305, radius: 34, name: "Lungs 🫁", hint: "Scan the respiratory chest cage area!" },
+        stomach:    { x: 285, y: 385, radius: 24, name: "Stomach 胃", hint: "Look on the left side right beneath the rib cage area!" },
+        liver:      { x: 320, y: 380, radius: 24, name: "Liver 🪵", hint: "Look directly beside the stomach on the right side!" },
+        kidneys:    { x: 300, y: 440, radius: 22, name: "Kidneys 🥔", hint: "Scan the middle abdomen background frame!" },
+        intestines: { x: 300, y: 495, radius: 28, name: "Intestines 🌀", hint: "Look near the lower belly region!" },
+        bones:      { x: 245, y: 360, radius: 22, name: "Bones 🦴", hint: "Scan the skeletal support frame in the arms or spine!" },
+        muscles:    { x: 355, y: 360, radius: 25, name: "Muscles 💪", hint: "Scan the outer shoulder or strong arm tracking layer!" },
+        joints:     { x: 240, y: 410, radius: 18, name: "Joints 🟢", hint: "Look closely at the bending junction of the elbow!" },
+        eyes:       { x: 288, y: 225, radius: 15, name: "Eyes 👀", hint: "Scan the facial area used for seeing things!" },
+        ears:       { x: 342, y: 235, radius: 16, name: "Ears 👂", hint: "Check out the side edges of the head region!" },
+        skin:       { x: 300, y: 640, radius: 25, name: "Skin 🤚", hint: "Scan down around the uncovered ankle/foot surface!" },
+        nose:       { x: 305, y: 232, radius: 12, name: "Nose 👃", hint: "Look right in the center of the face!" },
+        tongue:     { x: 300, y: 248, radius: 12, name: "Tongue 👅", hint: "Look right inside the open smiling mouth!" }
+    };
+
+    // Grade 2 Curriculum Riddle Pipeline
+    const curriculumTasks = [
+        { q: "Thump-thump! I am working even when you sleep, pumping blood down to your toes. Find me! ❤️", target: "heart" },
+        { q: "We take in fresh air when you run or practice deep breathing exercises! Scan us! 🫁", target: "lungs" },
+        { q: "I help you solve math puzzles, remember names, and tell your body how to move. Find me! 🧠", target: "brain" },
+        { q: "The yummy food you eat lands here to be broken down into energy. Scan this food pouch! 胃", target: "stomach" },
+        { q: "I store energy nutrients and keep your blood clean like a tiny body superhero. Find my shape! 🪵", target: "liver" },
+        { q: "We look like two tiny dark beans and wash out all waste liquid fluids from your body. Find us! 🥔", target: "kidneys" },
+        { q: "We are long, winding tubes that absorb the good nutrients from your digested meals. Find us! 🌀", target: "intestines" },
+        { q: "Without us, your body would be floppy like jelly! We form the hard skeleton frame. Scan us! 🦴", target: "bones" },
+        { q: "We cover your bones and grow strong when you run, swim, or lift weights! Scan us! 💪", target: "muscles" },
+        { q: "I am the magic junction like your elbow or knee that lets you bend and fold your limbs. Find me! 🟢", target: "joints" },
+        { q: "We help you read text boxes, spot colorful floating balloons, and look at the world. Scan us! 👀", target: "eyes" },
+        { q: "We let you hear your teacher's voice and enjoy the happy cartoon background music. Scan us! 👂", target: "ears" },
+        { q: "I cover your whole body from head to toe to feel if an ice cube is hot or cold! Scan me! 🤚", target: "skin" },
+        { q: "I am hidden inside your mouth to let you taste if a juicy lemon is sour or sweet! Scan me! 👅", target: "tongue" },
+        { q: "I can catch the sweet scent of pretty flowers or tell if food smells bad. Scan me! 👃", target: "nose" }
+    ];
+
+    // Screen 1: Displays Brand Logo for exactly 5 seconds, then advances to Screen 2
+    setTimeout(() => {
+        document.getElementById('logoScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }, 5000);
+
+    function showInstructions() {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'flex';
+    }
+
+    function startGame() {
+        document.getElementById('instructionScreen').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'flex';
+        
+        score = 0;
+        currentQuestionIndex = 0;
+        shuffleArray(curriculumTasks);
+        gameActive = true;
+        
+        sndBgm.currentTime = 0;
+        sndBgm.play().catch(()=>{});
+
+        loadQuestion();
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+    }
+
+    function loadQuestion() {
+        attemptsLeft = 2;
+        feedbackTimer = 0;
+        document.getElementById('hintPrompt').style.display = "none";
+        updateHUD();
+        document.getElementById('targetPrompt').innerText = curriculumTasks[currentQuestionIndex].q;
+    }
+
+    function updateHUD() {
+        document.getElementById('scoreLabel').innerText = `Score: ${score} / 15`;
+        document.getElementById('attemptsLabel').innerText = `Attempts Left: ${attemptsLeft}`;
+    }
+
+    function getCanvasCoords(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (clientX - rect.left) / scaleFactor,
+            y: (clientY - rect.top) / scaleFactor
+        };
+    }
+
+    function handleStart(clientX, clientY) {
+        if (!gameActive || feedbackTimer > 0) return;
+        const coords = getCanvasCoords(clientX, clientY);
+        let dist = Math.sqrt((coords.x - scanner.x) ** 2 + (coords.y - scanner.y) ** 2);
+        
+        if (dist < scanner.radius + 25) {
+            scanner.isDragging = true;
+            scanner.x = coords.x;
+            scanner.y = coords.y;
+        }
+    }
+
+    function handleMove(clientX, clientY) {
+        if (!scanner.isDragging) return;
+        const coords = getCanvasCoords(clientX, clientY);
+        scanner.x = Math.max(scanner.radius, Math.min(BASE_WIDTH - scanner.radius, coords.x));
+        scanner.y = Math.max(scanner.radius + 80, Math.min(BASE_HEIGHT - scanner.radius - 40, coords.y));
+    }
+
+    function handleEnd() {
+        if (!scanner.isDragging) return;
+        scanner.isDragging = false;
+        evaluateScanSelection();
+    }
+
+    window.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', handleEnd);
+
+    window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 0) handleStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+        if(e.touches.length > 0) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchend', handleEnd);
+
+    function evaluateScanSelection() {
+        let currentTargetKey = curriculumTasks[currentQuestionIndex].target;
+        let targetOrgan = organs[currentTargetKey];
+
+        let scanDistance = Math.sqrt((scanner.x - targetOrgan.x) ** 2 + (scanner.y - targetOrgan.y) ** 2);
+
+        if (scanDistance < targetOrgan.radius + 30) {
+            score++;
+            feedbackText = `✨ CORRECT! Found: ${targetOrgan.name} ✨`;
+            feedbackColor = "#16a34a";
+            feedbackTimer = 90; 
+            sndCorrect.currentTime = 0;
+            sndCorrect.play().catch(()=>{});
+            updateHUD();
+        } else {
+            attemptsLeft--;
+            sndWrong.currentTime = 0;
+            sndWrong.play().catch(()=>{});
+            
+            if (attemptsLeft > 0) {
+                feedbackText = "❌ Try Again! Move the scanner lens! ❌";
+                feedbackColor = "#dc2626";
+                feedbackTimer = 60;
+                updateHUD();
+            } else {
+                feedbackText = "💡 Check out the Hint box above! 💡";
+                feedbackColor = "#ca8a04";
+                feedbackTimer = 90;
+                document.getElementById('hintPrompt').innerText = `💡 Hint: ${targetOrgan.hint}`;
+                document.getElementById('hintPrompt').style.display = "block";
+                updateHUD();
+            }
+        }
+    }
+
+    function progressNextStep() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < curriculumTasks.length) {
+            loadQuestion();
+        } else {
+            endGameSummary();
+        }
+    }
+
+    function endGameSummary() {
+        gameActive = false;
+        sndBgm.pause();
+        sndClap.currentTime = 0;
+        sndClap.play().catch(()=>{});
+        
+        document.getElementById('uiOverlay').style.display = 'none';
+        document.getElementById('finalScore').innerText = `Final Score: ${score} / 15`;
+        document.getElementById('completionScreen').style.display = 'flex';
+    }
+
+    function restartGame() {
+        document.getElementById('completionScreen').style.display = 'none';
+        startGame();
+    }
+
+    function drawKidVector(ctx, maskMode) {
+        ctx.save();
+        
+        if (!maskMode) {
+            ctx.fillStyle = "#ffedd5"; 
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 4;
+        } else {
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+            ctx.fillStyle = "rgba(51, 65, 85, 0.9)";
+        }
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(bodyX, bodyY - 240, 55, 0, Math.PI * 2);
+        if(!maskMode) ctx.fill();
+        if(!maskMode) ctx.stroke();
+
+        // Ears
+        ctx.beginPath();
+        ctx.arc(bodyX - 58, bodyY - 235, 12, 0, Math.PI * 2);
+        ctx.arc(bodyX + 58, bodyY - 235, 12, 0, Math.PI * 2);
+        if(!maskMode) { ctx.fill(); ctx.stroke(); }
+
+        // Neck
+        if(!maskMode) ctx.fillRect(bodyX - 16, bodyY - 190, 32, 25);
+
+        // Chest/Torso Outfit
+        ctx.beginPath();
+        ctx.roundRect(bodyX - 60, bodyY - 165, 120, 210, 20);
+        if(!maskMode) {
+            ctx.fillStyle = "#bae6fd"; 
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        // Left Arm
+        ctx.save();
+        ctx.translate(bodyX - 60, bodyY - 155);
+        ctx.rotate(0.3);
+        ctx.beginPath();
+        ctx.roundRect(-24, 0, 28, 120, 12);
+        if(!maskMode) { ctx.fillStyle = "#ffedd5"; ctx.fill(); ctx.stroke(); }
+        ctx.restore();
+
+        // Right Arm
+        ctx.save();
+        ctx.translate(bodyX + 60, bodyY - 155);
+        ctx.rotate(-0.3);
+        ctx.beginPath();
+        ctx.roundRect(-4, 0, 28, 120, 12);
+        if(!maskMode) { ctx.fillStyle = "#ffedd5"; ctx.fill(); ctx.stroke(); }
+        ctx.restore();
+
+        // Left Leg
+        ctx.beginPath();
+        ctx.roundRect(bodyX - 50, bodyY + 40, 34, 180, 12);
+        if(!maskMode) { ctx.fillStyle = "#fef08a"; ctx.fill(); ctx.stroke(); } 
+
+        // Right Leg
+        ctx.beginPath();
+        ctx.roundRect(bodyX + 16, bodyY + 40, 34, 180, 12);
+        if(!maskMode) { ctx.fillStyle = "#fef08a"; ctx.fill(); ctx.stroke(); }
+
+        // External Facial Features (Only drawn outside the X-Ray lens)
+        if (!maskMode) {
+            // Eyes
+            ctx.fillStyle = "#1e3a8a";
+            ctx.beginPath();
+            ctx.arc(bodyX - 18, bodyY - 240, 6, 0, Math.PI * 2);
+            ctx.arc(bodyX + 18, bodyY - 240, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nose
+            ctx.fillStyle = "#fdba74";
+            ctx.beginPath();
+            ctx.arc(bodyX, bodyY - 228, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Smile Mouth / Tongue Area
+            ctx.strokeStyle = "#dc2626";
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.arc(bodyX, bodyY - 215, 14, 0, Math.PI);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    function drawInternalOrgans(ctx) {
+        // Skeletal Framework Layers
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        
+        ctx.beginPath();
+        ctx.moveTo(bodyX, bodyY - 165);
+        ctx.lineTo(bodyX, bodyY + 40);
+        ctx.stroke();
+
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(bodyX - 60, bodyY - 150);
+        ctx.lineTo(bodyX - 85, bodyY - 40);
+        ctx.moveTo(bodyX + 60, bodyY - 150);
+        ctx.lineTo(bodyX + 85, bodyY - 40);
+        ctx.moveTo(bodyX - 33, bodyY + 40);
+        ctx.lineTo(bodyX - 33, bodyY + 200);
+        ctx.moveTo(bodyX + 33, bodyY + 40);
+        ctx.lineTo(bodyX + 33, bodyY + 200);
+        ctx.stroke();
+
+        // Muscles Layer
+        ctx.fillStyle = "rgba(239, 68, 68, 0.75)";
+        ctx.beginPath();
+        ctx.ellipse(bodyX + 75, bodyY - 100, 14, 30, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Joint Turning Pin
+        ctx.fillStyle = "#22c55e";
+        ctx.beginPath();
+        ctx.arc(bodyX - 73, bodyY - 95, 8, 0, Math.PI * 2); 
+        ctx.fill();
+
+        // Brain
+        ctx.fillStyle = "#fbcfe8";
+        ctx.beginPath();
+        ctx.arc(bodyX, bodyY - 245, 28, 0, Math.PI * 2);
+        ctx.arc(bodyX - 15, bodyY - 240, 20, 0, Math.PI * 2);
+        ctx.arc(bodyX + 15, bodyY - 240, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Nose Core Location
+        ctx.fillStyle = "#f43f5e";
+        ctx.beginPath();
+        ctx.arc(organs.nose.x, organs.nose.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tongue Vector Node
+        ctx.fillStyle = "#fda4af";
+        ctx.beginPath();
+        ctx.ellipse(organs.tongue.x, organs.tongue.y, 8, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Lungs
+        ctx.fillStyle = "#fca5a5";
+        ctx.beginPath();
+        ctx.ellipse(bodyX - 24, bodyY - 125, 20, 38, 0.1, 0, Math.PI * 2);
+        ctx.ellipse(bodyX + 24, bodyY - 125, 20, 38, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Heart
+        ctx.fillStyle = "#dc2626";
+        ctx.beginPath();
+        ctx.moveTo(bodyX - 12, bodyY - 125);
+        ctx.bezierCurveTo(bodyX - 24, bodyY - 140, bodyX - 28, bodyY - 110, bodyX - 12, bodyY - 98);
+        ctx.bezierCurveTo(bodyX + 4, bodyY - 110, bodyX, bodyY - 140, bodyX - 12, bodyY - 125);
+        ctx.fill();
+
+        // Liver
+        ctx.fillStyle = "#b45309";
+        ctx.beginPath();
+        ctx.moveTo(bodyX + 8, bodyY - 80);
+        ctx.lineTo(bodyX + 44, bodyY - 75);
+        ctx.lineTo(bodyX + 36, bodyY - 50);
+        ctx.closePath();
+        ctx.fill();
+
+        // Stomach
+        ctx.fillStyle = "#fdba74";
+        ctx.beginPath();
+        ctx.ellipse(bodyX - 20, bodyY - 65, 18, 24, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Kidneys
+        ctx.fillStyle = "#991b1b";
+        ctx.beginPath();
+        ctx.ellipse(bodyX - 16, bodyY - 20, 7, 12, 0.1, 0, Math.PI * 2);
+        ctx.ellipse(bodyX + 16, bodyY - 20, 7, 12, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Intestines Tube System
+        ctx.fillStyle = "#fef08a";
+        ctx.strokeStyle = "#eab308";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(bodyX - 28, bodyY + 10, 56, 40, 10);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (!gameActive) return;
+
+        ctx.save();
+        ctx.scale(scaleFactor, scaleFactor);
+
+        let bgGrad = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+        bgGrad.addColorStop(0, "#f0fdf4");
+        bgGrad.addColorStop(0.7, "#bbf7d0");
+        bgGrad.addColorStop(1, "#86efac");
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+        // Render External Base Character Layer
+        drawKidVector(ctx, false);
+
+        // Magic Lens Lens Mask Engine Implementation
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(scanner.x, scanner.y, scanner.radius, 0, Math.PI * 2);
+        ctx.clip(); 
+
+        drawKidVector(ctx, true);
+        drawInternalOrgans(ctx);
+        ctx.restore();
+
+        // Handle Bar Control Ring Frame Overlay
+        ctx.save();
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 14;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(scanner.x + Math.cos(Math.PI/4) * scanner.radius, scanner.y + Math.sin(Math.PI/4) * scanner.radius);
+        ctx.lineTo(scanner.x + Math.cos(Math.PI/4) * (scanner.radius + 50), scanner.y + Math.sin(Math.PI/4) * (scanner.radius + 50));
+        ctx.stroke();
+
+        ctx.strokeStyle = "#0284c7";
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.arc(scanner.x, scanner.y, scanner.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "#bae6fd";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(scanner.x, scanner.y, scanner.radius - 4, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Animated Correct/Wrong Status Feedback Banner Card
+        if (feedbackTimer > 0) {
+            feedbackTimer--;
+            
+            ctx.save();
+            ctx.fillStyle = feedbackColor;
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 5;
+            
+            let cardW = 460;
+            let cardH = 55;
+            let cardX = (BASE_WIDTH - cardW) / 2;
+            let cardY = BASE_HEIGHT - 120;
+            
+            ctx.beginPath();
+            ctx.roundRect(cardX, cardY, cardW, cardH, 18);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 18px 'Comic Sans MS'";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(feedbackText, BASE_WIDTH / 2, cardY + cardH / 2);
+            ctx.restore();
+
+            if (feedbackTimer === 0 && feedbackColor === "#16a34a") {
+                progressNextStep();
+            }
+        }
+
+        ctx.restore();
+    }
+
+    function mainAnimationLoop() {
+        render();
+        requestAnimationFrame(mainAnimationLoop);
+    }
+    
+    mainAnimationLoop();
+</script>
+</body>
+</html>
