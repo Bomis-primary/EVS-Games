@@ -7,7 +7,19 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #e0f2fe; font-family: 'Comic Sans MS', sans-serif; }
-        #gameContainer { position: relative; width: 100%; height: 100%; max-width: 600px; max-height: 900px; margin: 0 auto; background: #e0f2fe; overflow: hidden; box-shadow: 0 0 25px rgba(0,0,0,0.15); }
+        
+        /* Device-Responsive Responsive Safe Wrapper Shell */
+        #gameContainer { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            max-width: 600px; 
+            max-height: 1000px; 
+            margin: 0 auto; 
+            background: #e0f2fe; 
+            overflow: hidden; 
+            box-shadow: 0 0 25px rgba(0,0,0,0.15); 
+        }
         canvas { display: block; width: 100%; height: 100%; }
         
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 30px; text-align: center; }
@@ -70,7 +82,7 @@
     </div>
     
     <div id="completionScreen" class="screen">
-        <h1 id="completionTitle" style="font-size: 42px; margin-bottom: 15px; font-weight: 900;">Awesome! 🎉</h1>
+        <h1 id="completionTitle" style="font-size: 38px; margin-bottom: 15px; font-weight: 900;">🎈 BALLOON KING! 👑</h1>
         <p style="font-size: 20px; margin-bottom: 25px; font-weight: bold; color: #4b5563;">You sorted everything beautifully!</p>
         <div class="ui-element" id="finalScore" style="font-size: 28px; padding: 14px 35px; border-color: #34d399; background: white; margin-bottom: 35px; font-weight: 900;">Final Score: 0/11</div>
         <button class="btn" style="background: #fbbf24; color: #78350f; box-shadow: 0 8px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
@@ -83,16 +95,24 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // Core Audio Assets
+    // Audio Assets
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
     const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
     sndBgm.loop = true;
 
+    // Cross-Device Reference Dimensions (Guarantees identical positions on all aspect ratios)
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 900;
+    let scaleFactor = 1;
+
     function resize() {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        // Compute dynamic scale matrix factor
+        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
     }
     window.addEventListener('resize', resize);
     resize();
@@ -107,17 +127,15 @@
     let targetCountForLevel = 0;
     let poppedCountForLevel = 0;
 
-    // Feedback speech bubbles
     let speechBubble = { x: 0, y: 0, text: "", color: "#10b981", visible: false };
     
-    // Cute Pin Character
     let pinMascot = { 
-        homeX: 0, 
-        homeY: 0, 
-        x: 0, 
-        y: 0, 
-        targetX: 0, 
-        targetY: 0, 
+        homeX: BASE_WIDTH / 2, 
+        homeY: BASE_HEIGHT - 90, 
+        x: BASE_WIDTH / 2, 
+        y: BASE_HEIGHT - 90, 
+        targetX: BASE_WIDTH / 2, 
+        targetY: BASE_HEIGHT - 90, 
         state: "idle", 
         rotation: 0,
         frame: 0,
@@ -194,8 +212,6 @@
         freezeTimerActive = false;
         speechBubble.visible = false;
         
-        pinMascot.homeX = canvas.width / 2;
-        pinMascot.homeY = canvas.height - 85;
         pinMascot.x = pinMascot.homeX;
         pinMascot.y = pinMascot.homeY;
         pinMascot.targetX = pinMascot.homeX;
@@ -207,7 +223,6 @@
         gameActive = true;
     }
 
-    // High performance Fisher-Yates array shuffling mechanism
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -229,17 +244,16 @@
             pool.push({ data: { text: "", bubble: "Oops! Empty Balloon! 🎈" }, isCorrect: false, isBlank: true });
         }
         
-        // RANDOMIZATION FIX: Shuffles items completely clean on every level load
         shuffleArray(pool);
-        
         targetCountForLevel = data.correctItems.length;
 
-        const bRadius = 52; 
-        const centerX = canvas.width / 2;
-        const startY = 240; 
+        // Big, Accessible Touch Targets
+        const bRadius = 55; 
+        const centerX = BASE_WIDTH / 2;
+        const startY = 245; 
         
-        const rowHeight = bRadius * 1.55; 
-        const hSpacing = bRadius * 1.82;  
+        const rowHeight = bRadius * 1.52; 
+        const hSpacing = bRadius * 1.80;  
 
         const matrixSchema = [
             { r: 0, cCount: 4, xOffsets: [-1.5, -0.5, 0.5, 1.5] },
@@ -247,7 +261,6 @@
             { r: 2, cCount: 4, xOffsets: [-1.5, -0.5, 0.5, 1.5] }
         ];
 
-        // Randomly shuffle background color arrangements too
         const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#55efc4", "#fd79a8", "#a29bfe", "#fdcb6e", "#e17055", "#00cec9", "#ff9ff3", "#54a0ff", "#10ac84"];
         shuffleArray(colors);
 
@@ -297,8 +310,10 @@
         if (!gameActive || freezeTimerActive || pinMascot.state !== "idle") return;
 
         const rect = canvas.getBoundingClientRect();
-        const tapX = clientX - rect.left;
-        const tapY = clientY - rect.top;
+        
+        // Dynamic Aspect Ratio Unscaling
+        const tapX = (clientX - rect.left) / scaleFactor;
+        const tapY = (clientY - rect.top) / scaleFactor;
 
         for (let i = 0; i < activeBalloons.length; i++) {
             let b = activeBalloons[i];
@@ -306,7 +321,7 @@
 
             let dx = tapX - b.x;
             let dy = tapY - b.y;
-            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 12) { 
+            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 15) { 
                 pinMascot.targetX = b.x;
                 pinMascot.targetY = b.y + 15; 
                 pinMascot.state = "flying";
@@ -385,8 +400,8 @@
             title.innerText = "Try Again! 👍";
             title.style.color = "#dc2626";
         } else {
-            title.innerText = "Super Popper! 🏆";
-            title.style.color = "#059669";
+            title.innerText = "🎈 BALLOON KING! 👑";
+            title.style.color = "#ea580c";
             sndClap.currentTime = 0;
             sndClap.play().catch(()=>{});
         }
@@ -547,13 +562,13 @@
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 4;
         
-        let bW = 200;
-        let bH = 46;
+        let bW = 220;
+        let bH = 50;
         let tX = bx - bW / 2;
-        let tY = by - 95;
+        let tY = by - 105;
 
         if (tX < 12) tX = 12;
-        if (tX + bW > canvas.width) tX = canvas.width - bW - 12;
+        if (tX + bW > BASE_WIDTH) tX = BASE_WIDTH - bW - 12;
 
         ctx.beginPath();
         ctx.roundRect(tX, tY, bW, bH, 16);
@@ -570,7 +585,7 @@
         ctx.stroke();
 
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 14px 'Comic Sans MS'";
+        ctx.font = "bold 15px 'Comic Sans MS'";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(text, tX + bW / 2, tY + bH / 2);
@@ -582,17 +597,21 @@
 
         if (!gameActive) return;
 
-        let parkBg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        ctx.save();
+        // Dynamic Resolution Hardware Scaling Engine
+        ctx.scale(scaleFactor, scaleFactor);
+
+        let parkBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
         parkBg.addColorStop(0, "#e0f2fe");
         parkBg.addColorStop(0.55, "#f0fdf4");
         parkBg.addColorStop(1, "#baffc9");
         ctx.fillStyle = parkBg;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
 
         ctx.fillStyle = "#22c55e";
         ctx.beginPath();
-        ctx.arc(100, canvas.height + 180, 280, 0, Math.PI * 2);
-        ctx.arc(canvas.width - 60, canvas.height + 210, 310, 0, Math.PI * 2);
+        ctx.arc(100, BASE_HEIGHT + 180, 280, 0, Math.PI * 2);
+        ctx.arc(BASE_WIDTH - 60, BASE_HEIGHT + 210, 310, 0, Math.PI * 2);
         ctx.fill();
 
         activeBalloons.forEach(b => {
@@ -622,23 +641,26 @@
             ctx.fill();
 
             if (!b.isBlank) {
-                let badgeW = b.radius * 1.68; 
-                let badgeH = 32; 
+                // Expanded badge container box for oversized fonts
+                let badgeW = b.radius * 1.76; 
+                let badgeH = 38; 
                 ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
                 ctx.beginPath();
-                ctx.roundRect(-badgeW / 2, -badgeH / 2, badgeW, badgeH, 8);
+                ctx.roundRect(-badgeW / 2, -badgeH / 2, badgeW, badgeH, 10);
                 ctx.fill();
                 ctx.stroke();
 
                 ctx.fillStyle = "#1e3a8a";
-                ctx.font = "bold 12px 'Comic Sans MS'"; 
+                // CRITICAL IMPROVEMENT: Extra bold 15px sans-serif labels for grade-school reading ease
+                ctx.font = "bold 15px 'Comic Sans MS'"; 
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 
-                drawWrappedText(ctx, b.item.text, 0, 0, badgeW - 4, 13);
+                // Optimized text spacing matrix line height
+                drawWrappedText(ctx, b.item.text, 0, 0, badgeW - 4, 16);
             } else {
                 ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-                ctx.font = "bold 20px 'Comic Sans MS'";
+                ctx.font = "bold 24px 'Comic Sans MS'";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText("✨", 0, -2);
@@ -652,6 +674,8 @@
         if (speechBubble.visible) {
             drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
         }
+
+        ctx.restore();
     }
 
     function mainLoop() {
