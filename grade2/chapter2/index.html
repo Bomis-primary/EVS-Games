@@ -3,501 +3,490 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Food Crush - Grade 2</title>
+    <title>Food Crush Mania</title>
     <style>
-        /* Design Blueprint: Soft, Cute pastel colors suited for Grade 2 */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #fcf6bd; font-family: 'Comic Sans MS', 'Chalkboard SE', Arial, sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #ffebf0; font-family: 'Arial Rounded MT Bold', 'Chalkboard SE', sans-serif; }
         
+        /* Vibrant Candy Crush inspired interface background wrap */
         #gameWrapper {
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, #fcf6bd 0%, #d0f4de 100%);
+            background: radial-gradient(circle, #ffebf0 0%, #ffccd5 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 10px;
+            padding: 12px;
             position: relative;
         }
 
-        /* Top Bar Indicators */
-        #hudBar {
+        /* Juicy Candy Crush Styled Level HUD headers */
+        #levelBanner {
             width: 100%;
-            max-width: 420px;
+            max-width: 430px;
+            background: linear-gradient(180deg, #ff6b8b 0%, #ff477e 100%);
+            border: 4px solid #ffffff;
+            border-radius: 20px;
+            padding: 8px 12px;
+            text-align: center;
+            box-shadow: 0 6px 16px rgba(255, 71, 126, 0.4);
+            color: #ffffff;
+        }
+        #levelTitle { font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 1px 2px 0px rgba(0,0,0,0.2); }
+        #levelTask { font-size: 13px; font-weight: bold; background: rgba(0, 0, 0, 0.15); border-radius: 10px; padding: 2px 8px; margin-top: 4px; display: inline-block; }
+
+        #statsBar {
+            width: 100%;
+            max-width: 430px;
             display: flex;
             justify-content: space-between;
+            margin: 6px 0;
+        }
+        .stat-pill {
+            background: #ffffff;
+            border: 3px solid #ffccd5;
+            border-radius: 16px;
+            padding: 6px 14px;
+            font-size: 14px;
+            font-weight: 900;
+            color: #ff477e;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 8px 16px;
-            border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            font-size: clamp(14px, 4.5vw, 18px);
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 5px;
+            gap: 6px;
         }
 
-        #targetBox {
-            background: #ff9f1c;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: clamp(12px, 3.8vw, 15px);
-        }
-
-        /* The Grid Board Layout */
+        /* Ultimate Vibrant Round Candy Grid Container */
         #boardContainer {
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 420px;
+            max-width: 430px;
             aspect-ratio: 1/1;
-            padding: 5px;
         }
-
         #gridBoard {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             grid-template-rows: repeat(6, 1fr);
-            gap: 6px;
+            gap: 8px;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.6);
-            border: 8px solid #a9def9;
-            border-radius: 24px;
-            padding: 6px;
-            box-shadow: 0 10px 20px rgba(165,180,200,0.2);
+            background: rgba(255, 255, 255, 0.85);
+            border: 8px solid #ff8fa3;
+            border-radius: 32px;
+            padding: 10px;
+            box-shadow: 0 12px 28px rgba(255, 143, 163, 0.3);
+            position: relative;
         }
 
-        /* Interactive Grid Item Elements */
+        /* Completely unique circle items */
         .tile {
-            background: #ffffff;
-            border-radius: 14px;
+            background: radial-gradient(circle, #ffffff 40%, #f0f0f0 100%);
+            border: 3px solid #e2e8f0;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(24px, 8vw, 36px);
+            font-size: clamp(26px, 8.5vw, 38px);
             cursor: pointer;
-            box-shadow: 0 4px 0 #e2e8f0;
-            transition: transform 0.1s ease, background-color 0.2s;
+            box-shadow: 0 6px 0 #cbd5e1;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
-            transform: translateZ(0);
         }
-        .tile:active { transform: scale(0.92); }
-        .tile.selected { background-color: #ffc6ff; border: 3px solid #bdb2ff; box-shadow: none; }
-        .tile.junk-tile { background-color: #ffe5ec; }
-
-        /* Animation States */
-        @keyframes popOut {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(0); opacity: 0; }
+        .tile:active { transform: scale(0.9); }
+        .tile.selected { 
+            background: radial-gradient(circle, #fff0f5 20%, #ffb6c1 100%);
+            border-color: #ff477e; 
+            box-shadow: 0 2px 0 #ff477e;
+            transform: scale(1.08);
+            animation: pulseTile 0.6s infinite alternate;
         }
-        .pop-anim { animation: popOut 0.25s ease-out forwards; }
 
-        /* Full Screen Overlay Screens */
-        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 100; }
-        
-        #screenLogo { background: #ffffff; z-index: 300; }
-        #screenLogo img { max-width: 65%; max-height: 40%; object-fit: contain; }
-
-        #screenTitle { background: linear-gradient(135deg, #fcf6bd 0%, #e8c1ff 100%); z-index: 200; }
-        #screenIntro { background: #e8f5e9; z-index: 150; color: #2e7d32; }
-        #screenEnd { background: linear-gradient(135deg, #c1fba4 0%, #ffc6ff 100%); display: none; z-index: 250; }
-
-        /* Style Controls for Text Hierarchy */
-        .game-title { font-size: clamp(38px, 11vw, 56px); color: #ff6b8b; font-weight: 900; line-height: 1.1; margin-bottom: 10px; text-shadow: 2px 2px 0 white; }
-        .sub-heading { font-size: clamp(16px, 4.5vw, 22px); color: #4a5568; font-weight: bold; margin-bottom: 25px; }
-        
-        .card-panel { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); max-width: 380px; width: 90%; }
-        .instruction-item { display: flex; align-items: center; gap: 12px; font-size: clamp(14px, 4vw, 17px); text-align: left; margin-bottom: 15px; font-weight: bold; color: #4a5568; }
-
-        .action-btn { background: #ff6b8b; color: white; border: none; padding: 14px 45px; font-size: clamp(16px, 4.5vw, 20px); font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #d94e6d; margin-top: 15px; -webkit-tap-highlight-color: transparent; }
-        .action-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #d94e6d; }
-
-        /* Bottom Status Character Dialogue Box */
-        #footerBanner {
+        /* Control Utility Toolbar Buttons */
+        #controlRow {
             width: 100%;
-            max-width: 420px;
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 10px 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            max-width: 430px;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: clamp(13px, 3.6vw, 15px);
-            font-weight: bold;
-            color: #4a5568;
+            justify-content: center;
+            gap: 15px;
             margin-top: 5px;
         }
-        .avatar { font-size: 30px; background: #ffe5ec; padding: 4px; border-radius: 50%; }
+        .util-btn {
+            background: linear-gradient(180deg, #4ed964 0%, #34c759 100%);
+            border: 3px solid #ffffff;
+            color: white;
+            padding: 8px 22px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3);
+        }
+        .util-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        @keyframes pulseTile { 0% { transform: scale(1.04); } 100% { transform: scale(1.12); } }
+        @keyframes popOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
+        .pop-anim { animation: popOut 0.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
+
+        /* Full Screen Layers overlay setup */
+        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 100; }
+        #screenLogo { background: #ffffff; z-index: 300; }
+        #screenLogo img { max-width: 70%; max-height: 40%; object-fit: contain; }
+
+        #screenTitle { background: linear-gradient(135deg, #ffebf0 0%, #ffccd5 100%); z-index: 200; }
+        #screenIntro { background: #fff0f3; z-index: 150; }
+        #screenEnd { background: radial-gradient(circle, #e8f5e9 0%, #c8e6c9 100%); display: none; z-index: 250; }
+
+        .game-title { font-size: clamp(42px, 12vw, 60px); color: #ff477e; font-weight: 900; text-transform: uppercase; line-height: 1; letter-spacing: -1px; text-shadow: 3px 4px 0 white; margin-bottom: 20px; }
+        .action-btn { background: linear-gradient(180deg, #ff7b93 0%, #ff477e 100%); color: white; border: 4px solid white; padding: 14px 45px; font-size: clamp(16px, 4.5vw, 22px); font-weight: 900; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 14px rgba(255, 71, 126, 0.3); }
+        .action-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        .popup-card { background: white; border: 4px solid #ff8fa3; border-radius: 28px; padding: 25px; width: 92%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .rule-line { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: bold; text-align: left; margin-bottom: 14px; color: #4a5568; }
     </style>
 </head>
 <body>
 
 <div id="gameWrapper">
+    <!-- Screen 1: Innovine Splash -->
     <div id="screenLogo" class="layer">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
+    <!-- Screen 2: Food Crush Title Screen -->
     <div id="screenTitle" class="layer">
-        <h1 class="game-title">Food<br><span style="color: #4ed964;">Crush</span></h1>
-        <p class="sub-heading">Grade 2 Science Journey</p>
+        <h1 class="game-title">Food<br><span style="color: #ff7b93;">Crush</span></h1>
         <button class="action-btn" onclick="showInstructions()">PLAY ▶</button>
     </div>
 
+    <!-- Screen 3: Interactive Instruction Board Map -->
     <div id="screenIntro" class="layer">
-        <div class="card-panel">
-            <h2 style="color: #2e7d32; margin-bottom: 20px; font-size: 22px;">How to Play!</h2>
-            <div class="instruction-item">
-                <span style="font-size: 24px;">🌱</span>
-                <span>Match 3 healthy items from PLANTS (Apple, Banana) or ANIMALS (Milk, Eggs) to score!</span>
-            </div>
-            <div class="instruction-item">
-                <span style="font-size: 24px;">🍔</span>
-                <span>Watch out! Avoid matching Junk Foods (Burgers, Soda, Pizza) from the board!</span>
-            </div>
-            <div class="instruction-item">
-                <span style="font-size: 24px;">🏆</span>
-                <span>Collect 10 healthy food matches to complete your quest!</span>
-            </div>
-            <button class="action-btn" style="background: #2e7d32; box-shadow: 0 6px 0 #1b5e20;" onclick="startGame()">START GAME 🚀</button>
+        <div class="popup-card">
+            <h2 style="color: #ff477e; margin-bottom: 15px;">Your Mission!</h2>
+            <div class="rule-line"><span>🌱</span><span>Level 1: Match foods from Plants!</span></div>
+            <div class="rule-line"><span>🥛</span><span>Level 2: Match foods from Animals!</span></div>
+            <div class="rule-line"><span>🍏</span><span>Level 3: Match Healthy items to drop Junk items!</span></div>
+            <div class="rule-line"><span>💪</span><span>Level 4: Match Body-Building & Protective items!</span></div>
+            <button class="action-btn" onclick="startCurrentLevel()">CRUSH IT! 🚀</button>
         </div>
     </div>
 
-    <div id="hudBar">
-        <span id="labelScore">⭐ Score: 0</span>
-        <div id="targetBox">Target Left: 10</div>
+    <!-- Levels Title Dynamic Track -->
+    <div id="levelBanner">
+        <div id="levelTitle">Level 1: Plant Power</div>
+        <div id="levelTask">Match Apple or Banana items!</div>
     </div>
 
+    <!-- Live Performance Stat Indicators Bar -->
+    <div id="statsBar">
+        <div class="stat-pill" id="lblScore">⭐ 0</div>
+        <div class="stat-pill" style="background:#ff477e; color:white; border-color:white;" id="lblTarget">Targets Left: 5</div>
+    </div>
+
+    <!-- Round Candy Grid Matrix Box -->
     <div id="boardContainer">
         <div id="gridBoard"></div>
     </div>
 
-    <div id="footerBanner">
-        <span class="avatar">🐯</span>
-        <span id="dialogueText">Match the healthy plant and animal foods! Avoid the junk foods!</span>
+    <!-- Controls Row Panel Toolbar -->
+    <div id="controlRow">
+        <button class="util-btn" onclick="triggerUndo()">↩️ UNDO SWAP</button>
     </div>
 
+    <!-- Screen 5: Game Completion End Screen -->
     <div id="screenEnd" class="layer">
-        <h1 class="game-title" id="endTitle" style="color: #2e7d32;">QUEST CLEAR!</h1>
-        <div class="card-panel" style="margin: 20px 0;">
-            <p style="font-size: 20px; font-weight: bold; color: #4a5568;" id="finalScoreText">Final Score: 0</p>
-            <p style="font-size: 15px; color: #718096; margin-top: 10px;">You are an expert on healthy eating habits!</p>
+        <h1 class="game-title" style="color: #2e7d32;">WINNER! 🏆</h1>
+        <div class="popup-card" style="border-color: #a1c4fd; margin-bottom: 20px;">
+            <p style="font-size: 22px; font-weight: 900; color: #2e7d32;" id="lblFinalScore">Final Score: 0</p>
+            <p style="font-weight: bold; color: #718096; margin-top: 8px;">Amazing job learning about healthy food options!</p>
         </div>
-        <button class="action-btn" onclick="location.reload()">PLAY AGAIN 🔄</button>
+        <button class="action-btn" style="background:linear-gradient(180deg, #4caf50 0%, #2e7d32 100%); border-color:white;" onclick="location.reload()">PLAY AGAIN 🔄</button>
     </div>
 </div>
 
 <script>
-    // Audio Node Architecture Maps
+    // System Sound Tracks Mapping
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
     const sndBgm = new Audio('assets/playfulsong.mp3');
     sndBgm.loop = true;
 
-    // Grid Dimensions and Items Definition
-    const BOARD_ROWS = 6;
-    const BOARD_COLS = 6;
+    const GRID_SIZE = 6;
     
-    // Healthy Items: Plant & Animal Sources
-    const HEALTHY_ITEMS = [
-        { symbol: "🍎", name: "Apple", type: "plant" },
-        { symbol: "🍌", name: "Banana", type: "plant" },
-        { symbol: "🥛", name: "Milk", type: "animal" },
-        { symbol: "🥚", name: "Eggs", type: "animal" },
-        { symbol: "🧀", name: "Cheese", type: "animal" }
-    ];
+    const ITEMS = {
+        apple:  { symbol: "🍎", type: "plant",  group: "protective" },
+        banana: { symbol: "🍌", type: "plant",  group: "energy" },
+        milk:   { symbol: "🥛", type: "animal", group: "bodybuilding" },
+        eggs:   { symbol: "🥚", type: "animal", group: "bodybuilding" },
+        cheese: { symbol: "🧀", type: "animal", group: "bodybuilding" },
+        burger: { symbol: "🍔", type: "junk",   group: "unhealthy" },
+        pizza:  { symbol: "🍕", type: "junk",   group: "unhealthy" },
+        soda:   { symbol: "🥤", type: "junk",   group: "unhealthy" }
+    };
 
-    // Unhealthy Blocker Items
-    const JUNK_ITEMS = [
-        { symbol: "🍔", name: "Burger", type: "junk" },
-        { symbol: "🍕", name: "Pizza", type: "junk" },
-        { symbol: "🥤", name: "Soda", type: "junk" }
-    ];
-
-    let gameBoard = [];
+    let currentLevel = 1;
     let score = 0;
-    let healthyMatchesNeeded = 10;
-    let firstSelectedTile = null;
-    let inputLock = false;
+    let levelTargetCount = 5;
+    let boardState = [];
+    let activeSelection = null;
+    let lockControls = false;
+    let lastExecutedSwap = null;
 
-    // Branding: Auto-dismiss splash screen after exactly 5 seconds
-    setTimeout(() => {
-        document.getElementById('screenLogo').style.display = 'none';
-    }, 5000);
+    // Splash Timer Setup
+    setTimeout(() => { document.getElementById('screenLogo').style.display = 'none'; }, 5000);
 
-    function showInstructions() {
-        document.getElementById('screenTitle').style.display = 'none';
-    }
-
-    function startGame() {
+    function showInstructions() { document.getElementById('screenTitle').style.display = 'none'; }
+    
+    function startCurrentLevel() {
         document.getElementById('screenIntro').style.display = 'none';
-        score = 0;
-        healthyMatchesNeeded = 10;
-        updateHUD();
-        buildBoard();
-        
-        sndBgm.currentTime = 0;
-        sndBgm.play().catch(() => {});
+        levelTargetCount = 5;
+        updateHUDView();
+        buildCandyBoard();
+        if(currentLevel === 1) { sndBgm.currentTime = 0; sndBgm.play().catch(()=>{}); }
     }
 
-    // Build randomized game grid ensuring no accidental initial lines of 3
-    function buildBoard() {
+    function buildCandyBoard() {
         const boardEl = document.getElementById('gridBoard');
         boardEl.innerHTML = "";
-        gameBoard = [];
+        boardState = [];
 
-        for (let r = 0; r < BOARD_ROWS; r++) {
-            gameBoard[r] = [];
-            for (let c = 0; c < BOARD_COLS; c++) {
-                let validTile = getRandomTileItem();
-                
-                // Regenerate tile item if it accidentally forms a match-3 instantly
-                while (willFormInitialMatch(r, c, validTile)) {
-                    validTile = getRandomTileItem();
-                }
+        for (let r = 0; r < GRID_SIZE; r++) {
+            boardState[r] = [];
+            for (let c = 0; c < GRID_SIZE; c++) {
+                let item = getRandomItem();
+                while (checkForInitialMatch3(r, c, item)) { item = getRandomItem(); }
+                boardState[r][c] = item;
 
-                gameBoard[r][c] = validTile;
-
-                const tileDiv = document.createElement('div');
-                tileDiv.id = `tile-${r}-${c}`;
-                tileDiv.className = `tile ${validTile.type === 'junk' ? 'junk-tile' : ''}`;
-                tileDiv.innerText = validTile.symbol;
-                
-                // Interaction triggers handling both mouse and mobile touch profiles
-                tileDiv.addEventListener('click', () => handleTileClick(r, c));
-                boardEl.appendChild(tileDiv);
+                const tileEl = document.createElement('div');
+                tileEl.id = `tile-${r}-${c}`;
+                tileEl.className = "tile";
+                tileEl.innerText = item.symbol;
+                tileEl.addEventListener('click', () => handleSelect(r, c));
+                boardEl.appendChild(tileEl);
             }
         }
+        verifyBoardHasPotentialMatches();
     }
 
-    function getRandomTileItem() {
-        // 75% Healthy Items, 25% Junk Food Blockers to maintain high engagement
-        if (Math.random() > 0.25) {
-            return HEALTHY_ITEMS[Math.floor(Math.random() * HEALTHY_ITEMS.length)];
-        } else {
-            return JUNK_ITEMS[Math.floor(Math.random() * JUNK_ITEMS.length)];
-        }
+    function getRandomItem() {
+        const keys = Object.keys(ITEMS);
+        return ITEMS[keys[Math.floor(Math.random() * keys.length)]];
     }
 
-    function willFormInitialMatch(r, c, item) {
-        if (c >= 2 && gameBoard[r][c-1]?.symbol === item.symbol && gameBoard[r][c-2]?.symbol === item.symbol) return true;
-        if (r >= 2 && gameBoard[r-1][c]?.symbol === item.symbol && gameBoard[r-2][c]?.symbol === item.symbol) return true;
+    function checkForInitialMatch3(r, c, item) {
+        if (c >= 2 && boardState[r][c-1]?.symbol === item.symbol && boardState[r][c-2]?.symbol === item.symbol) return true;
+        if (r >= 2 && boardState[r-1][c]?.symbol === item.symbol && boardState[r-2][c]?.symbol === item.symbol) return true;
         return false;
     }
 
-    function handleTileClick(r, c) {
-        if (inputLock) return;
+    function handleSelect(r, c) {
+        if (lockControls) return;
+        const clickedEl = document.getElementById(`tile-${r}-${c}`);
 
-        const clickedElement = document.getElementById(`tile-${r}-${c}`);
-
-        if (!firstSelectedTile) {
-            firstSelectedTile = { r, c, element: clickedElement };
-            clickedElement.classList.add('selected');
+        if (!activeSelection) {
+            activeSelection = { r, c, element: clickedEl };
+            clickedEl.classList.add('selected');
         } else {
-            // Unselect if clicking the same tile again
-            if (firstSelectedTile.r === r && firstSelectedTile.c === c) {
-                firstSelectedTile.element.classList.remove('selected');
-                firstSelectedTile = null;
+            if (activeSelection.r === r && activeSelection.c === c) {
+                clickedEl.classList.remove('selected');
+                activeSelection = null;
                 return;
             }
 
-            // Check adjacency
-            const isAdjacent = (Math.abs(firstSelectedTile.r - r) + Math.abs(firstSelectedTile.c - c)) === 1;
-
-            if (isAdjacent) {
-                executeSwap(firstSelectedTile.r, firstSelectedTile.c, r, c);
+            const dist = Math.abs(activeSelection.r - r) + Math.abs(activeSelection.c - c);
+            if (dist === 1) {
+                swapTilesAction(activeSelection.r, activeSelection.c, r, c, true);
             } else {
-                // Change selection to the newly clicked tile if not adjacent
-                firstSelectedTile.element.classList.remove('selected');
-                firstSelectedTile = { r, c, element: clickedElement };
-                clickedElement.classList.add('selected');
+                activeSelection.element.classList.remove('selected');
+                activeSelection = { r, c, element: clickedEl };
+                clickedEl.classList.add('selected');
             }
         }
     }
 
-    async function executeSwap(r1, c1, r2, c2) {
-        inputLock = true;
-        firstSelectedTile.element.classList.remove('selected');
+    async function swapTilesAction(r1, c1, r2, c2, recordHistory = true) {
+        lockControls = true;
+        if(activeSelection) activeSelection.element.classList.remove('selected');
+        activeSelection = null;
 
-        const el1 = document.getElementById(`tile-${r1}-${c1}`);
-        const el2 = document.getElementById(`tile-${r2}-${c2}`);
+        if (recordHistory) { lastExecutedSwap = { r1, c1, r2, c2 }; }
 
-        // Visual swapping movement simulation
-        let tempItem = gameBoard[r1][c1];
-        gameBoard[r1][c1] = gameBoard[r2][c2];
-        gameBoard[r2][c2] = tempItem;
+        let t1 = boardState[r1][c1];
+        boardState[r1][c1] = boardState[r2][c2];
+        boardState[r2][c2] = t1;
 
-        el1.innerText = gameBoard[r1][c1].symbol;
-        el2.innerText = gameBoard[r2][c2].symbol;
-        
-        // Re-classify junk-tile background styling updates after swap
-        updateTileClass(el1, gameBoard[r1][c1]);
-        updateTileClass(el2, gameBoard[r2][c2]);
+        document.getElementById(`tile-${r1}-${c1}`).innerText = boardState[r1][c1].symbol;
+        document.getElementById(`tile-${r2}-${c2}`).innerText = boardState[r2][c2].symbol;
 
-        // Evaluate Matches
-        let matches = checkGridMatches();
-
-        if (matches.length > 0) {
-            await resolveMatches(matches);
+        let matchedCoordinates = evaluateBoardMatches();
+        if (matchedCoordinates.length > 0) {
+            await resolveGridCascades(matchedCoordinates);
         } else {
-            // Reverse swap if no valid match-3 occurs
-            let reverseItem = gameBoard[r1][c1];
-            gameBoard[r1][c1] = gameBoard[r2][c2];
-            gameBoard[r2][c2] = reverseItem;
-
-            el1.innerText = gameBoard[r1][c1].symbol;
-            el2.innerText = gameBoard[r2][c2].symbol;
-            updateTileClass(el1, gameBoard[r1][c1]);
-            updateTileClass(el2, gameBoard[r2][c2]);
-            
-            document.getElementById('dialogueText').innerText = "Try making a different match! Look for healthy rows!";
+            if (recordHistory) {
+                // Reverse invalid player move automatically
+                let t2 = boardState[r1][c1];
+                boardState[r1][c1] = boardState[r2][c2];
+                boardState[r2][c2] = t2;
+                document.getElementById(`tile-${r1}-${c1}`).innerText = boardState[r1][c1].symbol;
+                document.getElementById(`tile-${r2}-${c2}`).innerText = boardState[r2][c2].symbol;
+                sndWrong.currentTime = 0; sndWrong.play().catch(()=>{});
+            }
         }
-
-        firstSelectedTile = null;
-        inputLock = false;
+        lockControls = false;
     }
 
-    function updateTileClass(element, item) {
-        if (item.type === 'junk') {
-            element.classList.add('junk-tile');
-        } else {
-            element.classList.remove('junk-tile');
-        }
+    function triggerUndo() {
+        if (lockControls || !lastExecutedSwap) return;
+        const { r1, c1, r2, c2 } = lastExecutedSwap;
+        swapTilesAction(r1, c1, r2, c2, false);
+        lastExecutedSwap = null;
     }
 
-    function checkGridMatches() {
-        let matchTiles = new Set();
-
-        // Horizontal Scanning
-        for (let r = 0; r < BOARD_ROWS; r++) {
-            for (let c = 0; c < BOARD_COLS - 2; c++) {
-                let t1 = gameBoard[r][c], t2 = gameBoard[r][c+1], t3 = gameBoard[r][c+2];
-                if (t1 && t2 && t3 && t1.symbol === t2.symbol && t1.symbol === t3.symbol) {
-                    matchTiles.add(`${r},${c}`);
-                    matchTiles.add(`${r},${c+1}`);
-                    matchTiles.add(`${r},${c+2}`);
+    function evaluateBoardMatches() {
+        let matchedSet = new Set();
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE - 2; c++) {
+                if (boardState[r][c] && boardState[r][c+1] && boardState[r][c+2] &&
+                    boardState[r][c].symbol === boardState[r][c+1].symbol && boardState[r][c].symbol === boardState[r][c+2].symbol) {
+                    matchedSet.add(`${r},${c}`); matchedSet.add(`${r},${c+1}`); matchedSet.add(`${r},${c+2}`);
                 }
             }
         }
-
-        // Vertical Scanning
-        for (let c = 0; c < BOARD_COLS; c++) {
-            for (let r = 0; r < BOARD_ROWS - 2; r++) {
-                let t1 = gameBoard[r][c], t2 = gameBoard[r+1][c], t3 = gameBoard[r+2][c];
-                if (t1 && t2 && t3 && t1.symbol === t2.symbol && t1.symbol === t3.symbol) {
-                    matchTiles.add(`${r},${c}`);
-                    matchTiles.add(`${r+1},${c}`);
-                    matchTiles.add(`${r+2},${c}`);
+        for (let c = 0; c < GRID_SIZE; c++) {
+            for (let r = 0; r < GRID_SIZE - 2; r++) {
+                if (boardState[r][c] && boardState[r+1][c] && boardState[r+2][c] &&
+                    boardState[r][c].symbol === boardState[r+1][c].symbol && boardState[r][c].symbol === boardState[r+2][c].symbol) {
+                    matchedSet.add(`${r},${c}`); matchedSet.add(`${r+1},${c}`); matchedSet.add(`${r+2},${c}`);
                 }
             }
         }
-
-        return Array.from(matchTiles).map(coord => {
-            let [r, c] = coord.split(',').map(Number);
-            return { r, c };
-        });
+        return Array.from(matchedSet).map(s => { const [r,c] = s.split(',').map(Number); return {r,c}; });
     }
 
-    async function resolveMatches(matches) {
-        let healthyPointsScored = 0;
-        let junkMatchDetected = false;
+    async function resolveGridCascades(matches) {
+        let levelMatchCounted = false;
 
-        // Visual clear animations triggered
         matches.forEach(coord => {
-            let el = document.getElementById(`tile-${coord.r}-${coord.c}`);
-            el.classList.add('pop-anim');
-            
-            if (gameBoard[coord.r][coord.c].type !== 'junk') {
-                healthyPointsScored++;
-            } else {
-                junkMatchDetected = true;
-            }
+            let item = boardState[coord.r][coord.c];
+            if (!item) return;
+
+            // Level Rule Validations
+            if (currentLevel === 1 && item.type === "plant") levelMatchCounted = true;
+            if (currentLevel === 2 && item.type === "animal") levelMatchCounted = true;
+            if (currentLevel === 3 && item.type !== "junk") levelMatchCounted = true;
+            if (currentLevel === 4 && (item.group === "bodybuilding" || item.group === "protective")) levelMatchCounted = true;
+
+            document.getElementById(`tile-${coord.r}-${coord.c}`).classList.add('pop-anim');
         });
 
-        // Play feedback sounds according to user input profile
-        if (junkMatchDetected) {
-            sndWrong.currentTime = 0;
-            sndWrong.play().catch(() => {});
-            document.getElementById('dialogueText').innerText = "Oops! Remember to avoid Junk Foods! Focus on plant or animal sources!";
-        } else if (healthyPointsScored > 0) {
-            score += (healthyPointsScored * 10);
-            healthyMatchesNeeded = Math.max(0, healthyMatchesNeeded - 1);
-            sndCorrect.currentTime = 0;
-            sndCorrect.play().catch(() => {});
-            document.getElementById('dialogueText').innerText = "Fantastic matching! That is healthy food!";
+        if (levelMatchCounted) {
+            score += 10;
+            levelTargetCount = Math.max(0, levelTargetCount - 1);
+            sndCorrect.currentTime = 0; sndCorrect.play().catch(()=>{});
         }
 
-        updateHUD();
+        updateHUDView();
+        await new Promise(res => setTimeout(res, 200));
 
-        // Await animation completion
-        await new Promise(resolve => setTimeout(resolve, 250));
-
-        if (healthyMatchesNeeded <= 0) {
-            triggerGameEnd(true);
+        if (levelTargetCount <= 0) {
+            advanceNextLevelStructure();
             return;
         }
 
-        // Push layout updates dropping upper items down
-        dropGridItems();
-        refillGridBoard();
+        executeBoardGravityDrop();
+        refillBoardSpaces();
 
-        // Recursive check for cascades
-        let comboMatches = checkGridMatches();
-        if (comboMatches.length > 0) {
-            await resolveMatches(comboMatches);
-        }
+        let recursiveMatches = evaluateBoardMatches();
+        if (recursiveMatches.length > 0) { await resolveGridCascades(recursiveMatches); }
+        else { verifyBoardHasPotentialMatches(); }
     }
 
-    function dropGridItems() {
-        for (let c = 0; c < BOARD_COLS; c++) {
-            let emptySpaces = 0;
-            for (let r = BOARD_ROWS - 1; r >= 0; r--) {
+    function executeBoardGravityDrop() {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            let spaceCount = 0;
+            for (let r = GRID_SIZE - 1; r >= 0; r--) {
                 if (document.getElementById(`tile-${r}-${c}`).classList.contains('pop-anim')) {
-                    emptySpaces++;
-                    gameBoard[r][c] = null;
-                } else if (emptySpaces > 0) {
-                    gameBoard[r + emptySpaces][c] = gameBoard[r][c];
-                    gameBoard[r][c] = null;
+                    spaceCount++;
+                    boardState[r][c] = null;
+                } else if (spaceCount > 0) {
+                    boardState[r + spaceCount][c] = boardState[r][c];
+                    boardState[r][c] = null;
                 }
             }
         }
     }
 
-    function refillGridBoard() {
-        for (let r = 0; r < BOARD_ROWS; r++) {
-            for (let c = 0; c < BOARD_COLS; c++) {
+    function refillBoardSpaces() {
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
                 let el = document.getElementById(`tile-${r}-${c}`);
                 el.classList.remove('pop-anim');
-
-                if (gameBoard[r][c] === null) {
-                    gameBoard[r][c] = getRandomTileItem();
-                }
-
-                el.innerText = gameBoard[r][c].symbol;
-                updateTileClass(el, gameBoard[r][c]);
+                if (boardState[r][c] === null) { boardState[r][c] = getRandomItem(); }
+                el.innerText = boardState[r][c].symbol;
             }
         }
     }
 
-    function updateHUD() {
-        document.getElementById('labelScore').innerText = `⭐ Score: ${score}`;
-        document.getElementById('targetBox').innerText = `Target Left: ${healthyMatchesNeeded}`;
+    function verifyBoardHasPotentialMatches() {
+        // Look ahead testing function simulation. If zero matches remain, it automatically reshuffles
+        let viable = false;
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                if (c < GRID_SIZE - 1) { // Horizontal check
+                    if (testSwapMatching(r, c, r, c + 1)) viable = true;
+                }
+                if (r < GRID_SIZE - 1) { // Vertical check
+                    if (testSwapMatching(r, c, r + 1, c)) viable = true;
+                }
+            }
+        }
+        if (!viable) { buildCandyBoard(); } // Clean Shuffle
     }
 
-    function triggerGameEnd(isWin) {
-        sndBgm.pause();
-        if (isWin) {
-            sndClap.play().catch(() => {});
+    function testSwapMatching(r1, c1, r2, c2) {
+        let temp = boardState[r1][c1];
+        boardState[r1][c1] = boardState[r2][c2];
+        boardState[r2][c2] = temp;
+        let matches = evaluateBoardMatches();
+        // Restore
+        boardState[r2][c2] = boardState[r1][c1];
+        boardState[r1][c1] = temp;
+        return matches.length > 0;
+    }
+
+    function advanceNextLevelStructure() {
+        if (currentLevel < 4) {
+            currentLevel++;
+            const banner = document.getElementById('levelBanner');
+            const title = document.getElementById('levelTitle');
+            const task = document.getElementById('levelTask');
+            const intro = document.getElementById('screenIntro');
+
+            if (currentLevel === 2) {
+                title.innerText = "Level 2: Animal Treats";
+                task.innerText = "Match Milk, Eggs, or Cheese items!";
+            } else if (currentLevel === 3) {
+                title.innerText = "Level 3: Clean Plate";
+                task.innerText = "Match healthy food items next to junk blockers!";
+            } else if (currentLevel === 4) {
+                title.innerText = "Level 4: Muscle & Shield";
+                task.innerText = "Match Body-Building or Protective foods!";
+            }
+            intro.style.display = "flex";
+        } else {
+            sndBgm.pause(); sndClap.play().catch(()=>{});
+            document.getElementById('lblFinalScore').innerText = `Final Score: ${score}`;
+            document.getElementById('screenEnd').style.display = 'flex';
         }
-        document.getElementById('finalScoreText').innerText = `Final Score: ${score}`;
-        document.getElementById('screenEnd').style.display = 'flex';
+    }
+
+    function updateHUDView() {
+        document.getElementById('lblScore').innerText = `⭐ SCORE: ${score}`;
+        document.getElementById('lblTarget').innerText = `Targets Left: ${levelTargetCount}`;
     }
 </script>
 </body>
