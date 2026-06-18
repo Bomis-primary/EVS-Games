@@ -8,7 +8,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #ffebf0; font-family: 'Arial Rounded MT Bold', 'Chalkboard SE', sans-serif; }
         
-        /* Vibrant Candy Crush inspired interface background wrap */
         #gameWrapper {
             width: 100vw;
             height: 100vh;
@@ -21,7 +20,7 @@
             position: relative;
         }
 
-        /* Juicy Candy Crush Styled Level HUD headers */
+        /* Candy Crush Styled Headers */
         #levelBanner {
             width: 100%;
             max-width: 430px;
@@ -57,7 +56,7 @@
             gap: 6px;
         }
 
-        /* Ultimate Vibrant Round Candy Grid Container */
+        /* Vibrant Candy Grid */
         #boardContainer {
             flex-grow: 1;
             display: flex;
@@ -82,7 +81,6 @@
             position: relative;
         }
 
-        /* Completely unique circle items */
         .tile {
             background: radial-gradient(circle, #ffffff 40%, #f0f0f0 100%);
             border: 3px solid #e2e8f0;
@@ -105,7 +103,6 @@
             animation: pulseTile 0.6s infinite alternate;
         }
 
-        /* Control Utility Toolbar Buttons */
         #controlRow {
             width: 100%;
             max-width: 430px;
@@ -131,7 +128,7 @@
         @keyframes popOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
         .pop-anim { animation: popOut 0.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
 
-        /* Full Screen Layers overlay setup */
+        /* Full Screen Layers overlay */
         .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 100; }
         #screenLogo { background: #ffffff; z-index: 300; }
         #screenLogo img { max-width: 70%; max-height: 40%; object-fit: contain; }
@@ -139,6 +136,14 @@
         #screenTitle { background: linear-gradient(135deg, #ffebf0 0%, #ffccd5 100%); z-index: 200; }
         #screenIntro { background: #fff0f3; z-index: 150; }
         #screenEnd { background: radial-gradient(circle, #e8f5e9 0%, #c8e6c9 100%); display: none; z-index: 250; }
+
+        /* Quiz Overlay Board Layout */
+        #screenQuiz { background: rgba(0,0,0,0.6); display: none; z-index: 400; }
+        .quiz-card { background: white; border: 6px solid #ff477e; border-radius: 28px; padding: 20px; width: 95%; max-width: 400px; box-shadow: 0 12px 30px rgba(0,0,0,0.3); text-align: left; }
+        .quiz-question { font-size: 16px; font-weight: bold; color: #2d3748; margin-bottom: 15px; line-height: 1.4; background: #fff0f3; padding: 12px; border-radius: 16px; }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { background: #f8fafc; border: 2px solid #cbd5e1; padding: 12px 16px; border-radius: 16px; font-size: 15px; font-weight: bold; color: #4a5568; cursor: pointer; text-align: left; transition: all 0.1s; }
+        .option-btn:active { transform: scale(0.98); }
 
         .game-title { font-size: clamp(42px, 12vw, 60px); color: #ff477e; font-weight: 900; text-transform: uppercase; line-height: 1; letter-spacing: -1px; text-shadow: 3px 4px 0 white; margin-bottom: 20px; }
         .action-btn { background: linear-gradient(180deg, #ff7b93 0%, #ff477e 100%); color: white; border: 4px solid white; padding: 14px 45px; font-size: clamp(16px, 4.5vw, 22px); font-weight: 900; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 14px rgba(255, 71, 126, 0.3); }
@@ -162,15 +167,26 @@
         <button class="action-btn" onclick="showInstructions()">PLAY ▶</button>
     </div>
 
-    <!-- Screen 3: Interactive Instruction Board Map -->
+    <!-- Screen 3: Interactive Instruction Board -->
     <div id="screenIntro" class="layer">
         <div class="popup-card">
-            <h2 style="color: #ff477e; margin-bottom: 15px;">Your Mission!</h2>
-            <div class="rule-line"><span>🌱</span><span>Level 1: Match foods from Plants!</span></div>
-            <div class="rule-line"><span>🥛</span><span>Level 2: Match foods from Animals!</span></div>
-            <div class="rule-line"><span>🍏</span><span>Level 3: Match Healthy items to drop Junk items!</span></div>
-            <div class="rule-line"><span>💪</span><span>Level 4: Match Body-Building & Protective items!</span></div>
+            <h2 style="color: #ff477e; margin-bottom: 15px;" id="introHeading">Your Mission!</h2>
+            <div id="introRules">
+                <div class="rule-line"><span>🌱</span><span>Level 1: Match foods from Plants!</span></div>
+                <div class="rule-line"><span>🥛</span><span>Level 2: Match foods from Animals!</span></div>
+                <div class="rule-line"><span>🍏</span><span>Level 3: Match Healthy items to drop Junk items!</span></div>
+                <div class="rule-line"><span>💪</span><span>Level 4: Match Body-Building & Protective items!</span></div>
+            </div>
             <button class="action-btn" onclick="startCurrentLevel()">CRUSH IT! 🚀</button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Situational Riddle Quiz Overlay Box -->
+    <div id="screenQuiz" class="layer">
+        <div class="quiz-card">
+            <h3 style="color:#ff477e; margin-bottom: 8px; font-size: 14px;" id="quizProgress">BONUS RIDDLE!</h3>
+            <div class="quiz-question" id="quizQuestionText">Loading riddle...</div>
+            <div class="quiz-options" id="quizOptionsContainer"></div>
         </div>
     </div>
 
@@ -180,10 +196,10 @@
         <div id="levelTask">Match Apple or Banana items!</div>
     </div>
 
-    <!-- Live Performance Stat Indicators Bar -->
+    <!-- Live Performance Indicators -->
     <div id="statsBar">
         <div class="stat-pill" id="lblScore">⭐ 0</div>
-        <div class="stat-pill" style="background:#ff477e; color:white; border-color:white;" id="lblTarget">Targets Left: 5</div>
+        <div class="stat-pill" style="background:#ff477e; color:white; border-color:white;" id="lblTarget">Matches Left: 8</div>
     </div>
 
     <!-- Round Candy Grid Matrix Box -->
@@ -191,12 +207,12 @@
         <div id="gridBoard"></div>
     </div>
 
-    <!-- Controls Row Panel Toolbar -->
+    <!-- Controls Row Panel -->
     <div id="controlRow">
         <button class="util-btn" onclick="triggerUndo()">↩️ UNDO SWAP</button>
     </div>
 
-    <!-- Screen 5: Game Completion End Screen -->
+    <!-- Screen 5: Completion Screen -->
     <div id="screenEnd" class="layer">
         <h1 class="game-title" style="color: #2e7d32;">WINNER! 🏆</h1>
         <div class="popup-card" style="border-color: #a1c4fd; margin-bottom: 20px;">
@@ -208,7 +224,7 @@
 </div>
 
 <script>
-    // System Sound Tracks Mapping
+    // Audio Tracks Maps
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
@@ -228,13 +244,38 @@
         soda:   { symbol: "🥤", type: "junk",   group: "unhealthy" }
     };
 
+    // 12 Situational Questions Bank
+    const quizBank = [
+        // Set 1 (Triggered at 2 Matches)
+        { q: "Rohan is looking inside a fruit basket. He finds a yellow fruit that monkeys absolutely love to eat! Help Rohan guess what it is!", ops: ["🍎 Apple", "🍌 Banana", "🥛 Milk"], ans: 1 },
+        { q: "Simran is eating hot kheer. Her mother says the rice in the kheer comes from a plant. Where does the milk in the kheer come from?", ops: ["🌱 Plant", "🐮 Animal", "🏪 Shop only"], ans: 1 },
+        { q: "Kabir wants to eat something made from wheat seeds. Which food items are made from wheat grains?", ops: ["🥛 Milk and Cheese", "🍞 Chapati and Bread", "🍯 Honey and Eggs"], ans: 1 },
+        // Set 2 (Triggered at 4 Matches)
+        { q: "Meera wants to run very fast in her school race 🏃‍♀️. She needs lots of Energy-giving food. What should she eat?", ops: ["🥔 Potato and Rice", "🥚 Eggs and Meat", "🥬 Spinach and Water"], ans: 0 },
+        { q: "Little Sonu wants his bones and muscles to grow big and strong 💪. Which Body-building food should he drink every day?", ops: ["🥤 Fizzy Soda", "🥛 Milk", "☕ Tea"], ans: 1 },
+        { q: "Tina had a small scratch on her knee while playing. Which food group helps our body heal injuries and rebuild?", ops: ["🍔 Junk Food", "🔋 Energy-giving Food", "🧱 Body-building Food"], ans: 2 },
+        // Set 3 (Triggered at 6 Matches)
+        { q: "Appu does not want to fall sick 🤒. He needs Protective food to fight off bad germs. What should he add to his plate?", ops: ["🍕 Pizza and Burgers", "🍇 Fruits and Vegetables", "🍬 Candy and Chocolates"], ans: 1 },
+        { q: "Joy tells his friends: 'I love eating fruits, rice, and vegetables, but I never eat meat or eggs!' What kind of food eater is Joy?", ops: ["🌱 Vegetarian", "🍗 Non-vegetarian", "🛸 Alien"], ans: 0 },
+        { q: "Teacher asks: 'Cookies are made using flour, milk, and butter. Where do these things come from?' What is the correct answer?", ops: ["Only from plants", "Only from animals", "Both plants and animals"], ans: 2 },
+        // Set 4 (Triggered at 8 Matches)
+        { q: "Aarav is sitting down to eat his lunch 🍽️. What must he do before and after eating food to stay healthy?", ops: ["🧼 Wash his hands with soap", "📱 Play a game on the phone", "😴 Go straight to sleep"], ans: 0 },
+        { q: "Sarita sees an open street food cart with flies flying over the uncovered food 🪰. What will happen if she eats this street food often?", ops: ["🦸‍♀️ She will get superpowers", "🤢 It can make her fall sick", "🎂 She will win a prize"], ans: 1 },
+        { q: "Look at these three dining habits. Which one is a good and healthy habit?", ops: ["🗣️ Talking loudly while chewing food", "🗑️ Leaving half the food on the plate to waste it", "👄 Eating slowly and chewing food well"], ans: 2 }
+    ];
+
     let currentLevel = 1;
     let score = 0;
-    let levelTargetCount = 5;
+    let totalLevelCorrectMatches = 0;
+    let levelTargetCount = 8; // Complete level requires 8 valid matches total
     let boardState = [];
     let activeSelection = null;
     let lockControls = false;
     let lastExecutedSwap = null;
+
+    // Quiz Control Tracking Parameters
+    let currentQuizIndex = 0;
+    let activeQuizBatchCount = 0;
 
     // Splash Timer Setup
     setTimeout(() => { document.getElementById('screenLogo').style.display = 'none'; }, 5000);
@@ -243,7 +284,8 @@
     
     function startCurrentLevel() {
         document.getElementById('screenIntro').style.display = 'none';
-        levelTargetCount = 5;
+        totalLevelCorrectMatches = 0;
+        levelTargetCount = 8;
         updateHUDView();
         buildCandyBoard();
         if(currentLevel === 1) { sndBgm.currentTime = 0; sndBgm.play().catch(()=>{}); }
@@ -327,7 +369,6 @@
             await resolveGridCascades(matchedCoordinates);
         } else {
             if (recordHistory) {
-                // Reverse invalid player move automatically
                 let t2 = boardState[r1][c1];
                 boardState[r1][c1] = boardState[r2][c2];
                 boardState[r2][c2] = t2;
@@ -360,7 +401,7 @@
             for (let r = 0; r < GRID_SIZE - 2; r++) {
                 if (boardState[r][c] && boardState[r+1][c] && boardState[r+2][c] &&
                     boardState[r][c].symbol === boardState[r+1][c].symbol && boardState[r][c].symbol === boardState[r+2][c].symbol) {
-                    matchedSet.add(`${r},${c}`); matchedSet.add(`${r+1},${c}`); matchedSet.add(`${r+2},${c}`);
+                    matchedSet.add(`${r},${c}`); matchedSet.add(`${r+1+c}`); matchedSet.add(`${r+2},${c}`);
                 }
             }
         }
@@ -368,23 +409,23 @@
     }
 
     async function resolveGridCascades(matches) {
-        let levelMatchCounted = false;
+        let validLevelMatchCleared = false;
 
         matches.forEach(coord => {
             let item = boardState[coord.r][coord.c];
             if (!item) return;
 
-            // Level Rule Validations
-            if (currentLevel === 1 && item.type === "plant") levelMatchCounted = true;
-            if (currentLevel === 2 && item.type === "animal") levelMatchCounted = true;
-            if (currentLevel === 3 && item.type !== "junk") levelMatchCounted = true;
-            if (currentLevel === 4 && (item.group === "bodybuilding" || item.group === "protective")) levelMatchCounted = true;
+            if (currentLevel === 1 && item.type === "plant") validLevelMatchCleared = true;
+            if (currentLevel === 2 && item.type === "animal") validLevelMatchCleared = true;
+            if (currentLevel === 3 && item.type !== "junk") validLevelMatchCleared = true;
+            if (currentLevel === 4 && (item.group === "bodybuilding" || item.group === "protective")) validLevelMatchCleared = true;
 
             document.getElementById(`tile-${coord.r}-${coord.c}`).classList.add('pop-anim');
         });
 
-        if (levelMatchCounted) {
+        if (validLevelMatchCleared) {
             score += 10;
+            totalLevelCorrectMatches++;
             levelTargetCount = Math.max(0, levelTargetCount - 1);
             sndCorrect.currentTime = 0; sndCorrect.play().catch(()=>{});
         }
@@ -392,13 +433,20 @@
         updateHUDView();
         await new Promise(res => setTimeout(res, 200));
 
+        executeBoardGravityDrop();
+        refillBoardSpaces();
+
+        // Check if a riddle milestone has been breached (Every 2 Correct Matches)
+        if (validLevelMatchCleared && totalLevelCorrectMatches % 2 === 0 && totalLevelCorrectMatches <= 8) {
+            activeQuizBatchCount = 0; 
+            setTimeout(launchQuizRiddleOverlay, 300);
+            return;
+        }
+
         if (levelTargetCount <= 0) {
             advanceNextLevelStructure();
             return;
         }
-
-        executeBoardGravityDrop();
-        refillBoardSpaces();
 
         let recursiveMatches = evaluateBoardMatches();
         if (recursiveMatches.length > 0) { await resolveGridCascades(recursiveMatches); }
@@ -431,20 +479,70 @@
         }
     }
 
+    function launchQuizRiddleOverlay() {
+        if (currentQuizIndex >= quizBank.length) {
+            currentQuizIndex = 0; // Loop questions safe guard
+        }
+        
+        lockControls = true;
+        const quizData = quizBank[currentQuizIndex];
+        document.getElementById('quizProgress').innerText = `BONUS RIDDLE (${activeQuizBatchCount + 1}/3)`;
+        document.getElementById('quizQuestionText').innerText = quizData.q;
+        
+        const optionsContainer = document.getElementById('quizOptionsContainer');
+        optionsContainer.innerHTML = "";
+        
+        quizData.ops.forEach((optionText, idx) => {
+            const btn = document.createElement('button');
+            btn.className = "option-btn";
+            btn.innerText = optionText;
+            btn.onclick = () => evaluateQuizAnswer(idx, btn);
+            optionsContainer.appendChild(btn);
+        });
+        
+        document.getElementById('screenQuiz').style.display = "flex";
+    }
+
+    function evaluateQuizAnswer(selectedIdx, buttonElement) {
+        const quizData = quizBank[currentQuizIndex];
+        if (selectedIdx === quizData.ans) {
+            score += 10;
+            updateHUDView();
+            buttonElement.style.background = "#c8e6c9";
+            buttonElement.style.borderColor = "#4caf50";
+            sndCorrect.currentTime = 0; sndCorrect.play().catch(()=>{});
+            
+            setTimeout(() => {
+                currentQuizIndex++;
+                activeQuizBatchCount++;
+                if (activeQuizBatchCount < 3) {
+                    launchQuizRiddleOverlay();
+                } else {
+                    document.getElementById('screenQuiz').style.display = "none";
+                    lockControls = false;
+                    if (levelTargetCount <= 0) {
+                        advanceNextLevelStructure();
+                    } else {
+                        verifyBoardHasPotentialMatches();
+                    }
+                }
+            }, 1000);
+        } else {
+            buttonElement.style.background = "#ffcdcd";
+            buttonElement.style.borderColor = "#f44336";
+            sndWrong.currentTime = 0; sndWrong.play().catch(()=>{});
+        }
+    }
+
     function verifyBoardHasPotentialMatches() {
-        // Look ahead testing function simulation. If zero matches remain, it automatically reshuffles
         let viable = false;
         for (let r = 0; r < GRID_SIZE; r++) {
             for (let c = 0; c < GRID_SIZE; c++) {
-                if (c < GRID_SIZE - 1) { // Horizontal check
-                    if (testSwapMatching(r, c, r, c + 1)) viable = true;
-                }
-                if (r < GRID_SIZE - 1) { // Vertical check
-                    if (testSwapMatching(r, c, r + 1, c)) viable = true;
-                }
+                if (c < GRID_SIZE - 1 && testSwapMatching(r, c, r, c + 1)) viable = true;
+                if (r < GRID_SIZE - 1 && testSwapMatching(r, c, r + 1, c)) viable = true;
             }
         }
-        if (!viable) { buildCandyBoard(); } // Clean Shuffle
+        if (!viable) { buildCandyBoard(); }
     }
 
     function testSwapMatching(r1, c1, r2, c2) {
@@ -452,7 +550,6 @@
         boardState[r1][c1] = boardState[r2][c2];
         boardState[r2][c2] = temp;
         let matches = evaluateBoardMatches();
-        // Restore
         boardState[r2][c2] = boardState[r1][c1];
         boardState[r1][c1] = temp;
         return matches.length > 0;
@@ -465,16 +562,23 @@
             const title = document.getElementById('levelTitle');
             const task = document.getElementById('levelTask');
             const intro = document.getElementById('screenIntro');
+            const heading = document.getElementById('introHeading');
+            const rules = document.getElementById('introRules');
+
+            heading.innerText = `Level ${currentLevel} Unlocked!`;
 
             if (currentLevel === 2) {
                 title.innerText = "Level 2: Animal Treats";
                 task.innerText = "Match Milk, Eggs, or Cheese items!";
+                rules.innerHTML = '<div class="rule-line"><span>🥛</span><span>Now collect items sourced from Animals to complete your targets!</span></div>';
             } else if (currentLevel === 3) {
                 title.innerText = "Level 3: Clean Plate";
-                task.innerText = "Match healthy food items next to junk blockers!";
+                task.innerText = "Match healthy food items!";
+                rules.innerHTML = '<div class="rule-line"><span>🍏</span><span>Clear your plate! Avoid matches containing Junk foods!</span></div>';
             } else if (currentLevel === 4) {
                 title.innerText = "Level 4: Muscle & Shield";
                 task.innerText = "Match Body-Building or Protective foods!";
+                rules.innerHTML = '<div class="rule-line"><span>💪</span><span>Final Quest! Match Body-Building (Eggs/Milk) or Protective (Fruits) foods!</span></div>';
             }
             intro.style.display = "flex";
         } else {
@@ -486,7 +590,7 @@
 
     function updateHUDView() {
         document.getElementById('lblScore').innerText = `⭐ SCORE: ${score}`;
-        document.getElementById('lblTarget').innerText = `Targets Left: ${levelTargetCount}`;
+        document.getElementById('lblTarget').innerText = `Matches Left: ${levelTargetCount}`;
     }
 </script>
 </body>
