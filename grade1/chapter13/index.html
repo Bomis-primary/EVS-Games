@@ -207,6 +207,14 @@
         gameActive = true;
     }
 
+    // High performance Fisher-Yates array shuffling mechanism
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
     function initLevelGrid() {
         activeBalloons = [];
         poppedCountForLevel = 0;
@@ -216,29 +224,32 @@
         data.correctItems.forEach(item => pool.push({ data: item, isCorrect: true, isBlank: false }));
         data.wrongItems.forEach(item => pool.push({ data: item, isCorrect: false, isBlank: false }));
         
-        // Dynamic padding to ensure we always have 12 balloons total (4 per row across 3 rows)
         let neededBlanks = 12 - pool.length;
         for(let i = 0; i < neededBlanks; i++) {
             pool.push({ data: { text: "", bubble: "Oops! Empty Balloon! 🎈" }, isCorrect: false, isBlank: true });
         }
         
-        pool.sort(() => Math.random() - 0.5);
+        // RANDOMIZATION FIX: Shuffles items completely clean on every level load
+        shuffleArray(pool);
+        
         targetCountForLevel = data.correctItems.length;
 
-        // Upgraded 4-Column Interlocking Cluster Sizing Coordinates
-        const bRadius = 52; // Increased balloon thickness
+        const bRadius = 52; 
         const centerX = canvas.width / 2;
         const startY = 240; 
         
         const rowHeight = bRadius * 1.55; 
         const hSpacing = bRadius * 1.82;  
 
-        // Setup matrix layout structure for 4 items per row
         const matrixSchema = [
             { r: 0, cCount: 4, xOffsets: [-1.5, -0.5, 0.5, 1.5] },
-            { r: 1, cCount: 4, xOffsets: [-1, 0, 1, 2] }, // Alternating layout offset
+            { r: 1, cCount: 4, xOffsets: [-1, 0, 1, 2] }, 
             { r: 2, cCount: 4, xOffsets: [-1.5, -0.5, 0.5, 1.5] }
         ];
+
+        // Randomly shuffle background color arrangements too
+        const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#55efc4", "#fd79a8", "#a29bfe", "#fdcb6e", "#e17055", "#00cec9", "#ff9ff3", "#54a0ff", "#10ac84"];
+        shuffleArray(colors);
 
         let index = 0;
         for (let i = 0; i < matrixSchema.length; i++) {
@@ -248,8 +259,6 @@
 
                 let bX = centerX + (config.xOffsets[j] * hSpacing);
                 let bY = startY + (config.r * rowHeight);
-
-                const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#55efc4", "#fd79a8", "#a29bfe", "#fdcb6e", "#e17055", "#00cec9", "#ff9ff3", "#54a0ff", "#10ac84"];
 
                 activeBalloons.push({
                     x: bX,
@@ -509,7 +518,6 @@
         ctx.restore();
     }
 
-    // Increased layout wrapping text processor
     function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
         const words = text.split(' ');
         let lines = [];
@@ -587,7 +595,6 @@
         ctx.arc(canvas.width - 60, canvas.height + 210, 310, 0, Math.PI * 2);
         ctx.fill();
 
-        // Draw Interlocking Honeycomb Balloons Matrix
         activeBalloons.forEach(b => {
             if (b.isPopped) return;
 
@@ -624,12 +631,10 @@
                 ctx.stroke();
 
                 ctx.fillStyle = "#1e3a8a";
-                // INCREASED FONT SIZE: Boosted text to bold 12px for highly legible labels
                 ctx.font = "bold 12px 'Comic Sans MS'"; 
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 
-                // Adjusted word wrapper calculations to fit with the newly upgraded font size
                 drawWrappedText(ctx, b.item.text, 0, 0, badgeW - 4, 13);
             } else {
                 ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
