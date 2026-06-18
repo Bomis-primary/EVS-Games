@@ -27,13 +27,12 @@
             background: linear-gradient(180deg, #ff6b8b 0%, #ff477e 100%);
             border: 4px solid #ffffff;
             border-radius: 20px;
-            padding: 8px 12px;
+            padding: 12px;
             text-align: center;
             box-shadow: 0 6px 16px rgba(255, 71, 126, 0.4);
             color: #ffffff;
         }
-        #levelTitle { font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 1px 2px 0px rgba(0,0,0,0.2); }
-        #levelTask { font-size: 13px; font-weight: bold; background: rgba(0, 0, 0, 0.15); border-radius: 10px; padding: 2px 8px; margin-top: 4px; display: inline-block; }
+        #levelTitle { font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 1px 2px 0px rgba(0,0,0,0.2); }
 
         #statsBar {
             width: 100%;
@@ -167,10 +166,13 @@
 
     <div id="screenIntro" class="layer">
         <div class="popup-card">
-            <h2 style="color: #ff477e; margin-bottom: 15px;" id="introHeading">Level 1 Setup!</h2>
+            <h2 style="color: #ff477e; margin-bottom: 15px;">Welcome to Food Crush!</h2>
             <div id="introRules">
-                </div>
-            <button class="action-btn" onclick="startCurrentLevel()">START LEVEL 🚀</button>
+                <div class="rule-line"><span>🌱</span><span>Match foods to score points!</span></div>
+                <div class="rule-line"><span>🎮</span><span>You get <b>2 Attempts</b> per level to swap pieces.</span></div>
+                <div class="rule-line"><span>🧠</span><span>Every match triggers healthy food riddles!</span></div>
+            </div>
+            <button class="action-btn" onclick="startGameSession()">START GAME 🚀</button>
         </div>
     </div>
 
@@ -183,13 +185,12 @@
     </div>
 
     <div id="levelBanner">
-        <div id="levelTitle">Level 1: Plant Power</div>
-        <div id="levelTask">Make matches to drop items and win!</div>
+        <div id="levelTitle">Level 1: Plant Based Foods</div>
     </div>
 
     <div id="statsBar">
-        <div class="stat-pill" id="lblScore">⭐ 0</div>
-        <div class="stat-pill" style="background:#ff477e; color:white; border-color:white;" id="lblTarget">Matches Left: 8</div>
+        <div class="stat-pill" id="lblScore">⭐ Score: 0</div>
+        <div class="stat-pill" style="background:#ff477e; color:white; border-color:white;" id="lblAttempts">Attempts Left: 2</div>
     </div>
 
     <div id="boardContainer">
@@ -233,28 +234,28 @@
 
     // 12 Situational Questions Bank
     const quizBank = [
-        // Set 1 (Triggered at 2 Matches)
+        // Set 1 (Level 1)
         { q: "Rohan is looking inside a fruit basket. He finds a yellow fruit that monkeys absolutely love to eat! Help Rohan guess what it is!", ops: ["🍎 Apple", "🍌 Banana", "🥛 Milk"], ans: 1 },
         { q: "Simran is eating hot kheer. Her mother says the rice in the kheer comes from a plant. Where does the milk in the kheer come from?", ops: ["🌱 Plant", "🐮 Animal", "🏪 Shop only"], ans: 1 },
         { q: "Kabir wants to eat something made from wheat seeds. Which food items are made from wheat grains?", ops: ["🥛 Milk and Cheese", "🍞 Chapati and Bread", "🍯 Honey and Eggs"], ans: 1 },
-        // Set 2 (Triggered at 4 Matches)
+        // Set 2 (Level 2)
         { q: "Meera wants to run very fast in her school race 🏃‍♀️. She needs lots of Energy-giving food. What should she eat?", ops: ["🥔 Potato and Rice", "🥚 Eggs and Meat", "🥬 Spinach and Water"], ans: 0 },
         { q: "Little Sonu wants his bones and muscles to grow big and strong 💪. Which Body-building food should he drink every day?", ops: ["🥤 Fizzy Soda", "🥛 Milk", "☕ Tea"], ans: 1 },
         { q: "Tina had a small scratch on her knee while playing. Which food group helps our body heal injuries and rebuild?", ops: ["🍔 Junk Food", "🔋 Energy-giving Food", "🧱 Body-building Food"], ans: 2 },
-        // Set 3 (Triggered at 6 Matches)
+        // Set 3 (Level 3)
         { q: "Appu does not want to fall sick 🤒. He needs Protective food to fight off bad germs. What should he add to his plate?", ops: ["🍕 Pizza and Burgers", "🍇 Fruits and Vegetables", "🍬 Candy and Chocolates"], ans: 1 },
         { q: "Joy tells his friends: 'I love eating fruits, rice, and vegetables, but I never eat meat or eggs!' What kind of food eater is Joy?", ops: ["🌱 Vegetarian", "🍗 Non-vegetarian", "🛸 Alien"], ans: 0 },
         { q: "Teacher asks: 'Cookies are made using flour, milk, and butter. Where do these things come from?' What is the correct answer?", ops: ["Only from plants", "Only from animals", "Both plants and animals"], ans: 2 },
-        // Set 4 (Triggered at 8 Matches)
+        // Set 4 (Level 4)
         { q: "Aarav is sitting down to eat his lunch 🍽️. What must he do before and after eating food to stay healthy?", ops: ["🧼 Wash his hands with soap", "📱 Play a game on the phone", "😴 Go straight to sleep"], ans: 0 },
         { q: "Sarita sees an open street food cart with flies flying over the uncovered food 🪰. What will happen if she eats this street food often?", ops: ["🦸‍♀️ She will get superpowers", "🤢 It can make her fall sick", "🎂 She will win a prize"], ans: 1 },
         { q: "Look at these three dining habits. Which one is a good and healthy habit?", ops: ["🗣️ Talking loudly while chewing food", "🗑️ Leaving half the food on the plate to waste it", "👄 Eating slowly and chewing food well"], ans: 2 }
     ];
 
     let currentLevel = 1;
-    let score = 0;
+    let score = 0; // Starts at exactly 0
     let totalLevelCorrectMatches = 0;
-    let levelTargetCount = 8; 
+    let attemptsRemaining = 2; // Locked to exactly 2 attempts per level
     let boardState = [];
     let activeSelection = null;
     let lockControls = false;
@@ -268,60 +269,27 @@
 
     function showFirstInstructions() {
         document.getElementById('screenTitle').style.display = 'none';
-        displayLevelInstructionCard();
-    }
-
-    // New logic: Isolate instructions and trigger only one card layout before each specific level
-    function displayLevelInstructionCard() {
-        const heading = document.getElementById('introHeading');
-        const rules = document.getElementById('introRules');
-        
-        heading.innerText = `Level ${currentLevel} Mission!`;
-
-        if (currentLevel === 1) {
-            rules.innerHTML = `
-                <div class="rule-line"><span>🌱</span><span><b>Topic: Plant Power!</b></span></div>
-                <div class="rule-line"><span>🎮</span><span>Match ANY 3 food items in a line to drop pieces.</span></div>
-                <div class="rule-line"><span>🧠</span><span>Every 2 matches unlocks bonus riddles about Plant Foods!</span></div>
-            `;
-        } else if (currentLevel === 2) {
-            rules.innerHTML = `
-                <div class="rule-line"><span>🥛</span><span><b>Topic: Animal Treats!</b></span></div>
-                <div class="rule-line"><span>🎮</span><span>Keep matching rows to score!</span></div>
-                <div class="rule-line"><span>🧠</span><span>Bonus puzzles will test you on foods we get from animals!</span></div>
-            `;
-        } else if (currentLevel === 3) {
-            rules.innerHTML = `
-                <div class="rule-line"><span>🍏</span><span><b>Topic: Healthy Plates!</b></span></div>
-                <div class="rule-line"><span>🎮</span><span>Swap foods to clear rows.</span></div>
-                <div class="rule-line"><span>🧠</span><span>Answer bonus questions to find what happens if we eat dirty street junk food!</span></div>
-            `;
-        } else if (currentLevel === 4) {
-            rules.innerHTML = `
-                <div class="rule-line"><span>💪</span><span><b>Topic: Muscle & Shield!</b></span></div>
-                <div class="rule-line"><span>🎮</span><span>The final level grid challenge!</span></div>
-                <div class="rule-line"><span>🧠</span><span>Riddles will ask about Body-Building foods vs Protective fruits!</span></div>
-            `;
-        }
-
-        document.getElementById('screenIntro').style.display = "flex";
+        document.getElementById('screenIntro').style.display = 'flex';
     }
     
-    function startCurrentLevel() {
+    function startGameSession() {
         document.getElementById('screenIntro').style.display = 'none';
+        initiateLevelDataLoad();
+        sndBgm.currentTime = 0; sndBgm.play().catch(()=>{});
+    }
+
+    function initiateLevelDataLoad() {
         totalLevelCorrectMatches = 0;
-        levelTargetCount = 8;
+        attemptsRemaining = 2;
         
-        // Dynamic display update
         const titleText = document.getElementById('levelTitle');
-        if (currentLevel === 1) titleText.innerText = "Level 1: Plant Power";
-        if (currentLevel === 2) titleText.innerText = "Level 2: Animal Treats";
-        if (currentLevel === 3) titleText.innerText = "Level 3: Clean Plate";
-        if (currentLevel === 4) titleText.innerText = "Level 4: Muscle & Shield";
+        if (currentLevel === 1) titleText.innerText = "Level 1: Plant Based Foods";
+        if (currentLevel === 2) titleText.innerText = "Level 2: Choosing Animal Foods";
+        if (currentLevel === 3) titleText.innerText = "Level 3: Healthy n Unhealthy";
+        if (currentLevel === 4) titleText.innerText = "Level 4: Protective and Bodybuilding";
 
         updateHUDView();
         buildCandyBoard();
-        if (currentLevel === 1) { sndBgm.currentTime = 0; sndBgm.play().catch(()=>{}); }
     }
 
     function buildCandyBoard() {
@@ -388,7 +356,11 @@
         if(activeSelection) activeSelection.element.classList.remove('selected');
         activeSelection = null;
 
-        if (recordHistory) { lastExecutedSwap = { r1, c1, r2, c2 }; }
+        if (recordHistory) { 
+            lastExecutedSwap = { r1, c1, r2, c2 }; 
+            attemptsRemaining--;
+            updateHUDView();
+        }
 
         let t1 = boardState[r1][c1];
         boardState[r1][c1] = boardState[r2][c2];
@@ -410,12 +382,19 @@
                 sndWrong.currentTime = 0; sndWrong.play().catch(()=>{});
             }
         }
+
+        // Auto move to next level if attempts run out
+        if (attemptsRemaining <= 0 && !document.getElementById('screenQuiz').style.display.includes('flex')) {
+            setTimeout(advanceNextLevelStructure, 600);
+        }
+
         lockControls = false;
     }
 
     function triggerUndo() {
         if (lockControls || !lastExecutedSwap) return;
         const { r1, c1, r2, c2 } = lastExecutedSwap;
+        attemptsRemaining++; // Return attempt on undo action
         swapTilesAction(r1, c1, r2, c2, false);
         lastExecutedSwap = null;
     }
@@ -447,14 +426,13 @@
         matches.forEach(coord => {
             let item = boardState[coord.r][coord.c];
             if (!item) return;
-            accurateMatchesFound = true; // Any complete aligned line is a valid match!
+            accurateMatchesFound = true; 
             document.getElementById(`tile-${coord.r}-${coord.c}`).classList.add('pop-anim');
         });
 
         if (accurateMatchesFound) {
-            score += 10;
+            score += 10; // +10 Points given instantly
             totalLevelCorrectMatches++;
-            levelTargetCount = Math.max(0, levelTargetCount - 1);
             sndCorrect.currentTime = 0; sndCorrect.play().catch(()=>{});
         }
 
@@ -464,15 +442,10 @@
         executeBoardGravityDrop();
         refillBoardSpaces();
 
-        // Check if a riddle break is hit (Every 2 Correct Matches)
-        if (accurateMatchesFound && totalLevelCorrectMatches % 2 === 0 && totalLevelCorrectMatches <= 8) {
+        // Trigger questions on match count checkpoints
+        if (accurateMatchesFound && totalLevelCorrectMatches % 2 === 0) {
             activeQuizBatchCount = 0; 
             setTimeout(launchQuizRiddleOverlay, 300);
-            return;
-        }
-
-        if (levelTargetCount <= 0) {
-            advanceNextLevelStructure();
             return;
         }
 
@@ -548,7 +521,8 @@
                 } else {
                     document.getElementById('screenQuiz').style.display = "none";
                     lockControls = false;
-                    if (levelTargetCount <= 0) {
+                    
+                    if (attemptsRemaining <= 0) {
                         advanceNextLevelStructure();
                     } else {
                         verifyBoardHasPotentialMatches();
@@ -586,7 +560,7 @@
     function advanceNextLevelStructure() {
         if (currentLevel < 4) {
             currentLevel++;
-            displayLevelInstructionCard();
+            initiateLevelDataLoad(); // Instantly reloads next level configurations smoothly
         } else {
             sndBgm.pause(); sndClap.play().catch(()=>{});
             document.getElementById('lblFinalScore').innerText = `Final Score: ${score}`;
@@ -595,8 +569,8 @@
     }
 
     function updateHUDView() {
-        document.getElementById('lblScore').innerText = `⭐ SCORE: ${score}`;
-        document.getElementById('lblTarget').innerText = `Matches Left: ${levelTargetCount}`;
+        document.getElementById('lblScore').innerText = `⭐ Score: ${score}`;
+        document.getElementById('lblAttempts').innerText = `Attempts Left: ${attemptsRemaining}`;
     }
 </script>
 </body>
