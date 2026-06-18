@@ -18,7 +18,7 @@
             align-items: center;
             justify-content: center;
         }
-        canvas { display: block; max-width: 100%; max-height: 75vh; object-fit: contain; background: #0d0d26; }
+        canvas { display: block; max-width: 100%; max-height: 72vh; object-fit: contain; background: #0d0d26; }
         
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; text-align: center; box-sizing: border-box; }
         
@@ -40,8 +40,8 @@
         .instruction-box { font-size: clamp(14px, 3.5vw, 18px); line-height: 1.6; color: #ffffff; padding: 20px; border: 3px dashed #ffcc00; border-radius: 12px; background: rgba(255,255,255,0.05); max-width: 500px; text-align: left; }
         .instruction-box p { margin-bottom: 12px; }
         
-        /* Pinned On-Screen Controls Layout Pannel Base */
-        #controlsContainer { position: absolute; bottom: 4vh; left: 50%; transform: translateX(-50%); width: 220px; height: 160px; z-index: 25; display: none; }
+        /* Pinned On-Screen Navigation Controls Map */
+        #controlsContainer { position: absolute; bottom: 3vh; left: 50%; transform: translateX(-50%); width: 220px; height: 160px; z-index: 25; display: none; }
         .d-pad { position: relative; width: 100%; height: 100%; }
         .d-btn { position: absolute; width: 64px; height: 52px; background: #ffcc00; border: none; border-radius: 12px; color: #0d0d26; font-size: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #cc9900; }
         .d-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #cc9900; }
@@ -71,7 +71,7 @@
         <div class="instruction-box">
             <p>💡 Read the <b>BIG Body Riddle</b> at the top of the screen.</p>
             <p class="yellow-text">🕹️ Use the Yellow Buttons below or Arrow Keys to move Pac-Man around!</p>
-            <p>🍒 Eat the flashing <b>TARGET FRUIT</b> matching the category answer!</p>
+            <p>🍒 Eat the flashing <b>TARGET FRUIT</b> matching the category answer to score points!</p>
             <p style="color: #ff6666;">👻 Watch out for the 2 slow ghosts! Don't let them catch you!</p>
         </div>
         <button class="btn" onclick="startGame()">START GAME 🚀</button>
@@ -107,7 +107,7 @@
     const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
     sndBgm.loop = true;
 
-    // Fixed Engine Base Coordinate Sizing Resoluions
+    // Fixed Engine Base Coordinate Sizing Resolutions
     const BASE_WIDTH = 600;
     const BASE_HEIGHT = 950;
 
@@ -123,9 +123,9 @@
 
     const TILE_SIZE = 36;
     const offsetX = (BASE_WIDTH - (15 * TILE_SIZE)) / 2;
-    const offsetY = 250; // Pushed down to clear roomy text area
+    const offsetY = 250; 
 
-    // Custom Symmetrical Kid-Friendly Maze Layout
+    // Symmetrical Kid-Friendly Maze Layout
     let mapGrid = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,2,2,2,2,2,1,2,2,2,2,2,2,2,1],
@@ -149,20 +149,20 @@
     // Pacman Configuration Matrix
     let player = { x: 1, y: 1, px: 0, py: 0, dx: 0, dy: 0, nextDx: 0, nextDy: 0, speed: 2, mouthAngle: 0, mouthDir: 0.08 };
 
-    // ONLY 2 GHOSTS LEFT: Drastically reduced speed to 0.8 for Grade 2 safety pace
+    // 2 Slow Ghosts for Grade 2 safety pace
     let ghosts = [
         { name: "Blinky", color: "#ff3333", x: 7, y: 7, px: 0, py: 0, dx: 1, dy: 0, speed: 0.8 },
         { name: "Pinky", color: "#ff99cc", x: 6, y: 7, px: 0, py: 0, dx: -1, dy: 0, speed: 0.8 }
     ];
 
-    // Static Answer Nodes Placement Categories Map
+    // Static Answer Fruits Category mapping data
     let fruits = [
         { type: "internal", x: 1, y: 13, color: "#ff3333", symbol: "🍒", label: "INTERNAL" },
         { type: "external", x: 13, y: 1, color: "#ffb800", symbol: "🍊", label: "EXTERNAL" },
         { type: "frame", x: 13, y: 13, color: "#33ff33", symbol: "🍏", label: "BODY FRAME" }
     ];
 
-    // Core Content Question Bank Pool Database
+    // Core Question Pool Database
     const questionPool = [
         { q: "I am inside your head. I help you think, learn, and remember things! Chomp the INTERNAL fruit!", target: "internal" },
         { q: "Thump-thump! I am in your chest pumping blood to your whole body! Chomp the INTERNAL fruit!", target: "internal" },
@@ -180,7 +180,7 @@
 
     let currentSessionQuestions = [];
 
-    // Screen Splash Timer Automation Controller
+    // Splash Screen Management Automation
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
@@ -250,7 +250,7 @@
         });
     }
 
-    // Hardware Keyboard Desktop Catch Triggers
+    // Hardware Keyboard Handlers
     window.addEventListener('keydown', (e) => {
         if (!gameActive || feedbackTimer > 0) return;
         if (e.key === "ArrowUp") changeDirection(0, -1);
@@ -278,9 +278,9 @@
             player.px = currTargetX;
             player.py = currTargetY;
 
+            // SCORING ADJUSTMENT: Yellow maze pellets are eaten cleanly but don't add score points anymore.
             if (currentMap[player.y][player.x] === 2) {
                 currentMap[player.y][player.x] = 0;
-                score += 10;
                 dotsLeft--;
                 if (dotsLeft <= 0) initMapState();
             }
@@ -306,7 +306,7 @@
         player.px += player.dx * player.speed;
         player.py += player.dy * player.speed;
 
-        // Slow Ghost Traversal Computations
+        // Slow Ghost AI
         ghosts.forEach(gh => {
             let gTargetX = offsetX + gh.x * TILE_SIZE + TILE_SIZE / 2;
             let gTargetY = offsetY + gh.y * TILE_SIZE + TILE_SIZE / 2;
@@ -350,7 +350,7 @@
         let correctTarget = currentSessionQuestions[currentQuestionIndex].target;
 
         if (fruitType === correctTarget) {
-            score += 100;
+            score += 100; // SCORING RULE: Correct answers dynamically yield 100 points
             feedbackText = "✨ CORRECT! GREAT JOB! ✨";
             feedbackColor = "#00ff00";
             feedbackTimer = 90;
@@ -420,7 +420,6 @@
         startGame();
     }
 
-    // Smart Multi-line Context Text Splitter Block
     function drawWrappedText(context, text, x, y, maxWidth, lineHeight) {
         let words = text.split(' ');
         let line = '';
@@ -444,37 +443,39 @@
     function render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Beautiful child-friendly midnight background fill
         ctx.fillStyle = "#0d0d26";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (!gameActive) return;
 
-        // Header Interface Statistics Indicators
+        // HUD Layout Headers
         ctx.save();
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 20px 'Arial'";
         ctx.textAlign = "left";
         ctx.fillText(`⭐ SCORE: ${score}`, 35, 45);
+        
+        // HUD LIVES REPLACEMENT: Static text tracking active lives count
+        ctx.textAlign = "right";
+        ctx.fillText(`❤️ LIVES: ${lives}`, BASE_WIDTH - 35, 45);
         ctx.restore();
 
-        // QUESTION DESIGN: Generous layout padding with giant 21px font allocation for Grade 2 readable clarity
+        // Question display area card block
         ctx.save();
         ctx.fillStyle = "#1a1a4c";
         ctx.strokeStyle = "#ffff00";
         ctx.lineWidth = 3;
-        // Large background card block container
         ctx.fillRect(25, 75, BASE_WIDTH - 50, 140);
         ctx.strokeRect(25, 75, BASE_WIDTH - 50, 140);
         
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 21px 'Arial'"; // GIANT FONT FOR KIDS
+        ctx.font = "bold 21px 'Arial'"; 
         ctx.textAlign = "center";
         let activeQuestionStr = currentSessionQuestions[currentQuestionIndex].q;
         drawWrappedText(ctx, activeQuestionStr, BASE_WIDTH / 2, 115, BASE_WIDTH - 80, 28);
         ctx.restore();
 
-        // Render Symmetrical Electric Blue Arena Labyrinth Passages
+        // Render Symmetrical Passages
         for (let r = 0; r < currentMap.length; r++) {
             for (let c = 0; c < currentMap[r].length; c++) {
                 let xPos = offsetX + c * TILE_SIZE;
@@ -493,7 +494,7 @@
             }
         }
 
-        // Render Fruit Category Nodes
+        // Render Answer Category Fruits
         fruits.forEach(fr => {
             let fx = offsetX + fr.x * TILE_SIZE + TILE_SIZE / 2;
             let fy = offsetY + fr.y * TILE_SIZE + TILE_SIZE / 2;
@@ -516,7 +517,7 @@
             ctx.restore();
         });
 
-        // Draw Player Pac-Man Vector Arc Frame
+        // Draw Player Pacman frame
         ctx.save();
         ctx.translate(player.px, player.py);
         
@@ -535,7 +536,7 @@
         ctx.fill();
         ctx.restore();
 
-        // Render 2 Ghost Entities
+        // Render 2 Ghost models
         ghosts.forEach(gh => {
             ctx.save();
             ctx.translate(gh.px, gh.py);
@@ -555,7 +556,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // Large Animated White Googly Eyes
+            // Large White Googly Eyes
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
             ctx.arc(-5, -3, 5, 0, Math.PI * 2);
@@ -571,21 +572,7 @@
             ctx.restore();
         });
 
-        // Lower Footer Remaining Lives Segment
-        ctx.save();
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 16px 'Arial'";
-        ctx.fillText("LIVES: ", offsetX, BASE_HEIGHT - 210);
-        for (let i = 0; i < lives; i++) {
-            ctx.fillStyle = "#ffff00";
-            ctx.beginPath();
-            ctx.arc(offsetX + 85 + i * 28, BASE_HEIGHT - 216, 10, 0.2, Math.PI * 2 - 0.2);
-            ctx.lineTo(offsetX + 85 + i * 28, BASE_HEIGHT - 216);
-            ctx.fill();
-        }
-        ctx.restore();
-
-        // Interactive Feedback Banners
+        // Overlay Feedback Alerts
         if (feedbackTimer > 0) {
             feedbackTimer--;
             
