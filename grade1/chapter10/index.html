@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Match Mission Game</title>
+    <title>Community Connect: The Matching Game</title>
     <style>
         :root {
             --bg-sky: #e0f2fe; 
@@ -333,7 +333,7 @@
             font-weight: bold;
         }
 
-        /* SCREEN 5: FINAL REPORT OVERLAY */
+        /* SCREEN 5: FINAL SUMMARY DISPLAY */
         .summary-pane {
             display: none;
             width: 100%;
@@ -393,7 +393,7 @@
     <!-- SCREEN 2: MAIN TITLE COVER SCREEN -->
     <div id="screen-title">
         <div class="title-wrapper-box">
-            <h1 class="game-main-heading">Match Mission</h1>
+            <h1 class="game-main-heading">Community Connect: The Matching Game</h1>
             <button class="btn-play-game" onclick="transitionToInstructions()">PLAY GAME</button>
         </div>
     </div>
@@ -402,7 +402,7 @@
     <div id="screen-instructions">
         <div class="instruction-card">
             <h2>Let's Start!</h2>
-            <p>Read the question carefully. Drag the correct picture card from the left side and drop it onto its correct match on the right!</p>
+            <p>Read the scenario carefully. Drag the correct item card from the left column and drop it onto the matching descriptive block on the right!</p>
             <button class="btn-start" onclick="launchActiveGameplay()">START MISSION</button>
         </div>
     </div>
@@ -411,7 +411,7 @@
     <div class="game-window-frame">
         <header class="game-header">
             <div class="header-left-group">
-                <div class="game-title">Match Mission</div>
+                <div class="game-title">Community Connect</div>
                 <div class="attempt-indicator-top" id="label-attempts-top">ATTEMPTS LEFT: 2</div>
             </div>
             <div class="header-right-group">
@@ -435,9 +435,9 @@
         <!-- SCREEN 5: FINAL SUMMARY DISPLAY -->
         <div class="summary-pane" id="summary-report-screen">
             <h2 style="color: var(--success-green); font-size: 42px; margin-bottom: 10px;">🌟 AWESOME JOB! 🌟</h2>
-            <p style="color: #64748b; font-size: 22px;">You completed the entire registry layout!</p>
+            <p style="color: #64748b; font-size: 22px;">You successfully found all matches!</p>
             
-            <h3 id="final-score-field" style="font-size: 54px; margin: 25px 0; color: #0284c7;">SCORE: 0</h3>
+            <h3 id="final-score-field" style="font-size: 54px; margin: 25px 0; color: #0284c7;">SCORE: 0 / 10</h3>
 
             <button class="btn-replay" onclick="resetAndRestartMission()">PLAY AGAIN</button>
         </div>
@@ -445,17 +445,17 @@
 
     <script>
         const scenariosDeck = [
-            { id: "fire", q: "Look at the Fire Station house image. Who works here to control fires safely?", h: "Find the label for the hero who controls fires!", leftImg: "assets/firestation.png", matchText: "Firefighter" },
-            { id: "hospital", q: "Look at the Hospital clinic image. Who treats you here when you need care?", h: "Find the label for the person who checks your heartbeat!", leftImg: "assets/hospital.png", matchText: "Doctor / Nurse" },
-            { id: "police", q: "Look at the Police Station image. Who stays inside to keep the area safe?", h: "Look for the label protecting the laws!", leftImg: "assets/policestation.png", matchText: "Police Officer" },
-            { id: "post", q: "Look at the Post Office image. Who collects letters from here to deliver them to homes?", h: "Find the worker who carries envelopes in a bag!", leftImg: "assets/postoffice.png", matchText: "Postman" },
-            { id: "school", q: "Look at the School building image. Who guides you inside your classroom every day?", h: "Find the worker who helps you write on the blackboard!", leftImg: "assets/school.png", matchText: "Teacher" },
-            { id: "market", q: "Look at the Market image. Who manages groceries and items for people here?", h: "Look for the vendor selling fresh daily provisions!", leftImg: "assets/market.png", matchText: "Shopkeeper" },
+            { id: "fire", q: "Smoke is rising from a local warehouse kitchen. Who must be contacted immediately to stop the hazard?", h: "Find the label for the specialist who controls active blazes!", leftImg: "assets/firestation.png", matchText: "Firefighter" },
+            { id: "hospital", q: "Someone twisted their ankle while playing basketball at the park. Who can bandage it up and check on them?", h: "Find the label for the health provider who checks heartbeats!", leftImg: "assets/hospital.png", matchText: "Doctor / Nurse" },
+            { id: "police", q: "A store owner notice a broken window latch and needs to report a theft. Who will secure the storefront?", h: "Look for the label protecting town rules and safety!", leftImg: "assets/policestation.png", matchText: "Police Officer" },
+            { id: "post", q: "You wrote an express birthday greetings card to your cousin who lives far away. Who handles sorting and sending it out?", h: "Find the worker who carries envelopes and mail directly to homes!", leftImg: "assets/postoffice.png", matchText: "Postman" },
+            { id: "school", q: "You want to learn how to solve fractions and read complex science maps. Who introduces these ideas daily?", h: "Find the worker who guides classrooms and blackboards!", leftImg: "assets/school.png", matchText: "Teacher" },
+            { id: "market", q: "The pantry ran out of grain, rice boxes, and cooking spices. Who handles stock checkout counters at the plaza?", h: "Look for the vendor managing fresh daily item sales!", leftImg: "assets/market.png", matchText: "Shopkeeper" },
             
-            { id: "electrician", q: "Look at the Electrician image. Which systems do they come to fix?", h: "Look for the box that says Power Wires / Sockets!", leftImg: "assets/electrician.png", matchText: "Power Wires / Sockets" },
-            { id: "plumber", q: "Look at the Plumber image. What parts around home utilities do they secure?", h: "Look for the box that matches leaking water systems!", leftImg: "assets/plumber.png", matchText: "Leaky Water Pipes" },
-            { id: "grocer", q: "Look at the Greengrocer image. What items do we buy from their stall?", h: "Find the target describing fresh green food crops!", leftImg: "assets/greengrocer.png", matchText: "Fruits & Vegetables" },
-            { id: "sweeper", q: "Look at the street cleaner image. What areas do they clear with their broom?", h: "Look for the label talking about lanes and pathways!", leftImg: "assets/cheerfulboy.png", matchText: "Neighborhood Streets" }
+            { id: "electrician", q: "The lights flickered out across the room and a wall outlet sparked. What dangerous issue requires immediate repair?", h: "Look for the box that mentions electrical power items!", leftImg: "assets/electrician.png", matchText: "Power Wires / Sockets" },
+            { id: "plumber", q: "Water is spraying out from underneath the bathroom vanity cabinet. What hardware components need tightening?", h: "Look for the box that describes leaky pipeline utility tubes!", leftImg: "assets/plumber.png", matchText: "Leaky Water Pipes" },
+            { id: "grocer", q: "You want to make a healthy mixed salad plate for lunch. What specific farm produce needs to be washed?", h: "Find the target tracking fresh green garden crops!", leftImg: "assets/greengrocer.png", matchText: "Fruits & Vegetables" },
+            { id: "sweeper", q: "Discarded papers and dry leaves have accumulated across the concrete lanes. What areas need sweeping?", h: "Look for the label referencing community pavement and avenues!", leftImg: "assets/cheerfulboy.png", matchText: "Neighborhood Streets" }
         ];
 
         let playDeck = [];
@@ -585,7 +585,8 @@
                         }, 300);
                     } catch(err){}
 
-                    scoreCounter += 10;
+                    // Incrementing score on a 1-point system base per card
+                    scoreCounter += 1;
                     document.getElementById('score-counter-text').innerText = `SCORE: ${scoreCounter}`;
 
                     dropBox.classList.add('matched');
@@ -641,7 +642,7 @@
 
         function concludeMission() {
             document.getElementById('main-play-arena').style.display = "none";
-            document.getElementById('final-score-field').innerText = `SCORE: ${scoreCounter} / 100`;
+            document.getElementById('final-score-field').innerText = `SCORE: ${scoreCounter} / 10`;
             document.getElementById('summary-report-screen').style.display = "flex";
         }
 
