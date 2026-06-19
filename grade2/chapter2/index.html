@@ -139,15 +139,18 @@
 <body>
 
 <div id="gameWrapper">
+    <!-- Screen 1: Splash -->
     <div id="screenLogo" class="layer">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
+    <!-- Screen 2: Title Screen -->
     <div id="screenTitle" class="layer">
         <h1 class="game-title">Food<br><span style="color: #ff7b93;">Crush</span></h1>
         <button class="action-btn" onclick="showFirstInstructions()">PLAY ▶</button>
     </div>
 
+    <!-- Screen 3: Instructions Panel -->
     <div id="screenIntro" class="layer">
         <div class="popup-card">
             <h2 style="color: #ff477e; margin-bottom: 18px; text-align: center; font-size: 24px;">How to Play!</h2>
@@ -160,6 +163,7 @@
         </div>
     </div>
 
+    <!-- Screen 4: Question Overlay Box -->
     <div id="screenQuiz" class="layer">
         <div class="quiz-card">
             <h3 style="color:#ff477e; margin-bottom: 8px; font-size: 14px;" id="quizProgress">CHALLENGE</h3>
@@ -168,20 +172,24 @@
         </div>
     </div>
 
+    <!-- HUD Stats Bar -->
     <div id="statsBar">
         <div class="stat-pill" id="lblLevel">🏆 Level: 1</div>
         <div class="stat-pill" id="lblScore">⭐ Score: 0</div>
         <div class="stat-pill" style="background:#ff477e; color:white; border-color:white;" id="lblAttempts">Lives: 2</div>
     </div>
 
+    <!-- Game Board Matrix -->
     <div id="boardContainer">
         <div id="gridBoard"></div>
     </div>
 
+    <!-- Controls Row -->
     <div id="controlRow">
         <button class="util-btn" onclick="triggerUndo()">↩️ UNDO SWAP</button>
     </div>
 
+    <!-- Screen 5: Game Completion -->
     <div id="screenEnd" class="layer">
         <h1 class="game-title" style="color: #2e7d32;">WINNER! 🏆</h1>
         <div class="popup-card" style="border-color: #a1c4fd; margin-bottom: 20px;">
@@ -197,7 +205,13 @@
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
     const sndBgm = new Audio('assets/playfulsong.mp3');
+    
+    // Strict multi-layered looping configuration
     sndBgm.loop = true;
+    sndBgm.addEventListener('ended', function() {
+        this.currentTime = 0;
+        this.play().catch(()=>{});
+    }, false);
 
     const GRID_SIZE = 6;
     
@@ -212,10 +226,10 @@
         soda:   { symbol: "🥤" }
     };
 
-    // STRICT LEVEL MAP: Completely removes randomness to enforce zero repeats
+    // All 12 unique questions perfectly scaled across 4 clean structural levels
     const levelQuestionMap = {
         1: [
-            { q: "I am a round and crunchy fruit. I can be red or green. An apple a day keeps the doctor away! What am I?", ops: ["🍎 Apple", "🍌 Banana", "🍍 Pineapple"], ans: "🍎 Apple", hint: "💡 Hint: Look closely at the phrase 'An apple a day'!" },
+            { q: "I am a round and crunchy fruit. I can be red or green. What am I?", ops: ["🍎 Apple", "🍌 Banana", "🍍 Pineapple"], ans: "🍎 Apple", hint: "💡 Hint: It's red, round, crunchy, and matches the top option!" },
             { q: "I am yellow and sweet. I am a long fruit that monkeys love to peel and eat. What am I?", ops: ["🍍 Pineapple", "🥭 Mango", "🍌 Banana"], ans: "🍌 Banana", hint: "💡 Hint: It has a yellow peel and curves like a little smile!" },
             { q: "I am yellow, sweet, and very juicy. Everyone calls me the 'King of Fruits' during the hot summer. What am I?", ops: ["🥭 Mango", "🍎 Apple", "🍉 Watermelon"], ans: "🥭 Mango", hint: "💡 Hint: India's favourite summer fruit, starting with the letter M!" }
         ],
@@ -228,6 +242,11 @@
             { q: "Little Sonu wants his bones and muscles to grow big, strong, and tall. Which Body-building food should he drink every single day?", ops: ["🥤 Fizzy Soda", "🥛 Milk", "☕ Tea"], ans: "🥛 Milk", hint: "💡 Hint: It's white, healthy, comes from cows, and builds our teeth!" },
             { q: "Ananya does not want to fall sick or catch a cold. She needs Protective food to fight germs. What should she eat?", ops: ["🍕 Pizza and Burgers", "🍇 Fruits and Vegetables", "🍬 Candy and Chocolates"], ans: "🍇 Fruits and Vegetables", hint: "💡 Hint: Natural, colourful items from garden trees keep us healthy!" },
             { q: "Rahul says: 'I love eating kheer, paneer, fruits, and dal, but I never eat meat, chicken, or fish!' What kind of food eater is Rahul?", ops: ["🌱 Vegetarian", "🍗 Non-vegetarian", "🛸 Alien"], ans: "🌱 Vegetarian", hint: "💡 Hint: People who eat only plants and dairy foods are vegetarians!" }
+        ],
+        4: [
+            { q: "Teacher asks: 'Yummy biscuits are made using wheat flour, sugar, milk, and butter. Where do these things come from?'", ops: ["🌱 Only from plants", "🐮 Only from animals", "🍕 Both plants and animals"], ans: "🍕 Both plants and animals", hint: "💡 Hint: Wheat comes from plants, but milk and butter come from cows!" },
+            { q: "Aarav is sitting down at the dining table to eat his lunch. What is the most important thing he must do before and after eating?", ops: ["🧼 Wash his hands with soap", "📱 Play a game on the phone", "😴 Go straight to sleep"], ans: "🧼 Wash his hands with soap", hint: "💡 Hint: Use soap and water to wash away dirty germs on fingers!" },
+            { q: "Sarita sees an open street food cart with dirty flies buzzing all over the uncovered food. What will happen if she eats it?", ops: ["🦸‍♀️ She will get superpowers", "🤢 It can make her fall sick", "🎂 She will win a prize"], ans: "🤢 It can make her fall sick", hint: "💡 Hint: Uncovered food with flies carries bad stomach germs!" }
         ]
     };
 
@@ -251,19 +270,18 @@
     function startGameSession() {
         document.getElementById('screenIntro').style.display = 'none';
         currentLevel = 1;
-        score = 0; // Starts score firmly at 0
+        score = 0; 
         loadQuestionsForCurrentLevel();
         initiateLevelDataLoad();
         sndBgm.currentTime = 0; sndBgm.play().catch(()=>{});
     }
 
     function loadQuestionsForCurrentLevel() {
-        // Loads structural mapping dynamically based strictly on level sequence
         let targetedSet = levelQuestionMap[currentLevel];
         currentLevelQuestions = targetedSet.map(item => {
             return {
                 q: item.q,
-                ops: [...item.ops], // Options alignment preserved
+                ops: [...item.ops], 
                 ans: item.ans,
                 hint: item.hint
             };
@@ -471,7 +489,7 @@
 
     function evaluateQuizAnswer(selectedText, buttonElement, correctText, hintText) {
         if (selectedText.trim() === correctText.trim()) {
-            score += 10; // Clean, absolute incremental increases by +10 points
+            score += 10; 
             updateHUDView();
             buttonElement.style.background = "#c8e6c9";
             buttonElement.style.borderColor = "#4caf50";
@@ -504,7 +522,6 @@
             if (quizLives <= 0) {
                 setTimeout(() => {
                     document.getElementById('screenQuiz').style.display = "none";
-                    // Resetting simply reloads the *same* static level layout structure
                     loadQuestionsForCurrentLevel(); 
                     initiateLevelDataLoad(); 
                     lockControls = false;
@@ -535,7 +552,8 @@
     }
 
     function advanceNextLevelStructure() {
-        if (currentLevel < 3) {
+        // Updated to dynamically finish on Level 4 since all 12 questions are covered
+        if (currentLevel < 4) {
             currentLevel++;
             loadQuestionsForCurrentLevel(); 
             initiateLevelDataLoad(); 
