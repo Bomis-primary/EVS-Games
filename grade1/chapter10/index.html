@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grade 1 EVS: Our Neighborhood Helpers Registry</title>
+    <title>Match Mission Game</title>
     <style>
         :root {
             --bg-sky: #e0f2fe; 
@@ -51,7 +51,7 @@
             height: auto;
         }
 
-        /* SCREEN 2: MAIN TITLE COVER SCREEN (SHOWN AFTER LOGO) */
+        /* SCREEN 2: MAIN TITLE COVER SCREEN */
         #screen-title {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -151,8 +151,8 @@
         }
 
         .game-header {
-            height: 10%;
-            min-height: 55px;
+            height: 12%;
+            min-height: 65px;
             background-color: #f0f9ff;
             border-bottom: 4px solid #e0f2fe;
             display: flex;
@@ -160,10 +160,38 @@
             align-items: center;
             padding: 0 25px;
         }
+        .header-left-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
         .game-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             color: #0369a1;
+        }
+        .attempt-indicator-top {
+            font-size: 14px;
+            font-weight: bold;
+            color: #b45309;
+            background: #fffbeb;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #fde68a;
+            width: fit-content;
+        }
+        .header-right-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .progress-capsule {
+            background: #cbd5e1;
+            color: #334155;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
         }
         .score-capsule {
             background: var(--sky-blue);
@@ -171,19 +199,18 @@
             padding: 6px 20px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .workspace-split {
             flex: 1;
             display: flex;
-            height: 90%;
+            height: 88%;
             overflow: hidden;
             position: relative;
             background-color: #f8fafc;
         }
 
-        /* DRAGGABLE CARDS AND TARGET DECKS */
         .column-pane-left {
             flex: 1;
             background-color: #ffffff;
@@ -269,7 +296,7 @@
             animation: matchPop 0.4s ease-out;
         }
 
-        /* PERFORMANCE HUD FOOTER PANEL */
+        /* HINT AND CONSOLE FOOTER PANEL */
         .info-panel-row {
             position: absolute;
             bottom: 15px;
@@ -287,7 +314,6 @@
         }
         .question-container-block {
             flex: 1;
-            margin-right: 20px;
         }
         .question-box-text {
             font-size: 19px;
@@ -305,16 +331,6 @@
             margin-top: 6px;
             display: none;
             font-weight: bold;
-        }
-        .status-indicators {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-            font-weight: bold;
-            font-size: 13px;
-            color: #64748b;
-            min-width: 140px;
         }
 
         /* SCREEN 5: FINAL REPORT OVERLAY */
@@ -377,7 +393,7 @@
     <!-- SCREEN 2: MAIN TITLE COVER SCREEN -->
     <div id="screen-title">
         <div class="title-wrapper-box">
-            <h1 class="game-main-heading">🏡 Our Neighborhood Helpers</h1>
+            <h1 class="game-main-heading">Match Mission</h1>
             <button class="btn-play-game" onclick="transitionToInstructions()">PLAY GAME</button>
         </div>
     </div>
@@ -394,8 +410,14 @@
     <!-- SCREEN 4: GAME AREA -->
     <div class="game-window-frame">
         <header class="game-header">
-            <div class="game-title">🏡 Grade 1 EVS: Match Mission</div>
-            <div class="score-capsule" id="score-counter-text">SCORE: 0</div>
+            <div class="header-left-group">
+                <div class="game-title">Match Mission</div>
+                <div class="attempt-indicator-top" id="label-attempts-top">ATTEMPTS LEFT: 2</div>
+            </div>
+            <div class="header-right-group">
+                <div class="progress-capsule" id="label-progress-top">ITEM: 1 / 10</div>
+                <div class="score-capsule" id="score-counter-text">SCORE: 0</div>
+            </div>
         </header>
 
         <div class="workspace-split" id="main-play-arena">
@@ -404,20 +426,16 @@
 
             <div class="info-panel-row" id="info-control-panel">
                 <div class="question-container-block">
-                    <div class="question-box-text" id="q-text-field">Loading helper mission registry...</div>
-                    <div class="hint-popup-alert" id="hint-display-el">Hint details box slot...</div>
-                </div>
-                <div class="status-indicators">
-                    <span id="label-progress">QUESTION: 1 / 10</span>
-                    <span class="attempt-indicator" id="label-attempts">ATTEMPTS LEFT: 2</span>
+                    <div class="question-box-text" id="q-text-field">Loading item data...</div>
+                    <div class="hint-popup-alert" id="hint-display-el">Hint slot...</div>
                 </div>
             </div>
         </div>
 
-        <!-- SCREEN 5: FINAL COMPLETION SUMMARY DISPLAY -->
+        <!-- SCREEN 5: FINAL SUMMARY DISPLAY -->
         <div class="summary-pane" id="summary-report-screen">
             <h2 style="color: var(--success-green); font-size: 42px; margin-bottom: 10px;">🌟 AWESOME JOB! 🌟</h2>
-            <p style="color: #64748b; font-size: 22px;">You completed the entire neighborhood workspace registry!</p>
+            <p style="color: #64748b; font-size: 22px;">You completed the entire registry layout!</p>
             
             <h3 id="final-score-field" style="font-size: 54px; margin: 25px 0; color: #0284c7;">SCORE: 0</h3>
 
@@ -427,17 +445,17 @@
 
     <script>
         const scenariosDeck = [
-            { id: "fire", q: "Look at the Fire Station house image. Who works here to put out neighborhood fires safely?", h: "Find the label for the hero who controls fires!", leftImg: "assets/firestation.png", matchText: "Firefighter" },
-            { id: "hospital", q: "Look at the Hospital clinic image. When you fall sick, who treats you here?", h: "Find the label for the person who checks your heartbeat!", leftImg: "assets/hospital.png", matchText: "Doctor / Nurse" },
-            { id: "police", q: "Look at the Police Station image. Who stays inside to keep our neighborhood safe?", h: "Look for the label protecting the town laws!", leftImg: "assets/policestation.png", matchText: "Police Officer" },
-            { id: "post", q: "Look at the Post Office image. Who collects letters from here to deliver them to our homes?", h: "Find the helper who carries envelopes in a bag!", leftImg: "assets/postoffice.png", matchText: "Postman" },
-            { id: "school", q: "Look at our School building image. Who guides you inside your classroom every day?", h: "Find the worker who helps you write on the blackboard!", leftImg: "assets/school.png", matchText: "Teacher" },
-            { id: "market", q: "Look at the Market image. Who manages groceries and daily food items for neighbors?", h: "Look for the helper selling fresh breakfast provisions!", leftImg: "assets/market.png", matchText: "Shopkeeper" },
+            { id: "fire", q: "Look at the Fire Station house image. Who works here to control fires safely?", h: "Find the label for the hero who controls fires!", leftImg: "assets/firestation.png", matchText: "Firefighter" },
+            { id: "hospital", q: "Look at the Hospital clinic image. Who treats you here when you need care?", h: "Find the label for the person who checks your heartbeat!", leftImg: "assets/hospital.png", matchText: "Doctor / Nurse" },
+            { id: "police", q: "Look at the Police Station image. Who stays inside to keep the area safe?", h: "Look for the label protecting the laws!", leftImg: "assets/policestation.png", matchText: "Police Officer" },
+            { id: "post", q: "Look at the Post Office image. Who collects letters from here to deliver them to homes?", h: "Find the worker who carries envelopes in a bag!", leftImg: "assets/postoffice.png", matchText: "Postman" },
+            { id: "school", q: "Look at the School building image. Who guides you inside your classroom every day?", h: "Find the worker who helps you write on the blackboard!", leftImg: "assets/school.png", matchText: "Teacher" },
+            { id: "market", q: "Look at the Market image. Who manages groceries and items for people here?", h: "Look for the vendor selling fresh daily provisions!", leftImg: "assets/market.png", matchText: "Shopkeeper" },
             
-            { id: "electrician", q: "Look at our Electrician helper image. Which neighborhood systems do they come to fix?", h: "Look for the box that says Power Wires / Sockets!", leftImg: "assets/electrician.png", matchText: "Power Wires / Sockets" },
-            { id: "plumber", q: "Look at our Plumber worker image. What parts around our home utilities are they called to secure?", h: "Look for the box that matches leaking water systems!", leftImg: "assets/plumber.png", matchText: "Leaky Water Pipes" },
-            { id: "grocer", q: "Look at our Greengrocer merchant image. What items do we buy from their neighborhood stall?", h: "Find the target describing clean, healthy green food crops!", leftImg: "assets/greengrocer.png", matchText: "Fruits & Vegetables" },
-            { id: "sweeper", q: "Look at our friendly street cleaner image. What parts of our town do they clear with their broom?", h: "Look for the label talking about local lanes and pathways!", leftImg: "assets/cheerfulboy.png", matchText: "Neighborhood Streets" }
+            { id: "electrician", q: "Look at the Electrician image. Which systems do they come to fix?", h: "Look for the box that says Power Wires / Sockets!", leftImg: "assets/electrician.png", matchText: "Power Wires / Sockets" },
+            { id: "plumber", q: "Look at the Plumber image. What parts around home utilities do they secure?", h: "Look for the box that matches leaking water systems!", leftImg: "assets/plumber.png", matchText: "Leaky Water Pipes" },
+            { id: "grocer", q: "Look at the Greengrocer image. What items do we buy from their stall?", h: "Find the target describing fresh green food crops!", leftImg: "assets/greengrocer.png", matchText: "Fruits & Vegetables" },
+            { id: "sweeper", q: "Look at the street cleaner image. What areas do they clear with their broom?", h: "Look for the label talking about lanes and pathways!", leftImg: "assets/cheerfulboy.png", matchText: "Neighborhood Streets" }
         ];
 
         let playDeck = [];
@@ -446,19 +464,16 @@
         let attemptCounter = 2;
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Strict 5-Second Brand Logo Screen Timeout Sequence
             setTimeout(() => {
                 document.getElementById('screen-logo').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('screen-logo').style.display = 'none';
-                    // Reveals Title Screen exactly after the logo finishes
                     document.getElementById('screen-title').style.display = 'flex';
                 }, 500);
             }, 5000);
         });
 
         function transitionToInstructions() {
-            // Interactive initialization starts background audio loops
             try { 
                 const bgAudio = document.getElementById('snd-bg');
                 bgAudio.volume = 0.4;
@@ -485,11 +500,11 @@
             }
 
             attemptCounter = 2;
-            document.getElementById('label-attempts').innerText = `ATTEMPTS LEFT: ${attemptCounter}`;
+            document.getElementById('label-attempts-top').innerText = `ATTEMPTS LEFT: ${attemptCounter}`;
             document.getElementById('hint-display-el').style.display = "none";
 
             const data = playDeck[cursorIdx];
-            document.getElementById('label-progress').innerText = `QUESTION: ${cursorIdx + 1} / ${playDeck.length}`;
+            document.getElementById('label-progress-top').innerText = `ITEM: ${cursorIdx + 1} / ${playDeck.length}`;
             document.getElementById('q-text-field').innerText = data.q;
             document.getElementById('hint-display-el').innerText = `HINT: ${data.h}`;
 
@@ -588,7 +603,7 @@
                     
                     if(dropBox) {
                         attemptCounter--;
-                        document.getElementById('label-attempts').innerText = `ATTEMPTS LEFT: ${attemptCounter}`;
+                        document.getElementById('label-attempts-top').innerText = `ATTEMPTS LEFT: ${attemptCounter}`;
 
                         const controlHUD = document.getElementById('info-control-panel');
                         controlHUD.classList.remove('shake-element');
