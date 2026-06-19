@@ -34,7 +34,7 @@
             align-items: center;
         }
 
-        /* LOADING BAR SYSTEM */
+        /* LOGO SCREEN (FIXED FOR MINIMUM 5 SECONDS) */
         #screen-logo {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -51,23 +51,9 @@
             max-width: 320px;
             width: 80%;
             height: auto;
-            margin-bottom: 20px;
-        }
-        .loader-container {
-            width: 200px;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .loader-fill {
-            width: 0%;
-            height: 100%;
-            background: var(--sky-blue);
-            transition: width 0.1s ease;
         }
 
-        /* COVER OVERLAY */
+        /* TITLE COVER SCREEN */
         #screen-title {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -107,7 +93,7 @@
             animation: pulsePlayButton 1.2s infinite alternate;
         }
 
-        /* DIRECTIONS SCREEN */
+        /* INSTRUCTIONS SCREEN */
         #screen-instructions {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -152,7 +138,7 @@
             box-shadow: 0 6px 15px rgba(34, 197, 94, 0.35);
         }
 
-        /* TWO COLUMN MOBILE WORKSPACE */
+        /* GAME LAYOUT CONTAINER */
         .game-window-frame {
             width: 96vw;
             height: 95vh;
@@ -250,7 +236,7 @@
             padding-bottom: 125px;
         }
 
-        /* SCALED IMAGE CARDS FOR MOBILE */
+        /* SCALED CARDS FOR MOBILE SCREEN */
         .matching-card {
             width: 90%;
             max-width: 220px;
@@ -280,7 +266,7 @@
             z-index: 1000;
         }
 
-        /* LARGE DROP targets */
+        /* MOBILE TOUCH ANSWER PLATES */
         .target-drop-box {
             width: 95%;
             max-width: 240px;
@@ -315,7 +301,7 @@
             color: #16a34a;
         }
 
-        /* NOTIFICATION DESK BLOCK */
+        /* QUESTION CONSOLE */
         .info-panel-row {
             position: absolute;
             bottom: 12px;
@@ -351,7 +337,7 @@
             font-weight: bold;
         }
 
-        /* END PANEL DISPLAY */
+        /* END SCREEN DISPLAY */
         .summary-pane {
             display: none;
             width: 100%;
@@ -395,6 +381,7 @@
 </head>
 <body>
 
+    <!-- SYSTEM AUDIO BUFFERS -->
     <div style="display:none;">
         <audio id="snd-bg" src="assets/acousticmusic.mp3" loop></audio>
         <audio id="snd-correct" src="assets/correct.mp3"></audio>
@@ -402,14 +389,12 @@
         <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
     </div>
 
+    <!-- BRAND LOGO DISPLAY (LOCKS VISIBLE FOR AT LEAST 5 SECONDS) -->
     <div id="screen-logo">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
-        <div class="loader-container">
-            <div class="loader-fill" id="preload-fill-meter"></div>
-        </div>
-        <p style="margin-top: 8px; color:#64748b; font-size:13px; font-weight:bold;">Loading Images safely...</p>
     </div>
 
+    <!-- GAME OVERLAY MAIN TITLE COVER -->
     <div id="screen-title">
         <div class="title-wrapper-box">
             <h1 class="game-main-heading">Community Connect: The Matching Game</h1>
@@ -417,6 +402,7 @@
         </div>
     </div>
 
+    <!-- DIRECTIONS SCREEN -->
     <div id="screen-instructions">
         <div class="instruction-card">
             <h2>Let's Start!</h2>
@@ -425,6 +411,7 @@
         </div>
     </div>
 
+    <!-- PLAY MAIN ARENA GRID FRAME -->
     <div class="game-window-frame" id="game-workspace-frame">
         <header class="game-header">
             <div class="header-left-group">
@@ -449,6 +436,7 @@
             </div>
         </div>
 
+        <!-- STAGE SUMMARY OVERLAY REPORT -->
         <div class="summary-pane" id="summary-report-screen">
             <h2 style="color: var(--success-green); font-size: 36px; margin-bottom: 8px;">🌟 AWESOME JOB! 🌟</h2>
             <p style="color: #64748b; font-size: 18px;">You successfully found all matches!</p>
@@ -459,19 +447,16 @@
 
     <script>
         const scenariosDeck = [
-            // Places / Buildings (Straightforward)
             { id: "fire", q: "There is a big fire down the street! Which building has the fire trucks ready to help?", h: "Look for the home base of fire engines!", leftImg: "assets/firestation.png", matchText: "Fire Station" },
             { id: "hospital", q: "You feel very sick and need a doctor to look at you. Where should your parents take you?", h: "Look for the building with health providers!", leftImg: "assets/hospital.png", matchText: "Hospital" },
             { id: "police", q: "Someone lost their wallet at the park. Which place should they visit to report it missing?", h: "Look for the place that secures the town lanes!", leftImg: "assets/policestation.png", matchText: "Police Station" },
             { id: "post", q: "You want to drop off a birthday card for your grandmother. Where do letters go first?", h: "Look for the building that sorts local mail!", leftImg: "assets/postoffice.png", matchText: "Post Office" },
             { id: "school", q: "It is morning time and you want to see your classmates and write on the board. Where are you going?", h: "Look for the classrooms and blackboards!", leftImg: "assets/school.png", matchText: "School" },
             { id: "market", q: "Your family needs to buy fresh food, eggs, and bread for dinner. Where is the best place to go?", h: "Look for the plaza checkout aisles!", leftImg: "assets/market.png", matchText: "Market" },
-            
-            // Tricker / People & Utilities (Advanced)
             { id: "electrician", q: "The television turned off and a wall plug made a loud spark. Who should we call to look at the power wires?", h: "Find the expert who fixes power cables and wires!", leftImg: "assets/electrician.png", matchText: "Electrician" },
             { id: "plumber", q: "Water is dripping all over the floor from a broken pipe under the sink. Who has the tools to fix it?", h: "Find the helper who fixes leaking utility flows!", leftImg: "assets/plumber.png", matchText: "Plumber" },
             { id: "grocer", q: "You want to eat healthy apples and crunchy carrots. Who sells these fresh items at their food stall?", h: "Find the vendor with garden farm items!", leftImg: "assets/greengrocer.png", matchText: "Greengrocer" },
-            { id: "sweeper", q: "The paths in our town are covered in messy leaves and plastic wrappers. Who keeps our lanes nice and clean?", h: "Find the person with the large street cleaning broom!", leftImg: "assets/cheerfulboy.png", matchText: "Street Sweeper" }
+            { id: "sweeper", q: "The paths in our town are covered in messy leaves and plastic wrappers. Who keeps our lanes nice and clean?", h: "Find the person with the large street cleaning broom!", leftImg: "assets/sweeper.png", matchText: "Street Sweeper" }
         ];
 
         let playDeck = [];
@@ -479,34 +464,23 @@
         let scoreCounter = 0; 
         let attemptCounter = 2;
 
-        // PROMISE METRIC ASSET PRELOADER
+        // LOAD BALANCER CHAIN
         window.addEventListener('DOMContentLoaded', () => {
-            let loadedAssetsCount = 0;
-            const totalAssets = scenariosDeck.length;
-
-            const registerAssetLoad = () => {
-                loadedAssetsCount++;
-                let pct = Math.floor((loadedAssetsCount / totalAssets) * 100);
-                document.getElementById('preload-fill-meter').style.width = `${pct}%`;
-                
-                if (loadedAssetsCount >= totalAssets) {
-                    setTimeout(() => {
-                        const logoEl = document.getElementById('screen-logo');
-                        logoEl.style.opacity = '0';
-                        setTimeout(() => {
-                            logoEl.style.display = 'none';
-                            document.getElementById('screen-title').style.display = 'flex';
-                        }, 500);
-                    }, 600);
-                }
-            };
-
+            // Trigger browser asset cache assignment silently in background
             scenariosDeck.forEach(asset => {
                 const imgCache = new Image();
-                imgCache.onload = registerAssetLoad;
-                imgCache.onerror = registerAssetLoad; 
                 imgCache.src = asset.leftImg;
             });
+
+            // GUARANTEED MINIMUM 5-SECOND LOGO DISPLAY LOCK TIME
+            setTimeout(() => {
+                const logoEl = document.getElementById('screen-logo');
+                logoEl.style.opacity = '0';
+                setTimeout(() => {
+                    logoEl.style.display = 'none';
+                    document.getElementById('screen-title').style.display = 'flex';
+                }, 500);
+            }, 5000);
         });
 
         function transitionToInstructions() {
@@ -523,7 +497,6 @@
             document.getElementById('screen-instructions').style.display = 'none';
             document.getElementById('game-workspace-frame').style.display = 'flex';
             
-            // Randomize whole question flow
             scenariosDeck.sort(() => Math.random() - 0.5);
             playDeck = [...scenariosDeck];
             cursorIdx = 0;
@@ -552,7 +525,7 @@
             leftPane.innerHTML = "";
             rightPane.innerHTML = "";
 
-            // Create ONE image card for the left column
+            // ONE active question image card left column
             const card = document.createElement('div');
             card.className = "matching-card";
             card.dataset.id = data.id;
@@ -560,11 +533,10 @@
             setupPointerDragSystem(card);
             leftPane.appendChild(card);
 
-            // Fetch two distinct decoy options for the multiple choice pool
+            // Dynamic multiple-choice selector generation (1 Answer + 2 Decoys)
             let decoys = scenariosDeck.filter(item => item.id !== data.id).sort(() => Math.random() - 0.5).slice(0, 2);
             let selectionPool = [data, ...decoys].sort(() => Math.random() - 0.5);
 
-            // Append targets to the right panel column
             selectionPool.forEach(boxItem => {
                 const box = document.createElement('div');
                 box.className = "target-drop-box";
