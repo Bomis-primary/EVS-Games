@@ -439,15 +439,12 @@
 
     <script>
         const scenariosDeck = [
-            // Places / Buildings (Straightforward)
             { id: "fire", q: "There is a big fire down the street! Which building has the fire trucks ready to help?", h: "Look for the home base of fire engines!", leftImg: "assets/firestation.png", matchText: "Fire Station" },
             { id: "hospital", q: "You feel very sick and need a doctor to look at you. Where should your parents take you?", h: "Look for the building with health providers!", leftImg: "assets/hospital.png", matchText: "Hospital" },
             { id: "police", q: "Someone lost their wallet at the park. Which place should they visit to report it missing?", h: "Look for the place that secures the town lanes!", leftImg: "assets/policestation.png", matchText: "Police Station" },
             { id: "post", q: "You want to drop off a birthday card for your grandmother. Where do letters go first?", h: "Look for the building that sorts local mail!", leftImg: "assets/postoffice.png", matchText: "Post Office" },
             { id: "school", q: "It is morning time and you want to see your classmates and write on the board. Where are you going?", h: "Look for the classrooms and blackboards!", leftImg: "assets/school.png", matchText: "School" },
             { id: "market", q: "Your family needs to buy fresh food, eggs, and bread for dinner. Where is the best place to go?", h: "Look for the plaza checkout aisles!", leftImg: "assets/market.png", matchText: "Market" },
-            
-            // Tricker / People & Utilities (Slightly Advanced)
             { id: "electrician", q: "The television turned off and a wall plug made a loud spark. Who should we call to look at the power wires?", h: "Find the expert who fixes power cables and electrical boxes!", leftImg: "assets/electrician.png", matchText: "Electrician" },
             { id: "plumber", q: "Water is dripping all over the floor from a broken pipe under the sink. Who has the tools to fix it?", h: "Find the helper who fixes leaking utility flows!", leftImg: "assets/plumber.png", matchText: "Plumber" },
             { id: "grocer", q: "You want to eat healthy apples and crunchy carrots. Who sells these fresh items at their food stall?", h: "Find the vendor with garden farm items!", leftImg: "assets/greengrocer.png", matchText: "Greengrocer" },
@@ -459,7 +456,13 @@
         let scoreCounter = 0; 
         let attemptCounter = 2;
 
+        // ASYNC HIGH-PRIORITY PIPELINE PRELOADER
         window.addEventListener('DOMContentLoaded', () => {
+            scenariosDeck.forEach(asset => {
+                const imgCache = new Image();
+                imgCache.src = asset.leftImg;
+            });
+
             setTimeout(() => {
                 document.getElementById('screen-logo').style.opacity = '0';
                 setTimeout(() => {
@@ -512,7 +515,10 @@
             let decoys = scenariosDeck.filter(item => item.id !== data.id).sort(() => Math.random() - 0.5).slice(0, 2);
             let currentPool = [data, ...decoys];
 
+            // FULL INDEPENDENT POOL RANDOMIZATION
             let leftCardsData = [...currentPool].sort(() => Math.random() - 0.5);
+            let rightCardsData = [...currentPool].sort(() => Math.random() - 0.5);
+
             leftCardsData.forEach(cardItem => {
                 const card = document.createElement('div');
                 card.className = "matching-card";
@@ -522,7 +528,6 @@
                 leftPane.appendChild(card);
             });
 
-            let rightCardsData = [...currentPool].sort(() => Math.random() - 0.5);
             rightCardsData.forEach(boxItem => {
                 const box = document.createElement('div');
                 box.className = "target-drop-box";
@@ -637,7 +642,8 @@
 
         function concludeMission() {
             document.getElementById('main-play-arena').style.display = "none";
-            document.getElementById('final-score-field').innerText = `SCORE: ${scoreCounter} / 10`;
+            // DYNAMIC CALCULATION OUTPUT
+            document.getElementById('final-score-field').innerText = `SCORE: ${scoreCounter} / ${playDeck.length}`;
             document.getElementById('summary-report-screen').style.display = "flex";
         }
 
