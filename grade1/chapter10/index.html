@@ -34,13 +34,14 @@
             align-items: center;
         }
 
-        /* SCREEN 1: 5-SECOND EXCLUSIVE BRAND LOGO LOCK */
+        /* BOOTSTAGE PRELOAD SCREEN */
         #screen-logo {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: #ffffff;
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             opacity: 1;
@@ -50,15 +51,29 @@
             max-width: 400px;
             width: 85%;
             height: auto;
+            margin-bottom: 20px;
+        }
+        .loading-bar-container {
+            width: 250px;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .loading-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--sky-blue);
+            transition: width 0.2s ease;
         }
 
-        /* SCREEN 2: MAIN TITLE COVER SCREEN */
+        /* MAIN SCREEN CONTAINER */
         #screen-title {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-sky);
             z-index: 995;
-            display: none; /* Controlled explicitly by JS sequence */
+            display: none; 
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -93,7 +108,7 @@
             animation: pulsePlayButton 1.2s infinite alternate;
         }
 
-        /* SCREEN 3: INSTRUCTIONS CARD */
+        /* SCREEN 3: DIRECTIONS CARD */
         #screen-instructions {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -138,14 +153,14 @@
             box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
         }
 
-        /* SCREEN 4: TWO-COLUMN MAIN GAME WORKSPACE */
+        /* WORKSPACE MODULE FRAME */
         .game-window-frame {
-            width: 95vw;
-            height: 92vh;
+            width: 96vw;
+            height: 94vh;
             background: #ffffff;
             border: 6px solid #bae6fd;
             border-radius: 32px;
-            display: none; /* CRITICAL ANTI-FLASH PROTECTION */
+            display: none; 
             flex-direction: column;
             overflow: hidden;
             box-shadow: 0 20px 45px rgba(0,0,0,0.06);
@@ -213,35 +228,39 @@
             background-color: #f8fafc;
         }
 
+        /* GRID/FLEX VIEWPORT PANELS FOR DISCOVERY DECK MATCHES */
         .column-pane-left {
             flex: 1;
             background-color: #ffffff;
             border-right: 3px dashed #cbd5e1;
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
-            gap: 20px;
+            align-content: center;
+            gap: 16px;
             padding: 20px;
-            padding-bottom: 130px;
+            padding-bottom: 140px;
+            overflow-y: auto;
         }
 
         .column-pane-right {
             flex: 1;
             background-color: var(--bg-sky);
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
-            gap: 20px;
+            align-content: center;
+            gap: 16px;
             padding: 20px;
-            padding-bottom: 130px;
+            padding-bottom: 140px;
+            overflow-y: auto;
         }
 
+        /* INCREASED SIZE SYSTEM FOR THE CARDS */
         .matching-card {
-            width: 90%;
-            max-width: 320px;
-            height: 110px;
+            width: 44%;
+            min-width: 150px;
+            height: 135px; /* Scaled up card area */
             background: var(--card-bg);
             border: 4px solid var(--sky-blue);
             border-radius: 20px;
@@ -255,36 +274,37 @@
             z-index: 10;
         }
         .matching-card img {
-            height: 80px;
-            width: 80px;
+            height: 110px; /* Scaled up image asset */
+            width: 110px;
             object-fit: contain;
             pointer-events: none;
         }
         .matching-card.dragging {
             cursor: grabbing;
-            transform: scale(1.08);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-            z-index: 100;
+            transform: scale(1.1);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+            z-index: 1000;
         }
 
         .target-drop-box {
-            width: 90%;
-            max-width: 320px;
-            height: 110px;
+            width: 44%;
+            min-width: 150px;
+            height: 135px; /* Symmetrical sizing adjustment */
             background: #f8fafc;
             border: 4px dashed #cbd5e1;
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 12px;
             text-align: center;
             transition: all 0.2s ease;
         }
         .target-drop-box span {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #475569;
+            word-wrap: break-word;
         }
         .target-drop-box.hovered {
             border-color: var(--sky-blue);
@@ -297,8 +317,11 @@
             color: #16a34a;
             animation: matchPop 0.4s ease-out;
         }
+        .target-drop-box.matched span {
+            color: #16a34a;
+        }
 
-        /* HINT AND CONSOLE FOOTER PANEL */
+        /* HUD LOWER CONSOLE NOTIFICATION AREA */
         .info-panel-row {
             position: absolute;
             bottom: 15px;
@@ -312,19 +335,19 @@
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            z-index: 50;
+            z-index: 2000;
         }
         .question-container-block {
             flex: 1;
         }
         .question-box-text {
-            font-size: 19px;
+            font-size: 20px;
             font-weight: bold;
             color: #334155;
             line-height: 1.4;
         }
         .hint-popup-alert {
-            font-size: 14px;
+            font-size: 15px;
             background: #fffbeb;
             border-left: 4px solid var(--accent-orange);
             padding: 6px 12px;
@@ -335,7 +358,7 @@
             font-weight: bold;
         }
 
-        /* SCREEN 5: FINAL SUMMARY DISPLAY */
+        /* END GAME MODULE PANEL */
         .summary-pane {
             display: none;
             width: 100%;
@@ -388,6 +411,10 @@
 
     <div id="screen-logo">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill" id="preload-progress-indicator"></div>
+        </div>
+        <p style="margin-top: 10px; color:#64748b; font-size:14px; font-weight:bold;">Preloading Game Assets...</p>
     </div>
 
     <div id="screen-title">
@@ -423,7 +450,7 @@
 
             <div class="info-panel-row" id="info-control-panel">
                 <div class="question-container-block">
-                    <div class="question-box-text" id="q-text-field">Loading item data...</div>
+                    <div class="question-box-text" id="q-text-field">Finding active item description data...</div>
                     <div class="hint-popup-alert" id="hint-display-el">Hint slot...</div>
                 </div>
             </div>
@@ -432,9 +459,7 @@
         <div class="summary-pane" id="summary-report-screen">
             <h2 style="color: var(--success-green); font-size: 42px; margin-bottom: 10px;">🌟 AWESOME JOB! 🌟</h2>
             <p style="color: #64748b; font-size: 22px;">You successfully found all matches!</p>
-            
             <h3 id="final-score-field" style="font-size: 54px; margin: 25px 0; color: #0284c7;">SCORE: 0 / 10</h3>
-
             <button class="btn-replay" onclick="resetAndRestartMission()">PLAY AGAIN</button>
         </div>
     </div>
@@ -458,23 +483,34 @@
         let scoreCounter = 0; 
         let attemptCounter = 2;
 
-        // SEQUENTIAL INITIALIZATION PIPELINE
+        // ASYNC PRELOAD PIPELINE WITH ABSOLUTE GUARANTEE TIMERS
         window.addEventListener('DOMContentLoaded', () => {
-            // Force browser image load mapping
+            let loadedAssetsCount = 0;
+            const totalAssets = scenariosDeck.length;
+
+            const updateBar = () => {
+                loadedAssetsCount++;
+                let pct = Math.floor((loadedAssetsCount / totalAssets) * 100);
+                document.getElementById('preload-progress-indicator').style.width = `${pct}%`;
+                
+                if (loadedAssetsCount >= totalAssets) {
+                    setTimeout(() => {
+                        const logoEl = document.getElementById('screen-logo');
+                        logoEl.style.opacity = '0';
+                        setTimeout(() => {
+                            logoEl.style.display = 'none';
+                            document.getElementById('screen-title').style.display = 'flex';
+                        }, 500);
+                    }, 800); // Small buffer step to make sure images fully render
+                }
+            };
+
             scenariosDeck.forEach(asset => {
                 const imgCache = new Image();
+                imgCache.onload = updateBar;
+                imgCache.onerror = updateBar; // Prevent blocking if file name has a minor typo
                 imgCache.src = asset.leftImg;
             });
-
-            // Transition strictly after 5 seconds to avoid UI jumps
-            setTimeout(() => {
-                const logoEl = document.getElementById('screen-logo');
-                logoEl.style.opacity = '0';
-                setTimeout(() => {
-                    logoEl.style.display = 'none';
-                    document.getElementById('screen-title').style.display = 'flex';
-                }, 500);
-            }, 5000);
         });
 
         function transitionToInstructions() {
@@ -489,7 +525,9 @@
 
         function launchActiveGameplay() {
             document.getElementById('screen-instructions').style.display = 'none';
-            document.getElementById('game-workspace-frame').style.display = 'flex'; // Turn board visible now
+            document.getElementById('game-workspace-frame').style.display = 'flex';
+            
+            // Scramble question order globally
             scenariosDeck.sort(() => Math.random() - 0.5);
             playDeck = [...scenariosDeck];
             cursorIdx = 0;
@@ -508,33 +546,30 @@
             document.getElementById('label-attempts-top').innerText = `ATTEMPTS LEFT: ${attemptCounter}`;
             document.getElementById('hint-display-el').style.display = "none";
 
-            const data = playDeck[cursorIdx];
+            const currentItem = playDeck[cursorIdx];
             document.getElementById('label-progress-top').innerText = `ITEM: ${cursorIdx + 1} / ${playDeck.length}`;
-            document.getElementById('q-text-field').innerText = data.q;
-            document.getElementById('hint-display-el').innerText = `HINT: ${data.h}`;
+            document.getElementById('q-text-field').innerText = currentItem.q;
+            document.getElementById('hint-display-el').innerText = `HINT: ${currentItem.h}`;
 
             const leftPane = document.getElementById('deck-source-left');
             const rightPane = document.getElementById('deck-targets-right');
             leftPane.innerHTML = "";
             rightPane.innerHTML = "";
 
-            let decoys = scenariosDeck.filter(item => item.id !== data.id).sort(() => Math.random() - 0.5).slice(0, 2);
-            let currentPool = [data, ...decoys];
+            // SCRAMBLE LOGIC: Generate independent pools of all 10 cards completely shuffled
+            let randomizedLeftDeck = [...scenariosDeck].sort(() => Math.random() - 0.5);
+            let randomizedRightDeck = [...scenariosDeck].sort(() => Math.random() - 0.5);
 
-            // FULL INDEPENDENT RANDOMIZATION FOR SHUFFLED COLUMNS
-            let leftCardsData = [...currentPool].sort(() => Math.random() - 0.5);
-            let rightCardsData = [...currentPool].sort(() => Math.random() - 0.5);
-
-            leftCardsData.forEach(cardItem => {
+            randomizedLeftDeck.forEach(cardItem => {
                 const card = document.createElement('div');
                 card.className = "matching-card";
                 card.dataset.id = cardItem.id;
-                card.innerHTML = `<img src="${cardItem.leftImg}" alt="match item">`;
+                card.innerHTML = `<img src="${cardItem.leftImg}" alt="match option">`;
                 setupPointerDragSystem(card);
                 leftPane.appendChild(card);
             });
 
-            rightCardsData.forEach(boxItem => {
+            randomizedRightDeck.forEach(boxItem => {
                 const box = document.createElement('div');
                 box.className = "target-drop-box";
                 box.dataset.id = boxItem.id;
@@ -582,6 +617,7 @@
                 const dropBox = checkCollisionTargets(e.clientX, e.clientY);
                 const activeQuestion = playDeck[cursorIdx];
 
+                // The player must drop the active required card onto its matching description container
                 if(dropBox && dropBox.dataset.id === el.dataset.id && el.dataset.id === activeQuestion.id) {
                     try { 
                         document.getElementById('snd-correct').currentTime = 0;
@@ -625,7 +661,7 @@
                     el.style.position = 'static';
                     el.style.left = 'auto';
                     el.style.top = 'auto';
-                    el.style.width = '90%';
+                    el.style.width = '44%';
                 }
             });
         }
