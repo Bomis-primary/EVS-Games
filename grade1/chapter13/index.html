@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -92,7 +92,7 @@
 
 <div id="gameContainer">
     <div id="logoScreen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none';">
     </div>
 
     <div id="titleScreen" class="screen">
@@ -131,11 +131,29 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    const sndCorrect = new Audio('assets/correct.mp3');
-    const sndWrong = new Audio('assets/wrong.mp3');
-    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
-    const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
-    sndBgm.loop = true;
+    // FAIL-SAFE AUDIO ENGINE: Wrapped helper prevents unhandled crashes if browser delays/blocks audio
+    function createSafeAudio(path, loop = false) {
+        let aud = new Audio();
+        aud.src = path;
+        aud.loop = loop;
+        aud.preload = 'auto';
+        aud.addEventListener('error', (e) => {
+            console.warn(`Audio bypassed safely to prevent mobile crash: ${path}`);
+        });
+        return aud;
+    }
+
+    const sndCorrect = createSafeAudio('assets/correct.mp3');
+    const sndWrong = createSafeAudio('assets/wrong.mp3');
+    const sndClap = createSafeAudio('assets/freesound_community-claps-44774.mp3');
+    const sndBgm = createSafeAudio('assets/cartoonbackgroundmusic.mp3', true);
+
+    function safePlay(audioObj) {
+        if (audioObj && typeof audioObj.play === 'function') {
+            audioObj.currentTime = 0;
+            audioObj.play().catch(err => console.log("Audio play blocked until user gesture interaction"));
+        }
+    }
 
     const BASE_WIDTH = 600;
     const BASE_HEIGHT = 900;
@@ -225,13 +243,12 @@
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
-    }, 5000);
+    }, 4000);
 
     function showInstructions() {
         document.getElementById('titleScreen').style.display = 'none';
         document.getElementById('instructionScreen').style.display = 'flex';
-        sndBgm.currentTime = 0;
-        sndBgm.play().catch(()=>{});
+        safePlay(sndBgm);
     }
 
     function startGame() {
@@ -371,8 +388,7 @@
             speechBubble.color = "#10b981";
             speechBubble.visible = true;
 
-            sndCorrect.currentTime = 0;
-            sndCorrect.play().catch(()=>{});
+            safePlay(sndCorrect);
         } else {
             b.shakeTimer = 30;
             hearts--;
@@ -383,8 +399,7 @@
             speechBubble.color = "#ef4444";
             speechBubble.visible = true;
 
-            sndWrong.currentTime = 0;
-            sndWrong.play().catch(()=>{});
+            safePlay(sndWrong);
         }
 
         updateHUD();
@@ -417,7 +432,7 @@
 
     function endGameSummary() {
         gameActive = false;
-        sndBgm.pause();
+        if (sndBgm && typeof sndBgm.pause === 'function') sndBgm.pause();
         
         document.getElementById('uiOverlay').style.display = 'none';
         document.getElementById('finalScore').innerText = `Final Score: ${score} / 11`;
@@ -429,8 +444,7 @@
         } else {
             title.innerText = "🎈 BALLOON KING! 👑";
             title.style.color = "#ea580c";
-            sndClap.currentTime = 0;
-            sndClap.play().catch(()=>{});
+            safePlay(sndClap);
         }
         
         document.getElementById('completionScreen').style.display = 'flex';
@@ -566,24 +580,21 @@
         ctx.restore();
     }
 
-    // FIXED: Dynamically calculates word width and auto-shrinks font size to guarantee text never overflows the balloon boundaries
     function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, balloonRadius) {
         const words = text.split(' ');
         
-        // Find longest separate word or segment to evaluate clipping thresholds
         let longestWordWidth = 0;
         words.forEach(w => {
             let wWidth = ctx.measureText(w).width;
             if(wWidth > longestWordWidth) longestWordWidth = wWidth;
         });
 
-        // If a word (like "Hide-&-Seek") exceeds safe horizontal padding boundaries, scale down the font size dynamically
         const maxSafeWidth = balloonRadius * 1.45;
         if (longestWordWidth > maxSafeWidth) {
             let scaleRatio = maxSafeWidth / longestWordWidth;
             let currentFontSize = parseInt(ctx.font);
             let adjustedFontSize = Math.floor(currentFontSize * scaleRatio);
-            if (adjustedFontSize < 11) adjustedFontSize = 11; // Hard clamp safe minimum readable font floor
+            if (adjustedFontSize < 11) adjustedFontSize = 11; 
             ctx.font = `900 ${adjustedFontSize}px 'Arial'`;
             lineHeight = adjustedFontSize + 3;
         }
@@ -706,12 +717,10 @@
                 ctx.lineWidth = 5.5; 
                 ctx.lineJoin = "round";
                 
-                // Initialize clean global base font measurements
                 ctx.font = "900 17px 'Arial'"; 
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 
-                // Send balloon boundaries parameters down to engine helper to auto-fit text inside ellipse perfectly
                 drawWrappedText(ctx, b.item.text, 0, -2, b.radius * 1.45, 20, b.radius);
             } else {
                 ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
