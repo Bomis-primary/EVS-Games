@@ -38,7 +38,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH VIEW - FORCED ABSOLUTE DEAD-CENTER ALIGNMENT FIX */
+/* CH1: SPLASH VIEW - FORCED ABSOLUTE DEAD-CENTER GRID MATRIX */
 #splashScreen {
   background: #ffffff;
   position: fixed;
@@ -48,12 +48,14 @@ body {
   height: 100vh;
   z-index: 9999;
   display: none;
-  flex-direction: column;
-  align-items: center;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  place-items: center;
+  align-content: center;
   justify-content: center;
 }
 #splashScreen.active { 
-  display: flex; 
+  display: grid; 
 }
 #splashScreen img {
   display: block;
@@ -276,7 +278,7 @@ canvas {
   <div class="game-card">
     <h1>Animal Dash Quest</h1>
     <p style="font-size: 19px; line-height: 1.6; color: #43a047; font-weight: 700; margin: 25px 0;">
-      Eat 2 apples with your snake to answer a fun animal riddle!
+      Eat 2 eggs with your snake to answer a fun animal riddle!
     </p>
     <button class="btn-main" onclick="bootGame()">▶ Play Game</button>
   </div>
@@ -286,7 +288,7 @@ canvas {
   <div class="game-card">
     
     <div class="hud-bar">
-      <div class="hud-item" id="hudTreatsBox">🍏 Apples: <span id="lblFood">0/2</span></div>
+      <div class="hud-item" id="hudTreatsBox">🥚 Eggs: <span id="lblFood">0/2</span></div>
       <div class="hud-item">⭐ Score: <span id="lblScore">0</span></div>
       <div class="hud-item" id="lblHearts">❤️❤️❤️</div>
     </div>
@@ -502,11 +504,42 @@ function gameTick() {
 function renderCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  ctx.fillStyle = "#ff8a80";
+  // VECTOR RENDERING: PASTEL EGGSHELL WITH DETAILED ACCENTS
+  let centerX = food.x + gridSize / 2;
+  let centerY = food.y + gridSize / 2;
+  
+  ctx.save();
   ctx.beginPath();
-  ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
+  // Generate an asymmetric oval contour (pointier top axis) using a Bezier curve path
+  ctx.moveTo(centerX, centerY - 8); 
+  ctx.bezierCurveTo(centerX + 7, centerY - 8, centerX + 8, centerY + 7, centerX, centerY + 8); 
+  ctx.bezierCurveTo(centerX - 8, centerY + 7, centerX - 7, centerY - 8, centerX, centerY - 8);
+  
+  // Gradient styling context
+  let eggGrad = ctx.createLinearGradient(food.x, food.y, food.x + gridSize, food.y + gridSize);
+  eggGrad.addColorStop(0, "#fffbeb"); // Soft cream base illumination
+  eggGrad.addColorStop(1, "#fef3c7"); // Warm vanilla base shadow
+  
+  ctx.fillStyle = eggGrad;
+  ctx.shadowColor = "rgba(180, 83, 9, 0.15)";
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetY = 2;
   ctx.fill();
   
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = "#fbbf24"; // Bright amber border line
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  // Decorative natural yolk-specks inside the structural egg mask
+  ctx.fillStyle = "#f59e0b";
+  ctx.beginPath();
+  ctx.arc(centerX + 2, centerY + 2, 1, 0, Math.PI * 2);
+  ctx.arc(centerX - 3, centerY, 0.7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  
+  // RENDER THE HERO DASH SNAKE SEGMENTS
   snake.forEach((part, idx) => {
     ctx.fillStyle = idx === 0 ? "#81c784" : "#a5d6a7";
     ctx.beginPath();
