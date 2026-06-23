@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Animal Dash Quest</title>
 <style>
 * {
@@ -21,12 +21,13 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow-x: hidden;
 }
 .screen {
   display: none;
   width: 100%;
   max-width: 500px;
-  padding: 20px;
+  padding: 15px;
   animation: fadeIn 0.4s ease-out;
 }
 .screen.active {
@@ -37,7 +38,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* CH1: SPLASH VIEW - FORCED ABSOLUTE DEAD-CENTER ALIGNMENT */
+/* CH1: SPLASH VIEW - FORCED ABSOLUTE DEAD-CENTER ALIGNMENT FIX */
 #splashScreen {
   background: #ffffff;
   position: fixed;
@@ -47,22 +48,19 @@ body {
   height: 100vh;
   z-index: 9999;
   display: none;
-  grid-template-columns: 1fr;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  place-content: center;
-  place-items: center;
 }
 #splashScreen.active { 
-  display: grid; 
+  display: flex; 
 }
 #splashScreen img {
   display: block;
-  margin: auto;
   width: auto;
   height: auto;
-  max-width: 75vw;
-  max-height: 45vh;
+  max-width: 70vw;
+  max-height: 40vh;
   object-fit: contain;
 }
 
@@ -108,7 +106,7 @@ h1 {
 .hud-bar {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 16px;
 }
 .hud-item {
@@ -118,9 +116,10 @@ h1 {
   padding: 8px 4px;
   border-radius: 16px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   color: #2e7d32;
   transition: opacity 0.2s ease;
+  white-space: nowrap;
 }
 
 /* SNAKE BOARD CANVAS BLOCK WRAPPER */
@@ -133,11 +132,13 @@ h1 {
   border: 5px solid #a5d6a7;
   border-radius: 24px;
   overflow: hidden;
-  margin: 10px 0;
+  margin: 5px 0;
   line-height: 0;
 }
 canvas {
   background: #fafafa;
+  max-width: 100%;
+  height: auto;
 }
 
 /* FULL-WIDTH DETACHED QUIZ INTERFACE CANVAS */
@@ -155,11 +156,11 @@ canvas {
 }
 
 .q-text {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 700;
   color: #1b5e20;
   margin-bottom: 16px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 .hint-banner {
   display: none; 
@@ -275,7 +276,7 @@ canvas {
   <div class="game-card">
     <h1>Animal Dash Quest</h1>
     <p style="font-size: 19px; line-height: 1.6; color: #43a047; font-weight: 700; margin: 25px 0;">
-      Eat 2 treats with your snake to unlock and solve fun animal riddles!
+      Eat 2 apples with your snake to answer a fun animal riddle!
     </p>
     <button class="btn-main" onclick="bootGame()">▶ Play Game</button>
   </div>
@@ -285,7 +286,7 @@ canvas {
   <div class="game-card">
     
     <div class="hud-bar">
-      <div class="hud-item" id="hudTreatsBox">🍎 Treats: <span id="lblFood">0/2</span></div>
+      <div class="hud-item" id="hudTreatsBox">🍏 Apples: <span id="lblFood">0/2</span></div>
       <div class="hud-item">⭐ Score: <span id="lblScore">0</span></div>
       <div class="hud-item" id="lblHearts">❤️❤️❤️</div>
     </div>
@@ -352,16 +353,16 @@ canvas {
 
 <script>
 const questionsBank = [
-  { q: "A farmer wants milk for his family every morning. Which animal should he keep?", a: "Cow", o: ["Cow", "Lion", "Duck"], h: "Hint: This friendly animal lives inside a shed and says 'Moo'!", r: "Cows live on farms and are cared for specifically because they give lots of fresh, healthy milk every single morning!" },
-  { q: "At night, a child hears a soft meowing outside the window. Which pet might be there?", a: "Cat", o: ["Cat", "Dog", "Frog"], h: "Hint: This furry pet has whiskers and loves drinking fresh milk!", r: "Cats make a soft 'meow' sound to talk to us, while dogs bark and frogs make croaking sounds." },
-  { q: "A small baby is seen playing near a dog. What is the baby dog called?", a: "Puppy", o: ["Puppy", "Kitten", "Calf"], h: "Hint: It is a small, playful baby animal that wags its tail!", r: "A baby dog is always called a puppy! Baby cats are called kittens, and baby cows are called calves." },
-  { q: "On a farm, one useful animal gives eggs for breakfast. Which animal is it?", a: "Hen", o: ["Hen", "Horse", "Rabbit"], h: "Hint: This feathered creature lives in a coop and can cluck!", r: "Hens lay eggs every morning inside their farm coops. Horses and rabbits don't lay eggs at all!" },
-  { q: "A little one looks up and sees beautiful feathers moving across the sky. Which animal is flying?", a: "Bird", o: ["Bird", "Fish", "Monkey"], h: "Hint: This animal has wings, chirps happily, and builds warm nests!", r: "Birds have lightweight feathers and strong wings that allow them to fly high in the air, unlike fish or monkeys." },
-  { q: "A tiny buzzing creature is very busy flying near the colorful flowers. Which animal is it?", a: "Bee", o: ["Bee", "Ant", "Spider"], h: "Hint: This insect makes sweet golden honey inside a buzz-filled hive!", r: "Bees buzz from flower to flower to collect sweet nectar, which they use to make yummy honey back inside their hives." },
-  { q: "Inside a deep forest den, a very loud roar is heard. Which animal lives there?", a: "Lion", o: ["Lion", "Deer", "Sheep"], h: "Hint: This brave wild predator is called the King of the Jungle!", r: "Lions make a booming roar that can be heard far away to show they are the strong leaders of their wild territory." },
-  { q: "A child goes to a clear pond and sees an animal swimming around with shiny fins. Which animal is it?", a: "Fish", o: ["Fish", "Bird", "Cat"], h: "Hint: This little animal breathes underwater and lives inside ponds!", r: "Fish are built to live underwater using their fins to paddle around and breathe comfortably, while cats and birds live on land." },
-  { q: "A girl sees a small animal hopping quickly into a cozy hole in the ground. Which animal is it?", a: "Rabbit", o: ["Rabbit", "Goat", "Elephant"], h: "Hint: This animal has long soft ears and loves crunching on carrots!", r: "Rabbits are quick hoppers that build safe, cozy underground tunnels called burrows to hide from danger and rest safely." },
-  { q: "At a farm, a rider climbs safely onto an animal that lives inside a stable. Which animal is it?", a: "Horse", o: ["Horse", "Pig", "Bear"], h: "Hint: This strong animal runs super fast and says 'Neigh'!", r: "Horses live in cozy stables on farms. They are built with strong legs made for galloping fast and carrying riders safely." }
+  { q: "Which animal gives us milk and says 'Moo'?", a: "Cow", o: ["Cow", "Lion", "Duck"], h: "Hint: This animal lives on a farm!", r: "Cows give us fresh, healthy milk to drink every day!" },
+  { q: "Which pet says 'Meow' and likes to chase mice?", a: "Cat", o: ["Cat", "Dog", "Frog"], h: "Hint: It has sharp whiskers!", r: "Cats say meow when they are happy or hungry!" },
+  { q: "What do we call a cute baby dog?", a: "Puppy", o: ["Puppy", "Kitten", "Calf"], h: "Hint: It loves to wag its little tail!", r: "A baby dog is a puppy, a baby cat is a kitten, and a baby cow is a calf!" },
+  { q: "Which farm animal lays eggs for our breakfast?", a: "Hen", o: ["Hen", "Horse", "Rabbit"], h: "Hint: It lives inside a coop and clucks!", r: "Hens lay eggs inside their coops on the farm." },
+  { q: "Which animal has colorful feathers and flies in the sky?", a: "Bird", o: ["Bird", "Fish", "Monkey"], h: "Hint: It chirps and builds nests in trees!", r: "Birds use their wings to fly high in the air!" },
+  { q: "What tiny insect flies around flowers and makes sweet honey?", a: "Bee", o: ["Bee", "Ant", "Spider"], h: "Hint: It makes a soft buzzing sound!", r: "Bees collect juice from flowers to make yummy honey in their hives!" },
+  { q: "Which wild animal is known as the King of the Jungle and roars loudly?", a: "Lion", o: ["Lion", "Deer", "Sheep"], h: "Hint: It has a large mane of hair!", r: "Lions are big, strong wild cats that live in the jungle!" },
+  { q: "Which animal swims underwater using its shiny fins?", a: "Fish", o: ["Fish", "Bird", "Cat"], h: "Hint: It lives inside ponds or bowls!", r: "Fish can breathe underwater and swim all day long!" },
+  { q: "Which fast animal has long ears and loves eating carrots?", a: "Rabbit", o: ["Rabbit", "Goat", "Elephant"], h: "Hint: It hops around the grass!", r: "Rabbits are soft hoppers that dig cozy holes in the ground." },
+  { q: "Which large animal lives in a stable, runs fast, and says 'Neigh'?", a: "Horse", o: ["Horse", "Pig", "Bear"], h: "Hint: People can ride on its back!", r: "Horses are strong animals built for running fast!" }
 ];
 
 const canvas = document.getElementById("stage");
@@ -509,7 +510,11 @@ function renderCanvas() {
   snake.forEach((part, idx) => {
     ctx.fillStyle = idx === 0 ? "#81c784" : "#a5d6a7";
     ctx.beginPath();
-    ctx.roundRect(part.x + 2, part.y + 2, gridSize - 4, gridSize - 4, [8]);
+    if (ctx.roundRect) {
+      ctx.roundRect(part.x + 2, part.y + 2, gridSize - 4, gridSize - 4, [8]);
+    } else {
+      ctx.rect(part.x + 2, part.y + 2, gridSize - 4, gridSize - 4);
+    }
     ctx.fill();
   });
 }
@@ -602,7 +607,6 @@ function verifyQuizAction(element, isCorrect) {
     } else {
       element.classList.add("wrong");
       
-      // Immediately display correct highlight states across the board
       document.querySelectorAll(".opt-card").forEach(b => {
         b.disabled = true;
         if (b.textContent === currentQ.a) b.classList.add("correct");
@@ -617,7 +621,6 @@ function verifyQuizAction(element, isCorrect) {
       sndWrong.play().catch(()=>{});
       syncPanel();
       
-      // NAVIGATE TO NEW WRONG ANSWER EXPLANATION SCREEN
       setTimeout(() => {
         if (lives <= 0) {
           terminateQuest(false);
@@ -637,7 +640,6 @@ function loadReviewScreen() {
 }
 
 function dismissReviewScreen() {
-  // Re-enter central hub screen loop context cleanly
   navigate("gameScreen");
   evaluateRoundProgression();
 }
