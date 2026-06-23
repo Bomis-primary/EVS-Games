@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -19,8 +19,9 @@
             overflow: hidden; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.12); 
         }
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
         
+        /* FIXED: Added strict containment, hidden overflows, and clear pointer isolation to prevent asset bleeding */
         .screen { 
             position: absolute; 
             top: 0; 
@@ -31,20 +32,23 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            z-index: 10; 
+            z-index: 95; 
             padding: 30px; 
             text-align: center; 
             backdrop-filter: blur(8px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            background-color: #ffffff;
+            transition: opacity 0.3s ease;
         }
         
-        #logoScreen { background-color: #ffffff; z-index: 100; }
-        #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
+        /* FIXED: Isolated the logo container explicitly to ensure large graphics cannot scale outside bounds */
+        #logoScreen { background-color: #ffffff; z-index: 100; width: 100%; height: 100%; overflow: hidden; }
+        #logoScreen img { max-width: 90%; max-height: 80%; object-fit: contain; position: relative; }
         
         #titleScreen { background: radial-gradient(circle, #fef08a 0%, #dbeafe 100%); z-index: 90; display: none; }
         #titleScreen h1 { 
             color: #f43f5e; 
-            font-size: 46px; 
+            font-size: 44px; 
             margin-bottom: 40px; 
             text-shadow: 4px 4px 0px #ffffff, -1px -1px 0px #ffffff; 
             line-height: 1.2; 
@@ -53,7 +57,7 @@
         }
         
         @keyframes floatTitle {
-            0%, 100% { transform: translateY(0px) rotate(-1s); }
+            0%, 100% { transform: translateY(0px) rotate(-1deg); }
             50% { transform: translateY(-10px) rotate(1deg); }
         }
         
@@ -131,7 +135,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // FAIL-SAFE AUDIO ENGINE: Wrapped helper prevents unhandled crashes if browser delays/blocks audio
     function createSafeAudio(path, loop = false) {
         let aud = new Audio();
         aud.src = path;
@@ -151,7 +154,7 @@
     function safePlay(audioObj) {
         if (audioObj && typeof audioObj.play === 'function') {
             audioObj.currentTime = 0;
-            audioObj.play().catch(err => console.log("Audio play blocked until user gesture interaction"));
+            audioObj.play().catch(err => console.log("Audio gesture delay handled"));
         }
     }
 
@@ -240,10 +243,11 @@
         }
     ];
 
+    // Transition splash away securely
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
-    }, 4000);
+    }, 3500);
 
     function showInstructions() {
         document.getElementById('titleScreen').style.display = 'none';
