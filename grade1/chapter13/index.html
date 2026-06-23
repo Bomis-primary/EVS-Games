@@ -19,7 +19,7 @@
             overflow: hidden; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.12); 
         }
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
         
         .screen { 
             position: absolute; 
@@ -31,20 +31,22 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            z-index: 10; 
+            z-index: 95; 
             padding: 30px; 
             text-align: center; 
             backdrop-filter: blur(8px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            background-color: #ffffff;
+            transition: opacity 0.3s ease;
         }
         
-        #logoScreen { background-color: #ffffff; z-index: 100; }
-        #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
+        #logoScreen { background-color: #ffffff; z-index: 100; width: 100%; height: 100%; overflow: hidden; }
+        #logoScreen img { max-width: 90%; max-height: 80%; object-fit: contain; position: relative; }
         
         #titleScreen { background: radial-gradient(circle, #fef08a 0%, #dbeafe 100%); z-index: 90; display: none; }
         #titleScreen h1 { 
             color: #f43f5e; 
-            font-size: 46px; 
+            font-size: 44px; 
             margin-bottom: 40px; 
             text-shadow: 4px 4px 0px #ffffff, -1px -1px 0px #ffffff; 
             line-height: 1.2; 
@@ -53,7 +55,7 @@
         }
         
         @keyframes floatTitle {
-            0%, 100% { transform: translateY(0px) rotate(-1s); }
+            0%, 100% { transform: translateY(0px) rotate(-1deg); }
             50% { transform: translateY(-10px) rotate(1deg); }
         }
         
@@ -92,7 +94,7 @@
 
 <div id="gameContainer">
     <div id="logoScreen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none';">
     </div>
 
     <div id="titleScreen" class="screen">
@@ -131,11 +133,28 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    const sndCorrect = new Audio('assets/correct.mp3');
-    const sndWrong = new Audio('assets/wrong.mp3');
-    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
-    const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
-    sndBgm.loop = true;
+    function createSafeAudio(path, loop = false) {
+        let aud = new Audio();
+        aud.src = path;
+        aud.loop = loop;
+        aud.preload = 'auto';
+        aud.addEventListener('error', (e) => {
+            console.warn(`Audio bypassed safely to prevent mobile crash: ${path}`);
+        });
+        return aud;
+    }
+
+    const sndCorrect = createSafeAudio('assets/correct.mp3');
+    const sndWrong = createSafeAudio('assets/wrong.mp3');
+    const sndClap = createSafeAudio('assets/freesound_community-claps-44774.mp3');
+    const sndBgm = createSafeAudio('assets/cartoonbackgroundmusic.mp3', true);
+
+    function safePlay(audioObj) {
+        if (audioObj && typeof audioObj.play === 'function') {
+            audioObj.currentTime = 0;
+            audioObj.play().catch(err => console.log("Audio gesture delay handled"));
+        }
+    }
 
     const BASE_WIDTH = 600;
     const BASE_HEIGHT = 900;
@@ -225,13 +244,12 @@
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
-    }, 5000);
+    }, 3500);
 
     function showInstructions() {
         document.getElementById('titleScreen').style.display = 'none';
         document.getElementById('instructionScreen').style.display = 'flex';
-        sndBgm.currentTime = 0;
-        sndBgm.play().catch(()=>{});
+        safePlay(sndBgm);
     }
 
     function startGame() {
@@ -262,6 +280,7 @@
         }
     }
 
+    /* FIXED: Swapped static values with a Proportional Matrix Grid configuration to completely resolve clumps and overlaps */
     function initLevelGrid() {
         activeBalloons = [];
         poppedCountForLevel = 0;
@@ -283,11 +302,11 @@
         shuffleArray(pool);
         targetCountForLevel = pool.filter(p => p.isCorrect).length;
 
-        const bRadius = 66; 
-        const startX = 110; 
-        const startY = 300; 
-        const hSpacing = 190;  
-        const rowHeight = 155; 
+        const bRadius = 58; 
+        
+        // Exact percentage anchors inside the safe boundaries
+        const colsX = [BASE_WIDTH * 0.22, BASE_WIDTH * 0.50, BASE_WIDTH * 0.78];
+        const rowsY = [BASE_HEIGHT * 0.28, BASE_HEIGHT * 0.46, BASE_HEIGHT * 0.64];
 
         const softColors = ["#ffb4b4", "#b3e5fc", "#c8e6c9", "#f3e5f5", "#fff9c4", "#ffe0b2", "#ffcc80", "#e1bee7", "#b2dfdb"];
         shuffleArray(softColors);
@@ -297,12 +316,9 @@
             for (let col = 0; col < 3; col++) {
                 if (index >= pool.length) break;
 
-                let bX = startX + (col * hSpacing);
-                let bY = startY + (row * rowHeight);
-
                 activeBalloons.push({
-                    x: bX,
-                    y: bY,
+                    x: colsX[col],
+                    y: rowsY[row],
                     radius: bRadius,
                     color: softColors[index % softColors.length],
                     item: pool[index].data,
@@ -371,8 +387,7 @@
             speechBubble.color = "#10b981";
             speechBubble.visible = true;
 
-            sndCorrect.currentTime = 0;
-            sndCorrect.play().catch(()=>{});
+            safePlay(sndCorrect);
         } else {
             b.shakeTimer = 30;
             hearts--;
@@ -383,8 +398,7 @@
             speechBubble.color = "#ef4444";
             speechBubble.visible = true;
 
-            sndWrong.currentTime = 0;
-            sndWrong.play().catch(()=>{});
+            safePlay(sndWrong);
         }
 
         updateHUD();
@@ -417,7 +431,7 @@
 
     function endGameSummary() {
         gameActive = false;
-        sndBgm.pause();
+        if (sndBgm && typeof sndBgm.pause === 'function') sndBgm.pause();
         
         document.getElementById('uiOverlay').style.display = 'none';
         document.getElementById('finalScore').innerText = `Final Score: ${score} / 11`;
@@ -429,8 +443,7 @@
         } else {
             title.innerText = "🎈 BALLOON KING! 👑";
             title.style.color = "#ea580c";
-            sndClap.currentTime = 0;
-            sndClap.play().catch(()=>{});
+            safePlay(sndClap);
         }
         
         document.getElementById('completionScreen').style.display = 'flex';
@@ -566,24 +579,21 @@
         ctx.restore();
     }
 
-    // FIXED: Dynamically calculates word width and auto-shrinks font size to guarantee text never overflows the balloon boundaries
     function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, balloonRadius) {
         const words = text.split(' ');
         
-        // Find longest separate word or segment to evaluate clipping thresholds
         let longestWordWidth = 0;
         words.forEach(w => {
             let wWidth = ctx.measureText(w).width;
             if(wWidth > longestWordWidth) longestWordWidth = wWidth;
         });
 
-        // If a word (like "Hide-&-Seek") exceeds safe horizontal padding boundaries, scale down the font size dynamically
         const maxSafeWidth = balloonRadius * 1.45;
         if (longestWordWidth > maxSafeWidth) {
             let scaleRatio = maxSafeWidth / longestWordWidth;
             let currentFontSize = parseInt(ctx.font);
             let adjustedFontSize = Math.floor(currentFontSize * scaleRatio);
-            if (adjustedFontSize < 11) adjustedFontSize = 11; // Hard clamp safe minimum readable font floor
+            if (adjustedFontSize < 11) adjustedFontSize = 11; 
             ctx.font = `900 ${adjustedFontSize}px 'Arial'`;
             lineHeight = adjustedFontSize + 3;
         }
@@ -706,12 +716,10 @@
                 ctx.lineWidth = 5.5; 
                 ctx.lineJoin = "round";
                 
-                // Initialize clean global base font measurements
                 ctx.font = "900 17px 'Arial'"; 
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 
-                // Send balloon boundaries parameters down to engine helper to auto-fit text inside ellipse perfectly
                 drawWrappedText(ctx, b.item.text, 0, -2, b.radius * 1.45, 20, b.radius);
             } else {
                 ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
