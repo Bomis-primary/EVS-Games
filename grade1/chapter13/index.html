@@ -246,12 +246,11 @@
         shuffleArray(pool);
         targetCountForLevel = data.correctItems.length;
 
-        // FIXED: Spaced out grid matrix covering the safe screen area comfortably
         const bRadius = 55; 
         const startX = 85;
         const startY = 240;
-        const hSpacing = 143;  // Wide horizontal distribution
-        const rowHeight = 150; // Tall vertical distribution
+        const hSpacing = 143;  
+        const rowHeight = 150; 
 
         const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#55efc4", "#fd79a8", "#a29bfe", "#fdcb6e", "#e17055", "#00cec9", "#ff9ff3", "#54a0ff", "#10ac84"];
         shuffleArray(colors);
@@ -261,7 +260,6 @@
             for (let col = 0; col < 3; col++) {
                 if (index >= pool.length) break;
 
-                // Alternating offsets creates a beautiful, loose honeycomb pattern
                 let xOffset = (row % 2 === 1) ? 35 : 0;
                 let bX = startX + (col * hSpacing) + xOffset;
                 let bY = startY + (row * rowHeight);
@@ -303,7 +301,10 @@
         if (!gameActive || freezeTimerActive || pinMascot.state !== "idle") return;
 
         const rect = canvas.getBoundingClientRect();
-        const tapX = (clientX - rect.left) / scaleFactor;
+        
+        // FIXED: Included centering alignment offsets inside tap handler calculation matrices
+        const currentOffsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
+        const tapX = ((clientX - rect.left) / scaleFactor) - currentOffsetX;
         const tapY = (clientY - rect.top) / scaleFactor;
 
         for (let i = 0; i < activeBalloons.length; i++) {
@@ -524,7 +525,6 @@
         ctx.restore();
     }
 
-    // FIXED: Wrapped lines are centered perfectly inside the round balloon frame
     function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
         const words = text.split(' ');
         let lines = [];
@@ -544,7 +544,6 @@
 
         let startY = y - ((lines.length - 1) * lineHeight) / 2;
         for (let j = 0; j < lines.length; j++) {
-            // Apply text outline for crisp pop contrast over balloon background colors
             ctx.strokeText(lines[j], x, startY + (j * lineHeight));
             ctx.fillText(lines[j], x, startY + (j * lineHeight));
         }
@@ -592,7 +591,11 @@
         if (!gameActive) return;
 
         ctx.save();
+        
+        // FIXED: Dynamically calculate and apply horizontal centering offsets to all drawn coordinate elements
+        let offsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
         ctx.scale(scaleFactor, scaleFactor);
+        ctx.translate(offsetX, 0);
 
         let parkBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
         parkBg.addColorStop(0, "#e0f2fe");
@@ -634,13 +637,11 @@
             ctx.fill();
 
             if (!b.isBlank) {
-                // FIXED: Text is rendered directly inside the balloon with crisp high-contrast outlines!
                 ctx.fillStyle = "#ffffff";
                 ctx.strokeStyle = "#1e3a8a";
                 ctx.lineWidth = 4.5;
                 ctx.lineJoin = "round";
                 
-                // Increased font weight and size for ultimate visibility
                 ctx.font = "bold 17px 'Comic Sans MS'"; 
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
