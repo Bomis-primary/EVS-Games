@@ -1,1 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Safety Dart Champion</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            background-color: #FDF6E2; 
+        }
+        html, body {
+            overflow: hidden;
+            height: 100%;
+        }
+        .scroll-bg {
+            background-image: url('image_bf5db5.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .chunky-panel {
+            box-shadow: 0px 8px 0px #8C6D31;
+        }
+        .chunky-btn {
+            box-shadow: 0px 5px 0px #5C4314;
+            transition: all 0.1s ease;
+        }
+        .chunky-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0px 2px 0px #5C4314;
+        }
+        @keyframes radarSweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .sweeper-line {
+            transform-origin: bottom center;
+            animation: radarSweep 2.5s linear infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 m-0 select-none text-[#5C4314]">
 
+    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
+
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-32 h-32 bg-[#F5E6CC] rounded-full flex items-center justify-center text-[#8C6D31] font-black text-4xl border-4 border-[#C2A673]\'>SD</div>';">
+    </div>
+
+    <div class="w-full max-w-sm flex flex-col h-full justify-center relative">
+
+        <div id="titleView" class="bg-[#FFFDF6] rounded-3xl p-6 text-center space-y-5 chunky-panel border-4 border-[#C2A673]">
+            <div class="space-y-2">
+                <span class="text-6xl block">🎯📜🚦</span>
+                <h1 class="text-3xl font-black tracking-wide leading-tight text-[#73541D]">Safety Dart<br>Champion</h1>
+                <p class="text-[#8C6D31] font-bold text-xs px-2">Launch darts to pop a balloon, then open the scroll! Answer in 2 attempts or lose the question points! 🎯</p>
+            </div>
+            
+            <div class="flex flex-col space-y-3 pt-2">
+                <button onclick="startGame()" class="w-full bg-[#C2A673] hover:bg-[#B39562] text-white font-black text-xl py-3.5 rounded-2xl chunky-btn cursor-pointer">
+                    PLAY GAME 🚀
+                </button>
+            </div>
+        </div>
+
+        <div id="gameView" class="hidden flex flex-col space-y-4 w-full">
+            
+            <div class="bg-[#FFFDF6] rounded-2xl p-3 flex items-center justify-between font-black text-xs border-2 border-[#C2A673] shadow-sm">
+                <div>Score: <span id="scoreTextValue" class="text-sm text-[#73541D]">0</span> / 100 pts</div>
+                <div class="bg-[#F5E6CC] text-[#73541D] px-2.5 py-1 rounded-full">Balloons Popped: <span id="clearedCountValue">0 / 10</span></div>
+            </div>
+
+            <div class="bg-[#FFFDF6] rounded-3xl p-4 border-4 border-[#C2A673] chunky-panel flex flex-col items-center relative overflow-hidden aspect-square justify-center">
+                
+                <div id="dartBoardCircle" class="w-64 h-64 rounded-full border-8 border-[#73541D] bg-[#FDFBF7] relative shadow-inner flex items-center justify-center overflow-hidden">
+                    
+                    <div id="radarLine" class="absolute bottom-1/2 left-1/2 w-1 h-32 bg-amber-700/70 sweeper-line origin-bottom"></div>
+                    
+                    <div id="targetNode1" class="absolute top-8 left-8 w-11 h-11 bg-rose-400 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">ROAD</span></div>
+                    <div id="targetNode2" class="absolute top-8 right-8 w-11 h-11 bg-amber-500 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">VEHICLE</span></div>
+                    <div id="targetNode3" class="absolute bottom-8 left-8 w-11 h-11 bg-cyan-400 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">HOME</span></div>
+                    <div id="targetNode4" class="absolute bottom-8 right-8 w-11 h-11 bg-emerald-400 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">SCHOOL</span></div>
+
+                    <div class="w-6 h-6 rounded-full bg-red-700 border-2 border-white z-10 shadow-sm flex items-center justify-center text-[8px] font-black text-white">🎯</div>
+                </div>
+
+                <button onclick="simulateDartThrowAction()" class="w-full mt-4 bg-amber-600 hover:bg-amber-700 text-white font-black text-lg py-3 rounded-xl border-b-4 border-amber-900 active:translate-y-1 active:border-b-0 cursor-pointer shadow-sm">
+                    THROW DART 🚀
+                </button>
+            </div>
+
+            <div id="questionModalOverlay" class="hidden fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-3">
+                
+                <div class="w-full max-w-[320px] aspect-[1/1.05] scroll-bg p-6 flex flex-col justify-between relative select-none animate-fade-in">
+                    
+                    <div class="text-center pt-5">
+                        <span id="modalCategoryBadge" class="bg-amber-100 text-amber-900 px-3 py-0.5 rounded-full text-[10px] font-black border border-amber-300 uppercase">ROAD LAWS</span>
+                    </div>
+
+                    <div class="px-3 text-center my-auto max-h-[60px] overflow-y-auto">
+                        <p id="questionDisplayLabel" class="text-xs font-black leading-snug text-amber-950"></p>
+                    </div>
+
+                    <div id="answersGridSlot" class="flex flex-col space-y-1.5 px-3 mb-1">
+                        </div>
+
+                    <div class="px-4 pb-6 text-center">
+                        <p id="helperAlertLabel" class="text-[10px] font-black text-amber-800 leading-tight min-h-[24px]"></p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div id="scoreView" class="hidden bg-[#FFFDF6] rounded-3xl p-6 text-center space-y-5 chunky-panel border-4 border-[#C2A673]">
+            <div class="space-y-1">
+                <span class="text-6xl block animate-bounce">👑🏆🏅</span>
+                <h2 class="text-2xl font-black text-[#73541D]">Mission Finished!</h2>
+                <p class="text-xs text-[#8C6D31] font-bold">Let's check your final Safety Score board results!</p>
+            </div>
+            <div class="bg-[#F5E6CC] p-4 rounded-2xl border-2 border-[#C2A673] max-w-[150px] mx-auto">
+                <p class="text-xs font-black text-[#8C6D31] uppercase tracking-wider mb-0.5">Final Score</p>
+                <p class="text-3xl font-black text-[#73541D]"><span id="finalScoreLabelField">0 / 100</span></p>
+            </div>
+            <button onclick="restartGame()" class="w-full bg-[#C2A673] text-white font-black text-lg py-4 rounded-2xl chunky-btn cursor-pointer">
+                PLAY AGAIN 🔄
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // 10 Grade-2 safety questions
+        const dartChapterDatabase = [
+            { tag: "ROAD", q: "Where should you walk on the road if there is no footpath available?", options: ["In the middle of the road", "On the safe side facing traffic"], ans: "On the safe side facing traffic", hint: "Hint: Always walk where you can see oncoming cars clearly!" },
+            { tag: "VEHICLE", q: "What should you always wear while sitting in a moving car?", options: ["A secure seatbelt", "A heavy school bag"], ans: "A secure seatbelt", hint: "Hint: It clicks across your chest and locks you safely in place!" },
+            { tag: "VEHICLE", q: "What is the right way to wait for your school bus at the stop?", options: ["Running and pushing forward", "Standing patiently in a queue"], ans: "Standing patiently in a queue", hint: "Hint: Waiting your turn keeps everyone from slipping or falling down!" },
+            { tag: "HOME", q: "Why should you never play with matchsticks or fire at home?", options: ["They can burn your fingers", "They make too much noise"], ans: "They can burn your fingers", hint: "Hint: Fire spreads very fast and is dangerous to touch without adults!" },
+            { tag: "HOME", q: "What could happen if you leave your toys scattered on the bedroom floor?", options: ["Someone might trip and get injured", "The toys will disappear"], ans: "Someone might trip and get injured", hint: "Hint: Clear your toys so the walkway remains completely safe for everyone!" },
+            { tag: "HOME", q: "Is it safe to touch electrical appliances with wet hands?", options: ["Yes, water cleans them", "No, you can get a dangerous shock"], ans: "No, you can get a dangerous shock", hint: "Hint: Always dry your hands completely with a clean towel first!" },
+            { tag: "SCHOOL", q: "What should you do when walking down the school stairs?", options: ["Slide down the banister railing", "Walk calmly without pushing"], ans: "Walk calmly without pushing", hint: "Hint: Pushing on steps can cause serious falls and knee injuries!" },
+            { tag: "PLAYGROUND", q: "Where is it dangerous to stand when someone is playing on a park swing?", options: ["Directly in front or behind it", "Far away on the green grass"], ans: "Directly in front or behind it", hint: "Hint: A heavy moving swing can hit you hard and cause bad injuries!" },
+            { tag: "SWIMMING", q: "If you have not learned how to swim properly yet, what must you wear?", options: ["A floating rubber swimming tube", "Heavy winter running shoes"], ans: "A floating rubber swimming tube", hint: "Hint: Swim tubes keep your chin safely floating above the water lines!" },
+            { tag: "FIRST AID", q: "What is the medical help given to an injured person before a doctor arrives called?", options: ["Classroom homework help", "First Aid treatment"], ans: "First Aid treatment", hint: "Hint: It is kept inside a box filled with cotton, bandages, and creams!" }
+        ];
+
+        let databasePointerIdx = 0;
+        let internalScore = 0;
+        let incorrectAttemptsCount = 0;
+        let completedTargetsTrack = 0;
+
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvasWindow();
+            window.addEventListener('resize', resizeCanvasWindow);
+            
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 400);
+            }, 5000);
+        });
+
+        function resizeCanvasWindow() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function launchConfettiBurst() {
+            canvas.classList.remove('hidden');
+            confettiParticles = [];
+            for (let i = 0; i < 45; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 11,
+                    vy: (Math.random() - 0.5) * 11 - 4,
+                    size: Math.random() * 5 + 4,
+                    color: `hsl(${Math.random() * 360}, 85%, 55%)`,
+                    alpha: 1
+                });
+            }
+            requestAnimationFrame(updateConfettiEngine);
+        }
+
+        function updateConfettiEngine() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let alive = false;
+            confettiParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.22;
+                p.alpha -= 0.025;
+                if (p.alpha > 0) {
+                    alive = true;
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+            if (alive) requestAnimationFrame(updateConfettiEngine);
+            else canvas.classList.add('hidden');
+        }
+
+        function startGame() {
+            document.getElementById('titleView').style.display = 'none';
+            document.getElementById('gameView').classList.remove('hidden');
+            internalScore = 0;
+            completedTargetsTrack = 0;
+            databasePointerIdx = 0;
+            
+            document.getElementById('scoreTextValue').innerText = 0;
+            document.getElementById('clearedCountValue').innerText = "0 / 10";
+            resetBalloonsOpacity();
+        }
+
+        function resetBalloonsOpacity() {
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`targetNode${i}`).style.opacity = "1";
+            }
+        }
+
+        function simulateDartThrowAction() {
+            if (databasePointerIdx >= dartChapterDatabase.length) return;
+            
+            const loopNodeId = `targetNode${(databasePointerIdx % 4) + 1}`;
+            const elem = document.getElementById(loopNodeId);
+            if(elem) elem.style.opacity = "0.2";
+
+            launchQuestionModalContext();
+        }
+
+        function launchQuestionModalContext() {
+            incorrectAttemptsCount = 0; // Reset counter for new question
+            document.getElementById('helperAlertLabel').innerText = "Attempts: 0 / 2";
+            
+            const itemData = dartChapterDatabase[databasePointerIdx];
+            document.getElementById('modalCategoryBadge').innerText = `${itemData.tag} RULES`;
+            document.getElementById('questionDisplayLabel').innerText = itemData.q;
+
+            const gridSlot = document.getElementById('answersGridSlot');
+            gridSlot.innerHTML = "";
+
+            itemData.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-[#FFFDF9]/90 hover:bg-amber-50 text-amber-950 font-black py-2 px-2.5 rounded-xl border border-amber-800/30 text-[11px] text-center active:scale-95 transition-all option-node-btn shadow-sm";
+                btn.onclick = () => verifySelectedAnswerOption(opt, btn, itemData);
+                btn.innerText = opt;
+                gridSlot.appendChild(btn);
+            });
+
+            document.getElementById('questionModalOverlay').classList.remove('hidden');
+        }
+
+        function verifySelectedAnswerOption(pickedOption, elementNode, dataObj) {
+            const allOptionButtons = document.querySelectorAll('.option-node-btn');
+
+            if (pickedOption === dataObj.ans) {
+                // CORRECT CHICE RULE
+                allOptionButtons.forEach(b => b.disabled = true);
+                elementNode.classList.remove('bg-[#FFFDF9]/90');
+                elementNode.classList.add('bg-green-600', 'text-white', 'border-green-800');
+                
+                playSound('soundCorrect');
+                launchConfettiBurst();
+
+                // Award points based on attempts taken
+                if (incorrectAttemptsCount === 0) {
+                    internalScore += 10; // +10 points on first attempt
+                } else {
+                    internalScore += 5;  // +5 points on second attempt
+                }
+                
+                document.getElementById('scoreTextValue').innerText = internalScore;
+                completedTargetsTrack++;
+                document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack} / 10`;
+
+                setTimeout(() => {
+                    document.getElementById('questionModalOverlay').classList.add('hidden');
+                    databasePointerIdx++;
+                    if ((databasePointerIdx % 4) === 0) resetBalloonsOpacity();
+                    evaluateGameProgressEndState();
+                }, 1400);
+
+            } else {
+                // WRONG CHOICE RULE
+                playSound('soundWrong');
+                elementNode.classList.remove('bg-[#FFFDF9]/90');
+                elementNode.classList.add('bg-red-600', 'text-white', 'border-red-800');
+                elementNode.disabled = true;
+                incorrectAttemptsCount++;
+
+                if (incorrectAttemptsCount === 1) {
+                    // Update layout to notify first attempt failure
+                    document.getElementById('helperAlertLabel').innerText = `Wrong choice! 1 / 2 Attempts Used.\n${dataObj.hint}`;
+                } else if (incorrectAttemptsCount >= 2) {
+                    // 2 Attempts exceeded! Points lost completely.
+                    document.getElementById('helperAlertLabel').innerText = "Attempts Used Up! Point lost ❌ Moving forward...";
+                    allOptionButtons.forEach(b => b.disabled = true);
+                    
+                    completedTargetsTrack++;
+                    document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack} / 10`;
+
+                    setTimeout(() => {
+                        document.getElementById('questionModalOverlay').classList.add('hidden');
+                        databasePointerIdx++;
+                        if ((databasePointerIdx % 4) === 0) resetBalloonsOpacity();
+                        evaluateGameProgressEndState();
+                    }, 2000);
+                }
+            }
+        }
+
+        function evaluateGameProgressEndState() {
+            if (completedTargetsTrack >= 10) {
+                setTimeout(() => {
+                    playSound('soundClapping');
+                    document.getElementById('gameView').style.display = 'none';
+                    document.getElementById('finalScoreLabelField').innerText = `${internalScore} / 100 PTS`;
+                    document.getElementById('scoreView').classList.remove('hidden');
+                }, 300);
+            }
+        }
+
+        function playSound(id) {
+            const trackElement = document.getElementById(id);
+            if (trackElement) {
+                trackElement.load();
+                const p = trackElement.play();
+                if (p !== undefined) {
+                    p.catch(err => console.log("Audio pipeline: ", err));
+                }
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('scoreView').classList.add('hidden');
+            document.getElementById('gameView').style.display = 'flex';
+            startGame();
+        }
+    </script>
+</body>
+</html>
