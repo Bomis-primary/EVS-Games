@@ -1,1 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Grid-Knot Matcher!</title>
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none; /* Stops mobile scrolling while dragging paths */
+        }
+        .grid-board {
+            background-color: #1E1E24;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-[#ECEFF1] to-[#CFD8DC] min-h-screen flex flex-col items-center justify-center p-3 m-0 overflow-hidden select-none">
 
+    <!-- AUDIO TARGET HOOKS -->
+    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
+
+    <!-- SCREEN 0: INNOVINE SPLASH SCREEN -->
+    <div id="splashScreen" class="fixed inset-0 bg-[#1A237E] flex flex-col items-center justify-center z-50 text-center p-4 transition-opacity duration-500">
+        <div class="space-y-4 flex flex-col items-center">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-24 h-24 object-contain rounded-2xl shadow-2xl bg-white p-2 border-4 border-[#00E676] animate-pulse" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-white rounded-2xl flex items-center justify-center text-[#1A237E] font-black text-4xl border-4 border-[#00E676]\'>IN</div><h1 class=\'text-white text-3xl font-bold mt-2\'>Innovine</h1>';">
+            <p class="text-[#A5D6A7] font-black text-xs tracking-widest uppercase mt-2">FUTURE OF LEARNING</p>
+        </div>
+    </div>
+
+    <!-- SCREEN 1: TITLE LAUNCH SCREEN -->
+    <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-xl border-4 border-[#37474F] text-center space-y-6 mx-auto">
+        <div class="space-y-2">
+            <span class="text-6xl block">🔲🧩🔗</span>
+            <h1 class="text-3xl font-black text-[#0097A7] tracking-wide leading-tight">The Grid-Knot<br>Matcher!</h1>
+            <p class="text-[#546E7A] font-bold text-sm px-2">Draw lines on the grid to connect the matching pairs without crossing tracks!</p>
+        </div>
+        <button onclick="showInstructions()" class="w-full bg-[#0097A7] hover:bg-[#00838F] text-white font-black text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#006064] transform active:scale-95 transition-all cursor-pointer">
+            PLAY GAME ▶️
+        </button>
+    </div>
+
+    <!-- SCREEN 2: INSTRUCTIONS SCREEN -->
+    <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-xl border-4 border-[#FFB300] text-center space-y-5 mx-auto">
+        <h2 class="text-2xl font-black text-[#FF8F00]">🧠 How to Solve</h2>
+        <div class="bg-[#FFF8E1] p-5 rounded-2xl text-left text-sm space-y-3 font-bold text-[#5D4037] border-2 border-dashed border-[#FFD54F]">
+            <p>1. Press down on an item inside a colored circle.</p>
+            <p>2. Drag through cells to find its correct partner match.</p>
+            <p>3. If you make a wrong match or get stuck, look at the bottom for a helpful Hint!</p>
+        </div>
+        <button onclick="startGame()" class="w-full bg-[#FF8F00] hover:bg-[#F57C00] text-white font-black text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#E65100] transform active:scale-95 transition-all cursor-pointer">
+            START FLOW ➡️
+        </button>
+    </div>
+
+    <!-- SCREEN 3: ACTIVE GAME BOARD SCREEN -->
+    <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-3 mx-auto relative">
+        <!-- TOP HUD -->
+        <div class="bg-white rounded-2xl p-3 shadow-sm flex items-center justify-between font-black text-xs md:text-sm border border-gray-200">
+            <div class="text-[#0097A7]">⭐ SCORE: <span id="hudScore" class="text-base text-[#006064]">0</span></div>
+            <div class="bg-[#E0F7FA] text-[#006064] px-3 py-1 rounded-full text-xs">Mission: <span id="hudProgress">1 / 4</span></div>
+            <button onclick="resetCurrentGrid()" class="bg-[#FFCDD2] text-[#B71C1C] px-3 py-1 rounded-lg text-xs font-black shadow-sm transform active:scale-95">Reset 🔄</button>
+        </div>
+
+        <!-- TARGET TASK DESCRIPTION INSTRUCTION BANNER -->
+        <div class="bg-white rounded-2xl p-3 border-2 border-dashed border-[#0097A7] text-center shadow-sm">
+            <p id="missionBannerText" class="text-xs md:text-sm font-black text-[#37474F]"></p>
+        </div>
+
+        <!-- RESPONSIVE LINKING GRID GRAPHIC BOARD -->
+        <div id="boardContainer" class="w-full aspect-square grid-board rounded-3xl p-1 relative overflow-hidden border-4 border-[#263238] shadow-2xl">
+            <canvas id="gridCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
+            <div id="gridItemsOverlay" class="absolute inset-0 grid grid-cols-4 grid-rows-4 z-20"></div>
+        </div>
+
+        <!-- LIVE HINT AND DYNAMIC FEEDBACK TEXT DRAWER -->
+        <div id="feedbackTextDrawer" class="bg-white rounded-xl p-2.5 text-center shadow-sm border border-orange-200 min-h-[44px] flex items-center justify-center">
+            <p id="hintOrFeedbackText" class="text-xs font-bold text-gray-500">Tap a colored circle to start drawing!</p>
+        </div>
+
+        <!-- POPUP MODAL DRAWER FOR SUCCESS EXPLANATIONS -->
+        <div id="explanationModal" class="hidden absolute inset-x-0 bottom-0 top-0 bg-black/40 z-50 flex items-end justify-center p-4 rounded-3xl">
+            <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl border-t-4 border-[#00E676] space-y-3 transform translate-y-0 transition-transform">
+                <div class="flex items-center space-x-3">
+                    <span id="explanationIcon" class="text-3xl">🌟</span>
+                    <h4 class="font-black text-[#2E7D32] text-sm md:text-base">Match Found!</h4>
+                </div>
+                <p id="explanationBodyText" class="text-xs md:text-sm font-bold text-gray-700 leading-relaxed"></p>
+                <button onclick="closeExplanationModal()" class="w-full bg-[#0097A7] text-white font-black text-xs py-2 rounded-xl border-b-4 border-[#006064]">CONTINUE ▶️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: MISSION COMPLETE SUMMARY OUTRO -->
+    <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-xl border-4 border-[#4CAF50] text-center space-y-4 mx-auto">
+        <div class="space-y-1">
+            <span class="text-6xl block">🏗️🎖️🎉</span>
+            <h2 class="text-2xl font-black text-[#2E7D32]">Master Builder!</h2>
+            <p class="text-sm text-gray-600 font-bold px-2">Every structural wire and tool pathway is cleanly locked down!</p>
+        </div>
+        <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
+            <p class="text-[#2E7D32] text-4xl font-black"><span id="finalScore">0</span> Pts</p>
+        </div>
+        <button onclick="restartGame()" class="w-full bg-[#0097A7] text-white font-black text-lg py-4 rounded-2xl shadow-md border-b-8 border-[#006064] transform active:scale-95 transition-all cursor-pointer">
+            SOLVE AGAIN 🔄
+        </button>
+    </div>
+
+    <!-- GRID LOGIC CONTROLLER SCRIPT Engine -->
+    <script>
+        const gridLevels = [
+            {
+                banner: "👷 Help the workers! Draw a line from each helper to the item they need!",
+                gridSize: 4,
+                pairs: [
+                    { id: 1, color: "#EF5350", name: "Mason", symbol: "👷", start: {r:0, c:0}, end: {r:3, c:1}, hint: "Hint: Look for something red and heavy used to build strong walls!", exp: "The Mason needs strong bricks to build our walls!" },
+                    { id: 2, color: "#42A5F5", name: "Plumber", symbol: "🚰", start: {r:3, c:0}, end: {r:1, c:3}, hint: "Hint: What does water flow through to reach your bathroom sink?", exp: "The Plumber fixes your bathroom pipes and leaky taps!" },
+                    { id: 3, color: "#66BB6A", name: "Architect", symbol: "📐", start: {r:0, c:3}, end: {r:3, c:3}, hint: "Hint: Before building a house, what do we draw on paper first?", exp: "The Architect draws the house on paper before we build it!" }
+                ]
+            },
+            {
+                banner: "⚡ More helpers need their tools! Connect them to finish the house!",
+                gridSize: 4,
+                pairs: [
+                    { id: 1, color: "#EF5350", name: "Carpenter", symbol: "🪚", start: {r:0, c:1}, end: {r:3, c:2}, hint: "Hint: What is made of wood that you open and close to enter a room?", exp: "The Carpenter cuts wood to make our doors and windows!" },
+                    { id: 2, color: "#42A5F5", name: "Electrician", symbol: "💡", start: {r:2, c:0}, end: {r:0, c:3}, hint: "Hint: What do you press when a room is too dark?", exp: "The Electrician puts in wires so our lights can switch on!" },
+                    { id: 3, color: "#66BB6A", name: "Painter", symbol: "🖌️", start: {r:0, c:0}, end: {r:3, c:3}, hint: "Hint: Look for a bucket full of bright, beautiful colors!", exp: "The Painter uses bright colors to paint our walls!" }
+                ]
+            },
+            {
+                banner: "🏢 Where do these building materials go? Match them to the right house!",
+                gridSize: 4,
+                pairs: [
+                    { id: 1, color: "#EF5350", name: "Straw", symbol: "🌾", start: {r:0, c:1}, end: {r:2, c:2}, hint: "Hint: Which house is built in a village and has a roof made of grass?", exp: "Mud and straw are used to build weak Kutcha huts in villages." },
+                    { id: 2, color: "#42A5F5", name: "Brick", symbol: "🧱", start: {r:3, c:0}, end: {r:0, c:3}, hint: "Hint: Which city house is very tall, strong, and permanent?", exp: "Bricks and cement make strong Pucca houses in big cities!" },
+                    { id: 3, color: "#66BB6A", name: "Snow", symbol: "❄️", start: {r:1, c:0}, end: {r:3, c:3}, hint: "Hint: Which house is round, white, and built in very cold ice lands?", exp: "Eskimos use cold snow blocks to build warm, round Igloos!" }
+                ]
+            },
+            {
+                banner: "🚌 Some houses are special! Can you match the items to the correct house?",
+                gridSize: 4,
+                pairs: [
+                    { id: 1, color: "#EF5350", name: "Canvas", symbol: "⛺", start: {r:1, c:1}, end: {r:3, c:1}, hint: "Hint: Look for a house made of cloth that you use when camping in the forest!", exp: "Tents are made of thick cloth. Campers can fold them up easily!" },
+                    { id: 2, color: "#42A5F5", name: "Wheels", symbol: "🛞", start: {r:0, c:0}, end: {r:2, c:3}, hint: "Hint: Which house can drive around like a big car or a van?", exp: "A Caravan is a special house on wheels that can drive anywhere!" },
+                    { id: 3, color: "#66BB6A", name: "Poles", symbol: "🪵", start: {r:3, c:0}, end: {r:0, c:3}, hint: "Hint: Which house stands tall on wooden legs to stay safe from floods?", exp: "Stilt houses stand high on poles in places where it rains a lot!" }
+                ]
+            }
+        ];
+
+        let currentLevelIdx = 0;
+        let score = 0;
+        let canvas = document.getElementById('gridCanvas');
+        let ctx = canvas.getContext('2d');
+        
+        let completedLines = {};
+        let activeTrackingPair = null;
+        let activePathCoordinates = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('titleScreen').classList.remove('hidden');
+                }, 500);
+            }, 5000);
+
+            window.addEventListener('resize', fitCanvasCoordinates);
+            setupInputControlListeners();
+        });
+
+        function showInstructions() {
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('instructionsScreen').classList.remove('hidden');
+        }
+
+        function startGame() {
+            document.getElementById('instructionsScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.remove('hidden');
+            currentLevelIdx = 0;
+            score = 0;
+            document.getElementById('hudScore').innerText = score;
+            loadGridLevelLayout();
+        }
+
+        function fitCanvasCoordinates() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            redrawAllConnectedFlowPipes();
+        }
+
+        function loadGridLevelLayout() {
+            completedLines = {};
+            activeTrackingPair = null;
+            activePathCoordinates = [];
+            document.getElementById('hintOrFeedbackText').innerText = "Tap a colored circle to start drawing!";
+            document.getElementById('hintOrFeedbackText').className = "text-xs font-bold text-gray-500";
+            
+            const lvl = gridLevels[currentLevelIdx];
+            document.getElementById('hudProgress').innerText = `${currentLevelIdx + 1} / ${gridLevels.length}`;
+            document.getElementById('missionBannerText').innerText = lvl.banner;
+
+            fitCanvasCoordinates();
+            buildInteractiveGridDOM();
+        }
+
+        function buildInteractiveGridDOM() {
+            const overlay = document.getElementById('gridItemsOverlay');
+            overlay.innerHTML = "";
+            const lvl = gridLevels[currentLevelIdx];
+            
+            for (let r = 0; r < lvl.gridSize; r++) {
+                for (let c = 0; c < lvl.gridSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = "flex items-center justify-center relative w-full h-full border border-[rgba(255,255,255,0.03)]";
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    
+                    lvl.pairs.forEach(p => {
+                        if ((p.start.r === r && p.start.c === c) || (p.end.r === r && p.end.c === c)) {
+                            const nodeCircle = document.createElement('div');
+                            nodeCircle.className = "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-lg z-30 font-bold text-white border-2 border-white/20";
+                            nodeCircle.style.backgroundColor = p.color;
+                            nodeCircle.innerText = p.symbol;
+                            cell.appendChild(nodeCircle);
+                        }
+                    });
+                    overlay.appendChild(cell);
+                }
+            }
+        }
+
+        function setupInputControlListeners() {
+            const overlay = document.getElementById('gridItemsOverlay');
+
+            const handleActionStart = (e) => {
+                if (!document.getElementById('explanationModal').classList.contains('hidden')) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const elem = document.elementFromPoint(clientX, clientY);
+                const targetCell = elem ? elem.closest('[data-row]') : null;
+
+                if (targetCell) {
+                    const r = parseInt(targetCell.dataset.row);
+                    const c = parseInt(targetCell.dataset.col);
+                    const lvl = gridLevels[currentLevelIdx];
+
+                    const matchingPair = lvl.pairs.find(p => (p.start.r === r && p.start.c === c) || (p.end.r === r && p.end.c === c));
+                    
+                    if (matchingPair) {
+                        activeTrackingPair = matchingPair;
+                        activePathCoordinates = [{r, c}];
+                        delete completedLines[matchingPair.id];
+                        document.getElementById('hintOrFeedbackText').innerText = `Connecting lines for ${matchingPair.name}...`;
+                        document.getElementById('hintOrFeedbackText').className = "text-xs font-black text-blue-600";
+                    }
+                }
+            };
+
+            const handleActionMove = (e) => {
+                if (!activeTrackingPair) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const elem = document.elementFromPoint(clientX, clientY);
+                const targetCell = elem ? elem.closest('[data-row]') : null;
+
+                if (targetCell) {
+                    const r = parseInt(targetCell.dataset.row);
+                    const c = parseInt(targetCell.dataset.col);
+                    const lastPos = activePathCoordinates[activePathCoordinates.length - 1];
+                    
+                    const rowDiff = Math.abs(r - lastPos.r);
+                    const colDiff = Math.abs(c - lastPos.c);
+                    
+                    if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+                        const alreadyVisited = activePathCoordinates.some(pt => pt.r === r && pt.c === c);
+                        if (!alreadyVisited) {
+                            const lvl = gridLevels[currentLevelIdx];
+                            const p = activeTrackingPair;
+                            
+                            // Check if drawing hits a WRONG target node partner endpoint
+                            const wrongTargetHit = lvl.pairs.some(otherPair => {
+                                if (otherPair.id === p.id) return false;
+                                return (otherPair.start.r === r && otherPair.start.c === c) || (otherPair.end.r === r && otherPair.end.c === c);
+                            });
+
+                            if (wrongTargetHit) {
+                                playSound('soundWrong');
+                                document.getElementById('hintOrFeedbackText').innerText = p.hint;
+                                document.getElementById('hintOrFeedbackText').className = "text-xs font-bold text-orange-600 animate-pulse";
+                                activeTrackingPair = null;
+                                activePathCoordinates = [];
+                                redrawAllConnectedFlowPipes();
+                                return;
+                            }
+
+                            activePathCoordinates.push({r, c});
+                            redrawAllConnectedFlowPipes();
+                            
+                            const hitCorrectEnd = (p.start.r === r && p.start.c === c) || (p.end.r === r && p.end.c === c);
+                            if (hitCorrectEnd && activePathCoordinates.length > 1) {
+                                completedLines[p.id] = [...activePathCoordinates];
+                                activeTrackingPair = null;
+                                playSound('soundCorrect');
+                                popExplanationModal(p);
+                            }
+                        }
+                    }
+                }
+            };
+
+            const handleActionEnd = () => {
+                if (activeTrackingPair) {
+                    activeTrackingPair = null;
+                    activePathCoordinates = [];
+                    redrawAllConnectedFlowPipes();
+                    document.getElementById('hintOrFeedbackText').innerText = "Line broken! Try matching again.";
+                    document.getElementById('hintOrFeedbackText').className = "text-xs font-bold text-gray-400";
+                }
+            };
+
+            overlay.addEventListener('mousedown', handleActionStart);
+            window.addEventListener('mousemove', handleActionMove);
+            window.addEventListener('mouseup', handleActionEnd);
+
+            overlay.addEventListener('touchstart', handleActionStart, {passive: true});
+            window.addEventListener('touchmove', handleActionMove, {passive: false});
+            window.addEventListener('touchend', handleActionEnd);
+        }
+
+        function redrawAllConnectedFlowPipes() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const lvl = gridLevels[currentLevelIdx];
+            const cellSize = canvas.width / lvl.gridSize;
+
+            ctx.lineWidth = cellSize * 0.38; 
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            const drawVectorLine = (path, color) => {
+                if (path.length < 2) return;
+                ctx.strokeStyle = color;
+                ctx.beginPath();
+                ctx.moveTo((path[0].c + 0.5) * cellSize, (path[0].r + 0.5) * cellSize);
+                for (let i = 1; i < path.length; i++) {
+                    ctx.lineTo((path[i].c + 0.5) * cellSize, (path[i].r + 0.5) * cellSize);
+                }
+                ctx.stroke();
+            };
+
+            Object.keys(completedLines).forEach(id => {
+                const pair = lvl.pairs.find(p => p.id == id);
+                drawVectorLine(completedLines[id], pair.color);
+            });
+
+            if (activeTrackingPair) {
+                drawVectorLine(activePathCoordinates, activeTrackingPair.color);
+            }
+        }
+
+        function popExplanationModal(pair) {
+            document.getElementById('explanationIcon').innerText = pair.symbol;
+            document.getElementById('explanationBodyText').innerText = pair.exp;
+            document.getElementById('explanationModal').classList.remove('hidden');
+        }
+
+        function closeExplanationModal() {
+            document.getElementById('explanationModal').classList.add('hidden');
+            document.getElementById('hintOrFeedbackText').innerText = "Great job! Find the next match.";
+            document.getElementById('hintOrFeedbackText').className = "text-xs font-black text-green-600";
+            checkLevelAccomplishmentState();
+        }
+
+        function checkLevelAccomplishmentState() {
+            const lvl = gridLevels[currentLevelIdx];
+            const activeKeysCount = Object.keys(completedLines).length;
+
+            if (activeKeysCount === lvl.pairs.length) {
+                score += 50;
+                document.getElementById('hudScore').innerText = score;
+                
+                setTimeout(() => {
+                    currentLevelIdx++;
+                    if (currentLevelIdx < gridLevels.length) {
+                        loadGridLevelLayout();
+                    } else {
+                        triggerGameSummaryOutro();
+                    }
+                }, 500);
+            }
+        }
+
+        function resetCurrentGrid() {
+            playSound('soundWrong');
+            loadGridLevelLayout();
+        }
+
+        function triggerGameSummaryOutro() {
+            playSound('soundClapping');
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('scoreScreen').classList.remove('hidden');
+        }
+
+        function playSound(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.currentTime = 0;
+                el.play().catch(()=>{});
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('scoreScreen').classList.add('hidden');
+            document.getElementById('gameScreen').style.display = 'flex';
+            startGame();
+        }
+    </script>
+</body>
+</html>
