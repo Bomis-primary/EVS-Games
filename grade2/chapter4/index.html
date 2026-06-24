@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Grid-Knot Matcher!</title>
-    <!-- Tailwind CSS Engine -->
+    <title>Tile Explorer: House Matcher</title>
+    <!-- Lightweight Tailwind CSS build script for styling and layout responsiveness -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            touch-action: none; /* Stops mobile scrolling while dragging paths */
+            touch-action: manipulation;
         }
-        .grid-board {
-            background-color: #1E1E24;
-            background-image: 
-                linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px);
+        /* Lock screen scrolling to prevent buggy dragging behaviors on older mobile browsers */
+        html, body {
+            overflow: hidden;
+            height: 100%;
         }
     </style>
 </head>
-<body class="bg-gradient-to-b from-[#ECEFF1] to-[#CFD8DC] min-h-screen flex flex-col items-center justify-center p-3 m-0 overflow-hidden select-none">
+<body class="bg-gradient-to-b from-[#FFF3E0] to-[#FFE0B2] flex flex-col items-center justify-center p-2 m-0 select-none text-[#37474F]">
 
     <!-- AUDIO TARGET HOOKS -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
@@ -35,133 +34,132 @@
         </div>
     </div>
 
-    <!-- SCREEN 1: TITLE LAUNCH SCREEN -->
-    <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-xl border-4 border-[#37474F] text-center space-y-6 mx-auto">
+    <!-- SCREEN 1: TITLE SCREEN -->
+    <div id="titleScreen" class="hidden w-full max-w-sm bg-white rounded-3xl p-5 shadow-xl border-4 border-[#E65100] text-center space-y-5 mx-auto">
         <div class="space-y-2">
-            <span class="text-6xl block">🔲🧩🔗</span>
-            <h1 class="text-3xl font-black text-[#0097A7] tracking-wide leading-tight">The Grid-Knot<br>Matcher!</h1>
-            <p class="text-[#546E7A] font-bold text-sm px-2">Draw lines on the grid to connect the matching pairs without crossing tracks!</p>
+            <span class="text-5xl block animate-pulse">❤️💙💚</span>
+            <h1 class="text-2xl font-black text-[#E65100] tracking-wide leading-tight">Tile Explorer:<br>House Matcher</h1>
+            <p class="text-[#5D4037] font-bold text-xs px-2">Match the matching hearts to unlock hidden questions about houses and tools!</p>
         </div>
-        <button onclick="showInstructions()" class="w-full bg-[#0097A7] hover:bg-[#00838F] text-white font-black text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#006064] transform active:scale-95 transition-all cursor-pointer">
+        <button onclick="showInstructions()" class="w-full bg-[#E65100] hover:bg-[#F57C00] text-white font-black text-lg py-3 rounded-xl shadow-md border-b-4 border-[#BF360C] transform active:scale-95 transition-all cursor-pointer">
             PLAY GAME ▶️
         </button>
     </div>
 
     <!-- SCREEN 2: INSTRUCTIONS SCREEN -->
-    <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-xl border-4 border-[#FFB300] text-center space-y-5 mx-auto">
-        <h2 class="text-2xl font-black text-[#FF8F00]">🧠 How to Solve</h2>
-        <div class="bg-[#FFF8E1] p-5 rounded-2xl text-left text-sm space-y-3 font-bold text-[#5D4037] border-2 border-dashed border-[#FFD54F]">
-            <p>1. Press down on an item inside a colored circle.</p>
-            <p>2. Drag through cells to find its correct partner match.</p>
-            <p>3. If you make a wrong match or get stuck, look at the bottom for a helpful Hint!</p>
+    <div id="instructionsScreen" class="hidden w-full max-w-sm bg-white rounded-3xl p-5 shadow-xl border-4 border-[#00796B] text-center space-y-4 mx-auto">
+        <h2 class="text-xl font-black text-[#004D40]">🪟 Rules of the Game</h2>
+        <div class="bg-[#E0F2F1] p-4 rounded-xl text-left text-xs space-y-2 font-bold text-[#004D40] border-2 border-dashed border-[#4DB6AC]">
+            <p>1. Tap identical heart tiles to send them into your storage tray.</p>
+            <p>2. Making a group of 3 matching hearts will clear them away!</p>
+            <p>3. Every 2 sets you match unlocks a special 3-Question Challenge!</p>
         </div>
-        <button onclick="startGame()" class="w-full bg-[#FF8F00] hover:bg-[#F57C00] text-white font-black text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#E65100] transform active:scale-95 transition-all cursor-pointer">
-            START FLOW ➡️
+        <button onclick="startGame()" class="w-full bg-[#009688] hover:bg-[#00796B] text-white font-black text-lg py-3 rounded-xl shadow-md border-b-4 border-[#004D40] transform active:scale-95 transition-all cursor-pointer">
+            START MATCH ➡️
         </button>
     </div>
 
-    <!-- SCREEN 3: ACTIVE GAME BOARD SCREEN -->
-    <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-3 mx-auto relative">
-        <!-- TOP HUD -->
-        <div class="bg-white rounded-2xl p-3 shadow-sm flex items-center justify-between font-black text-xs md:text-sm border border-gray-200">
-            <div class="text-[#0097A7]">⭐ SCORE: <span id="hudScore" class="text-base text-[#006064]">0</span></div>
-            <div class="bg-[#E0F7FA] text-[#006064] px-3 py-1 rounded-full text-xs">Mission: <span id="hudProgress">1 / 4</span></div>
-            <button onclick="resetCurrentGrid()" class="bg-[#FFCDD2] text-[#B71C1C] px-3 py-1 rounded-lg text-xs font-black shadow-sm transform active:scale-95">Reset 🔄</button>
+    <!-- SCREEN 3: ACTIVE GAME BOARD -->
+    <div id="gameScreen" class="hidden w-full max-w-sm flex flex-col space-y-2.5 mx-auto relative h-full justify-center">
+        <!-- TOP HUD TRACKER -->
+        <div class="bg-white rounded-xl p-2.5 shadow-sm flex items-center justify-between font-black text-xs border border-gray-200">
+            <div class="text-[#E65100]">⭐ POINTS: <span id="hudScore" class="text-sm">0</span></div>
+            <div class="bg-[#FFF3E0] text-[#E65100] px-2.5 py-0.5 rounded-full">Cleared: <span id="hudCleared">0 / 8</span></div>
         </div>
 
-        <!-- TARGET TASK DESCRIPTION INSTRUCTION BANNER -->
-        <div class="bg-white rounded-2xl p-3 border-2 border-dashed border-[#0097A7] text-center shadow-sm">
-            <p id="missionBannerText" class="text-xs md:text-sm font-black text-[#37474F]"></p>
+        <!-- MAIN TILE MATRIX CANVAS VIEW (ADAPTED FROM image_7e1183.jpg) -->
+        <div class="bg-[#3E2723] rounded-2xl p-3 shadow-xl border-4 border-[#271714] aspect-square relative flex items-center justify-center">
+            <div id="tileMatrixGrid" class="grid grid-cols-4 gap-2 w-full h-full">
+                <!-- Dynamically populated heart tiles go here -->
+            </div>
         </div>
 
-        <!-- RESPONSIVE LINKING GRID GRAPHIC BOARD -->
-        <div id="boardContainer" class="w-full aspect-square grid-board rounded-3xl p-1 relative overflow-hidden border-4 border-[#263238] shadow-2xl">
-            <canvas id="gridCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
-            <div id="gridItemsOverlay" class="absolute inset-0 grid grid-cols-4 grid-rows-4 z-20"></div>
+        <!-- TARGET DISPLAY FEEDBACK HINT BAR -->
+        <div class="bg-white rounded-xl p-2 text-center shadow-sm border border-orange-100 min-h-[36px] flex items-center justify-center">
+            <p id="gameHintBarText" class="text-[11px] font-bold text-gray-400">Tap three matching hearts to clear them!</p>
         </div>
 
-        <!-- LIVE HINT AND DYNAMIC FEEDBACK TEXT DRAWER -->
-        <div id="feedbackTextDrawer" class="bg-white rounded-xl p-2.5 text-center shadow-sm border border-orange-200 min-h-[44px] flex items-center justify-center">
-            <p id="hintOrFeedbackText" class="text-xs font-bold text-gray-500">Tap a colored circle to start drawing!</p>
+        <!-- HOLDING STORAGE DOCK DRAY (ADAPTED FROM image_7e1183.jpg) -->
+        <div class="bg-[#263238] rounded-xl p-2 border-2 border-[#1a2327] shadow-inner">
+            <p class="text-[9px] text-gray-400 font-black tracking-wider uppercase mb-1 px-1">Storage Dock Tray</p>
+            <div id="dockTraySlots" class="grid grid-cols-7 gap-1 h-11 w-full bg-[#151D20] rounded-lg p-1">
+                <!-- Max 7 spaces for selected hearts -->
+            </div>
         </div>
 
-        <!-- POPUP MODAL DRAWER FOR SUCCESS EXPLANATIONS -->
-        <div id="explanationModal" class="hidden absolute inset-x-0 bottom-0 top-0 bg-black/40 z-50 flex items-end justify-center p-4 rounded-3xl">
-            <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl border-t-4 border-[#00E676] space-y-3 transform translate-y-0 transition-transform">
-                <div class="flex items-center space-x-3">
-                    <span id="explanationIcon" class="text-3xl">🌟</span>
-                    <h4 class="font-black text-[#2E7D32] text-sm md:text-base">Match Found!</h4>
+        <!-- POPUP OVERLAY SCREEN CONTAINER FOR THE CHRONICLED TRIVIA CHALLENGES -->
+        <div id="triviaChallengeOverlay" class="hidden fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-3">
+            <div class="bg-white w-full max-w-xs rounded-2xl p-4 shadow-2xl border-t-8 border-[#0097A7] space-y-3">
+                <div class="text-center">
+                    <span class="text-3xl block">📝💫</span>
+                    <h3 class="font-black text-[#006064] text-base">Trivia Challenge!</h3>
+                    <p class="text-[10px] bg-[#E0F7FA] text-[#006064] px-2 py-0.5 rounded-full inline-block mt-1 font-black">Question <span id="triviaProgressCounter">1/3</span></p>
                 </div>
-                <p id="explanationBodyText" class="text-xs md:text-sm font-bold text-gray-700 leading-relaxed"></p>
-                <button onclick="closeExplanationModal()" class="w-full bg-[#0097A7] text-white font-black text-xs py-2 rounded-xl border-b-4 border-[#006064]">CONTINUE ▶️</button>
+                
+                <!-- QUESTION TEXT FIELD -->
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 min-h-[50px] flex items-center justify-center">
+                    <p id="triviaQuestionText" class="text-xs font-black text-center text-gray-700 leading-tight"></p>
+                </div>
+
+                <!-- SELECTION OPTION BUTTON BLOCK -->
+                <div id="triviaOptionsBlock" class="flex flex-col space-y-2">
+                    <!-- Dynamic option buttons go here -->
+                </div>
+
+                <!-- QUIZ ERROR HINT BOX FOOTER -->
+                <div class="bg-orange-50 rounded-lg p-1.5 text-center border border-orange-100 min-h-[28px] flex items-center justify-center">
+                    <p id="triviaHintText" class="text-[10px] font-bold text-orange-700"></p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN 4: MISSION COMPLETE SUMMARY OUTRO -->
-    <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-xl border-4 border-[#4CAF50] text-center space-y-4 mx-auto">
+    <!-- SCREEN 4: SUMMARY OUTRO GAME OVER -->
+    <div id="scoreScreen" class="hidden w-full max-w-sm bg-white rounded-3xl p-5 shadow-xl border-4 border-[#4CAF50] text-center space-y-4 mx-auto">
         <div class="space-y-1">
-            <span class="text-6xl block">🏗️🎖️🎉</span>
-            <h2 class="text-2xl font-black text-[#2E7D32]">Master Builder!</h2>
-            <p class="text-sm text-gray-600 font-bold px-2">Every structural wire and tool pathway is cleanly locked down!</p>
+            <span class="text-5xl block">🏆🇬🇧🏡</span>
+            <h2 class="text-xl font-black text-[#2E7D32]">Perfect Score!</h2>
+            <p class="text-xs text-gray-500 font-bold px-1">Superb sorting and flawless chapter mastery! You solved all twelve structural questions accurately.</p>
         </div>
-        <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
-            <p class="text-[#2E7D32] text-4xl font-black"><span id="finalScore">0</span> Pts</p>
+        <div class="bg-[#E8F5E9] p-3 rounded-xl border-2 border-[#4CAF50] max-w-[160px] mx-auto">
+            <p class="text-[#2E7D32] text-3xl font-black"><span id="finalScoreText">0</span> Pts</p>
         </div>
-        <button onclick="restartGame()" class="w-full bg-[#0097A7] text-white font-black text-lg py-4 rounded-2xl shadow-md border-b-8 border-[#006064] transform active:scale-95 transition-all cursor-pointer">
+        <button onclick="restartGame()" class="w-full bg-[#E65100] text-white font-black text-base py-3 rounded-xl shadow-md border-b-4 border-[#BF360C] transform active:scale-95 transition-all cursor-pointer">
             SOLVE AGAIN 🔄
         </button>
     </div>
 
-    <!-- GRID LOGIC CONTROLLER SCRIPT Engine -->
+    <!-- ENGINE CONTROLLER IMPLEMENTATION MODULE -->
     <script>
-        const gridLevels = [
-            {
-                banner: "👷 Help the workers! Draw a line from each helper to the item they need!",
-                gridSize: 4,
-                pairs: [
-                    { id: 1, color: "#EF5350", name: "Mason", symbol: "👷", start: {r:0, c:0}, end: {r:3, c:1}, hint: "Hint: Look for something red and heavy used to build strong walls!", exp: "The Mason needs strong bricks to build our walls!" },
-                    { id: 2, color: "#42A5F5", name: "Plumber", symbol: "🚰", start: {r:3, c:0}, end: {r:1, c:3}, hint: "Hint: What does water flow through to reach your bathroom sink?", exp: "The Plumber fixes your bathroom pipes and leaky taps!" },
-                    { id: 3, color: "#66BB6A", name: "Architect", symbol: "📐", start: {r:0, c:3}, end: {r:3, c:3}, hint: "Hint: Before building a house, what do we draw on paper first?", exp: "The Architect draws the house on paper before we build it!" }
-                ]
-            },
-            {
-                banner: "⚡ More helpers need their tools! Connect them to finish the house!",
-                gridSize: 4,
-                pairs: [
-                    { id: 1, color: "#EF5350", name: "Carpenter", symbol: "🪚", start: {r:0, c:1}, end: {r:3, c:2}, hint: "Hint: What is made of wood that you open and close to enter a room?", exp: "The Carpenter cuts wood to make our doors and windows!" },
-                    { id: 2, color: "#42A5F5", name: "Electrician", symbol: "💡", start: {r:2, c:0}, end: {r:0, c:3}, hint: "Hint: What do you press when a room is too dark?", exp: "The Electrician puts in wires so our lights can switch on!" },
-                    { id: 3, color: "#66BB6A", name: "Painter", symbol: "🖌️", start: {r:0, c:0}, end: {r:3, c:3}, hint: "Hint: Look for a bucket full of bright, beautiful colors!", exp: "The Painter uses bright colors to paint our walls!" }
-                ]
-            },
-            {
-                banner: "🏢 Where do these building materials go? Match them to the right house!",
-                gridSize: 4,
-                pairs: [
-                    { id: 1, color: "#EF5350", name: "Straw", symbol: "🌾", start: {r:0, c:1}, end: {r:2, c:2}, hint: "Hint: Which house is built in a village and has a roof made of grass?", exp: "Mud and straw are used to build weak Kutcha huts in villages." },
-                    { id: 2, color: "#42A5F5", name: "Brick", symbol: "🧱", start: {r:3, c:0}, end: {r:0, c:3}, hint: "Hint: Which city house is very tall, strong, and permanent?", exp: "Bricks and cement make strong Pucca houses in big cities!" },
-                    { id: 3, color: "#66BB6A", name: "Snow", symbol: "❄️", start: {r:1, c:0}, end: {r:3, c:3}, hint: "Hint: Which house is round, white, and built in very cold ice lands?", exp: "Eskimos use cold snow blocks to build warm, round Igloos!" }
-                ]
-            },
-            {
-                banner: "🚌 Some houses are special! Can you match the items to the correct house?",
-                gridSize: 4,
-                pairs: [
-                    { id: 1, color: "#EF5350", name: "Canvas", symbol: "⛺", start: {r:1, c:1}, end: {r:3, c:1}, hint: "Hint: Look for a house made of cloth that you use when camping in the forest!", exp: "Tents are made of thick cloth. Campers can fold them up easily!" },
-                    { id: 2, color: "#42A5F5", name: "Wheels", symbol: "🛞", start: {r:0, c:0}, end: {r:2, c:3}, hint: "Hint: Which house can drive around like a big car or a van?", exp: "A Caravan is a special house on wheels that can drive anywhere!" },
-                    { id: 3, color: "#66BB6A", name: "Poles", symbol: "🪵", start: {r:3, c:0}, end: {r:0, c:3}, hint: "Hint: Which house stands tall on wooden legs to stay safe from floods?", exp: "Stilt houses stand high on poles in places where it rains a lot!" }
-                ]
-            }
+        // 12 Chapter questions tailored to British English with hints that do not reveal answers.
+        const chapterDatabase = [
+            { q: "What strong material does a mason use to construct permanent apartment walls?", a: "Bricks and cement", options: ["Mud and straw", "Bricks and cement", "Canvas cloth"], hint: "Hint: Think about the heavy blocks that make city buildings strong!" },
+            { q: "Which helper should you call if a water pipe or bathroom tap starts to leak?", a: "A plumber", options: ["A plumber", "An electrician", "A carpenter"], hint: "Hint: This person specializes in pipes and water systems!" },
+            { q: "What does an architect draw on paper before building workers start their job?", a: "A house drawing plan", options: ["A paint layout", "A house drawing plan", "An electricity wire map"], hint: "Hint: It is the blueprint design that shows where rooms go!" },
+            { q: "Which tool does a carpenter use to cut down heavy timber logs for wooden doors?", a: "A wood saw", options: ["A brick trowel", "A pipe wrench", "A wood saw"], hint: "Hint: It is a sharp tool with metal teeth made for slicing timber!" },
+            { q: "Who handles routing safety cables so your bedroom light switches can operate?", a: "An electrician", options: ["An electrician", "A painter", "A mason"], hint: "Hint: This expert deals with electrical currents and power!" },
+            { q: "What do country villagers use to build weak, temporary kutcha huts?", a: "Mud and straw", options: ["Iron bars and metal", "Mud and straw", "Bricks and cement"], hint: "Hint: These are simple materials found in nature that can wash away in heavy rain!" },
+            { q: "What type of permanent house is built tall in big cities to hold many families?", a: "A multi-storey building", options: ["A camper tent", "A village hut", "A multi-storey building"], hint: "Hint: Look out for very high city structures with lots of storeys!" },
+            { q: "What material do campers use to pitch a light, movable tent inside a forest?", a: "Canvas cloth", options: ["Snow blocks", "Canvas cloth", "Bricks and cement"], hint: "Hint: It is a thick, foldable fabric that protects from the wind!" },
+            { q: "What special home on wheels can be driven around by travellers from place to place?", a: "A caravan", options: ["A stilt house", "An igloo", "A caravan"], hint: "Hint: It is a mobile vehicle that acts like a moving house!" },
+            { q: "What do Eskimos use to build round igloo shelters in freezing arctic regions?", a: "Snow blocks", options: ["Wooden poles", "Snow blocks", "Mud and straw"], hint: "Hint: They use the frozen moisture that falls from the cold winter sky!" },
+            { q: "Why are stilt houses built high up on long wooden poles in places like Assam?", a: "To stay safe from floods", options: ["To stay safe from floods", "To be closer to trees", "To keep cool from the sun"], hint: "Hint: Think about what happens when heavy rains create deep puddles on the ground!" },
+            { q: "What does a painter use to make plain gray interior rooms look bright and beautiful?", a: "Paint and brushes", options: ["Pipes and wrenches", "Wires and switches", "Paint and brushes"], hint: "Hint: This liquid adds bright, vibrant color to the walls!" }
         ];
 
-        let currentLevelIdx = 0;
+        const heartStyles = [
+            { name: "red", emoji: "❤️", color: "bg-red-100 text-red-500 border-red-300" },
+            { name: "blue", emoji: "💙", color: "bg-blue-100 text-blue-500 border-blue-300" },
+            { name: "green", emoji: "💚", color: "bg-green-100 text-green-500 border-green-300" },
+            { name: "yellow", emoji: "💛", color: "bg-yellow-100 text-yellow-500 border-yellow-300" }
+        ];
+
+        let matrixTrayList = [];
+        let activeDockArray = [];
         let score = 0;
-        let canvas = document.getElementById('gridCanvas');
-        let ctx = canvas.getContext('2d');
-        
-        let completedLines = {};
-        let activeTrackingPair = null;
-        let activePathCoordinates = [];
+        let successfulTriosCleared = 0;
+        let triviaBatchIdx = 0;
+        let currentQuestionSubIdx = 0;
 
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -170,11 +168,8 @@
                 setTimeout(() => {
                     splash.style.display = 'none';
                     document.getElementById('titleScreen').classList.remove('hidden');
-                }, 500);
+                }, 400);
             }, 5000);
-
-            window.addEventListener('resize', fitCanvasCoordinates);
-            setupInputControlListeners();
         });
 
         function showInstructions() {
@@ -185,230 +180,170 @@
         function startGame() {
             document.getElementById('instructionsScreen').style.display = 'none';
             document.getElementById('gameScreen').classList.remove('hidden');
-            currentLevelIdx = 0;
             score = 0;
+            successfulTriosCleared = 0;
+            triviaBatchIdx = 0;
+            activeDockArray = [];
+            
             document.getElementById('hudScore').innerText = score;
-            loadGridLevelLayout();
-        }
-
-        function fitCanvasCoordinates() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            redrawAllConnectedFlowPipes();
-        }
-
-        function loadGridLevelLayout() {
-            completedLines = {};
-            activeTrackingPair = null;
-            activePathCoordinates = [];
-            document.getElementById('hintOrFeedbackText').innerText = "Tap a colored circle to start drawing!";
-            document.getElementById('hintOrFeedbackText').className = "text-xs font-bold text-gray-500";
+            document.getElementById('hudCleared').innerText = "0 / 8";
             
-            const lvl = gridLevels[currentLevelIdx];
-            document.getElementById('hudProgress').innerText = `${currentLevelIdx + 1} / ${gridLevels.length}`;
-            document.getElementById('missionBannerText').innerText = lvl.banner;
-
-            fitCanvasCoordinates();
-            buildInteractiveGridDOM();
+            renderFreshMatrixPuzzleBoard();
+            renderDockTrayGraphics();
         }
 
-        function buildInteractiveGridDOM() {
-            const overlay = document.getElementById('gridItemsOverlay');
-            overlay.innerHTML = "";
-            const lvl = gridLevels[currentLevelIdx];
-            
-            for (let r = 0; r < lvl.gridSize; r++) {
-                for (let c = 0; c < lvl.gridSize; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = "flex items-center justify-center relative w-full h-full border border-[rgba(255,255,255,0.03)]";
-                    cell.dataset.row = r;
-                    cell.dataset.col = c;
-                    
-                    lvl.pairs.forEach(p => {
-                        if ((p.start.r === r && p.start.c === c) || (p.end.r === r && p.end.c === c)) {
-                            const nodeCircle = document.createElement('div');
-                            nodeCircle.className = "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-lg z-30 font-bold text-white border-2 border-white/20";
-                            nodeCircle.style.backgroundColor = p.color;
-                            nodeCircle.innerText = p.symbol;
-                            cell.appendChild(nodeCircle);
-                        }
-                    });
-                    overlay.appendChild(cell);
-                }
+        function renderFreshMatrixPuzzleBoard() {
+            // 8 trios = 24 total heart tiles matching our math constraints
+            let pools = [];
+            for (let i = 0; i < 8; i++) {
+                const selectedHeart = heartStyles[i % heartStyles.length];
+                pools.push({...selectedHeart}, {...selectedHeart}, {...selectedHeart});
             }
+            // Shuffle pool list seamlessly
+            matrixTrayList = pools.sort(() => Math.random() - 0.5);
+            updateGridDOMElements();
         }
 
-        function setupInputControlListeners() {
-            const overlay = document.getElementById('gridItemsOverlay');
+        function updateGridDOMElements() {
+            const container = document.getElementById('tileMatrixGrid');
+            container.innerHTML = "";
 
-            const handleActionStart = (e) => {
-                if (!document.getElementById('explanationModal').classList.contains('hidden')) return;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                const elem = document.elementFromPoint(clientX, clientY);
-                const targetCell = elem ? elem.closest('[data-row]') : null;
-
-                if (targetCell) {
-                    const r = parseInt(targetCell.dataset.row);
-                    const c = parseInt(targetCell.dataset.col);
-                    const lvl = gridLevels[currentLevelIdx];
-
-                    const matchingPair = lvl.pairs.find(p => (p.start.r === r && p.start.c === c) || (p.end.r === r && p.end.c === c));
-                    
-                    if (matchingPair) {
-                        activeTrackingPair = matchingPair;
-                        activePathCoordinates = [{r, c}];
-                        delete completedLines[matchingPair.id];
-                        document.getElementById('hintOrFeedbackText').innerText = `Connecting lines for ${matchingPair.name}...`;
-                        document.getElementById('hintOrFeedbackText').className = "text-xs font-black text-blue-600";
-                    }
+            matrixTrayList.forEach((item, index) => {
+                const tileBtn = document.createElement('button');
+                if (item === null) {
+                    // Placeholder card slot for vanished elements
+                    tileBtn.className = "w-full h-full opacity-0 pointer-events-none";
+                } else {
+                    tileBtn.className = `w-full h-full rounded-xl border-2 border-b-4 flex items-center justify-center text-2xl shadow-sm cursor-pointer transform active:scale-95 transition-all ${item.color}`;
+                    tileBtn.innerText = item.emoji;
+                    tileBtn.onclick = () => handleTileSelectionTap(index);
                 }
-            };
-
-            const handleActionMove = (e) => {
-                if (!activeTrackingPair) return;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                const elem = document.elementFromPoint(clientX, clientY);
-                const targetCell = elem ? elem.closest('[data-row]') : null;
-
-                if (targetCell) {
-                    const r = parseInt(targetCell.dataset.row);
-                    const c = parseInt(targetCell.dataset.col);
-                    const lastPos = activePathCoordinates[activePathCoordinates.length - 1];
-                    
-                    const rowDiff = Math.abs(r - lastPos.r);
-                    const colDiff = Math.abs(c - lastPos.c);
-                    
-                    if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
-                        const alreadyVisited = activePathCoordinates.some(pt => pt.r === r && pt.c === c);
-                        if (!alreadyVisited) {
-                            const lvl = gridLevels[currentLevelIdx];
-                            const p = activeTrackingPair;
-                            
-                            // Check if drawing hits a WRONG target node partner endpoint
-                            const wrongTargetHit = lvl.pairs.some(otherPair => {
-                                if (otherPair.id === p.id) return false;
-                                return (otherPair.start.r === r && otherPair.start.c === c) || (otherPair.end.r === r && otherPair.end.c === c);
-                            });
-
-                            if (wrongTargetHit) {
-                                playSound('soundWrong');
-                                document.getElementById('hintOrFeedbackText').innerText = p.hint;
-                                document.getElementById('hintOrFeedbackText').className = "text-xs font-bold text-orange-600 animate-pulse";
-                                activeTrackingPair = null;
-                                activePathCoordinates = [];
-                                redrawAllConnectedFlowPipes();
-                                return;
-                            }
-
-                            activePathCoordinates.push({r, c});
-                            redrawAllConnectedFlowPipes();
-                            
-                            const hitCorrectEnd = (p.start.r === r && p.start.c === c) || (p.end.r === r && p.end.c === c);
-                            if (hitCorrectEnd && activePathCoordinates.length > 1) {
-                                completedLines[p.id] = [...activePathCoordinates];
-                                activeTrackingPair = null;
-                                playSound('soundCorrect');
-                                popExplanationModal(p);
-                            }
-                        }
-                    }
-                }
-            };
-
-            const handleActionEnd = () => {
-                if (activeTrackingPair) {
-                    activeTrackingPair = null;
-                    activePathCoordinates = [];
-                    redrawAllConnectedFlowPipes();
-                    document.getElementById('hintOrFeedbackText').innerText = "Line broken! Try matching again.";
-                    document.getElementById('hintOrFeedbackText').className = "text-xs font-bold text-gray-400";
-                }
-            };
-
-            overlay.addEventListener('mousedown', handleActionStart);
-            window.addEventListener('mousemove', handleActionMove);
-            window.addEventListener('mouseup', handleActionEnd);
-
-            overlay.addEventListener('touchstart', handleActionStart, {passive: true});
-            window.addEventListener('touchmove', handleActionMove, {passive: false});
-            window.addEventListener('touchend', handleActionEnd);
-        }
-
-        function redrawAllConnectedFlowPipes() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const lvl = gridLevels[currentLevelIdx];
-            const cellSize = canvas.width / lvl.gridSize;
-
-            ctx.lineWidth = cellSize * 0.38; 
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-
-            const drawVectorLine = (path, color) => {
-                if (path.length < 2) return;
-                ctx.strokeStyle = color;
-                ctx.beginPath();
-                ctx.moveTo((path[0].c + 0.5) * cellSize, (path[0].r + 0.5) * cellSize);
-                for (let i = 1; i < path.length; i++) {
-                    ctx.lineTo((path[i].c + 0.5) * cellSize, (path[i].r + 0.5) * cellSize);
-                }
-                ctx.stroke();
-            };
-
-            Object.keys(completedLines).forEach(id => {
-                const pair = lvl.pairs.find(p => p.id == id);
-                drawVectorLine(completedLines[id], pair.color);
+                container.appendChild(tileBtn);
             });
+        }
 
-            if (activeTrackingPair) {
-                drawVectorLine(activePathCoordinates, activeTrackingPair.color);
+        function handleTileSelectionTap(index) {
+            if (activeDockArray.length >= 7) return; 
+            
+            const targetedItem = matrixTrayList[index];
+            matrixTrayList[index] = null; // Mark vacancy
+            updateGridDOMElements();
+
+            activeDockArray.push(targetedItem);
+            renderDockTrayGraphics();
+
+            // Run evaluation check to seek triplet combos
+            const matchedColorCount = activeDockArray.filter(h => h.name === targetedItem.name).length;
+            
+            if (matchedColorCount === 3) {
+                setTimeout(() => {
+                    // Purge the matching triplet loop
+                    activeDockArray = activeDockArray.filter(h => h.name !== targetedItem.name);
+                    renderDockTrayGraphics();
+                    playSound('soundCorrect');
+                    
+                    successfulTriosCleared++;
+                    score += 10;
+                    document.getElementById('hudScore').innerText = score;
+                    document.getElementById('hudCleared').innerText = `${successfulTriosCleared} / 8`;
+
+                    // Trigger a 3-Question Challenge every 2 sets matched
+                    if (successfulTriosCleared % 2 === 0 && successfulTriosCleared > 0) {
+                        launchTriviaBatchOverlay();
+                    }
+                }, 300);
+            } else if (activeDockArray.length === 7) {
+                // Dock full failure protection auto-refresh safeguard
+                setTimeout(() => {
+                    playSound('soundWrong');
+                    document.getElementById('gameHintBarText').innerText = "Tray full! Shuffling hearts back to safety.";
+                    document.getElementById('gameHintBarText').className = "text-[11px] font-black text-red-500 animate-pulse";
+                    startGame();
+                }, 400);
             }
         }
 
-        function popExplanationModal(pair) {
-            document.getElementById('explanationIcon').innerText = pair.symbol;
-            document.getElementById('explanationBodyText').innerText = pair.exp;
-            document.getElementById('explanationModal').classList.remove('hidden');
+        function renderDockTrayGraphics() {
+            const tray = document.getElementById('dockTraySlots');
+            tray.innerHTML = "";
+
+            for (let i = 0; i < 7; i++) {
+                const slot = document.createElement('div');
+                slot.className = "w-full h-full rounded-md border border-dashed border-gray-700 bg-black/30 flex items-center justify-center text-base";
+                
+                if (activeDockArray[i]) {
+                    slot.className = `w-full h-full rounded-md flex items-center justify-center text-lg shadow-sm font-bold ${activeDockArray[i].color}`;
+                    slot.innerText = activeDockArray[i].emoji;
+                }
+                tray.appendChild(slot);
+            }
         }
 
-        function closeExplanationModal() {
-            document.getElementById('explanationModal').classList.add('hidden');
-            document.getElementById('hintOrFeedbackText').innerText = "Great job! Find the next match.";
-            document.getElementById('hintOrFeedbackText').className = "text-xs font-black text-green-600";
-            checkLevelAccomplishmentState();
+        function launchTriviaBatchOverlay() {
+            currentQuestionSubIdx = 0;
+            document.getElementById('triviaChallengeOverlay').classList.remove('hidden');
+            loadIndividualTriviaQuestion();
         }
 
-        function checkLevelAccomplishmentState() {
-            const lvl = gridLevels[currentLevelIdx];
-            const activeKeysCount = Object.keys(completedLines).length;
+        function loadIndividualTriviaQuestion() {
+            document.getElementById('triviaHintText').innerText = "";
+            
+            // Map out unique chronological questions across batches
+            const absoluteQuestionIdx = (triviaBatchIdx * 3) + currentQuestionSubIdx;
+            
+            if (absoluteQuestionIdx >= chapterDatabase.length) {
+                closeTriviaChallengeOverlay();
+                return;
+            }
 
-            if (activeKeysCount === lvl.pairs.length) {
-                score += 50;
+            const activeQuestionData = chapterDatabase[absoluteQuestionIdx];
+            document.getElementById('triviaProgressCounter').innerText = `${currentQuestionSubIdx + 1} / 3`;
+            document.getElementById('triviaQuestionText').innerText = activeQuestionData.q;
+
+            const block = document.getElementById('triviaOptionsBlock');
+            block.innerHTML = "";
+
+            activeQuestionData.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-white hover:bg-gray-50 text-gray-800 font-black py-2.5 px-3 rounded-xl border-2 border-gray-200 border-b-4 text-xs text-left transform active:scale-95 transition-all flex items-center space-x-2 cursor-pointer";
+                btn.onclick = () => evaluateTriviaResponse(opt, btn, activeQuestionData);
+                btn.innerHTML = `<span class='text-blue-500'>🏠</span> <span class='flex-1 leading-tight'>${opt}</span>`;
+                block.appendChild(btn);
+            });
+        }
+
+        function evaluateTriviaResponse(selectedOpt, btnElement, dataObj) {
+            if (selectedOpt === dataObj.a) {
+                playSound('soundCorrect');
+                score += 15;
                 document.getElementById('hudScore').innerText = score;
                 
-                setTimeout(() => {
-                    currentLevelIdx++;
-                    if (currentLevelIdx < gridLevels.length) {
-                        loadGridLevelLayout();
-                    } else {
-                        triggerGameSummaryOutro();
-                    }
-                }, 500);
+                currentQuestionSubIdx++;
+                if (currentQuestionSubIdx < 3) {
+                    loadIndividualTriviaQuestion();
+                } else {
+                    triviaBatchIdx++;
+                    closeTriviaChallengeOverlay();
+                }
+            } else {
+                playSound('soundWrong');
+                btnElement.classList.add('border-red-400', 'bg-red-50');
+                document.getElementById('triviaHintText').innerText = dataObj.hint;
             }
         }
 
-        function resetCurrentGrid() {
-            playSound('soundWrong');
-            loadGridLevelLayout();
-        }
-
-        function triggerGameSummaryOutro() {
-            playSound('soundClapping');
-            document.getElementById('gameScreen').style.display = 'none';
-            document.getElementById('finalScore').innerText = score;
-            document.getElementById('scoreScreen').classList.remove('hidden');
+        function closeTriviaChallengeOverlay() {
+            document.getElementById('triviaChallengeOverlay').classList.add('hidden');
+            
+            // Check if final ending requirements are reached
+            if (successfulTriosCleared === 8) {
+                setTimeout(() => {
+                    playSound('soundClapping');
+                    document.getElementById('gameScreen').style.display = 'none';
+                    document.getElementById('finalScoreText').innerText = score;
+                    document.getElementById('scoreScreen').classList.remove('hidden');
+                }, 400);
+            }
         }
 
         function playSound(id) {
