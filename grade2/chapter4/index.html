@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tile Explorer: House Matcher</title>
+    <!-- Tailwind CSS Build Engine -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            background-color: #FDFBF7; /* Cozy Warm Beige */
+            background-color: #FDFBF7; 
         }
         html, body {
             overflow: hidden;
@@ -41,15 +42,21 @@
 </head>
 <body class="flex flex-col items-center justify-center p-3 m-0 select-none text-[#4A148C]">
 
+    <!-- AUDIO TARGET HOOKS -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
     <audio id="soundSwoosh" src="assets/swoosh.mp3" preload="auto"></audio>
 
-    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-4 transition-opacity duration-500">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-32 h-32 object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-[#E8EAF6] rounded-full flex items-center justify-center text-[#4A148C] font-black text-4xl border-4 border-[#D1C4E9]\'>IN</div>';">
+    <!-- CONFETTI EFFECT CANVAS -->
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <!-- SCREEN 0: INNOVINE ENLARGED SPLASH SCREEN -->
+    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs md:max-w-sm h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-32 h-32 bg-[#E8EAF6] rounded-full flex items-center justify-center text-[#4A148C] font-black text-4xl border-4 border-[#D1C4E9]\'>IN</div>';">
     </div>
 
+    <!-- SCREEN 1: TITLE LAUNCH SCREEN -->
     <div id="titleScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-6 mx-auto chunky-panel">
         <div class="space-y-3">
             <span class="text-6xl block">❤️✨💙</span>
@@ -61,49 +68,63 @@
         </button>
     </div>
 
+    <!-- SCREEN 2: INSTRUCTIONS SCREEN -->
     <div id="instructionsScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-5 mx-auto chunky-panel">
         <h2 class="text-2xl font-black text-[#4A148C]">⭐ How to Play ⭐</h2>
         <div class="bg-white/80 p-5 rounded-2xl text-left text-sm space-y-3 font-bold text-[#6A1B9A] border-2 border-dashed border-[#B39DDB]">
             <p>1. Tap a heart to put it into your tray.</p>
             <p>2. Find <span class="text-[#4A148C]">3 of the same hearts</span> to make them go SWOOSH!</p>
-            <p>3. Every 2 matches unlocks an easy story question for points!</p>
+            <p>3. Every 2 matches unlocks easy questions for points! Be careful, you only get 2 tries per question!</p>
         </div>
         <button onclick="startGame()" class="w-full bg-[#7E57C2] hover:bg-[#673AB7] text-white font-black text-xl py-4 rounded-2xl chunky-tile border-b-0 cursor-pointer">
             LET'S GO ➡️
         </button>
     </div>
 
+    <!-- SCREEN 3: ACTIVE GAME PLAYGROUND -->
     <div id="gameScreen" class="hidden w-full max-w-sm flex flex-col space-y-4 mx-auto relative h-full justify-center">
+        <!-- TOP HUD CLOUD BOX -->
         <div class="bg-[#E8EAF6] rounded-2xl p-3 shadow-sm flex items-center justify-between font-black text-sm border-2 border-[#D1C4E9]">
             <div class="text-[#4A148C]">⭐ SCORE: <span id="hudScore" class="text-lg">0</span></div>
             <div class="bg-white text-[#673AB7] px-3 py-1 rounded-full text-xs border border-[#D1C4E9]">Matches: <span id="hudCleared">0 / 8</span></div>
         </div>
 
+        <!-- MAIN TILE PLAYGROUND GRID -->
         <div class="bg-[#D1C4E9]/40 rounded-3xl p-4 shadow-inner border-4 border-[#D1C4E9] aspect-square relative flex items-center justify-center">
             <div id="tileMatrixGrid" class="grid grid-cols-4 gap-3 w-full h-full">
-                </div>
+                <!-- Heart tiles injected here dynamically -->
+            </div>
         </div>
 
+        <!-- STYLISH HOLDING TRAY -->
         <div class="bg-[#E8EAF6] rounded-2xl p-3 border-2 border-[#D1C4E9] shadow-sm">
             <div id="dockTraySlots" class="grid grid-cols-7 gap-1.5 h-12 w-full bg-white/60 rounded-xl p-1.5 border border-[#B39DDB]">
-                </div>
+                <!-- Max 7 Tray Slot Spaces -->
+            </div>
         </div>
 
+        <!-- REFINED TRIVIA OVERLAY CARD MODAL -->
         <div id="triviaChallengeOverlay" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
             <div class="bg-[#FDFBF7] w-full max-w-sm rounded-3xl p-5 shadow-2xl border-4 border-[#D1C4E9] space-y-4 chunky-panel">
-                <div class="text-center">
+                <div class="text-center space-y-2">
                     <span class="text-4xl block">📝🎈</span>
-                    <h3 class="font-black text-[#4A148C] text-lg mt-1">Story Question!</h3>
-                    <p class="text-xs bg-[#E8EAF6] text-[#4A148C] px-3 py-0.5 rounded-full inline-block mt-1 font-black">Question <span id="triviaProgressCounter">1/3</span></p>
+                    <!-- Simplified Clean Label to fix layout seen in image_8889af.png -->
+                    <div class="bg-[#E8EAF6] text-[#4A148C] px-5 py-1.5 rounded-full inline-block font-black text-sm border border-[#B39DDB]">
+                        Question <span id="triviaProgressCounter">1</span>
+                    </div>
                 </div>
                 
+                <!-- EASY STORY DISPLAY -->
                 <div class="bg-white p-4 rounded-2xl border border-[#D1C4E9] shadow-inner text-center">
                     <p id="triviaQuestionText" class="text-sm font-black text-[#4A148C] leading-snug"></p>
                 </div>
 
+                <!-- SELECTION BUTTON ARRAY -->
                 <div id="triviaOptionsBlock" class="flex flex-col space-y-2.5">
-                    </div>
+                    <!-- Options injected here -->
+                </div>
 
+                <!-- HINT BAR -->
                 <div class="bg-[#E8EAF6] rounded-xl p-2.5 text-center border border-[#D1C4E9] min-h-[36px] flex items-center justify-center">
                     <p id="triviaHintText" class="text-xs font-bold text-[#6A1B9A]"></p>
                 </div>
@@ -111,6 +132,7 @@
         </div>
     </div>
 
+    <!-- SCREEN 4: TROPHY CELEBRATION END SCREEN -->
     <div id="scoreScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-5 mx-auto chunky-panel">
         <div class="space-y-2">
             <span class="text-6xl block animate-bounce">👑👑👑</span>
@@ -126,6 +148,7 @@
         </button>
     </div>
 
+    <!-- ENGINE CONTROLLER MODULE -->
     <script>
         const chapterDatabase = [
             { q: "A big bad wolf tries to blow down a city building. Why is it too strong for him?", a: "It is built with strong bricks and cement", options: ["It is made of soft grass", "It is built with strong bricks and cement", "It is a light cloth tent"], hint: "Hint: Think about the heavy blocks that make city walls solid!" },
@@ -155,8 +178,16 @@
         let successfulTriosCleared = 0;
         let triviaBatchIdx = 0;
         let currentQuestionSubIdx = 0;
+        let currentQuestionWrongAttempts = 0;
+
+        // Confetti Generator System Variables
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
 
         window.addEventListener('DOMContentLoaded', () => {
+            resizeConfettiCanvas();
+            window.addEventListener('resize', resizeConfettiCanvas);
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 splash.style.opacity = '0';
@@ -166,6 +197,54 @@
                 }, 400);
             }, 5000);
         });
+
+        function resizeConfettiCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function triggerConfettiBurst() {
+            canvas.classList.remove('hidden');
+            confettiParticles = [];
+            for (let i = 0; i < 60; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12 - 4,
+                    size: Math.random() * 8 + 4,
+                    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                    alpha: 1
+                });
+            }
+            requestAnimationFrame(updateConfettiPhysics);
+        }
+
+        function updateConfettiPhysics() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let alive = false;
+            confettiParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // Gravity
+                p.alpha -= 0.015;
+                if (p.alpha > 0) {
+                    alive = true;
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+            if (alive) {
+                requestAnimationFrame(updateConfettiPhysics);
+            } else {
+                canvas.classList.add('hidden');
+            }
+        }
 
         function showInstructions() {
             document.getElementById('titleScreen').style.display = 'none';
@@ -239,7 +318,8 @@
                     setTimeout(() => {
                         activeDockArray = activeDockArray.filter(h => h.name !== targetedItem.name);
                         renderDockTrayGraphics();
-                        playSound('soundCorrect');
+                        
+                        triggerConfettiBurst(); 
                         
                         successfulTriosCleared++;
                         document.getElementById('hudCleared').innerText = `${successfulTriosCleared} / 8`;
@@ -283,6 +363,8 @@
 
         function loadIndividualTriviaQuestion() {
             document.getElementById('triviaHintText').innerText = "";
+            currentQuestionWrongAttempts = 0; 
+            
             const absoluteQuestionIdx = (triviaBatchIdx * 3) + currentQuestionSubIdx;
             
             if (absoluteQuestionIdx >= chapterDatabase.length) {
@@ -291,9 +373,13 @@
             }
 
             const activeQuestionData = chapterDatabase[absoluteQuestionIdx];
-            document.getElementById('triviaProgressCounter').innerText = `${currentQuestionSubIdx + 1} / 3`;
+            document.getElementById('triviaProgressCounter').innerText = absoluteQuestionIdx + 1;
             document.getElementById('triviaQuestionText').innerText = activeQuestionData.q;
 
+            renderOptionsUIBlock(activeQuestionData);
+        }
+
+        function renderOptionsUIBlock(activeQuestionData) {
             const block = document.getElementById('triviaOptionsBlock');
             block.innerHTML = "";
 
@@ -308,21 +394,45 @@
 
         function evaluateTriviaResponse(selectedOpt, btnElement, dataObj) {
             if (selectedOpt === dataObj.a) {
-                playSound('soundCorrect');
+                playSound('soundClapping'); // Keep clapping for correct answers
                 score += 10;
                 document.getElementById('hudScore').innerText = score;
-                
-                currentQuestionSubIdx++;
-                if (currentQuestionSubIdx < 3) {
-                    loadIndividualTriviaQuestion();
-                } else {
-                    triviaBatchIdx++;
-                    closeTriviaChallengeOverlay();
-                }
+                advanceToNextQuestionFlow();
             } else {
                 playSound('soundWrong');
+                currentQuestionWrongAttempts++;
                 btnElement.classList.add('border-red-400', 'bg-red-50');
-                document.getElementById('triviaHintText').innerText = dataObj.hint;
+                btnElement.disabled = true;
+                
+                if (currentQuestionWrongAttempts >= 2) {
+                    // Strike out! Auto-highlight answer briefly, then skip to give them the next question chance
+                    document.getElementById('triviaHintText').innerText = "Let's check out the next story question!";
+                    
+                    // Visually highlight the correct answer so they learn from the slip
+                    const block = document.getElementById('triviaOptionsBlock');
+                    Array.from(block.children).forEach(child => {
+                        if (child.innerText.includes(dataObj.a)) {
+                            child.classList.remove('border-[#D1C4E9]');
+                            child.classList.add('border-green-400', 'bg-green-50');
+                        }
+                    });
+
+                    setTimeout(() => {
+                        advanceToNextQuestionFlow();
+                    }, 1800);
+                } else {
+                    document.getElementById('triviaHintText').innerText = dataObj.hint;
+                }
+            }
+        }
+
+        function advanceToNextQuestionFlow() {
+            currentQuestionSubIdx++;
+            if (currentQuestionSubIdx < 3) {
+                loadIndividualTriviaQuestion();
+            } else {
+                triviaBatchIdx++;
+                closeTriviaChallengeOverlay();
             }
         }
 
