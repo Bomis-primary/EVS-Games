@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Closet Chronicles!</title>
-    <!-- Tailwind CSS Framework -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
@@ -33,7 +32,7 @@
         .box-back {
             transform: rotateY(180deg);
         }
-        /* Animated Strike-out SVG Line Overlay */
+        /* High-Visibility Animated Strike line styling */
         .strike-line {
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
@@ -48,17 +47,14 @@
 </head>
 <body class="bg-gradient-to-b from-[#FFF5F5] via-[#FFF9E6] to-[#E8F5E9] min-h-screen flex flex-col items-center justify-center select-none text-[#333333] p-4 m-0">
 
-    <!-- AUDIO CORE SOURCES -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
 
-    <!-- SCREEN 1: FIXED 5-SECOND LOGO SPLASH SCREEN -->
     <div id="splashScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 opacity-100">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-[70%] h-auto object-contain">
     </div>
 
-    <!-- SCREEN 2: GAME TITLE SLIDE -->
     <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#FFD166] text-center space-y-6 mx-2">
         <div class="space-y-3">
             <span class="text-6xl block animate-bounce">👕✨👚</span>
@@ -70,90 +66,70 @@
         </button>
     </div>
 
-    <!-- SCREEN 3: GAME INSTRUCTIONS SLIDE -->
     <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-6 mx-2">
         <h2 class="text-2xl font-black text-[#4A90E2]">☀️ How to Play ☀️</h2>
-        
         <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base space-y-3 text-[#4A4A4A] font-medium">
             <p>1. Tap any padlocked 🔒 card on the board grid.</p>
             <p>2. Answer correctly to reveal a hidden secret symbol!</p>
             <p>3. If you form a straight matching line, watch it strike out for a huge bonus!</p>
             <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
         </div>
-
         <button onclick="startGame()" class="w-full bg-[#FF6B6B] hover:bg-[#EE5253] text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#C0392B]">
             PLAY GAME ▶️
         </button>
     </div>
 
-    <!-- SCREEN 4: INTERACTIVE QUIZ BOARD GRID -->
     <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-5 px-2">
-        <!-- TOP HUD BAR -->
         <div class="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-base">
             <div class="text-[#4A90E2]">Progress: <span id="hudProgress" class="bg-[#E3F2FD] text-[#1E88E5] px-3 py-1 rounded-full text-sm border border-[#1E88E5]">0 / 9 Solved</span></div>
             <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-lg">❤️❤️❤️</div>
             <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
         </div>
 
-        <!-- NOTIFICATION BANNER FOR LINE COMPLETIONS -->
         <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-sm font-bold text-[#2E7D32] animate-pulse">
             🎉 Tic-Tac-Toe Line Achieved! Match Formed! 🎉
         </div>
 
-        <!-- STYLISH TIC-TAC-TOE INTERACTIVE GRID WITH SVG OVERLAY LAYER -->
         <div class="bg-white rounded-3xl p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
-            <div id="gridContainer" class="grid grid-cols-3 gap-4 w-full h-full">
-                <!-- Inner grid blocks populate dynamically -->
-            </div>
+            <div id="gridContainer" class="grid grid-cols-3 gap-4 w-full h-full relative z-10">
+                </div>
 
-            <!-- DYNAMIC CANVAS LAYER FOR STRIKE LINE -->
-            <svg id="strikeSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <svg id="strikeSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30" style="min-width: 100%; min-height: 100%;" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
         </div>
         <div class="text-center text-xs text-gray-500 font-bold tracking-wide">Tap any locked card above to open a weather story!</div>
     </div>
 
-    <!-- SCREEN 5: PROBLEM POP-UP OVERLAY PANEL -->
     <div id="questionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-5 border-4 border-[#4A90E2] flex flex-col space-y-4 max-h-[92vh] overflow-y-auto">
-            
             <div id="modalBody" class="bg-[#F0F7FF] rounded-2xl p-4 border-2 border-[#BCDFFA] text-center">
                 <p id="questionText" class="text-base md:text-lg font-bold text-[#2C3E50] leading-snug"></p>
             </div>
-
-            <!-- INTERACTIVE HINT CARD ROW -->
             <div id="hintContainer" class="hidden bg-[#FFF9E6] border-2 border-dashed border-[#FFD166] rounded-2xl p-3 text-center text-sm text-[#795548] font-semibold">
                 💡 <span id="hintText"></span>
             </div>
-
             <div id="optionsContainer" class="flex flex-col space-y-3">
-                <!-- Choices populate here dynamically -->
-            </div>
-
+                </div>
             <button id="nextBtn" onclick="submitAndAdvance()" class="hidden w-full bg-[#4CAF50] text-white font-bold text-lg py-3 rounded-xl shadow-md transform active:scale-95 transition-all border-b-4 border-[#2E7D32]">
                 CONFIRM ➡️
             </button>
         </div>
     </div>
 
-    <!-- SCREEN 6: GAME SUCCESS OUTRO METRICS -->
     <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
         <div class="space-y-2">
             <span class="text-6xl block">🏆✨🥳</span>
             <h2 id="endGameStatus" class="text-3xl font-black text-[#4CAF50]">Quest Completed!</h2>
             <p id="endGameMessage" class="text-lg font-bold text-gray-700">Fantastic Job! You are a Wardrobe Wizard! 🌟</p>
         </div>
-        
         <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
             <p class="text-gray-600 font-bold uppercase text-xs tracking-wider">Your Final Tally</p>
             <p class="text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> Pts</p>
         </div>
-
         <button onclick="restartGame()" class="w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-bold text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#C0392B] transform active:scale-95 transition-all">
             PLAY AGAIN 🔄
         </button>
     </div>
 
-    <!-- GAME ENGINE PIPELINE -->
     <script>
         const originalDatabase = [
             { question: "Farmer Tom is in a field of fluffy white plants. Which plant is he picking to make light summer shirts?", options: ["Coir", "Cotton", "Bamboo"], answer: 1, hint: "This soft white plant is spun into thin thread for cool clothing." },
@@ -176,7 +152,8 @@
         let questionSuccess = false;
 
         let boardState = Array(9).fill(null);
-        let hasLineOccurred = false; // Tracks if a single line layout has already been triggered
+        let hiddenSymbolPool = []; // Hidden array that contains the 5-4 / 4-5 layout split
+        let hasLineOccurred = false; 
 
         const winPatterns = [
             { indices: [0, 1, 2], coords: { x1: 5, y1: 16.6, x2: 95, y2: 16.6 } },  // Row 1
@@ -214,17 +191,29 @@
         }
 
         function buildAndShuffleBoard() {
+            // Shuffle database questions
             database = [...originalDatabase];
             for (let i = database.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [database[i], database[j]] = [database[j], database[i]];
             }
 
+            // Create a locked 5 vs 4 or 4 vs 5 pool distribution for the cells
+            const mainSymbol = (Math.random() > 0.5) ? "⭕" : "❌";
+            const secondarySymbol = (mainSymbol === "⭕") ? "❌" : "⭕";
+            
+            hiddenSymbolPool = Array(5).fill(mainSymbol).concat(Array(4).fill(secondarySymbol));
+            // Shuffle the symbol pool so it maps randomly to the card slots
+            for (let i = hiddenSymbolPool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [hiddenSymbolPool[i], hiddenSymbolPool[j]] = [hiddenSymbolPool[j], hiddenSymbolPool[i]];
+            }
+
             const container = document.getElementById('gridContainer');
             container.innerHTML = "";
             for(let i=0; i<9; i++) {
                 container.innerHTML += `
-                    <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer">
+                    <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer relative z-10">
                         <div class="box-inner w-full h-full relative">
                             <div class="box-front flex items-center justify-center bg-[#FFF9E6] hover:bg-[#FFEAA7] border-4 border-[#FFD166] rounded-2xl text-3xl shadow-md transition-all">🔒</div>
                             <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner"></div>
@@ -327,44 +316,14 @@
             }
         }
 
-        // Assigns symbols organically while checking line restrictions
-        function calculateSmartSymbol(index) {
-            // If a line has already been made, force whichever symbol *avoids* causing a second line
-            if (hasLineOccurred) {
-                let options = ["⭕", "❌"];
-                // Shuffle options to keep it feeling random
-                if(Math.random() > 0.5) options.reverse();
-                
-                for(let sym of options) {
-                    boardState[index] = sym;
-                    if (!doesSymbolHaveLine(sym)) {
-                        boardState[index] = null;
-                        return sym;
-                    }
-                }
-                boardState[index] = null;
-                return options[0];
-            }
-
-            // If no line has occurred yet, assign a symbol completely at random
-            return (Math.random() > 0.5) ? "⭕" : "❌";
-        }
-
-        function doesSymbolHaveLine(symbol) {
-            return winPatterns.some(pattern => 
-                boardState[pattern.indices[0]] === symbol &&
-                boardState[pattern.indices[1]] === symbol &&
-                boardState[pattern.indices[2]] === symbol
-            );
-        }
-
         function submitAndAdvance() {
             document.getElementById('questionModal').classList.add('hidden');
             const backSign = document.getElementById(`boxBackSign${activeIdx}`);
             
             let awardedSymbol = "🔒";
             if (questionSuccess) {
-                awardedSymbol = calculateSmartSymbol(activeIdx);
+                // Extracts the symbol allocated to this coordinate slot from the 5 vs 4 pool
+                awardedSymbol = hiddenSymbolPool[activeIdx];
                 boardState[activeIdx] = awardedSymbol;
 
                 backSign.innerText = awardedSymbol;
@@ -386,7 +345,8 @@
             solvedCount++;
             updateProgressHUD();
 
-            if (questionSuccess && !hasLineOccurred) {
+            // Run lines evaluations immediately
+            if (questionSuccess) {
                 checkAndProcessLineCompletions(awardedSymbol);
             } else {
                 checkEndGameTransitions();
@@ -396,7 +356,6 @@
         function checkAndProcessLineCompletions(symbol) {
             let activeLinePattern = null;
 
-            // Search if the newly placed symbol forms a line configuration
             for (let pattern of winPatterns) {
                 if (boardState[pattern.indices[0]] === symbol &&
                     boardState[pattern.indices[1]] === symbol &&
@@ -406,28 +365,33 @@
                 }
             }
 
-            if (activeLinePattern) {
-                hasLineOccurred = true; // Block any future lines from generating
+            // Draw line if found and a line hasn't already been drawn this run
+            if (activeLinePattern && !hasLineOccurred) {
+                hasLineOccurred = true; 
                 playSound('soundClapping');
                 
                 const banner = document.getElementById('lineNotification');
                 banner.classList.remove('hidden');
 
                 const svg = document.getElementById('strikeSvg');
+                // Force a vibrant blue line overlay for circle vectors, crimson line for cross vectors
                 const lineColor = (symbol === "⭕") ? "#1E88E5" : "#D81B60";
                 
+                // Clear out any stale tags inside container
+                svg.innerHTML = "";
+
                 const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
                 line.setAttribute("x1", activeLinePattern.coords.x1);
                 line.setAttribute("y1", activeLinePattern.coords.y1);
                 line.setAttribute("x2", activeLinePattern.coords.x2);
                 line.setAttribute("y2", activeLinePattern.coords.y2);
                 line.setAttribute("stroke", lineColor);
-                line.setAttribute("stroke-width", "5");
+                line.setAttribute("stroke-width", "6");
                 line.setAttribute("stroke-linecap", "round");
                 line.setAttribute("class", "strike-line");
                 svg.appendChild(line);
 
-                // Show line for exactly 2 seconds, clear overlay, then continue seamlessly
+                // Show line overlay for exactly 2000 milliseconds (2 seconds) then fade it out cleanly
                 setTimeout(() => {
                     banner.classList.add('hidden');
                     svg.innerHTML = ""; 
@@ -457,11 +421,11 @@
             finalTally.innerText = score;
 
             if (hasLineOccurred) {
-                finalTitle.innerText = "Fantastic Win! 🏆";
-                finalMsg.innerText = `You successfully struck out a matching sequence row across the board grid pattern! ✨`;
+                finalTitle.innerText = "Fantastic Line Match! 🏆";
+                finalMsg.innerText = `Sensational! You unlocked a matching sequence across the wardrobe grid layout! ✨`;
             } else {
                 finalTitle.innerText = "What a Close Match! 🤝";
-                finalMsg.innerText = "The board is full! No matching lines were left open. You are officially a weather closet expert! Try another shuffle! 🌟";
+                finalMsg.innerText = "The board is full! No lines were left open. You are officially a weather closet expert! Try another shuffle! 🌟";
             }
 
             document.getElementById('scoreScreen').classList.remove('hidden');
