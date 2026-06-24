@@ -17,7 +17,6 @@
             overflow: hidden;
             height: 100%;
         }
-        /* Tactile 3D Buttons & Cards */
         .chunky-tile {
             box-shadow: 0px 6px 0px #B39DDB;
             transition: all 0.1s ease;
@@ -29,7 +28,6 @@
         .chunky-panel {
             box-shadow: 0px 8px 0px #D1C4E9;
         }
-        /* Swoosh Animation Layer */
         @keyframes swooshOut {
             0% { transform: scale(1); opacity: 1; filter: blur(0px); }
             30% { transform: scale(1.2); opacity: 1; }
@@ -92,7 +90,7 @@
         <!-- MAIN TILE PLAYGROUND GRID -->
         <div class="bg-[#D1C4E9]/40 rounded-3xl p-4 shadow-inner border-4 border-[#D1C4E9] aspect-square relative flex items-center justify-center">
             <div id="tileMatrixGrid" class="grid grid-cols-4 gap-3 w-full h-full">
-                <!-- Heart tiles injected here dynamically -->
+                <!-- Heart tiles injected here -->
             </div>
         </div>
 
@@ -103,12 +101,11 @@
             </div>
         </div>
 
-        <!-- REFINED TRIVIA OVERLAY CARD MODAL -->
+        <!-- TRIVIA OVERLAY CARD MODAL -->
         <div id="triviaChallengeOverlay" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
             <div class="bg-[#FDFBF7] w-full max-w-sm rounded-3xl p-5 shadow-2xl border-4 border-[#D1C4E9] space-y-4 chunky-panel">
                 <div class="text-center space-y-2">
                     <span class="text-4xl block">📝🎈</span>
-                    <!-- Simplified Clean Label to fix layout seen in image_8889af.png -->
                     <div class="bg-[#E8EAF6] text-[#4A148C] px-5 py-1.5 rounded-full inline-block font-black text-sm border border-[#B39DDB]">
                         Question <span id="triviaProgressCounter">1</span>
                     </div>
@@ -124,9 +121,13 @@
                     <!-- Options injected here -->
                 </div>
 
-                <!-- HINT BAR -->
-                <div class="bg-[#E8EAF6] rounded-xl p-2.5 text-center border border-[#D1C4E9] min-h-[36px] flex items-center justify-center">
+                <!-- HINT BAR & ACTION BUTTONS -->
+                <div class="bg-[#E8EAF6] rounded-xl p-2.5 text-center border border-[#D1C4E9] min-h-[44px] flex flex-col items-center justify-center space-y-2">
                     <p id="triviaHintText" class="text-xs font-bold text-[#6A1B9A]"></p>
+                    <!-- User interaction button to clear browser audio block blocks -->
+                    <button id="triviaNextActionBtn" onclick="advanceToNextQuestionFlow()" class="hidden w-full bg-[#7E57C2] hover:bg-[#673AB7] text-white text-xs font-black py-2 rounded-xl chunky-tile shadow-sm cursor-pointer border-b-2">
+                        NEXT QUESTION ➡️
+                    </button>
                 </div>
             </div>
         </div>
@@ -180,7 +181,6 @@
         let currentQuestionSubIdx = 0;
         let currentQuestionWrongAttempts = 0;
 
-        // Confetti Generator System Variables
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
         let confettiParticles = [];
@@ -226,7 +226,7 @@
             confettiParticles.forEach(p => {
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.2; // Gravity
+                p.vy += 0.2;
                 p.alpha -= 0.015;
                 if (p.alpha > 0) {
                     alive = true;
@@ -363,6 +363,7 @@
 
         function loadIndividualTriviaQuestion() {
             document.getElementById('triviaHintText').innerText = "";
+            document.getElementById('triviaNextActionBtn').classList.add('hidden');
             currentQuestionWrongAttempts = 0; 
             
             const absoluteQuestionIdx = (triviaBatchIdx * 3) + currentQuestionSubIdx;
@@ -385,7 +386,7 @@
 
             activeQuestionData.options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "w-full bg-white hover:bg-purple-50 text-[#4A148C] font-black py-3 px-4 rounded-xl border-2 border-[#D1C4E9] text-xs text-left transform active:scale-95 transition-all flex items-center space-x-2 cursor-pointer shadow-sm";
+                btn.className = "w-full bg-white hover:bg-purple-50 text-[#4A148C] font-black py-3 px-4 rounded-xl border-2 border-[#D1C4E9] text-xs text-left transform active:scale-95 transition-all flex items-center space-x-2 cursor-pointer shadow-sm trivia-opt-btn";
                 btn.onclick = () => evaluateTriviaResponse(opt, btn, activeQuestionData);
                 btn.innerHTML = `<span>🏡</span> <span class='flex-1 leading-tight'>${opt}</span>`;
                 block.appendChild(btn);
@@ -393,11 +394,19 @@
         }
 
         function evaluateTriviaResponse(selectedOpt, btnElement, dataObj) {
+            // Lock all option choices during selection feedback
+            const optionsButtons = document.querySelectorAll('.trivia-opt-btn');
+            
             if (selectedOpt === dataObj.a) {
-                playSound('soundClapping'); // Keep clapping for correct answers
+                optionsButtons.forEach(b => b.disabled = true);
+                btnElement.classList.remove('border-[#D1C4E9]');
+                btnElement.classList.add('border-green-400', 'bg-green-50');
+                
+                playSound('soundClapping'); // Direct User click tap action fires audio cleanly!
+                
                 score += 10;
                 document.getElementById('hudScore').innerText = score;
-                advanceToNextQuestionFlow();
+                document.getElementById('triviaNextActionBtn').classList.remove('hidden');
             } else {
                 playSound('soundWrong');
                 currentQuestionWrongAttempts++;
@@ -405,21 +414,18 @@
                 btnElement.disabled = true;
                 
                 if (currentQuestionWrongAttempts >= 2) {
-                    // Strike out! Auto-highlight answer briefly, then skip to give them the next question chance
-                    document.getElementById('triviaHintText').innerText = "Let's check out the next story question!";
+                    optionsButtons.forEach(b => b.disabled = true);
+                    document.getElementById('triviaHintText').innerText = "Let's check out the next question!";
                     
-                    // Visually highlight the correct answer so they learn from the slip
-                    const block = document.getElementById('triviaOptionsBlock');
-                    Array.from(block.children).forEach(child => {
+                    // Highlight the right choice so the student learns
+                    Array.from(optionsButtons).forEach(child => {
                         if (child.innerText.includes(dataObj.a)) {
                             child.classList.remove('border-[#D1C4E9]');
                             child.classList.add('border-green-400', 'bg-green-50');
                         }
                     });
 
-                    setTimeout(() => {
-                        advanceToNextQuestionFlow();
-                    }, 1800);
+                    document.getElementById('triviaNextActionBtn').classList.remove('hidden');
                 } else {
                     document.getElementById('triviaHintText').innerText = dataObj.hint;
                 }
