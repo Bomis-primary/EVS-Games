@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Closet Chronicles!</title>
-    <!-- Tailwind CSS Framework -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
@@ -33,21 +32,29 @@
         .box-back {
             transform: rotateY(180deg);
         }
+        /* Win Line SVG Strike Overlay Style */
+        .strike-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 0.5s ease-out forwards;
+        }
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-b from-[#FFF5F5] via-[#FFF9E6] to-[#E8F5E9] min-h-screen flex flex-col items-center justify-center select-none text-[#333333] p-4 m-0">
 
-    <!-- AUDIO CORE SOURCES -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
 
-    <!-- SCREEN 1: FIXED 5-SECOND LOGO SPLASH SCREEN -->
     <div id="splashScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 opacity-100">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-[70%] h-auto object-contain">
     </div>
 
-    <!-- SCREEN 2: GAME TITLE SLIDE -->
     <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#FFD166] text-center space-y-6 mx-2">
         <div class="space-y-3">
             <span class="text-6xl block animate-bounce">👕✨👚</span>
@@ -59,14 +66,13 @@
         </button>
     </div>
 
-    <!-- SCREEN 3: GAME INSTRUCTIONS SLIDE -->
     <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-6 mx-2">
         <h2 class="text-2xl font-black text-[#4A90E2]">☀️ How to Play ☀️</h2>
         
         <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base space-y-3 text-[#4A4A4A] font-medium">
             <p>1. Tap any padlocked 🔒 card on the board grid.</p>
             <p>2. Answer the question correctly to claim that square with your turn's shape!</p>
-            <p>3. Try to connect 3 matching shapes in a line. The game goes on until all 9 squares are filled!</p>
+            <p>3. Match 3 shapes in a line to trigger a strike line! Complete all 9 squares to finish.</p>
             <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
         </div>
 
@@ -75,39 +81,38 @@
         </button>
     </div>
 
-    <!-- SCREEN 4: INTERACTIVE QUIZ BOARD GRID -->
     <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-5 px-2">
-        <!-- TOP HUD BAR -->
         <div class="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-base">
             <div class="text-[#4A90E2]">✨ Puzzles: <span id="hudLevel">0</span>/9</div>
             <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-lg">❤️❤️❤️</div>
             <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
         </div>
 
-        <!-- NOTIFICATION BANNER FOR LINE COMPLETIONS -->
         <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-sm font-bold text-[#2E7D32] animate-pulse">
             🎉 Brilliant! A matching line of 3 was made! Keep going to solve all squares! 🎉
         </div>
 
-        <!-- STYLISH TIC-TAC-TOE INTERACTIVE GRID -->
-        <div class="bg-white rounded-3xl p-5 shadow-2xl border-4 border-[#4A90E2] grid grid-cols-3 gap-4 aspect-square w-full">
-            <script>
-                for(let i=0; i<9; i++) {
-                    document.write(`
-                        <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer">
-                            <div class="box-inner w-full h-full relative">
-                                <div class="box-front flex items-center justify-center bg-[#FFF9E6] hover:bg-[#FFEAA7] border-4 border-[#FFD166] rounded-2xl text-3xl shadow-md transition-all">🔒</div>
-                                <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner"></div>
+        <div class="bg-white rounded-3xl p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
+            <div class="grid grid-cols-3 gap-4 w-full h-full">
+                <script>
+                    for(let i=0; i<9; i++) {
+                        document.write(`
+                            <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer">
+                                <div class="box-inner w-full h-full relative">
+                                    <div class="box-front flex items-center justify-center bg-[#FFF9E6] hover:bg-[#FFEAA7] border-4 border-[#FFD166] rounded-2xl text-3xl shadow-md transition-all">🔒</div>
+                                    <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner"></div>
+                                </div>
                             </div>
-                        </div>
-                    `);
-                }
-            </script>
+                        `);
+                    }
+                </script>
+            </div>
+
+            <svg id="strikeSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
         </div>
         <div class="text-center text-xs text-gray-500 font-bold tracking-wide">Tap any locked card above to open a weather story!</div>
     </div>
 
-    <!-- SCREEN 5: PROBLEM POP-UP OVERLAY PANEL -->
     <div id="questionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-5 border-4 border-[#4A90E2] flex flex-col space-y-4 max-h-[92vh] overflow-y-auto">
             
@@ -115,14 +120,12 @@
                 <p id="questionText" class="text-base md:text-lg font-bold text-[#2C3E50] leading-snug"></p>
             </div>
 
-            <!-- INTERACTIVE HINT CARD ROW -->
             <div id="hintContainer" class="hidden bg-[#FFF9E6] border-2 border-dashed border-[#FFD166] rounded-2xl p-3 text-center text-sm text-[#795548] font-semibold">
                 💡 <span id="hintText"></span>
             </div>
 
             <div id="optionsContainer" class="flex flex-col space-y-3">
-                <!-- Choices populate here dynamically -->
-            </div>
+                </div>
 
             <button id="nextBtn" onclick="submitAndAdvance()" class="hidden w-full bg-[#4CAF50] text-white font-bold text-lg py-3 rounded-xl shadow-md transform active:scale-95 transition-all border-b-4 border-[#2E7D32]">
                 CONFIRM ➡️
@@ -130,7 +133,6 @@
         </div>
     </div>
 
-    <!-- SCREEN 6: GAME SUCCESS OUTRO METRICS -->
     <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
         <div class="space-y-2">
             <span class="text-6xl block">🏆✨🥳</span>
@@ -148,9 +150,7 @@
         </button>
     </div>
 
-    <!-- GAME ENGINE PIPELINE -->
     <script>
-        // CLEAN GRADE 2 BRITISH ENGLISH LANGUAGE DATABASE
         const database = [
             { question: "Farmer Tom is in a field of fluffy white plants. Which plant is he picking to make light summer shirts?", options: ["Coir", "Cotton", "Bamboo"], answer: 1, hint: "This soft white plant is spun into thin thread for cool clothing." },
             { question: "Princess Mia wants a shiny, beautiful dress for a party. Which little insect gives us this smooth thread?", options: ["Spider", "Silkworm", "Ant"], answer: 1, hint: "This tiny caterpillar eats green leaves and makes a silky cocoon." },
@@ -168,11 +168,23 @@
         let lives = 3;
         let activeIdx = null;
         let currentAnswersWrong = 0;
-        let turnToggle = true; // true = ⭕, false = ❌
+        let turnToggle = true; 
         let questionSuccess = false;
 
         let boardState = Array(9).fill(null);
-        let celebratedLines = []; // Keeps track of already celebrated line patterns
+        let celebratedLines = []; 
+
+        // Precise SVG Coordinates relative to 100x100 matrix container box grid
+        const winPatterns = [
+            { indices: [0, 1, 2], coords: { x1: 5, y1: 16.6, x2: 95, y2: 16.6 } },  // Row 1
+            { indices: [3, 4, 5], coords: { x1: 5, y1: 50, x2: 95, y2: 50 } },      // Row 2
+            { indices: [6, 7, 8], coords: { x1: 5, y1: 83.3, x2: 95, y2: 83.3 } },  // Row 3
+            { indices: [0, 3, 6], coords: { x1: 16.6, y1: 5, x2: 16.6, y2: 95 } },  // Col 1
+            { indices: [1, 4, 7], coords: { x1: 50, y1: 5, x2: 50, y2: 95 } },      // Col 2
+            { indices: [2, 5, 8], coords: { x1: 83.3, y1: 5, x2: 83.3, y2: 95 } },  // Col 3
+            { indices: [0, 4, 8], coords: { x1: 5, y1: 5, x2: 95, y2: 95 } },       // Diag 1
+            { indices: [2, 4, 6], coords: { x1: 95, y1: 5, x2: 5, y2: 95 } }        // Diag 2
+        ];
 
         window.onload = function() {
             setTimeout(() => {
@@ -213,6 +225,7 @@
             document.getElementById('hudLevel').innerText = solvedCount;
             document.getElementById('hudScore').innerText = score;
             document.getElementById('lineNotification').classList.add('hidden');
+            document.getElementById('strikeSvg').innerHTML = ""; // Clear canvas lines
             updateLivesHUD();
             
             for(let i=0; i<9; i++) {
@@ -324,15 +337,14 @@
             solvedCount++;
             document.getElementById('hudLevel').innerText = solvedCount;
 
-            // Check if a line was made, but DO NOT terminate the game loop early!
-            if (questionSuccess && checkAndNotifyWinCondition(currentSymbol)) {
+            // Check matching configurations to render animated line streaks
+            if (questionSuccess && checkAndDrawWinCondition(currentSymbol)) {
                 playSound('soundClapping');
                 const banner = document.getElementById('lineNotification');
                 banner.classList.remove('hidden');
                 setTimeout(() => { banner.classList.add('hidden'); }, 4000);
             }
 
-            // End game ONLY when all 9 grid questions have run their full course
             if (solvedCount >= 9) {
                 setTimeout(() => { endGameScenario(); }, 1200);
                 return;
@@ -341,21 +353,33 @@
             turnToggle = !turnToggle;
         }
 
-        function checkAndNotifyWinCondition(symbol) {
-            const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontals
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Verticals
-                [0, 4, 8], [2, 4, 6]             // Diagonals
-            ];
-            
+        // SVG STRIKE GENERATION ENGINE
+        function checkAndDrawWinCondition(symbol) {
             let newlineFound = false;
+            const svg = document.getElementById('strikeSvg');
+            const lineColor = (symbol === "⭕") ? "#1E88E5" : "#D81B60";
+
             winPatterns.forEach((pattern, index) => {
                 if (!celebratedLines.includes(index)) {
-                    if (boardState[pattern[0]] === symbol &&
-                        boardState[pattern[1]] === symbol &&
-                        boardState[pattern[2]] === symbol) {
+                    if (boardState[pattern.indices[0]] === symbol &&
+                        boardState[pattern.indices[1]] === symbol &&
+                        boardState[pattern.indices[2]] === symbol) {
+                        
                         celebratedLines.push(index);
                         newlineFound = true;
+
+                        // Create dynamic linear trace line elements on overlay canvas
+                        const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
+                        line.setAttribute("x1", pattern.coords.x1);
+                        line.setAttribute("y1", pattern.coords.y1);
+                        line.setAttribute("x2", pattern.coords.x2);
+                        line.setAttribute("y2", pattern.coords.y2);
+                        line.setAttribute("stroke", lineColor);
+                        line.setAttribute("stroke-width", "2.5");
+                        line.setAttribute("stroke-linecap", "round");
+                        line.setAttribute("class", "strike-line");
+                        
+                        svg.appendChild(line);
                     }
                 }
             });
