@@ -4,154 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tile Explorer: House Matcher</title>
-    <!-- Lightweight Tailwind CSS build script for styling and layout responsiveness -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
+            background-color: #FDFBF7; /* Cozy Warm Beige */
         }
-        /* Lock screen scrolling to prevent buggy dragging behaviors on older mobile browsers */
         html, body {
             overflow: hidden;
             height: 100%;
         }
+        /* Tactile 3D Buttons & Cards */
+        .chunky-tile {
+            box-shadow: 0px 6px 0px #B39DDB;
+            transition: all 0.1s ease;
+        }
+        .chunky-tile:active {
+            transform: translateY(4px);
+            box-shadow: 0px 2px 0px #B39DDB;
+        }
+        .chunky-panel {
+            box-shadow: 0px 8px 0px #D1C4E9;
+        }
+        /* Swoosh Animation Layer */
+        @keyframes swooshOut {
+            0% { transform: scale(1); opacity: 1; filter: blur(0px); }
+            30% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; filter: blur(4px); }
+        }
+        .animate-swoosh {
+            animation: swooshOut 0.5s forwards ease-in-out;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-b from-[#FFF3E0] to-[#FFE0B2] flex flex-col items-center justify-center p-2 m-0 select-none text-[#37474F]">
+<body class="flex flex-col items-center justify-center p-3 m-0 select-none text-[#4A148C]">
 
-    <!-- AUDIO TARGET HOOKS -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
+    <audio id="soundSwoosh" src="assets/swoosh.mp3" preload="auto"></audio>
 
-    <!-- SCREEN 0: INNOVINE SPLASH SCREEN -->
-    <div id="splashScreen" class="fixed inset-0 bg-[#1A237E] flex flex-col items-center justify-center z-50 text-center p-4 transition-opacity duration-500">
-        <div class="space-y-4 flex flex-col items-center">
-            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-24 h-24 object-contain rounded-2xl shadow-2xl bg-white p-2 border-4 border-[#00E676] animate-pulse" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-white rounded-2xl flex items-center justify-center text-[#1A237E] font-black text-4xl border-4 border-[#00E676]\'>IN</div><h1 class=\'text-white text-3xl font-bold mt-2\'>Innovine</h1>';">
-            <p class="text-[#A5D6A7] font-black text-xs tracking-widest uppercase mt-2">FUTURE OF LEARNING</p>
-        </div>
+    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-4 transition-opacity duration-500">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-32 h-32 object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-[#E8EAF6] rounded-full flex items-center justify-center text-[#4A148C] font-black text-4xl border-4 border-[#D1C4E9]\'>IN</div>';">
     </div>
 
-    <!-- SCREEN 1: TITLE SCREEN -->
-    <div id="titleScreen" class="hidden w-full max-w-sm bg-white rounded-3xl p-5 shadow-xl border-4 border-[#E65100] text-center space-y-5 mx-auto">
-        <div class="space-y-2">
-            <span class="text-5xl block animate-pulse">❤️💙💚</span>
-            <h1 class="text-2xl font-black text-[#E65100] tracking-wide leading-tight">Tile Explorer:<br>House Matcher</h1>
-            <p class="text-[#5D4037] font-bold text-xs px-2">Match the matching hearts to unlock hidden questions about houses and tools!</p>
+    <div id="titleScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-6 mx-auto chunky-panel">
+        <div class="space-y-3">
+            <span class="text-6xl block">❤️✨💙</span>
+            <h1 class="text-3xl font-black text-[#4A148C] tracking-wide leading-tight">Tile Explorer:<br>House Matcher</h1>
+            <p class="text-[#6A1B9A] font-bold text-sm px-2">Match the beautiful hearts to unlock fun stories about homes and builders!</p>
         </div>
-        <button onclick="showInstructions()" class="w-full bg-[#E65100] hover:bg-[#F57C00] text-white font-black text-lg py-3 rounded-xl shadow-md border-b-4 border-[#BF360C] transform active:scale-95 transition-all cursor-pointer">
-            PLAY GAME ▶️
+        <button onclick="showInstructions()" class="w-full bg-[#7E57C2] hover:bg-[#673AB7] text-white font-black text-xl py-4 rounded-2xl chunky-tile border-b-0 cursor-pointer">
+            PLAY ▶️
         </button>
     </div>
 
-    <!-- SCREEN 2: INSTRUCTIONS SCREEN -->
-    <div id="instructionsScreen" class="hidden w-full max-w-sm bg-white rounded-3xl p-5 shadow-xl border-4 border-[#00796B] text-center space-y-4 mx-auto">
-        <h2 class="text-xl font-black text-[#004D40]">🪟 Rules of the Game</h2>
-        <div class="bg-[#E0F2F1] p-4 rounded-xl text-left text-xs space-y-2 font-bold text-[#004D40] border-2 border-dashed border-[#4DB6AC]">
-            <p>1. Tap identical heart tiles to send them into your storage tray.</p>
-            <p>2. Making a group of 3 matching hearts will clear them away!</p>
-            <p>3. Every 2 sets you match unlocks a special 3-Question Challenge!</p>
+    <div id="instructionsScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-5 mx-auto chunky-panel">
+        <h2 class="text-2xl font-black text-[#4A148C]">⭐ How to Play ⭐</h2>
+        <div class="bg-white/80 p-5 rounded-2xl text-left text-sm space-y-3 font-bold text-[#6A1B9A] border-2 border-dashed border-[#B39DDB]">
+            <p>1. Tap a heart to put it into your tray.</p>
+            <p>2. Find <span class="text-[#4A148C]">3 of the same hearts</span> to make them go SWOOSH!</p>
+            <p>3. Every 2 matches unlocks an easy story question for points!</p>
         </div>
-        <button onclick="startGame()" class="w-full bg-[#009688] hover:bg-[#00796B] text-white font-black text-lg py-3 rounded-xl shadow-md border-b-4 border-[#004D40] transform active:scale-95 transition-all cursor-pointer">
-            START MATCH ➡️
+        <button onclick="startGame()" class="w-full bg-[#7E57C2] hover:bg-[#673AB7] text-white font-black text-xl py-4 rounded-2xl chunky-tile border-b-0 cursor-pointer">
+            LET'S GO ➡️
         </button>
     </div>
 
-    <!-- SCREEN 3: ACTIVE GAME BOARD -->
-    <div id="gameScreen" class="hidden w-full max-w-sm flex flex-col space-y-2.5 mx-auto relative h-full justify-center">
-        <!-- TOP HUD TRACKER -->
-        <div class="bg-white rounded-xl p-2.5 shadow-sm flex items-center justify-between font-black text-xs border border-gray-200">
-            <div class="text-[#E65100]">⭐ POINTS: <span id="hudScore" class="text-sm">0</span></div>
-            <div class="bg-[#FFF3E0] text-[#E65100] px-2.5 py-0.5 rounded-full">Cleared: <span id="hudCleared">0 / 8</span></div>
+    <div id="gameScreen" class="hidden w-full max-w-sm flex flex-col space-y-4 mx-auto relative h-full justify-center">
+        <div class="bg-[#E8EAF6] rounded-2xl p-3 shadow-sm flex items-center justify-between font-black text-sm border-2 border-[#D1C4E9]">
+            <div class="text-[#4A148C]">⭐ SCORE: <span id="hudScore" class="text-lg">0</span></div>
+            <div class="bg-white text-[#673AB7] px-3 py-1 rounded-full text-xs border border-[#D1C4E9]">Matches: <span id="hudCleared">0 / 8</span></div>
         </div>
 
-        <!-- MAIN TILE MATRIX CANVAS VIEW (ADAPTED FROM image_7e1183.jpg) -->
-        <div class="bg-[#3E2723] rounded-2xl p-3 shadow-xl border-4 border-[#271714] aspect-square relative flex items-center justify-center">
-            <div id="tileMatrixGrid" class="grid grid-cols-4 gap-2 w-full h-full">
-                <!-- Dynamically populated heart tiles go here -->
-            </div>
+        <div class="bg-[#D1C4E9]/40 rounded-3xl p-4 shadow-inner border-4 border-[#D1C4E9] aspect-square relative flex items-center justify-center">
+            <div id="tileMatrixGrid" class="grid grid-cols-4 gap-3 w-full h-full">
+                </div>
         </div>
 
-        <!-- TARGET DISPLAY FEEDBACK HINT BAR -->
-        <div class="bg-white rounded-xl p-2 text-center shadow-sm border border-orange-100 min-h-[36px] flex items-center justify-center">
-            <p id="gameHintBarText" class="text-[11px] font-bold text-gray-400">Tap three matching hearts to clear them!</p>
+        <div class="bg-[#E8EAF6] rounded-2xl p-3 border-2 border-[#D1C4E9] shadow-sm">
+            <div id="dockTraySlots" class="grid grid-cols-7 gap-1.5 h-12 w-full bg-white/60 rounded-xl p-1.5 border border-[#B39DDB]">
+                </div>
         </div>
 
-        <!-- HOLDING STORAGE DOCK DRAY (ADAPTED FROM image_7e1183.jpg) -->
-        <div class="bg-[#263238] rounded-xl p-2 border-2 border-[#1a2327] shadow-inner">
-            <p class="text-[9px] text-gray-400 font-black tracking-wider uppercase mb-1 px-1">Storage Dock Tray</p>
-            <div id="dockTraySlots" class="grid grid-cols-7 gap-1 h-11 w-full bg-[#151D20] rounded-lg p-1">
-                <!-- Max 7 spaces for selected hearts -->
-            </div>
-        </div>
-
-        <!-- POPUP OVERLAY SCREEN CONTAINER FOR THE CHRONICLED TRIVIA CHALLENGES -->
-        <div id="triviaChallengeOverlay" class="hidden fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-3">
-            <div class="bg-white w-full max-w-xs rounded-2xl p-4 shadow-2xl border-t-8 border-[#0097A7] space-y-3">
+        <div id="triviaChallengeOverlay" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
+            <div class="bg-[#FDFBF7] w-full max-w-sm rounded-3xl p-5 shadow-2xl border-4 border-[#D1C4E9] space-y-4 chunky-panel">
                 <div class="text-center">
-                    <span class="text-3xl block">📝💫</span>
-                    <h3 class="font-black text-[#006064] text-base">Trivia Challenge!</h3>
-                    <p class="text-[10px] bg-[#E0F7FA] text-[#006064] px-2 py-0.5 rounded-full inline-block mt-1 font-black">Question <span id="triviaProgressCounter">1/3</span></p>
+                    <span class="text-4xl block">📝🎈</span>
+                    <h3 class="font-black text-[#4A148C] text-lg mt-1">Story Question!</h3>
+                    <p class="text-xs bg-[#E8EAF6] text-[#4A148C] px-3 py-0.5 rounded-full inline-block mt-1 font-black">Question <span id="triviaProgressCounter">1/3</span></p>
                 </div>
                 
-                <!-- QUESTION TEXT FIELD -->
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 min-h-[50px] flex items-center justify-center">
-                    <p id="triviaQuestionText" class="text-xs font-black text-center text-gray-700 leading-tight"></p>
+                <div class="bg-white p-4 rounded-2xl border border-[#D1C4E9] shadow-inner text-center">
+                    <p id="triviaQuestionText" class="text-sm font-black text-[#4A148C] leading-snug"></p>
                 </div>
 
-                <!-- SELECTION OPTION BUTTON BLOCK -->
-                <div id="triviaOptionsBlock" class="flex flex-col space-y-2">
-                    <!-- Dynamic option buttons go here -->
-                </div>
+                <div id="triviaOptionsBlock" class="flex flex-col space-y-2.5">
+                    </div>
 
-                <!-- QUIZ ERROR HINT BOX FOOTER -->
-                <div class="bg-orange-50 rounded-lg p-1.5 text-center border border-orange-100 min-h-[28px] flex items-center justify-center">
-                    <p id="triviaHintText" class="text-[10px] font-bold text-orange-700"></p>
+                <div class="bg-[#E8EAF6] rounded-xl p-2.5 text-center border border-[#D1C4E9] min-h-[36px] flex items-center justify-center">
+                    <p id="triviaHintText" class="text-xs font-bold text-[#6A1B9A]"></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN 4: SUMMARY OUTRO GAME OVER -->
-    <div id="scoreScreen" class="hidden w-full max-w-sm bg-white rounded-3xl p-5 shadow-xl border-4 border-[#4CAF50] text-center space-y-4 mx-auto">
-        <div class="space-y-1">
-            <span class="text-5xl block">🏆🇬🇧🏡</span>
-            <h2 class="text-xl font-black text-[#2E7D32]">Perfect Score!</h2>
-            <p class="text-xs text-gray-500 font-bold px-1">Superb sorting and flawless chapter mastery! You solved all twelve structural questions accurately.</p>
+    <div id="scoreScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-5 mx-auto chunky-panel">
+        <div class="space-y-2">
+            <span class="text-6xl block animate-bounce">👑👑👑</span>
+            <h2 class="text-2xl font-black text-[#4A148C]">Official Home Designer!</h2>
+            <p class="text-xs text-[#6A1B9A] font-bold px-2">Every worker has their tools and every family has a warm roof! Amazing job!</p>
         </div>
-        <div class="bg-[#E8F5E9] p-3 rounded-xl border-2 border-[#4CAF50] max-w-[160px] mx-auto">
-            <p class="text-[#2E7D32] text-3xl font-black"><span id="finalScoreText">0</span> Pts</p>
+        <div class="bg-white p-4 rounded-2xl border-4 border-[#B39DDB] max-w-[180px] mx-auto shadow-inner">
+            <p class="text-xs font-black text-[#673AB7] uppercase tracking-wider mb-1">Final Score</p>
+            <p class="text-[#4A148C] text-4xl font-black"><span id="finalScoreText">0</span> / 120</p>
         </div>
-        <button onclick="restartGame()" class="w-full bg-[#E65100] text-white font-black text-base py-3 rounded-xl shadow-md border-b-4 border-[#BF360C] transform active:scale-95 transition-all cursor-pointer">
-            SOLVE AGAIN 🔄
+        <button onclick="restartGame()" class="w-full bg-[#7E57C2] text-white font-black text-lg py-4 rounded-2xl chunky-tile border-b-0 cursor-pointer">
+            PLAY AGAIN 🔄
         </button>
     </div>
 
-    <!-- ENGINE CONTROLLER IMPLEMENTATION MODULE -->
     <script>
-        // 12 Chapter questions tailored to British English with hints that do not reveal answers.
         const chapterDatabase = [
-            { q: "What strong material does a mason use to construct permanent apartment walls?", a: "Bricks and cement", options: ["Mud and straw", "Bricks and cement", "Canvas cloth"], hint: "Hint: Think about the heavy blocks that make city buildings strong!" },
-            { q: "Which helper should you call if a water pipe or bathroom tap starts to leak?", a: "A plumber", options: ["A plumber", "An electrician", "A carpenter"], hint: "Hint: This person specializes in pipes and water systems!" },
-            { q: "What does an architect draw on paper before building workers start their job?", a: "A house drawing plan", options: ["A paint layout", "A house drawing plan", "An electricity wire map"], hint: "Hint: It is the blueprint design that shows where rooms go!" },
-            { q: "Which tool does a carpenter use to cut down heavy timber logs for wooden doors?", a: "A wood saw", options: ["A brick trowel", "A pipe wrench", "A wood saw"], hint: "Hint: It is a sharp tool with metal teeth made for slicing timber!" },
-            { q: "Who handles routing safety cables so your bedroom light switches can operate?", a: "An electrician", options: ["An electrician", "A painter", "A mason"], hint: "Hint: This expert deals with electrical currents and power!" },
-            { q: "What do country villagers use to build weak, temporary kutcha huts?", a: "Mud and straw", options: ["Iron bars and metal", "Mud and straw", "Bricks and cement"], hint: "Hint: These are simple materials found in nature that can wash away in heavy rain!" },
-            { q: "What type of permanent house is built tall in big cities to hold many families?", a: "A multi-storey building", options: ["A camper tent", "A village hut", "A multi-storey building"], hint: "Hint: Look out for very high city structures with lots of storeys!" },
-            { q: "What material do campers use to pitch a light, movable tent inside a forest?", a: "Canvas cloth", options: ["Snow blocks", "Canvas cloth", "Bricks and cement"], hint: "Hint: It is a thick, foldable fabric that protects from the wind!" },
-            { q: "What special home on wheels can be driven around by travellers from place to place?", a: "A caravan", options: ["A stilt house", "An igloo", "A caravan"], hint: "Hint: It is a mobile vehicle that acts like a moving house!" },
-            { q: "What do Eskimos use to build round igloo shelters in freezing arctic regions?", a: "Snow blocks", options: ["Wooden poles", "Snow blocks", "Mud and straw"], hint: "Hint: They use the frozen moisture that falls from the cold winter sky!" },
-            { q: "Why are stilt houses built high up on long wooden poles in places like Assam?", a: "To stay safe from floods", options: ["To stay safe from floods", "To be closer to trees", "To keep cool from the sun"], hint: "Hint: Think about what happens when heavy rains create deep puddles on the ground!" },
-            { q: "What does a painter use to make plain gray interior rooms look bright and beautiful?", a: "Paint and brushes", options: ["Pipes and wrenches", "Wires and switches", "Paint and brushes"], hint: "Hint: This liquid adds bright, vibrant color to the walls!" }
+            { q: "A big bad wolf tries to blow down a city building. Why is it too strong for him?", a: "It is built with strong bricks and cement", options: ["It is made of soft grass", "It is built with strong bricks and cement", "It is a light cloth tent"], hint: "Hint: Think about the heavy blocks that make city walls solid!" },
+            { q: "Oh no! Water is leaking from the bathroom tap! Who can fix it?", a: "A friendly plumber", options: ["A friendly plumber", "A happy painter", "A wood carpenter"], hint: "Hint: Look for the helper who loves fixing water pipes!" },
+            { q: "Maya wants to build a beautiful new house. Who will draw the shape of the house on paper first?", a: "A creative architect", options: ["A school teacher", "A bus driver", "A creative architect"], hint: "Hint: This helper uses a ruler to draw houses before we build them!" },
+            { q: "Uncle Tom needs a new wooden front door for his cottage. Who can cut the wood and make it?", a: "A busy carpenter", options: ["A busy carpenter", "A mason", "An electrician"], hint: "Hint: Look for the helper who works with logs, trees, and saws!" },
+            { q: "It is night-time and the living room is completely dark. Who fixes the wires so the lights turn on?", a: "A clever electrician", options: ["A painter", "A clever electrician", "A plumber"], hint: "Hint: This expert hooks up light switches and power plugs!" },
+            { q: "The walls of the new school look dull and gray. Who can make them look bright and pretty?", a: "A kind painter", options: ["A kind painter", "A mason", "An architect"], hint: "Hint: This helper uses big brushes and lots of beautiful colors!" },
+            { q: "A little village hut is made of mud and straw. What happens if a massive rainstorm hits it?", a: "It can break or wash away", options: ["It stays strong forever", "It can break or wash away", "It turns into ice"], hint: "Hint: Mud and straw make weak houses that can get hurt by heavy rain." },
+            { q: "Lots of different families want to live in the busy city. Where can they all live together?", a: "In a tall multi-storey building", options: ["In a tiny snow igloo", "In a tall multi-storey building", "Inside a small canvas tent"], hint: "Hint: Look for a very tall building with lots of floors!" },
+            { q: "Sam is going camping in the green forest for one night. What house can he fold up and carry in his bag?", a: "A cosy canvas tent", options: ["A brick building", "A cosy canvas tent", "A muddy hut"], hint: "Hint: This house is made of thick cloth and can be packed away easily!" },
+            { q: "The Happy family wants to go on holiday to the beach and the mountains using a house on wheels! What is it?", a: "A rolling caravan van", options: ["A rolling caravan van", "A tall city building", "A village hut"], hint: "Hint: Look for a special van that has beds and a kitchen inside!" },
+            { q: "It is freezing cold in the snowy ice lands. What round house do Eskimos build out of blocks of ice?", a: "A winter igloo", options: ["A canvas tent", "A winter igloo", "A brick house"], hint: "Hint: This house is white, round, and made entirely of hard snow!" },
+            { q: "It rains every single day in some wet places, causing big floods. How do people keep their houses high and dry?", a: "They build on top of high wooden stilts", options: ["They build on top of high wooden stilts", "They build them underwater", "They make them out of mud"], hint: "Hint: These homes stand tall on wooden legs to stay above the water!" }
         ];
 
         const heartStyles = [
-            { name: "red", emoji: "❤️", color: "bg-red-100 text-red-500 border-red-300" },
-            { name: "blue", emoji: "💙", color: "bg-blue-100 text-blue-500 border-blue-300" },
-            { name: "green", emoji: "💚", color: "bg-green-100 text-green-500 border-green-300" },
-            { name: "yellow", emoji: "💛", color: "bg-yellow-100 text-yellow-500 border-yellow-300" }
+            { name: "red", emoji: "❤️", color: "bg-red-50 text-red-500 border-red-200" },
+            { name: "blue", emoji: "💙", color: "bg-blue-50 text-blue-500 border-blue-200" },
+            { name: "green", emoji: "💚", color: "bg-green-50 text-green-500 border-green-200" },
+            { name: "yellow", emoji: "💛", color: "bg-yellow-50 text-yellow-500 border-yellow-200" }
         ];
 
         let matrixTrayList = [];
@@ -193,13 +188,11 @@
         }
 
         function renderFreshMatrixPuzzleBoard() {
-            // 8 trios = 24 total heart tiles matching our math constraints
             let pools = [];
             for (let i = 0; i < 8; i++) {
                 const selectedHeart = heartStyles[i % heartStyles.length];
                 pools.push({...selectedHeart}, {...selectedHeart}, {...selectedHeart});
             }
-            // Shuffle pool list seamlessly
             matrixTrayList = pools.sort(() => Math.random() - 0.5);
             updateGridDOMElements();
         }
@@ -211,11 +204,11 @@
             matrixTrayList.forEach((item, index) => {
                 const tileBtn = document.createElement('button');
                 if (item === null) {
-                    // Placeholder card slot for vanished elements
                     tileBtn.className = "w-full h-full opacity-0 pointer-events-none";
                 } else {
-                    tileBtn.className = `w-full h-full rounded-xl border-2 border-b-4 flex items-center justify-center text-2xl shadow-sm cursor-pointer transform active:scale-95 transition-all ${item.color}`;
+                    tileBtn.className = `w-full h-full rounded-2xl border-2 border-b-4 flex items-center justify-center text-3xl shadow-sm cursor-pointer chunky-tile ${item.color}`;
                     tileBtn.innerText = item.emoji;
+                    tileBtn.id = `tile-${index}`;
                     tileBtn.onclick = () => handleTileSelectionTap(index);
                 }
                 container.appendChild(tileBtn);
@@ -226,41 +219,44 @@
             if (activeDockArray.length >= 7) return; 
             
             const targetedItem = matrixTrayList[index];
-            matrixTrayList[index] = null; // Mark vacancy
-            updateGridDOMElements();
-
-            activeDockArray.push(targetedItem);
-            renderDockTrayGraphics();
-
-            // Run evaluation check to seek triplet combos
-            const matchedColorCount = activeDockArray.filter(h => h.name === targetedItem.name).length;
+            const tileNode = document.getElementById(`tile-${index}`);
             
-            if (matchedColorCount === 3) {
-                setTimeout(() => {
-                    // Purge the matching triplet loop
-                    activeDockArray = activeDockArray.filter(h => h.name !== targetedItem.name);
-                    renderDockTrayGraphics();
-                    playSound('soundCorrect');
-                    
-                    successfulTriosCleared++;
-                    score += 10;
-                    document.getElementById('hudScore').innerText = score;
-                    document.getElementById('hudCleared').innerText = `${successfulTriosCleared} / 8`;
-
-                    // Trigger a 3-Question Challenge every 2 sets matched
-                    if (successfulTriosCleared % 2 === 0 && successfulTriosCleared > 0) {
-                        launchTriviaBatchOverlay();
-                    }
-                }, 300);
-            } else if (activeDockArray.length === 7) {
-                // Dock full failure protection auto-refresh safeguard
-                setTimeout(() => {
-                    playSound('soundWrong');
-                    document.getElementById('gameHintBarText').innerText = "Tray full! Shuffling hearts back to safety.";
-                    document.getElementById('gameHintBarText').className = "text-[11px] font-black text-red-500 animate-pulse";
-                    startGame();
-                }, 400);
+            if (tileNode) {
+                tileNode.classList.add('animate-swoosh');
+                playSound('soundSwoosh');
             }
+
+            setTimeout(() => {
+                matrixTrayList[index] = null;
+                updateGridDOMElements();
+
+                activeDockArray.push(targetedItem);
+                renderDockTrayGraphics();
+
+                const matchedColorCount = activeDockArray.filter(h => h.name === targetedItem.name).length;
+                
+                if (matchedColorCount === 3) {
+                    setTimeout(() => {
+                        activeDockArray = activeDockArray.filter(h => h.name !== targetedItem.name);
+                        renderDockTrayGraphics();
+                        playSound('soundCorrect');
+                        
+                        successfulTriosCleared++;
+                        document.getElementById('hudCleared').innerText = `${successfulTriosCleared} / 8`;
+
+                        if (successfulTriosCleared % 2 === 0 && successfulTriosCleared > 0) {
+                            launchTriviaBatchOverlay();
+                        } else {
+                            checkWinConditionState();
+                        }
+                    }, 200);
+                } else if (activeDockArray.length === 7) {
+                    setTimeout(() => {
+                        playSound('soundWrong');
+                        startGame();
+                    }, 400);
+                }
+            }, 450);
         }
 
         function renderDockTrayGraphics() {
@@ -269,10 +265,10 @@
 
             for (let i = 0; i < 7; i++) {
                 const slot = document.createElement('div');
-                slot.className = "w-full h-full rounded-md border border-dashed border-gray-700 bg-black/30 flex items-center justify-center text-base";
+                slot.className = "w-full h-full rounded-lg border border-dashed border-[#B39DDB] bg-white flex items-center justify-center text-base";
                 
                 if (activeDockArray[i]) {
-                    slot.className = `w-full h-full rounded-md flex items-center justify-center text-lg shadow-sm font-bold ${activeDockArray[i].color}`;
+                    slot.className = `w-full h-full rounded-xl flex items-center justify-center text-xl shadow-sm border ${activeDockArray[i].color}`;
                     slot.innerText = activeDockArray[i].emoji;
                 }
                 tray.appendChild(slot);
@@ -287,8 +283,6 @@
 
         function loadIndividualTriviaQuestion() {
             document.getElementById('triviaHintText').innerText = "";
-            
-            // Map out unique chronological questions across batches
             const absoluteQuestionIdx = (triviaBatchIdx * 3) + currentQuestionSubIdx;
             
             if (absoluteQuestionIdx >= chapterDatabase.length) {
@@ -305,9 +299,9 @@
 
             activeQuestionData.options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "w-full bg-white hover:bg-gray-50 text-gray-800 font-black py-2.5 px-3 rounded-xl border-2 border-gray-200 border-b-4 text-xs text-left transform active:scale-95 transition-all flex items-center space-x-2 cursor-pointer";
+                btn.className = "w-full bg-white hover:bg-purple-50 text-[#4A148C] font-black py-3 px-4 rounded-xl border-2 border-[#D1C4E9] text-xs text-left transform active:scale-95 transition-all flex items-center space-x-2 cursor-pointer shadow-sm";
                 btn.onclick = () => evaluateTriviaResponse(opt, btn, activeQuestionData);
-                btn.innerHTML = `<span class='text-blue-500'>🏠</span> <span class='flex-1 leading-tight'>${opt}</span>`;
+                btn.innerHTML = `<span>🏡</span> <span class='flex-1 leading-tight'>${opt}</span>`;
                 block.appendChild(btn);
             });
         }
@@ -315,7 +309,7 @@
         function evaluateTriviaResponse(selectedOpt, btnElement, dataObj) {
             if (selectedOpt === dataObj.a) {
                 playSound('soundCorrect');
-                score += 15;
+                score += 10;
                 document.getElementById('hudScore').innerText = score;
                 
                 currentQuestionSubIdx++;
@@ -334,8 +328,10 @@
 
         function closeTriviaChallengeOverlay() {
             document.getElementById('triviaChallengeOverlay').classList.add('hidden');
-            
-            // Check if final ending requirements are reached
+            checkWinConditionState();
+        }
+
+        function checkWinConditionState() {
             if (successfulTriosCleared === 8) {
                 setTimeout(() => {
                     playSound('soundClapping');
