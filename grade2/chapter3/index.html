@@ -66,7 +66,7 @@
         <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base space-y-3 text-[#4A4A4A] font-medium">
             <p>1. Tap any padlocked 🔒 card on the board grid.</p>
             <p>2. Answer the question correctly to claim that square with your turn's shape!</p>
-            <p>3. Match 3 symbols in a horizontal, vertical, or diagonal line to win the match!</p>
+            <p>3. Try to connect 3 matching shapes in a line. The game goes on until all 9 squares are filled!</p>
             <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
         </div>
 
@@ -82,6 +82,11 @@
             <div class="text-[#4A90E2]">✨ Puzzles: <span id="hudLevel">0</span>/9</div>
             <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-lg">❤️❤️❤️</div>
             <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
+        </div>
+
+        <!-- NOTIFICATION BANNER FOR LINE COMPLETIONS -->
+        <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-sm font-bold text-[#2E7D32] animate-pulse">
+            🎉 Brilliant! A matching line of 3 was made! Keep going to solve all squares! 🎉
         </div>
 
         <!-- STYLISH TIC-TAC-TOE INTERACTIVE GRID -->
@@ -129,8 +134,8 @@
     <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
         <div class="space-y-2">
             <span class="text-6xl block">🏆✨🥳</span>
-            <h2 id="endGameStatus" class="text-3xl font-black text-[#4CAF50]">Quest Completed!</h2>
-            <p id="endGameMessage" class="text-lg font-bold text-gray-700">Fantastic Job! You are a Wardrobe Wizard! 🌟</p>
+            <h2 class="text-3xl font-black text-[#4CAF50]">Quest Completed!</h2>
+            <p class="text-lg font-bold text-gray-700">Fantastic Job! You are a Wardrobe Wizard! 🌟</p>
         </div>
         
         <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
@@ -145,17 +150,17 @@
 
     <!-- GAME ENGINE PIPELINE -->
     <script>
-        // EASY BRITISH ENGLISH LANGUAGE DATABASE
+        // CLEAN GRADE 2 BRITISH ENGLISH LANGUAGE DATABASE
         const database = [
-            { question: "Farmer Tom is in a field of fluffy white plants. Which plant is he picking to make light summer shirts?", options: ["🥥 Coir", "☁️ Cotton", "🪵 Bamboo"], answer: 1, hint: "This soft white plant is spun into thin thread for cool clothing." },
-            { question: "Princess Mia wants a shiny, beautiful dress for a party. Which little insect gives us this smooth, shiny thread?", options: ["🕷️ Spider", "🐛 Silkworm", "🐜 Ant"], answer: 1, hint: "This tiny caterpillar eats green leaves and makes a silky cocoon." },
-            { question: "The farmers are cutting the thick, curly coats off their sheep. What warm material are they gathering?", options: ["🧶 Wool", "🪶 Feathers", "🪵 Straw"], answer: 0, hint: "We use this cosy animal hair to knit warm winter jumpers." },
-            { question: "Ben is playing outside in the hot, bright sunshine. What should he wear to stay cool and fresh?", options: ["🧥 Thick Coat", "👚 Light Cotton Shirt", "🧣 Warm Scarf"], answer: 1, hint: "Thin cotton clothes let the summer breeze pass through easily." },
-            { question: "Lily is visiting a snowy mountain. The winter wind is freezing! What must she wear to keep warm?", options: ["🎽 Thin Vest", "👗 Silk Dress", "🧥 Woolen Overcoat"], answer: 2, hint: "Thick woollen coats trap your body heat to keep out the cold." },
-            { question: "Heavy rain is falling from the dark clouds. What should Daisy wear over her clothes to stay dry?", options: ["🥻 Silk Sari", "🧥 Raincoat", "🥋 Linen Robe"], answer: 1, hint: "We need a waterproof jacket that does not soak up the rainwater." },
-            { question: "A brave firefighter is rushing to help put out a fire. Why do they wear a heavy, special uniform?", options: ["🎭 To look funny", "👔 To stay safe at work", "🛍️ To go shopping"], answer: 1, hint: "Special uniforms protect workers from fire, heat, or accidents." },
-            { question: "You walk into a busy hospital and spot the doctor straight away. What helped you find them?", options: ["👟 Bright Trainers", "🥼 A White Medical Uniform", "🎩 Magician Hat"], answer: 1, hint: "Special uniforms help us recognise community helpers instantly." },
-            { question: "After laundry day, your clean clothes are piled on your bed. What is the best way to look after them?", options: ["🧺 Fold them neatly into the wardrobe", "🌪️ Throw them on the floor", "🛌 Hide them under the bed"], answer: 0, hint: "Folding your clothes neatly keeps them smooth, tidy, and clean." }
+            { question: "Farmer Tom is in a field of fluffy white plants. Which plant is he picking to make light summer shirts?", options: ["Coir", "Cotton", "Bamboo"], answer: 1, hint: "This soft white plant is spun into thin thread for cool clothing." },
+            { question: "Princess Mia wants a shiny, beautiful dress for a party. Which little insect gives us this smooth thread?", options: ["Spider", "Silkworm", "Ant"], answer: 1, hint: "This tiny caterpillar eats green leaves and makes a silky cocoon." },
+            { question: "The farmers are cutting the thick, curly coats off their sheep. What warm material are they gathering?", options: ["Wool", "Feathers", "Straw"], answer: 0, hint: "We use this cosy animal hair to knit warm winter jumpers." },
+            { question: "Ben is playing outside in the hot, bright sunshine. What should he wear to stay cool and fresh?", options: ["Thick coat", "Cotton shirt", "Warm scarf"], answer: 1, hint: "Thin cotton clothes let the summer breeze pass through easily." },
+            { question: "Lily is visiting a snowy mountain. The winter wind is freezing! What must she wear to keep warm?", options: ["Thin vest", "Silk dress", "Woollen coat"], answer: 2, hint: "Thick woollen coats trap your body heat to keep out the cold." },
+            { question: "Heavy rain is falling from the dark clouds. What should Daisy wear over her clothes to stay dry?", options: ["Silk sari", "Raincoat", "Linen robe"], answer: 1, hint: "We need a waterproof jacket that does not soak up the rainwater." },
+            { question: "A brave firefighter is rushing to help put out a fire. Why do they wear a heavy, special uniform?", options: ["To look funny", "To stay safe", "To go shopping"], answer: 1, hint: "Special uniforms protect workers from fire, heat, or accidents." },
+            { question: "You walk into a busy hospital and spot the doctor straight away. What helped you find them?", options: ["Bright trainers", "White uniform", "Magician hat"], answer: 1, hint: "Special uniforms help us recognise community helpers instantly." },
+            { question: "After laundry day, your clean clothes are piled on your bed. What is the best way to look after them?", options: ["Fold them neatly", "Throw them down", "Hide them away"], answer: 0, hint: "Folding your clothes neatly keeps them smooth, tidy, and clean." }
         ];
 
         let solvedCount = 0;
@@ -167,6 +172,7 @@
         let questionSuccess = false;
 
         let boardState = Array(9).fill(null);
+        let celebratedLines = []; // Keeps track of already celebrated line patterns
 
         window.onload = function() {
             setTimeout(() => {
@@ -203,8 +209,10 @@
             score = 0;
             turnToggle = true;
             boardState.fill(null);
+            celebratedLines = [];
             document.getElementById('hudLevel').innerText = solvedCount;
             document.getElementById('hudScore').innerText = score;
+            document.getElementById('lineNotification').classList.add('hidden');
             updateLivesHUD();
             
             for(let i=0; i<9; i++) {
@@ -277,7 +285,6 @@
                     document.getElementById('hintText').innerText = qData.hint;
                     document.getElementById('hintContainer').classList.remove('hidden');
                 } else if (lives <= 0) {
-                    // Fail State: Lock choices, calculate penalty, and allow skipping forward
                     const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
                     for (let b of btns) b.disabled = true;
                     
@@ -305,7 +312,6 @@
                     backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
                 }
             } else {
-                // If they failed completely, mark cell with a neutral lock block sign
                 boardState[activeIdx] = "🔒";
                 backSign.innerText = "🔒";
                 backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-gray-200 border-4 border-gray-400 text-gray-400";
@@ -318,48 +324,47 @@
             solvedCount++;
             document.getElementById('hudLevel').innerText = solvedCount;
 
-            // Strict Win Condition Check: Validates horizontal, vertical, and diagonal lines
-            if (questionSuccess && checkWinCondition(currentSymbol)) {
-                setTimeout(() => { endGameScenario(true, currentSymbol); }, 600);
-                return;
+            // Check if a line was made, but DO NOT terminate the game loop early!
+            if (questionSuccess && checkAndNotifyWinCondition(currentSymbol)) {
+                playSound('soundClapping');
+                const banner = document.getElementById('lineNotification');
+                banner.classList.remove('hidden');
+                setTimeout(() => { banner.classList.add('hidden'); }, 4000);
             }
 
+            // End game ONLY when all 9 grid questions have run their full course
             if (solvedCount >= 9) {
-                setTimeout(() => { endGameScenario(false, null); }, 600);
+                setTimeout(() => { endGameScenario(); }, 1200);
                 return;
             }
 
             turnToggle = !turnToggle;
         }
 
-        function checkWinCondition(symbol) {
+        function checkAndNotifyWinCondition(symbol) {
             const winPatterns = [
                 [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontals
                 [0, 3, 6], [1, 4, 7], [2, 5, 8], // Verticals
                 [0, 4, 8], [2, 4, 6]             // Diagonals
             ];
-            return winPatterns.some(pattern => 
-                boardState[pattern[0]] === symbol &&
-                boardState[pattern[1]] === symbol &&
-                boardState[pattern[2]] === symbol
-            );
+            
+            let newlineFound = false;
+            winPatterns.forEach((pattern, index) => {
+                if (!celebratedLines.includes(index)) {
+                    if (boardState[pattern[0]] === symbol &&
+                        boardState[pattern[1]] === symbol &&
+                        boardState[pattern[2]] === symbol) {
+                        celebratedLines.push(index);
+                        newlineFound = true;
+                    }
+                }
+            });
+            return newlineFound;
         }
 
-        function endGameScenario(hasLineWin, winningSymbol) {
+        function endGameScenario() {
             playSound('soundClapping');
             document.getElementById('gameScreen').style.display = 'none';
-            
-            const statusTitle = document.getElementById('endGameStatus');
-            const statusMsg = document.getElementById('endGameMessage');
-            
-            if (hasLineWin) {
-                statusTitle.innerText = `Line Formed! ${winningSymbol}`;
-                statusMsg.innerText = `Brilliant! You connected a straight line of three matching shapes across the board! 🌟`;
-            } else {
-                statusTitle.innerText = "Board Completed!";
-                statusMsg.innerText = "Game over! Let's see how many points you scored looking after your wardrobe! 🌟";
-            }
-            
             document.getElementById('finalScore').innerText = score;
             document.getElementById('scoreScreen').classList.remove('hidden');
         }
