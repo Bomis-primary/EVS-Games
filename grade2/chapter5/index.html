@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -36,15 +36,9 @@
             box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9), 0 0 0 2px rgba(255, 255, 255, 0.05);
         }
 
-        @keyframes dynamicAiming {
-            0% { left: 20%; top: 20%; }
-            30% { left: 70%; top: 25%; }
-            60% { left: 25%; top: 65%; }
-            85% { left: 65%; top: 60%; }
-            100% { left: 20%; top: 20%; }
-        }
+        /* Smooth mechanical transition for moving the crosshair directly to targets */
         .sleek-crosshair {
-            animation: dynamicAiming 6.5s infinite cubic-bezier(0.45, 0, 0.55, 1);
+            transition: left 0.6s cubic-bezier(0.25, 1, 0.5, 1), top 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         @keyframes autoGlowHint {
@@ -75,13 +69,12 @@
             animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* Continuous gentle floating effect for balloons */
         @keyframes balloonFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-6px); }
         }
         .floating-balloon {
-            animation: balloonFloat 3s infinite ease-in-out;
+            animation: balloonFloat 2.5s infinite ease-in-out;
         }
     </style>
 </head>
@@ -93,15 +86,12 @@
 
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <!-- INVINITY LOGO SPLASH CONTAINER OVERLAY (5 Seconds) -->
     <div id="splashScreen" class="fixed inset-0 bg-[#090911] flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-indigo-600/10 rounded-full flex items-center justify-center text-indigo-400 font-bold text-4xl border border-indigo-500/20\'>🎯</div>';">
     </div>
 
-    <!-- MAIN CONSOLE LAYOUT FRAME -->
     <div class="w-full max-w-md flex flex-col h-[92vh] max-h-[680px] relative justify-center">
         
-        <!-- VIEW 1: TITLE SCREEN -->
         <div id="titleView" class="w-full arcade-card rounded-[36px] p-8 text-center space-y-6 animate-scale">
             <div class="space-y-3">
                 <div class="inline-block text-6xl animate-bounce drop-shadow-[0_0_15px_rgba(255,51,102,0.5)]">
@@ -118,8 +108,8 @@
             <div class="bg-black/40 rounded-2xl p-4 border border-slate-800 text-left space-y-2">
                 <p class="text-amber-400 text-sm font-bold flex items-center">⭐ HOW TO PLAY:</p>
                 <ul class="text-slate-200 text-sm font-medium space-y-1.5 list-none pl-1">
-                    <li class="flex items-center space-x-2"><span>🚀</span> <span>Tap the button to throw your dart!</span></li>
-                    <li class="flex items-center space-x-2"><span>🎈</span> <span>Pop a big balloon to discover a question!</span></li>
+                    <li class="flex items-center space-x-2"><span>🚀</span> <span>Tap the button to target a mystery balloon!</span></li>
+                    <li class="flex items-center space-x-2"><span>🎈</span> <span>The dart locks onto the balloon, pops it, and starts a quiz!</span></li>
                     <li class="flex items-center space-x-2"><span>🧠</span> <span>Pick the safest answer. 2 misses cost -5 points!</span></li>
                 </ul>
             </div>
@@ -129,7 +119,6 @@
             </button>
         </div>
 
-        <!-- VIEW 2: ACTIVE GAME PLAY SUITE -->
         <div id="gameView" class="hidden w-full h-full flex flex-col justify-between space-y-4">
             
             <div class="w-full flex items-center justify-between px-2">
@@ -142,8 +131,7 @@
                 </div>
             </div>
 
-            <!-- FIXED THE DARTBOARD BY REMOVING ALL LABELS & MAKING BALLOONS HUGE -->
-            <div class="flex-1 sleek-board rounded-[36px] relative overflow-hidden flex items-center justify-center p-4">
+            <div id="dartboardContainer" class="flex-1 sleek-board rounded-[36px] relative overflow-hidden flex items-center justify-center p-4">
                 <div class="w-72 h-72 rounded-full border-4 border-dashed border-indigo-500/20 bg-[#121222] relative flex items-center justify-center shadow-2xl">
                     <div class="w-52 h-52 rounded-full border-2 border-slate-800 absolute"></div>
                     <div class="w-24 h-24 rounded-full border border-indigo-500/10 absolute"></div>
@@ -151,23 +139,21 @@
                         <div class="w-3 h-3 bg-white rounded-full"></div>
                     </div>
 
-                    <!-- Clean, Plain, Giant Floating Balloons (No text labels, much bigger size) -->
                     <div id="targetNode1" class="absolute top-4 left-4 text-6xl filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.5)] transition-all duration-300 floating-balloon select-none">🎈</div>
                     <div id="targetNode2" class="absolute top-4 right-4 text-6xl filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.5)] transition-all duration-300 floating-balloon select-none" style="animation-delay: 0.5s;">🎈</div>
                     <div id="targetNode3" class="absolute bottom-6 left-4 text-6xl filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.5)] transition-all duration-300 floating-balloon select-none" style="animation-delay: 1s;">🎈</div>
                     <div id="targetNode4" class="absolute bottom-6 right-4 text-6xl filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.5)] transition-all duration-300 floating-balloon select-none" style="animation-delay: 1.5s;">🎈</div>
                 </div>
 
-                <div id="crosshairIndicator" class="absolute w-12 h-12 border-2 border-dashed border-indigo-400 rounded-full sleek-crosshair flex items-center justify-center z-20 pointer-events-none shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+                <div id="crosshairIndicator" class="absolute w-14 h-14 border-2 border-dashed border-indigo-400 rounded-full sleek-crosshair flex items-center justify-center z-20 pointer-events-none shadow-[0_0_15px_rgba(99,102,241,0.4)]">
                     <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
                 </div>
             </div>
 
-            <button onclick="simulateDartThrowAction()" class="w-full arcade-pop-btn text-white font-bold text-lg py-4 rounded-2xl cursor-pointer tracking-wider uppercase arcade-font">
+            <button id="throwBtn" onclick="simulateDartThrowAction()" class="w-full arcade-pop-btn text-white font-bold text-lg py-4 rounded-2xl cursor-pointer tracking-wider uppercase arcade-font">
                 🎯 THROW DART! 🎯
             </button>
 
-            <!-- ARCADE QUESTION CARD MODAL -->
             <div id="questionModalOverlay" class="hidden absolute inset-0 bg-black/90 z-40 flex items-center justify-center p-4 backdrop-blur-md">
                 <div class="w-full max-w-sm quiz-modal-card rounded-[32px] p-6 flex flex-col justify-between space-y-6 animate-scale">
                     
@@ -182,10 +168,8 @@
                     </div>
 
                     <div id="answersGridSlot" class="flex flex-col space-y-3 w-full">
-                        <!-- Loaded dynamically -->
-                    </div>
+                        </div>
 
-                    <!-- DYNAMIC LEARNING RIBBON -->
                     <div class="text-center pt-3 border-t border-slate-800">
                         <p id="helperAlertLabel" class="text-sm font-bold text-slate-300 leading-normal min-h-[40px] flex items-center justify-center px-2">
                             Choose the safest option above!
@@ -197,7 +181,6 @@
 
         </div>
 
-        <!-- VIEW 3: SIMULATION RESULT GRADUATION CARD -->
         <div id="scoreView" class="hidden w-full arcade-card rounded-[36px] p-8 text-center space-y-6 animate-scale">
             <div class="space-y-2">
                 <span class="text-6xl block">🏆</span>
@@ -224,7 +207,7 @@
             { tag: "HOME", q: "What could happen if you leave your toys scattered on the bedroom floor?", options: ["Someone might trip and get hurt", "The toys will disappear"], ans: "Someone might trip and get hurt", hint: "Hint: Clear up toys so family members don't trip!", explanation: "✨ Spot on! Putting your toys back in their boxes keeps your room clean and protects your family from stepping on them." },
             { tag: "HOME", q: "Is it safe to touch electrical appliances with wet hands?", options: ["Yes, water cleans them", "No, you can get a dangerous shock"], ans: "No, you can get a dangerous shock", hint: "Hint: Always dry your hands completely with a towel first!", explanation: "✨ Great job! Water carries electricity into your skin very fast, so always dry your hands completely first!" },
             { tag: "SCHOOL", q: "What should you do when walking down the school stairs?", options: ["Slide down the banister railing", "Walk calmly without pushing"], ans: "Walk calmly without pushing", hint: "Hint: Take safe steps without running to avoid tumbles!", explanation: "✨ Beautiful! Walking calmly one step at a time keeps your balance perfectly solid on the stairs." },
-            { tag: "PLAYGROUND", q: "Where is it dangerous to stand when someone is playing on a park swing?", options: ["Directly in front or behind it", "Far away on the green grass"], ans: "Directly in front or behind it", hint: "Hint: Moving swings can hit you hard if you stand too close!", explanation: "✨ Correct! Heavy moving swings carry a lot of force and can accidentally bump you if you stand in their pathway." },
+            { tag: "PLAYGROUND", q: "Where is it dangerous to stand when someone is playing on a park swing?", options: ["Directly in front or behind it", "Far away on the green grass"], ans: "Directly in front or behind it", hint: "Hint: Heavy moving swings carry a lot of force and can accidentally bump you if you stand in their pathway." },
             { tag: "SWIMMING", q: "If you have not learned how to swim properly yet, what must you wear?", options: ["A floating rubber swimming tube", "Heavy winter running shoes"], ans: "A floating rubber swimming tube", hint: "Hint: Floating gear keeps your chin safely above the water line!", explanation: "✨ Yes! Inflatable gear effortlessly keeps your head floating safely above water while you practice your kicks." },
             { tag: "FIRST AID", q: "What is the medical help given to an injured person before a doctor arrives?", options: ["Classroom homework help", "First Aid treatment"], ans: "First Aid treatment", hint: "Hint: It comes from a helpful box filled with bandages and creams!", explanation: "✨ Magnificent! First Aid provides quick, clean bandages to protect scrapes right after an accident occurs." }
         ];
@@ -234,6 +217,8 @@
         let incorrectAttemptsCount = 0;
         let completedTargetsTrack = 0;
         let dynamicAssistanceTimerNode = null;
+        let crosshairLoopInterval = null;
+        let activeTargetNodeIndex = 1;
 
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
@@ -305,7 +290,7 @@
             document.getElementById('scoreTextValue').innerText = 0;
             document.getElementById('clearedCountValue').innerText = "0/10";
             resetBalloonsOpacity();
-            setCrosshairState(false);
+            startCrosshairAimingSequence();
         }
 
         function resetBalloonsOpacity() {
@@ -319,20 +304,55 @@
             }
         }
 
-        function setCrosshairState(shouldFreeze) {
+        // Dynamically calculates positions of balloons on the board to move crosshair perfectly over them
+        function startCrosshairAimingSequence() {
+            if (crosshairLoopInterval) clearInterval(crosshairLoopInterval);
+            
             const crosshair = document.getElementById('crosshairIndicator');
-            crosshair.style.animationPlayState = shouldFreeze ? 'paused' : 'running';
+            const board = document.getElementById('dartboardContainer');
+
+            function updateAimPosition() {
+                // Pick next balloon sequentially
+                let safetyCounter = 0;
+                while (document.getElementById(`targetNode${activeTargetNodeIndex}`).style.display === "none" && safetyCounter < 5) {
+                    activeTargetNodeIndex = (activeTargetNodeIndex % 4) + 1;
+                    safetyCounter++;
+                }
+
+                const targetBalloon = document.getElementById(`targetNode${activeTargetNodeIndex}`);
+                if (targetBalloon && board) {
+                    const targetRect = targetBalloon.getBoundingClientRect();
+                    const boardRect = board.getBoundingClientRect();
+
+                    // Center alignment calculation
+                    const targetLeft = (targetRect.left - boardRect.left) + (targetRect.width / 2) - 28;
+                    const targetTop = (targetRect.top - boardRect.top) + (targetRect.height / 2) - 28;
+
+                    crosshair.style.left = `${targetLeft}px`;
+                    crosshair.style.top = `${targetTop}px`;
+                }
+                activeTargetNodeIndex = (activeTargetNodeIndex % 4) + 1;
+            }
+
+            updateAimPosition();
+            crosshairLoopInterval = setInterval(updateAimPosition, 900);
         }
 
         function simulateDartThrowAction() {
             if (databasePointerIdx >= dartChapterDatabase.length) return;
             
-            setCrosshairState(true);
+            // Stop crosshair on current selected balloon target
+            clearInterval(crosshairLoopInterval);
+            document.getElementById('throwBtn').disabled = true;
 
-            const currentLoopId = `targetNode${(databasePointerIdx % 4) + 1}`;
-            const targetElement = document.getElementById(currentLoopId);
-            if(targetElement) {
-                targetElement.style.transform = "scale(0.3)";
+            // Get target currently locked on by the index shift
+            let hitIndex = activeTargetNodeIndex - 1;
+            if (hitIndex === 0) hitIndex = 4;
+
+            const targetElement = document.getElementById(`targetNode${hitIndex}`);
+            
+            if (targetElement && targetElement.style.display !== "none") {
+                targetElement.style.transform = "scale(0.2)";
                 targetElement.style.opacity = "0";
                 setTimeout(() => {
                     targetElement.style.display = "none";
@@ -412,8 +432,12 @@
                 setTimeout(() => {
                     document.getElementById('questionModalOverlay').classList.add('hidden');
                     databasePointerIdx++;
+                    document.getElementById('throwBtn').disabled = false;
+                    
+                    // If all 4 balloons are burst, restore them perfectly
                     if ((databasePointerIdx % 4) === 0) resetBalloonsOpacity();
-                    setCrosshairState(false);
+                    
+                    startCrosshairAimingSequence();
                     evaluateGameProgressEndState();
                 }, 3500);
 
@@ -434,7 +458,6 @@
                 } else if (incorrectAttemptsCount >= 2) {
                     activateCorrectOptionGlowHint();
                     
-                    // Automatically deduct 5 points for failing twice
                     internalScore = Math.max(0, internalScore - 5);
                     document.getElementById('scoreTextValue').innerText = internalScore;
 
@@ -448,8 +471,11 @@
                     setTimeout(() => {
                         document.getElementById('questionModalOverlay').classList.add('hidden');
                         databasePointerIdx++;
+                        document.getElementById('throwBtn').disabled = false;
+                        
                         if ((databasePointerIdx % 4) === 0) resetBalloonsOpacity();
-                        setCrosshairState(false);
+                        
+                        startCrosshairAimingSequence();
                         evaluateGameProgressEndState();
                     }, 4500);
                 }
@@ -458,6 +484,7 @@
 
         function evaluateGameProgressEndState() {
             if (completedTargetsTrack >= 10) {
+                clearInterval(crosshairLoopInterval);
                 setTimeout(() => {
                     playSound('soundClapping');
                     document.getElementById('gameView').style.display = 'none';
@@ -473,7 +500,7 @@
                 trackElement.load();
                 const p = trackElement.play();
                 if (p !== undefined) {
-                    p.catch(err => console.log("Audio pipeline exception: ", err));
+                    p.catch(err => console.log("Audio pipeline handling: ", err));
                 }
             }
         }
@@ -481,6 +508,7 @@
         function restartGame() {
             document.getElementById('scoreView').classList.add('hidden');
             document.getElementById('gameView').style.display = 'flex';
+            document.getElementById('throwBtn').disabled = false;
             startGame();
         }
     </script>
