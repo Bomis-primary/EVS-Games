@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Closet Chronicles!</title>
+    <!-- Tailwind CSS Framework -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
@@ -36,14 +37,17 @@
 </head>
 <body class="bg-gradient-to-b from-[#FFF5F5] via-[#FFF9E6] to-[#E8F5E9] min-h-screen flex flex-col items-center justify-center select-none text-[#333333] p-4 m-0">
 
+    <!-- AUDIO CORE SOURCES -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
 
+    <!-- SCREEN 1: FIXED 5-SECOND LOGO SPLASH SCREEN -->
     <div id="splashScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 opacity-100">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-[70%] h-auto object-contain">
     </div>
 
+    <!-- SCREEN 2: GAME TITLE SLIDE -->
     <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#FFD166] text-center space-y-6 mx-2">
         <div class="space-y-3">
             <span class="text-6xl block animate-bounce">👕✨👚</span>
@@ -55,14 +59,15 @@
         </button>
     </div>
 
+    <!-- SCREEN 3: GAME INSTRUCTIONS SLIDE -->
     <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-6 mx-2">
         <h2 class="text-2xl font-black text-[#4A90E2]">☀️ How to Play ☀️</h2>
         
         <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base space-y-3 text-[#4A4A4A] font-medium">
             <p>1. Tap any padlocked 🔒 card on the board grid.</p>
-            <p>2. Read the fun story clue carefully.</p>
-            <p>3. Pick the correct dress answer to claim that space with an ⭕ or ❌!</p>
-            <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Get the answer right to earn +10 Points!<br>Try to make a straight line of 3 matching symbols to win!</p>
+            <p>2. Answer the question correctly to claim that square with your turn's shape!</p>
+            <p>3. Match 3 symbols in a horizontal, vertical, or diagonal line to win the match!</p>
+            <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
         </div>
 
         <button onclick="startGame()" class="w-full bg-[#FF6B6B] hover:bg-[#EE5253] text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#C0392B]">
@@ -70,13 +75,16 @@
         </button>
     </div>
 
+    <!-- SCREEN 4: INTERACTIVE QUIZ BOARD GRID -->
     <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-5 px-2">
+        <!-- TOP HUD BAR -->
         <div class="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-base">
-            <div class="text-[#4A90E2]">✨ Puzzles Solved: <span id="hudLevel">0</span>/9</div>
+            <div class="text-[#4A90E2]">✨ Puzzles: <span id="hudLevel">0</span>/9</div>
             <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-lg">❤️❤️❤️</div>
-            <div class="text-[#4CAF50]">🏆 Pts: <span id="hudScore">0</span></div>
+            <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
         </div>
 
+        <!-- STYLISH TIC-TAC-TOE INTERACTIVE GRID -->
         <div class="bg-white rounded-3xl p-5 shadow-2xl border-4 border-[#4A90E2] grid grid-cols-3 gap-4 aspect-square w-full">
             <script>
                 for(let i=0; i<9; i++) {
@@ -94,6 +102,7 @@
         <div class="text-center text-xs text-gray-500 font-bold tracking-wide">Tap any locked card above to open a weather story!</div>
     </div>
 
+    <!-- SCREEN 5: PROBLEM POP-UP OVERLAY PANEL -->
     <div id="questionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-5 border-4 border-[#4A90E2] flex flex-col space-y-4 max-h-[92vh] overflow-y-auto">
             
@@ -101,12 +110,14 @@
                 <p id="questionText" class="text-base md:text-lg font-bold text-[#2C3E50] leading-snug"></p>
             </div>
 
+            <!-- INTERACTIVE HINT CARD ROW -->
             <div id="hintContainer" class="hidden bg-[#FFF9E6] border-2 border-dashed border-[#FFD166] rounded-2xl p-3 text-center text-sm text-[#795548] font-semibold">
                 💡 <span id="hintText"></span>
             </div>
 
             <div id="optionsContainer" class="flex flex-col space-y-3">
-                </div>
+                <!-- Choices populate here dynamically -->
+            </div>
 
             <button id="nextBtn" onclick="submitAndAdvance()" class="hidden w-full bg-[#4CAF50] text-white font-bold text-lg py-3 rounded-xl shadow-md transform active:scale-95 transition-all border-b-4 border-[#2E7D32]">
                 CONFIRM ➡️
@@ -114,6 +125,7 @@
         </div>
     </div>
 
+    <!-- SCREEN 6: GAME SUCCESS OUTRO METRICS -->
     <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
         <div class="space-y-2">
             <span class="text-6xl block">🏆✨🥳</span>
@@ -123,7 +135,7 @@
         
         <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
             <p class="text-gray-600 font-bold uppercase text-xs tracking-wider">Your Final Tally</p>
-            <p class="text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> Pts</p>
+            <p class="text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> / 90 Pts</p>
         </div>
 
         <button onclick="restartGame()" class="w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-bold text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#C0392B] transform active:scale-95 transition-all">
@@ -131,18 +143,19 @@
         </button>
     </div>
 
+    <!-- GAME ENGINE PIPELINE -->
     <script>
-        // EXACTLY 9 STRATEGIC PUZZLES TO FILL THE 9 TILES OF THE GRID PERFECTLY
+        // EASY BRITISH ENGLISH LANGUAGE DATABASE
         const database = [
-            { question: "Farmer Joy is walking through fields of soft white plants. Which crop material is he picking to weave light summer shirts?", options: ["🥥 Coir", "☁️ Cotton", "🪵 Bamboo"], answer: 1, hint: "This soft white material grows in seed pods on plants before it is spun into breezy thread." },
-            { question: "Princess Tanya wants a shimmering, beautiful frock for a grand festival. Which little insect's cocoon gives us this shiny thread?", options: ["🕷️ Spider", "🐛 Silkworm", "🐜 Ant"], answer: 1, hint: "This little crawler feeds on green mulberry leaves and wraps itself in a smooth silk cocoon." },
-            { question: "The farm workers are gently clipping the thick, curly coats off their sheep. What warm material are they gathering?", options: ["🧶 Wool", "🪶 Feathers", "🪵 Straw"], answer: 0, hint: "We use this curly animal wool hair to spin yarn and knit warm winter sweaters." },
-            { question: "Kabir is walking outside under a bright, blazing hot sun. Which clothing material will help him stay fresh and cool?", options: ["🧥 Heavy Leather", "👚 Light Cotton", "🧣 Warm Wool"], answer: 1, hint: "Light-coloured cotton garments allow air to pass through easily and absorb body sweat." },
-            { question: "Maya is visiting a snowy mountain. The cold winter wind is freezing! What should she wear to keep her body warm?", options: ["🎽 Thin Vest", "👗 Silk Dress", "🧥 Woolen Coat"], answer: 2, hint: "Thick woolen coats trap your body heat inside to safeguard you against winter chills." },
-            { question: "Heavy water raindrops are pouring down from the dark clouds. What should Nina wear over her frock to stay dry?", options: ["🥻 Silk Sari", "🧥 Raincoat", "🥋 Linen Robe"], answer: 1, hint: "We need a waterproof jacket made of rubber or plastic that does not soak up rainwater." },
-            { question: "A brave firefighter is rushing to help someone out. Why do they wear a heavy uniform instead of normal clothes?", options: ["🎭 To look funny", "👔 To stay safe at work", "🛍️ To go shopping"], answer: 1, hint: "Special uniforms are designed to protect workers from accidents, fire, or hazards while doing their job." },
-            { question: "You walk into a busy hospital and know exactly who the doctor is right away. What clue helped you figure it out?", options: ["👟 Bright Sneakers", "🥼 Clean Uniform", "🎩 Magician Hat"], answer: 1, hint: "Specific uniforms make it very easy for us to spot community helpers instantly." },
-            { question: "After laundry day, your clean clothes are piled on your bed. What is the best way to keep them looking neat?", options: ["🧺 Fold them neatly", "🌪️ Throw them on the floor", "🛌 Hide them under the bed"], answer: 0, hint: "Folding garments neatly keeps them smooth, tidy, and clean in your wardrobe." }
+            { question: "Farmer Tom is in a field of fluffy white plants. Which plant is he picking to make light summer shirts?", options: ["🥥 Coir", "☁️ Cotton", "🪵 Bamboo"], answer: 1, hint: "This soft white plant is spun into thin thread for cool clothing." },
+            { question: "Princess Mia wants a shiny, beautiful dress for a party. Which little insect gives us this smooth, shiny thread?", options: ["🕷️ Spider", "🐛 Silkworm", "🐜 Ant"], answer: 1, hint: "This tiny caterpillar eats green leaves and makes a silky cocoon." },
+            { question: "The farmers are cutting the thick, curly coats off their sheep. What warm material are they gathering?", options: ["🧶 Wool", "🪶 Feathers", "🪵 Straw"], answer: 0, hint: "We use this cosy animal hair to knit warm winter jumpers." },
+            { question: "Ben is playing outside in the hot, bright sunshine. What should he wear to stay cool and fresh?", options: ["🧥 Thick Coat", "👚 Light Cotton Shirt", "🧣 Warm Scarf"], answer: 1, hint: "Thin cotton clothes let the summer breeze pass through easily." },
+            { question: "Lily is visiting a snowy mountain. The winter wind is freezing! What must she wear to keep warm?", options: ["🎽 Thin Vest", "👗 Silk Dress", "🧥 Woolen Overcoat"], answer: 2, hint: "Thick woollen coats trap your body heat to keep out the cold." },
+            { question: "Heavy rain is falling from the dark clouds. What should Daisy wear over her clothes to stay dry?", options: ["🥻 Silk Sari", "🧥 Raincoat", "🥋 Linen Robe"], answer: 1, hint: "We need a waterproof jacket that does not soak up the rainwater." },
+            { question: "A brave firefighter is rushing to help put out a fire. Why do they wear a heavy, special uniform?", options: ["🎭 To look funny", "👔 To stay safe at work", "🛍️ To go shopping"], answer: 1, hint: "Special uniforms protect workers from fire, heat, or accidents." },
+            { question: "You walk into a busy hospital and spot the doctor straight away. What helped you find them?", options: ["👟 Bright Trainers", "🥼 A White Medical Uniform", "🎩 Magician Hat"], answer: 1, hint: "Special uniforms help us recognise community helpers instantly." },
+            { question: "After laundry day, your clean clothes are piled on your bed. What is the best way to look after them?", options: ["🧺 Fold them neatly into the wardrobe", "🌪️ Throw them on the floor", "🛌 Hide them under the bed"], answer: 0, hint: "Folding your clothes neatly keeps them smooth, tidy, and clean." }
         ];
 
         let solvedCount = 0;
@@ -150,9 +163,9 @@
         let lives = 3;
         let activeIdx = null;
         let currentAnswersWrong = 0;
-        let turnToggle = true; // Alternates symbols: true = ⭕, false = ❌
+        let turnToggle = true; // true = ⭕, false = ❌
+        let questionSuccess = false;
 
-        // Track what symbol occupies each of the 9 cells
         let boardState = Array(9).fill(null);
 
         window.onload = function() {
@@ -215,9 +228,9 @@
             activeIdx = gridIndex;
             lives = 3; 
             currentAnswersWrong = 0;
+            questionSuccess = false;
             updateLivesHUD();
             
-            // Map the cell index directly to our 9 database questions
             let qData = database[gridIndex];
 
             document.getElementById('questionText').innerText = qData.question;
@@ -247,8 +260,8 @@
                 const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
                 for (let b of btns) b.disabled = true;
 
-                // FIXED +10 SCORE SCALE REGARDLESS OF ATTEMPTS
                 score += 10;
+                questionSuccess = true;
                 document.getElementById('hudScore').innerText = score;
                 document.getElementById('nextBtn').classList.remove('hidden');
             } else {
@@ -260,9 +273,18 @@
                 clickedBtn.className = "w-full text-left bg-[#FFCDD2] text-[#C62828] font-bold py-3 px-4 rounded-xl border-2 border-[#E53935] opacity-60 line-through text-sm md:text-base";
                 clickedBtn.disabled = true;
 
-                if (currentAnswersWrong >= 2) {
+                if (currentAnswersWrong === 2) {
                     document.getElementById('hintText').innerText = qData.hint;
                     document.getElementById('hintContainer').classList.remove('hidden');
+                } else if (lives <= 0) {
+                    // Fail State: Lock choices, calculate penalty, and allow skipping forward
+                    const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
+                    for (let b of btns) b.disabled = true;
+                    
+                    score -= 10;
+                    questionSuccess = false;
+                    document.getElementById('hudScore').innerText = score;
+                    document.getElementById('nextBtn').classList.remove('hidden');
                 }
             }
         }
@@ -271,20 +293,24 @@
             document.getElementById('questionModal').classList.add('hidden');
 
             const backSign = document.getElementById(`boxBackSign${activeIdx}`);
-            
-            // Assign the symbol based on the current turn toggle
             let currentSymbol = turnToggle ? "⭕" : "❌";
-            boardState[activeIdx] = currentSymbol;
             
-            if (turnToggle) {
-                backSign.innerText = "⭕";
-                backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#E3F2FD] border-4 border-[#1E88E5] text-[#1E88E5]";
+            if (questionSuccess) {
+                boardState[activeIdx] = currentSymbol;
+                if (turnToggle) {
+                    backSign.innerText = "⭕";
+                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#E3F2FD] border-4 border-[#1E88E5] text-[#1E88E5]";
+                } else {
+                    backSign.innerText = "❌";
+                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
+                }
             } else {
-                backSign.innerText = "❌";
-                backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
+                // If they failed completely, mark cell with a neutral lock block sign
+                boardState[activeIdx] = "🔒";
+                backSign.innerText = "🔒";
+                backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-gray-200 border-4 border-gray-400 text-gray-400";
             }
 
-            // Flip the card visually
             const cell = document.getElementById(`gridCell${activeIdx}`);
             cell.classList.add('flipped');
             cell.style.pointerEvents = 'none';
@@ -292,28 +318,25 @@
             solvedCount++;
             document.getElementById('hudLevel').innerText = solvedCount;
 
-            // Check if this placement formed a winning line
-            if (checkWinCondition(currentSymbol)) {
+            // Strict Win Condition Check: Validates horizontal, vertical, and diagonal lines
+            if (questionSuccess && checkWinCondition(currentSymbol)) {
                 setTimeout(() => { endGameScenario(true, currentSymbol); }, 600);
                 return;
             }
 
-            // Check if the board is completely full
             if (solvedCount >= 9) {
                 setTimeout(() => { endGameScenario(false, null); }, 600);
                 return;
             }
 
-            // Switch turns for the next grid selection
             turnToggle = !turnToggle;
         }
 
-        // TIC-TAC-TOE LINE MATCHING ENGINE
         function checkWinCondition(symbol) {
             const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontal lines
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Vertical lines
-                [0, 4, 8], [2, 4, 6]             // Diagonal lines
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontals
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Verticals
+                [0, 4, 8], [2, 4, 6]             // Diagonals
             ];
             return winPatterns.some(pattern => 
                 boardState[pattern[0]] === symbol &&
@@ -331,11 +354,10 @@
             
             if (hasLineWin) {
                 statusTitle.innerText = `Line Formed! ${winningSymbol}`;
-                statusMsg.innerText = `Brilliant! You connected three shapes in a row and won the match! 🌟`;
-                score += 50; // Give a bonus for completing a line
+                statusMsg.innerText = `Brilliant! You connected a straight line of three matching shapes across the board! 🌟`;
             } else {
-                statusTitle.innerText = "Board Cleared!";
-                statusMsg.innerText = "Fantastic matching effort! You opened every single locked wardrobe tile! 🌟";
+                statusTitle.innerText = "Board Completed!";
+                statusMsg.innerText = "Game over! Let's see how many points you scored looking after your wardrobe! 🌟";
             }
             
             document.getElementById('finalScore').innerText = score;
