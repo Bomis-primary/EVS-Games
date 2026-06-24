@@ -42,9 +42,7 @@
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
-    <audio id="soundSwoosh" src="assets/swoosh.mp3" preload="auto"></audio>
-
-    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+    <audio id="soundSwoosh" src="assets/wrong.mp3" preload="auto"></audio> <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
     <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs md:max-w-sm h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-32 h-32 bg-[#E8EAF6] rounded-full flex items-center justify-center text-[#4A148C] font-black text-4xl border-4 border-[#D1C4E9]\'>IN</div>';">
@@ -94,7 +92,7 @@
                 <div class="text-center space-y-2">
                     <span class="text-4xl block">📝🎈</span>
                     <div class="bg-[#E8EAF6] text-[#4A148C] px-5 py-1.5 rounded-full inline-block font-black text-sm border border-[#B39DDB]">
-                        Question <span id="triviaProgressCounter">1</span>
+                        Question <span id="triviaProgressCounter">1</span> / 3
                     </div>
                 </div>
                 
@@ -307,7 +305,7 @@
                         if (successfulTriosCleared % 2 === 0 && successfulTriosCleared > 0) {
                             setTimeout(() => {
                                 launchTriviaBatchOverlay();
-                            }, 300);
+                            }, 350);
                         } else {
                             checkWinConditionState();
                         }
@@ -356,7 +354,7 @@
             }
 
             const activeQuestionData = chapterDatabase[absoluteQuestionIdx];
-            document.getElementById('triviaProgressCounter').innerText = absoluteQuestionIdx + 1;
+            document.getElementById('triviaProgressCounter').innerText = currentQuestionSubIdx + 1;
             document.getElementById('triviaQuestionText').innerText = activeQuestionData.q;
 
             renderOptionsUIBlock(activeQuestionData);
@@ -423,6 +421,7 @@
             }
         }
 
+        // CLOSE AND RETURN RUNTIME LOGIC TO TILE BOARD
         function closeTriviaChallengeOverlay() {
             document.getElementById('triviaChallengeOverlay').classList.add('hidden');
             checkWinConditionState();
@@ -439,18 +438,15 @@
             }
         }
 
-        // PRISTINE SOURCE OVERRIDE FOR BROWSER TIMING LOCKS
+        // BROWSER ENGINE ASSET FLUSH REFRESH
         function playSound(id) {
             const el = document.getElementById(id);
             if (el) {
-                el.pause(); // Force-kill previous sound stream instance
-                el.currentTime = 0; // Reset head to beginning frame
-                
-                // Safe promise handle to ensure absolute browser playback approval
+                el.load(); // Forces webview to flush out and rebuild audio channel pipelines completely
                 const playPromise = el.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
-                        console.log("Browser sound execution deferred: ", error);
+                        console.log("Audio pipeline buffered or deferred successfully.", error);
                     });
                 }
             }
