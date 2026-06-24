@@ -3,146 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Safety Dart Champion</title>
+    <title>Safety Dart - Sleek Edition</title>
+    <!-- Tailwind CSS Engine -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+        
         body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #1E1E2F 0%, #0F0F1A 100%);
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            background-color: #FDF6E2; 
-        }
-        html, body {
-            overflow: hidden;
-            height: 100%;
         }
         .scroll-bg {
             background-image: url('image_bf5db5.png');
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center;
+            filter: drop-shadow(0px 20px 40px rgba(0,0,0,0.6));
         }
-        .chunky-panel {
-            box-shadow: 0px 8px 0px #8C6D31;
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .chunky-btn {
-            box-shadow: 0px 5px 0px #5C4314;
-            transition: all 0.1s ease;
+        /* Sleek Futuristic Dart Board styling */
+        .sleek-board {
+            background: radial-gradient(circle, #161625 40%, #0B0B13 100%);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
-        .chunky-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0px 2px 0px #5C4314;
+        /* Smooth Modern Pulse Glows */
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.03); opacity: 0.6; }
         }
-        @keyframes radarSweep {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .board-glow {
+            animation: pulseGlow 4s infinite ease-in-out;
         }
-        .sweeper-line {
-            transform-origin: bottom center;
-            animation: radarSweep 2.5s linear infinite;
+        /* Kinetic Scanning Crosshair Animation */
+        @keyframes dynamicAiming {
+            0% { left: 15%; top: 20%; }
+            30% { left: 75%; top: 25%; }
+            60% { left: 25%; top: 70%; }
+            85% { left: 70%; top: 60%; }
+            100% { left: 15%; top: 20%; }
+        }
+        .sleek-crosshair {
+            animation: dynamicAiming 3.5s infinite cubic-bezier(0.45, 0, 0.55, 1);
+        }
+        /* Micro-interactions */
+        .action-btn {
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .action-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+        @keyframes modalFadeIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-modal {
+            animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4 m-0 select-none text-[#5C4314]">
+<body class="flex flex-col items-center justify-center p-4 m-0 select-none text-white min-h-screen">
 
+    <!-- AUDIO TARGET REPOSITORIES -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
 
+    <!-- CONFETTI BURST OVERLAY -->
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-32 h-32 bg-[#F5E6CC] rounded-full flex items-center justify-center text-[#8C6D31] font-black text-4xl border-4 border-[#C2A673]\'>SD</div>';">
+    <!-- LOGO OVERLAY LOADING SPLASH SCREEN (5 Seconds) -->
+    <div id="splashScreen" class="fixed inset-0 bg-[#0F0F1A] flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-indigo-600/10 rounded-3xl flex items-center justify-center text-indigo-400 font-black text-3xl border border-indigo-500/30\'>SD</div>';">
     </div>
 
-    <div class="w-full max-w-sm flex flex-col h-full justify-center relative">
+    <!-- MAIN APP CANVAS OVERLAY CONTAINER -->
+    <div class="w-full max-w-sm flex flex-col h-[90vh] max-h-[620px] relative justify-center">
+        
+        <!-- VIEW 1: MINIMALIST DASHBOARD TITLE VIEW -->
+        <div id="titleView" class="w-full glass-panel rounded-[32px] p-8 text-center space-y-8 animate-modal">
+            <div class="space-y-4">
+                <div class="w-20 h-20 bg-indigo-500/10 border border-indigo-500/20 rounded-3xl flex items-center justify-center text-4xl mx-auto shadow-inner">
+                    🎯
+                </div>
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                        Safety Dart
+                    </h1>
+                    <p class="text-indigo-400 font-bold text-xs uppercase tracking-widest">Interactive Simulator</p>
+                </div>
+                <p class="text-slate-400 text-xs font-medium leading-relaxed px-2">
+                    Test your tactical execution. Time the flight tracker to deploy darts onto safety nodes. Answer within 2 attempts per scroll to secure points.
+                </p>
+            </div>
+            
+            <button onclick="startGame()" class="w-full action-btn text-white font-bold text-sm py-4 rounded-2xl cursor-pointer tracking-wider uppercase">
+                LAUNCH SIMULATION
+            </button>
+        </div>
 
-        <div id="titleView" class="bg-[#FFFDF6] rounded-3xl p-6 text-center space-y-5 chunky-panel border-4 border-[#C2A673]">
+        <!-- VIEW 2: GAMEPLAY ACTIVE INTERACTION WORKSPACE -->
+        <div id="gameView" class="hidden w-full h-full flex flex-col justify-between space-y-4">
+            
+            <!-- TOP HEADS UP DISPLAY HUD META DATA -->
+            <div class="w-full flex items-center justify-between px-2">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">Current Score</span>
+                    <span class="text-xl font-extrabold text-white"><span id="scoreTextValue" class="text-indigo-400">0</span><span class="text-xs text-slate-500 font-normal"> / 100</span></span>
+                </div>
+                <div class="glass-panel px-4 py-2 rounded-2xl text-[11px] font-bold tracking-wider text-slate-300">
+                    Cleared: <span id="clearedCountValue" class="text-indigo-400 font-extrabold">0/10</span>
+                </div>
+            </div>
+
+            <!-- THE MODERN SLEEK DARTBOARD COMPONENT -->
+            <div class="flex-1 sleek-board rounded-[32px] relative overflow-hidden flex items-center justify-center p-6">
+                
+                <!-- Vector Neon Ambience Ring Layers -->
+                <div class="absolute inset-0 border border-indigo-500/5 rounded-[32px] board-glow pointer-events-none"></div>
+                
+                <!-- The Core Symmetrical Radial Board Frame Matrix -->
+                <div class="w-60 h-60 rounded-full border border-slate-800 bg-[#12121F] relative flex items-center justify-center shadow-2xl">
+                    
+                    <!-- Modern Clean Vector Calibration Lines -->
+                    <div class="w-44 h-44 rounded-full border border-slate-800/60 absolute"></div>
+                    <div class="w-28 h-28 rounded-full border border-indigo-500/10 absolute"></div>
+                    
+                    <!-- High-Tech Micro Dead Center Target Core -->
+                    <div class="w-6 h-6 rounded-full bg-indigo-500 border border-indigo-300/40 z-10 shadow-[0_0_15px_rgba(99,102,241,0.6)] flex items-center justify-center">
+                        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                    </div>
+
+                    <!-- Clean Flat Neon Targets Minimalist Nodes -->
+                    <div id="targetNode1" class="absolute top-5 left-5 px-3 py-1.5 bg-slate-900/90 border border-rose-500/30 text-rose-400 rounded-xl flex items-center space-x-1 shadow-lg text-[9px] font-bold tracking-wider transition-all duration-300"><span>🎈</span><span>ROAD</span></div>
+                    <div id="targetNode2" class="absolute top-5 right-5 px-3 py-1.5 bg-slate-900/90 border border-amber-500/30 text-amber-400 rounded-xl flex items-center space-x-1 shadow-lg text-[9px] font-bold tracking-wider transition-all duration-300"><span>🎈</span><span>VEHICLE</span></div>
+                    <div id="targetNode3" class="absolute bottom-5 left-5 px-3 py-1.5 bg-slate-900/90 border border-cyan-500/30 text-cyan-400 rounded-xl flex items-center space-x-1 shadow-lg text-[9px] font-bold tracking-wider transition-all duration-300"><span>🎈</span><span>HOME</span></div>
+                    <div id="targetNode4" class="absolute bottom-5 right-5 px-3 py-1.5 bg-slate-900/90 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center space-x-1 shadow-lg text-[9px] font-bold tracking-wider transition-all duration-300"><span>🎈</span><span>SCHOOL</span></div>
+                </div>
+
+                <!-- SLEEK NEON VECTOR TARGET CROSSHAIR DETECTOR -->
+                <div id="crosshairIndicator" class="absolute w-8 h-8 border border-indigo-400 rounded-full sleek-crosshair flex items-center justify-center z-20 pointer-events-none shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                    <div class="w-1 h-1 bg-indigo-400 rounded-full"></div>
+                    <div class="absolute w-full h-[1px] bg-indigo-400/30"></div>
+                    <div class="absolute h-full w-[1px] bg-indigo-400/30"></div>
+                </div>
+            </div>
+
+            <!-- SIMULATION EXECUTION FIRE CONTROLLER TRIGGER -->
+            <button onclick="simulateDartThrowAction()" class="w-full action-btn text-white font-bold text-sm py-4 rounded-2xl cursor-pointer tracking-widest uppercase">
+                LAUNCH TACTICAL DART
+            </button>
+
+            <!-- TRIVIA OVERLAY SCROLL POPUP -->
+            <div id="questionModalOverlay" class="hidden absolute inset-0 bg-black/80 z-40 flex items-center justify-center p-2 backdrop-blur-sm">
+                
+                <!-- SCROLL BACKGROUND CONTENT CANVAS WRAPPER -->
+                <div class="w-full max-w-[295px] aspect-[1/1.06] scroll-bg p-5 flex flex-col justify-between relative animate-modal text-amber-950">
+                    
+                    <!-- Upper Category Header Label Layout Badge -->
+                    <div class="text-center pt-4">
+                        <span id="modalCategoryBadge" class="bg-amber-950/10 text-amber-950 px-3 py-0.5 rounded-full text-[8.5px] font-bold tracking-widest uppercase border border-amber-900/10">ROAD RULES</span>
+                    </div>
+
+                    <!-- Main Dynamic Dilemma Textbook Context Segment -->
+                    <div class="px-2 text-center my-auto max-h-[55px] overflow-y-auto">
+                        <p id="questionDisplayLabel" class="text-[11px] font-bold leading-snug"></p>
+                    </div>
+
+                    <!-- Interactive Input Option Grid Matrix Structure Slot -->
+                    <div id="answersGridSlot" class="flex flex-col space-y-1.5 px-2 mb-1">
+                        <!-- Loaded programmatically inside client stack controller -->
+                    </div>
+
+                    <!-- Footer Guidance Life Meter Notification -->
+                    <div class="px-3 pb-5 text-center flex items-center justify-center">
+                        <p id="helperAlertLabel" class="text-[9px] font-bold text-amber-900/80 leading-tight min-h-[20px]"></p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- VIEW 3: GRADUATION SUMMARY SCORESCREEN PANEL -->
+        <div id="scoreView" class="hidden w-full glass-panel rounded-[32px] p-8 text-center space-y-6 animate-modal">
             <div class="space-y-2">
-                <span class="text-6xl block">🎯📜🚦</span>
-                <h1 class="text-3xl font-black tracking-wide leading-tight text-[#73541D]">Safety Dart<br>Champion</h1>
-                <p class="text-[#8C6D31] font-bold text-xs px-2">Launch darts to pop a balloon, then open the scroll! Answer in 2 attempts or lose the question points! 🎯</p>
-            </div>
-            
-            <div class="flex flex-col space-y-3 pt-2">
-                <button onclick="startGame()" class="w-full bg-[#C2A673] hover:bg-[#B39562] text-white font-black text-xl py-3.5 rounded-2xl chunky-btn cursor-pointer">
-                    PLAY GAME 🚀
-                </button>
-            </div>
-        </div>
-
-        <div id="gameView" class="hidden flex flex-col space-y-4 w-full">
-            
-            <div class="bg-[#FFFDF6] rounded-2xl p-3 flex items-center justify-between font-black text-xs border-2 border-[#C2A673] shadow-sm">
-                <div>Score: <span id="scoreTextValue" class="text-sm text-[#73541D]">0</span> / 100 pts</div>
-                <div class="bg-[#F5E6CC] text-[#73541D] px-2.5 py-1 rounded-full">Balloons Popped: <span id="clearedCountValue">0 / 10</span></div>
-            </div>
-
-            <div class="bg-[#FFFDF6] rounded-3xl p-4 border-4 border-[#C2A673] chunky-panel flex flex-col items-center relative overflow-hidden aspect-square justify-center">
-                
-                <div id="dartBoardCircle" class="w-64 h-64 rounded-full border-8 border-[#73541D] bg-[#FDFBF7] relative shadow-inner flex items-center justify-center overflow-hidden">
-                    
-                    <div id="radarLine" class="absolute bottom-1/2 left-1/2 w-1 h-32 bg-amber-700/70 sweeper-line origin-bottom"></div>
-                    
-                    <div id="targetNode1" class="absolute top-8 left-8 w-11 h-11 bg-rose-400 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">ROAD</span></div>
-                    <div id="targetNode2" class="absolute top-8 right-8 w-11 h-11 bg-amber-500 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">VEHICLE</span></div>
-                    <div id="targetNode3" class="absolute bottom-8 left-8 w-11 h-11 bg-cyan-400 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">HOME</span></div>
-                    <div id="targetNode4" class="absolute bottom-8 right-8 w-11 h-11 bg-emerald-400 text-white border-2 border-white rounded-full flex flex-col items-center justify-center text-lg shadow-md font-bold">🎈<span class="text-[7px] tracking-tight -mt-1 font-black">SCHOOL</span></div>
-
-                    <div class="w-6 h-6 rounded-full bg-red-700 border-2 border-white z-10 shadow-sm flex items-center justify-center text-[8px] font-black text-white">🎯</div>
+                <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-2 animate-bounce">
+                    🏆
                 </div>
-
-                <button onclick="simulateDartThrowAction()" class="w-full mt-4 bg-amber-600 hover:bg-amber-700 text-white font-black text-lg py-3 rounded-xl border-b-4 border-amber-900 active:translate-y-1 active:border-b-0 cursor-pointer shadow-sm">
-                    THROW DART 🚀
-                </button>
+                <h2 class="text-2xl font-extrabold tracking-tight text-white">Mission Concluded</h2>
+                <p class="text-xs text-slate-400 font-medium px-4">Evaluation run finalized successfully. Check your telemetry matrix down below.</p>
             </div>
-
-            <div id="questionModalOverlay" class="hidden fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-3">
-                
-                <div class="w-full max-w-[320px] aspect-[1/1.05] scroll-bg p-6 flex flex-col justify-between relative select-none animate-fade-in">
-                    
-                    <div class="text-center pt-5">
-                        <span id="modalCategoryBadge" class="bg-amber-100 text-amber-900 px-3 py-0.5 rounded-full text-[10px] font-black border border-amber-300 uppercase">ROAD LAWS</span>
-                    </div>
-
-                    <div class="px-3 text-center my-auto max-h-[60px] overflow-y-auto">
-                        <p id="questionDisplayLabel" class="text-xs font-black leading-snug text-amber-950"></p>
-                    </div>
-
-                    <div id="answersGridSlot" class="flex flex-col space-y-1.5 px-3 mb-1">
-                        </div>
-
-                    <div class="px-4 pb-6 text-center">
-                        <p id="helperAlertLabel" class="text-[10px] font-black text-amber-800 leading-tight min-h-[24px]"></p>
-                    </div>
-
-                </div>
+            <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 max-w-[150px] mx-auto shadow-inner">
+                <p class="text-[9px] font-bold tracking-widest uppercase text-slate-500 mb-0.5">Final Yield</p>
+                <p class="text-xl font-extrabold text-indigo-400"><span id="finalScoreLabelField">0 / 100</span></p>
             </div>
-
-        </div>
-
-        <div id="scoreView" class="hidden bg-[#FFFDF6] rounded-3xl p-6 text-center space-y-5 chunky-panel border-4 border-[#C2A673]">
-            <div class="space-y-1">
-                <span class="text-6xl block animate-bounce">👑🏆🏅</span>
-                <h2 class="text-2xl font-black text-[#73541D]">Mission Finished!</h2>
-                <p class="text-xs text-[#8C6D31] font-bold">Let's check your final Safety Score board results!</p>
-            </div>
-            <div class="bg-[#F5E6CC] p-4 rounded-2xl border-2 border-[#C2A673] max-w-[150px] mx-auto">
-                <p class="text-xs font-black text-[#8C6D31] uppercase tracking-wider mb-0.5">Final Score</p>
-                <p class="text-3xl font-black text-[#73541D]"><span id="finalScoreLabelField">0 / 100</span></p>
-            </div>
-            <button onclick="restartGame()" class="w-full bg-[#C2A673] text-white font-black text-lg py-4 rounded-2xl chunky-btn cursor-pointer">
-                PLAY AGAIN 🔄
+            <button onclick="restartGame()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-3.5 rounded-xl border border-slate-700 cursor-pointer uppercase tracking-wider transition-all">
+                RESTART TELEMETRY 🔄
             </button>
         </div>
 
     </div>
 
+    <!-- MAIN CONSOLE LOGIC CONTROLLER MODULE -->
     <script>
-        // 10 Grade-2 safety questions
+        // 10 Symmetrical Core Safety Target Node Profiles
         const dartChapterDatabase = [
             { tag: "ROAD", q: "Where should you walk on the road if there is no footpath available?", options: ["In the middle of the road", "On the safe side facing traffic"], ans: "On the safe side facing traffic", hint: "Hint: Always walk where you can see oncoming cars clearly!" },
-            { tag: "VEHICLE", q: "What should you always wear while sitting in a moving car?", options: ["A secure seatbelt", "A heavy school bag"], ans: "A secure seatbelt", hint: "Hint: It clicks across your chest and locks you safely in place!" },
+            { tag: "VEHICLE", q: "What should you always wear while sitting inside a moving car?", options: ["A secure seatbelt", "A heavy school bag"], ans: "A secure seatbelt", hint: "Hint: It clicks across your chest and locks you safely in place!" },
             { tag: "VEHICLE", q: "What is the right way to wait for your school bus at the stop?", options: ["Running and pushing forward", "Standing patiently in a queue"], ans: "Standing patiently in a queue", hint: "Hint: Waiting your turn keeps everyone from slipping or falling down!" },
             { tag: "HOME", q: "Why should you never play with matchsticks or fire at home?", options: ["They can burn your fingers", "They make too much noise"], ans: "They can burn your fingers", hint: "Hint: Fire spreads very fast and is dangerous to touch without adults!" },
             { tag: "HOME", q: "What could happen if you leave your toys scattered on the bedroom floor?", options: ["Someone might trip and get injured", "The toys will disappear"], ans: "Someone might trip and get injured", hint: "Hint: Clear your toys so the walkway remains completely safe for everyone!" },
@@ -166,6 +244,7 @@
             resizeCanvasWindow();
             window.addEventListener('resize', resizeCanvasWindow);
             
+            // Failsafe 5-second splash loading overlay
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 splash.style.opacity = '0';
@@ -185,10 +264,10 @@
                 confettiParticles.push({
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 11,
-                    vy: (Math.random() - 0.5) * 11 - 4,
-                    size: Math.random() * 5 + 4,
-                    color: `hsl(${Math.random() * 360}, 85%, 55%)`,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10 - 4,
+                    size: Math.random() * 4 + 3,
+                    color: `hsl(${Math.random() * 360}, 85%, 65%)`,
                     alpha: 1
                 });
             }
@@ -226,32 +305,52 @@
             databasePointerIdx = 0;
             
             document.getElementById('scoreTextValue').innerText = 0;
-            document.getElementById('clearedCountValue').innerText = "0 / 10";
+            document.getElementById('clearedCountValue').innerText = "0/10";
             resetBalloonsOpacity();
+            setCrosshairState(false);
         }
 
         function resetBalloonsOpacity() {
             for(let i=1; i<=4; i++) {
-                document.getElementById(`targetNode${i}`).style.opacity = "1";
+                const node = document.getElementById(`targetNode${i}`);
+                if(node) {
+                    node.style.opacity = "1";
+                    node.style.transform = "scale(1)";
+                    node.className = node.className.replace(/border-slate-800/g, "");
+                }
             }
+        }
+
+        function setCrosshairState(shouldFreeze) {
+            const crosshair = document.getElementById('crosshairIndicator');
+            crosshair.style.animationPlayState = shouldFreeze ? 'paused' : 'running';
         }
 
         function simulateDartThrowAction() {
             if (databasePointerIdx >= dartChapterDatabase.length) return;
             
-            const loopNodeId = `targetNode${(databasePointerIdx % 4) + 1}`;
-            const elem = document.getElementById(loopNodeId);
-            if(elem) elem.style.opacity = "0.2";
+            setCrosshairState(true);
 
-            launchQuestionModalContext();
+            // Pop scaling transformation logic
+            const currentLoopId = `targetNode${(databasePointerIdx % 4) + 1}`;
+            const targetElement = document.getElementById(currentLoopId);
+            if(targetElement) {
+                targetElement.style.transform = "scale(0.85)";
+                targetElement.style.opacity = "0.25";
+            }
+
+            setTimeout(() => {
+                launchQuestionModalContext();
+            }, 300);
         }
 
         function launchQuestionModalContext() {
-            incorrectAttemptsCount = 0; // Reset counter for new question
-            document.getElementById('helperAlertLabel').innerText = "Attempts: 0 / 2";
+            incorrectAttemptsCount = 0; 
+            document.getElementById('helperAlertLabel').innerText = "Select the correct action pattern:";
+            document.getElementById('helperAlertLabel').className = "text-[9px] font-bold text-amber-950/80 leading-tight min-h-[20px]";
             
             const itemData = dartChapterDatabase[databasePointerIdx];
-            document.getElementById('modalCategoryBadge').innerText = `${itemData.tag} RULES`;
+            document.getElementById('modalCategoryBadge').innerText = `${itemData.tag} ANOMALY`;
             document.getElementById('questionDisplayLabel').innerText = itemData.q;
 
             const gridSlot = document.getElementById('answersGridSlot');
@@ -259,7 +358,7 @@
 
             itemData.options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "w-full bg-[#FFFDF9]/90 hover:bg-amber-50 text-amber-950 font-black py-2 px-2.5 rounded-xl border border-amber-800/30 text-[11px] text-center active:scale-95 transition-all option-node-btn shadow-sm";
+                btn.className = "w-full bg-[#FFFDF9]/95 hover:bg-amber-50 text-amber-950 font-bold py-2 px-3 rounded-xl border border-amber-900/20 text-[10.5px] text-center active:scale-[0.99] transition-all option-node-btn shadow-xs";
                 btn.onclick = () => verifySelectedAnswerOption(opt, btn, itemData);
                 btn.innerText = opt;
                 gridSlot.appendChild(btn);
@@ -272,57 +371,57 @@
             const allOptionButtons = document.querySelectorAll('.option-node-btn');
 
             if (pickedOption === dataObj.ans) {
-                // CORRECT CHICE RULE
+                // Correct verification response rule checked
                 allOptionButtons.forEach(b => b.disabled = true);
-                elementNode.classList.remove('bg-[#FFFDF9]/90');
-                elementNode.classList.add('bg-green-600', 'text-white', 'border-green-800');
+                elementNode.className = "w-full bg-emerald-600 text-white font-bold py-2 px-3 rounded-xl border border-emerald-700 text-[10.5px] text-center shadow-md animate-pulse";
                 
                 playSound('soundCorrect');
                 launchConfettiBurst();
 
-                // Award points based on attempts taken
+                // Increment score depending on attempt level step tracking
                 if (incorrectAttemptsCount === 0) {
-                    internalScore += 10; // +10 points on first attempt
+                    internalScore += 10;
                 } else {
-                    internalScore += 5;  // +5 points on second attempt
+                    internalScore += 5;
                 }
                 
                 document.getElementById('scoreTextValue').innerText = internalScore;
                 completedTargetsTrack++;
-                document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack} / 10`;
+                document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack}/10`;
 
                 setTimeout(() => {
                     document.getElementById('questionModalOverlay').classList.add('hidden');
                     databasePointerIdx++;
                     if ((databasePointerIdx % 4) === 0) resetBalloonsOpacity();
+                    setCrosshairState(false);
                     evaluateGameProgressEndState();
-                }, 1400);
+                }, 1300);
 
             } else {
-                // WRONG CHOICE RULE
+                // Wrong verification response rule checked
                 playSound('soundWrong');
-                elementNode.classList.remove('bg-[#FFFDF9]/90');
-                elementNode.classList.add('bg-red-600', 'text-white', 'border-red-800');
+                elementNode.className = "w-full bg-rose-600 text-white font-bold py-2 px-3 rounded-xl border border-rose-700 text-[10.5px] text-center opacity-60 line-through cursor-not-allowed";
                 elementNode.disabled = true;
                 incorrectAttemptsCount++;
 
                 if (incorrectAttemptsCount === 1) {
-                    // Update layout to notify first attempt failure
-                    document.getElementById('helperAlertLabel').innerText = `Wrong choice! 1 / 2 Attempts Used.\n${dataObj.hint}`;
+                    document.getElementById('helperAlertLabel').className = "text-[8.5px] font-bold text-rose-800 leading-tight min-h-[20px]";
+                    document.getElementById('helperAlertLabel').innerText = `⚠️ ${dataObj.hint}`;
                 } else if (incorrectAttemptsCount >= 2) {
-                    // 2 Attempts exceeded! Points lost completely.
-                    document.getElementById('helperAlertLabel').innerText = "Attempts Used Up! Point lost ❌ Moving forward...";
+                    // Attempt limit reached! Question closes and progress moves forward.
+                    document.getElementById('helperAlertLabel').innerText = "Deduction rule processed. Continuing runtime...";
                     allOptionButtons.forEach(b => b.disabled = true);
                     
                     completedTargetsTrack++;
-                    document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack} / 10`;
+                    document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack}/10`;
 
                     setTimeout(() => {
                         document.getElementById('questionModalOverlay').classList.add('hidden');
                         databasePointerIdx++;
                         if ((databasePointerIdx % 4) === 0) resetBalloonsOpacity();
+                        setCrosshairState(false);
                         evaluateGameProgressEndState();
-                    }, 2000);
+                    }, 1600);
                 }
             }
         }
@@ -332,7 +431,7 @@
                 setTimeout(() => {
                     playSound('soundClapping');
                     document.getElementById('gameView').style.display = 'none';
-                    document.getElementById('finalScoreLabelField').innerText = `${internalScore} / 100 PTS`;
+                    document.getElementById('finalScoreLabelField').innerText = `${internalScore} / 100`;
                     document.getElementById('scoreView').classList.remove('hidden');
                 }, 300);
             }
@@ -344,7 +443,7 @@
                 trackElement.load();
                 const p = trackElement.play();
                 if (p !== undefined) {
-                    p.catch(err => console.log("Audio pipeline: ", err));
+                    p.catch(err => console.log("Audio logic streaming issue: ", err));
                 }
             }
         }
