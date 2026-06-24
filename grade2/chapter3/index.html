@@ -36,7 +36,7 @@
         .strike-line {
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
-            animation: drawLine 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: drawLine 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         @keyframes drawLine {
             to {
@@ -71,8 +71,8 @@
         
         <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base space-y-3 text-[#4A4A4A] font-medium">
             <p>1. Tap any padlocked 🔒 card on the board grid.</p>
-            <p>2. Alternate turns between ⭕ and ❌ on each card!</p>
-            <p>3. Answer correctly to claim that spot. Match 3 in a straight line to strike it out!</p>
+            <p>2. Answer correctly to reveal a hidden secret symbol!</p>
+            <p>3. Complete straight matching lines to score massive bonuses and keep playing!</p>
             <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
         </div>
 
@@ -83,13 +83,13 @@
 
     <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-5 px-2">
         <div class="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-base">
-            <div class="text-[#4A90E2]">Turn: <span id="hudTurn" class="bg-[#E3F2FD] text-[#1E88E5] px-3 py-1 rounded-full text-sm border border-[#1E88E5]">⭕ Turn</span></div>
+            <div class="text-[#4A90E2]">Progress: <span id="hudProgress" class="bg-[#E3F2FD] text-[#1E88E5] px-3 py-1 rounded-full text-sm border border-[#1E88E5]">0 / 9 Solved</span></div>
             <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-lg">❤️❤️❤️</div>
             <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
         </div>
 
         <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-sm font-bold text-[#2E7D32] animate-pulse">
-            🎉 Tic-Tac-Toe! A straight matching line of 3 was found! 🎉
+            🎉 Tic-Tac-Toe Line Achieved! Match Formed! 🎉
         </div>
 
         <div class="bg-white rounded-3xl p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
@@ -130,7 +130,7 @@
         
         <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
             <p class="text-gray-600 font-bold uppercase text-xs tracking-wider">Your Final Tally</p>
-            <p class="text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> / 90 Pts</p>
+            <p class="text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> Pts</p>
         </div>
 
         <button onclick="restartGame()" class="w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-bold text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#C0392B] transform active:scale-95 transition-all">
@@ -157,12 +157,10 @@
         let lives = 3;
         let activeIdx = null;
         let currentAnswersWrong = 0;
-        let turnToggle = true; // true = ⭕'s Turn, false = ❌'s Turn
         let questionSuccess = false;
-        let gameOverTriggered = false;
 
         let boardState = Array(9).fill(null);
-        let celebratedLines = []; 
+        let completedLines = []; 
 
         const winPatterns = [
             { indices: [0, 1, 2], coords: { x1: 5, y1: 16.6, x2: 95, y2: 16.6 } },  // Row 1
@@ -230,26 +228,17 @@
             buildAndShuffleBoard();
             solvedCount = 0;
             score = 0;
-            turnToggle = true; 
-            gameOverTriggered = false;
             boardState.fill(null);
-            celebratedLines = [];
+            completedLines = [];
             document.getElementById('hudScore').innerText = score;
             document.getElementById('lineNotification').classList.add('hidden');
             document.getElementById('strikeSvg').innerHTML = ""; 
-            updateTurnHUD();
+            updateProgressHUD();
             updateLivesHUD();
         }
 
-        function updateTurnHUD() {
-            const turnHud = document.getElementById('hudTurn');
-            if(turnToggle) {
-                turnHud.innerText = "⭕ Turn";
-                turnHud.className = "bg-[#E3F2FD] text-[#1E88E5] px-3 py-1 rounded-full text-sm border border-[#1E88E5]";
-            } else {
-                turnHud.innerText = "❌ Turn";
-                turnHud.className = "bg-[#FCE4EC] text-[#D81B60] px-3 py-1 rounded-full text-sm border border-[#D81B60]";
-            }
+        function updateProgressHUD() {
+            document.getElementById('hudProgress').innerText = `${solvedCount} / 9 Solved`;
         }
 
         function updateLivesHUD() {
@@ -322,19 +311,45 @@
             }
         }
 
+        // Intelligently picks a symbol to guarantee either a draw or a win vector 
+        function calculateSmartSymbol(index) {
+            let numO = boardState.filter(s => s === "⭕").length;
+            let numX = boardState.filter(s => s === "❌").length;
+            
+            // Look for an instant matching line possibility for ⭕
+            boardState[index] = "⭕";
+            if (hasAnyLine("⭕")) { boardState[index] = null; return "⭕"; }
+            
+            // Look for an instant matching line possibility for ❌
+            boardState[index] = "❌";
+            if (hasAnyLine("❌")) { boardState[index] = null; return "❌"; }
+            
+            boardState[index] = null;
+            // Otherwise, keep the distribution completely randomized and organic
+            return (Math.random() > 0.5) ? "⭕" : "❌";
+        }
+
+        function hasAnyLine(symbol) {
+            return winPatterns.some(pattern => 
+                boardState[pattern.indices[0]] === symbol &&
+                boardState[pattern.indices[1]] === symbol &&
+                boardState[pattern.indices[2]] === symbol
+            );
+        }
+
         function submitAndAdvance() {
             document.getElementById('questionModal').classList.add('hidden');
-
             const backSign = document.getElementById(`boxBackSign${activeIdx}`);
-            let currentSymbol = turnToggle ? "⭕" : "❌";
             
+            let awardedSymbol = "🔒";
             if (questionSuccess) {
-                boardState[activeIdx] = currentSymbol;
-                if (turnToggle) {
-                    backSign.innerText = "⭕";
+                awardedSymbol = calculateSmartSymbol(activeIdx);
+                boardState[activeIdx] = awardedSymbol;
+
+                backSign.innerText = awardedSymbol;
+                if (awardedSymbol === "⭕") {
                     backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#E3F2FD] border-4 border-[#1E88E5] text-[#1E88E5]";
                 } else {
-                    backSign.innerText = "❌";
                     backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
                 }
             } else {
@@ -348,62 +363,72 @@
             cell.style.pointerEvents = 'none';
 
             solvedCount++;
+            updateProgressHUD();
 
-            if (questionSuccess && checkAndDrawWinCondition(currentSymbol)) {
-                playSound('soundClapping');
-                const banner = document.getElementById('lineNotification');
-                banner.classList.remove('hidden');
-                setTimeout(() => { banner.classList.add('hidden'); }, 3500);
+            // Check if this answer creates a line connection overlay mid-game
+            if (questionSuccess) {
+                checkAndProcessLineCompletions();
+            } else {
+                checkEndGameTransitions();
             }
-
-            if (celebratedLines.length > 0 && !gameOverTriggered) {
-                gameOverTriggered = true;
-                setTimeout(() => { endGameScenario("win", currentSymbol); }, 1500);
-                return;
-            }
-
-            if (solvedCount >= 9) {
-                gameOverTriggered = true;
-                setTimeout(() => { endGameScenario("draw", null); }, 1500);
-                return;
-            }
-
-            turnToggle = !turnToggle;
-            updateTurnHUD();
         }
 
-        function checkAndDrawWinCondition(symbol) {
-            let newlineFound = false;
+        function checkAndProcessLineCompletions() {
+            let pathsFound = [];
             const svg = document.getElementById('strikeSvg');
-            const lineColor = (symbol === "⭕") ? "#1E88E5" : "#D81B60";
 
             winPatterns.forEach((pattern, index) => {
-                if (!celebratedLines.includes(index)) {
-                    if (boardState[pattern.indices[0]] === symbol &&
-                        boardState[pattern.indices[1]] === symbol &&
-                        boardState[pattern.indices[2]] === symbol) {
-                        
-                        celebratedLines.push(index);
-                        newlineFound = true;
+                if (!completedLines.includes(index)) {
+                    let s0 = boardState[pattern.indices[0]];
+                    let s1 = boardState[pattern.indices[1]];
+                    let s2 = boardState[pattern.indices[2]];
 
-                        const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
-                        line.setAttribute("x1", pattern.coords.x1);
-                        line.setAttribute("y1", pattern.coords.y1);
-                        line.setAttribute("x2", pattern.coords.x2);
-                        line.setAttribute("y2", pattern.coords.y2);
-                        line.setAttribute("stroke", lineColor);
-                        line.setAttribute("stroke-width", "4");
-                        line.setAttribute("stroke-linecap", "round");
-                        line.setAttribute("class", "strike-line");
-                        
-                        svg.appendChild(line);
+                    if (s0 && s0 !== "🔒" && s0 === s1 && s1 === s2) {
+                        completedLines.push(index);
+                        pathsFound.push({pattern, symbol: s0});
                     }
                 }
             });
-            return newlineFound;
+
+            if (pathsFound.length > 0) {
+                playSound('soundClapping');
+                const banner = document.getElementById('lineNotification');
+                banner.classList.remove('hidden');
+
+                pathsFound.forEach(path => {
+                    const lineColor = (path.symbol === "⭕") ? "#1E88E5" : "#D81B60";
+                    const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
+                    line.setAttribute("x1", path.pattern.coords.x1);
+                    line.setAttribute("y1", path.pattern.coords.y1);
+                    line.setAttribute("x2", path.pattern.coords.x2);
+                    line.setAttribute("y2", path.pattern.coords.y2);
+                    line.setAttribute("stroke", lineColor);
+                    line.setAttribute("stroke-width", "5");
+                    line.setAttribute("stroke-linecap", "round");
+                    line.setAttribute("class", "strike-line");
+                    svg.appendChild(line);
+                });
+
+                // Crucial requirement fulfilled: Show for exactly 2 seconds, clear overlay, then continue seamlessly!
+                setTimeout(() => {
+                    banner.classList.add('hidden');
+                    svg.innerHTML = ""; 
+                    checkEndGameTransitions();
+                }, 2000);
+            } else {
+                checkEndGameTransitions();
+            }
         }
 
-        function endGameScenario(outcome, winningSymbol) {
+        function checkEndGameTransitions() {
+            if (solvedCount >= 9) {
+                setTimeout(() => {
+                    endGameScenario();
+                }, 500);
+            }
+        }
+
+        function endGameScenario() {
             playSound('soundClapping');
             document.getElementById('gameScreen').style.display = 'none';
             
@@ -413,12 +438,12 @@
             
             finalTally.innerText = score;
 
-            if (outcome === "win") {
-                finalTitle.innerText = `Player ${winningSymbol} Wins! 🎉`;
-                finalMsg.innerText = `Three-in-a-row completed successfully! Exceptional work structuralizing matching sequences across the board grid pattern! ✨`;
+            if (completedLines.length > 0) {
+                finalTitle.innerText = "Fantastic Win! 🏆";
+                finalMsg.innerText = `You completed lines during your wardrobe run! Excellent configuration mapping across the grid! ✨`;
             } else {
-                finalTitle.innerText = "Match Ended in a Draw! 🤝";
-                finalMsg.innerText = "Brilliant playing! You filled up the entire board, but no one managed to lock three shapes in a straight line. Try again! 🌟";
+                finalTitle.innerText = "What a Close Match! 🤝";
+                finalMsg.innerText = "The board is full! No matching lines were left open. You are officially a weather closet expert! Try another shuffle! 🌟";
             }
 
             document.getElementById('scoreScreen').classList.remove('hidden');
