@@ -42,7 +42,8 @@
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
-    <audio id="soundSwoosh" src="assets/wrong.mp3" preload="auto"></audio> <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
     <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs md:max-w-sm h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-32 h-32 bg-[#E8EAF6] rounded-full flex items-center justify-center text-[#4A148C] font-black text-4xl border-4 border-[#D1C4E9]\'>IN</div>';">
@@ -63,7 +64,7 @@
         <h2 class="text-2xl font-black text-[#4A148C]">⭐ How to Play ⭐</h2>
         <div class="bg-white/80 p-5 rounded-2xl text-left text-sm space-y-3 font-bold text-[#6A1B9A] border-2 border-dashed border-[#B39DDB]">
             <p>1. Tap a heart to put it into your tray.</p>
-            <p>2. Find <span class="text-[#4A148C]">3 of the same hearts</span> to make them go SWOOSH!</p>
+            <p>2. Find <span class="text-[#4A148C]">3 of the same hearts</span> to clear them with a burst of confetti!</p>
             <p>3. Every 2 matches unlocks easy questions for points! Be careful, you only get 2 tries per question!</p>
         </div>
         <button onclick="startGame()" class="w-full bg-[#7E57C2] hover:bg-[#673AB7] text-white font-black text-xl py-4 rounded-2xl chunky-tile border-b-0 cursor-pointer">
@@ -280,7 +281,7 @@
             
             if (tileNode) {
                 tileNode.classList.add('animate-swoosh');
-                playSound('soundSwoosh');
+                // Swoosh sound trigger completely deleted here
             }
 
             setTimeout(() => {
@@ -297,7 +298,7 @@
                         activeDockArray = activeDockArray.filter(h => h.name !== targetedItem.name);
                         renderDockTrayGraphics();
                         
-                        triggerConfettiBurst(); 
+                        triggerConfettiBurst(); // Visual confetti burst celebration triggers instantly instead
                         
                         successfulTriosCleared++;
                         document.getElementById('hudCleared').innerText = `${successfulTriosCleared} / 8`;
@@ -382,12 +383,14 @@
                 btnElement.classList.remove('border-[#D1C4E9]');
                 btnElement.classList.add('border-green-400', 'bg-green-50');
                 
-                playSound('soundClapping'); 
+                // Plays correct sound only
+                playSound('soundCorrect'); 
                 
                 score += 10;
                 document.getElementById('hudScore').innerText = score;
                 document.getElementById('triviaNextActionBtn').classList.remove('hidden');
             } else {
+                // Plays wrong sound only
                 playSound('soundWrong');
                 currentQuestionWrongAttempts++;
                 btnElement.classList.add('border-red-400', 'bg-red-50');
@@ -421,7 +424,6 @@
             }
         }
 
-        // CLOSE AND RETURN RUNTIME LOGIC TO TILE BOARD
         function closeTriviaChallengeOverlay() {
             document.getElementById('triviaChallengeOverlay').classList.add('hidden');
             checkWinConditionState();
@@ -430,6 +432,7 @@
         function checkWinConditionState() {
             if (successfulTriosCleared === 8) {
                 setTimeout(() => {
+                    // Clapping triggers ONLY at the final scoreboard view screen
                     playSound('soundClapping');
                     document.getElementById('gameScreen').style.display = 'none';
                     document.getElementById('finalScoreText').innerText = score;
@@ -438,15 +441,14 @@
             }
         }
 
-        // BROWSER ENGINE ASSET FLUSH REFRESH
         function playSound(id) {
             const el = document.getElementById(id);
             if (el) {
-                el.load(); // Forces webview to flush out and rebuild audio channel pipelines completely
+                el.load(); 
                 const playPromise = el.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
-                        console.log("Audio pipeline buffered or deferred successfully.", error);
+                        console.log("Audio pipeline handled safely: ", error);
                     });
                 }
             }
