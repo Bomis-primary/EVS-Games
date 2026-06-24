@@ -151,7 +151,7 @@
     </div>
 
     <script>
-        const database = [
+        const originalDatabase = [
             { question: "Farmer Tom is in a field of fluffy white plants. Which plant is he picking to make light summer shirts?", options: ["Coir", "Cotton", "Bamboo"], answer: 1, hint: "This soft white plant is spun into thin thread for cool clothing." },
             { question: "Princess Mia wants a shiny, beautiful dress for a party. Which little insect gives us this smooth thread?", options: ["Spider", "Silkworm", "Ant"], answer: 1, hint: "This tiny caterpillar eats green leaves and makes a silky cocoon." },
             { question: "The farmers are cutting the thick, curly coats off their sheep. What warm material are they gathering?", options: ["Wool", "Feathers", "Straw"], answer: 0, hint: "We use this cosy animal hair to knit warm winter jumpers." },
@@ -163,6 +163,7 @@
             { question: "After laundry day, your clean clothes are piled on your bed. What is the best way to look after them?", options: ["Fold them neatly", "Throw them down", "Hide them away"], answer: 0, hint: "Folding your clothes neatly keeps them smooth, tidy, and clean." }
         ];
 
+        let database = [];
         let solvedCount = 0;
         let score = 0;
         let lives = 3;
@@ -174,7 +175,6 @@
         let boardState = Array(9).fill(null);
         let celebratedLines = []; 
 
-        // Precise SVG Coordinates relative to 100x100 matrix container box grid
         const winPatterns = [
             { indices: [0, 1, 2], coords: { x1: 5, y1: 16.6, x2: 95, y2: 16.6 } },  // Row 1
             { indices: [3, 4, 5], coords: { x1: 5, y1: 50, x2: 95, y2: 50 } },      // Row 2
@@ -210,6 +210,15 @@
             }
         }
 
+        function shuffleQuestions() {
+            // Fisher-Yates Shuffle algorithm to randomize database indices layout cleanly
+            database = [...originalDatabase];
+            for (let i = database.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [database[i], database[j]] = [database[j], database[i]];
+            }
+        }
+
         function startGame() {
             document.getElementById('instructionsScreen').style.display = 'none';
             document.getElementById('gameScreen').classList.remove('hidden');
@@ -217,6 +226,7 @@
         }
 
         function resetBoard() {
+            shuffleQuestions(); // Randomizes positioning layouts natively upon load
             solvedCount = 0;
             score = 0;
             turnToggle = true;
@@ -225,7 +235,7 @@
             document.getElementById('hudLevel').innerText = solvedCount;
             document.getElementById('hudScore').innerText = score;
             document.getElementById('lineNotification').classList.add('hidden');
-            document.getElementById('strikeSvg').innerHTML = ""; // Clear canvas lines
+            document.getElementById('strikeSvg').innerHTML = ""; 
             updateLivesHUD();
             
             for(let i=0; i<9; i++) {
@@ -337,7 +347,7 @@
             solvedCount++;
             document.getElementById('hudLevel').innerText = solvedCount;
 
-            // Check matching configurations to render animated line streaks
+            // Evaluates matches across the newly positioned blocks!
             if (questionSuccess && checkAndDrawWinCondition(currentSymbol)) {
                 playSound('soundClapping');
                 const banner = document.getElementById('lineNotification');
@@ -353,7 +363,6 @@
             turnToggle = !turnToggle;
         }
 
-        // SVG STRIKE GENERATION ENGINE
         function checkAndDrawWinCondition(symbol) {
             let newlineFound = false;
             const svg = document.getElementById('strikeSvg');
@@ -368,7 +377,6 @@
                         celebratedLines.push(index);
                         newlineFound = true;
 
-                        // Create dynamic linear trace line elements on overlay canvas
                         const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
                         line.setAttribute("x1", pattern.coords.x1);
                         line.setAttribute("y1", pattern.coords.y1);
