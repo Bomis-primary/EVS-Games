@@ -1,1 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eco-Catcher Play Adventure - Chapter 6</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(to bottom, #BAE6FD 0%, #E0F2FE 100%);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        h1, h2, h3, .child-font {
+            font-family: 'Fredoka', cursive;
+        }
 
+        .cute-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 4px solid #4ADE80;
+            box-shadow: 0 12px 0 #22C55E, 0 15px 30px rgba(34, 197, 94, 0.2);
+        }
+
+        .quiz-modal-card {
+            background: #FFFFFF;
+            border: 5px solid #3B82F6;
+            box-shadow: 0 16px 0 #1D4ED8, 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-viewport {
+            background: linear-gradient(to bottom, #F0FDF4 0%, #DCFCE7 100%);
+            box-shadow: inset 0 8px 0 rgba(0,0,0,0.05);
+            overflow: hidden;
+            position: relative;
+            border: 4px solid #86EFAC;
+        }
+
+        @keyframes softGlowHint {
+            0%, 100% { border-color: #F59E0B; box-shadow: 0 0 12px #F59E0B; transform: scale(1); }
+            50% { border-color: #FBBF24; box-shadow: 0 0 28px #FBBF24; transform: scale(1.03); }
+        }
+        .correct-answer-glow {
+            animation: softGlowHint 1s infinite ease-in-out !important;
+            background: #FEF3C7 !important;
+            border: 4px solid #F59E0B !important;
+            color: #B45309 !important;
+        }
+
+        .cute-btn {
+            background: linear-gradient(135deg, #4ADE80 0%, #22C55E 100%);
+            box-shadow: 0 8px 0 #16A34A, 0 12px 20px rgba(22, 163, 74, 0.25);
+            transition: all 0.1s ease;
+        }
+        .cute-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #16A34A, 0 6px 10px rgba(22, 163, 74, 0.25);
+        }
+
+        .arrow-btn {
+            background: linear-gradient(135deg, #FB923C 0%, #F97316 100%);
+            box-shadow: 0 6px 0 #EA580C, 0 10px 15px rgba(249, 115, 22, 0.2);
+        }
+        .arrow-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #EA580C, 0 5px 8px rgba(249, 115, 22, 0.2);
+        }
+
+        @keyframes cloudDrift {
+            0% { transform: translateX(-20px); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(-20px); }
+        }
+        .bg-cloud {
+            animation: cloudDrift 6s infinite ease-in-out;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-scale {
+            animation: scaleIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .falling-item {
+            transition: top 0.1s linear, left 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 m-0 select-none text-slate-700 min-h-screen relative overflow-hidden">
+
+    <div class="absolute top-10 left-6 text-6xl opacity-30 bg-cloud select-none pointer-events-none">☁️</div>
+    <div class="absolute top-32 right-8 text-7xl opacity-25 bg-cloud select-none pointer-events-none" style="animation-delay: 2s;">☁️</div>
+    <div class="absolute bottom-20 left-4 text-5xl opacity-20 bg-cloud select-none pointer-events-none" style="animation-delay: 4s;">☁️</div>
+
+    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="soundClapping" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <div id="splashScreen" class="fixed inset-0 bg-[#E0F2FE] flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-28 h-28 bg-white rounded-full flex items-center justify-center text-emerald-400 font-bold text-5xl shadow-lg border-4 border-emerald-300\'>🌍</div>';">
+    </div>
+
+    <div class="w-full max-w-md flex flex-col h-[92vh] max-h-[680px] relative justify-center z-10">
+        
+        <div id="titleView" class="w-full cute-card rounded-[40px] p-8 text-center space-y-6 animate-scale">
+            <div class="space-y-3">
+                <div class="inline-block text-7xl animate-bounce drop-shadow-md">
+                    🌱
+                </div>
+                <h1 class="text-4xl font-bold tracking-wide text-emerald-600 drop-shadow-sm">
+                    Eco-Catcher!
+                </h1>
+                <div class="bg-emerald-100 rounded-full py-1.5 px-5 inline-block border-2 border-emerald-300">
+                    <span class="text-emerald-700 font-bold text-xs uppercase tracking-widest child-font">✨ Keeping Surroundings Clean ✨</span>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 rounded-3xl p-5 border-2 border-amber-200 text-left space-y-2.5 shadow-inner">
+                <p class="text-amber-600 text-base font-black flex items-center child-font">🎈 HOW TO PLAY:</p>
+                <ul class="text-slate-600 text-sm font-semibold space-y-2 list-none pl-1">
+                    <li class="flex items-center space-x-2.5"><span>📲</span> <span>Tap orange buttons to slide your cleanup basket!</span></li>
+                    <li class="flex items-center space-x-2.5"><span>🍏</span> <span>Catch clean elements to pop open a fun school quiz!</span></li>
+                    <li class="flex items-center space-x-2.5"><span>⭐</span> <span>Finish 10 cleanup missions to save our lovely planet!</span></li>
+                </ul>
+            </div>
+            
+            <button onclick="startGame()" class="w-full cute-btn text-white font-bold text-xl py-4.5 rounded-3xl cursor-pointer tracking-wide uppercase child-font">
+                LET'S PLAY! 🚀
+            </button>
+        </div>
+
+        <div id="gameView" class="hidden w-full h-full flex flex-col justify-between space-y-3.5">
+            
+            <div class="w-full flex items-center justify-between px-2">
+                <div class="flex flex-col">
+                    <span class="text-xs text-sky-700 font-extrabold tracking-wider uppercase child-font">Star Points</span>
+                    <span class="text-3xl font-black text-amber-500 drop-shadow-sm child-font" id="scoreTextValue">0</span>
+                </div>
+                <div class="bg-white border-3 border-sky-300 px-5 py-1.5 rounded-2xl text-xs font-black text-sky-800 shadow-sm child-font">
+                    Missions: <span id="clearedCountValue" class="text-emerald-500">0/10</span>
+                </div>
+            </div>
+
+            <div id="catcherAreaContainer" class="flex-1 game-viewport rounded-[40px]">
+                
+                <div id="fallingItemNode" class="absolute text-6xl falling-item select-none pointer-events-none drop-shadow-md" style="top: -70px; left: 50%;">🍏</div>
+
+                <div id="basketCatcherNode" class="absolute bottom-4 w-20 h-16 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-2xl border-3 border-white flex items-center justify-center text-4xl shadow-lg transition-all duration-100" style="left: calc(50% - 40px);">
+                    🗑️
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 w-full">
+                <button onclick="shiftBasketPosition('left')" class="arrow-btn text-white font-bold py-4.5 rounded-3xl flex items-center justify-center text-lg cursor-pointer transition-all border-b-4 border-orange-700 active:border-b-0 child-font">
+                    👈 MOVE LEFT
+                </button>
+                <button onclick="shiftBasketPosition('right')" class="arrow-btn text-white font-bold py-4.5 rounded-3xl flex items-center justify-center text-lg cursor-pointer transition-all border-b-4 border-orange-700 active:border-b-0 child-font">
+                    MOVE RIGHT 👉
+                </button>
+            </div>
+
+            <div id="questionModalOverlay" class="hidden absolute inset-0 bg-sky-900/60 z-40 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div class="w-full max-w-sm quiz-modal-card rounded-[36px] p-6 flex flex-col justify-between space-y-5 animate-scale">
+                    
+                    <div class="text-center">
+                        <span id="modalCategoryBadge" class="bg-emerald-100 text-emerald-700 px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase border-2 border-emerald-200 child-font">CLEANUP MISSION</span>
+                    </div>
+
+                    <div class="text-center py-1">
+                        <h2 id="questionDisplayLabel" class="text-lg font-bold text-slate-800 leading-snug px-1 child-font">
+                            Where should you put dirty household wrappers?
+                        </h2>
+                    </div>
+
+                    <div id="answersGridSlot" class="flex flex-col space-y-3 w-full">
+                        </div>
+
+                    <div class="text-center pt-3 border-t-2 border-slate-100">
+                        <p id="helperAlertLabel" class="text-sm font-bold text-slate-500 leading-normal min-h-[44px] flex items-center justify-center px-2">
+                            Tap the best safe choice above!
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div id="scoreView" class="hidden w-full cute-card rounded-[40px] p-8 text-center space-y-6 animate-scale">
+            <div class="space-y-2">
+                <span class="text-7xl block animate-bounce">👑</span>
+                <h2 class="text-3xl font-bold text-emerald-600 child-font">Super Hero!</h2>
+                <p class="text-sm text-slate-600 font-bold px-4">You did it! You know exactly how to recycle waste and protect our beautiful trees! ⭐</p>
+            </div>
+            <div class="bg-amber-50 p-4.5 rounded-2xl border-2 border-amber-200 max-w-[170px] mx-auto shadow-inner">
+                <p class="text-[11px] font-black tracking-wider uppercase text-amber-600 mb-0.5 child-font">Total Stars</p>
+                <p class="text-3xl font-black text-amber-500 child-font"><span id="finalScoreLabelField">0 / 100</span></p>
+            </div>
+            <button onclick="restartGame()" class="w-full cute-btn text-white font-bold text-base py-4.5 rounded-2xl cursor-pointer uppercase tracking-wider transition-all child-font">
+                PLAY AGAIN 🔄
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // CHAPTER 6 DATA MATRIX
+        const catcherQuizDatabase = [
+            { tag: "GARBAGE", q: "What should we use to throw away our everyday household garbage safely?", options: ["An open pile behind the house", "A covered dustbin"], ans: "A covered dustbin", hint: "Hint: Covering it keeps flies and nasty germs away!", explanation: "✨ Correct! A covered dustbin keeps bugs away and stops bad smells from spreading!" },
+            { tag: "SURROUNDINGS", q: "What happens if we let garbage pile up outside our homes?", options: ["It attracts flies and cockroaches", "It makes the grass grow faster"], ans: "It attracts flies and cockroaches", hint: "Hint: Dirty piles bring unwanted insects that carry diseases!", explanation: "✨ Spot on! Piles of trash bring pests that can make your whole family sick!" },
+            { tag: "WATER POLLUTION", q: "What would happen if people threw plastic bottles and garbage into rivers?", options: ["The water becomes cleaner to drink", "Water animals suffer and it gets dirty"], ans: "Water animals suffer and it gets dirty", hint: "Hint: Fish and turtles need clean water to live!", explanation: "✨ Exactly! Pollution destroys water homes and makes the water unsafe for everyone!" },
+            { tag: "TREES", q: "Instead of cutting down green trees, what should we do to help nature?", options: ["Plant more new trees", "Cover the soil with concrete"], ans: "Plant more new trees", hint: "Hint: Trees give us fresh air and beautiful shade!", explanation: "✨ Fantastic! Planting trees keeps our air clean, fresh, and full of oxygen!" },
+            { tag: "HYGIENE", q: "Is it okay to spit in open public areas like roads or parks?", options: ["No, it spreads dangerous germs", "Yes, it keeps the roads clean"], ans: "No, it spreads dangerous germs", hint: "Hint: Spitting openly allows sickness to travel through the air!", explanation: "✨ Beautifully answered! Keeping your spit to yourself stops harmful germs from spreading!" },
+            { tag: "PLASTIC FACT", q: "How many years does a piece of plastic take just to begin decomposing?", options: ["Around 5 years", "About 450 years"], ans: "About 450 years", hint: "Hint: Plastic stays on Earth for a very, very long time!", explanation: "✨ Wow! Plastic takes 450 years just to start breaking down, which is why we must say NO to plastic bags!" },
+            { tag: "CLEANUP", q: "You see some scattered candy wrappers near your school gate. What should you do?", options: ["Pick them up and put them in a trash bin", "Ignore them and walk past"], ans: "Pick them up and put them in a trash bin", hint: "Hint: Taking action helps keep your school beautiful!", explanation: "✨ Super choice! Helping pick up trash keeps our environment clean and safe!" },
+            { tag: "AIR QUALITY", q: "Why should we avoid burning noisy firecrackers during festivals?", options: ["They pollute the air and create smoke", "They make the air fresh and sweet"], ans: "They pollute the air and create smoke", hint: "Hint: Firecracker smoke makes it hard for people to breathe!", explanation: "✨ Perfect! Saying no to firecrackers keeps our air breathable and protects animals from loud noises!" },
+            { tag: "PET SAFETY", q: "What is the correct way to manage our pets when taking them for walks?", options: ["Do not allow them to make surroundings dirty", "Let them leave messes anywhere on the path"], ans: "Do not allow them to make surroundings dirty", hint: "Hint: Clean up after your pets to keep pathways nice for everyone!", explanation: "✨ Excellent! Responsible pet owners make sure their furry friends don't leave messy sidewalks behind!" },
+            { tag: "ECO TRAVEL", q: "To protect our surroundings from vehicle smoke on short distances, we should:", options: ["Drive a large car", "Walk or cycle instead"], ans: "Walk or cycle instead", hint: "Hint: Walking keeps your body healthy and causes zero pollution!", explanation: "✨ Brilliant! Walking short distances exercises your body and cuts down on air pollution!" }
+        ];
+
+        let databasePointerIdx = 0;
+        let internalScore = 0;
+        let incorrectAttemptsCount = 0;
+        let completedTargetsTrack = 0;
+        let dynamicAssistanceTimerNode = null;
+        
+        let targetLanePosition = 1; 
+        let itemFallingTopPos = -70;
+        let fallingProcessLoop = null;
+        let currentVisualEmoji = "🍏";
+
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
+
+        const structuralEmojis = ["🍏", "📦", "🍂", "💧", "🌱"];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvasWindow();
+            window.addEventListener('resize', resizeCanvasWindow);
+            
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 400);
+            }, 3000);
+        });
+
+        function resizeCanvasWindow() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function launchConfettiBurst() {
+            canvas.classList.remove('hidden');
+            confettiParticles = [];
+            for (let i = 0; i < 40; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12 - 5,
+                    size: Math.random() * 5 + 4,
+                    color: `hsl(${Math.random() * 360}, 95%, 70%)`,
+                    alpha: 1
+                });
+            }
+            requestAnimationFrame(updateConfettiEngine);
+        }
+
+        function updateConfettiEngine() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let alive = false;
+            confettiParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.25;
+                p.alpha -= 0.02;
+                if (p.alpha > 0) {
+                    alive = true;
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+            if (alive) requestAnimationFrame(updateConfettiEngine);
+            else canvas.classList.add('hidden');
+        }
+
+        function startGame() {
+            document.getElementById('titleView').style.display = 'none';
+            document.getElementById('gameView').classList.remove('hidden');
+            internalScore = 0;
+            completedTargetsTrack = 0;
+            databasePointerIdx = 0;
+            
+            document.getElementById('scoreTextValue').innerText = 0;
+            document.getElementById('clearedCountValue').innerText = "0/10";
+            
+            repositionBasketCatcher();
+            spawnNewFallingEntity();
+        }
+
+        function repositionBasketCatcher() {
+            const basket = document.getElementById('basketCatcherNode');
+            if (targetLanePosition === 0) basket.style.left = "calc(16.6% - 40px)";
+            else if (targetLanePosition === 1) basket.style.left = "calc(50% - 40px)";
+            else if (targetLanePosition === 2) basket.style.left = "calc(83.3% - 40px)";
+        }
+
+        function shiftBasketPosition(dir) {
+            if (dir === 'left' && targetLanePosition > 0) targetLanePosition--;
+            else if (dir === 'right' && targetLanePosition < 2) targetLanePosition++;
+            repositionBasketCatcher();
+        }
+
+        function spawnNewFallingEntity() {
+            if (fallingProcessLoop) clearInterval(fallingProcessLoop);
+            
+            itemFallingTopPos = -70;
+            const randomLane = Math.floor(Math.random() * 3); 
+            currentVisualEmoji = structuralEmojis[Math.floor(Math.random() * structuralEmojis.length)];
+            
+            const element = document.getElementById('fallingItemNode');
+            element.innerText = currentVisualEmoji;
+            
+            if (randomLane === 0) element.style.left = "calc(16.6% - 30px)";
+            else if (randomLane === 1) element.style.left = "calc(50% - 30px)";
+            else if (randomLane === 2) element.style.left = "calc(83.3% - 30px)";
+
+            fallingProcessLoop = setInterval(() => {
+                itemFallingTopPos += 6;
+                element.style.top = `${itemFallingTopPos}px`;
+
+                const containerHeight = document.getElementById('catcherAreaContainer').clientHeight;
+                
+                if (itemFallingTopPos >= containerHeight - 90 && itemFallingTopPos <= containerHeight - 45) {
+                    if (randomLane === targetLanePosition) {
+                        clearInterval(fallingProcessLoop);
+                        launchQuestionModalContext();
+                    }
+                }
+
+                if (itemFallingTopPos > containerHeight) {
+                    itemFallingTopPos = -70;
+                    spawnNewFallingEntity();
+                }
+            }, 30);
+        }
+
+        function launchQuestionModalContext() {
+            incorrectAttemptsCount = 0; 
+            if(dynamicAssistanceTimerNode) clearTimeout(dynamicAssistanceTimerNode);
+
+            document.getElementById('helperAlertLabel').innerText = "Tap the best safe choice above!";
+            document.getElementById('helperAlertLabel').className = "text-sm font-bold text-slate-500 leading-normal min-h-[44px] flex items-center justify-center px-2";
+            
+            const itemData = catcherQuizDatabase[databasePointerIdx];
+            document.getElementById('modalCategoryBadge').innerText = `${itemData.tag} MISSION`;
+            document.getElementById('questionDisplayLabel').innerText = itemData.q;
+
+            const gridSlot = document.getElementById('answersGridSlot');
+            gridSlot.innerHTML = "";
+
+            itemData.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-3.5 px-4 rounded-2xl border-3 border-slate-200 text-base text-center active:scale-[0.98] transition-all option-node-btn shadow-sm cursor-pointer child-font";
+                btn.onclick = () => verifySelectedAnswerOption(opt, btn, itemData);
+                btn.innerText = opt;
+                if(opt === itemData.ans) {
+                    btn.setAttribute('data-correct', 'true');
+                }
+                gridSlot.appendChild(btn);
+            });
+
+            document.getElementById('questionModalOverlay').classList.remove('hidden');
+
+            dynamicAssistanceTimerNode = setTimeout(() => {
+                activateCorrectOptionGlowHint();
+            }, 12000);
+        }
+
+        function activateCorrectOptionGlowHint() {
+            const correctBtn = document.querySelector('.option-node-btn[data-correct="true"]');
+            if (correctBtn && !correctBtn.disabled) {
+                correctBtn.classList.add('correct-answer-glow');
+                document.getElementById('helperAlertLabel').innerText = "💡 Need help? Tap the magical glowing button!";
+                document.getElementById('helperAlertLabel').className = "text-sm font-extrabold text-amber-500 leading-normal min-h-[44px] flex items-center justify-center px-2";
+            }
+        }
+
+        function verifySelectedAnswerOption(pickedOption, elementNode, dataObj) {
+            if(dynamicAssistanceTimerNode) clearTimeout(dynamicAssistanceTimerNode);
+            const allOptionButtons = document.querySelectorAll('.option-node-btn');
+
+            if (pickedOption === dataObj.ans) {
+                allOptionButtons.forEach(b => b.disabled = true);
+                elementNode.className = "w-full bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-2xl border-3 border-emerald-300 text-base text-center shadow-md child-font animate-scale";
+                
+                playSound('soundCorrect');
+                launchConfettiBurst();
+
+                document.getElementById('helperAlertLabel').innerText = dataObj.explanation;
+                document.getElementById('helperAlertLabel').className = "text-sm font-extrabold text-emerald-600 leading-normal min-h-[44px] flex items-center justify-center px-2";
+
+                if (incorrectAttemptsCount === 0) {
+                    internalScore += 10;
+                } else {
+                    internalScore += 5;
+                }
+                
+                document.getElementById('scoreTextValue').innerText = internalScore;
+                completedTargetsTrack++;
+                document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack}/10`;
+
+                setTimeout(() => {
+                    document.getElementById('questionModalOverlay').classList.add('hidden');
+                    databasePointerIdx++;
+                    
+                    if (completedTargetsTrack < 10) {
+                        spawnNewFallingEntity();
+                    } else {
+                        evaluateGameProgressEndState();
+                    }
+                }, 3800);
+
+            } else {
+                playSound('soundWrong');
+                elementNode.className = "w-full bg-rose-100 text-rose-400 font-bold py-3.5 px-4 rounded-2xl border-3 border-rose-200 text-base text-center opacity-50 line-through cursor-not-allowed child-font";
+                elementNode.disabled = true;
+                incorrectAttemptsCount++;
+
+                if (incorrectAttemptsCount === 1) {
+                    document.getElementById('helperAlertLabel').className = "text-sm font-bold text-rose-500 leading-normal min-h-[44px] flex items-center justify-center px-2";
+                    document.getElementById('helperAlertLabel').innerText = `❌ ${dataObj.hint}`;
+                    
+                    dynamicAssistanceTimerNode = setTimeout(() => {
+                        activateCorrectOptionGlowHint();
+                    }, 12000);
+
+                } else if (incorrectAttemptsCount >= 2) {
+                    activateCorrectOptionGlowHint();
+                    
+                    internalScore = Math.max(0, internalScore - 5);
+                    document.getElementById('scoreTextValue').innerText = internalScore;
+
+                    document.getElementById('helperAlertLabel').innerText = `💥 Let's study: ${dataObj.explanation}`;
+                    document.getElementById('helperAlertLabel').className = "text-sm font-bold text-amber-500 leading-normal min-h-[44px] flex items-center justify-center px-2";
+                    allOptionButtons.forEach(b => b.disabled = true);
+                    
+                    completedTargetsTrack++;
+                    document.getElementById('clearedCountValue').innerText = `${completedTargetsTrack}/10`;
+
+                    setTimeout(() => {
+                        document.getElementById('questionModalOverlay').classList.add('hidden');
+                        databasePointerIdx++;
+                        
+                        if (completedTargetsTrack < 10) {
+                            spawnNewFallingEntity();
+                        } else {
+                            evaluateGameProgressEndState();
+                        }
+                    }, 4800);
+                }
+            }
+        }
+
+        function evaluateGameProgressEndState() {
+            if (completedTargetsTrack >= 10) {
+                if (fallingProcessLoop) clearInterval(fallingProcessLoop);
+                setTimeout(() => {
+                    playSound('soundClapping');
+                    document.getElementById('gameView').style.display = 'none';
+                    document.getElementById('finalScoreLabelField').innerText = `${internalScore} / 100`;
+                    document.getElementById('scoreView').classList.remove('hidden');
+                }, 200);
+            }
+        }
+
+        function playSound(id) {
+            const trackElement = document.getElementById(id);
+            if (trackElement) {
+                trackElement.load();
+                const p = trackElement.play();
+                if (p !== undefined) {
+                    p.catch(err => console.log("Audio pipeline handled: ", err));
+                }
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('scoreView').classList.add('hidden');
+            document.getElementById('gameView').style.display = 'flex';
+            startGame();
+        }
+    </script>
+</body>
+</html>
