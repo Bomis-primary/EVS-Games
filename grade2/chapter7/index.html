@@ -27,18 +27,19 @@
             box-shadow: 0 10px 0 #047857, 0 12px 24px rgba(4, 120, 87, 0.1);
         }
 
-        /* Empty blank gets the bottom red line */
+        /* Empty blank baseline */
         .letter-blank {
             border-bottom: 4px solid #F43F5E;
             color: transparent;
         }
 
-        /* Filled character box sits cleanly with NO bottom red lines visible */
+        /* Clean blue rounded block layout - NO bottom lines attached */
         .letter-filled-box {
             background-color: #E0F2FE;
             border: 2px solid #38BDF8;
             color: #0369A1;
             border-radius: 12px;
+            border-bottom: none !important;
         }
 
         .keyboard-key {
@@ -236,19 +237,20 @@
     </div>
 
     <script>
+        // Updated completely balanced 12 unique answers question list
         const textbookQuestionsSource = [
-            { question: "Pine and fir trees grow in cool weather on high, freezing cold __________", answer: "MOUNTAINS", fact: "🌲 Fir trees have sloped branches so heavy snow easily slides right off!" },
-            { question: "Prickly cactus plants grow in dry, hot __________ where there is very little water.", answer: "DESERTS", fact: "🌵 Cacti can store water inside their thick stems for a long time!" },
-            { question: "Beautiful lotus and water lily plants are special because they grow inside __________", answer: "WATER", fact: "🪷 Their leaves are wide and flat so they can float perfectly on top!" },
-            { question: "The underground parts that anchor a plant firmly and drink soil nutrients are the __________", answer: "ROOTS", fact: "🥕 Roots act like tiny drinking straws hidden deep inside the dirt!" },
-            { question: "The part growing above the ground that holds up leaves, flowers, and fruits is the __________", answer: "STEM", fact: "🪵 The stem carries food and water up and down to help the plant grow!" },
-            { question: "Plants use their flat green __________ to catch sunlight and cook their own food.", answer: "LEAVES", fact: "🍃 Leaves are like a plant's tiny natural kitchen powered by the sun!" },
-            { question: "Fleshy vegetables like carrots, radishes, and beetroots are actually modified __________", answer: "ROOTS", fact: "🥕 These plants save extra food inside their roots beneath the soil!" },
-            { question: "Fleshy ginger, turmeric, and potatoes grow underground but are actually modified __________", answer: "STEMS", fact: "🥔 Even though they live underground, they have small buds called eyes!" },
-            { question: "Plants like the cactus, rose, and lemon grow sharp __________ to stay safe from hungry animals.", answer: "THORNS", fact: "🌹 Thorns work like sharp armor so animals don't bite the plant!" },
-            { question: "We get sweet crystals of sugar by crushing the juicy stems of __________ plants.", answer: "SUGARCANE", fact: "🎋 Squeezing these tall, sweet stems gives us the juice used to make sugar!" },
-            { question: "Strong bags, heavy sacks, thick ropes, and mats are woven using tough __________ fibres.", answer: "JUTE", fact: "🧵 Jute comes from the long, strong skin layers of the jute plant stem!" },
-            { question: "Science shows us that trees can 'talk' to each other by releasing chemicals through their __________", answer: "ROOTS", fact: "🌳 Trees use their roots to send secret warning signals to their neighbors!" }
+            { question: "Very small, weak plants with soft, green stems like mint and coriander are called __________", answer: "HERBS", fact: "🌿 Herbs live for only one or two seasons and add flavor to food!" },
+            { question: "Medium-sized plants with thin, woody stems branching near the ground like the rose are __________", answer: "SHRUBS", fact: "🌹 Shrubs are also called bushes and live for several years!" },
+            { question: "Big, strong plants with a thick, hard brown main trunk like mango or neem are called __________", answer: "TREES", fact: "🌳 Trees have a single thick trunk that stands strong for many years!" },
+            { question: "Plants with weak stems that climb up walls or sticks for support are called __________", answer: "CLIMBERS", fact: "🍇 Climbers have special features to hold onto ropes or branches!" },
+            { question: "Weak-stemmed plants like watermelons and pumpkins that crawl along the ground are __________", answer: "CREEPERS", fact: "🍉 Creepers grow huge, heavy fruits that cannot lift into the air!" },
+            { question: "Fir and pine trees are adapted to live on cold, snow-covered mountains with a __________ shape.", answer: "CONICAL", fact: "📐 Their slope shape lets heavy mountain snow slip off safely!" },
+            { question: "Plants that grow in dry, hot deserts with very little water are called __________", answer: "XEROPHYTES", fact: "🌵 Xerophytes store huge pockets of water inside fleshy leaves or stems!" },
+            { question: "The broad, flat green part of a leaf that catches sunlight to cook food is the __________", answer: "LAMINA", fact: "🍃 The lamina acts like a flat solar panel catching the sunshine!" },
+            { question: "Plants use sunlight, water, and air to cook their food through a process called __________", answer: "PHOTOSYNTHESIS", fact: "🧪 Photosynthesis means 'making things using natural light energy'!" },
+            { question: "The part growing above the ground that holds up branches, leaves, and fruits is the __________", answer: "STEM", fact: "🪵 The stem carries healthy food and water up and down the plant!" },
+            { question: "Fleshy vegetables like carrots, radishes, and turnip are actually modified __________", answer: "ROOTS", fact: "🥕 These roots save extra plant food safely hidden under the dirt!" },
+            { question: "Plants like lemons and cacti grow sharp, pointy structures called __________ to stay safe.", answer: "THORNS", fact: "🍋 Thorns keep hungry garden animals from biting into the stems!" }
         ];
 
         let activeQuestionList = [];
@@ -302,7 +304,7 @@
         function prepareGameStructureData() {
             const savedState = localStorage.getItem('gardenSpellbee_saveState');
             
-            // Dynamic Save State: Tracks and updates correctly starting from ANY question index
+            // Dynamic Save State Logic: Saves and reads correctly starting from ANY question number!
             if (savedState) {
                 try {
                     const parsed = JSON.parse(savedState);
@@ -316,7 +318,7 @@
                     }
                     return;
                 } catch(e) {
-                    console.log("State clean bypass triggered");
+                    console.log("State recovery bypass");
                 }
             }
             
@@ -343,7 +345,6 @@
             
             updateLivesCounterUI();
             document.getElementById('scoreDisplay').innerText = runningScore;
-            
             buildQuestionRoundDisplay();
         }
 
@@ -390,15 +391,14 @@
                 const isLetterFilled = workingProgress[i] !== "";
                 
                 if (isLetterFilled) {
-                    // Clean blue rounded block layout - NO bottom lines attached
+                    // Solid blue block - NO red underlines showing
                     box.className = "w-7 h-9 flex items-center justify-center font-black text-sm child-font uppercase letter-filled-box";
                     box.innerText = workingProgress[i];
                 } else {
-                    // Simple underline container element for empty items
+                    // Flat red baseline line for empty slots
                     box.className = "w-7 h-9 flex items-center justify-center font-black text-sm child-font uppercase letter-blank";
                     box.innerText = "";
                 }
-                
                 container.appendChild(box);
             }
         }
