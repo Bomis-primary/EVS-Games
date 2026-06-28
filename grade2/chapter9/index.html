@@ -20,7 +20,6 @@
             font-family: 'Fredoka', cursive;
         }
 
-        /* Claymorphic Kid Card Layout */
         .sky-isle-card {
             background: radial-gradient(circle at top left, #FFFFFF 0%, #F0F9FF 100%);
             border: 4px solid #0EA5E9;
@@ -38,7 +37,7 @@
             transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Cute pastel cloud blocks for empty zones instead of black spaces */
+        /* Soft pastel cloud blocks for non-word zones */
         .crossword-cell.pastel-block {
             background: rgba(224, 242, 254, 0.4) !important;
             border-color: transparent !important;
@@ -61,7 +60,7 @@
             font-size: 14px;
             font-weight: 900;
             color: #0F172A;
-            display: none; /* Kept hidden until solved */
+            display: none;
         }
 
         /* Bouncy active glowing tracks */
@@ -232,6 +231,7 @@
     </div>
 
     <script>
+        // SHUFFLED MCQ OPTION INDICES & STRICT 11x11 GRAPH MAP GEOMETRY
         const accurateCrosswordRegistry = [
             {
                 id: 1,
@@ -251,7 +251,7 @@
                 clueLabel: "1 Down: A full balloon drops lower on a balancing scale because air has _____. (6 Letters)",
                 solved: false,
                 poolA: [{ q: "A balloon full of air tilts downward on a scale compared to an empty balloon. This proves air has ________.", choices: ["Color", "Weight", "No use"], correct: 1 }],
-                poolB: [{ q: "Why is a football full of air heavier than a flat football?", choices: ["Because it contains air inside", "Because of its rubber color", "Because it contains mud"], correct: 0 }]
+                poolB: [{ q: "Why is a football full of air heavier than a flat football?", choices: ["Because of its bright color", "Because it contains mud", "Because it contains air inside"], correct: 2 }]
             },
             {
                 id: 3,
@@ -291,7 +291,7 @@
                 clueLabel: "4 Across: Humans, animals, and plants take in air continuously to _____. (7 Letters)",
                 solved: false,
                 poolA: [{ q: "Humans, animals, and plants all need air to ________ and stay alive.", choices: ["Breathe", "Sleep", "Dance"], correct: 0 }],
-                poolB: [{ q: "What happens if you try to hold your breath for a little bit?", choices: ["You feel completely fine", "You start feeling uneasy because your body needs air", "You grow taller instantly"], correct: 1 }]
+                poolB: [{ q: "What happens if you try to hold your breath for a little bit?", choices: ["You feel completely fine", "You grow taller instantly", "You start feeling uneasy because your body needs air"], correct: 2 }]
             },
             {
                 id: 7,
@@ -331,7 +331,7 @@
                 clueLabel: "6 Down: To stay healthy, we must always breathe fresh, _____ air. (5 Letters)",
                 solved: false,
                 poolA: [{ q: "To stay healthy and strong, we must always breathe fresh, ________ air.", choices: ["Dirty", "Clean", "Smoky"], correct: 1 }],
-                poolB: [{ q: "Where will you find the cleanest and freshest air to breathe safely?", choices: ["On a busy road with heavy traffic", "In a green open park with trees", "Inside a dusty closed room"], correct: 1 }]
+                poolB: [{ q: "Where will you find the cleanest and freshest air to breathe safely?", choices: ["On a busy road with heavy traffic", "Inside a dusty closed room", "In a green open park with trees"], correct: 2 }]
             }
         ];
 
@@ -354,13 +354,20 @@
             const gridPlane = document.getElementById('crosswordLayoutGridPlane');
             gridPlane.innerHTML = "";
 
-            const coordCache = {};
+            const coordMap = {};
             const hintNumbers = {};
 
+            // Map characters explicitly to avoid overlaps overwriting index data
             accurateCrosswordRegistry.forEach(item => {
-                item.cells.forEach(([r, c]) => {
-                    if (!coordCache[`${r}-${c}`]) coordCache[`${r}-${c}`] = [];
-                    coordCache[`${r}-${c}`].push(item);
+                item.cells.forEach(([r, c], index) => {
+                    const coordKey = `${r}-${c}`;
+                    if (!coordMap[coordKey]) {
+                        coordMap[coordKey] = {
+                            words: [],
+                            letter: item.word[index]
+                        };
+                    }
+                    coordMap[coordKey].words.push(item);
                 });
                 const [firstR, firstC] = item.cells[0];
                 hintNumbers[`${firstR}-${firstC}`] = item.clueNumber;
@@ -371,18 +378,12 @@
                     const key = `${r}-${c}`;
                     const cellNode = document.createElement('div');
 
-                    if (coordCache[key]) {
-                        const wordObj = coordCache[key][0];
+                    if (coordMap[key]) {
                         cellNode.id = `crossword-cell-node-${r}-${c}`;
                         cellNode.className = "crossword-cell flex items-center justify-center select-none";
                         
-                        const charPos = wordObj.cells.findIndex(([row, col]) => row === r && col === c);
-                        const letterStr = wordObj.word[charPos] || "";
-
-                        // Inject inner containers safely to protect numbers from breaking later
-                        cellNode.innerHTML = `
-                            <span class="cell-letter-text">${letterStr}</span>
-                        `;
+                        // Inject the correct letter node safely
+                        cellNode.innerHTML = `<span class="cell-letter-text">${coordMap[key].letter}</span>`;
 
                         if (hintNumbers[key]) {
                             const numLabel = document.createElement('span');
@@ -393,7 +394,8 @@
 
                         cellNode.addEventListener('pointerdown', (e) => {
                             e.preventDefault();
-                            launchClueQuestionFlow(wordObj);
+                            // Launch using the first bound line target
+                            launchClueQuestionFlow(coordMap[key].words[0]);
                         });
                     } else {
                         cellNode.className = "crossword-cell pastel-block";
@@ -569,7 +571,6 @@
                 const cell = document.getElementById(`crossword-cell-node-${row}-${col}`);
                 if (cell) {
                     cell.classList.remove('tile-active-glow');
-                    // Applies the CSS styled letter reveals instantly
                     cell.classList.add('tile-solved-success');
                 }
             });
