@@ -61,7 +61,6 @@
             50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
         }
 
-        /* Animated Action / Trap Tiles */
         .action-pulse-green {
             animation: pulseGreen 2s infinite alternate;
         }
@@ -105,7 +104,6 @@
             box-shadow: 0 3px 0 #047857;
         }
 
-        /* 3D Dice Spin Animation effect */
         .dice-spin-effect {
             animation: spinDice 0.15s linear infinite;
         }
@@ -170,11 +168,11 @@
                 </div>
                 <div class="flex items-start space-x-2">
                     <span class="shrink-0 text-sm">📜</span> 
-                    <p>Answering right gets you <b>+10 points</b>. If you make a mistake, you can try one more time!</p>
+                    <p>Each question tile has <b>2 questions</b> inside it! Answer both to complete the tile.</p>
                 </div>
                 <div class="flex items-start space-x-2">
                     <span class="shrink-0 text-sm">📈</span> 
-                    <p>Your total score changes based on the question blocks you land on!</p>
+                    <p>Your final total score changes based on the number of questions you answer!</p>
                 </div>
             </div>
 
@@ -254,7 +252,6 @@
     </div>
 
     <script>
-        // Track Scheme Array Definitions
         const verticalTrailSequence = [
             { id: 0, text: "START 🚩", type: "start", align: "justify-start pl-4", color: "bg-rose-500 text-white border-rose-700" },
             { id: 1, text: "🦁 Wild Animals", type: "question", cat: "wild", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
@@ -274,63 +271,56 @@
             { id: 15, text: "FINISH 🏆", type: "finish", align: "justify-center px-2", color: "bg-emerald-500 text-white border-emerald-700" }
         ];
 
-        // 3 Questions Per Category Pool Array Database
+        // 2 Questions explicitly matched to every category node element
         const categoryQuestionsPool = {
             wild: [
                 { q: "Animals like tigers, lions, and bears that live in natural forests are called __________ animals.", choices: ["domestic", "wild", "pet"], correct: 1 },
-                { q: "Wild animals find their own food in the forest. They do not live with __________.", choices: ["trees", "humans", "birds"], correct: 1 },
-                { q: "Which of these animals is a wild animal that lives in the jungle?", choices: ["Cow", "Cat", "Fox"], correct: 2 }
+                { q: "Wild animals find their own food in the forest. They do not live with __________.", choices: ["trees", "humans", "birds"], correct: 1 }
             ],
             diet: [
                 { q: "Deer, giraffes, and zebras eat only grass and plants. They are called __________.", choices: ["carnivores", "herbivores", "scavengers"], correct: 1 },
-                { q: "Tigers and cheetahs eat the flesh of other animals. They are called __________.", choices: ["carnivores", "herbivores", "omnivores"], correct: 0 },
-                { q: "Vultures and jackals help keep the forest clean by eating __________.", choices: ["fresh leaves", "dead animals", "fruits"], correct: 1 }
+                { q: "Tigers and cheetahs eat the flesh of other animals. They are called __________.", choices: ["carnivores", "herbivores", "omnivores"], correct: 0 }
             ],
             farm: [
                 { q: "Animals that are kept on farms to help us work or carry heavy loads are called __________ animals.", choices: ["wild", "domestic", "flesh-eating"], correct: 1 },
-                { q: "Oxen help farmers in the crop fields by performing what important work?", choices: ["pulling carts", "ploughing fields", "guarding homes"], correct: 1 },
-                { q: "Which animal gives us wool to make warm clothes?", choices: ["Dog", "Sheep", "Horse"], correct: 1 }
+                { q: "Oxen help farmers in the crop fields by performing what important work?", choices: ["pulling carts", "ploughing fields", "guarding homes"], correct: 1 }
             ],
             move: [
                 { q: "Kangaroos, rabbits, and frogs move quickly by using their strong back legs to __________.", choices: ["crawl", "fly", "hop and jump"], correct: 2 },
-                { q: "Snakes, earthworms, and snails do not have legs, so they __________ along the ground.", choices: ["crawl", "swim", "hop"], correct: 0 },
-                { q: "Birds can fly high in the air because they have light bodies and strong __________.", choices: ["fins", "wings", "horns"], correct: 1 }
+                { q: "Snakes, earthworms, and snails do not have legs, so they __________ along the ground.", choices: ["crawl", "swim", "hop"], correct: 0 }
             ],
             shelter: [
                 { q: "Domestic horses are kept safe and warm inside a human-made home called a __________.", choices: ["kennel", "stable", "coop"], correct: 1 },
-                { q: "Where do wild lions and big bears go to sleep inside the jungle?", choices: ["dens and caves", "burrows", "tree tops"], correct: 0 },
-                { q: "Rabbits and rats dig holes in the ground to live safely. These holes are called __________.", choices: ["stables", "coops", "burrows"], correct: 2 }
+                { q: "Where do wild lions and big bears go to sleep inside the jungle?", choices: ["dens and caves", "burrows", "tree tops"], correct: 0 }
             ],
             care: [
                 { q: "If a farm animal or a pet gets sick, we must take them to an animal doctor called a _________.", choices: ["dentist", "vet", "tailor"], correct: 1 },
-                { q: "Taking good care of domestic animals means giving them a clean place, good food, and clean _________.", choices: ["toys", "water", "clothes"], correct: 1 },
-                { q: "We should always be __________ to animals and never tease them.", choices: ["kind", "mean", "loud"], correct: 0 }
+                { q: "Taking good care of domestic animals means giving them a clean place, good food, and clean _________.", choices: ["toys", "water", "clothes"], correct: 1 }
             ],
             fact: [
                 { q: "What helps horses sleep safely while standing completely upright?", choices: ["special steady lock-legs", "sleeping with open eyes", "they never sleep"], correct: 0 },
-                { q: "Dolphins are smart water animals. They use special sounds that work like their own _________.", choices: ["songs", "names", "warnings"], correct: 1 },
-                { q: "Which animal can sleep while standing up?", choices: ["Dog", "Horse", "Rabbit"], correct: 1 }
+                { q: "Dolphins are smart water animals. They use special sounds that work like their own _________.", choices: ["songs", "names", "warnings"], correct: 1 }
             ],
             safe: [
                 { q: "Animals like the giant panda and rhinoceros that are disappearing fast from Earth are called __________ animals.", choices: ["endangered", "friendly", "domestic"], correct: 0 },
-                { q: "Why do humans cut down wild forests and put animal lives in danger?", choices: ["to plant flowers", "to clear land and trees", "to feed animals"], correct: 1 },
-                { q: "We can protect wild animals by stopping people from __________ them.", choices: ["feeding", "hunting", "watching"], correct: 1 }
+                { q: "Why do humans cut down wild forests and put animal lives in danger?", choices: ["to plant flowers", "to clear land and trees", "to feed animals"], correct: 1 }
             ],
             water: [
                 { q: "Fish can swim smoothly in water with the help of __________.", choices: ["wings", "fins", "legs"], correct: 1 },
-                { q: "Animals like frogs are special because they can live comfortably both __________.", choices: ["in trees and skies", "on land and in water", "in caves"], correct: 1 },
-                { q: "Which of these animals can live *both* on land and in water?", choices: ["Fish", "Frog", "Cow"], correct: 1 }
+                { q: "Animals like frogs are special because they can live comfortably both __________.", choices: ["in trees and skies", "on land and in water", "in caves"], correct: 1 }
             ]
         };
 
-        // Engine states
+        // Engine Track State Variables
         let currentTokenIndex = 0;
         let runningScore = 0;
         let runningMaxPossibleScore = 0; 
         let isDiceRolling = false;
         let playerFrozenTurn = false;
 
-        let dynamicCurrentQuestionObj = null;
+        // Sequence Controller Variables for managing 2 sequential questions per tile landing
+        let activeQuestionsQueue = [];
+        let activeQueuePointerIndex = 0;
         let currentAttemptsCount = 1;
 
         const canvas = document.getElementById('confettiCanvas');
@@ -477,7 +467,6 @@
                     
                     document.getElementById('diceFeedback').innerText = `Advanced +${rolledNum} steps!`;
                     
-                    // Walk character step-by-step first!
                     executeTokenTrailHops(rolledNum);
                 }
             }, 100);
@@ -493,7 +482,6 @@
                     refreshTokenTrackDisplays();
                 } else {
                     clearInterval(incrementalTimer);
-                    // Movement completely stops before triggering consequences!
                     setTimeout(() => {
                         evaluateLandedStoneConsequences();
                     }, 400);
@@ -505,11 +493,13 @@
             const stoneData = verticalTrailSequence[currentTokenIndex];
 
             if (stoneData.type === "question") {
-                runningMaxPossibleScore += 10;
+                // Adds +20 total to maximum score pool because there are 2 questions present inside the tile
+                runningMaxPossibleScore += 20;
                 document.getElementById('maxScoreDisplay').innerText = runningMaxPossibleScore;
 
-                const questionArray = categoryQuestionsPool[stoneData.cat];
-                dynamicCurrentQuestionObj = questionArray[Math.floor(Math.random() * questionArray.length)];
+                // Load both fixed questions sequentially
+                activeQuestionsQueue = [...categoryQuestionsPool[stoneData.cat]];
+                activeQueuePointerIndex = 0;
                 currentAttemptsCount = 1;
                 
                 triggerQuestionModalDisplay();
@@ -547,14 +537,17 @@
         }
 
         function triggerQuestionModalDisplay() {
-            document.getElementById('modalCategoryTitle').innerText = `${verticalTrailSequence[currentTokenIndex].text}`;
+            const activeQuestionObj = activeQuestionsQueue[activeQueuePointerIndex];
+            
+            // Displays if it is Q1 or Q2 on the tile header
+            document.getElementById('modalCategoryTitle').innerText = `${verticalTrailSequence[currentTokenIndex].text} (Q${activeQueuePointerIndex + 1}/2)`;
             document.getElementById('modalAttemptStars').innerText = "⭐⭐";
-            document.getElementById('modalQuestionPrompt').innerText = dynamicCurrentQuestionObj.q;
+            document.getElementById('modalQuestionPrompt').innerText = activeQuestionObj.q;
 
             const stack = document.getElementById('modalOptionsStack');
             stack.innerHTML = "";
 
-            dynamicCurrentQuestionObj.choices.forEach((choiceStr, idx) => {
+            activeQuestionObj.choices.forEach((choiceStr, idx) => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-slate-700 bg-slate-50 border-2 border-slate-200 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left active:scale-98 cursor-pointer child-font";
                 btn.innerText = `${String.fromCharCode(65 + idx)}) ${choiceStr}`;
@@ -568,7 +561,8 @@
         }
 
         function verifyOptionAnswerSubmission(selectedIndex, chosenButtonNode) {
-            const correctOptionIdx = dynamicCurrentQuestionObj.correct;
+            const activeQuestionObj = activeQuestionsQueue[activeQueuePointerIndex];
+            const correctOptionIdx = activeQuestionObj.correct;
             const stack = document.getElementById('modalOptionsStack');
             const feedbackText = document.getElementById('modalFeedbackMessage');
 
@@ -584,7 +578,7 @@
                 feedbackText.innerText = currentAttemptsCount === 1 ? "🎉 Great Job! +10 Points (⭐⭐)" : "👍 You got it! +10 Points (⭐)";
                 feedbackText.className = "text-[11px] font-black text-emerald-600 block animate-pulse";
 
-                setTimeout(() => { dismissModalOverlay(); }, 1500);
+                setTimeout(() => { moveNextInQuestionQueue(); }, 1500);
             } else {
                 playSound('soundWrong');
                 chosenButtonNode.className = "w-full text-white bg-rose-500 border-2 border-rose-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left opacity-60 child-font";
@@ -607,11 +601,23 @@
                     const accurateBtn = stack.children[correctOptionIdx];
                     if (accurateBtn) accurateBtn.className = "w-full text-white bg-emerald-500 border-2 border-emerald-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left child-font";
 
-                    feedbackText.innerText = "❌ Let's keep moving forward!";
+                    feedbackText.innerText = "❌ Moving to the next question!";
                     feedbackText.className = "text-[11px] font-black text-rose-500 block";
 
-                    setTimeout(() => { dismissModalOverlay(); }, 2000);
+                    setTimeout(() => { moveNextInQuestionQueue(); }, 2000);
                 }
+            }
+        }
+
+        function moveNextInQuestionQueue() {
+            activeQueuePointerIndex++;
+            if (activeQueuePointerIndex < activeQuestionsQueue.length) {
+                // Load second question on the exact same tile right away
+                currentAttemptsCount = 1;
+                triggerQuestionModalDisplay();
+            } else {
+                // Finished both questions, close overlay and let user spin dice again
+                dismissModalOverlay();
             }
         }
 
