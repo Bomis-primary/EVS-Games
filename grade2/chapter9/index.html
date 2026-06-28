@@ -20,47 +20,78 @@
             font-family: 'Fredoka', cursive;
         }
 
+        /* Claymorphic Kid Card Layout */
         .sky-isle-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 249, 255, 0.98) 100%);
-            border: 5px solid #0284C7;
-            box-shadow: 0 14px 0 #0369A1, 0 20px 35px rgba(3, 105, 161, 0.25);
-            border-radius: 32px;
+            background: radial-gradient(circle at top left, #FFFFFF 0%, #F0F9FF 100%);
+            border: 4px solid #0EA5E9;
+            box-shadow: 0 12px 0 #0284C7, 0 20px 30px rgba(2, 132, 199, 0.2);
+            border-radius: 28px;
         }
 
         /* Traditional Crossword Grid Styling */
         .crossword-cell {
             aspect-ratio: 1 / 1;
             background-color: #FFFFFF;
-            border: 1.5px solid #334155;
+            border: 2px solid #7DD3FC;
+            border-radius: 6px;
             position: relative;
-            transition: all 0.2s ease-out;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Black out non-puzzle areas completely */
-        .crossword-cell.black-block {
-            background-color: #0f172a !important;
-            border-color: #0f172a !important;
+        /* Cute pastel cloud blocks for empty zones instead of black spaces */
+        .crossword-cell.pastel-block {
+            background: rgba(224, 242, 254, 0.4) !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            pointer-events: none;
         }
 
         .crossword-cell-hint-number {
             position: absolute;
-            top: 1px;
-            left: 2px;
+            top: 2px;
+            left: 3px;
             font-size: 8px;
             font-weight: 800;
-            color: #1e293b;
+            color: #0369A1;
             line-height: 1;
             z-index: 10;
         }
 
-        .tile-active-glow {
-            animation: bubblePulse 1.2s infinite ease-in-out;
-            border-color: #F59E0B !important;
-            z-index: 20;
+        .cell-letter-text {
+            font-size: 14px;
+            font-weight: 900;
+            color: #0F172A;
+            display: none; /* Kept hidden until solved */
         }
-        @keyframes bubblePulse {
-            0%, 100% { background-color: #FEF3C7; }
-            50% { background-color: #FDE68A; }
+
+        /* Bouncy active glowing tracks */
+        .tile-active-glow {
+            animation: bounceGlow 1s infinite alternate ease-in-out;
+            border-color: #F59E0B !important;
+            background-color: #FEF3C7 !important;
+            transform: scale(1.03);
+            z-index: 20;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+        }
+        @keyframes bounceGlow {
+            0% { transform: scale(1.01); }
+            100% { transform: scale(1.05); }
+        }
+
+        /* Locked / Solved State */
+        .tile-solved-success {
+            background: linear-gradient(135deg, #34D399 0%, #10B981 100%) !important;
+            border-color: #059669 !important;
+            transform: scale(1);
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
+        }
+        .tile-solved-success .cell-letter-text {
+            display: block !important;
+            color: #FFFFFF !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .tile-solved-success .crossword-cell-hint-number {
+            color: #D1FAE5 !important;
         }
 
         .btn-pop-orange {
@@ -90,7 +121,7 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-2 m-0 select-none min-h-screen relative w-full overflow-x-hidden">
+<body class="flex flex-col items-center justify-center p-3 m-0 select-none min-h-screen relative w-full overflow-x-hidden">
 
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
@@ -102,14 +133,14 @@
         
         <div id="titleView" class="w-full sky-isle-card p-5 text-center space-y-4">
             <div class="space-y-1 py-1">
-                <div class="inline-block text-5xl">🧩</div>
+                <div class="inline-block text-5xl">🎈</div>
                 <h1 class="text-3xl font-bold text-sky-900 tracking-wide drop-shadow-sm">Word Puzzle</h1>
                 <p class="text-[10px] text-sky-600 font-black tracking-widest uppercase child-font">Crossword Challenge</p>
             </div>
 
             <div class="bg-white/90 border border-sky-100 p-4 rounded-2xl shadow-inner text-center">
                 <p class="text-xs font-bold text-slate-700 leading-relaxed">
-                    Tap on the crossword boxes to read the questions and lock your words into the puzzle!
+                    Tap on the white crossword boxes to read the questions and lock your words into the puzzle!
                 </p>
             </div>
             
@@ -124,7 +155,7 @@
             <div class="space-y-2.5 text-xs text-slate-700 font-bold text-left">
                 <div class="flex items-center space-x-3 bg-white/90 p-3 rounded-xl border border-sky-100 shadow-sm">
                     <span class="text-xl bg-sky-100 p-1 rounded-lg">✏️</span>
-                    <p>Tap a white crossword line to solve its 2 questions!</p>
+                    <p>Tap a white crossword box to solve its 2 questions!</p>
                 </div>
                 <div class="flex items-center space-x-3 bg-white/90 p-3 rounded-xl border border-sky-100 shadow-sm">
                     <span class="text-xl bg-amber-100 p-1 rounded-lg">💡</span>
@@ -156,9 +187,9 @@
                 </div>
             </div>
 
-            <div class="bg-white border-4 border-sky-400 p-2 rounded-[24px] shadow-md flex-1 flex flex-col justify-center overflow-hidden">
+            <div class="bg-sky-100 border-4 border-sky-400 p-2.5 rounded-[24px] shadow-inner flex-1 flex flex-col justify-center overflow-hidden">
                 <div class="w-full flex items-center justify-center">
-                    <div id="crosswordLayoutGridPlane" class="grid grid-cols-11 gap-[1px] bg-slate-700 p-[1px] w-full max-w-[310px] aspect-square justify-center items-center">
+                    <div id="crosswordLayoutGridPlane" class="grid grid-cols-11 gap-[2px] bg-sky-200/50 p-1 rounded-xl w-full max-w-[310px] aspect-square justify-center items-center">
                         </div>
                 </div>
             </div>
@@ -172,7 +203,7 @@
             <div class="bg-white border-4 border-sky-400 rounded-[28px] p-4 w-full max-w-sm text-center space-y-3 shadow-2xl">
                 
                 <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                    <span id="modalHeaderTitle" class="text-[9px] font-black text-sky-600 tracking-wider uppercase child-font">Clue Task</span>
+                    <span id="modalHeaderTitle" class="text-[9px] font-black text-sky-600 tracking-wider uppercase child-font">Puzzle Task</span>
                     <div id="modalAttemptStars" class="text-amber-400 text-xs font-bold">⭐⭐</div>
                 </div>
 
@@ -201,7 +232,6 @@
     </div>
 
     <script>
-        // STRICT INTERSECTING GRAPH MATRIX (11x11 FIXED TEMPLATE STRUCTURE)
         const accurateCrosswordRegistry = [
             {
                 id: 1,
@@ -344,12 +374,15 @@
                     if (coordCache[key]) {
                         const wordObj = coordCache[key][0];
                         cellNode.id = `crossword-cell-node-${r}-${c}`;
-                        // Blank puzzle tiles are cleanly empty with visible dark borders
-                        cellNode.className = "crossword-cell flex items-center justify-center font-black text-slate-900 text-xs sm:text-sm cursor-pointer select-none child-font";
+                        cellNode.className = "crossword-cell flex items-center justify-center select-none";
                         
-                        // Set the letter container data attribute but keep layout text empty initially
                         const charPos = wordObj.cells.findIndex(([row, col]) => row === r && col === c);
-                        cellNode.setAttribute('data-letter', wordObj.word[charPos] || "");
+                        const letterStr = wordObj.word[charPos] || "";
+
+                        // Inject inner containers safely to protect numbers from breaking later
+                        cellNode.innerHTML = `
+                            <span class="cell-letter-text">${letterStr}</span>
+                        `;
 
                         if (hintNumbers[key]) {
                             const numLabel = document.createElement('span');
@@ -363,8 +396,7 @@
                             launchClueQuestionFlow(wordObj);
                         });
                     } else {
-                        // Completely blacked-out structural blocks where there are no words
-                        cellNode.className = "crossword-cell black-block";
+                        cellNode.className = "crossword-cell pastel-block";
                     }
                     gridPlane.appendChild(cellNode);
                 }
@@ -407,7 +439,7 @@
 
         function launchClueQuestionFlow(wordObject) {
             if (wordObject.solved) {
-                document.getElementById('clueLabelFooterDisplay').innerText = `🎉 Already solved! Word line "${wordObject.word}" is locked into the grid!`;
+                document.getElementById('clueLabelFooterDisplay').innerText = `🎉 Line filled! "${wordObject.word}" is locked on the board!`;
                 return;
             }
 
@@ -435,7 +467,7 @@
         function triggerInteractiveModalPopup() {
             const target = (activeSubQuestionIndex === 0) ? randomQuestionA : randomQuestionB;
 
-            document.getElementById('modalHeaderTitle').innerText = `Puzzle Line: ${selectedWordReference.clueNumber} (Question ${activeSubQuestionIndex + 1}/2)`;
+            document.getElementById('modalHeaderTitle').innerText = `Line: ${selectedWordReference.clueNumber} (Question ${activeSubQuestionIndex + 1}/2)`;
             document.getElementById('modalAttemptStars').innerText = "⭐⭐";
             document.getElementById('modalQuestionText').innerText = target.q;
 
@@ -537,22 +569,14 @@
                 const cell = document.getElementById(`crossword-cell-node-${row}-${col}`);
                 if (cell) {
                     cell.classList.remove('tile-active-glow');
-                    
-                    // GET AND REVEAL THE HIDDEN CHARACTER IMMEDIATELY INSIDE THE BOX
-                    const trueLetter = cell.getAttribute('data-letter');
-                    
-                    const hintNode = cell.querySelector('.crossword-cell-hint-number');
-                    cell.className = "crossword-cell flex items-center justify-center font-black text-white bg-emerald-500 border-1 border-emerald-600 text-xs sm:text-sm select-none shadow child-font";
-                    
-                    // Put the true letter value perfectly inside the text node
-                    cell.innerText = trueLetter;
-                    if (hintNode) cell.appendChild(hintNode);
+                    // Applies the CSS styled letter reveals instantly
+                    cell.classList.add('tile-solved-success');
                 }
             });
 
             const currentSolvedCount = accurateCrosswordRegistry.filter(w => w.solved).length;
             document.getElementById('progressCounterDisplay').innerText = `Solved: ${currentSolvedCount}/10`;
-            document.getElementById('clueLabelFooterDisplay').innerText = `🌟 Brilliant! Word "${wordObject.word}" is unlocked and placed into the puzzle board!`;
+            document.getElementById('clueLabelFooterDisplay').innerText = `🌟 Brilliant! Word "${wordObject.word}" is unlocked and placed into the board!`;
 
             if (currentSolvedCount === accurateCrosswordRegistry.length) {
                 setTimeout(() => { concludeAdventureJourney(true); }, 1200);
