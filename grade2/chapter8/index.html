@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Safari Animal Kingdom Expedition</title>
+    <title>Animal Kingdom Game</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
@@ -13,7 +13,7 @@
             background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            min-h-screen: 100vh;
+            min-height: 100vh;
         }
         
         h1, h2, h3, .child-font {
@@ -26,9 +26,9 @@
             box-shadow: 0 12px 0 #065F46, 0 16px 30px rgba(4, 120, 87, 0.2);
         }
 
-        /* Scrollable Vertical Trail Map container rules */
+        /* Scrollable Track Path rules */
         .trail-scroll-view {
-            max-height: 340px;
+            max-height: 320px;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: #059669 #E2E8F0;
@@ -46,29 +46,45 @@
             border-radius: 10px;
         }
 
-        /* Beautiful stepped stone alignments */
         .stepping-stone {
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
         }
 
         .active-stone-glow {
-            animation: stoneGlow 1.6s infinite ease-in-out;
+            animation: stoneGlow 1.4s infinite ease-in-out;
             border-color: #F59E0B !important;
-            transform: scale(1.03);
+            transform: scale(1.05);
         }
         @keyframes stoneGlow {
-            0%, 100% { box-shadow: 0 0 0 0px rgba(245, 158, 11, 0.8); }
-            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+            0%, 100% { box-shadow: 0 0 0 0px rgba(245, 158, 11, 0.9); }
+            50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+
+        /* Animated Action / Trap Tiles */
+        .action-pulse-green {
+            animation: pulseGreen 2s infinite alternate;
+        }
+        @keyframes pulseGreen {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); background-color: #FDE047; }
+        }
+
+        .action-pulse-blue {
+            animation: pulseBlue 1.8s infinite alternate;
+        }
+        @keyframes pulseBlue {
+            0% { transform: scale(1); }
+            100% { transform: scale(0.97); background-color: #7DD3FC; }
         }
 
         .safari-explorer-token {
-            animation: tokenBounce 0.4s infinite alternate ease-in-out;
+            animation: tokenBounce 0.35s infinite alternate ease-in-out;
             z-index: 40;
         }
         @keyframes tokenBounce {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-10px) scale(1.1); }
+            0% { transform: translateY(0) scale(1) translateX(-50%); }
+            100% { transform: translateY(-12px) scale(1.15) translateX(-50%); }
         }
 
         .btn-clay-orange {
@@ -89,12 +105,22 @@
             box-shadow: 0 3px 0 #047857;
         }
 
+        /* 3D Dice Spin Animation effect */
         .dice-spin-effect {
-            animation: spinMatrix 0.35s linear infinite;
+            animation: spinDice 0.15s linear infinite;
         }
-        @keyframes spinMatrix {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spinDice {
+            0% { transform: scale(0.8) rotate(0deg); filter: blur(0.5px); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(0.8) rotate(360deg); filter: blur(0.5px); }
+        }
+        
+        .dice-settle {
+            animation: popSettle 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popSettle {
+            0% { transform: scale(0.5); }
+            100% { transform: scale(1.3); }
         }
     </style>
 </head>
@@ -113,41 +139,47 @@
 
     <div class="w-full max-w-md flex flex-col h-[95vh] max-h-[590px] justify-center relative z-10 px-1 overflow-hidden">
         
-        <div id="titleView" class="w-full safari-container rounded-[36px] p-6 text-center space-y-6">
-            <div class="space-y-2 py-4">
+        <div id="titleView" class="w-full safari-container rounded-[36px] p-6 text-center space-y-5">
+            <div class="space-y-2 py-2">
                 <div class="inline-block text-7xl animate-bounce">🤠</div>
                 <h1 class="text-3xl font-bold tracking-wide text-emerald-800 drop-shadow-sm">Animal Kingdom</h1>
-                <p class="text-xs text-amber-700 font-bold tracking-wider uppercase child-font">Vertical Expedition Quest</p>
+                <p class="text-xs text-amber-700 font-bold tracking-wider uppercase child-font">Fun Animal Journey</p>
+            </div>
+
+            <div class="bg-amber-50 border-2 border-amber-200 p-3 rounded-2xl text-left shadow-inner">
+                <p class="text-xs font-bold text-slate-700 leading-relaxed">
+                    🌟 <b>The Story:</b> Meet Toby! He found a lost puppy 🐶 in the forest. Let's roll the dice and walk down the secret trail to help the puppy find its happy family in the Animal Kingdom!
+                </p>
             </div>
             
-            <button id="startBtnAction" class="w-full btn-clay-orange text-white font-bold text-xl py-4 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
-                START EXPEDITION 🚀
+            <button id="startBtnAction" class="w-full btn-clay-orange text-white font-bold text-xl py-3.5 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
+                HELP THE PUPPY! 🚀
             </button>
         </div>
 
         <div id="instructionsView" class="hidden w-full safari-container rounded-[36px] p-5 text-center space-y-4">
             <div class="space-y-1">
-                <h2 class="text-2xl font-bold text-slate-800 child-font">Expedition Rules 📖</h2>
-                <p class="text-[11px] text-emerald-700 font-bold">Follow the trail into the wild canyon!</p>
+                <h2 class="text-2xl font-bold text-slate-800 child-font">How to Play ⭐</h2>
+                <p class="text-[11px] text-emerald-700 font-bold">Follow the path to win!</p>
             </div>
 
             <div class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-200 text-left space-y-3 shadow-inner text-xs text-slate-700 font-semibold leading-relaxed">
                 <div class="flex items-start space-x-2">
                     <span class="shrink-0 text-sm">🎲</span> 
-                    <p><b>Roll the Dice</b> to hop down the winding vertical stepping stones trail.</p>
+                    <p><b>Roll the Dice</b> to see Toby walk down the magic trail.</p>
                 </div>
                 <div class="flex items-start space-x-2">
                     <span class="shrink-0 text-sm">📜</span> 
-                    <p>Answering right adds <b>+10 points</b>. Mistakes give a 2nd try but cost <b>-5 points</b>.</p>
+                    <p>Answering right gets you <b>+10 points</b>. If you make a mistake, you can try one more time!</p>
                 </div>
                 <div class="flex items-start space-x-2">
                     <span class="shrink-0 text-sm">📈</span> 
-                    <p>Your total score adapts to the number of quiz stones you actually hit along your run!</p>
+                    <p>Your total score changes based on the question blocks you land on!</p>
                 </div>
             </div>
 
             <button id="playBtnAction" class="w-full btn-jungle-green text-white font-bold text-lg py-3 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
-                LAUNCH 🎉
+                START 🎉
             </button>
         </div>
 
@@ -155,30 +187,34 @@
             
             <div class="w-full flex items-center justify-between px-1 shrink-0">
                 <div class="bg-white border-2 border-emerald-600 px-3 py-1 rounded-xl shadow-sm flex flex-col">
-                    <span class="text-[9px] font-black text-slate-400 leading-none child-font uppercase">Current Score</span>
+                    <span class="text-[9px] font-black text-slate-400 leading-none child-font uppercase">Your Score</span>
                     <span class="text-lg font-black text-orange-500 leading-tight"><span id="scoreDisplay">0</span> / <span id="maxScoreDisplay">0</span></span>
                 </div>
                 <div class="bg-emerald-800 border-2 border-emerald-950 px-3 py-2 rounded-xl text-xs font-black text-white shadow-sm child-font" id="positionCounter">
-                    Stone: 1/16
+                    Step: 1/16
                 </div>
             </div>
 
             <div class="bg-emerald-900 border-4 border-emerald-950 p-3 rounded-[28px] shadow-lg relative flex-1 flex flex-col overflow-hidden">
                 <div class="text-center pb-1 shrink-0">
-                    <span class="text-[10px] uppercase tracking-widest font-black text-emerald-300 child-font">📜 Scroll down to view full trail canyon</span>
+                    <span class="text-[10px] uppercase tracking-widest font-black text-emerald-300 child-font">📜 Scroll down to see the whole path</span>
                 </div>
                 
                 <div id="trailScrollViewport" class="trail-scroll-view flex-1 w-full space-y-3 py-2">
                     </div>
             </div>
 
-            <div class="bg-amber-50 border-2 border-amber-200 rounded-[22px] p-2 flex items-center justify-between shadow-inner shrink-0">
+            <div class="bg-amber-50 border-2 border-amber-200 rounded-[22px] p-2 flex items-center justify-between shadow-inner shrink-0 relative min-h-[76px]">
                 <div class="flex flex-col text-left pl-2">
-                    <span class="text-[10px] text-amber-800 font-extrabold uppercase child-font leading-none">Your Move</span>
-                    <span id="diceFeedback" class="text-xs font-black text-slate-700 mt-1">Spin the dice!</span>
+                    <span class="text-[10px] text-amber-800 font-extrabold uppercase child-font leading-none">Your Turn</span>
+                    <span id="diceFeedback" class="text-xs font-black text-slate-700 mt-1">Roll the dice!</span>
                 </div>
-                <button id="diceRollBtn" class="btn-clay-orange text-white px-5 py-2.5 rounded-xl font-black text-sm flex items-center space-x-2 child-font">
-                    <span id="diceEmojiIcon" class="text-lg">🎲</span>
+                
+                <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-20">
+                    <div id="visualDiceBox" class="text-4xl bg-white border-2 border-orange-400 w-12 h-12 rounded-xl shadow-md flex items-center justify-center font-black text-orange-600 transition-all select-none">⚀</div>
+                </div>
+
+                <button id="diceRollBtn" class="btn-clay-orange text-white px-5 py-2.5 rounded-xl font-black text-sm flex items-center child-font relative z-30">
                     <span id="diceBtnText">ROLL</span>
                 </button>
             </div>
@@ -203,85 +239,94 @@
         <div id="scoreView" class="hidden w-full safari-container rounded-[36px] p-6 text-center space-y-5">
             <div class="space-y-1">
                 <span class="text-6xl block animate-bounce">👑</span>
-                <h2 class="text-2xl font-bold text-emerald-800 child-font">Expedition Over!</h2>
-                <p class="text-xs text-slate-600 font-bold px-4">Great work exploring! Here is your dynamic wildlife score matching your custom trail run:</p>
+                <h2 class="text-2xl font-bold text-emerald-800 child-font">You Finished!</h2>
+                <p class="text-xs text-slate-600 font-bold px-4">Toby returned the puppy safely! Here is your total score for this run:</p>
             </div>
             <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200 max-w-[180px] mx-auto shadow-inner">
-                <p class="text-[10px] font-black tracking-wider uppercase text-amber-600 mb-0.5 child-font">Final Score</p>
+                <p class="text-[10px] font-black tracking-wider uppercase text-amber-600 mb-0.5 child-font">Total Score</p>
                 <p class="text-3xl font-black text-orange-600 child-font"><span id="finalScore">0</span> / <span id="finalMaxScore">0</span></p>
             </div>
             <button id="restartBtnAction" class="w-full btn-clay-orange text-white font-bold text-base py-3 rounded-xl cursor-pointer uppercase tracking-wider child-font">
-                EXPLORE AGAIN 🔄
+                PLAY AGAIN 🔄
             </button>
         </div>
 
     </div>
 
     <script>
-        // Track Arrangement Map: Staggered horizontal layout offsets create a beautiful snake curve trail down the view box
+        // Track Scheme Array Definitions
         const verticalTrailSequence = [
             { id: 0, text: "START 🚩", type: "start", align: "justify-start pl-4", color: "bg-rose-500 text-white border-rose-700" },
-            { id: 1, text: "🦁 Wild Habitat", type: "question", cat: "wild", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 2, text: "🌾 Animal Diet", type: "question", cat: "diet", align: "justify-end pr-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 3, text: "🚀 GO FORWARD +2", type: "action", actionType: "forward", steps: 2, align: "justify-center px-2", color: "bg-yellow-400 text-amber-950 border-yellow-600 font-bold" },
-            { id: 4, text: "🐮 Farm Helpers", type: "question", cat: "farm", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 5, text: "🏃‍♂️ Movement", type: "question", cat: "move", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 6, text: "💥 CANYON TRAP -1", type: "action", actionType: "backward", steps: 1, align: "justify-end pr-4", color: "bg-sky-400 text-sky-950 border-sky-600 font-bold" },
-            { id: 7, text: "🏠 Cozy Shelters", type: "question", cat: "shelter", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 8, text: "🩺 Animal Care", type: "question", cat: "care", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 9, text: "🌟 Super Fact", type: "question", cat: "fact", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 10, text: "🚀 BONANZA STEP +1", type: "action", actionType: "forward", steps: 1, align: "justify-end pr-4", color: "bg-yellow-400 text-amber-950 border-yellow-600 font-bold" },
-            { id: 11, text: "🛑 FREEZE TILE", type: "action", actionType: "freeze", align: "justify-center px-2", color: "bg-indigo-400 text-indigo-950 border-indigo-600 font-bold" },
-            { id: 12, text: "🚨 Safe Kingdom", type: "question", cat: "safe", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 13, text: "🌊 Water Shelters", type: "question", cat: "water", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
-            { id: 14, text: "💥 CANYON TRAP -2", type: "action", actionType: "backward", steps: 2, align: "justify-end pr-4", color: "bg-sky-400 text-sky-950 border-sky-600 font-bold" },
+            { id: 1, text: "🦁 Wild Animals", type: "question", cat: "wild", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 2, text: "🌾 Animal Food", type: "question", cat: "diet", align: "justify-end pr-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 3, text: "🚀 SHORTCUT +2 STEPS", type: "action", actionType: "forward", steps: 2, align: "justify-center px-2", color: "bg-yellow-400 text-amber-950 border-yellow-600 font-bold action-pulse-green" },
+            { id: 4, text: "🐮 Farm Animals", type: "question", cat: "farm", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 5, text: "🏃‍♂️ Moving Around", type: "question", cat: "move", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 6, text: "💥 CANYON SLIDE -1", type: "action", actionType: "backward", steps: 1, align: "justify-end pr-4", color: "bg-sky-400 text-sky-950 border-sky-600 font-bold action-pulse-blue" },
+            { id: 7, text: "🏠 Animal Homes", type: "question", cat: "shelter", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 8, text: "🩺 Caring for Animals", type: "question", cat: "care", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 9, text: "🌟 Fun Animal Fact", type: "question", cat: "fact", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 10, text: "🚀 BONANZA HOPO +1", type: "action", actionType: "forward", steps: 1, align: "justify-end pr-4", color: "bg-yellow-400 text-amber-950 border-yellow-600 font-bold action-pulse-green" },
+            { id: 11, text: "🛑 MUD SWAMP (WAIT)", type: "action", actionType: "freeze", align: "justify-center px-2", color: "bg-indigo-400 text-indigo-950 border-indigo-600 font-bold" },
+            { id: 12, text: "🚨 Safe Animals", type: "question", cat: "safe", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 13, text: "🌊 Water Animals", type: "question", cat: "water", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 14, text: "💥 CANYON SLIDE -2", type: "action", actionType: "backward", steps: 2, align: "justify-end pr-4", color: "bg-sky-400 text-sky-950 border-sky-600 font-bold action-pulse-blue" },
             { id: 15, text: "FINISH 🏆", type: "finish", align: "justify-center px-2", color: "bg-emerald-500 text-white border-emerald-700" }
         ];
 
-        // 2-Questions-Per-Tile Dictionary Bank
+        // 3 Questions Per Category Pool Array Database
         const categoryQuestionsPool = {
             wild: [
-                { q: "Animals like tigers, lions, and bears that live freely in natural forests are called __________ animals.", choices: ["domestic", "wild", "pet"], correct: 1 },
-                { q: "Wild animals find their own food and safety in the forest because they do not live with __________.", choices: ["trees", "humans", "birds"], correct: 1 }
+                { q: "Animals like tigers, lions, and bears that live in natural forests are called __________ animals.", choices: ["domestic", "wild", "pet"], correct: 1 },
+                { q: "Wild animals find their own food in the forest. They do not live with __________.", choices: ["trees", "humans", "birds"], correct: 1 },
+                { q: "Which of these animals is a wild animal that lives in the jungle?", choices: ["Cow", "Cat", "Fox"], correct: 2 }
             ],
             diet: [
-                { q: "Deer, giraffes, and zebras are plant-eating animals, which means they are __________.", choices: ["carnivorous", "herbivorous", "scavengers"], correct: 1 },
-                { q: "Tigers and cheetahs are flesh-eating animals, which means they are __________.", choices: ["carnivorous", "herbivorous", "omnivorous"], correct: 0 }
+                { q: "Deer, giraffes, and zebras eat only grass and plants. They are called __________.", choices: ["carnivores", "herbivores", "scavengers"], correct: 1 },
+                { q: "Tigers and cheetahs eat the flesh of other animals. They are called __________.", choices: ["carnivores", "herbivores", "omnivores"], correct: 0 },
+                { q: "Vultures and jackals help keep the forest clean by eating __________.", choices: ["fresh leaves", "dead animals", "fruits"], correct: 1 }
             ],
             farm: [
-                { q: "Animals that are kept on farms or houses to help us carry heavy loads are called __________ animals.", choices: ["wild", "domestic", "flesh-eating"], correct: 1 },
-                { q: "Oxen help farmers in the crop fields by performing what important work?", choices: ["pulling carts", "ploughing fields", "guarding homes"], correct: 1 }
+                { q: "Animals that are kept on farms to help us work or carry heavy loads are called __________ animals.", choices: ["wild", "domestic", "flesh-eating"], correct: 1 },
+                { q: "Oxen help farmers in the crop fields by performing what important work?", choices: ["pulling carts", "ploughing fields", "guarding homes"], correct: 1 },
+                { q: "Which animal gives us wool to make warm clothes?", choices: ["Dog", "Sheep", "Horse"], correct: 1 }
             ],
             move: [
-                { q: "Kangaroos, rabbits, and frogs move quickly across the grass by using their strong back legs to __________.", choices: ["crawl", "fly", "hop and jump"], correct: 2 },
-                { q: "Snakes, earthworms, and snails do not have legs, so they __________ along the ground.", choices: ["crawl", "swim", "hop"], correct: 0 }
+                { q: "Kangaroos, rabbits, and frogs move quickly by using their strong back legs to __________.", choices: ["crawl", "fly", "hop and jump"], correct: 2 },
+                { q: "Snakes, earthworms, and snails do not have legs, so they __________ along the ground.", choices: ["crawl", "swim", "hop"], correct: 0 },
+                { q: "Birds can fly high in the air because they have light bodies and strong __________.", choices: ["fins", "wings", "horns"], correct: 1 }
             ],
             shelter: [
-                { q: "Domestic horses are kept safe, dry, and rested inside a human-made shelter called a __________.", choices: ["kennel", "stable", "coop"], correct: 1 },
-                { q: "Where do wild lions and big bears go to sleep inside the natural forest?", choices: ["dens and caves", "burrows", "tree tops"], correct: 0 }
+                { q: "Domestic horses are kept safe and warm inside a human-made home called a __________.", choices: ["kennel", "stable", "coop"], correct: 1 },
+                { q: "Where do wild lions and big bears go to sleep inside the jungle?", choices: ["dens and caves", "burrows", "tree tops"], correct: 0 },
+                { q: "Rabbits and rats dig holes in the ground to live safely. These holes are called __________.", choices: ["stables", "coops", "burrows"], correct: 2 }
             ],
             care: [
-                { q: "If a farm animal or a loved pet gets sick, we must take them immediately to an animal doctor called a __________.", choices: ["dentist", "vet", "tailor"], correct: 1 },
-                { q: "Taking proper care of domestic animals means providing them with a clean place, healthy food, and clear __________.", choices: ["toys", "water", "clothes"], correct: 1 }
+                { q: "If a farm animal or a pet gets sick, we must take them to an animal doctor called a _________.", choices: ["dentist", "vet", "tailor"], correct: 1 },
+                { q: "Taking good care of domestic animals means giving them a clean place, good food, and clean _________.", choices: ["toys", "water", "clothes"], correct: 1 },
+                { q: "We should always be __________ to animals and never tease them.", choices: ["kind", "mean", "loud"], correct: 0 }
             ],
             fact: [
-                { q: "What amazing body feature allows horses to sleep safely while standing completely upright?", choices: ["special steady lock-legs", "sleeping with open eyes", "they never sleep"], correct: 0 },
-                { q: "Dolphins are highly intelligent water animals that use special individual sounds to serve as their own __________.", choices: ["songs", "names", "warnings"], correct: 1 }
+                { q: "What helps horses sleep safely while standing completely upright?", choices: ["special steady lock-legs", "sleeping with open eyes", "they never sleep"], correct: 0 },
+                { q: "Dolphins are smart water animals. They use special sounds that work like their own _________.", choices: ["songs", "names", "warnings"], correct: 1 },
+                { q: "Which animal can sleep while standing up?", choices: ["Dog", "Horse", "Rabbit"], correct: 1 }
             ],
             safe: [
                 { q: "Animals like the giant panda and rhinoceros that are disappearing fast from Earth are called __________ animals.", choices: ["endangered", "friendly", "domestic"], correct: 0 },
-                { q: "Why do human beings cut down wild forests and put innocent animal lives in danger?", choices: ["to plant flowers", "to clear land and trees", "to feed wild animals"], correct: 1 }
+                { q: "Why do humans cut down wild forests and put animal lives in danger?", choices: ["to plant flowers", "to clear land and trees", "to feed animals"], correct: 1 },
+                { q: "We can protect wild animals by stopping people from __________ them.", choices: ["feeding", "hunting", "watching"], correct: 1 }
             ],
             water: [
-                { q: "Fish can swim smoothly in water with the help of __________ on both sides of their body.", choices: ["wings", "fins", "legs"], correct: 1 },
-                { q: "Animals like frogs are special because they are adapted to live comfortably both __________.", choices: ["in trees and skies", "on land and in water", "in deep dark caves"], correct: 1 }
+                { q: "Fish can swim smoothly in water with the help of __________.", choices: ["wings", "fins", "legs"], correct: 1 },
+                { q: "Animals like frogs are special because they can live comfortably both __________.", choices: ["in trees and skies", "on land and in water", "in caves"], correct: 1 },
+                { q: "Which of these animals can live *both* on land and in water?", choices: ["Fish", "Frog", "Cow"], correct: 1 }
             ]
         };
 
-        // Engine Status State Trackers
+        // Engine states
         let currentTokenIndex = 0;
         let runningScore = 0;
-        let runningMaxPossibleScore = 0; // Dynamic "Out-Of" Tracker variable
+        let runningMaxPossibleScore = 0; 
         let isDiceRolling = false;
         let playerFrozenTurn = false;
 
@@ -302,7 +347,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Splash layout presentation execution
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 if (splash) {
@@ -320,7 +364,6 @@
             viewport.innerHTML = "";
 
             verticalTrailSequence.forEach(data => {
-                // Wrapper flex block to anchor alignment distribution shapes
                 const flexRowWrapper = document.createElement('div');
                 flexRowWrapper.className = `w-full flex ${data.align}`;
 
@@ -341,7 +384,6 @@
                 document.getElementById('titleView').style.display = 'none';
                 document.getElementById('instructionsView').classList.remove('hidden');
                 
-                // Active looped audio channel execution
                 const bgAudio = document.getElementById('soundBg');
                 if(bgAudio) {
                     bgAudio.volume = 0.20;
@@ -364,18 +406,18 @@
                 
                 document.getElementById('scoreDisplay').innerText = "0";
                 document.getElementById('maxScoreDisplay').innerText = "0";
-                document.getElementById('diceFeedback').innerText = "Spin the dice!";
+                document.getElementById('diceFeedback').innerText = "Roll the dice!";
+                document.getElementById('visualDiceBox').innerText = "⚀";
                 document.getElementById('scoreView').classList.add('hidden');
                 document.getElementById('gameView').style.display = 'flex';
 
-                refreshTokenTrackDisplays();
+                buildVerticalTrailListUI();
             });
 
             bindClickEvent('diceRollBtn', handleDiceRollTrigger);
         }
 
         function refreshTokenTrackDisplays() {
-            // Unset all active highlights and old tokens
             verticalTrailSequence.forEach(data => {
                 const element = document.getElementById(`stone-id-${data.id}`);
                 if (element) {
@@ -385,23 +427,21 @@
                 }
             });
 
-            // Target current stone node
             const targetedStone = document.getElementById(`stone-id-${currentTokenIndex}`);
             if (targetedStone) {
                 targetedStone.classList.add('active-stone-glow');
                 
                 const token = document.createElement('div');
-                token.className = "safari-explorer-token absolute -top-4 left-1/2 -translate-x-1/2 text-2xl drop-shadow-md pointer-events-none";
+                token.className = "safari-explorer-token absolute -top-4 left-1/2 text-2xl drop-shadow-md pointer-events-none";
                 token.innerText = "🤠";
                 targetedStone.appendChild(token);
 
-                // Auto-Scroll the viewport wrapper so the current active node is always perfectly visible!
                 setTimeout(() => {
                     targetedStone.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }, 50);
             }
 
-            document.getElementById('positionCounter').innerText = `Stone: ${currentTokenIndex + 1}/16`;
+            document.getElementById('positionCounter').innerText = `Step: ${currentTokenIndex + 1}/16`;
         }
 
         function handleDiceRollTrigger() {
@@ -409,33 +449,35 @@
 
             if (playerFrozenTurn) {
                 playerFrozenTurn = false;
-                document.getElementById('diceFeedback').innerText = "Unfrozen! Next turn ready.";
+                document.getElementById('diceFeedback').innerText = "Ready to move next turn!";
                 playSound('soundWrong');
                 return;
             }
 
             isDiceRolling = true;
             document.getElementById('diceRollBtn').disabled = true;
-            document.getElementById('diceEmojiIcon').classList.add('dice-spin-effect');
-            document.getElementById('diceBtnText').innerText = "SPINNING...";
+            
+            const diceBox = document.getElementById('visualDiceBox');
+            diceBox.className = "text-4xl bg-white border-2 border-orange-400 w-12 h-12 rounded-xl shadow-md flex items-center justify-center font-black text-orange-600 dice-spin-effect";
 
             let ticks = 0;
             const diceFaces = ["⚀", "⚁", "⚂"];
             
             const animTimer = setInterval(() => {
-                document.getElementById('diceEmojiIcon').innerText = diceFaces[Math.floor(Math.random() * 3)];
+                diceBox.innerText = diceFaces[Math.floor(Math.random() * 3)];
                 ticks++;
 
-                if (ticks >= 6) {
+                if (ticks >= 8) {
                     clearInterval(animTimer);
                     
                     const rolledNum = Math.floor(Math.random() * 3) + 1;
                     
-                    document.getElementById('diceEmojiIcon').classList.remove('dice-spin-effect');
-                    document.getElementById('diceEmojiIcon').innerText = diceFaces[rolledNum - 1];
-                    document.getElementById('diceBtnText').innerText = "ROLL";
-                    document.getElementById('diceFeedback').innerText = `Advanced +${rolledNum} stones!`;
+                    diceBox.className = "text-4xl bg-white border-2 border-orange-400 w-12 h-12 rounded-xl shadow-md flex items-center justify-center font-black text-orange-600 dice-settle";
+                    diceBox.innerText = diceFaces[rolledNum - 1];
                     
+                    document.getElementById('diceFeedback').innerText = `Advanced +${rolledNum} steps!`;
+                    
+                    // Walk character step-by-step first!
                     executeTokenTrailHops(rolledNum);
                 }
             }, 100);
@@ -451,16 +493,18 @@
                     refreshTokenTrackDisplays();
                 } else {
                     clearInterval(incrementalTimer);
-                    evaluateLandedStoneConsequences();
+                    // Movement completely stops before triggering consequences!
+                    setTimeout(() => {
+                        evaluateLandedStoneConsequences();
+                    }, 400);
                 }
-            }, 260);
+            }, 300);
         }
 
         function evaluateLandedStoneConsequences() {
             const stoneData = verticalTrailSequence[currentTokenIndex];
 
             if (stoneData.type === "question") {
-                // Landed on a question tile -> Increment the "Out-Of" Max Possible score by 10!
                 runningMaxPossibleScore += 10;
                 document.getElementById('maxScoreDisplay').innerText = runningMaxPossibleScore;
 
@@ -471,30 +515,28 @@
                 triggerQuestionModalDisplay();
             } 
             else if (stoneData.type === "action") {
-                setTimeout(() => {
-                    if (stoneData.actionType === "forward") {
-                        document.getElementById('diceFeedback').innerText = `🚀 Bonus Path! Forward +${stoneData.steps}!`;
-                        executeTokenTrailHops(stoneData.steps);
-                    } 
-                    else if (stoneData.actionType === "backward") {
-                        document.getElementById('diceFeedback').innerText = `💥 Canyon Slide! Back -${stoneData.steps}!`;
-                        playSound('soundWrong');
-                        
-                        currentTokenIndex = Math.max(0, currentTokenIndex - stoneData.steps);
-                        refreshTokenTrackDisplays();
-                        
-                        isDiceRolling = false;
-                        document.getElementById('diceRollBtn').disabled = false;
-                    } 
-                    else if (stoneData.actionType === "freeze") {
-                        document.getElementById('diceFeedback').innerText = "🛑 Mud Swamp! Next turn frozen!";
-                        playSound('soundWrong');
-                        
-                        playerFrozenTurn = true;
-                        isDiceRolling = false;
-                        document.getElementById('diceRollBtn').disabled = false;
-                    }
-                }, 400);
+                if (stoneData.actionType === "forward") {
+                    document.getElementById('diceFeedback').innerText = `🚀 Shortcut! Forward +${stoneData.steps}!`;
+                    executeTokenTrailHops(stoneData.steps);
+                } 
+                else if (stoneData.actionType === "backward") {
+                    document.getElementById('diceFeedback').innerText = `💥 Oh no! Back -${stoneData.steps}!`;
+                    playSound('soundWrong');
+                    
+                    currentTokenIndex = Math.max(0, currentTokenIndex - stoneData.steps);
+                    refreshTokenTrackDisplays();
+                    
+                    isDiceRolling = false;
+                    document.getElementById('diceRollBtn').disabled = false;
+                } 
+                else if (stoneData.actionType === "freeze") {
+                    document.getElementById('diceFeedback').innerText = "🛑 Wait 1 turn here!";
+                    playSound('soundWrong');
+                    
+                    playerFrozenTurn = true;
+                    isDiceRolling = false;
+                    document.getElementById('diceRollBtn').disabled = false;
+                }
             } 
             else if (stoneData.type === "finish" || currentTokenIndex >= 15) {
                 resolveFinalEndGameStats();
@@ -539,7 +581,7 @@
                 runningScore += 10;
                 document.getElementById('scoreDisplay').innerText = runningScore;
 
-                feedbackText.innerText = currentAttemptsCount === 1 ? "🎉 Fantastic! +10 Points (⭐⭐)" : "👍 Good job! +10 Points (⭐)";
+                feedbackText.innerText = currentAttemptsCount === 1 ? "🎉 Great Job! +10 Points (⭐⭐)" : "👍 You got it! +10 Points (⭐)";
                 feedbackText.className = "text-[11px] font-black text-emerald-600 block animate-pulse";
 
                 setTimeout(() => { dismissModalOverlay(); }, 1500);
@@ -550,7 +592,7 @@
                 if (currentAttemptsCount === 1) {
                     currentAttemptsCount = 2;
                     document.getElementById('modalAttemptStars').innerText = "⭐";
-                    feedbackText.innerText = "❌ That's incorrect. Think and try your last chance!";
+                    feedbackText.innerText = "❌ Not quite! Try one more time!";
                     feedbackText.className = "text-[11px] font-black text-orange-600 block";
 
                     setTimeout(() => {
@@ -559,14 +601,13 @@
                         });
                     }, 600);
                 } else {
-                    // Both attempts missed
                     runningScore = Math.max(0, runningScore - 5);
                     document.getElementById('scoreDisplay').innerText = runningScore;
 
                     const accurateBtn = stack.children[correctOptionIdx];
                     if (accurateBtn) accurateBtn.className = "w-full text-white bg-emerald-500 border-2 border-emerald-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left child-font";
 
-                    feedbackText.innerText = "❌ No tries left! -5 Points. Path continues!";
+                    feedbackText.innerText = "❌ Let's keep moving forward!";
                     feedbackText.className = "text-[11px] font-black text-rose-500 block";
 
                     setTimeout(() => { dismissModalOverlay(); }, 2000);
@@ -590,7 +631,6 @@
             setTimeout(() => {
                 document.getElementById('gameView').style.display = 'none';
                 
-                // Map the real-time maximum possible score accurately to the final report box
                 document.getElementById('finalScore').innerText = runningScore;
                 document.getElementById('finalMaxScore').innerText = runningMaxPossibleScore;
                 
