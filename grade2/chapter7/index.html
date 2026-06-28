@@ -13,6 +13,7 @@
             background: linear-gradient(to bottom, #F0FDF4 0%, #FEFCE8 100%);
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
+            overflow: hidden;
         }
         
         h1, h2, h3, .child-font {
@@ -20,15 +21,19 @@
         }
 
         .cute-card {
-            background: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.98);
             border: 4px solid #10B981;
-            box-shadow: 0 12px 0 #047857, 0 15px 30px rgba(4, 120, 87, 0.12);
+            box-shadow: 0 10px 0 #047857, 0 12px 24px rgba(4, 120, 87, 0.1);
         }
 
         .letter-blank {
             border-bottom: 4px solid #F43F5E;
             color: #0F172A;
-            transition: all 0.2s ease;
+        }
+
+        .vowel-revealed {
+            border-bottom: 4px solid #10B981;
+            color: #059669;
         }
 
         .keyboard-key {
@@ -36,13 +41,15 @@
             border: 2px solid #E2E8F0;
             box-shadow: 0 4px 0 #CBD5E1;
             transition: all 0.05s ease;
+            -webkit-user-select: none;
+            user-select: none;
         }
         .keyboard-key:active:not(:disabled) {
             transform: translateY(2px);
             box-shadow: 0 2px 0 #CBD5E1;
         }
         .keyboard-key:disabled {
-            opacity: 0.25;
+            opacity: 0.2;
             box-shadow: none !important;
             transform: translateY(3px);
         }
@@ -57,42 +64,42 @@
 
         @keyframes pulseGlow {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.06); }
+            50% { transform: scale(1.05); }
         }
 
-        .start-btn {
+        .btn-rose {
             background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
-            box-shadow: 0 8px 0 #9F1239, 0 12px 20px rgba(225, 29, 72, 0.25);
+            box-shadow: 0 6px 0 #9F1239;
         }
-        .start-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #9F1239;
+        .btn-rose:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #9F1239;
         }
 
-        .play-btn {
+        .btn-orange {
             background: linear-gradient(135deg, #FB923C 0%, #EA580C 100%);
-            box-shadow: 0 8px 0 #9A3412, 0 12px 20px rgba(234, 88, 12, 0.25);
+            box-shadow: 0 6px 0 #9A3412;
         }
-        .play-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #9A3412;
+        .btn-orange:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #9A3412;
         }
 
         @keyframes floatEffect {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(5deg); }
+            50% { transform: translateY(-6px) rotate(4deg); }
         }
         .floating-item {
             animation: floatEffect 4s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4 m-0 select-none min-h-screen relative overflow-hidden">
+<body class="flex flex-col items-center justify-center p-3 m-0 select-none min-h-screen relative w-full overflow-hidden">
 
-    <div class="absolute top-8 left-6 text-4xl opacity-15 floating-item pointer-events-none">🍃</div>
-    <div class="absolute top-24 right-8 text-5xl opacity-15 floating-item pointer-events-none" style="animation-delay: 1.5s;">🌸</div>
-    <div class="absolute bottom-12 left-8 text-5xl opacity-15 floating-item pointer-events-none" style="animation-delay: 0.7s;">🍉</div>
-    <div class="absolute bottom-24 right-6 text-4xl opacity-15 floating-item pointer-events-none" style="animation-delay: 2.2s;">🍊</div>
+    <div class="absolute top-4 left-4 text-3xl opacity-10 floating-item pointer-events-none">🍃</div>
+    <div class="absolute top-16 right-4 text-4xl opacity-10 floating-item pointer-events-none" style="animation-delay: 1.5s;">🌸</div>
+    <div class="absolute bottom-6 left-4 text-4xl opacity-10 floating-item pointer-events-none" style="animation-delay: 0.7s;">🌻</div>
+    <div class="absolute bottom-16 right-4 text-3xl opacity-10 floating-item pointer-events-none" style="animation-delay: 2.2s;">🍊</div>
 
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
@@ -101,132 +108,124 @@
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
     <div id="splashScreen" class="fixed inset-0 bg-[#F0FDF4] flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-28 h-28 bg-white rounded-full flex items-center justify-center text-emerald-500 font-bold text-5xl shadow-lg border-4 border-emerald-300 animate-pulse\'>🌸</div>';">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[60vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-white rounded-full flex items-center justify-center text-emerald-500 font-bold text-4xl shadow-lg border-4 border-emerald-300 animate-pulse\'>🌸</div>';">
     </div>
 
-    <div class="w-full max-w-md flex flex-col h-[94vh] max-h-[660px] justify-center relative z-10">
+    <div class="w-full max-w-md flex flex-col h-[96vh] max-h-[640px] justify-center relative z-10 px-1">
         
-        <div id="titleView" class="w-full cute-card rounded-[40px] p-8 text-center space-y-8 dynamic-card">
-            <div class="space-y-3 py-4">
-                <div class="inline-block text-8xl floating-item drop-shadow-sm">🌸</div>
+        <div id="titleView" class="w-full cute-card rounded-[36px] p-6 text-center space-y-6">
+            <div class="space-y-2 py-4">
+                <div class="inline-block text-7xl floating-item drop-shadow-sm">🌸</div>
                 <h1 class="text-4xl font-bold tracking-wide text-emerald-700 drop-shadow-sm">Garden Spellbee</h1>
                 <p class="text-xs text-emerald-600 font-bold tracking-wider uppercase child-font">A Magical Word Journey</p>
             </div>
             
-            <button onclick="showInstructionsScreen()" class="w-full start-btn text-white font-bold text-xl py-4 rounded-3xl cursor-pointer tracking-wide uppercase child-font transition-transform">
+            <button id="startBtnAction" class="w-full btn-rose text-white font-bold text-xl py-3.5 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
                 START 🚀
             </button>
         </div>
 
-        <div id="instructionsView" class="hidden w-full cute-card rounded-[40px] p-7 text-center space-y-6">
+        <div id="instructionsView" class="hidden w-full cute-card rounded-[36px] p-6 text-center space-y-5">
             <div class="space-y-1">
                 <h2 class="text-2xl font-bold text-slate-800 child-font">How To Play 📖</h2>
                 <p class="text-xs text-slate-500 font-medium">Read carefully to save your magical heart lives!</p>
             </div>
 
-            <div class="bg-amber-50 rounded-3xl p-5 border-2 border-amber-200 text-left space-y-3 shadow-inner">
-                <div class="flex items-start space-x-3 text-xs text-slate-600 font-semibold">
-                    <span class="text-lg leading-none">✏️</span>
-                    <p>Read the broken garden sentence and type the missing letters using the keyboard.</p>
+            <div class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-200 text-left space-y-2.5 shadow-inner text-xs text-slate-600 font-semibold">
+                <div class="flex items-start space-x-2">
+                    <span>🟢</span> <p><span class="text-emerald-600 font-black">All vowels (A, E, I, O, U)</span> are filled inside the spaces from the start!</p>
                 </div>
-                <div class="flex items-start space-x-3 text-xs text-slate-600 font-semibold">
-                    <span class="text-lg leading-none">❤️</span>
-                    <p>You have <span class="text-rose-500 font-black">3 Lives</span>. Clicking a wrong letter costs <span class="text-rose-500 font-black">1 Life</span> and deducts <span class="text-rose-500 font-black">-5 points</span>!</p>
+                <div class="flex items-start space-x-2">
+                    <span>🔂</span> <p>Typing a matching letter fills <span class="text-purple-600 font-black">all twin or double letters</span> at the same time!</p>
                 </div>
-                <div class="flex items-start space-x-3 text-xs text-slate-600 font-semibold">
-                    <span class="text-lg leading-none">💡</span>
-                    <p>Stuck? If you don't type for 12 seconds, a magical gold letter will guide you for free!</p>
+                <div class="flex items-start space-x-2">
+                    <span>❤️</span> <p>You have <span class="text-rose-500 font-black">3 Lives</span>. Clicking a wrong key costs <span class="text-rose-500 font-black">1 Life</span> and costs <span class="text-rose-500 font-black">-5 points</span>!</p>
+                </div>
+                <div class="flex items-start space-x-2">
+                    <span>💡</span> <p>If you wait for 12 seconds, a magical gold letter will show you the answer!</p>
                 </div>
             </div>
 
-            <button onclick="launchActiveGameplay()" class="w-full play-btn text-white font-bold text-lg py-4 rounded-3xl cursor-pointer tracking-wide uppercase child-font">
+            <button id="playBtnAction" class="w-full btn-orange text-white font-bold text-lg py-3.5 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
                 PLAY GAME 🎉
             </button>
         </div>
 
-        <div id="gameView" class="hidden w-full h-full flex flex-col justify-between space-y-3">
+        <div id="gameView" class="hidden w-full h-full flex flex-col justify-between space-y-2.5">
             
             <div class="w-full flex items-center justify-between px-1">
-                <div class="flex items-center space-x-1 bg-white border-2 border-rose-200 px-3 py-1.5 rounded-2xl shadow-sm">
-                    <span class="text-xs font-black text-rose-500 mr-1 child-font">LIVES:</span>
-                    <span id="heartsContainerLayout" class="text-base tracking-tight">❤️❤️❤️</span>
+                <div class="flex items-center space-x-1 bg-white border-2 border-rose-200 px-3 py-1 rounded-xl shadow-sm">
+                    <span class="text-[10px] font-black text-rose-500 mr-1 child-font">LIVES:</span>
+                    <span id="heartsContainer" class="text-sm tracking-tight">❤️❤️❤️</span>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3">
                     <div class="flex flex-col items-end">
                         <span class="text-[9px] text-emerald-800 font-extrabold uppercase child-font">SCORE</span>
-                        <span class="text-2xl font-black text-amber-500 leading-none" id="scoreDisplayNode">0</span>
+                        <span class="text-xl font-black text-amber-500 leading-none" id="scoreDisplay">0</span>
                     </div>
-                    <div class="bg-white border-2 border-emerald-300 px-3 py-1 rounded-xl text-xs font-black text-emerald-800 shadow-sm child-font" id="roundCounterNode">
+                    <div class="bg-white border-2 border-emerald-300 px-3 py-1 rounded-xl text-xs font-black text-emerald-800 shadow-sm child-font" id="roundCounter">
                         1/12
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white border-4 border-emerald-400 rounded-[36px] p-5 flex flex-col justify-between shadow-sm flex-1 min-h-[220px]">
-                
-                <div class="text-center py-2">
-                    <p id="sentencePromptParagraph" class="text-base font-bold text-slate-800 leading-relaxed px-1">
-                        Gathering nature secrets...
+            <div class="bg-white border-4 border-emerald-400 rounded-[32px] p-4 flex flex-col justify-between shadow-sm flex-1 min-h-[180px]">
+                <div class="text-center my-auto py-1">
+                    <p id="sentencePrompt" class="text-sm sm:text-base font-bold text-slate-800 leading-relaxed px-1">
+                        Loading...
                     </p>
                 </div>
 
-                <div id="letterSlotsWrapper" class="flex flex-wrap justify-center gap-2 py-3">
-                    </div>
+                <div id="letterSlotsContainer" class="flex flex-wrap justify-center gap-1.5 py-2"></div>
 
-                <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 text-center min-h-[50px] flex items-center justify-center">
-                    <p id="statusFeedbackText" class="text-xs font-bold text-emerald-800 leading-normal">
-                        Tap the alphabet keys below to fill the slots!
-                    </p>
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-2.5 text-center min-h-[46px] flex items-center justify-center">
+                    <p id="statusFeedback" class="text-xs font-bold text-emerald-800 leading-normal"></p>
                 </div>
-
             </div>
 
-            <div class="bg-slate-100 border-2 border-slate-200 rounded-[24px] p-2.5 shadow-inner space-y-1.5">
-                <div class="grid grid-cols-7 gap-1.5 justify-center">
-                    <button onclick="registerKeyInput('A')" id="key-A" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">A</button>
-                    <button onclick="registerKeyInput('B')" id="key-B" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">B</button>
-                    <button onclick="registerKeyInput('C')" id="key-C" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">C</button>
-                    <button onclick="registerKeyInput('D')" id="key-D" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">D</button>
-                    <button onclick="registerKeyInput('E')" id="key-E" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">E</button>
-                    <button onclick="registerKeyInput('F')" id="key-F" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">F</button>
-                    <button onclick="registerKeyInput('G')" id="key-G" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">G</button>
+            <div class="bg-slate-100 border-2 border-slate-200 rounded-[20px] p-2 shadow-inner space-y-1">
+                <div class="grid grid-cols-7 gap-1 justify-center">
+                    <button id="key-B" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">B</button>
+                    <button id="key-C" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">C</button>
+                    <button id="key-D" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">D</button>
+                    <button id="key-F" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">F</button>
+                    <button id="key-G" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">G</button>
+                    <button id="key-H" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">H</button>
+                    <button id="key-J" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">J</button>
                 </div>
-                <div class="grid grid-cols-7 gap-1.5 justify-center">
-                    <button onclick="registerKeyInput('H')" id="key-H" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">H</button>
-                    <button onclick="registerKeyInput('I')" id="key-I" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">I</button>
-                    <button onclick="registerKeyInput('J')" id="key-J" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">J</button>
-                    <button onclick="registerKeyInput('K')" id="key-K" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">K</button>
-                    <button onclick="registerKeyInput('L')" id="key-L" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">L</button>
-                    <button onclick="registerKeyInput('M')" id="key-M" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">M</button>
-                    <button onclick="registerKeyInput('N')" id="key-N" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">N</button>
+                <div class="grid grid-cols-7 gap-1 justify-center">
+                    <button id="key-K" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">K</button>
+                    <button id="key-L" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">L</button>
+                    <button id="key-M" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">M</button>
+                    <button id="key-N" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">N</button>
+                    <button id="key-P" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">P</button>
+                    <button id="key-Q" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">Q</button>
+                    <button id="key-R" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">R</button>
                 </div>
-                <div class="grid grid-cols-6 gap-1.5 justify-center">
-                    <button onclick="registerKeyInput('O')" id="key-O" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">O</button>
-                    <button onclick="registerKeyInput('P')" id="key-P" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">P</button>
-                    <button onclick="registerKeyInput('R')" id="key-R" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">R</button>
-                    <button onclick="registerKeyInput('S')" id="key-S" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">S</button>
-                    <button onclick="registerKeyInput('T')" id="key-T" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">T</button>
-                    <button onclick="registerKeyInput('W')" id="key-W" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">W</button>
-                </div>
-                <div class="grid grid-cols-2 gap-1.5 justify-center w-1/3 mx-auto">
-                    <button onclick="registerKeyInput('U')" id="key-U" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">U</button>
-                    <button onclick="registerKeyInput('Y')" id="key-Y" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-xl text-xs child-font cursor-pointer">Y</button>
+                <div class="grid grid-cols-7 gap-1 justify-center">
+                    <button id="key-S" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">S</button>
+                    <button id="key-T" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">T</button>
+                    <button id="key-V" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">V</button>
+                    <button id="key-W" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">W</button>
+                    <button id="key-X" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">X</button>
+                    <button id="key-Y" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">Y</button>
+                    <button id="key-Z" class="keyboard-key text-slate-700 font-extrabold py-2.5 rounded-lg text-xs child-font">Z</button>
                 </div>
             </div>
 
         </div>
 
-        <div id="scoreView" class="hidden w-full cute-card rounded-[40px] p-8 text-center space-y-6">
+        <div id="scoreView" class="hidden w-full cute-card rounded-[36px] p-6 text-center space-y-5">
             <div class="space-y-2">
-                <span id="endEmojiLabel" class="text-7xl block floating-item">👑</span>
-                <h2 id="endHeadingText" class="text-2xl font-bold text-emerald-700 child-font">Garden Master!</h2>
-                <p id="endMessageParagraph" class="text-xs text-slate-600 font-bold px-2">Sensational effort! You completed the spelling challenges perfectly!</p>
+                <span id="endEmoji" class="text-6xl block floating-item">👑</span>
+                <h2 id="endHeading" class="text-2xl font-bold text-emerald-700 child-font">Garden Master!</h2>
+                <p id="endMessage" class="text-xs text-slate-600 font-bold px-2"></p>
             </div>
-            <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200 max-w-[160px] mx-auto shadow-inner">
-                <p class="text-[10px] font-black tracking-wider uppercase text-amber-600 mb-0.5 child-font">Total Score</p>
-                <p class="text-3xl font-black text-amber-500 child-font" id="finalScoreDisplay">0</p>
+            <div class="bg-amber-50 p-3 rounded-xl border-2 border-amber-200 max-w-[140px] mx-auto shadow-inner">
+                <p class="text-[9px] font-black tracking-wider uppercase text-amber-600 mb-0.5 child-font">Total Score</p>
+                <p class="text-2xl font-black text-amber-500 child-font" id="finalScore">0</p>
             </div>
-            <button onclick="restartFullGameSystem()" class="w-full start-btn text-white font-bold text-base py-4 rounded-2xl cursor-pointer uppercase tracking-wider child-font">
+            <button id="restartBtnAction" class="w-full btn-rose text-white font-bold text-base py-3 rounded-xl cursor-pointer uppercase tracking-wider child-font">
                 PLAY AGAIN 🔄
             </button>
         </div>
@@ -234,8 +233,8 @@
     </div>
 
     <script>
-        // STRICTLY 12 QUESTIONS SOURCED ONLY FROM TEXTBOOK RELEASES
-        const itemRegistryList = [
+        // MASTER POOL OF 12 QUESTIONS DIRECTLY CORRELATED TO TEXTBOOK
+        const textbookQuestionsSource = [
             { question: "Pine and fir trees grow in cool weather on high, freezing cold __________", answer: "MOUNTAINS", fact: "🌲 Fir trees have sloped branches so heavy snow easily slides right off!" },
             { question: "Prickly cactus plants grow in dry, hot __________ where there is very little water.", answer: "DESERTS", fact: "🌵 Cacti can store water inside their thick stems for a long time!" },
             { question: "Beautiful lotus and water lily plants are special because they grow inside __________", answer: "WATER", fact: "🪷 Their leaves are wide and flat so they can float perfectly on top!" },
@@ -250,251 +249,330 @@
             { question: "Science shows us that trees can 'talk' to each other by releasing chemicals through their __________", answer: "ROOTS", fact: "🌳 Trees use their roots to send secret warning signals to their neighbors!" }
         ];
 
+        let activeQuestionList = [];
         let indexPointer = 0;
         let runningScore = 0;
-        let playerLivesLeft = 3;
-        let targetWordString = "";
-        let workingLettersProgress = [];
-        let automatedAssistTimer = null;
+        let playerLives = 3;
+        let targetWord = "";
+        let workingProgress = [];
+        let assistTimer = null;
+        const vowels = ['A', 'E', 'I', 'O', 'U'];
 
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
         let confettiArray = [];
 
-        // Splash screen fade rule execution
+        // CROSS-PLATFORM SAFE INTERACTION ASSIGNMENT FUNCTION
+        function bindEvent(elementId, callback) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const handler = (e) => {
+                e.preventDefault();
+                callback();
+            };
+            el.addEventListener('pointerdown', handler, { passive: false });
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            // Splash screen 5 second timer visibility rule
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 splash.style.opacity = '0';
                 setTimeout(() => splash.style.display = 'none', 500);
             }, 5000);
+
+            setupInteractionPipelines();
+            prepareGameStructureData();
         });
 
-        function showInstructionsScreen() {
+        function setupInteractionPipelines() {
+            bindEvent('startBtnAction', showInstructions);
+            bindEvent('playBtnAction', startGameSession);
+            bindEvent('restartBtnAction', clearAndResetUniverse);
+
+            // Connect on-screen keys safely to modern click metrics
+            document.querySelectorAll('.keyboard-key').forEach(keyNode => {
+                const char = keyNode.innerText;
+                keyNode.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if(!keyNode.disabled) handleCharacterInput(char);
+                }, { passive: false });
+            });
+        }
+
+        function prepareGameStructureData() {
+            const savedState = localStorage.getItem('gardenSpellbee_saveState');
+            
+            if (savedState) {
+                try {
+                    const parsed = JSON.parse(savedState);
+                    activeQuestionList = parsed.activeQuestionList;
+                    indexPointer = parsed.indexPointer;
+                    runningScore = parsed.runningScore;
+                    playerLives = parsed.playerLives;
+                    
+                    // If the user previously finished everything, trigger clean reboot map layout
+                    if (indexPointer >= activeQuestionList.length) {
+                        clearAndResetUniverse();
+                    }
+                    return;
+                } catch(e) {
+                    console.log("State recovery bypass");
+                }
+            }
+            
+            // Fresh Initialization: Create random copy map structure arrays
+            activeQuestionList = [...textbookQuestionsSource].sort(() => Math.random() - 0.5);
+            indexPointer = 0;
+            runningScore = 0;
+            playerLives = 3;
+            saveCurrentProgressToStorage();
+        }
+
+        function saveCurrentProgressToStorage() {
+            const state = { activeQuestionList, indexPointer, runningScore, playerLives };
+            localStorage.setItem('gardenSpellbee_saveState', JSON.stringify(state));
+        }
+
+        function showInstructions() {
             document.getElementById('titleView').style.display = 'none';
             document.getElementById('instructionsView').classList.remove('hidden');
         }
 
-        function launchActiveGameplay() {
+        function startGameSession() {
             document.getElementById('instructionsView').style.display = 'none';
             document.getElementById('gameView').classList.remove('hidden');
-            runningScore = 0;
-            playerLivesLeft = 3;
-            indexPointer = 0;
             
-            updateLivesDisplayUI();
-            document.getElementById('scoreDisplayNode').innerText = runningScore;
+            updateLivesCounterUI();
+            document.getElementById('scoreDisplay').innerText = runningScore;
             
-            loadQuestionTaskSegment();
+            buildQuestionRoundDisplay();
         }
 
-        function updateLivesDisplayUI() {
+        function updateLivesCounterUI() {
             let hearts = "";
-            for(let i=0; i<playerLivesLeft; i++) {
-                hearts += "❤️";
-            }
-            if(playerLivesLeft === 0) hearts = "💔";
-            document.getElementById('heartsContainerLayout').innerText = hearts;
+            for(let i=0; i<playerLives; i++) hearts += "❤️";
+            if(playerLives === 0) hearts = "💔";
+            document.getElementById('heartsContainer').innerText = hearts;
         }
 
-        function loadQuestionTaskSegment() {
-            if(automatedAssistTimer) clearTimeout(automatedAssistTimer);
+        function buildQuestionRoundDisplay() {
+            if(assistTimer) clearTimeout(assistTimer);
             
-            // Re-enable and clear old state variables on virtual pads
-            document.querySelectorAll('.keyboard-key').forEach(btn => {
-                btn.disabled = false;
-                btn.classList.remove('key-glow-hint');
+            document.querySelectorAll('.keyboard-key').forEach(b => {
+                b.disabled = false;
+                b.classList.remove('key-glow-hint');
             });
 
-            const currentData = itemRegistryList[indexPointer];
-            targetWordString = currentData.answer;
-            workingLettersProgress = Array(targetWordString.length).fill("");
+            const activeData = activeQuestionList[indexPointer];
+            targetWord = activeData.answer;
+            workingProgress = Array(targetWord.length).fill("");
 
-            document.getElementById('roundCounterNode').innerText = `${indexPointer + 1}/12`;
-            document.getElementById('sentencePromptParagraph').innerText = currentData.question;
-            
-            document.getElementById('statusFeedbackText').innerText = "Tap alphabet keys below to fill the slots!";
-            document.getElementById('statusFeedbackText').className = "text-xs font-bold text-emerald-800 leading-normal";
+            // RULE 1 IMPLEMENTATION: Automatically reveal all vowels from start
+            for(let i = 0; i < targetWord.length; i++) {
+                if(vowels.includes(targetWord[i])) {
+                    workingProgress[i] = targetWord[i];
+                }
+            }
 
-            renderDisplaySlots();
-            startTimerSequence();
+            document.getElementById('roundCounter').innerText = `${indexPointer + 1}/12`;
+            document.getElementById('sentencePrompt').innerText = activeData.question;
+            document.getElementById('statusFeedback').innerText = "Type consonants below to complete the words!";
+            document.getElementById('statusFeedback').className = "text-xs font-bold text-emerald-800 leading-normal";
+
+            renderLetterSlots();
+            initiateAssistCountdown();
         }
 
-        function renderDisplaySlots() {
-            const container = document.getElementById('letterSlotsWrapper');
+        function renderLetterSlots() {
+            const container = document.getElementById('letterSlotsContainer');
             container.innerHTML = "";
 
-            for (let i = 0; i < targetWordString.length; i++) {
+            for(let i = 0; i < targetWord.length; i++) {
                 const box = document.createElement('div');
-                box.className = "w-9 h-11 letter-blank text-xl font-black flex items-center justify-center child-font uppercase mx-0.5";
-                box.id = `slot-node-${i}`;
-                box.innerText = workingLettersProgress[i] || "_";
+                const isVowel = vowels.includes(targetWord[i]);
+                
+                box.className = `w-8 h-10 flex items-center justify-center font-black text-lg child-font uppercase mx-0.5 ${isVowel ? 'vowel-revealed' : 'letter-blank'}`;
+                box.id = `slot-${i}`;
+                box.innerText = workingProgress[i] || "_";
+                
                 container.appendChild(box);
             }
         }
 
-        function startTimerSequence() {
-            if(automatedAssistTimer) clearTimeout(automatedAssistTimer);
+        function initiateAssistCountdown() {
+            if(assistTimer) clearTimeout(assistTimer);
             
-            // 12-Second Automatic Assist Timer
-            automatedAssistTimer = setTimeout(() => {
-                const missingIndex = workingLettersProgress.indexOf("");
-                if (missingIndex !== -1) {
-                    const nextNeededChar = targetWordString[missingIndex];
-                    const targetKeyNode = document.getElementById(`key-${nextNeededChar}`);
-                    
-                    if (targetKeyNode && !targetKeyNode.disabled) {
-                        targetKeyNode.classList.add('key-glow-hint');
-                        document.getElementById('statusFeedbackText').innerText = `💡 Magical Hint! Tap the blinking gold letter key!`;
-                        document.getElementById('statusFeedbackText').className = "text-xs font-extrabold text-amber-600 leading-normal";
+            // 12-Second Auto Hint Assist Loop
+            assistTimer = setTimeout(() => {
+                const missingIdx = workingProgress.indexOf("");
+                if (missingIdx !== -1) {
+                    const nextCharNeeded = targetWord[missingIdx];
+                    const elementKey = document.getElementById(`key-${nextCharNeeded}`);
+                    if (elementKey && !elementKey.disabled) {
+                        elementKey.classList.add('key-glow-hint');
+                        document.getElementById('statusFeedback').innerText = `💡 Hint! Tap the glowing golden letter key!`;
+                        document.getElementById('statusFeedback').className = "text-xs font-extrabold text-amber-600 leading-normal";
                     }
                 }
             }, 12000);
         }
 
-        function registerKeyInput(pressedChar) {
-            if(automatedAssistTimer) clearTimeout(automatedAssistTimer);
-            document.querySelectorAll('.keyboard-key').forEach(b => b.classList.remove('key-glow-hint'));
+        function handleCharacterInput(pressedLetter) {
+            if(assistTimer) clearTimeout(assistTimer);
+            document.querySelectorAll('.keyboard-key').forEach(k => k.classList.remove('key-glow-hint'));
 
             let matched = false;
-            for (let i = 0; i < targetWordString.length; i++) {
-                if (targetWordString[i] === pressedChar && workingLettersProgress[i] === "") {
-                    workingLettersProgress[i] = pressedChar;
+
+            // RULE 2 IMPLEMENTATION: Fill all twin / multiple identical consonant instances at once
+            for (let i = 0; i < targetWord.length; i++) {
+                if (targetWord[i] === pressedLetter && workingProgress[i] === "") {
+                    workingProgress[i] = pressedLetter;
                     matched = true;
-                    break;
                 }
             }
 
             if (matched) {
-                playSoundEffect('soundCorrect');
-                renderDisplaySlots();
+                playSound('soundCorrect');
+                renderLetterSlots();
+                
+                // Disable key instantly so it can't be registered again
+                const keyNode = document.getElementById(`key-${pressedLetter}`);
+                if(keyNode) keyNode.disabled = true;
 
-                if (!workingLettersProgress.includes("")) {
-                    handleSuccessfulRoundCompletion();
+                if (!workingProgress.includes("")) {
+                    handleRoundSuccessComplete();
                 } else {
-                    startTimerSequence();
+                    initiateAssistCountdown();
                 }
             } else {
-                // Wrong entry penalty rules application
-                playSoundEffect('soundWrong');
-                const targetKey = document.getElementById(`key-${pressedChar}`);
-                if(targetKey) targetKey.disabled = true;
+                // Wrong Match Penalties Allocation
+                playSound('soundWrong');
+                const keyNode = document.getElementById(`key-${pressedLetter}`);
+                if(keyNode) keyNode.disabled = true;
 
-                playerLivesLeft--;
-                updateLivesDisplayUI();
+                playerLives--;
+                updateLivesCounterUI();
 
                 runningScore = Math.max(0, runningScore - 5);
-                document.getElementById('scoreDisplayNode').innerText = runningScore;
+                document.getElementById('scoreDisplay').innerText = runningScore;
 
-                document.getElementById('statusFeedbackText').innerText = "❌ That letter doesn't fit here! Try another letter!";
-                document.getElementById('statusFeedbackText').className = "text-xs font-bold text-rose-500 leading-normal";
+                document.getElementById('statusFeedback').innerText = "❌ That letter doesn't fit! Try another choice!";
+                document.getElementById('statusFeedback').className = "text-xs font-bold text-rose-500 leading-normal";
 
-                if (playerLivesLeft <= 0) {
-                    terminateSessionEarly(false);
+                saveCurrentProgressToStorage();
+
+                if (playerLives <= 0) {
+                    terminateSession(false);
                 } else {
-                    startTimerSequence();
+                    initiateAssistCountdown();
                 }
             }
         }
 
-        function handleSuccessfulRoundCompletion() {
-            if(automatedAssistTimer) clearTimeout(automatedAssistTimer);
+        function handleRoundSuccessComplete() {
+            if(assistTimer) clearTimeout(assistTimer);
             document.querySelectorAll('.keyboard-key').forEach(b => b.disabled = true);
 
-            playSoundEffect('soundCorrect');
-            launchConfettiBurst();
+            playSound('soundCorrect');
+            triggerConfetti();
 
-            for(let i = 0; i < targetWordString.length; i++) {
-                const node = document.getElementById(`slot-node-${i}`);
-                node.className = "w-9 h-11 text-xl font-black bg-emerald-500 text-white rounded-xl flex items-center justify-center child-font uppercase mx-0.5 animate-pulse";
+            for(let i = 0; i < targetWord.length; i++) {
+                const slotNode = document.getElementById(`slot-${i}`);
+                if(slotNode) {
+                    slotNode.className = "w-8 h-10 text-lg font-black bg-emerald-500 text-white rounded-lg flex items-center justify-center child-font uppercase mx-0.5 scale-105";
+                }
             }
 
             runningScore += 10;
-            document.getElementById('scoreDisplayNode').innerText = runningScore;
+            document.getElementById('scoreDisplay').innerText = runningScore;
 
-            document.getElementById('statusFeedbackText').innerText = itemRegistryList[indexPointer].fact;
-            document.getElementById('statusFeedbackText').className = "text-xs font-black text-emerald-600 leading-normal px-1";
+            document.getElementById('statusFeedback').innerText = activeQuestionList[indexPointer].fact;
+            document.getElementById('statusFeedback').className = "text-xs font-black text-emerald-600 leading-normal px-1";
 
-            // 4.5 seconds textbook explanation read time
+            indexPointer++;
+            saveCurrentProgressToStorage();
+
+            // 4.5 Seconds Textbook Pop Read Window Time Allocation Frame Rule
             setTimeout(() => {
-                indexPointer++;
-                if (indexPointer < itemRegistryList.length) {
-                    loadQuestionTaskSegment();
+                if (indexPointer < activeQuestionList.length) {
+                    buildQuestionRoundDisplay();
                 } else {
-                    terminateSessionEarly(true);
+                    terminateSession(true);
                 }
             }, 4500);
         }
 
-        function terminateSessionEarly(isVictory) {
-            if(automatedAssistTimer) clearTimeout(automatedAssistTimer);
+        function terminateSession(victoryReached) {
+            if(assistTimer) clearTimeout(assistTimer);
             
             setTimeout(() => {
                 document.getElementById('gameView').style.display = 'none';
-                document.getElementById('finalScoreDisplay').innerText = runningScore;
+                document.getElementById('finalScore').innerText = runningScore;
                 
-                const panel = document.getElementById('scoreView');
-                const emoji = document.getElementById('endEmojiLabel');
-                const heading = document.getElementById('endHeadingText');
-                const msg = document.getElementById('endMessageParagraph');
+                const outroCard = document.getElementById('scoreView');
+                const emoji = document.getElementById('endEmoji');
+                const heading = document.getElementById('endHeading');
+                const paragraph = document.getElementById('endMessage');
 
-                if(isVictory) {
-                    playSoundEffect('soundClapping');
+                if (victoryReached) {
+                    playSound('soundClapping');
                     emoji.innerText = "👑";
                     heading.innerText = "Garden Master!";
                     heading.className = "text-2xl font-bold text-emerald-700 child-font";
-                    msg.innerText = "Sensational spelling accuracy! You have discovered all the hidden survival secrets of the plant kingdom!";
+                    paragraph.innerText = "Amazing learning adventure! You completed every spelling puzzle flawlessly!";
+                    localStorage.removeItem('gardenSpellbee_saveState'); // Clear save file once finished completely
                 } else {
                     emoji.innerText = "🍂";
                     heading.innerText = "Keep Practicing!";
                     heading.className = "text-2xl font-bold text-amber-600 child-font";
-                    msg.innerText = "Don't worry! Review your plant kingdom materials and try again to save your hearts!";
+                    paragraph.innerText = "Good try! Review your plant kingdom materials and click below to try again from the beginning!";
                 }
 
-                panel.classList.remove('hidden');
-            }, 150);
+                outroCard.classList.remove('hidden');
+            }, 100);
         }
 
-        function playSoundEffect(id) {
-            const track = document.getElementById(id);
-            if (track) {
-                track.load();
-                const p = track.play();
-                if (p !== undefined) {
-                    p.catch(e => console.log("Audio routing debug check: ", e));
+        function playSound(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.load();
+                const executionPromise = element.play();
+                if (executionPromise !== undefined) {
+                    executionPromise.catch(() => {});
                 }
             }
         }
 
-        function launchConfettiBurst() {
+        function triggerConfetti() {
             canvas.classList.remove('hidden');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             confettiArray = [];
-            for (let i = 0; i < 35; i++) {
+            for (let i = 0; i < 30; i++) {
                 confettiArray.push({
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 10 - 4,
-                    size: Math.random() * 4 + 4,
-                    color: `hsl(${Math.random() * 110 + 60}, 90%, 65%)`, // Vibrant garden theme colors
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 3,
+                    size: Math.random() * 3 + 3,
+                    color: `hsl(${Math.random() * 100 + 70}, 85%, 60%)`,
                     alpha: 1
                 });
             }
-            requestAnimationFrame(renderConfettiTickFrame);
+            requestAnimationFrame(renderConfettiFrame);
         }
 
-        function renderConfettiTickFrame() {
+        function renderConfettiFrame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let active = false;
+            let running = false;
             confettiArray.forEach(p => {
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.22;
+                p.vy += 0.2;
                 p.alpha -= 0.02;
                 if (p.alpha > 0) {
-                    active = true;
+                    running = true;
                     ctx.save();
                     ctx.globalAlpha = p.alpha;
                     ctx.fillStyle = p.color;
@@ -504,14 +582,16 @@
                     ctx.restore();
                 }
             });
-            if (active) requestAnimationFrame(renderConfettiTickFrame);
+            if (running) requestAnimationFrame(renderConfettiFrame);
             else canvas.classList.add('hidden');
         }
 
-        function restartFullGameSystem() {
+        function clearAndResetUniverse() {
+            localStorage.removeItem('gardenSpellbee_saveState');
             document.getElementById('scoreView').classList.add('hidden');
             document.getElementById('gameView').style.display = 'flex';
-            launchActiveGameplay();
+            prepareGameStructureData();
+            startGameSession();
         }
     </script>
 </body>
