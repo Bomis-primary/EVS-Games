@@ -3,94 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Safari Animal Kingdom Adventure</title>
+    <title>Safari Animal Kingdom Expedition</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(to bottom, #FEF3C7 0%, #FFFBEB 100%);
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            overflow: hidden;
-            height: 100vh;
+            min-h-screen: 100vh;
         }
         
         h1, h2, h3, .child-font {
             font-family: 'Fredoka', cursive;
         }
 
-        .safari-card {
-            background: rgba(255, 255, 255, 0.98);
+        .safari-container {
+            background: rgba(255, 255, 255, 0.95);
             border: 4px solid #047857;
-            box-shadow: 0 10px 0 #065F46, 0 12px 24px rgba(4, 120, 87, 0.15);
+            box-shadow: 0 12px 0 #065F46, 0 16px 30px rgba(4, 120, 87, 0.2);
         }
 
-        /* Responsive Grid Track Map */
-        .board-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+        /* Scrollable Vertical Trail Map container rules */
+        .trail-scroll-view {
+            max-height: 340px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #059669 #E2E8F0;
+            padding-right: 4px;
+        }
+        .trail-scroll-view::-webkit-scrollbar {
+            width: 6px;
+        }
+        .trail-scroll-view::-webkit-scrollbar-track {
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+        .trail-scroll-view::-webkit-scrollbar-thumb {
+            background: #059669;
+            border-radius: 10px;
         }
 
-        .tile-stone {
-            aspect-ratio: 1 / 1;
-            transition: all 0.2s ease;
+        /* Beautiful stepped stone alignments */
+        .stepping-stone {
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
-            font-family: 'Fredoka', cursive;
         }
 
-        .tile-active-highlight {
-            animation: pulseTile 1.5s infinite ease-in-out;
+        .active-stone-glow {
+            animation: stoneGlow 1.6s infinite ease-in-out;
+            border-color: #F59E0B !important;
+            transform: scale(1.03);
+        }
+        @keyframes stoneGlow {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(245, 158, 11, 0.8); }
+            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
         }
 
-        @keyframes pulseTile {
-            0%, 100% { box-shadow: 0 0 0 0px rgba(245, 158, 11, 0.7); }
-            50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
-        }
-
-        /* Token Bouncy Animation */
-        .safari-token {
+        .safari-explorer-token {
             animation: tokenBounce 0.4s infinite alternate ease-in-out;
-            z-index: 30;
+            z-index: 40;
         }
-
         @keyframes tokenBounce {
             0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-8px) scale(1.05); }
+            100% { transform: translateY(-10px) scale(1.1); }
         }
 
-        /* Custom Action Buttons styling */
-        .btn-clay {
+        .btn-clay-orange {
             background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
             box-shadow: 0 6px 0 #9A3412;
         }
-        .btn-clay:active {
+        .btn-clay-orange:active {
             transform: translateY(3px);
             box-shadow: 0 3px 0 #9A3412;
         }
 
-        .btn-safari-green {
+        .btn-jungle-green {
             background: linear-gradient(135deg, #10B981 0%, #059669 100%);
             box-shadow: 0 6px 0 #047857;
         }
-        .btn-safari-green:active {
+        .btn-jungle-green:active {
             transform: translateY(3px);
             box-shadow: 0 3px 0 #047857;
         }
 
-        /* Dice Rotational Animation */
-        .dice-spinning {
-            animation: spinDice 0.4s linear infinite;
+        .dice-spin-effect {
+            animation: spinMatrix 0.35s linear infinite;
         }
-        @keyframes spinDice {
-            0% { transform: rotate(0deg) scale(0.9); }
-            100% { transform: rotate(360deg) scale(0.9); }
+        @keyframes spinMatrix {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-2 m-0 select-none min-h-screen relative w-full overflow-hidden">
+<body class="flex flex-col items-center justify-center p-3 m-0 select-none min-h-screen relative w-full overflow-x-hidden">
 
     <audio id="soundBg" src="assets/cartoonbackgroundmusic.mp3" preload="auto" loop></audio>
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
@@ -103,135 +111,134 @@
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[60vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-white rounded-full flex items-center justify-center text-orange-500 font-bold text-4xl shadow-lg border-4 border-orange-300 animate-pulse\'>🦁</div>';">
     </div>
 
-    <div class="w-full max-w-md flex flex-col h-[96vh] max-h-[600px] justify-center relative z-10 px-1 overflow-hidden">
+    <div class="w-full max-w-md flex flex-col h-[95vh] max-h-[590px] justify-center relative z-10 px-1 overflow-hidden">
         
-        <div id="titleView" class="w-full safari-card rounded-[36px] p-6 text-center space-y-6">
+        <div id="titleView" class="w-full safari-container rounded-[36px] p-6 text-center space-y-6">
             <div class="space-y-2 py-4">
-                <div class="inline-block text-7xl drop-shadow-sm animate-bounce">🤠</div>
+                <div class="inline-block text-7xl animate-bounce">🤠</div>
                 <h1 class="text-3xl font-bold tracking-wide text-emerald-800 drop-shadow-sm">Animal Kingdom</h1>
-                <p class="text-xs text-amber-700 font-bold tracking-wider uppercase child-font">Virtual Safari Board Game</p>
+                <p class="text-xs text-amber-700 font-bold tracking-wider uppercase child-font">Vertical Expedition Quest</p>
             </div>
             
-            <button id="startBtnAction" class="w-full btn-clay text-white font-bold text-xl py-3.5 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
-                START SAFARI 🚀
+            <button id="startBtnAction" class="w-full btn-clay-orange text-white font-bold text-xl py-4 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
+                START EXPEDITION 🚀
             </button>
         </div>
 
-        <div id="instructionsView" class="hidden w-full safari-card rounded-[36px] p-5 text-center space-y-4">
+        <div id="instructionsView" class="hidden w-full safari-container rounded-[36px] p-5 text-center space-y-4">
             <div class="space-y-1">
-                <h2 class="text-2xl font-bold text-slate-800 child-font">Safari Rules 📖</h2>
-                <p class="text-[11px] text-emerald-700 font-bold">Simple steps to complete your quest!</p>
+                <h2 class="text-2xl font-bold text-slate-800 child-font">Expedition Rules 📖</h2>
+                <p class="text-[11px] text-emerald-700 font-bold">Follow the trail into the wild canyon!</p>
             </div>
 
             <div class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-200 text-left space-y-3 shadow-inner text-xs text-slate-700 font-semibold leading-relaxed">
                 <div class="flex items-start space-x-2">
                     <span class="shrink-0 text-sm">🎲</span> 
-                    <p><b>Roll the Dice</b> to move your explorer token across the 16 safari blocks.</p>
+                    <p><b>Roll the Dice</b> to hop down the winding vertical stepping stones trail.</p>
                 </div>
                 <div class="flex items-start space-x-2">
-                    <span class="shrink-0 text-sm">🦁</span> 
-                    <p>Land on <b>Question Tiles</b> to solve textbook puzzles. Correct steps give <b>+10 points</b>.</p>
+                    <span class="shrink-0 text-sm">📜</span> 
+                    <p>Answering right adds <b>+10 points</b>. Mistakes give a 2nd try but cost <b>-5 points</b>.</p>
                 </div>
                 <div class="flex items-start space-x-2">
-                    <span class="shrink-0 text-sm">⭐</span> 
-                    <p>Answer right on the <b>1st try</b> to earn <b>2 Stars</b>! Mistakes deduct <b>-5 points</b> but give a 2nd try.</p>
+                    <span class="shrink-0 text-sm">📈</span> 
+                    <p>Your total score adapts to the number of quiz stones you actually hit along your run!</p>
                 </div>
             </div>
 
-            <button id="playBtnAction" class="w-full btn-safari-green text-white font-bold text-lg py-3 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
-                PLAY GAME 🎉
+            <button id="playBtnAction" class="w-full btn-jungle-green text-white font-bold text-lg py-3 rounded-2xl cursor-pointer tracking-wide uppercase child-font">
+                LAUNCH 🎉
             </button>
         </div>
 
         <div id="gameView" class="hidden w-full h-full flex flex-col justify-between space-y-2 overflow-hidden">
             
             <div class="w-full flex items-center justify-between px-1 shrink-0">
-                <div class="bg-white border-2 border-emerald-500 px-3 py-1 rounded-xl shadow-sm flex flex-col">
-                    <span class="text-[9px] font-black text-slate-400 leading-none child-font uppercase">Score</span>
-                    <span id="scoreDisplay" class="text-xl font-black text-orange-500 leading-tight">0</span>
+                <div class="bg-white border-2 border-emerald-600 px-3 py-1 rounded-xl shadow-sm flex flex-col">
+                    <span class="text-[9px] font-black text-slate-400 leading-none child-font uppercase">Current Score</span>
+                    <span class="text-lg font-black text-orange-500 leading-tight"><span id="scoreDisplay">0</span> / <span id="maxScoreDisplay">0</span></span>
                 </div>
-                <div id="turnBadgeStatus" class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-xl text-center flex-1 mx-3 hidden">
-                    <p id="turnStatusText" class="text-[11px] font-bold text-amber-900 leading-none"></p>
-                </div>
-                <div class="bg-white border-2 border-emerald-500 px-3 py-2 rounded-xl text-xs font-black text-emerald-800 shadow-sm child-font" id="positionCounter">
-                    Tile: 1/16
+                <div class="bg-emerald-800 border-2 border-emerald-950 px-3 py-2 rounded-xl text-xs font-black text-white shadow-sm child-font" id="positionCounter">
+                    Stone: 1/16
                 </div>
             </div>
 
-            <div id="boardGridWrapper" class="board-grid bg-emerald-900 border-4 border-emerald-950 p-2 rounded-[24px] shadow-lg relative flex-1 min-h-[280px] items-center">
+            <div class="bg-emerald-900 border-4 border-emerald-950 p-3 rounded-[28px] shadow-lg relative flex-1 flex flex-col overflow-hidden">
+                <div class="text-center pb-1 shrink-0">
+                    <span class="text-[10px] uppercase tracking-widest font-black text-emerald-300 child-font">📜 Scroll down to view full trail canyon</span>
                 </div>
+                
+                <div id="trailScrollViewport" class="trail-scroll-view flex-1 w-full space-y-3 py-2">
+                    </div>
+            </div>
 
-            <div class="bg-amber-100 border-2 border-amber-200 rounded-[22px] p-2.5 flex items-center justify-between shadow-inner shrink-0">
-                <div class="flex flex-col text-left pl-1">
-                    <span class="text-[10px] text-amber-800 font-extrabold uppercase child-font leading-none">Your Action</span>
-                    <span id="diceFeedback" class="text-xs font-black text-slate-700 mt-1">Roll to begin!</span>
+            <div class="bg-amber-50 border-2 border-amber-200 rounded-[22px] p-2 flex items-center justify-between shadow-inner shrink-0">
+                <div class="flex flex-col text-left pl-2">
+                    <span class="text-[10px] text-amber-800 font-extrabold uppercase child-font leading-none">Your Move</span>
+                    <span id="diceFeedback" class="text-xs font-black text-slate-700 mt-1">Spin the dice!</span>
                 </div>
-                <button id="diceRollBtn" class="btn-clay text-white px-5 py-2.5 rounded-xl font-black text-sm flex items-center space-x-2 child-font">
+                <button id="diceRollBtn" class="btn-clay-orange text-white px-5 py-2.5 rounded-xl font-black text-sm flex items-center space-x-2 child-font">
                     <span id="diceEmojiIcon" class="text-lg">🎲</span>
                     <span id="diceBtnText">ROLL</span>
                 </button>
             </div>
         </div>
 
-        <div id="questionModalOverlay" class="fixed inset-0 bg-black/40 items-center justify-center p-4 z-40 hidden transition-all">
-            <div class="bg-white border-4 border-orange-500 rounded-[32px] p-5 w-full max-w-sm text-center space-y-4 shadow-2xl transform scale-100">
+        <div id="questionModalOverlay" class="fixed inset-0 bg-black/50 items-center justify-center p-4 z-50 hidden transition-all">
+            <div class="bg-white border-4 border-orange-500 rounded-[32px] p-5 w-full max-w-sm text-center space-y-4 shadow-2xl">
                 
-                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-1.5">
-                    <span id="modalCategoryTitle" class="text-xs font-black text-orange-600 tracking-wide uppercase child-font">🦁 Category</span>
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span id="modalCategoryTitle" class="text-xs font-black text-orange-600 tracking-wide uppercase child-font">Category</span>
                     <div id="modalAttemptStars" class="text-amber-400 text-sm tracking-tight font-bold">⭐⭐</div>
                 </div>
 
                 <p id="modalQuestionPrompt" class="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed py-1"></p>
 
-                <div class="space-y-2 pt-1" id="modalOptionsStack">
-                    </div>
+                <div class="space-y-2 pt-1" id="modalOptionsStack"></div>
 
                 <p id="modalFeedbackMessage" class="text-[11px] font-extrabold text-emerald-600 hidden min-h-[16px]"></p>
             </div>
         </div>
 
-        <div id="scoreView" class="hidden w-full safari-card rounded-[36px] p-6 text-center space-y-5">
+        <div id="scoreView" class="hidden w-full safari-container rounded-[36px] p-6 text-center space-y-5">
             <div class="space-y-1">
                 <span class="text-6xl block animate-bounce">👑</span>
-                <h2 class="text-2xl font-bold text-emerald-800 child-font">Safari Expert!</h2>
-                <p class="text-xs text-slate-600 font-bold px-4">Incredible job! You explored the whole animal kingdom path safely!</p>
+                <h2 class="text-2xl font-bold text-emerald-800 child-font">Expedition Over!</h2>
+                <p class="text-xs text-slate-600 font-bold px-4">Great work exploring! Here is your dynamic wildlife score matching your custom trail run:</p>
             </div>
-            <div class="bg-amber-50 p-3 rounded-2xl border-2 border-amber-200 max-w-[150px] mx-auto shadow-inner">
-                <p class="text-[9px] font-black tracking-wider uppercase text-amber-600 mb-0.5 child-font">Final Score</p>
-                <p class="text-3xl font-black text-orange-500 child-font" id="finalScore">0</p>
+            <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200 max-w-[180px] mx-auto shadow-inner">
+                <p class="text-[10px] font-black tracking-wider uppercase text-amber-600 mb-0.5 child-font">Final Score</p>
+                <p class="text-3xl font-black text-orange-600 child-font"><span id="finalScore">0</span> / <span id="finalMaxScore">0</span></p>
             </div>
-            <button id="restartBtnAction" class="w-full btn-clay text-white font-bold text-base py-3 rounded-xl cursor-pointer uppercase tracking-wider child-font">
-                PLAY AGAIN 🔄
+            <button id="restartBtnAction" class="w-full btn-clay-orange text-white font-bold text-base py-3 rounded-xl cursor-pointer uppercase tracking-wider child-font">
+                EXPLORE AGAIN 🔄
             </button>
         </div>
 
     </div>
 
     <script>
-        // Comprehensive Track Scheme Architecture Definitions
-        const mapTileDataSequence = [
-            { id: 0, text: "START 🚩", type: "start", color: "bg-rose-500 text-white border-rose-700" },
-            { id: 1, text: "🦁 Wild", type: "question", cat: "wild", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 2, text: "🌾 Diet", type: "question", cat: "diet", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 3, text: "🚀 +2 STEPS", type: "action", actionType: "forward", steps: 2, color: "bg-amber-400 text-amber-950 border-amber-600 font-bold" },
-            { id: 4, text: "🐮 Farm", type: "question", cat: "farm", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 5, text: "🏃‍♂️ Move", type: "question", cat: "move", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 6, text: "💥 TRAP -1", type: "action", actionType: "backward", steps: 1, color: "bg-sky-400 text-sky-950 border-sky-600 font-bold" },
-            { id: 7, text: "🏠 Shelter", type: "question", cat: "shelter", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 8, text: "🩺 Care", type: "question", cat: "care", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 9, text: "🌟 Fact", type: "question", cat: "fact", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 10, text: "🚀 +1 STEP", type: "action", actionType: "forward", steps: 1, color: "bg-amber-400 text-amber-950 border-amber-600 font-bold" },
-            { id: 11, text: "🛑 FREEZE", type: "action", actionType: "freeze", color: "bg-indigo-400 text-indigo-950 border-indigo-600 font-bold" },
-            { id: 12, text: "🚨 Safe", type: "question", cat: "safe", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 13, text: "🌊 Water", type: "question", cat: "water", color: "bg-white text-slate-800 border-slate-300 shadow-sm" },
-            { id: 14, text: "💥 TRAP -2", type: "action", actionType: "backward", steps: 2, color: "bg-sky-400 text-sky-950 border-sky-600 font-bold" },
-            { id: 15, text: "FINISH 🏆", type: "finish", color: "bg-emerald-500 text-white border-emerald-700" }
+        // Track Arrangement Map: Staggered horizontal layout offsets create a beautiful snake curve trail down the view box
+        const verticalTrailSequence = [
+            { id: 0, text: "START 🚩", type: "start", align: "justify-start pl-4", color: "bg-rose-500 text-white border-rose-700" },
+            { id: 1, text: "🦁 Wild Habitat", type: "question", cat: "wild", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 2, text: "🌾 Animal Diet", type: "question", cat: "diet", align: "justify-end pr-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 3, text: "🚀 GO FORWARD +2", type: "action", actionType: "forward", steps: 2, align: "justify-center px-2", color: "bg-yellow-400 text-amber-950 border-yellow-600 font-bold" },
+            { id: 4, text: "🐮 Farm Helpers", type: "question", cat: "farm", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 5, text: "🏃‍♂️ Movement", type: "question", cat: "move", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 6, text: "💥 CANYON TRAP -1", type: "action", actionType: "backward", steps: 1, align: "justify-end pr-4", color: "bg-sky-400 text-sky-950 border-sky-600 font-bold" },
+            { id: 7, text: "🏠 Cozy Shelters", type: "question", cat: "shelter", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 8, text: "🩺 Animal Care", type: "question", cat: "care", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 9, text: "🌟 Super Fact", type: "question", cat: "fact", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 10, text: "🚀 BONANZA STEP +1", type: "action", actionType: "forward", steps: 1, align: "justify-end pr-4", color: "bg-yellow-400 text-amber-950 border-yellow-600 font-bold" },
+            { id: 11, text: "🛑 FREEZE TILE", type: "action", actionType: "freeze", align: "justify-center px-2", color: "bg-indigo-400 text-indigo-950 border-indigo-600 font-bold" },
+            { id: 12, text: "🚨 Safe Kingdom", type: "question", cat: "safe", align: "justify-start pl-4", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 13, text: "🌊 Water Shelters", type: "question", cat: "water", align: "justify-center px-2", color: "bg-amber-50 text-slate-800 border-amber-300 shadow-sm" },
+            { id: 14, text: "💥 CANYON TRAP -2", type: "action", actionType: "backward", steps: 2, align: "justify-end pr-4", color: "bg-sky-400 text-sky-950 border-sky-600 font-bold" },
+            { id: 15, text: "FINISH 🏆", type: "finish", align: "justify-center px-2", color: "bg-emerald-500 text-white border-emerald-700" }
         ];
 
-        // Layout mapping to snake around 4x4 matrix correctly without visual breaks
-        const gridVisualSequenceMapping = [0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12];
-
-        // Complete 2-Questions-Per-Tile Dictionary Bank
+        // 2-Questions-Per-Tile Dictionary Bank
         const categoryQuestionsPool = {
             wild: [
                 { q: "Animals like tigers, lions, and bears that live freely in natural forests are called __________ animals.", choices: ["domestic", "wild", "pet"], correct: 1 },
@@ -271,15 +278,15 @@
             ]
         };
 
-        // Engine States runtime variables
+        // Engine Status State Trackers
         let currentTokenIndex = 0;
         let runningScore = 0;
+        let runningMaxPossibleScore = 0; // Dynamic "Out-Of" Tracker variable
         let isDiceRolling = false;
         let playerFrozenTurn = false;
 
-        // Current Popup Modal Interaction States
         let dynamicCurrentQuestionObj = null;
-        let currentAttemptsCount = 0;
+        let currentAttemptsCount = 1;
 
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
@@ -295,7 +302,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Splash automatic presentation framework setup
+            // Splash layout presentation execution
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 if (splash) {
@@ -304,27 +311,29 @@
                 }
             }, 5000);
 
-            buildBoardGridUIElements();
+            buildVerticalTrailListUI();
             setupInteractivePipelines();
         });
 
-        function buildBoardGridUIElements() {
-            const wrapper = document.getElementById('boardGridWrapper');
-            wrapper.innerHTML = "";
+        function buildVerticalTrailListUI() {
+            const viewport = document.getElementById('trailScrollViewport');
+            viewport.innerHTML = "";
 
-            // Create tiles in visual layout sequence mapping order
-            gridVisualSequenceMapping.forEach(visualIdx => {
-                const data = mapTileDataSequence[visualIdx];
-                const block = document.createElement('div');
-                block.id = `tile-node-${data.id}`;
-                block.className = `tile-stone rounded-xl border-2 p-1 text-center flex flex-col items-center justify-center text-[10px] font-bold ${data.color} cursor-default select-none transition-all`;
-                
-                // Truncate structural wording string layouts for small screen sizes
-                block.innerText = data.text;
-                wrapper.appendChild(block);
+            verticalTrailSequence.forEach(data => {
+                // Wrapper flex block to anchor alignment distribution shapes
+                const flexRowWrapper = document.createElement('div');
+                flexRowWrapper.className = `w-full flex ${data.align}`;
+
+                const stoneNode = document.createElement('div');
+                stoneNode.id = `stone-id-${data.id}`;
+                stoneNode.className = `stepping-stone w-44 py-2 px-3 border-2 text-center rounded-2xl text-xs font-bold child-font select-none ${data.color}`;
+                stoneNode.innerText = data.text;
+
+                flexRowWrapper.appendChild(stoneNode);
+                viewport.appendChild(flexRowWrapper);
             });
 
-            refreshUIElementsPositions();
+            refreshTokenTrackDisplays();
         }
 
         function setupInteractivePipelines() {
@@ -332,10 +341,10 @@
                 document.getElementById('titleView').style.display = 'none';
                 document.getElementById('instructionsView').classList.remove('hidden');
                 
-                // Play and loop safari background atmosphere music
+                // Active looped audio channel execution
                 const bgAudio = document.getElementById('soundBg');
                 if(bgAudio) {
-                    bgAudio.volume = 0.25;
+                    bgAudio.volume = 0.20;
                     bgAudio.play().catch(() => {});
                 }
             });
@@ -343,58 +352,63 @@
             bindClickEvent('playBtnAction', () => {
                 document.getElementById('instructionsView').style.display = 'none';
                 document.getElementById('gameView').style.display = 'flex';
-                refreshUIElementsPositions();
+                refreshTokenTrackDisplays();
             });
 
             bindClickEvent('restartBtnAction', () => {
                 currentTokenIndex = 0;
                 runningScore = 0;
+                runningMaxPossibleScore = 0;
                 playerFrozenTurn = false;
                 isDiceRolling = false;
                 
                 document.getElementById('scoreDisplay').innerText = "0";
-                document.getElementById('diceFeedback').innerText = "Roll to begin!";
-                document.getElementById('turnBadgeStatus').classList.add('hidden');
+                document.getElementById('maxScoreDisplay').innerText = "0";
+                document.getElementById('diceFeedback').innerText = "Spin the dice!";
                 document.getElementById('scoreView').classList.add('hidden');
                 document.getElementById('gameView').style.display = 'flex';
 
-                refreshUIElementsPositions();
+                refreshTokenTrackDisplays();
             });
 
             bindClickEvent('diceRollBtn', handleDiceRollTrigger);
         }
 
-        function refreshUIElementsPositions() {
-            // Remove previous instances of token text elements on track nodes
-            mapTileDataSequence.forEach(data => {
-                const node = document.getElementById(`tile-node-${data.id}`);
-                if (node) {
-                    node.classList.remove('tile-active-highlight');
-                    const existingToken = node.querySelector('.safari-token');
-                    if (existingToken) existingToken.remove();
+        function refreshTokenTrackDisplays() {
+            // Unset all active highlights and old tokens
+            verticalTrailSequence.forEach(data => {
+                const element = document.getElementById(`stone-id-${data.id}`);
+                if (element) {
+                    element.classList.remove('active-stone-glow');
+                    const oldToken = element.querySelector('.safari-explorer-token');
+                    if (oldToken) oldToken.remove();
                 }
             });
 
-            // Anchor active explorer token graphical object inside current target location node
-            const currentNode = document.getElementById(`tile-node-${currentTokenIndex}`);
-            if (currentNode) {
-                currentNode.classList.add('tile-active-highlight');
-                const tokenElement = document.createElement('div');
-                tokenElement.className = "safari-token absolute -top-3 left-1/2 -translate-x-1/2 text-2xl drop-shadow-md pointer-events-none";
-                tokenElement.innerText = "🤠";
-                currentNode.appendChild(tokenElement);
+            // Target current stone node
+            const targetedStone = document.getElementById(`stone-id-${currentTokenIndex}`);
+            if (targetedStone) {
+                targetedStone.classList.add('active-stone-glow');
+                
+                const token = document.createElement('div');
+                token.className = "safari-explorer-token absolute -top-4 left-1/2 -translate-x-1/2 text-2xl drop-shadow-md pointer-events-none";
+                token.innerText = "🤠";
+                targetedStone.appendChild(token);
+
+                // Auto-Scroll the viewport wrapper so the current active node is always perfectly visible!
+                setTimeout(() => {
+                    targetedStone.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 50);
             }
 
-            document.getElementById('positionCounter').innerText = `Tile: ${currentTokenIndex + 1}/16`;
+            document.getElementById('positionCounter').innerText = `Stone: ${currentTokenIndex + 1}/16`;
         }
 
         function handleDiceRollTrigger() {
             if (isDiceRolling) return;
 
-            // Handle freezing trap skips cleanly
             if (playerFrozenTurn) {
                 playerFrozenTurn = false;
-                document.getElementById('turnBadgeStatus').classList.add('hidden');
                 document.getElementById('diceFeedback').innerText = "Unfrozen! Next turn ready.";
                 playSound('soundWrong');
                 return;
@@ -402,79 +416,78 @@
 
             isDiceRolling = true;
             document.getElementById('diceRollBtn').disabled = true;
-            document.getElementById('diceEmojiIcon').classList.add('dice-spinning');
-            document.getElementById('diceBtnText').innerText = "ROLLING...";
+            document.getElementById('diceEmojiIcon').classList.add('dice-spin-effect');
+            document.getElementById('diceBtnText').innerText = "SPINNING...";
 
-            let iterations = 0;
-            const emojiOptions = ["⚀", "⚁", "⚂"];
+            let ticks = 0;
+            const diceFaces = ["⚀", "⚁", "⚂"];
             
-            const animationInterval = setInterval(() => {
-                const randomVisualValue = Math.floor(Math.random() * 3);
-                document.getElementById('diceEmojiIcon').innerText = emojiOptions[randomVisualValue];
-                iterations++;
+            const animTimer = setInterval(() => {
+                document.getElementById('diceEmojiIcon').innerText = diceFaces[Math.floor(Math.random() * 3)];
+                ticks++;
 
-                if (iterations >= 6) {
-                    clearInterval(animationInterval);
+                if (ticks >= 6) {
+                    clearInterval(animTimer);
                     
-                    // Final roll resolution bounded between 1 and 3 spaces
-                    const finalRollValue = Math.floor(Math.random() * 3) + 1;
+                    const rolledNum = Math.floor(Math.random() * 3) + 1;
                     
-                    document.getElementById('diceEmojiIcon').className = "text-lg";
-                    document.getElementById('diceEmojiIcon').innerText = emojiOptions[finalRollValue - 1];
+                    document.getElementById('diceEmojiIcon').classList.remove('dice-spin-effect');
+                    document.getElementById('diceEmojiIcon').innerText = diceFaces[rolledNum - 1];
                     document.getElementById('diceBtnText').innerText = "ROLL";
-                    document.getElementById('diceFeedback').innerText = `You rolled a ${finalRollValue}!`;
+                    document.getElementById('diceFeedback').innerText = `Advanced +${rolledNum} stones!`;
                     
-                    executeTokenStepsHop(finalRollValue);
+                    executeTokenTrailHops(rolledNum);
                 }
             }, 100);
         }
 
-        function executeTokenStepsHop(stepsCount) {
-            let spaceHopsRemaining = stepsCount;
+        function executeTokenTrailHops(totalSteps) {
+            let leftToHop = totalSteps;
 
-            const movementLoopTimer = setInterval(() => {
-                if (spaceHopsRemaining > 0 && currentTokenIndex < 15) {
+            const incrementalTimer = setInterval(() => {
+                if (leftToHop > 0 && currentTokenIndex < 15) {
                     currentTokenIndex++;
-                    spaceHopsRemaining--;
-                    refreshUIElementsPositions();
+                    leftToHop--;
+                    refreshTokenTrackDisplays();
                 } else {
-                    clearInterval(movementLoopTimer);
-                    resolveLandedTileRules();
+                    clearInterval(incrementalTimer);
+                    evaluateLandedStoneConsequences();
                 }
-            }, 250);
+            }, 260);
         }
 
-        function resolveLandedTileRules() {
-            const activeTileData = mapTileDataSequence[currentTokenIndex];
+        function evaluateLandedStoneConsequences() {
+            const stoneData = verticalTrailSequence[currentTokenIndex];
 
-            if (activeTileData.type === "question") {
-                // Fetch dynamic array questions category data
-                const pool = categoryQuestionsPool[activeTileData.cat];
-                dynamicCurrentQuestionObj = pool[Math.floor(Math.random() * pool.length)];
+            if (stoneData.type === "question") {
+                // Landed on a question tile -> Increment the "Out-Of" Max Possible score by 10!
+                runningMaxPossibleScore += 10;
+                document.getElementById('maxScoreDisplay').innerText = runningMaxPossibleScore;
+
+                const questionArray = categoryQuestionsPool[stoneData.cat];
+                dynamicCurrentQuestionObj = questionArray[Math.floor(Math.random() * questionArray.length)];
                 currentAttemptsCount = 1;
                 
-                openQuestionModalLayout();
+                triggerQuestionModalDisplay();
             } 
-            else if (activeTileData.type === "action") {
+            else if (stoneData.type === "action") {
                 setTimeout(() => {
-                    if (activeTileData.actionType === "forward") {
-                        document.getElementById('diceFeedback').innerText = `🚀 Shortcut! Go +${activeTileData.steps} Spaces!`;
-                        executeTokenStepsHop(activeTileData.steps);
+                    if (stoneData.actionType === "forward") {
+                        document.getElementById('diceFeedback').innerText = `🚀 Bonus Path! Forward +${stoneData.steps}!`;
+                        executeTokenTrailHops(stoneData.steps);
                     } 
-                    else if (activeTileData.actionType === "backward") {
-                        document.getElementById('diceFeedback').innerText = `💥 Trap! Pulled Back -${activeTileData.steps} Spaces!`;
+                    else if (stoneData.actionType === "backward") {
+                        document.getElementById('diceFeedback').innerText = `💥 Canyon Slide! Back -${stoneData.steps}!`;
                         playSound('soundWrong');
                         
-                        // Retract position safely bounded to 0 indices
-                        currentTokenIndex = Math.max(0, currentTokenIndex - activeTileData.steps);
-                        refreshUIElementsPositions();
+                        currentTokenIndex = Math.max(0, currentTokenIndex - stoneData.steps);
+                        refreshTokenTrackDisplays();
+                        
                         isDiceRolling = false;
                         document.getElementById('diceRollBtn').disabled = false;
                     } 
-                    else if (activeTileData.actionType === "freeze") {
-                        document.getElementById('diceFeedback').innerText = "🛑 Trapped! Frozen for 1 turn!";
-                        document.getElementById('turnStatusText').innerText = "🛑 NEXT TURN FROZEN";
-                        document.getElementById('turnBadgeStatus').classList.remove('hidden');
+                    else if (stoneData.actionType === "freeze") {
+                        document.getElementById('diceFeedback').innerText = "🛑 Mud Swamp! Next turn frozen!";
                         playSound('soundWrong');
                         
                         playerFrozenTurn = true;
@@ -483,133 +496,120 @@
                     }
                 }, 400);
             } 
-            else if (activeTileData.type === "finish" || currentTokenIndex >= 15) {
-                handleVictoryTermination();
+            else if (stoneData.type === "finish" || currentTokenIndex >= 15) {
+                resolveFinalEndGameStats();
             } else {
-                // Free start safely releases control lock back
                 isDiceRolling = false;
                 document.getElementById('diceRollBtn').disabled = false;
             }
         }
 
-        function openQuestionModalLayout() {
-            document.getElementById('modalCategoryTitle').innerText = `🦁 Category: ${mapTileDataSequence[currentTokenIndex].text}`;
+        function triggerQuestionModalDisplay() {
+            document.getElementById('modalCategoryTitle').innerText = `${verticalTrailSequence[currentTokenIndex].text}`;
             document.getElementById('modalAttemptStars').innerText = "⭐⭐";
             document.getElementById('modalQuestionPrompt').innerText = dynamicCurrentQuestionObj.q;
 
-            const optionsStack = document.getElementById('modalOptionsStack');
-            optionsStack.innerHTML = "";
+            const stack = document.getElementById('modalOptionsStack');
+            stack.innerHTML = "";
 
-            dynamicCurrentQuestionObj.choices.forEach((choiceText, index) => {
-                const choiceBtn = document.createElement('button');
-                choiceBtn.className = "w-full text-slate-700 bg-slate-50 border-2 border-slate-200 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left transition-all active:scale-98 cursor-pointer child-font";
-                choiceBtn.innerText = `${String.fromCharCode(65 + index)}) ${choiceText}`;
+            dynamicCurrentQuestionObj.choices.forEach((choiceStr, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-slate-700 bg-slate-50 border-2 border-slate-200 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left active:scale-98 cursor-pointer child-font";
+                btn.innerText = `${String.fromCharCode(65 + idx)}) ${choiceStr}`;
                 
-                choiceBtn.onclick = () => evaluationSelectedAnswerInput(index, choiceBtn);
-                optionsStack.appendChild(choiceBtn);
+                btn.onclick = () => verifyOptionAnswerSubmission(idx, btn);
+                stack.appendChild(btn);
             });
 
-            const msg = document.getElementById('modalFeedbackMessage');
-            msg.classList.add('hidden');
-            msg.innerText = "";
-
+            document.getElementById('modalFeedbackMessage').classList.add('hidden');
             document.getElementById('questionModalOverlay').style.display = 'flex';
         }
 
-        function evaluationSelectedAnswerInput(chosenIndex, targetBtnElement) {
-            const correctIndex = dynamicCurrentQuestionObj.correct;
-            const optionsStack = document.getElementById('modalOptionsStack');
-            const feedbackMessage = document.getElementById('modalFeedbackMessage');
+        function verifyOptionAnswerSubmission(selectedIndex, chosenButtonNode) {
+            const correctOptionIdx = dynamicCurrentQuestionObj.correct;
+            const stack = document.getElementById('modalOptionsStack');
+            const feedbackText = document.getElementById('modalFeedbackMessage');
 
-            // Disable all option choices to prevent dual-taps
-            Array.from(optionsStack.children).forEach(btn => btn.disabled = true);
+            Array.from(stack.children).forEach(b => b.disabled = true);
 
-            if (chosenIndex === correctIndex) {
+            if (selectedIndex === correctOptionIdx) {
                 playSound('soundCorrect');
-                targetBtnElement.className = "w-full text-white bg-emerald-500 border-2 border-emerald-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left child-font";
+                chosenButtonNode.className = "w-full text-white bg-emerald-500 border-2 border-emerald-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left child-font";
                 
-                // Add points on correct input
                 runningScore += 10;
                 document.getElementById('scoreDisplay').innerText = runningScore;
 
-                feedbackMessage.innerText = currentAttemptsCount === 1 ? "🎉 Perfect! +10 Points (⭐⭐)" : "👍 Got it! +10 Points (⭐)";
-                feedbackMessage.className = "text-[11px] font-black text-emerald-600 block animate-pulse";
+                feedbackText.innerText = currentAttemptsCount === 1 ? "🎉 Fantastic! +10 Points (⭐⭐)" : "👍 Good job! +10 Points (⭐)";
+                feedbackText.className = "text-[11px] font-black text-emerald-600 block animate-pulse";
 
-                setTimeout(() => {
-                    closeModalWindowOverlay();
-                }, 1500);
-
+                setTimeout(() => { dismissModalOverlay(); }, 1500);
             } else {
                 playSound('soundWrong');
-                targetBtnElement.className = "w-full text-white bg-rose-500 border-2 border-rose-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left opacity-60 child-font";
+                chosenButtonNode.className = "w-full text-white bg-rose-500 border-2 border-rose-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left opacity-60 child-font";
 
                 if (currentAttemptsCount === 1) {
-                    // Update star displays for second attempt
                     currentAttemptsCount = 2;
                     document.getElementById('modalAttemptStars').innerText = "⭐";
-                    feedbackMessage.innerText = "❌ Incorrect! Think carefully and try 1 last time!";
-                    feedbackMessage.className = "text-[11px] font-black text-orange-600 block";
+                    feedbackText.innerText = "❌ That's incorrect. Think and try your last chance!";
+                    feedbackText.className = "text-[11px] font-black text-orange-600 block";
 
-                    // Re-enable option slots except the wrong one chosen
                     setTimeout(() => {
-                        Array.from(optionsStack.children).forEach((btn, idx) => {
-                            if (idx !== chosenIndex) btn.disabled = false;
+                        Array.from(stack.children).forEach((b, i) => {
+                            if (i !== selectedIndex) b.disabled = false;
                         });
                     }, 600);
-
                 } else {
-                    // Exhausted all 2 attempts
+                    // Both attempts missed
                     runningScore = Math.max(0, runningScore - 5);
                     document.getElementById('scoreDisplay').innerText = runningScore;
 
-                    // Outline correct answer row in green
-                    const correctBtn = optionsStack.children[correctIndex];
-                    if (correctBtn) correctBtn.className = "w-full text-white bg-emerald-500 border-2 border-emerald-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left child-font";
+                    const accurateBtn = stack.children[correctOptionIdx];
+                    if (accurateBtn) accurateBtn.className = "w-full text-white bg-emerald-500 border-2 border-emerald-600 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm text-left child-font";
 
-                    feedbackMessage.innerText = "❌ No attempts left! -5 Points. Moving forward...";
-                    feedbackMessage.className = "text-[11px] font-black text-rose-500 block";
+                    feedbackText.innerText = "❌ No tries left! -5 Points. Path continues!";
+                    feedbackText.className = "text-[11px] font-black text-rose-500 block";
 
-                    setTimeout(() => {
-                        closeModalWindowOverlay();
-                    }, 2000);
+                    setTimeout(() => { dismissModalOverlay(); }, 2000);
                 }
             }
         }
 
-        function closeModalWindowOverlay() {
+        function dismissModalOverlay() {
             document.getElementById('questionModalOverlay').style.display = 'none';
-            
-            // Release system locks safely for next rolls
             isDiceRolling = false;
             document.getElementById('diceRollBtn').disabled = false;
             document.getElementById('diceFeedback').innerText = "Roll for your next step!";
         }
 
-        function handleVictoryTermination() {
+        function resolveFinalEndGameStats() {
             if (isDiceRolling) isDiceRolling = false;
             
             playSound('soundClapping');
-            triggerConfettiExplosionAnimation();
+            triggerConfettiParticlesWave();
 
             setTimeout(() => {
                 document.getElementById('gameView').style.display = 'none';
+                
+                // Map the real-time maximum possible score accurately to the final report box
                 document.getElementById('finalScore').innerText = runningScore;
+                document.getElementById('finalMaxScore').innerText = runningMaxPossibleScore;
+                
                 document.getElementById('scoreView').classList.remove('hidden');
             }, 400);
         }
 
-        function playSound(audioId) {
-            const clip = document.getElementById(audioId);
-            if (clip) {
-                clip.load();
-                const runPromise = clip.play();
-                if (runPromise !== undefined) {
-                    runPromise.catch(() => {});
+        function playSound(id) {
+            const audio = document.getElementById(id);
+            if (audio) {
+                audio.load();
+                const executionPromise = audio.play();
+                if (executionPromise !== undefined) {
+                    executionPromise.catch(() => {});
                 }
             }
         }
 
-        function triggerConfettiExplosionAnimation() {
+        function triggerConfettiParticlesWave() {
             canvas.classList.remove('hidden');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -621,23 +621,23 @@
                     vx: (Math.random() - 0.5) * 10,
                     vy: (Math.random() - 0.5) * 10 - 4,
                     size: Math.random() * 4 + 3,
-                    color: `hsl(${Math.random() * 60 + 20}, 90%, 55%)`, // Vibrant wild safari tones
+                    color: `hsl(${Math.random() * 60 + 30}, 95%, 55%)`,
                     alpha: 1
                 });
             }
-            requestAnimationFrame(renderConfettiParticles);
+            requestAnimationFrame(renderConfettiFrameLoop);
         }
 
-        function renderConfettiParticles() {
+        function renderConfettiFrameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let active = false;
+            let runs = false;
             confettiArray.forEach(p => {
                 p.x += p.vx;
                 p.y += p.vy;
                 p.vy += 0.22;
                 p.alpha -= 0.015;
                 if (p.alpha > 0) {
-                    active = true;
+                    runs = true;
                     ctx.save();
                     ctx.globalAlpha = p.alpha;
                     ctx.fillStyle = p.color;
@@ -647,7 +647,7 @@
                     ctx.restore();
                 }
             });
-            if (active) requestAnimationFrame(renderConfettiParticles);
+            if (runs) requestAnimationFrame(renderConfettiFrameLoop);
             else canvas.classList.add('hidden');
         }
     </script>
