@@ -13,17 +13,18 @@
             background: radial-gradient(circle, #5c2c16 0%, #2e1205 100%);
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
-        /* 3D Toy Box Mobile Container Frame Shell */
+        /* Upgraded Dynamic Mobile Container Frame Shell - Allows internal scroll */
         .game-main-box {
             background: #fffbf4;
             border: 4px solid #4a1d08;
             box-shadow: 0 16px 0 #2b0f03, 0 24px 36px rgba(0,0,0,0.5);
             border-radius: 32px;
             width: 100%;
-            height: 610px;
+            max-width: 380px;
+            height: 620px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -85,137 +86,138 @@
             box-shadow: 0 2px 0 #14532d;
         }
 
-        /* Clean Hide Scrollbars */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        /* Custom Scrollbar styling for the entry tray drawer */
+        .drawer-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .drawer-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        .drawer-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4 m-0 select-none min-h-screen w-full">
+<body class="flex flex-col items-center justify-center p-4 m-0 select-none">
 
     <canvas id="canvasConfetti" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <div class="w-full max-w-sm flex flex-col justify-center items-center">
-        <div class="game-main-box p-4">
+    <div class="game-main-box p-4">
 
-            <div id="factPopupModal" class="hidden absolute inset-0 bg-stone-950/90 z-50 rounded-[28px] flex flex-col items-center justify-center p-5 text-center">
-                <div class="my-auto w-full">
-                    <div class="w-full bg-white border-4 solid border-orange-500 rounded-2xl p-4 shadow-2xl">
-                        <div class="text-5xl mb-2 animate-bounce">⭐</div>
-                        <h2 class="text-2xl font-black text-orange-950 tracking-wide uppercase">You Found It!</h2>
-                        <div class="bg-orange-50 border border-orange-200 p-3.5 rounded-xl mt-2">
-                            <p id="factModalContentText" class="text-stone-800 font-semibold text-xs leading-relaxed">
-                                </p>
-                        </div>
+        <div id="factPopupModal" class="hidden absolute inset-0 bg-stone-950/90 z-50 rounded-[28px] flex flex-col items-center justify-center p-5 text-center">
+            <div class="my-auto w-full">
+                <div class="w-full bg-white border-4 border-orange-500 rounded-2xl p-4 shadow-2xl">
+                    <div class="text-5xl mb-2 animate-bounce">⭐</div>
+                    <h2 class="text-2xl font-black text-orange-950 tracking-wide uppercase">You Found It!</h2>
+                    <div class="bg-orange-50 border border-orange-200 p-3.5 rounded-xl mt-2">
+                        <p id="factModalContentText" class="text-stone-800 font-semibold text-xs leading-relaxed"></p>
                     </div>
                 </div>
-                <button id="btnDismissFact" class="w-full button-green-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
-                    NEXT QUESTION ➡️
-                </button>
             </div>
-
-            <div id="innovineLogoView" class="w-full flex flex-col justify-center items-center h-full flex-1 py-4">
-                <div class="flex flex-col items-center justify-center">
-                    <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-56 h-auto object-contain mx-auto">
-                </div>
-            </div>
-
-            <div id="welcomeMenuView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-2">
-                <div class="space-y-1 mt-4">
-                    <div class="text-6xl">🔍</div>
-                    <h1 class="text-3xl font-black text-amber-950 tracking-tight">EARTH MATCH!</h1>
-                    <span class="text-[10px] text-orange-950 font-bold bg-orange-200 px-3 py-0.5 rounded-full inline-block uppercase">Fun Learning Game</span>
-                </div>
-
-                <div class="bg-orange-50 border border-orange-200 p-4 rounded-xl text-center">
-                    <p class="text-xs font-semibold text-stone-700 leading-relaxed">
-                        Welcome, little detective! Read the story puzzles and drag the matching word cards directly into the brown lab box to test your knowledge!
-                    </p>
-                </div>
-
-                <button id="btnMenuNext" class="w-full button-orange-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
-                    PLAY NOW 🎮
-                </button>
-            </div>
-
-            <div id="gameRulesView" class="hidden w-full flex flex-col justify-between h-full flex-1 py-2">
-                <div class="text-center">
-                    <h2 class="text-xl font-black text-amber-950">How To Play!</h2>
-                </div>
-                
-                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs font-semibold text-stone-700 space-y-3 my-auto leading-relaxed">
-                    <p class="flex items-center"><span class="text-lg mr-2">🎯</span> Match all 12 puzzle questions by dragging cards.</p>
-                    <p class="flex items-center"><span class="text-lg mr-2">🪨</span> You have 3 rocks! Each wrong guess cracks one.</p>
-                    <p class="flex items-center"><span class="text-lg mr-2">💡</span> Stuck? Make 2 mistakes and the correct answer will glow!</p>
-                </div>
-
-                <button id="btnLaunchEngine" class="w-full button-orange-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
-                    START GAME ⚡
-                </button>
-            </div>
-
-            <div id="mainGameplayView" class="hidden w-full h-full flex flex-col justify-between flex-1 space-y-3">
-                
-                <div class="w-full flex items-center justify-between shrink-0">
-                    <div class="bg-stone-100 border border-stone-200 px-2.5 py-1 rounded-lg text-center">
-                        <span class="block text-[7px] font-bold text-stone-400 uppercase tracking-tight">Question</span>
-                        <span id="txtProgressBadge" class="text-xs font-black text-stone-800 leading-none">1 / 12</span>
-                    </div>
-
-                    <div class="flex items-center space-x-1 bg-stone-900 px-2.5 py-1.5 rounded-xl shadow-inner text-xs">
-                        <span id="rockLife1" class="transition-opacity duration-200">🪨</span>
-                        <span id="rockLife2" class="transition-opacity duration-200">🪨</span>
-                        <span id="rockLife3" class="transition-opacity duration-200">🪨</span>
-                    </div>
-
-                    <div class="bg-amber-950 px-2.5 py-1 rounded-lg text-center min-w-[65px]">
-                        <span class="block text-[7px] text-orange-400 uppercase font-bold tracking-tight">Score</span>
-                        <span id="txtLiveScore" class="text-xs font-black text-orange-300 leading-none">000</span>
-                    </div>
-                </div>
-
-                <div id="gameplayDropArena" class="cave-box-theme rounded-2xl p-3 flex flex-col justify-center items-center h-44 relative transition-all duration-200">
-                    
-                    <div id="mainDropTargetFrame" class="w-full border-4 border-dashed border-orange-500/60 rounded-xl h-full flex flex-col justify-center items-center p-2.5 text-center">
-                        <span class="text-[8px] bg-orange-400 text-amber-950 font-black px-2 py-0.5 rounded-full mb-2 uppercase tracking-wider">Drop Card Here</span>
-                        <p id="txtScenarioRequestPrompt" class="text-[11px] font-semibold text-amber-50 leading-relaxed max-w-[270px]">
-                            </p>
-                    </div>
-                </div>
-
-                <div class="bg-stone-50 border border-stone-200 rounded-xl p-2.5 flex-1 flex flex-col min-h-[190px]">
-                    <div class="text-center mb-1.5 shrink-0">
-                        <span class="text-[8px] font-black text-stone-400 bg-stone-200 px-3 py-0.5 rounded-full uppercase">Your Answer Cards</span>
-                    </div>
-
-                    <div id="trayGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto no-scrollbar pr-0.5 flex-1">
-                        </div>
-                </div>
-            </div>
-
-            <div id="summaryDashboardView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-1">
-                <div class="space-y-1 mt-3">
-                    <span id="lblFinalEmoji" class="text-5xl block">🏆</span>
-                    <h2 id="lblFinalTitle" class="text-2xl font-black text-stone-900 tracking-tight">Great Job!</h2>
-                    <p id="lblFinalFeedback" class="text-xs text-stone-600 font-semibold px-2 leading-relaxed mt-1">
-                        </p>
-                </div>
-
-                <div class="bg-orange-50 px-5 py-3 rounded-xl border border-orange-200 my-2">
-                    <p class="text-[8px] font-black tracking-widest uppercase text-stone-400">Total Score</p>
-                    <p class="text-3xl font-black text-orange-600"><span id="lblFinalScore">0</span> / 120</p>
-                </div>
-
-                <button id="btnRestartGame" class="w-full button-orange-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
-                    TRY AGAIN 🔄
-                </button>
-            </div>
-
+            <button id="btnDismissFact" class="w-full button-green-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
+                NEXT QUESTION ➡️
+            </button>
         </div>
+
+        <div id="innovineLogoView" class="w-full flex flex-col justify-center items-center h-full flex-1 py-4">
+            <div class="flex flex-col items-center justify-center">
+                <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-56 h-auto object-contain mx-auto">
+            </div>
+        </div>
+
+        <div id="welcomeMenuView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-2">
+            <div class="space-y-1 mt-4">
+                <div class="text-6xl">🔍</div>
+                <h1 class="text-3xl font-black text-amber-950 tracking-tight">EARTH MATCH!</h1>
+                <span class="text-[10px] text-orange-950 font-bold bg-orange-200 px-3 py-0.5 rounded-full inline-block uppercase">Fun Learning Game</span>
+            </div>
+
+            <div class="bg-orange-50 border border-orange-200 p-4 rounded-xl text-center">
+                <p class="text-xs font-semibold text-stone-700 leading-relaxed">
+                    Welcome, little detective! Read the story puzzles and drag the matching word cards directly into the brown lab box to test your knowledge!
+                </p>
+            </div>
+
+            <button id="btnMenuNext" class="w-full button-orange-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
+                PLAY NOW 🎮
+            </button>
+        </div>
+
+        <div id="gameRulesView" class="hidden w-full flex flex-col justify-between h-full flex-1 py-2">
+            <div class="text-center">
+                <h2 class="text-xl font-black text-amber-950">How To Play!</h2>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs font-semibold text-stone-700 space-y-3 my-auto leading-relaxed">
+                <p class="flex items-center"><span class="text-lg mr-2">🎯</span> Match all 12 puzzle questions by dragging cards.</p>
+                <p class="flex items-center"><span class="text-lg mr-2">🪨</span> You have 3 rocks! Each wrong guess cracks one.</p>
+                <p class="flex items-center"><span class="text-lg mr-2">💡</span> Stuck? Make 2 mistakes and the correct answer will glow!</p>
+            </div>
+
+            <button id="btnLaunchEngine" class="w-full button-orange-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
+                START GAME ⚡
+            </button>
+        </div>
+
+        <div id="mainGameplayView" class="hidden w-full h-full flex flex-col justify-between flex-1 space-y-2">
+            
+            <div class="w-full flex items-center justify-between shrink-0">
+                <div class="bg-stone-100 border border-stone-200 px-2.5 py-1 rounded-lg text-center">
+                    <span class="block text-[7px] font-bold text-stone-400 uppercase tracking-tight">Question</span>
+                    <span id="txtProgressBadge" class="text-xs font-black text-stone-800 leading-none">1 / 12</span>
+                </div>
+
+                <div class="flex items-center space-x-1 bg-stone-900 px-2.5 py-1.5 rounded-xl shadow-inner text-xs">
+                    <span id="rockLife1" class="transition-opacity duration-200">🪨</span>
+                    <span id="rockLife2" class="transition-opacity duration-200">🪨</span>
+                    <span id="rockLife3" class="transition-opacity duration-200">🪨</span>
+                </div>
+
+                <div class="bg-amber-950 px-2.5 py-1 rounded-lg text-center min-w-[65px]">
+                    <span class="block text-[7px] text-orange-400 uppercase font-bold tracking-tight">Score</span>
+                    <span id="txtLiveScore" class="text-xs font-black text-orange-300 leading-none">000</span>
+                </div>
+            </div>
+
+            <div id="gameplayDropArena" class="cave-box-theme rounded-2xl p-2.5 flex flex-col justify-center items-center h-36 shrink-0 relative transition-all duration-200">
+                <div id="mainDropTargetFrame" class="w-full border-4 border-dashed border-orange-500/60 rounded-xl h-full flex flex-col justify-center items-center p-2 text-center">
+                    <span class="text-[8px] bg-orange-400 text-amber-950 font-black px-2 py-0.5 rounded-full mb-1 uppercase tracking-wider">Drop Card Here</span>
+                    <p id="txtScenarioRequestPrompt" class="text-[11px] font-semibold text-amber-50 leading-tight max-w-[270px]"></p>
+                </div>
+            </div>
+
+            <div class="bg-stone-50 border border-stone-200 rounded-xl p-2 flex-1 flex flex-col overflow-hidden">
+                <div class="text-center mb-1 shrink-0">
+                    <span class="text-[8px] font-black text-stone-400 bg-stone-200 px-3 py-0.5 rounded-full uppercase">Scroll & Find Answer Card</span>
+                </div>
+
+                <div id="trayGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto drawer-scrollbar pr-1 pb-2 flex-1">
+                    </div>
+            </div>
+        </div>
+
+        <div id="summaryDashboardView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-1">
+            <div class="space-y-1 mt-3">
+                <span id="lblFinalEmoji" class="text-5xl block">🏆</span>
+                <h2 id="lblFinalTitle" class="text-2xl font-black text-stone-900 tracking-tight">Great Job!</h2>
+                <p id="lblFinalFeedback" class="text-xs text-stone-600 font-semibold px-2 leading-relaxed mt-1"></p>
+            </div>
+
+            <div class="bg-orange-50 px-5 py-3 rounded-xl border border-orange-200 my-2">
+                <p class="text-[8px] font-black tracking-widest uppercase text-stone-400">Total Score</p>
+                <p class="text-3xl font-black text-orange-600"><span id="lblFinalScore">0</span> / 120</p>
+            </div>
+
+            <button id="btnRestartGame" class="w-full button-orange-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
+                TRY AGAIN 🔄
+            </button>
+        </div>
+
     </div>
 
     <script>
-        // Completely simplified definitions for Grade 2 student retention
         const Game_Questions_Data = [
             { id: 1, prompt: "A builder wants to make strong, colored floor tiles that never scratch. Drag the hardest rock here:", label: "GRANITE", fact: "Granite is an extra tough rock that comes in lots of beautiful colors!" },
             { id: 2, prompt: "An artist wants to carve a shiny white statue for a grand garden. Drag the beautiful white rock here:", label: "MARBLE", fact: "White marble was used to build the famous Taj Mahal!" },
@@ -241,7 +243,6 @@
             executeLogoHoldTimer();
         });
 
-        // FIXED: Exact 5 seconds brand delay logic without extra text tags
         function executeLogoHoldTimer() {
             setTimeout(() => {
                 document.getElementById('innovineLogoView').classList.add('hidden');
@@ -289,38 +290,27 @@
 
         function renderQuestionTaskState() {
             const currentItem = Game_Questions_Data[indexPointer];
-            
             refreshDashboardUI();
             document.getElementById('txtScenarioRequestPrompt').innerText = currentItem.prompt;
 
-            // Generate card element block options grid layout
             const tray = document.getElementById('trayGridContainer');
             tray.innerHTML = "";
 
-            // Alphabetic list loading sort to make searching clean for kids
             const visualTrayOrder = [...Game_Questions_Data].sort((a, b) => a.label.localeCompare(b.label));
 
             visualTrayOrder.forEach(item => {
                 const card = document.createElement('div');
                 card.id = `card-node-${item.label}`;
-                card.className = "item-text-card h-14 rounded-xl flex items-center justify-center text-center font-bold text-xs text-amber-950 p-2 select-none touch-none";
+                card.className = "item-text-card h-12 rounded-xl flex items-center justify-center text-center font-bold text-xs text-amber-950 p-2 select-none touch-none";
                 card.innerText = item.label;
-                
-                // Mount pointer events handlers directly
                 card.onpointerdown = triggerSpecimenCardDragPhysics;
                 tray.appendChild(card);
             });
 
-            // FIXED: If consecutive fails active, highlight option node directly to provide helpful guidance
+            // Help logic: If student fails 2 times, auto glow the solution choice card item
             if (consecutiveFails >= 2) {
-                applyAssistedGlowHighlight(currentItem.label);
-            }
-        }
-
-        function applyAssistedGlowHighlight(correctLabelName) {
-            const correctCardNode = document.getElementById(`card-node-${correctLabelName}`);
-            if (correctCardNode) {
-                correctCardNode.classList.add('card-correct-glow-hint');
+                const targetNode = document.getElementById(`card-node-${currentItem.label}`);
+                if (targetNode) targetNode.classList.add('card-correct-glow-hint');
             }
         }
 
@@ -328,18 +318,21 @@
             const targetAnswerObj = Game_Questions_Data[indexPointer];
 
             if (selectedCardRef.innerText === targetAnswerObj.label) {
-                selectedCardRef.classList.add('bg-green-500', 'text-white', 'border-green-600', 'animate-pulse');
+                selectedCardRef.classList.add('bg-green-500', 'text-white', 'border-green-600');
                 scoreTracker += 10;
                 refreshDashboardUI();
-                consecutiveFails = 0; // reset automated help counter
+                consecutiveFails = 0;
+
+                playGameAudioNotification('assets/correct.mp3');
 
                 setTimeout(() => {
-                    selectedCardRef.classList.remove('bg-green-500', 'text-white', 'border-green-600', 'animate-pulse');
+                    selectedCardRef.classList.remove('bg-green-500', 'text-white', 'border-green-600');
                     displayFactModalWindow(targetAnswerObj.fact);
-                }, 700);
+                }, 600);
 
             } else {
                 consecutiveFails++;
+                playGameAudioNotification('assets/wrong.mp3');
                 
                 const arena = document.getElementById('gameplayDropArena');
                 arena.classList.add('bg-rose-950', 'border-rose-800');
@@ -368,6 +361,7 @@
             if (indexPointer < 12) {
                 renderQuestionTaskState();
             } else {
+                playGameAudioNotification('assets/freesound_community-claps-44774.mp3');
                 launchConfettiBurst();
                 completeGameSession(true);
             }
@@ -395,7 +389,14 @@
             document.getElementById('summaryDashboardView').classList.remove('hidden');
         }
 
-        // --- LAG-FREE COMPACT HARDWARE DRAG & DROP TRACKER ---
+        // Safe integrated audio engine
+        function playGameAudioNotification(sourceUrl) {
+            const soundElement = new Audio(sourceUrl);
+            soundElement.volume = 0.4;
+            soundElement.play().catch(() => {});
+        }
+
+        // --- SEAMLESS DRAG & DROP POINTER EVENTS ENGINE ---
         let selectedCardRef = null;
         let slotInDrawerParentRef = null;
         let isPointerTrackingActive = false;
@@ -416,7 +417,7 @@
             selectedCardRef.style.height = `${boxBounds.height}px`;
             selectedCardRef.style.left = `${boxBounds.left}px`;
             selectedCardRef.style.top = `${boxBounds.top}px`;
-            selectedCardRef.classList.add('scale-105', 'shadow-2xl', 'opacity-90');
+            selectedCardRef.classList.add('scale-105', 'shadow-2xl', 'opacity-95');
 
             window.addEventListener('pointermove', whileCardIsMoving);
             window.addEventListener('pointerup', completeCardReleaseAction);
@@ -443,20 +444,18 @@
             const targetCenterX = cardRect.left + (cardRect.width / 2);
             const targetCenterY = cardRect.top + (cardRect.height / 2);
 
-            // Verify bounding collision with target drop area box
             if (targetCenterX >= targetRect.left && targetCenterX <= targetRect.right &&
                 targetCenterY >= targetRect.top && targetCenterY <= targetRect.bottom) {
                 evaluateUserDropChoice();
             }
 
-            // Restore elements properties cleanly
             selectedCardRef.style.position = '';
             selectedCardRef.style.zIndex = '';
             selectedCardRef.style.width = '';
             selectedCardRef.style.height = '';
             selectedCardRef.style.left = '';
             selectedCardRef.style.top = '';
-            selectedCardRef.classList.remove('scale-105', 'shadow-2xl', 'opacity-90');
+            selectedCardRef.classList.remove('scale-105', 'shadow-2xl', 'opacity-95');
 
             if (slotInDrawerParentRef) {
                 slotInDrawerParentRef.appendChild(selectedCardRef);
@@ -464,7 +463,7 @@
             selectedCardRef = null;
         }
 
-        // Particle Canvas Confetti FX Module
+        // Particle Canvas Confetti Burst Logic
         const canvas = document.getElementById('canvasConfetti');
         const ctx = canvas.getContext('2d');
         let confArrayList = [];
@@ -475,13 +474,13 @@
             canvas.height = window.innerHeight;
             confArrayList = [];
 
-            for (let i = 0; i < 60; i++) {
+            for (let i = 0; i < 50; i++) {
                 confArrayList.push({
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2.2,
-                    vx: (Math.random() - 0.5) * 14,
-                    vy: (Math.random() - 0.5) * 14 - 5,
-                    r: Math.random() * 3 + 3,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12 - 4,
+                    r: Math.random() * 3 + 2,
                     color: `hsl(${Math.random() * 360}, 95%, 60%)`,
                     alpha: 1
                 });
