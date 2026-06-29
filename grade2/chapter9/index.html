@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Word Crossword Adventure</title>
+    <title>Word Search Challenge</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
@@ -27,66 +27,38 @@
             border-radius: 28px;
         }
 
-        .crossword-cell {
+        .search-cell {
             aspect-ratio: 1 / 1;
             background-color: #FFFFFF;
-            border: 2px solid #7DD3FC;
-            border-radius: 6px;
-            position: relative;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .crossword-cell.pastel-block {
-            background: rgba(224, 242, 254, 0.4) !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-            pointer-events: none;
-        }
-
-        .crossword-cell-hint-number {
-            position: absolute;
-            top: 2px;
-            left: 3px;
-            font-size: 8px;
-            font-weight: 800;
-            color: #0369A1;
-            line-height: 1;
-            z-index: 10;
-        }
-
-        .cell-letter-text {
-            font-size: 14px;
+            border: 2px solid #E0F2FE;
+            border-radius: 8px;
+            font-size: 15px;
             font-weight: 900;
-            color: #0F172A;
-            display: none;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: all 0.25s ease;
         }
 
-        .tile-active-glow {
-            animation: bounceGlow 1s infinite alternate ease-in-out;
-            border-color: #F59E0B !important;
-            background-color: #FEF3C7 !important;
-            transform: scale(1.03);
-            z-index: 20;
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
-        }
-        @keyframes bounceGlow {
-            0% { transform: scale(1.01); }
-            100% { transform: scale(1.05); }
-        }
-
-        .tile-solved-success {
+        .cell-solved-success {
             background: linear-gradient(135deg, #34D399 0%, #10B981 100%) !important;
             border-color: #059669 !important;
-            transform: scale(1);
-            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
-        }
-        .tile-solved-success .cell-letter-text {
-            display: block !important;
             color: #FFFFFF !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+            transform: scale(1.02);
         }
-        .tile-solved-success .crossword-cell-hint-number {
-            color: #D1FAE5 !important;
+
+        .btn-clue-card {
+            background-color: #FFFFFF;
+            border: 2px solid #7DD3FC;
+            box-shadow: 0 4px 0 #7DD3FC;
+            transition: all 0.15s ease;
+        }
+        .btn-clue-card:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #7DD3FC;
         }
 
         .btn-pop-orange {
@@ -130,18 +102,18 @@
         </div>
     </div>
 
-    <div class="w-full max-w-md flex flex-col h-[96vh] max-h-[580px] justify-center relative z-10 px-1 overflow-hidden">
+    <div class="w-full max-w-md flex flex-col h-[96vh] max-h-[610px] justify-center relative z-10 px-1 overflow-hidden">
         
         <div id="titleView" class="hidden w-full sky-isle-card p-5 text-center space-y-4">
             <div class="space-y-1 py-1">
-                <div class="inline-block text-5xl">🎈</div>
-                <h1 class="text-3xl font-bold text-sky-900 tracking-wide drop-shadow-sm">Word Puzzle</h1>
-                <p class="text-[10px] text-sky-600 font-black tracking-widest uppercase child-font">Crossword Challenge</p>
+                <div class="inline-block text-5xl">🔍</div>
+                <h1 class="text-3xl font-bold text-sky-900 tracking-wide drop-shadow-sm">Word Search</h1>
+                <p class="text-[10px] text-sky-600 font-black tracking-widest uppercase child-font">Challenge Board</p>
             </div>
 
             <div class="bg-white/90 border border-sky-100 p-4 rounded-2xl shadow-inner text-center">
                 <p class="text-xs font-bold text-slate-700 leading-relaxed">
-                    Tap on the white crossword boxes to read the questions and lock your words into the puzzle!
+                    Tap a clue question button at the bottom to solve puzzles and unlock words inside the letter board!
                 </p>
             </div>
             
@@ -155,17 +127,17 @@
 
             <div class="space-y-2.5 text-xs text-slate-700 font-bold text-left">
                 <div class="flex items-center space-x-3 bg-white/90 p-3 rounded-xl border border-sky-100 shadow-sm">
-                    <span class="text-xl bg-sky-100 p-1 rounded-lg">✏️</span>
-                    <p>Tap a white crossword box to solve its 2 questions!</p>
+                    <span class="text-xl bg-sky-100 p-1 rounded-lg">❓</span>
+                    <p>Pick a question clue from the lower scrolling deck panel list.</p>
                 </div>
                 <div class="flex items-center space-x-3 bg-white/90 p-3 rounded-xl border border-sky-100 shadow-sm">
-                    <span class="text-xl bg-amber-100 p-1 rounded-lg">💡</span>
-                    <p>Get answers right to reveal and lock the hidden words on the board.</p>
+                    <span class="text-xl bg-emerald-100 p-1 rounded-lg">✨</span>
+                    <p>Answer both challenges successfully to automatically highlight the word green on the board!</p>
                 </div>
             </div>
 
             <button id="playBtnAction" class="w-full btn-pop-sky text-white font-bold text-base py-3 rounded-xl cursor-pointer uppercase tracking-wider child-font">
-                OPEN PUZZLE 🧩
+                OPEN GAME BOARD 🧩
             </button>
         </div>
 
@@ -184,19 +156,19 @@
                 </div>
 
                 <div class="bg-sky-800 border border-sky-950 px-3 py-1.5 rounded-xl text-xs font-black text-white shadow child-font" id="progressCounterDisplay">
-                    Solved: 0/10
+                    Unlocked: 0/10
                 </div>
             </div>
 
-            <div class="bg-sky-100 border-4 border-sky-400 p-2.5 rounded-[24px] shadow-inner flex-1 flex flex-col justify-center overflow-hidden">
-                <div class="w-full flex items-center justify-center">
-                    <div id="crosswordLayoutGridPlane" class="grid grid-cols-11 gap-[2px] bg-sky-200/50 p-1 rounded-xl w-full max-w-[310px] aspect-square justify-center items-center">
-                        </div>
-                </div>
+            <div class="bg-sky-50 border-4 border-sky-400 p-2 rounded-[24px] shadow-inner flex flex-col justify-center items-center overflow-hidden">
+                <div id="wordSearchGridPlane" class="grid grid-cols-10 gap-1 p-1 bg-white/60 rounded-xl w-full max-w-[325px] aspect-square justify-center items-center">
+                    </div>
             </div>
 
-            <div class="bg-sky-50 border-4 border-sky-400 rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-sm min-h-[56px] shrink-0">
-                <p id="clueLabelFooterDisplay" class="text-xs font-bold text-sky-950 leading-tight">👉 Tap any white box on the crossword puzzle to see the clue!</p>
+            <div class="flex-1 flex flex-col min-h-[110px] overflow-hidden bg-sky-100/60 border-2 border-sky-300 rounded-xl p-1.5">
+                <span class="text-[9px] font-black tracking-widest text-sky-700 uppercase px-1 mb-1 block child-font">Available Clue Question List:</span>
+                <div id="cluesScrollingDeckStack" class="flex-1 overflow-y-auto space-y-1.5 pr-1">
+                    </div>
             </div>
         </div>
 
@@ -204,7 +176,7 @@
             <div class="bg-white border-4 border-sky-400 rounded-[28px] p-4 w-full max-w-sm text-center space-y-3 shadow-2xl">
                 
                 <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                    <span id="modalHeaderTitle" class="text-[9px] font-black text-sky-600 tracking-wider uppercase child-font">Puzzle Task</span>
+                    <span id="modalHeaderTitle" class="text-[9px] font-black text-sky-600 tracking-wider uppercase child-font">Task Window</span>
                     <div id="modalAttemptStars" class="text-amber-400 text-xs font-bold">⭐⭐</div>
                 </div>
 
@@ -218,8 +190,8 @@
         <div id="scoreView" class="hidden w-full sky-isle-card p-5 text-center space-y-4">
             <div class="space-y-1">
                 <span id="endEmojiLabel" class="text-5xl block mb-1">👑</span>
-                <h2 id="endHeadlineLabel" class="text-xl font-bold text-sky-900 child-font">Puzzle Finished!</h2>
-                <p id="endDescriptorLabel" class="text-xs text-slate-600 font-bold px-1">Great job! You successfully filled every word block completely inside the grid lines!</p>
+                <h2 id="endHeadlineLabel" class="text-xl font-bold text-sky-900 child-font">Complete!</h2>
+                <p id="endDescriptorLabel" class="text-xs text-slate-600 font-bold px-1">Super Job! Every single word has been successfully unlocked on the letter board grid!</p>
             </div>
             <div class="bg-sky-50 p-3 rounded-xl border-2 border-sky-100 max-w-[150px] mx-auto shadow-inner">
                 <p class="text-[9px] font-black tracking-widest uppercase text-sky-400 mb-0.5 child-font">Total Score</p>
@@ -233,108 +205,31 @@
     </div>
 
     <script>
-        // SPATIALLY OPTIMIZED GRID REGISTRY WITH ONLY EXACTLY ONE INTERSECTION POINT total (WIND & DUST at D)
-        const accurateCrosswordRegistry = [
-            {
-                id: 1,
-                word: "WIND",
-                cells: [[1,1], [1,2], [1,3], [1,4]],
-                clueNumber: "1",
-                clueLabel: "1 Across: What do we call air when it moves from one place to another? (4 Letters)",
-                solved: false,
-                poolA: [{ q: "What do we call air when it moves from one place to another?", choices: ["Storm", "Rain", "Wind"], correct: 2 }], 
-                poolB: [{ q: "Which of these needs moving air (wind) to fly or move safely?", choices: ["A kite and a sailboat", "A television screen", "A heavy stone brick"], correct: 0 }] 
-            },
-            {
-                id: 2,
-                word: "DUST",
-                cells: [[1,4], [2,4], [3,4], [4,4]],
-                clueNumber: "1",
-                clueLabel: "1 Down: Tiny, fine dirt bits seen flying around inside a beam of sunlight. (4 Letters)",
-                solved: false,
-                poolA: [{ q: "What are the tiny floating bits you see dancing inside a sunbeam?", choices: ["Insects", "Dust particles", "Raindrops"], correct: 1 }], 
-                poolB: [{ q: "Where does floating dust in our room air mostly come from?", choices: ["Wind blowing over dry dirt outside", "Inside old television screens", "Soft white snow clouds"], correct: 0 }] 
-            },
-            {
-                id: 3,
-                word: "BREATHE",
-                cells: [[3,0], [3,1], [3,2], [3,3], [3,4], [3,5], [3,6]],
-                clueNumber: "2",
-                clueLabel: "2 Across: Humans, animals, and plants take in air continuously to _____. (7 Letters)",
-                solved: false,
-                poolA: [{ q: "Humans, animals, and plants all need air to ________ and stay alive.", choices: ["Breathe", "Sleep", "Dance"], correct: 0 }], 
-                poolB: [{ q: "What happens if you try to hold your breath for a little bit?", choices: ["You feel completely fine", "You grow taller instantly", "You feel uneasy because your body needs air"], correct: 2 }] 
-            },
-            {
-                id: 4,
-                word: "WEIGHT",
-                cells: [[5,1], [5,2], [5,3], [5,4], [5,5], [5,6]],
-                clueNumber: "3",
-                clueLabel: "3 Across: A full balloon drops lower on a balancing scale because air has _____. (6 Letters)",
-                solved: false,
-                poolA: [{ q: "A balloon full of air tilts downward on a scale. This proves air has ________.", choices: ["Color", "Weight", "No use"], correct: 1 }], 
-                poolB: [{ q: "Why is a football full of air heavier than a flat football?", choices: ["Because it has a bright color", "Because it contains mud", "Because it contains air inside"], correct: 2 }] 
-            },
-            {
-                id: 5,
-                word: "AIR",
-                cells: [[7,1], [7,2], [7,3]],
-                clueNumber: "4",
-                clueLabel: "4 Across: We cannot see, smell, or taste it, but it is present all around us. (3 Letters)",
-                solved: false,
-                poolA: [{ q: "We cannot see, smell, or taste it, but it is all around us. What is it?", choices: ["Water", "Soil", "Air"], correct: 2 }], 
-                poolB: [{ q: "True or False: An empty open cup or drinking bottle is actually full of air.", choices: ["False", "True"], correct: 1 }] 
-            },
-            {
-                id: 6,
-                word: "SPACE",
-                cells: [[9,1], [9,2], [9,3], [9,4], [9,5]],
-                clueNumber: "5",
-                clueLabel: "5 Across: When you blow air into a balloon, it inflates because air takes up _____. (5 Letters)",
-                solved: false,
-                poolA: [{ q: "When you blow into a balloon, it grows bigger because air takes up ________.", choices: ["Space", "Water", "Food"], correct: 0 }], 
-                poolB: [{ q: "Why can't water enter an upside-down glass when pushed straight down into a bucket?", choices: ["The glass is too heavy", "The air inside takes up space and blocks it", "Water is afraid of glass"], correct: 1 }]
-            },
-            {
-                id: 7,
-                word: "SMOKE",
-                cells: [[1,6], [1,7], [1,8], [1,9], [1,10]],
-                clueNumber: "6",
-                clueLabel: "6 Across: Dark, harmful gas from factory chimneys that spoils clean air. (5 Letters)",
-                solved: false,
-                poolA: [{ q: "What is the dark, harmful gas that comes out of factory chimneys?", choices: ["Oxygen", "Smoke", "Water vapor"], correct: 1 }], 
-                poolB: [{ q: "Breathing in air that has too much dark factory smoke is bad for our ________.", choices: ["Lungs and health", "Hair color", "Shoes"], correct: 0 }] 
-            },
-            {
-                id: 8,
-                word: "CLEAN",
-                cells: [[6,6], [6,7], [6,8], [6,9], [6,10]],
-                clueNumber: "7",
-                clueLabel: "7 Across: To stay healthy, we must always breathe fresh, _____ air. (5 Letters)",
-                solved: false,
-                poolA: [{ q: "To stay healthy and strong, we must always breathe fresh, ________ air.", choices: ["Dirty", "Smoky", "Clean"], correct: 2 }], 
-                poolB: [{ q: "Where will you find the cleanest and freshest air to breathe safely?", choices: ["On a busy highway road", "In a dusty closed storage room", "In a green open park with trees"], correct: 2 }] 
-            },
-            {
-                id: 9,
-                word: "GERMS",
-                cells: [[8,6], [8,7], [8,8], [8,9], [8,10]],
-                clueNumber: "8",
-                clueLabel: "8 Across: Invisible, harmful things shot into the air when people cough. (5 Letters)",
-                solved: false,
-                poolA: [{ q: "Sick people shoot out tiny, invisible things when they cough. These are ________.", choices: ["Germs", "Seeds", "Bugs"], correct: 0 }], 
-                poolB: [{ q: "Why should we cover our mouth with a clean handkerchief when we sneeze?", choices: ["To hide our face", "To stop bad germs from spreading into the air", "To wash our hands"], correct: 1 }] 
-            },
-            {
-                id: 10,
-                word: "PLANTS",
-                cells: [[10,5], [10,6], [10,7], [10,8], [10,9], [10,10]],
-                clueNumber: "9",
-                clueLabel: "9 Across: Green living things that make our surrounding air clean and fresh. (6 Letters)",
-                solved: false,
-                poolA: [{ q: "Which living things help make dirty air clean and fresh again?", choices: ["Factories", "Green plants", "Motorbikes"], correct: 1 }], 
-                poolB: [{ q: "Why should we grow more green trees and plants around our homes?", choices: ["They block out the light", "They help keep the air clean and fresh", "They take up space"], correct: 1 }] 
-            }
+        // Clean 10x10 isolated structural matrix rows layout with zero overlap mapping
+        const gridLettersMatrix = [
+            ['W','I','N','D','X','Q','V','Z','K','M'], // R0 -> WIND
+            ['D','U','S','T','L','P','F','R','B','W'], // R1 -> DUST
+            ['B','R','E','A','T','H','E','G','Y','N'], // R2 -> BREATHE
+            ['W','E','I','G','H','T','J','S','Q','K'], // R3 -> WEIGHT
+            ['A','I','R','X','M','Z','L','V','P','T'], // R4 -> AIR
+            ['S','P','A','C','E','F','R','B','D','H'], // R5 -> SPACE
+            ['S','M','O','K','E','Q','K','N','Z','G'], // R6 -> SMOKE
+            ['C','L','E','A','N','Y','W','P','M','F'], // R7 -> CLEAN
+            ['G','E','R','M','S','V','X','L','R','B'], // R8 -> GERMS
+            ['P','L','A','N','T','S','Z','Q','K','W']  // R9 -> PLANTS
+        ];
+
+        const wordSearchRegistry = [
+            { id: 1, word: "WIND", label: "Clue 1: Moving Air", cells: [[0,0],[0,1],[0,2],[0,3]], solved: false, poolA: [{ q: "What do we call air when it moves from one place to another?", choices: ["Storm", "Rain", "Wind"], correct: 2 }], poolB: [{ q: "Which of these needs moving air (wind) to fly or move safely?", choices: ["A kite and a sailboat", "A television screen", "A heavy stone brick"], correct: 0 }] },
+            { id: 2, word: "DUST", label: "Clue 2: Floating Sunbeam Particles", cells: [[1,0],[1,1],[1,2],[1,3]], solved: false, poolA: [{ q: "What are the tiny floating bits you see dancing inside a sunbeam?", choices: ["Insects", "Dust particles", "Raindrops"], correct: 1 }], poolB: [{ q: "Where does floating dust in our room air mostly come from?", choices: ["Wind blowing over dry dirt outside", "Inside old television screens", "Soft white snow clouds"], correct: 0 }] },
+            { id: 3, word: "BREATHE", label: "Clue 3: Taking In Air", cells: [[2,0],[2,1],[2,2],[2,3],[2,4],[2,5],[2,6]], solved: false, poolA: [{ q: "Humans, animals, and plants all need air to ________ and stay alive.", choices: ["Breathe", "Sleep", "Dance"], correct: 0 }], poolB: [{ q: "What happens if you try to hold your breath for a little bit?", choices: ["You feel completely fine", "You grow taller instantly", "You feel uneasy because your body needs air"], correct: 2 }] },
+            { id: 4, word: "WEIGHT", label: "Clue 4: Balloon Mass Scale", cells: [[3,0],[3,1],[3,2],[3,3],[3,4],[3,5]], solved: false, poolA: [{ q: "A balloon full of air tilts downward on a scale. This proves air has ________.", choices: ["Color", "Weight", "No use"], correct: 1 }], poolB: [{ q: "Why is a football full of air heavier than a flat football?", choices: ["Because it contains air inside", "Because it has a bright color", "Because it contains mud"], correct: 0 }] },
+            { id: 5, word: "AIR", label: "Clue 5: Invisible Surrounding Element", cells: [[4,0],[4,1],[4,2]], solved: false, poolA: [{ q: "We cannot see, smell, or taste it, but it is all around us. What is it?", choices: ["Water", "Soil", "Air"], correct: 2 }], poolB: [{ q: "True or False: An empty open cup or drinking bottle is actually full of air.", choices: ["False", "True"], correct: 1 }] },
+            { id: 6, word: "SPACE", label: "Clue 6: Filling Containers", cells: [[5,0],[5,1],[5,2],[5,3],[5,4]], solved: false, poolA: [{ q: "When you blow into a balloon, it grows bigger because air takes up ________.", choices: ["Space", "Water", "Food"], correct: 0 }], poolB: [{ q: "Why can't water enter an upside-down glass when pushed straight down into a bucket?", choices: ["The glass is too heavy", "The air inside takes up space and blocks it", "Water is afraid of glass"], correct: 1 }] },
+            { id: 7, word: "SMOKE", label: "Clue 7: Factory Chimney Gas", cells: [[6,0],[6,1],[6,2],[6,3],[6,4]], solved: false, poolA: [{ q: "What is the dark, harmful gas that comes out of factory chimneys?", choices: ["Oxygen", "Smoke", "Water vapor"], correct: 1 }], poolB: [{ q: "Breathing in air that has too much dark factory smoke is bad for our ________.", choices: ["Lungs and health", "Hair color", "Shoes"], correct: 0 }] },
+            { id: 8, merge: "CLEAN", label: "Clue 8: Fresh Healthy Breathing", cells: [[7,0],[7,1],[7,2],[7,3],[7,4]], solved: false, poolA: [{ q: "To stay healthy and strong, we must always breathe fresh, ________ air.", choices: ["Dirty", "Smoky", "Clean"], correct: 2 }], poolB: [{ q: "Where will you find the cleanest and freshest air to breathe safely?", choices: ["On a busy highway road", "In a dusty closed storage room", "In a green open park with trees"], correct: 2 }] },
+            { id: 9, word: "GERMS", label: "Clue 9: Sneaky Sneeze Microbes", cells: [[8,0],[8,1],[8,2],[8,3],[8,4]], solved: false, poolA: [{ q: "Sick people shoot out tiny, invisible things when they cough. These are ________.", choices: ["Germs", "Seeds", "Bugs"], correct: 0 }], poolB: [{ q: "Why should we cover our mouth with a clean handkerchief when we sneeze?", choices: ["To hide our face", "To stop bad germs from spreading into the air", "To wash our hands"], correct: 1 }] },
+            { id: 10, word: "PLANTS", label: "Clue 10: Nature's Air Purifiers", cells: [[9,0],[9,1],[9,2],[9,3],[9,4],[9,5]], solved: false, poolA: [{ q: "Which living things help make dirty air clean and fresh again?", choices: ["Factories", "Green plants", "Motorbikes"], correct: 1 }], poolB: [{ q: "Why should we grow more green trees and plants around our homes?", choices: ["They block out the light", "They help keep the air clean and fresh", "They take up space"], correct: 1 }] }
         ];
 
         let currentLiveScore = 0;
@@ -357,59 +252,39 @@
                 }, 700);
             }, 5000);
 
-            initCrosswordGridSystem();
+            initWordSearchCanvasBoard();
+            renderInteractiveClueChips();
             bindNavigationControls();
         });
 
-        function initCrosswordGridSystem() {
-            const gridPlane = document.getElementById('crosswordLayoutGridPlane');
+        function initWordSearchCanvasBoard() {
+            const gridPlane = document.getElementById('wordSearchGridPlane');
             gridPlane.innerHTML = "";
 
-            const coordMap = {};
-            const hintNumbers = {};
-
-            accurateCrosswordRegistry.forEach(item => {
-                item.cells.forEach(([r, c], index) => {
-                    const coordKey = `${r}-${c}`;
-                    if (!coordMap[coordKey]) {
-                        coordMap[coordKey] = {
-                            words: [],
-                            letter: item.word[index]
-                        };
-                    }
-                    coordMap[coordKey].words.push(item);
-                });
-                const [firstR, firstC] = item.cells[0];
-                hintNumbers[`${firstR}-${firstC}`] = item.clueNumber;
-            });
-
-            for (let r = 0; r < 11; r++) {
-                for (let c = 0; c < 11; c++) {
-                    const key = `${r}-${c}`;
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
                     const cellNode = document.createElement('div');
-
-                    if (coordMap[key]) {
-                        cellNode.id = `crossword-cell-node-${r}-${c}`;
-                        cellNode.className = "crossword-cell flex items-center justify-center select-none cursor-pointer";
-                        cellNode.innerHTML = `<span class="cell-letter-text">${coordMap[key].letter}</span>`;
-
-                        if (hintNumbers[key]) {
-                            const numLabel = document.createElement('span');
-                            numLabel.className = "crossword-cell-hint-number";
-                            numLabel.innerText = hintNumbers[key];
-                            cellNode.appendChild(numLabel);
-                        }
-
-                        cellNode.addEventListener('pointerdown', (e) => {
-                            e.preventDefault();
-                            launchClueQuestionFlow(coordMap[key].words[0]);
-                        });
-                    } else {
-                        cellNode.className = "crossword-cell pastel-block";
-                    }
+                    cellNode.id = `search-cell-node-${r}-${c}`;
+                    cellNode.className = "search-cell shadow-sm";
+                    cellNode.innerText = gridLettersMatrix[r][c];
                     gridPlane.appendChild(cellNode);
                 }
             }
+        }
+
+        function renderInteractiveClueChips() {
+            const stack = document.getElementById('cluesScrollingDeckStack');
+            stack.innerHTML = "";
+
+            wordSearchRegistry.forEach((clueObj) => {
+                const btn = document.createElement('button');
+                btn.id = `clue-deck-chip-${clueObj.id}`;
+                btn.className = "w-full text-left p-2.5 rounded-xl btn-clue-card text-xs font-bold text-slate-700 flex items-center justify-between cursor-pointer";
+                btn.innerHTML = `<span>${clueObj.label}</span> <span class="text-[10px] text-sky-400 font-black uppercase tracking-wider">Solve 🔍</span>`;
+                
+                btn.onclick = () => { launchQuestionsFlowSequence(clueObj); };
+                stack.appendChild(btn);
+            });
         }
 
         function bindNavigationControls() {
@@ -431,8 +306,7 @@
 
                 document.getElementById('scoreDisplay').innerText = "0";
                 document.getElementById('maxScoreDisplay').innerText = "0";
-                document.getElementById('progressCounterDisplay').innerText = "Solved: 0/10";
-                document.getElementById('clueLabelFooterDisplay').innerText = "👉 Tap any white box on the crossword puzzle to see the clue!";
+                document.getElementById('progressCounterDisplay').innerText = "Unlocked: 0/10";
                 
                 for(let i = 1; i <= 3; i++) {
                     document.getElementById(`bulbElementLife${i}`).className = "text-lg";
@@ -441,26 +315,15 @@
                 document.getElementById('scoreView').classList.add('hidden');
                 document.getElementById('gameView').style.display = 'flex';
 
-                accurateCrosswordRegistry.forEach(w => w.solved = false);
-                initCrosswordGridSystem();
+                wordSearchRegistry.forEach(w => w.solved = false);
+                initWordSearchCanvasBoard();
+                renderInteractiveClueChips();
             };
         }
 
-        function launchClueQuestionFlow(wordObject) {
-            if (wordObject.solved) {
-                document.getElementById('clueLabelFooterDisplay').innerText = `🎉 Line filled! "${wordObject.word}" is locked on the board!`;
-                return;
-            }
-
+        function launchQuestionsFlowSequence(wordObject) {
             selectedWordReference = wordObject;
 
-            document.querySelectorAll('.crossword-cell').forEach(t => t.classList.remove('tile-active-glow'));
-            wordObject.cells.forEach(([r, c]) => {
-                const cell = document.getElementById(`crossword-cell-node-${r}-${c}`);
-                if (cell) cell.classList.add('tile-active-glow');
-            });
-
-            document.getElementById('clueLabelFooterDisplay').innerText = wordObject.clueLabel;
             runningMaxScorePool += 20;
             document.getElementById('maxScoreDisplay').innerText = runningMaxScorePool;
 
@@ -470,13 +333,13 @@
             activeSubQuestionIndex = 0;
             currentAttemptsCounter = 1;
 
-            setTimeout(() => { triggerInteractiveModalPopup(); }, 250);
+            triggerInteractiveModalPopup();
         }
 
         function triggerInteractiveModalPopup() {
             const target = (activeSubQuestionIndex === 0) ? randomQuestionA : randomQuestionB;
 
-            document.getElementById('modalHeaderTitle').innerText = `Line: ${selectedWordReference.clueNumber} (Question ${activeSubQuestionIndex + 1}/2)`;
+            document.getElementById('modalHeaderTitle').innerText = `Question ${activeSubQuestionIndex + 1}/2`;
             document.getElementById('modalAttemptStars').innerText = "⭐⭐";
             document.getElementById('modalQuestionText').innerText = target.q;
 
@@ -567,27 +430,37 @@
                 triggerInteractiveModalPopup();
             } else {
                 document.getElementById('questionModalOverlay').style.display = 'none';
-                revealSolvedLettersOnCanvasGrid(selectedWordReference);
+                highlightCorrectWordSequenceOnBoard(selectedWordReference);
             }
         }
 
-        function revealSolvedLettersOnCanvasGrid(wordObject) {
+        function highlightCorrectWordSequenceOnBoard(wordObject) {
             wordObject.solved = true;
 
+            // Instant full-screen confetti celebratory burst on clearing the questions
+            runConfettiExplosion();
+
+            // Transform the deck item button chip into completed styling state
+            const chip = document.getElementById(`clue-deck-chip-${wordObject.id}`);
+            if (chip) {
+                chip.disabled = true;
+                chip.style.background = "#F0FDF4";
+                chip.style.borderColor = "#BBF7D0";
+                chip.className = "w-full text-left p-2.5 rounded-xl text-xs font-bold text-emerald-700 flex items-center justify-between opacity-70";
+                chip.innerHTML = `<span>✓ Completed</span> <span class="text-[10px] text-emerald-500 font-black">UNLOCKED ✨</span>`;
+            }
+
+            // Glow the word search cells green permanently
             wordObject.cells.forEach(([row, col]) => {
-                const cell = document.getElementById(`crossword-cell-node-${row}-${col}`);
-                if (cell) {
-                    cell.classList.remove('tile-active-glow');
-                    cell.classList.add('tile-solved-success');
-                }
+                const cell = document.getElementById(`search-cell-node-${row}-${col}`);
+                if (cell) cell.classList.add('cell-solved-success');
             });
 
-            const currentSolvedCount = accurateCrosswordRegistry.filter(w => w.solved).length;
-            document.getElementById('progressCounterDisplay').innerText = `Solved: ${currentSolvedCount}/10`;
-            document.getElementById('clueLabelFooterDisplay').innerText = `🌟 Brilliant! Word "${wordObject.word}" is unlocked and placed into the board!`;
+            const currentSolvedCount = wordSearchRegistry.filter(w => w.solved).length;
+            document.getElementById('progressCounterDisplay').innerText = `Unlocked: ${currentSolvedCount}/10`;
 
-            if (currentSolvedCount === accurateCrosswordRegistry.length) {
-                setTimeout(() => { concludeAdventureJourney(true); }, 1200);
+            if (currentSolvedCount === wordSearchRegistry.length) {
+                setTimeout(() => { concludeAdventureJourney(true); }, 1500);
             }
         }
 
@@ -598,12 +471,12 @@
                 triggerAudioEvent('soundClapping');
                 runConfettiExplosion();
                 document.getElementById('endEmojiLabel').innerText = "👑";
-                document.getElementById('endHeadlineLabel').innerText = "Puzzle Solved!";
-                document.getElementById('endDescriptorLabel').innerText = "Amazing job! You solved all the line grids and locked every word on the board perfectly!";
+                document.getElementById('endHeadlineLabel').innerText = "Super Finish!";
+                document.getElementById('endDescriptorLabel').innerText = "Brilliant work! You completed every clue task and uncovered all words on the grid!";
             } else {
                 document.getElementById('endEmojiLabel').innerText = "🎈";
                 document.getElementById('endHeadlineLabel').innerText = "Game Over!";
-                document.getElementById('endDescriptorLabel').innerText = "All your lightbulbs broke. Tap below to try again and solve the puzzle!";
+                document.getElementById('endDescriptorLabel').innerText = "All your lightbulbs broke. Tap play again to try the puzzle over!";
             }
             
             document.getElementById('finalScoreDisplay').innerText = currentLiveScore;
@@ -628,14 +501,14 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             particles = [];
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 55; i++) {
                 particles.push({
                     x: window.innerWidth / 2,
-                    y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 10 - 4,
-                    size: Math.random() * 4 + 3,
-                    color: `hsl(${Math.random() * 45 + 190}, 95%, 60%)`,
+                    y: window.innerHeight / 2.5,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.5) * 15 - 6,
+                    size: Math.random() * 5 + 3,
+                    color: `hsl(${Math.random() * 360}, 95%, 60%)`,
                     alpha: 1
                 });
             }
@@ -648,8 +521,8 @@
             particles.forEach(p => {
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.2;
-                p.alpha -= 0.015;
+                p.vy += 0.25;
+                p.alpha -= 0.012;
                 if (p.alpha > 0) {
                     isActive = true;
                     ctx.save();
