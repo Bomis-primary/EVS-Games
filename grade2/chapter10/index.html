@@ -20,34 +20,37 @@
             font-family: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', sans-serif !important;
         }
 
-        /* 3D Soft Rounded Card Container UI styling */
+        /* Fixed outer 3D box container layout to prevent layout gaps */
         .adventure-card-box {
             background: #FFFFFF;
             border: 4px solid #0369A1;
             box-shadow: 0 12px 0 #025a8b, 0 20px 30px rgba(2, 132, 199, 0.25);
             border-radius: 28px;
+            width: 100%;
+            min-height: 480px;
+            display: flex;
+            flex-col: top;
+            justify-content: space-between;
+            transition: all 0.3s ease-in-out;
         }
 
-        /* Ambient glowing highlights for the active node level tracking */
         .active-environment-zone {
             border-color: #F59E0B !important;
             background-color: #FEF3C7 !important;
-            transform: scale(1.03);
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+            transform: scale(1.02);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
         }
 
-        /* Bouncy fluid animation for Dippy the Droplet */
         .droplet-agent-bounce {
             animation: dropletFloat 1.8s ease-in-out infinite;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes dropletFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-6px); }
         }
 
-        /* Custom 3D Child-friendly Action Buttons */
         .btn-orange-pop {
             background: linear-gradient(135deg, #FB923C 0%, #F97316 100%);
             box-shadow: 0 6px 0 #C2410C;
@@ -68,18 +71,17 @@
             box-shadow: 0 3px 0 #0369A1;
         }
 
-        /* Fluid animation timeline track for Level 2 */
         @keyframes pipelineSlide {
-            0% { left: -10%; }
-            100% { left: 105%; }
+            0% { left: -8%; }
+            100% { left: 102%; }
         }
         .sliding-pipe-element {
             position: absolute;
-            animation: pipelineSlide 4.5s linear infinite;
+            animation: pipelineSlide 4s linear infinite;
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-3 m-0 select-none min-h-screen w-full overflow-x-hidden">
+<body class="flex flex-col items-center justify-center p-4 m-0 select-none min-h-screen w-full overflow-hidden">
 
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
@@ -88,153 +90,148 @@
     <canvas id="canvasConfetti" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
     <div id="splashScreen" class="fixed inset-0 bg-[#F0F9FF] flex flex-col items-center justify-center z-50 transition-opacity duration-500 p-6">
-        <div class="w-full max-w-xs flex justify-center items-center">
-            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-52 h-auto object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-3xl font-bold tracking-widest text-sky-600 uppercase\'>INNOVINE</div>'">
-        </div>
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-52 h-auto object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-3xl font-bold tracking-widest text-sky-600 uppercase\'>INNOVINE</div>'">
     </div>
 
-    <div class="w-full max-w-md flex flex-col h-[95vh] max-h-[620px] justify-center relative px-1">
+    <div class="w-full max-w-sm flex flex-col justify-center items-center">
         
-        <div id="welcomeView" class="hidden w-full adventure-card-box p-6 text-center space-y-5">
-            <div class="space-y-1">
-                <div class="text-6xl animate-bounce mb-2">🌊</div>
-                <h1 class="text-3xl font-extrabold text-sky-900 tracking-wide">Water For All</h1>
-                <p class="text-xs text-sky-500 font-bold tracking-widest uppercase">Chapter 10 Unified Learning Game</p>
-            </div>
-
-            <div class="bg-sky-50 border border-sky-100 p-4 rounded-2xl">
-                <p class="text-xs font-bold text-slate-700 leading-relaxed">
-                    Embark on an amazing 3-level journey! Master the Water Cycle, purify pipelines, and save household water resources!
-                </p>
-            </div>
-
-            <button id="btnStartGame" class="w-full btn-orange-pop text-white font-bold text-base py-3.5 rounded-xl cursor-pointer uppercase tracking-wider">
-                START ADVENTURE! 🚀
-            </button>
-        </div>
-
-        <div id="instructionsView" class="hidden w-full adventure-card-box p-6 text-center space-y-4">
-            <h2 id="levelTitleIntro" class="text-xl font-bold text-slate-800">Level Blueprint 🗺️</h2>
+        <div class="adventure-card-box p-5 flex flex-col justify-between">
             
-            <div id="levelBriefingBox" class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-left text-xs text-slate-700 font-bold space-y-2">
+            <div id="welcomeView" class="w-full flex flex-col justify-between items-center text-center h-full flex-1 py-2">
+                <div class="space-y-2 mt-4">
+                    <div class="text-6xl animate-bounce">🌊</div>
+                    <h1 class="text-3xl font-extrabold text-sky-900 tracking-wide">Water For All</h1>
+                    <p class="text-[11px] text-sky-500 font-bold tracking-widest uppercase">Chapter 10 Unified Game</p>
                 </div>
 
-            <button id="btnLaunchLevel" class="w-full btn-blue-pop text-white font-bold text-sm py-3 rounded-xl cursor-pointer uppercase tracking-widest">
-                LAUNCH LEVEL! ⚡
-            </button>
-        </div>
-
-        <div id="mainGameplayView" class="hidden w-full h-full flex flex-col justify-between space-y-3 overflow-hidden">
-            
-            <div class="w-full flex items-center justify-between px-1 shrink-0">
-                <div class="bg-white border-4 border-sky-500 px-3 py-1 rounded-xl flex flex-col items-center shadow">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Game Level</span>
-                    <span id="levelBadgeText" class="text-xs font-extrabold text-orange-500 leading-none mt-0.5">1 / 3</span>
+                <div class="bg-sky-50 border border-sky-100 p-4 rounded-2xl my-4">
+                    <p class="text-xs font-bold text-slate-700 leading-relaxed">
+                        Embark on an amazing 3-level journey! Master the Water Cycle, purify pipelines, and save household water resources!
+                    </p>
                 </div>
 
-                <div class="flex items-center space-x-1 bg-sky-950 px-3 py-2 rounded-2xl shadow-inner">
-                    <span id="lifeIcon1" class="text-sm">💡</span>
-                    <span id="lifeIcon2" class="text-sm">💡</span>
-                    <span id="lifeIcon3" class="text-sm">💡</span>
-                </div>
-
-                <div class="bg-sky-900 px-3 py-2 rounded-xl text-[10px] font-extrabold text-white tracking-wide border border-sky-700 shadow" id="stageProgressCounter">
-                    Question: 1 / 4
-                </div>
+                <button id="btnStartGame" class="w-full btn-orange-pop text-white font-bold text-base py-3.5 rounded-xl cursor-pointer uppercase tracking-wider mt-2">
+                    START ADVENTURE! 🚀
+                </button>
             </div>
 
-            <div id="gameplayGraphicArena" class="bg-white border-4 border-sky-500 p-2 rounded-[24px] shadow-inner flex flex-col justify-center items-center overflow-hidden flex-1 min-h-[270px] relative">
-                
-                <div id="layoutContainerLevel1" class="hidden w-full h-full relative">
-                    <div id="dippyDropletAgent" class="droplet-agent-bounce absolute z-30 text-4xl select-none pointer-events-none filter drop-shadow">💧</div>
-                    
-                    <div class="grid grid-cols-2 gap-2 w-full h-full">
-                        <div id="quad-collection" class="border-2 border-dashed border-emerald-300 rounded-xl bg-emerald-50/50 p-2 flex flex-col items-center justify-center relative">
-                            <span class="absolute top-1 left-1 text-[9px] font-bold bg-emerald-200 text-emerald-800 px-1 rounded">RIVER 🌊</span>
-                            <span class="text-2xl mt-1">🌊</span>
-                        </div>
-                        <div id="quad-evaporation" class="border-2 border-dashed border-sky-300 rounded-xl bg-sky-50/50 p-2 flex flex-col items-center justify-center relative">
-                            <span class="absolute top-1 left-1 text-[9px] font-bold bg-sky-200 text-sky-800 px-1 rounded">SKY 🌤️</span>
-                            <span class="text-2xl mt-1">🌤️</span>
-                        </div>
-                        <div id="quad-condensation" class="border-2 border-dashed border-indigo-300 rounded-xl bg-indigo-50/50 p-2 flex flex-col items-center justify-center relative">
-                            <span class="absolute top-1 left-1 text-[9px] font-bold bg-indigo-200 text-indigo-800 px-1 rounded">CLOUDS ☁️</span>
-                            <span class="text-2xl mt-1">☁️</span>
-                        </div>
-                        <div id="quad-precipitation" class="border-2 border-dashed border-blue-300 rounded-xl bg-blue-50/50 p-2 flex flex-col items-center justify-center relative">
-                            <span class="absolute top-1 left-1 text-[9px] font-bold bg-blue-200 text-blue-800 px-1 rounded">RAIN 🌧️</span>
-                            <span class="text-2xl mt-1">🌧️</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="layoutContainerLevel2" class="hidden w-full h-full flex flex-col justify-center items-center relative px-2">
-                    <div class="text-xs font-bold text-sky-700 tracking-wide mb-4">Pipeline Transit Route</div>
-                    
-                    <div class="w-full h-5 bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 rounded-full border-2 border-slate-500 relative flex items-center shadow-inner">
-                        <div id="pipelineSlidingDroplet" class="sliding-pipe-element text-3xl select-none top-[-10px]">🦠</div>
-                    </div>
-
-                    <div class="w-full flex justify-between items-center mt-6 px-4">
-                        <div class="text-center bg-orange-100 p-1.5 rounded-lg border border-orange-200 text-[10px] font-bold text-orange-700">From Pond 🪵</div>
-                        <div class="text-3xl animate-pulse">🚰</div>
-                        <div class="text-center bg-emerald-100 p-1.5 rounded-lg border border-emerald-200 text-[10px] font-bold text-emerald-700">Safe Home Glass 🥛</div>
-                    </div>
-                </div>
-
-                <div id="layoutContainerLevel3" class="hidden w-full h-full flex items-center justify-between px-3 relative">
-                    <div class="flex-1 mr-4 bg-slate-50 border-2 border-slate-100 p-3 rounded-xl min-h-[140px] flex items-center justify-center text-center">
-                        <p id="level3ScenarioVisualText" class="text-xs font-bold text-slate-700 leading-normal"></p>
-                    </div>
-
-                    <div class="w-16 h-44 bg-slate-100 border-4 border-slate-400 rounded-t-lg rounded-b-2xl relative shadow-inner overflow-hidden flex flex-col justify-end">
-                        <div id="waterTankFluidLevel" class="w-full bg-gradient-to-t from-sky-600 to-sky-400 border-t-2 border-sky-200 transition-all duration-700 shadow-md" style="height: 100%;"></div>
-                        <span class="absolute inset-x-0 bottom-2 text-center text-[9px] font-extrabold text-white uppercase drop-shadow">Tank Capacity</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col justify-between shrink-0 space-y-2">
+            <div id="instructionsView" class="hidden w-full flex flex-col justify-between h-full flex-1 py-1">
                 <div class="text-center">
-                    <span id="badgeContextTitle" class="text-[9px] font-bold tracking-wider text-sky-800 uppercase bg-sky-200 px-2.5 py-0.5 rounded-full">Task Quest</span>
-                    <p id="labelQuestionText" class="text-xs font-bold text-slate-800 leading-normal mt-1 min-h-[36px] flex items-center justify-center px-1"></p>
+                    <h2 id="levelTitleIntro" class="text-xl font-bold text-slate-800">Level Blueprint 🗺️</h2>
+                </div>
+                
+                <div id="levelBriefingBox" class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-left text-xs text-slate-700 font-bold space-y-2 my-4">
+                    </div>
+
+                <button id="btnLaunchLevel" class="w-full btn-blue-pop text-white font-bold text-sm py-3.5 rounded-xl cursor-pointer uppercase tracking-widest">
+                    LAUNCH LEVEL! ⚡
+                </button>
+            </div>
+
+            <div id="mainGameplayView" class="hidden w-full h-full flex flex-col justify-between flex-1 space-y-3">
+                
+                <div class="w-full flex items-center justify-between shrink-0">
+                    <div class="bg-sky-50 border-2 border-sky-500 px-2.5 py-0.5 rounded-lg flex flex-col items-center">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tight">Level</span>
+                        <span id="levelBadgeText" class="text-xs font-extrabold text-orange-500 leading-none">1 / 3</span>
+                    </div>
+
+                    <div class="flex items-center space-x-1 bg-sky-950 px-2.5 py-1.5 rounded-xl shadow-inner">
+                        <span id="lifeIcon1" class="text-xs">💡</span>
+                        <span id="lifeIcon2" class="text-xs">💡</span>
+                        <span id="lifeIcon3" class="text-xs">💡</span>
+                    </div>
+
+                    <div class="bg-sky-900 px-2 py-1 rounded-lg text-[9px] font-extrabold text-white" id="stageProgressCounter">
+                        Info: 1 / 4
+                    </div>
                 </div>
 
-                <div id="gridResponseChoices" class="grid grid-cols-2 gap-2">
+                <div id="gameplayGraphicArena" class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-2 flex flex-col justify-center items-center overflow-hidden h-40 relative">
+                    
+                    <div id="layoutContainerLevel1" class="hidden w-full h-full relative">
+                        <div id="dippyDropletAgent" class="droplet-agent-bounce absolute z-30 text-3xl select-none pointer-events-none">💧</div>
+                        <div class="grid grid-cols-2 gap-1.5 w-full h-full text-[9px] font-bold text-slate-600">
+                            <div id="quad-collection" class="border border-dashed border-emerald-300 rounded-lg bg-emerald-50/40 flex flex-col items-center justify-center relative">
+                                <span class="absolute top-0.5 left-1 text-[8px] bg-emerald-100 text-emerald-800 px-1 rounded">RIVER 🌊</span>
+                                <span class="text-xl mt-1">🌊</span>
+                            </div>
+                            <div id="quad-evaporation" class="border border-dashed border-sky-300 rounded-lg bg-sky-50/40 flex flex-col items-center justify-center relative">
+                                <span class="absolute top-0.5 left-1 text-[8px] bg-sky-100 text-sky-800 px-1 rounded">SKY 🌤️</span>
+                                <span class="text-xl mt-1">🌤️</span>
+                            </div>
+                            <div id="quad-condensation" class="border border-dashed border-indigo-300 rounded-lg bg-indigo-50/40 flex flex-col items-center justify-center relative">
+                                <span class="absolute top-0.5 left-1 text-[8px] bg-indigo-100 text-indigo-800 px-1 rounded">CLOUDS ☁️</span>
+                                <span class="text-xl mt-1">☁️</span>
+                            </div>
+                            <div id="quad-precipitation" class="border border-dashed border-blue-300 rounded-lg bg-blue-50/40 flex flex-col items-center justify-center relative">
+                                <span class="absolute top-0.5 left-1 text-[8px] bg-blue-100 text-blue-800 px-1 rounded">RAIN 🌧️</span>
+                                <span class="text-xl mt-1">🌧️</span>
+                            </div>
+                        </div>
                     </div>
+
+                    <div id="layoutContainerLevel2" class="hidden w-full h-full flex flex-col justify-center items-center relative">
+                        <div class="w-full h-3 bg-slate-300 rounded-full border border-slate-400 relative flex items-center shadow-inner">
+                            <div id="pipelineSlidingDroplet" class="sliding-pipe-element text-2xl select-none top-[-10px]">🦠</div>
+                        </div>
+                        <div class="w-full flex justify-between items-center mt-4 px-2 text-[8px] font-bold text-slate-500">
+                            <span>Pond Source 🪵</span>
+                            <span class="text-2xl animate-pulse">🚰</span>
+                            <span>Clean Glass 🥛</span>
+                        </div>
+                    </div>
+
+                    <div id="layoutContainerLevel3" class="hidden w-full h-full flex items-center justify-between px-2">
+                        <div class="flex-1 mr-3 bg-white border border-slate-100 p-2 rounded-xl text-center">
+                            <p id="level3ScenarioVisualText" class="text-[11px] font-bold text-slate-600 leading-normal"></p>
+                        </div>
+                        <div class="w-12 h-32 bg-slate-200 border-2 border-slate-400 rounded-b-xl relative overflow-hidden flex flex-col justify-end">
+                            <div id="waterTankFluidLevel" class="w-full bg-gradient-to-t from-sky-600 to-sky-400 border-t border-sky-200 transition-all duration-500" style="height: 100%;"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="bg-sky-50 border border-sky-200 rounded-xl p-2.5 space-y-2">
+                    <div class="text-center">
+                        <span id="badgeContextTitle" class="text-[8px] font-bold tracking-wider text-sky-800 bg-sky-200 px-2 py-0.5 rounded-full uppercase">Task Quest</span>
+                        <p id="labelQuestionText" class="text-xs font-bold text-slate-700 mt-1 min-h-[32px] flex items-center justify-center px-1"></p>
+                    </div>
+
+                    <div id="gridResponseChoices" class="grid grid-cols-1 gap-1.5">
+                        </div>
+                </div>
             </div>
+
+            <div id="summaryScoreboardView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-2">
+                <div class="space-y-1 mt-2">
+                    <span id="finalEmojiHeader" class="text-5xl block">👑</span>
+                    <h2 id="finalTitleHeader" class="text-xl font-bold text-sky-900">Adventure Completed!</h2>
+                    <p id="finalFeedbackParagraph" class="text-[11px] text-slate-500 font-bold px-1 leading-normal"></p>
+                </div>
+
+                <div class="bg-sky-50 p-2.5 rounded-xl border border-sky-100 my-3">
+                    <p class="text-[8px] font-bold tracking-widest uppercase text-sky-400">Total Score</p>
+                    <p class="text-xl font-extrabold text-orange-500"><span id="finalScoreDisplay">0</span> / 100</p>
+                </div>
+
+                <button id="btnRestartAdventure" class="w-full btn-orange-pop text-white font-bold text-xs py-3 rounded-xl cursor-pointer uppercase tracking-wider">
+                    PLAY AGAIN 🔄
+                </button>
+            </div>
+
         </div>
-
-        <div id="summaryScoreboardView" class="hidden w-full adventure-card-box p-6 text-center space-y-5">
-            <div class="space-y-1">
-                <span id="finalEmojiHeader" class="text-6xl block mb-2">👑</span>
-                <h2 id="finalTitleHeader" class="text-2xl font-bold text-sky-900">Adventure Completed!</h2>
-                <p id="finalFeedbackParagraph" class="text-xs text-slate-600 font-bold px-1 leading-relaxed"></p>
-            </div>
-
-            <div class="bg-sky-50 p-3 rounded-2xl border-2 border-sky-100 max-w-[150px] mx-auto shadow-inner">
-                <p class="text-[9px] font-bold tracking-widest uppercase text-sky-400 mb-0.5">Total Score</p>
-                <p class="text-2xl font-extrabold text-orange-500"><span id="finalScoreDisplay">0</span> / 100</p>
-            </div>
-
-            <button id="btnRestartAdventure" class="w-full btn-orange-pop text-white font-bold text-xs py-3.5 rounded-xl cursor-pointer uppercase tracking-wider">
-                PLAY ADVENTURE AGAIN 🔄
-            </button>
-        </div>
-
     </div>
 
     <script>
-        // Matrix schema dividing the chapter into 3 distinct interactive modules
         const structuredLevelsData = [
             {
                 levelIndex: 1,
                 title: "Level 1: The Cycle Skyways 🌤️",
                 briefing: `
-                    <p class="mb-1">🌟 Let's learn how water changes forms in nature!</p>
-                    <p class="mb-1">💧 Guide Dippy the droplet as he moves from the river to sky, clouds, and rain.</p>
-                    <p>🎯 Tap the correct scientific process button to trigger his next nature transformation!</p>
+                    <p> Let's learn how water changes forms in nature!</p>
+                    <p>💧 Guide Dippy the droplet from the river up to the clouds, and back as rain!</p>
                 `,
                 questions: [
                     {
@@ -247,30 +244,21 @@
                         ]
                     },
                     {
-                        question: "Dippy is warm water vapor high in the air. When he cools down, he joins other drops to make a cloud. This is...",
+                        question: "Dippy is high in the air as water vapor. When he cools down, he makes a fluffy cloud. This is...",
                         quadTarget: "quad-evaporation",
                         dropletVisual: "💨",
                         choices: [
-                            { label: "🌱 Plant Collection", correct: false },
+                            { label: "🌱 Collection on ground", correct: false },
                             { label: "☁️ Condensation (Makes Clouds)", correct: true }
                         ]
                     },
                     {
-                        question: "Dippy is inside a very heavy, gray cloud. When it becomes too heavy to float, Dippy falls down to Earth! This is...",
+                        question: "Dippy is inside a very heavy, gray cloud. He falls down to Earth as water drops! This is...",
                         quadTarget: "quad-condensation",
                         dropletVisual: "☁️",
                         choices: [
                             { label: "🌧️ Precipitation (Rain)", correct: true },
-                            { label: "☀️ Melting into steam", correct: false }
-                        ]
-                    },
-                    {
-                        question: "Dippy has fallen as rainwater! He collects in streams, ponds, and rivers. This process is called...",
-                        quadTarget: "quad-precipitation",
-                        dropletVisual: "🌧️",
-                        choices: [
-                            { label: "🔥 Boiling on stove", correct: false },
-                            { label: "🌊 Collection (Fills Rivers)", correct: true }
+                            { label: "☀️ Melting away into nothing", correct: false }
                         ]
                     }
                 ]
@@ -279,8 +267,7 @@
                 levelIndex: 2,
                 title: "Level 2: Pure Tap Pipeline 🚰",
                 briefing: `
-                    <p class="mb-1">🌟 Water from ponds and rivers can have dirt or germs inside.</p>
-                    <p class="mb-1">🦠 Contaminated drops are flowing through the main city pipeline route.</p>
+                    <p> Water from ponds and rivers can have dirt or bad germs inside.</p>
                     <p>🎯 Choose whether we need to Boil or Filter the water drop to make it completely safe!</p>
                 `,
                 questions: [
@@ -297,15 +284,7 @@
                         dropletVisual: "🦠",
                         choices: [
                             { label: "🔥 Boil it to kill germs", correct: true },
-                            { label: "✨ Wash it with soap", correct: false }
-                        ]
-                    },
-                    {
-                        question: "True or False: Water that looks clean and bright can still have harmful germs inside it.",
-                        dropletVisual: "💧",
-                        choices: [
-                            { label: "👍 True (Always clean it!)", correct: true },
-                            { label: "👎 False (It is perfectly safe)", correct: false }
+                            { label: "✨ Use soap on water", correct: false }
                         ]
                     }
                 ]
@@ -314,33 +293,23 @@
                 levelIndex: 3,
                 title: "Level 3: Eco-Home Hero 🪣",
                 briefing: `
-                    <p class="mb-1">🌟 Water is very precious! We must protect it from being wasted.</p>
-                    <p class="mb-1">🚰 Stop bad household habits before our home water storage tank empties out.</p>
-                    <p>🎯 Select the smart conservation action row to secure the water supply!</p>
+                    <p> Water is precious! We must protect it from being wasted.</p>
+                    <p>🎯 Select the smart conservation action row to save the tank supply!</p>
                 `,
                 questions: [
                     {
                         question: "Rohan is brushing his teeth and leaves the tap running completely open. What should he do?",
-                        scenarioText: "🪥 Bathroom: Tap is running while brushing teeth!",
+                        scenarioText: "🪥 Bathroom: Running tap!",
                         tankHeight: "100%",
                         choices: [
                             { label: "🔒 Close tap while brushing", correct: true },
-                            { label: "🚰 Keep it flowing to look cool", correct: false }
-                        ]
-                    },
-                    {
-                        question: "Manya's uncle is washing his car with a running hose pipe, wasting buckets of clean water. What is a better way?",
-                        scenarioText: "🚗 Garden Yard: Hose pipe is spraying water endlessly!",
-                        tankHeight: "65%",
-                        choices: [
-                            { label: "🚿 Use a high pressure hose", correct: false },
-                            { label: "🪣 Use water in a bucket & sponge", correct: true }
+                            { label: "🚰 Keep it running", correct: false }
                         ]
                     },
                     {
                         question: "The kitchen tap is broken and keeps dripping 'drip, drop!' all day long. Who should we call to fix it?",
-                        scenarioText: "🔧 Kitchen Sink: Drip... drop... Leak alert!",
-                        tankHeight: "35%",
+                        scenarioText: "🔧 Kitchen Sink: Drip... drop... Leak!",
+                        tankHeight: "45%",
                         choices: [
                             { label: "🪚 A local Carpenter", correct: false },
                             { label: "🔧 A helpful Plumber", correct: true }
@@ -356,28 +325,26 @@
         let playerActiveHearts = 3;
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Dismiss Splash automatically after 2.5 seconds
+            // Dismiss loader quickly and reveal welcome screen inside the card framework
             setTimeout(() => {
-                const preloader = document.getElementById('splashScreen');
-                preloader.style.opacity = '0';
+                document.getElementById('splashScreen').style.opacity = '0';
                 setTimeout(() => {
-                    preloader.style.display = 'none';
-                    document.getElementById('welcomeView').classList.remove('hidden');
-                }, 500);
-            }, 2500);
+                    document.getElementById('splashScreen').style.display = 'none';
+                }, 400);
+            }, 1500);
 
             setupUnifiedClickListeners();
         });
 
         function setupUnifiedClickListeners() {
             document.getElementById('btnStartGame').onclick = () => {
-                document.getElementById('welcomeView').style.display = 'none';
+                document.getElementById('welcomeView').classList.add('hidden');
                 displayLevelBriefingScreen();
             };
 
             document.getElementById('btnLaunchLevel').onclick = () => {
-                document.getElementById('instructionsView').style.display = 'none';
-                document.getElementById('mainGameplayView').style.display = 'flex';
+                document.getElementById('instructionsView').classList.add('hidden');
+                document.getElementById('mainGameplayView').classList.remove('hidden');
                 renderActiveQuestionTrack();
             };
 
@@ -387,7 +354,6 @@
                 runningAccumulatedScore = 0;
                 playerActiveHearts = 3;
 
-                // Restock visual heart node bulbs
                 for (let i = 1; i <= 3; i++) {
                     document.getElementById(`lifeIcon${i}`).style.opacity = "1";
                 }
@@ -399,11 +365,10 @@
 
         function displayLevelBriefingScreen() {
             const currentLevelData = structuredLevelsData[currentLevelPointer];
-            
             document.getElementById('levelTitleIntro').innerText = currentLevelData.title;
             document.getElementById('levelBriefingBox').innerHTML = currentLevelData.briefing;
             
-            document.getElementById('mainGameplayView').style.display = 'none';
+            document.getElementById('mainGameplayView').classList.add('hidden');
             document.getElementById('instructionsView').classList.remove('hidden');
         }
 
@@ -411,12 +376,10 @@
             const levelData = structuredLevelsData[currentLevelPointer];
             const questionData = levelData.questions[currentQuestionPointer];
 
-            // Set general progress monitoring headers
             document.getElementById('levelBadgeText').innerText = `${levelData.levelIndex} / 3`;
-            document.getElementById('stageProgressCounter').innerText = `Question: ${currentQuestionPointer + 1} / ${levelData.questions.length}`;
+            document.getElementById('stageProgressCounter').innerText = `Q: ${currentQuestionPointer + 1} / ${levelData.questions.length}`;
             document.getElementById('labelQuestionText').innerText = questionData.question;
 
-            // Toggle active interface view modules based on current level index pointers
             document.getElementById('layoutContainerLevel1').style.display = 'none';
             document.getElementById('layoutContainerLevel2').style.display = 'none';
             document.getElementById('layoutContainerLevel3').style.display = 'none';
@@ -425,7 +388,6 @@
                 document.getElementById('layoutContainerLevel1').style.display = 'block';
                 document.getElementById('badgeContextTitle').innerText = "Water Cycle State";
                 
-                // Unhighlight old quadrants & set new active target quadrant highlight zone
                 document.querySelectorAll('.border-dashed').forEach(el => el.classList.remove('active-environment-zone'));
                 const targetedQuadNode = document.getElementById(questionData.quadTarget);
                 if (targetedQuadNode) targetedQuadNode.classList.add('active-environment-zone');
@@ -434,28 +396,23 @@
 
             } else if (levelData.levelIndex === 2) {
                 document.getElementById('layoutContainerLevel2').style.display = 'flex';
-                document.getElementById('badgeContextTitle').innerText = "Pipeline Cleanliness";
-                
-                const dropletToken = document.getElementById('pipelineSlidingDroplet');
-                dropletToken.innerText = questionData.dropletVisual;
+                document.getElementById('badgeContextTitle').innerText = "Pipeline Safety Track";
+                document.getElementById('pipelineSlidingDroplet').innerText = questionData.dropletVisual;
 
             } else if (levelData.levelIndex === 3) {
                 document.getElementById('layoutContainerLevel3').style.display = 'flex';
                 document.getElementById('badgeContextTitle').innerText = "Conservation Habit";
-                
                 document.getElementById('level3ScenarioVisualText').innerText = questionData.scenarioText;
                 document.getElementById('waterTankFluidLevel').style.height = questionData.tankHeight;
             }
 
-            // Build out choice button objects safely
             const buttonsGrid = document.getElementById('gridResponseChoices');
             buttonsGrid.innerHTML = "";
 
             questionData.choices.forEach((choice) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-slate-700 bg-white border-2 border-slate-200 hover:border-sky-400 py-3 px-2 rounded-xl font-bold text-xs text-center cursor-pointer shadow-sm transition-all";
+                btn.className = "w-full text-slate-700 bg-white border border-slate-300 py-2.5 px-2 rounded-xl font-bold text-xs text-center cursor-pointer shadow-sm active:bg-slate-50";
                 btn.innerText = choice.label;
-                
                 btn.onclick = () => evaluationResponseTap(choice.correct, btn);
                 buttonsGrid.appendChild(btn);
             });
@@ -467,15 +424,11 @@
 
             if (parentContainerNode) {
                 setTimeout(() => {
-                    const parentBounds = parentContainerNode.parentNode.getBoundingClientRect();
-                    const targetBounds = parentContainerNode.getBoundingClientRect();
-
-                    const absoluteTop = (targetBounds.top - parentBounds.top) + (targetBounds.height / 2) - 24;
-                    const absoluteLeft = (targetBounds.left - parentBounds.left) + (targetBounds.width / 2) - 18;
-
+                    const absoluteTop = parentContainerNode.offsetTop + (parentContainerNode.offsetHeight / 2) - 16;
+                    const absoluteLeft = parentContainerNode.offsetLeft + (parentContainerNode.offsetWidth / 2) - 14;
                     agentNode.style.top = `${absoluteTop}px`;
                     agentNode.style.left = `${absoluteLeft}px`;
-                }, 60);
+                }, 40);
             }
         }
 
@@ -485,16 +438,15 @@
 
             if (isCorrect) {
                 triggerAudioPlayback('soundCorrect');
-                actionButtonNode.className = "w-full text-white bg-emerald-500 border-2 border-emerald-600 py-3 px-2 rounded-xl font-bold text-xs text-center shadow-md animate-pulse";
-                
-                runningAccumulatedScore += 10;
+                actionButtonNode.className = "w-full text-white bg-emerald-500 border border-emerald-600 py-2.5 px-2 rounded-xl font-bold text-xs text-center shadow-md animate-pulse";
+                runningAccumulatedScore += 15;
 
                 setTimeout(() => {
                     progressGameEngineFlow();
-                }, 1400);
+                }, 1200);
             } else {
                 triggerAudioPlayback('soundWrong');
-                actionButtonNode.className = "w-full text-white bg-rose-500 border-2 border-rose-600 py-3 px-2 rounded-xl font-bold text-xs text-center shadow-sm opacity-90";
+                actionButtonNode.className = "w-full text-white bg-rose-500 border border-rose-600 py-2.5 px-2 rounded-xl font-bold text-xs text-center shadow-sm";
 
                 const targetedHeartNode = document.getElementById(`lifeIcon${playerActiveHearts}`);
                 if (targetedHeartNode) targetedHeartNode.style.opacity = "0.15";
@@ -504,12 +456,11 @@
                     if (playerActiveHearts <= 0) {
                         terminateAdventureSession(false);
                     } else {
-                        // Re-enable remaining choice buttons for a secondary try
                         Array.from(optionGrid.children).forEach(button => {
                             if (!button.classList.contains('bg-rose-500')) button.disabled = false;
                         });
                     }
-                }, 1200);
+                }, 1000);
             }
         }
 
@@ -520,7 +471,6 @@
             if (currentQuestionPointer < currentLevelData.questions.length) {
                 renderActiveQuestionTrack();
             } else {
-                // Current level cleared out successfully! Advance module hierarchy pointers.
                 currentLevelPointer++;
                 currentQuestionPointer = 0;
 
@@ -533,7 +483,7 @@
         }
 
         function terminateAdventureSession(wonEntirely) {
-            document.getElementById('mainGameplayView').style.display = 'none';
+            document.getElementById('mainGameplayView').classList.add('hidden');
 
             const finalEmoji = document.getElementById('finalEmojiHeader');
             const finalTitle = document.getElementById('finalTitleHeader');
@@ -544,16 +494,13 @@
                 launchConfettiBurstSequence();
                 finalEmoji.innerText = "👑";
                 finalTitle.innerText = "Water Saving Hero! 🌟";
-                finalDesc.innerText = "Incredible effort! You mastered the natural cycle stages, filtered the incoming pipeline, and secured home conservation habits perfectly!";
-                runningAccumulatedScore += 10; // Bonus points for clean completion survival
+                finalDesc.innerText = "Fantastic job! You helped clean the pipelines and practiced awesome home conservation habits!";
+                runningAccumulatedScore = 100;
             } else {
-                finalEmoji.innerText = "🎈";
-                finalTitle.innerText = "Let's Try Again!";
-                finalDesc.innerText = "The local water system got a bit tangled up. Let's refresh our purification steps and try the journey again!";
+                finalEmoji.innerText = "🪣";
+                finalTitle.innerText = "Let's Practice Again!";
+                finalDesc.innerText = "Let's jump back in to review how to save leaking taps and filter raw water safely!";
             }
-
-            // Cap absolute score limits safely at 100 maximum metrics
-            if (runningAccumulatedScore > 100) runningAccumulatedScore = 100;
 
             document.getElementById('finalScoreDisplay').innerText = runningAccumulatedScore;
             document.getElementById('summaryScoreboardView').classList.remove('hidden');
@@ -567,7 +514,7 @@
             }
         }
 
-        // Lightweight Procedural Particle Engine for Winning Feedback
+        // Procedural Summary Confetti Canvas Engine
         const partyCanvas = document.getElementById('canvasConfetti');
         const particleCtx = partyCanvas.getContext('2d');
         let particleList = [];
@@ -578,14 +525,14 @@
             partyCanvas.height = window.innerHeight;
             particleList = [];
 
-            for (let i = 0; i < 60; i++) {
+            for (let i = 0; i < 40; i++) {
                 particleList.push({
                     posX: window.innerWidth / 2,
-                    posY: window.innerHeight / 2.5,
-                    velX: (Math.random() - 0.5) * 15,
-                    velY: (Math.random() - 0.5) * 15 - 5,
-                    radius: Math.random() * 4 + 4,
-                    hueColor: `hsl(${Math.random() * 360}, 95%, 65%)`,
+                    posY: window.innerHeight / 2.2,
+                    velX: (Math.random() - 0.5) * 12,
+                    velY: (Math.random() - 0.5) * 12 - 4,
+                    radius: Math.random() * 3 + 3,
+                    hueColor: `hsl(${Math.random() * 360}, 90%, 60%)`,
                     transparency: 1
                 });
             }
@@ -599,8 +546,8 @@
             particleList.forEach(p => {
                 p.posX += p.velX;
                 p.posY += p.velY;
-                p.velY += 0.25; // Continuous gravitational pull offset
-                p.transparency -= 0.015;
+                p.velY += 0.2;
+                p.transparency -= 0.02;
 
                 if (p.transparency > 0) {
                     loopRunning = true;
