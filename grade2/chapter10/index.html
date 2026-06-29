@@ -104,15 +104,7 @@
 </head>
 <body class="flex flex-col items-center justify-center p-4 m-0 select-none min-h-screen w-full overflow-hidden">
 
-    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
-    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
-    <audio id="soundClapping" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
-
     <canvas id="canvasConfetti" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
-
-    <div id="splashScreen" class="fixed inset-0 bg-[#F0F9FF] flex flex-col items-center justify-center z-50 transition-opacity duration-500 p-6">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-52 h-auto object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-3xl font-bold tracking-widest text-sky-600 uppercase\'>INNOVINE</div>'">
-    </div>
 
     <div class="w-full max-w-sm flex flex-col justify-center items-center">
         <div class="adventure-card-box p-5">
@@ -192,7 +184,7 @@
                         </div>
                     </div>
 
-                    <div id="layoutContainerLevel2" class="hidden w-full h-full flex flex-col justify-center items-center relative w-full px-4">
+                    <div id="layoutContainerLevel2" class="hidden w-full h-full flex-col justify-center items-center relative px-4">
                         <div class="w-full h-4 pipeline-track-bar rounded-full relative flex items-center shadow-inner overflow-visible">
                             <div id="pipelineSlidingDroplet" class="absolute text-3xl select-none top-[-10px]" style="left: 0%;">🟫</div>
                         </div>
@@ -233,7 +225,7 @@
                         <p id="labelQuestionText" class="text-xs font-bold text-slate-700 mt-1.5 min-h-[36px] flex items-center justify-center px-1 leading-normal"></p>
                     </div>
 
-                    <div id="hintTextContainer" class="hidden bg-amber-50 border border-amber-200 p-2 rounded-lg text-[10px] font-medium text-amber-900 leading-snug text-center animate-fade-in">
+                    <div id="hintTextContainer" class="hidden bg-amber-50 border border-amber-200 p-2 rounded-lg text-[10px] font-medium text-amber-900 leading-snug text-center">
                         </div>
 
                     <div id="gridResponseChoices" class="grid grid-cols-1 gap-1.5">
@@ -267,7 +259,7 @@
                 levelIndex: 1,
                 title: "Level 1: The Cycle Skyways 🌤️",
                 briefing: `
-                    <p class="text-blue-600">🌟 Stage 1: The Full Journey of Water</p>
+                    <p class="text-blue-600 font-bold">🌟 Stage 1: The Full Journey of Water</p>
                     <p>💧 Water travels in a continuous cycle in nature. Let's trace it through all 4 key stages: **Collection, Evaporation, Condensation, and Precipitation**!</p>
                     <p>🎯 Move Dippy through the entire loop by choosing the right state transformation!</p>
                 `,
@@ -318,7 +310,7 @@
                 levelIndex: 2,
                 title: "Level 2: Pure Tap Pipeline 🚰",
                 briefing: `
-                    <p class="text-amber-600">🌟 Stage 2: Making Water Clean & Safe</p>
+                    <p class="text-amber-600 font-bold">🌟 Stage 2: Making Water Clean & Safe</p>
                     <p>🦠 Raw water from ponds contains dirt and germs that make us sick. We must purify it before drinking!</p>
                     <p>🎯 Choose the right method. Watch the drop transform from dirty to pure blue water as it reaches the tap!</p>
                 `,
@@ -349,7 +341,7 @@
                 levelIndex: 3,
                 title: "Level 3: Eco-Home Hero 🪣",
                 briefing: `
-                    <p class="text-emerald-600">🌟 Stage 3: Saving Water Resources</p>
+                    <p class="text-emerald-600 font-bold">🌟 Stage 3: Saving Water Resources</p>
                     <p>🚰 Fresh drinking water is limited! Leaving taps running drains our storage reserves quickly.</p>
                     <p>🎯 Choose the smart conservation choices to protect our home water cylinder from running dry!</p>
                 `,
@@ -412,13 +404,6 @@
         let playerActiveHearts = 3;
 
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.getElementById('splashScreen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splashScreen').style.display = 'none';
-                }, 400);
-            }, 1200);
-
             setupUnifiedClickListeners();
         });
 
@@ -434,14 +419,13 @@
                 renderActiveQuestionTrack();
             };
 
-            // Setup Hint panel interactive toggle click link action handler
             document.getElementById('btnTriggerHint').onclick = () => {
                 const levelData = structuredLevelsData[currentLevelPointer];
                 const questionData = levelData.questions[currentQuestionPointer];
                 const hintPanel = document.getElementById('hintTextContainer');
 
                 if (hintPanel.classList.contains('hidden')) {
-                    hintPanel.innerText = `💡 Hint: ${questionData.hint}`;
+                    hintPanel.innerText = `💡 ${questionData.hint}`;
                     hintPanel.classList.remove('hidden');
                 } else {
                     hintPanel.classList.add('hidden');
@@ -481,12 +465,10 @@
             const levelData = structuredLevelsData[currentLevelPointer];
             const questionData = levelData.questions[currentQuestionPointer];
 
-            // Reset dynamic sub-panel rows
             document.getElementById('hintTextContainer').classList.add('hidden');
             updateScoreboardTextCounter();
 
             document.getElementById('levelBadgeText').innerText = `${levelData.levelIndex} / 3`;
-            document.getElementById('stageProgressCounter').innerText = `Round: ${currentQuestionPointer + 1} / ${levelData.questions.length}`;
             document.getElementById('labelQuestionText').innerText = questionData.question;
 
             document.getElementById('layoutContainerLevel1').style.display = 'none';
@@ -554,13 +536,9 @@
             const arenaNode = document.getElementById('gameplayGraphicArena');
 
             if (isCorrect) {
-                // Disable all choice options for clean flow progression
                 Array.from(optionGrid.children).forEach(button => button.disabled = true);
-                
-                triggerAudioPlayback('soundCorrect');
                 actionButtonNode.className = "w-full text-white bg-emerald-500 border border-emerald-600 py-2.5 px-3 rounded-xl font-bold text-xs text-center shadow-md animate-pulse";
                 
-                // Add perfect score allocation ratio step metric balances
                 runningAccumulatedScore += 10;
                 updateScoreboardTextCounter();
 
@@ -581,7 +559,6 @@
                         }, 600);
                     }, 400);
                 } else if (levelData.levelIndex === 3) {
-                    // Refill target glass cylinder to signify saving home assets
                     document.getElementById('waterTankFluidLevel').style.height = "100%";
                     document.getElementById('tankPercentageText').innerText = "100% SAVED! 🎉";
                     setTimeout(progressGameEngineFlow, 1400);
@@ -590,12 +567,9 @@
                 }
 
             } else {
-                // Wrong attempt logic flow
-                triggerAudioPlayback('soundWrong');
                 actionButtonNode.className = "w-full text-white bg-rose-500 border border-rose-600 py-2.5 px-3 rounded-xl font-bold text-xs text-center shadow-sm opacity-60";
-                actionButtonNode.disabled = true; // Turn off just the wrong button so child can try again!
+                actionButtonNode.disabled = true;
 
-                // Flash Arena interface layout framework border red as an active error penalty
                 arenaNode.classList.remove('bg-slate-100');
                 arenaNode.classList.add('bg-rose-50', 'border-rose-400');
                 setTimeout(() => {
@@ -609,7 +583,6 @@
                     document.getElementById('tankPercentageText').innerText = "DRAINED! ⚠️";
                 }
 
-                // Dims one available engine heart light light indicators
                 const targetedHeartNode = document.getElementById(`lifeIcon${playerActiveHearts}`);
                 if (targetedHeartNode) targetedHeartNode.style.opacity = "0.15";
                 playerActiveHearts--;
@@ -649,7 +622,6 @@
             const finalDesc = document.getElementById('finalFeedbackParagraph');
 
             if (wonEntirely) {
-                triggerAudioPlayback('soundClapping');
                 launchConfettiBurstSequence();
                 finalEmoji.innerText = "👑";
                 finalTitle.innerText = "Water Saving Hero! 🌟";
@@ -665,15 +637,7 @@
             document.getElementById('summaryScoreboardView').classList.remove('hidden');
         }
 
-        function triggerAudioPlayback(elementId) {
-            const playerNode = document.getElementById(elementId);
-            if (playerNode) {
-                playerNode.load();
-                playerNode.play().catch(() => {});
-            }
-        }
-
-        // Vector Ribbon Confetti Animation Engine 
+        // Canvas Confetti
         const partyCanvas = document.getElementById('canvasConfetti');
         const particleCtx = partyCanvas.getContext('2d');
         let particleList = [];
