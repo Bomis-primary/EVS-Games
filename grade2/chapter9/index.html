@@ -124,13 +124,15 @@
 
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
+    <div id="splashScreenView" class="fixed inset-0 bg-[#F0F9FF] flex flex-col items-center justify-center z-50 transition-opacity duration-700 ease-out p-6">
+        <div class="w-full max-w-xs flex justify-center items-center">
+            <img src="assets/innovine_logo.png" alt="Innovine Logo" class="w-48 h-auto object-contain drop-shadow-sm" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-2xl font-black tracking-widest text-sky-500 uppercase child-font\'>INNOVINE</div>'">
+        </div>
+    </div>
+
     <div class="w-full max-w-md flex flex-col h-[96vh] max-h-[580px] justify-center relative z-10 px-1 overflow-hidden">
         
-        <div id="titleView" class="w-full sky-isle-card p-5 text-center space-y-4">
-            <div class="flex justify-center items-center pt-1 pb-1">
-                <img src="assets/innovine_logo.png" alt="Innovine Logo" class="h-10 w-auto object-contain drop-shadow-sm" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-xs font-black tracking-widest text-sky-500 uppercase child-font\'>INNOVINE</div>'">
-            </div>
-
+        <div id="titleView" class="hidden w-full sky-isle-card p-5 text-center space-y-4">
             <div class="space-y-1 py-1">
                 <div class="inline-block text-5xl">🎈</div>
                 <h1 class="text-3xl font-bold text-sky-900 tracking-wide drop-shadow-sm">Word Puzzle</h1>
@@ -346,6 +348,16 @@
         let randomQuestionB = null;
 
         window.addEventListener('DOMContentLoaded', () => {
+            // SPARK 5-SECOND TIMEOUT TO REMOVE THE SPLASH OVERLAY
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreenView');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('titleView').classList.remove('hidden');
+                }, 700);
+            }, 5000);
+
             initCrosswordGridSystem();
             bindNavigationControls();
         });
