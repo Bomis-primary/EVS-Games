@@ -16,15 +16,15 @@
             min-height: 100vh;
         }
 
-        /* Upgraded Dynamic Mobile Container Frame Shell */
+        /* Fully Responsive Dynamic Shell - Auto fits cross-device screens cleanly */
         .game-main-box {
             background: #fffbf4;
             border: 4px solid #4a1d08;
             box-shadow: 0 16px 0 #2b0f03, 0 24px 36px rgba(0,0,0,0.5);
             border-radius: 32px;
             width: 100%;
-            max-width: 380px;
-            height: 620px;
+            max-width: 400px;
+            height: 660px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -32,14 +32,25 @@
             overflow: hidden;
         }
 
-        /* Warm Brown Cave Theme Interaction Panels */
+        /* Cave Theme Interior Box */
         .cave-box-theme {
             background: linear-gradient(135deg, #3d1a0b 0%, #240e04 100%);
             border: 3px solid #632a10;
             box-shadow: inset 0 6px 12px rgba(0,0,0,0.6);
         }
 
-        /* Dynamic Assistance Glow Highlights for Answer Cards */
+        /* Incorrect Answer Shake Feedback Keyframes */
+        .shake-error-animation {
+            animation: snapShake 0.4s ease-in-out;
+        }
+
+        @keyframes snapShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Automated Solution Pulsing Hint Glow */
         .card-correct-glow-hint {
             border-color: #fbbf24 !important;
             box-shadow: 0 0 15px #fbbf24, 0 4px 0 #7c2d12 !important;
@@ -48,10 +59,10 @@
 
         @keyframes cardPulseGlow {
             0% { transform: scale(1); background-color: #fffbeb; }
-            100% { transform: scale(1.04); background-color: #fef3c7; }
+            100% { transform: scale(1.03); background-color: #fef3c7; }
         }
 
-        /* Premium Aesthetic Grade 2 Level Text Blocks */
+        /* Tactile Game Interactive Tokens */
         .item-text-card {
             background: #ffffff;
             border: 2.5px solid #4a1d08;
@@ -63,7 +74,6 @@
             cursor: grabbing;
         }
 
-        /* Interactive Dynamic Game Buttons */
         .button-orange-pop {
             background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
             border: 2.5px solid #4a1d08;
@@ -86,7 +96,6 @@
             box-shadow: 0 2px 0 #14532d;
         }
 
-        /* Custom Scrollbar styling for the entry tray drawer */
         .drawer-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
@@ -100,26 +109,11 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4 m-0 select-none">
+<body class="flex flex-col items-center justify-center p-3 m-0 select-none">
 
     <canvas id="canvasConfetti" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
     <div class="game-main-box p-4">
-
-        <div id="factPopupModal" class="hidden absolute inset-0 bg-stone-950/90 z-50 rounded-[28px] flex flex-col items-center justify-center p-5 text-center">
-            <div class="my-auto w-full">
-                <div class="w-full bg-white border-4 border-orange-500 rounded-2xl p-4 shadow-2xl">
-                    <div class="text-5xl mb-2 animate-bounce">⭐</div>
-                    <h2 class="text-2xl font-black text-orange-950 tracking-wide uppercase">You Found It!</h2>
-                    <div class="bg-orange-50 border border-orange-200 p-3.5 rounded-xl mt-2">
-                        <p id="factModalContentText" class="text-stone-800 font-semibold text-xs leading-relaxed"></p>
-                    </div>
-                </div>
-            </div>
-            <button id="btnDismissFact" class="w-full button-green-pop text-white font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider">
-                NEXT QUESTION ➡️
-            </button>
-        </div>
 
         <div id="innovineLogoView" class="w-full flex flex-col justify-center items-center h-full flex-1 py-4">
             <div class="flex flex-col items-center justify-center">
@@ -181,11 +175,19 @@
                 </div>
             </div>
 
-            <div id="gameplayDropArena" class="cave-box-theme rounded-2xl p-2.5 flex flex-col justify-center items-center h-36 shrink-0 relative transition-all duration-200">
-                <div id="mainDropTargetFrame" class="w-full border-4 border-dashed border-orange-500/60 rounded-xl h-full flex flex-col justify-center items-center p-2 text-center">
-                    <span class="text-[8px] bg-orange-400 text-amber-950 font-black px-2 py-0.5 rounded-full mb-1 uppercase tracking-wider">Drop Card Here</span>
-                    <p id="txtScenarioRequestPrompt" class="text-[11px] font-semibold text-amber-50 leading-tight max-w-[270px]"></p>
+            <div id="gameplayDropArena" class="cave-box-theme rounded-2xl p-3 flex flex-col justify-between items-center h-52 shrink-0 relative transition-all duration-200">
+                
+                <div id="mainDropTargetFrame" class="w-full border-2 border-dashed border-orange-500/40 rounded-xl p-2 flex flex-col items-center justify-center flex-1 text-center">
+                    <p id="txtScenarioRequestPrompt" class="text-xs font-semibold text-amber-50 leading-snug max-w-[310px] mb-2"></p>
+                    
+                    <div id="placedCardSlotAnchor" class="w-40 h-9 border border-amber-900/40 rounded-lg bg-stone-950/30 flex items-center justify-center text-center text-xs font-bold text-orange-300">
+                        <span id="placedSlotPlaceholderLabel" class="text-[9px] text-stone-500 font-normal uppercase tracking-wider">Drag Tile Here</span>
+                    </div>
                 </div>
+
+                <button id="btnInlineNextQuestion" class="hidden w-full button-green-pop text-white font-bold text-xs py-2 rounded-xl uppercase tracking-wider mt-2 animate-bounce">
+                    NEXT QUESTION ➡️
+                </button>
             </div>
 
             <div class="bg-stone-50 border border-stone-200 rounded-xl p-2 flex-1 flex flex-col overflow-hidden">
@@ -193,7 +195,7 @@
                     <span class="text-[8px] font-black text-stone-400 bg-stone-200 px-3 py-0.5 rounded-full uppercase">Scroll & Find Answer Card</span>
                 </div>
 
-                <div id="trayGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto drawer-scrollbar pr-1 pb-2 flex-1">
+                <div id="trayGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto drawer-scrollbar pr-1 pb-1 flex-1">
                     </div>
             </div>
         </div>
@@ -218,7 +220,6 @@
     </div>
 
     <script>
-        // Unique 12 items dataset array loaded directly
         const Game_Questions_Data = [
             { id: 1, prompt: "A builder wants to make strong, colored floor tiles that never scratch. Drag the hardest rock here:", label: "GRANITE", fact: "Granite is an extra tough rock that comes in lots of beautiful colors!" },
             { id: 2, prompt: "An artist wants to carve a shiny white statue for a grand garden. Drag the beautiful white rock here:", label: "MARBLE", fact: "White marble was used to build the famous Taj Mahal!" },
@@ -238,6 +239,7 @@
         let scoreTracker = 0;
         let heartsCount = 3;
         let consecutiveFails = 0;
+        let blockGameplayInteraction = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             attachMenuButtonTriggers();
@@ -263,9 +265,10 @@
                 renderQuestionTaskState();
             };
 
-            document.getElementById('btnDismissFact').onclick = () => {
-                document.getElementById('factPopupModal').classList.add('hidden');
-                document.getElementById('mainGameplayView').classList.remove('hidden');
+            // NEW: Inline next button execution pathway
+            document.getElementById('btnInlineNextQuestion').onclick = () => {
+                document.getElementById('btnInlineNextQuestion').classList.add('hidden');
+                blockGameplayInteraction = false;
                 progressNextGameplayStep();
             };
 
@@ -274,6 +277,7 @@
                 scoreTracker = 0;
                 heartsCount = 3;
                 consecutiveFails = 0;
+                blockGameplayInteraction = false;
 
                 for (let i = 1; i <= 3; i++) {
                     document.getElementById(`rockLife${i}`).style.opacity = "1";
@@ -293,14 +297,18 @@
             const currentItem = Game_Questions_Data[indexPointer];
             refreshDashboardUI();
             
-            // Updates the question layout text safely
             document.getElementById('txtScenarioRequestPrompt').innerText = currentItem.prompt;
+            
+            // Clear drop target placeholder back to original clean layout
+            const anchor = document.getElementById('placedCardSlotAnchor');
+            anchor.className = "w-40 h-9 border border-amber-900/40 rounded-lg bg-stone-950/30 flex items-center justify-center text-center text-xs font-bold text-orange-300";
+            anchor.innerHTML = '<span id="placedSlotPlaceholderLabel" class="text-[9px] text-stone-500 font-normal uppercase tracking-wider">Drag Tile Here</span>';
 
             const tray = document.getElementById('trayGridContainer');
             tray.innerHTML = "";
-            tray.scrollTop = 0; // Auto scroll container back to top view block layout 
+            tray.scrollTop = 0; 
 
-            // Sorting list unique map labels cleanly to avoid duplication bugs
+            // Alphabetize option lists so scrolling feels clean and predictable
             const visualTrayOrder = [...Game_Questions_Data].sort((a, b) => a.label.localeCompare(b.label));
 
             visualTrayOrder.forEach(item => {
@@ -313,7 +321,6 @@
                 tray.appendChild(card);
             });
 
-            // Help Hint Glow Mechanism: Triggers glow if failures reach 2
             if (consecutiveFails >= 2) {
                 const targetNode = document.getElementById(`card-node-${currentItem.label}`);
                 if (targetNode) targetNode.classList.add('card-correct-glow-hint');
@@ -324,26 +331,38 @@
             const targetAnswerObj = Game_Questions_Data[indexPointer];
             const droppedLabel = selectedCardRef.getAttribute('data-answer-label');
 
+            // Match Check
             if (droppedLabel === targetAnswerObj.label) {
-                selectedCardRef.classList.add('bg-green-500', 'text-white', 'border-green-600');
+                blockGameplayInteraction = true; 
+                consecutiveFails = 0;
                 scoreTracker += 10;
                 refreshDashboardUI();
-                consecutiveFails = 0;
 
                 playGameAudioNotification('assets/correct.mp3');
 
-                setTimeout(() => {
-                    selectedCardRef.classList.remove('bg-green-500', 'text-white', 'border-green-600');
-                    displayFactModalWindow(targetAnswerObj.fact);
-                }, 600);
+                // FIX: Put answer card safely into target window permanently without erasing layout
+                const anchor = document.getElementById('placedCardSlotAnchor');
+                anchor.innerHTML = ""; 
+                anchor.className = "w-40 h-9 rounded-lg flex items-center justify-center text-center font-bold text-xs bg-green-600 text-white border-2 border-green-700 shadow-md";
+                anchor.innerText = targetAnswerObj.label;
+
+                // Hide choice card token completely from choice list grid to prevent overlap confusion
+                selectedCardRef.classList.add('hidden');
+
+                // Displays fact message directly inside scenario drop block arena window
+                document.getElementById('txtScenarioRequestPrompt').innerText = targetAnswerObj.fact;
+                document.getElementById('btnInlineNextQuestion').classList.remove('hidden');
 
             } else {
+                // Incorrect Answer Path - Trigger instant vibration shake feedback and return
                 consecutiveFails++;
                 playGameAudioNotification('assets/wrong.mp3');
                 
                 const arena = document.getElementById('gameplayDropArena');
-                arena.classList.add('bg-rose-950', 'border-rose-800');
-                setTimeout(() => { arena.classList.remove('bg-rose-950', 'border-rose-800'); }, 400);
+                arena.classList.add('shake-error-animation', 'bg-rose-950/40');
+                setTimeout(() => { 
+                    arena.classList.remove('shake-error-animation', 'bg-rose-950/40'); 
+                }, 400);
 
                 const heartIcon = document.getElementById(`rockLife${heartsCount}`);
                 if (heartIcon) heartIcon.style.opacity = "0.15";
@@ -351,22 +370,16 @@
 
                 if (heartsCount <= 0) {
                     setTimeout(() => { completeGameSession(false); }, 600);
-                } else {
-                    renderQuestionTaskState();
+                } else if (consecutiveFails >= 2) {
+                    renderQuestionTaskState(); // Force-refresh layout to flash glowing answer card instantly
                 }
             }
-        }
-
-        function displayFactModalWindow(textString) {
-            document.getElementById('mainGameplayView').classList.add('hidden');
-            document.getElementById('factModalContentText').innerText = textString;
-            document.getElementById('factPopupModal').classList.remove('hidden');
         }
 
         function progressNextGameplayStep() {
             indexPointer++;
             if (indexPointer < 12) {
-                renderQuestionTaskState(); // This instantly loads the next text index scenario item!
+                renderQuestionTaskState();
             } else {
                 playGameAudioNotification('assets/freesound_community-claps-44774.mp3');
                 launchConfettiBurst();
@@ -376,7 +389,6 @@
 
         function completeGameSession(isVictory) {
             document.getElementById('mainGameplayView').classList.add('hidden');
-            document.getElementById('factPopupModal').classList.add('hidden');
 
             const emoji = document.getElementById('lblFinalEmoji');
             const title = document.getElementById('lblFinalTitle');
@@ -402,13 +414,13 @@
             soundElement.play().catch(() => {});
         }
 
-        // --- SEAMLESS DRAG & DROP POINTER EVENTS ENGINE ---
+        // --- HARDWARE-ACCELERATED POINTER DRAG MODULE ---
         let selectedCardRef = null;
         let slotInDrawerParentRef = null;
         let isPointerTrackingActive = false;
 
         function triggerSpecimenCardDragPhysics(e) {
-            if (isPointerTrackingActive || selectedCardRef) return;
+            if (isPointerTrackingActive || selectedCardRef || blockGameplayInteraction) return;
             isPointerTrackingActive = true;
             selectedCardRef = e.currentTarget;
             slotInDrawerParentRef = selectedCardRef.parentNode;
@@ -423,7 +435,7 @@
             selectedCardRef.style.height = `${boxBounds.height}px`;
             selectedCardRef.style.left = `${boxBounds.left}px`;
             selectedCardRef.style.top = `${boxBounds.top}px`;
-            selectedCardRef.classList.add('scale-105', 'shadow-2xl', 'opacity-95');
+            selectedCardRef.classList.add('scale-105', 'shadow-xl', 'opacity-90');
 
             window.addEventListener('pointermove', whileCardIsMoving);
             window.addEventListener('pointerup', completeCardReleaseAction);
@@ -444,31 +456,38 @@
             window.removeEventListener('pointerup', completeCardReleaseAction);
 
             const cardRect = selectedCardRef.getBoundingClientRect();
-            const targetZoneNode = document.getElementById('mainDropTargetFrame');
+            const targetZoneNode = document.getElementById('placedCardSlotAnchor');
             const targetRect = targetZoneNode.getBoundingClientRect();
 
             const targetCenterX = cardRect.left + (cardRect.width / 2);
             const targetCenterY = cardRect.top + (cardRect.height / 2);
 
+            let hitDetected = false;
             if (targetCenterX >= targetRect.left && targetCenterX <= targetRect.right &&
                 targetCenterY >= targetRect.top && targetCenterY <= targetRect.bottom) {
-                evaluateUserDropChoice();
+                hitDetected = true;
             }
 
+            // Clean properties layout restorer
             selectedCardRef.style.position = '';
             selectedCardRef.style.zIndex = '';
             selectedCardRef.style.width = '';
             selectedCardRef.style.height = '';
             selectedCardRef.style.left = '';
             selectedCardRef.style.top = '';
-            selectedCardRef.classList.remove('scale-105', 'shadow-2xl', 'opacity-95');
+            selectedCardRef.classList.remove('scale-105', 'shadow-xl', 'opacity-90');
 
             if (slotInDrawerParentRef) {
                 slotInDrawerParentRef.appendChild(selectedCardRef);
             }
+
+            if (hitDetected) {
+                evaluateUserDropChoice();
+            }
             selectedCardRef = null;
         }
 
+        // Lightweight Confetti Particles
         const canvas = document.getElementById('canvasConfetti');
         const ctx = canvas.getContext('2d');
         let confArrayList = [];
@@ -479,14 +498,14 @@
             canvas.height = window.innerHeight;
             confArrayList = [];
 
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 40; i++) {
                 confArrayList.push({
                     x: window.innerWidth / 2,
-                    y: window.innerHeight / 2.2,
-                    vx: (Math.random() - 0.5) * 12,
-                    vy: (Math.random() - 0.5) * 12 - 4,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10 - 4,
                     r: Math.random() * 3 + 2,
-                    color: `hsl(${Math.random() * 360}, 95%, 60%)`,
+                    color: `hsl(${Math.random() * 360}, 90%, 60%)`,
                     alpha: 1
                 });
             }
@@ -500,8 +519,8 @@
             confArrayList.forEach(p => {
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.22;
-                p.alpha -= 0.016;
+                p.vy += 0.2;
+                p.alpha -= 0.02;
 
                 if (p.alpha > 0) {
                     active = true;
