@@ -16,7 +16,7 @@
             min-height: 100vh;
         }
 
-        /* Upgraded Dynamic Mobile Container Frame Shell - Allows internal scroll */
+        /* Upgraded Dynamic Mobile Container Frame Shell */
         .game-main-box {
             background: #fffbf4;
             border: 4px solid #4a1d08;
@@ -218,6 +218,7 @@
     </div>
 
     <script>
+        // Unique 12 items dataset array loaded directly
         const Game_Questions_Data = [
             { id: 1, prompt: "A builder wants to make strong, colored floor tiles that never scratch. Drag the hardest rock here:", label: "GRANITE", fact: "Granite is an extra tough rock that comes in lots of beautiful colors!" },
             { id: 2, prompt: "An artist wants to carve a shiny white statue for a grand garden. Drag the beautiful white rock here:", label: "MARBLE", fact: "White marble was used to build the famous Taj Mahal!" },
@@ -291,11 +292,15 @@
         function renderQuestionTaskState() {
             const currentItem = Game_Questions_Data[indexPointer];
             refreshDashboardUI();
+            
+            // Updates the question layout text safely
             document.getElementById('txtScenarioRequestPrompt').innerText = currentItem.prompt;
 
             const tray = document.getElementById('trayGridContainer');
             tray.innerHTML = "";
+            tray.scrollTop = 0; // Auto scroll container back to top view block layout 
 
+            // Sorting list unique map labels cleanly to avoid duplication bugs
             const visualTrayOrder = [...Game_Questions_Data].sort((a, b) => a.label.localeCompare(b.label));
 
             visualTrayOrder.forEach(item => {
@@ -303,11 +308,12 @@
                 card.id = `card-node-${item.label}`;
                 card.className = "item-text-card h-12 rounded-xl flex items-center justify-center text-center font-bold text-xs text-amber-950 p-2 select-none touch-none";
                 card.innerText = item.label;
+                card.setAttribute('data-answer-label', item.label);
                 card.onpointerdown = triggerSpecimenCardDragPhysics;
                 tray.appendChild(card);
             });
 
-            // Help logic: If student fails 2 times, auto glow the solution choice card item
+            // Help Hint Glow Mechanism: Triggers glow if failures reach 2
             if (consecutiveFails >= 2) {
                 const targetNode = document.getElementById(`card-node-${currentItem.label}`);
                 if (targetNode) targetNode.classList.add('card-correct-glow-hint');
@@ -316,8 +322,9 @@
 
         function evaluateUserDropChoice() {
             const targetAnswerObj = Game_Questions_Data[indexPointer];
+            const droppedLabel = selectedCardRef.getAttribute('data-answer-label');
 
-            if (selectedCardRef.innerText === targetAnswerObj.label) {
+            if (droppedLabel === targetAnswerObj.label) {
                 selectedCardRef.classList.add('bg-green-500', 'text-white', 'border-green-600');
                 scoreTracker += 10;
                 refreshDashboardUI();
@@ -359,7 +366,7 @@
         function progressNextGameplayStep() {
             indexPointer++;
             if (indexPointer < 12) {
-                renderQuestionTaskState();
+                renderQuestionTaskState(); // This instantly loads the next text index scenario item!
             } else {
                 playGameAudioNotification('assets/freesound_community-claps-44774.mp3');
                 launchConfettiBurst();
@@ -389,7 +396,6 @@
             document.getElementById('summaryDashboardView').classList.remove('hidden');
         }
 
-        // Safe integrated audio engine
         function playGameAudioNotification(sourceUrl) {
             const soundElement = new Audio(sourceUrl);
             soundElement.volume = 0.4;
@@ -463,7 +469,6 @@
             selectedCardRef = null;
         }
 
-        // Particle Canvas Confetti Burst Logic
         const canvas = document.getElementById('canvasConfetti');
         const ctx = canvas.getContext('2d');
         let confArrayList = [];
