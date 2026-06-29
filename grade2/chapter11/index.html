@@ -1,1 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chapter 11: Rocks & Minerals Lab</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+            background: linear-gradient(180deg, #FDBA74 0%, #F97316 50%, #7C2D12 100%);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            min-height: 100vh;
+        }
 
+        h1, h2, h3, div, span, p, button {
+            font-family: 'Fredoka', 'Comic Sans MS', sans-serif !important;
+        }
+
+        /* 3D App Box Container Frame Shell */
+        .adventure-card-box {
+            background: #FFFFFF;
+            border: 4px solid #7C2D12;
+            box-shadow: 0 14px 0 #431407, 0 24px 36px rgba(124, 45, 18, 0.4);
+            border-radius: 32px;
+            width: 100%;
+            min-height: 570px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Active highlight box animations */
+        .completed-environment-zone {
+            border-color: #10B981 !important;
+            background-color: #D1FAE5 !important;
+            color: #065F46 !important;
+        }
+
+        .active-environment-zone {
+            border-color: #FBBF24 !important;
+            background-color: #FEF3C7 !important;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+
+        /* Bouncy fluid animation logic */
+        .droplet-agent-bounce {
+            animation: dropletFloat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes dropletFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Premium Interactive Tactile UI Buttons */
+        .btn-amber-pop {
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+            box-shadow: 0 6px 0 #B45309;
+            transition: all 0.1s ease;
+        }
+        .btn-amber-pop:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #B45309;
+        }
+
+        .btn-earth-pop {
+            background: linear-gradient(135deg, #A16207 0%, #78350F 100%);
+            box-shadow: 0 6px 0 #451A03;
+            transition: all 0.1s ease;
+        }
+        .btn-earth-pop:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #451A03;
+        }
+
+        /* Level 2 Fluid Pipeline Movement Rules */
+        .pipeline-track-bar {
+            background: repeating-linear-gradient(90deg, #4A5568, #4A5568 20px, #2D3748 20px, #2D3748 40px);
+            border: 4px solid #1A202C;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        #pipelineSlidingDroplet {
+            position: absolute;
+            top: -14px;
+            left: var(--drop-position, 10%);
+            transition: left 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s ease, opacity 0.3s ease;
+            transform: translateX(-50%);
+            font-size: 28px;
+            z-index: 40;
+        }
+
+        /* Premium aesthetic text card boxes */
+        .specimen-text-block {
+            background: #FFFFFF;
+            border: 3px solid #7C2D12;
+            box-shadow: 0 6px 0 #431407;
+            cursor: pointer;
+            transition: all 0.1s ease, background-color 0.4s ease;
+        }
+        .specimen-text-block:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #431407;
+        }
+
+        /* Educational Fact Modal popup screen */
+        .edu-fact-modal {
+            border: 4px solid #F59E0B;
+            box-shadow: 0 10px 0 #B45309, 0 20px 30px rgba(124, 45, 18, 0.3);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 m-0 select-none min-h-screen w-full overflow-hidden">
+
+    <canvas id="canvasConfetti" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <div class="w-full max-w-sm flex flex-col justify-center items-center">
+        <div class="adventure-card-box p-5">
+            
+            <div id="eduFactPopup" class="hidden absolute inset-0 bg-stone-900/95 z-50 rounded-[28px] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                <div class="my-auto">
+                    <div class="w-full bg-white edu-fact-modal p-5 text-center">
+                        <div class="text-6xl mb-1 animate-bounce">⚒️</div>
+                        <h2 class="text-3xl font-black text-amber-900 tracking-wide uppercase">Correct!</h2>
+                        <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-xl mt-3 shadow-inner">
+                            <p id="eduFactText" class="text-amber-950 font-semibold text-xs leading-relaxed">
+                                </p>
+                        </div>
+                    </div>
+                </div>
+                <button id="btnDismissFactModal" class="w-full max-w-[200px] btn-amber-pop text-stone-900 font-bold text-sm py-3 rounded-xl uppercase tracking-wider mb-2">
+                    KEEP LOGGING ➡️
+                </button>
+            </div>
+
+            <div id="innovineLogoView" class="w-full flex flex-col justify-center items-center h-full flex-1 py-4">
+                <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-56 h-auto object-contain mx-auto" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-4xl font-black tracking-widest text-sky-600 uppercase\'>INNOVINE</div>'">
+                <p class="text-xs text-orange-900 font-bold mt-2 animate-pulse">Loading Chapter 11 Engine...</p>
+            </div>
+
+            <div id="welcomeView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-2">
+                <div class="space-y-2 mt-4">
+                    <div class="text-7xl">💎</div>
+                    <h1 class="text-3xl font-black text-amber-900 tracking-wide drop-shadow-sm">Earth Detectives</h1>
+                    <p class="text-xs text-amber-700 font-bold tracking-widest uppercase">Rocks & Minerals Lab</p>
+                </div>
+
+                <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl my-4 shadow-inner">
+                    <p class="text-xs font-bold text-amber-950 leading-relaxed">
+                        Become a certified geologist! Analyze different natural rock samples, design legendary monuments, and discover minerals used in every household object!
+                    </p>
+                </div>
+
+                <button id="btnFromMenuToInstructions" class="w-full btn-amber-pop text-stone-900 font-bold text-base py-3.5 rounded-xl cursor-pointer uppercase tracking-wider mt-2">
+                    CONTINUE ⚒️
+                </button>
+            </div>
+
+            <div id="instructionsView" class="hidden w-full flex flex-col justify-between h-full flex-1 py-1">
+                <div class="text-center">
+                    <h2 id="levelTitleIntro" class="text-xl font-bold text-stone-800">Geologist Mission Briefing</h2>
+                </div>
+                
+                <div id="levelBriefingBox" class="bg-orange-50 border border-orange-100 p-4 rounded-2xl text-left text-xs text-stone-700 font-bold space-y-2.5 my-4 leading-relaxed shadow-inner">
+                    <p class="text-amber-800 font-bold">🌟 The Geologist Lab Challenge</p>
+                    <p>Your task is to identify 12 unique earth samples based on the lab requests!</p>
+                    <p>🎯 **Attempts:** You have **3 Attempts** represented by rock icons. A wrong match breaks one rock!</p>
+                    <p>💡 **Hints:** After **2 errors**, the Scanner will **glow bright** with a lab hint!</p>
+                    <p>📚 **Facts:** Every correct specimen matching unlocks a fascinating geological educational fact!</p>
+                </div>
+
+                <button id="btnLaunchLevel" class="w-full btn-earth-pop text-white font-bold text-sm py-3.5 rounded-xl cursor-pointer uppercase tracking-widest">
+                    LET'S START! ⚡
+                </button>
+            </div>
+
+            <div id="mainGameplayView" class="hidden w-full h-full flex flex-col justify-between flex-1 space-y-3">
+                
+                <div class="w-full flex items-center justify-between shrink-0">
+                    <div class="bg-amber-50 border-2 border-amber-600 px-3 py-0.5 rounded-lg flex flex-col items-center">
+                        <span class="text-[8px] font-bold text-amber-700 uppercase tracking-tight">Scanner Log</span>
+                        <span id="levelBadgeText" class="text-xs font-extrabold text-amber-900 leading-none">1 / 12</span>
+                    </div>
+
+                    <div class="flex items-center space-x-1 bg-stone-900 px-2.5 py-1.5 rounded-xl shadow-inner text-xs">
+                        <span id="lifeIcon1" class="transition-opacity duration-300">🪨</span>
+                        <span id="lifeIcon2" class="transition-opacity duration-300">🪨</span>
+                        <span id="lifeIcon3" class="transition-opacity duration-300">🪨</span>
+                    </div>
+
+                    <div class="bg-stone-800 px-2.5 py-1 rounded-lg text-[9px] font-extrabold text-white flex flex-col items-center min-w-[65px]">
+                        <span class="text-[7px] text-amber-400 uppercase font-bold tracking-tighter">Mineral Score</span>
+                        <span id="runningScoreText" class="text-xs text-amber-300 leading-none mt-0.5">000</span>
+                    </div>
+                </div>
+
+                <div id="gameplayGraphicArena" class="bg-stone-100 border-2 border-stone-200 rounded-2xl p-2 flex flex-col justify-center items-center overflow-hidden h-44 relative transition-colors duration-300">
+                    
+                    <div id="hintTextContainer" class="hidden absolute top-1 right-1 max-w-[200px] bg-amber-50 border-2 border-amber-300 p-2.5 rounded-lg text-[10px] font-semibold text-amber-950 leading-snug text-center animate-pulse z-20">
+                        </div>
+
+                    <div id="targetDropZone" class="w-full border-4 border-dashed border-amber-500 rounded-3xl h-full flex flex-col justify-center items-center p-3 text-center transition-all duration-300 active-environment-zone">
+                        <span class="text-[8px] bg-amber-100 border border-amber-200 text-amber-900 px-2 py-0.5 rounded-full mb-1 tracking-wider font-bold uppercase">Scanner Request</span>
+                        <p id="targetZonePromptText" class="text-[11px] font-semibold text-amber-950 leading-relaxed px-0.5">Find the smooth, river rocks known as Pebbles!</p>
+                    </div>
+
+                </div>
+
+                <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 space-y-2 shadow-sm relative">
+                    <div class="text-center mb-1.5 flex items-center justify-center space-x-1.5">
+                        <span class="text-[8px] font-bold tracking-wider text-amber-900 bg-amber-200 px-2.5 py-0.5 rounded-full uppercase">Lab Specimen Tray</span>
+                    </div>
+
+                    <div id="gridResponseChoices" class="grid grid-cols-2 gap-2 h-44 w-full overflow-y-auto">
+                        </div>
+                </div>
+            </div>
+
+            <div id="summaryScoreboardView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-1">
+                <div class="space-y-1 mt-2">
+                    <span id="finalEmojiHeader" class="text-6xl block">🏆</span>
+                    <h2 id="finalTitleHeader" class="text-2xl font-bold text-stone-900">Grand Geologist!</h2>
+                    <p id="finalFeedbackParagraph" class="text-xs text-stone-500 font-semibold px-2 leading-relaxed mt-1"></p>
+                </div>
+
+                <div class="bg-sky-50 p-3 rounded-2xl border border-sky-100 my-3 min-w-[140px] shadow-inner">
+                    <p class="text-[8px] font-bold tracking-widest uppercase text-sky-400">Total Specimens Logged</p>
+                    <p class="text-3xl font-black text-orange-500"><span id="finalScoreDisplay">0</span> / 120</p>
+                </div>
+
+                <button id="btnRestartAdventure" class="w-full btn-amber-pop text-stone-900 font-bold text-xs py-3.5 rounded-xl cursor-pointer uppercase tracking-wider">
+                    RESTART DRILL RIG 🔄
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // List of 12 text-based scenario questions and facts tailored to Grade 2 from textbook screenshots
+        const Lab_Missions_List = [
+            { id: 1, prompt: " Shh! We are walking near a quiet forest stream and see smooth, round stones. What are they?", label: "PEBBLES", isRock: true, hint: "Pebbles are smooth stones found near running water!", fact: "Pebbles are small pieces of rocks made smooth by water!" },
+            { id: 2, prompt: " A builder needs a very hard rock to fix robust floor tiles that do not scratch easily. Find it:", label: "GRANITE", isRock: true, hint: "Granite is a very hard rock used for flooring!", fact: "Granite is a very hard rock that comes in many colors!" },
+            { id: 3, prompt: " Look at the beautiful Lotus Temple and Taj Mahal! Which mostly white rock builds these famous landmarks?", label: "MARBLE", isRock: true, hint: "The Taj Mahal and Lotus Temple are made of Marble!", fact: "Marble is mostly white and used to build many statues!" },
+            { id: 4, prompt: " You are visiting the massive Red Fort walls. Which reddish building rock are you looking at?", label: "SANDSTONE", isRock: true, hint: "The Red Fort and India Gate are made of Sandstone!", fact: "Sandstone is a hard rock used as building material!" },
+            { id: 5, prompt: " Brrr! After playtime, your family is cooking over a warm fire powered by which black, soft fuel rock?", label: "COAL", isRock: true, hint: "Coal is black, soft, and used as fuel for cooking!", fact: "Coal runs steam engines and powers big factories too!" },
+            { id: 6, prompt: " Look at the classroom blackboard! What soft rock rubs off easily onto blackboards for writing?", label: "CHALK", isRock: true, hint: "Chalk is a soft rock used to write on blackboards!", fact: "Chalk rubs off onto blackboards for writing and drawing!" },
+            { id: 7, prompt: " Find the soft rock used to make roofs of some houses and sturdy blackboards.", label: "SLATE", isRock: true, hint: "Slate is used for making blackboards and house roofs!", fact: "Slate is also used as writing blackboards in schools!" },
+            { id: 8, prompt: " An engineer is building a strong steel bridge. Which tough mineral do they need to mine?", label: "IRON", isRock: false, hint: "Iron is the robust mineral used for making bridges!", fact: "Iron builds machines and massive bridges!", gemstone: false },
+            { id: 9, prompt: " We are looking at precious, sparkling gems like Ruby and Emerald. What type of mineral are these?", label: "GEMSTONES", isRock: false, hint: "Gemstones like diamonds are hard and sparkling!", fact: "Hard, sparkling minerals are called gemstones!" },
+            { id: 10, prompt: " Ouch! Your pencil point breaks. What soft, dark mineral did you just use for writing?", label: "GRAPHITE", isRock: false, hint: "Graphite is the dark substance inside writing pencils!", fact: "Pencil lead is actually made out of safe graphite!" },
+            { id: 11, prompt: " Shh! Shh! Soft talcum powder is being mounded into bottles. Which softest mineral made that powder?", label: "TALC", isRock: false, hint: "Talc is the softest mineral known on Earth!", fact: "Soft, smooth Talc is used to make talcum powder!" },
+            { id: 12, prompt: " Let's make art pottery! Which soft mineral is shapes fine pottery and ceramic vases?", label: "CHINA CLAY", isRock: false, hint: "China Clay is soft and mounded to make pottery!", fact: "Clay from China Clay mineral makes lovely pottery!" }
+        ];
+
+        let currentQuestionPointer = 0;
+        let runningAccumulatedScore = 0;
+        let playerActiveHearts = 3;
+        let consecutiveErrorsCounter = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupUnifiedClickListeners();
+            executeAutoLogoTimer();
+        });
+
+        // FIXED: Logo timer configuration extended to 5000 milliseconds (5 seconds)
+        function executeAutoLogoTimer() {
+            setTimeout(() => {
+                document.getElementById('innovineLogoView').classList.add('hidden');
+                document.getElementById('welcomeView').classList.remove('hidden');
+            }, 5000);
+        }
+
+        function setupUnifiedClickListeners() {
+            // Splash to Menu
+            document.getElementById('btnFromMenuToInstructions').onclick = () => {
+                document.getElementById('welcomeView').classList.add('hidden');
+                displayLevelBriefingScreen();
+            };
+
+            // Instructions to Gameplay
+            document.getElementById('btnLaunchLevel').onclick = () => {
+                document.getElementById('instructionsView').classList.add('hidden');
+                document.getElementById('mainGameplayView').classList.remove('hidden');
+                renderActiveQuestionTrack();
+            };
+
+            // Dismiss Fact Modal
+            document.getElementById('btnDismissFactModal').onclick = () => {
+                document.getElementById('eduFactPopup').classList.add('hidden');
+                document.getElementById('mainGameplayView').classList.remove('hidden');
+                progressGameEngineFlow();
+            };
+
+            document.getElementById('btnRestartAdventure').onclick = () => {
+                currentQuestionPointer = 0;
+                runningAccumulatedScore = 0;
+                playerActiveHearts = 3;
+                consecutiveErrorsCounter = 0;
+
+                for (let i = 1; i <= 3; i++) {
+                    document.getElementById(`lifeIcon${i}`).style.opacity = "1";
+                }
+
+                document.getElementById('summaryScoreboardView').classList.add('hidden');
+                document.getElementById('welcomeView').classList.remove('hidden');
+            };
+        }
+
+        function displayLevelBriefingScreen() {
+            document.getElementById('mainGameplayView').classList.add('hidden');
+            document.getElementById('instructionsView').classList.remove('hidden');
+        }
+
+        function updateScoreboardTextCounter() {
+            const formatted = String(runningAccumulatedScore).padStart(3, '0');
+            document.getElementById('runningScoreText').innerText = formatted;
+        }
+
+        function renderActiveQuestionTrack() {
+            const questionData = Lab_Missions_List[currentQuestionPointer];
+
+            // Reset dynamic hint display state
+            const hintPanel = document.getElementById('hintTextContainer');
+            const targetZone = document.getElementById('targetDropZone');
+            hintPanel.classList.add('hidden');
+            targetZone.classList.remove('border-amber-400', 'border-opacity-60', 'animate-pulse');
+            targetZone.classList.add('border-amber-500');
+
+            updateScoreboardTextCounter();
+
+            document.getElementById('levelBadgeText').innerText = `${currentQuestionPointer + 1} / 12`;
+            document.getElementById('targetZonePromptText').innerText = questionData.prompt;
+
+            // Populate choices below
+            const choiceTray = document.getElementById('gridResponseChoices');
+            choiceTray.innerHTML = "";
+            renderSpecimenTextCardsTray(choiceTray);
+        }
+
+        function renderSpecimenTextCardsTray(targetGridNode) {
+            Lab_Missions_List.forEach((specimen) => {
+                const card = document.createElement('div');
+                card.id = `specimen-${specimen.label}`;
+                card.className = "specimen-text-block h-20 rounded-xl flex items-center justify-center text-center font-bold text-xs text-amber-950 p-2 select-none touch-none";
+                card.innerText = specimen.label;
+                
+                card.onpointerdown = startDragging; // standard hardware-accelerated touch moves
+                targetGridNode.appendChild(card);
+            });
+        }
+
+        function triggerHintLabScanGlow() {
+            const questionData = Lab_Missions_List[currentQuestionPointer];
+            const hintPanel = document.getElementById('hintTextContainer');
+            const targetZone = document.getElementById('targetDropZone');
+
+            hintPanel.innerText = `💡 Lab Hint: ${questionData.hint}`;
+            hintPanel.classList.remove('hidden');
+            targetZone.classList.remove('border-amber-500');
+            targetZone.classList.add('border-amber-400', 'border-opacity-60', 'animate-pulse');
+        }
+
+        function evaluationResponseDrop() {
+            // Verify if correct specimen dropped by matching label
+            const correctSpecimen = Lab_Missions_List[currentQuestionPointer];
+            const evaluationButtonNode = document.getElementById('eduFactText'); // facts used later for text dump
+
+            if (draggedCardSourceElement.innerText === correctSpecimen.label) {
+                // Style visual node feedback
+                draggedCardSourceElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'animate-pulse');
+                runningAccumulatedScore += 10;
+                updateScoreboardTextCounter();
+                consecutiveErrorsCounter = 0; // reset hint logic
+
+                triggerAudioPlayback('assets/correct.mp3');
+
+                setTimeout(() => {
+                    draggedCardSourceElement.classList.remove('bg-emerald-500', 'text-white', 'border-emerald-600', 'animate-pulse');
+                    displayEducationalFactModal(correctSpecimen.fact);
+                }, 1000);
+
+            } else {
+                triggerAudioPlayback('assets/wrong.mp3');
+                
+                arenaNode.classList.add('bg-rose-50', 'border-rose-400');
+                setTimeout(() => {
+                    arenaNode.classList.remove('bg-rose-50', 'border-rose-400');
+                }, 400);
+
+                const targetedHeartNode = document.getElementById(`lifeIcon${playerActiveHearts}`);
+                if (targetedHeartNode) {
+                    targetedHeartNode.style.opacity = "0.15";
+                }
+                playerActiveHearts--;
+                consecutiveErrorsCounter++;
+
+                if (playerActiveHearts <= 0) {
+                    setTimeout(() => {
+                        terminateAdventureSession(false);
+                    }, 800);
+                } else if (consecutiveErrorsCounter >= 2) {
+                    triggerHintLabScanGlow();
+                }
+            }
+        }
+
+        function displayEducationalFactModal(factText) {
+            document.getElementById('mainGameplayView').classList.add('hidden');
+            document.getElementById('eduFactText').innerText = factText;
+            document.getElementById('eduFactPopup').classList.remove('hidden');
+        }
+
+        function progressGameEngineFlow() {
+            currentQuestionPointer++;
+
+            if (currentQuestionPointer < 12) {
+                renderActiveQuestionTrack();
+            } else {
+                // Whole seamless line complete!
+                launchConfettiBurstSequence();
+                triggerAudioPlayback('assets/freesound_community-claps-44774.mp3');
+                terminateAdventureSession(true);
+            }
+        }
+
+        function terminateAdventureSession(wonEntirely) {
+            document.getElementById('mainGameplayView').classList.add('hidden');
+            document.getElementById('innovineLogoView').classList.add('hidden'); // ensure logo hidden
+            document.getElementById('instructionsView').classList.add('hidden'); // ensure briefing hidden
+
+            const finalEmoji = document.getElementById('finalEmojiHeader');
+            const finalTitle = document.getElementById('finalTitleHeader');
+            const finalDesc = document.getElementById('finalFeedbackParagraph');
+
+            if (wonEntirely) {
+                finalEmoji.innerText = "🏆";
+                finalTitle.innerText = "Grand Geologist!";
+                finalDesc.innerText = "Fantastic logging job! You identified all natural rocks vs. man-made substances, determined the structural stones for monuments like Taj Mahal and Red Fort, and calibrated factory minerals perfectly!";
+            } else {
+                finalEmoji.innerText = "⛏️";
+                finalTitle.innerText = "Rig Overheated!";
+                finalDesc.innerText = "Let's reboot the drill! Review textbook data about whether monuments use hard Marble or Sandstone, and learn how soft Graphite mineral builds writing pencil lead!";
+            }
+
+            document.getElementById('finalScoreDisplay').innerText = runningAccumulatedScore;
+            document.getElementById('summaryScoreboardView').classList.remove('hidden');
+        }
+
+        function triggerAudioPlayback(sourcePath) {
+            const playerNode = new Audio(sourcePath);
+            playerNode.volume = 0.6;
+            playerNode.play().catch(() => {});
+        }
+
+        // --- Optimized Hardware Accelerated Drag & Drop Touch Physics Logic ---
+        const arenaNode = document.getElementById('gameplayGraphicArena');
+        const targetZoneNode = document.getElementById('targetDropZone');
+        const choiceTrayNode = document.getElementById('gridResponseChoices');
+        let draggedCardSourceElement = null;
+        let isCurrentlyDraggingOnPointer = false;
+        let originalParentInTray = null;
+
+        function startDragging(e) {
+            if (isCurrentlyDraggingOnPointer || draggedCardSourceElement) return;
+            isCurrentlyDraggingOnPointer = true;
+            draggedCardSourceElement = e.currentTarget;
+            originalParentInTray = draggedCardSourceElement.parentNode;
+
+            // Compute initial offsets relative to pointer
+            const rect = draggedCardSourceElement.getBoundingClientRect();
+            draggedCardSourceElement.dataset.offsetX = e.clientX - rect.left;
+            draggedCardSourceElement.dataset.offsetY = e.clientY - rect.top;
+
+            // Elevate visual layering, remove layout position, apply initial coordinates
+            draggedCardSourceElement.style.position = 'fixed';
+            draggedCardSourceElement.style.zIndex = '100';
+            draggedCardSourceElement.style.width = `${rect.width}px`;
+            draggedCardSourceElement.style.height = `${rect.height}px`;
+            draggedCardSourceElement.style.left = `${rect.left}px`;
+            draggedCardSourceElement.style.top = `${rect.top}px`;
+            draggedCardSourceElement.classList.add('shadow-xl', 'rotate-2');
+
+            // Attach listeners widely
+            window.addEventListener('pointermove', whileDragging);
+            window.addEventListener('pointerup', endDragging);
+        }
+
+        function whileDragging(e) {
+            if (!draggedCardSourceElement) return;
+            draggedCardSourceElement.style.left = `${e.clientX - draggedCardSourceElement.dataset.offsetX}px`;
+            draggedCardSourceElement.style.top = `${e.clientY - draggedCardSourceElement.dataset.offsetY}px`;
+        }
+
+        function endDragging(e) {
+            isCurrentlyDraggingOnPointer = false;
+            if (!draggedCardSourceElement) return;
+            window.removeEventListener('pointermove', whileDragging);
+            window.removeEventListener('pointerup', endDragging);
+
+            const rectSource = draggedCardSourceElement.getBoundingClientRect();
+            const rectTarget = targetZoneNode.getBoundingClientRect();
+
+            // Detect collision over target zone (simplified center point check)
+            const sourceCenterX = rectSource.left + (rectSource.width / 2);
+            const sourceCenterY = rectSource.top + (rectSource.height / 2);
+
+            if (sourceCenterX >= rectTarget.left && sourceCenterX <= rectTarget.right &&
+                sourceCenterY >= rectTarget.top && sourceCenterY <= rectTarget.bottom) {
+                // Dropped inside!
+                targetZoneNode.classList.add('completed-environment-zone');
+                evaluationResponseDrop();
+            }
+
+            // Cleanly restore layout properties to prevent artifacts during reuse
+            draggedCardSourceElement.style.position = '';
+            draggedCardSourceElement.style.zIndex = '';
+            draggedCardSourceElement.style.width = '';
+            draggedCardSourceElement.style.height = '';
+            draggedCardSourceElement.style.left = '';
+            draggedCardSourceElement.style.top = '';
+            draggedCardSourceElement.classList.remove('shadow-xl', 'rotate-2');
+
+            // In all scenarios (correct or incorrect drop), visually return the physical card back into its tray slot smoothly
+            if (originalParentInTray) originalParentInTray.appendChild(draggedCardSourceElement);
+            
+            targetZoneNode.classList.remove('completed-environment-zone');
+            draggedCardSourceElement = null;
+        }
+
+        // Canvas Confetti Engine
+        const partyCanvas = document.getElementById('canvasConfetti');
+        const particleCtx = partyCanvas.getContext('2d');
+        let particleList = [];
+
+        function launchConfettiBurstSequence() {
+            partyCanvas.classList.remove('hidden');
+            partyCanvas.width = window.innerWidth;
+            partyCanvas.height = window.innerHeight;
+            particleList = [];
+
+            for (let i = 0; i < 60; i++) {
+                particleList.push({
+                    posX: window.innerWidth / 2,
+                    posY: window.innerHeight / 2.2,
+                    velX: (Math.random() - 0.5) * 14,
+                    velY: (Math.random() - 0.5) * 14 - 5,
+                    radius: Math.random() * 3 + 3,
+                    hueColor: `hsl(${Math.random() * 360}, 95%, 65%)`,
+                    transparency: 1
+                });
+            }
+            requestAnimationFrame(confettiRenderLoop);
+        }
+
+        function confettiRenderLoop() {
+            particleCtx.clearRect(0, 0, partyCanvas.width, partyCanvas.height);
+            let loopRunning = false;
+
+            particleList.forEach(p => {
+                p.posX += p.velX;
+                p.posY += p.velY;
+                p.velY += 0.22;
+                p.transparency -= 0.018;
+
+                if (p.transparency > 0) {
+                    loopRunning = true;
+                    particleCtx.save();
+                    particleCtx.globalAlpha = p.transparency;
+                    particleCtx.fillStyle = p.hueColor;
+                    particleCtx.beginPath();
+                    particleCtx.arc(p.posX, p.posY, p.radius, 0, Math.PI * 2);
+                    particleCtx.fill();
+                    particleCtx.restore();
+                }
+            });
+
+            if (loopRunning) {
+                requestAnimationFrame(confettiRenderLoop);
+            } else {
+                partyCanvas.classList.add('hidden');
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 m-0 select-none min-h-screen w-full overflow-hidden">
+    <canvas id="canvasConfetti" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+    ```
