@@ -31,14 +31,20 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: relative;
         }
 
-        /* Active highlight box animations */
+        /* Dynamic completed quadrant states */
+        .completed-environment-zone {
+            border-color: #10B981 !important;
+            background-color: #D1FAE5 !important;
+            color: #065F46 !important;
+        }
+
         .active-environment-zone {
             border-color: #F59E0B !important;
             background-color: #FEF3C7 !important;
-            transform: scale(1.03);
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.45);
+            transform: scale(1.02);
         }
 
         /* Bouncy fluid animation logic */
@@ -48,7 +54,7 @@
 
         @keyframes dropletFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
 
         /* Premium Interactive Tactile UI Buttons */
@@ -72,7 +78,7 @@
             box-shadow: 0 3px 0 #0369A1;
         }
 
-        /* FIXED: Level 2 Fluid Pipeline Movement Rules */
+        /* Level 2 Fluid Pipeline Movement Rules */
         .pipeline-track-bar {
             background: linear-gradient(180deg, #94A3B8 0%, #64748B 50%, #475569 100%);
             border: 2px solid #334155;
@@ -80,11 +86,10 @@
             position: relative;
         }
 
-        /* Native Variable Positioning Engine to bypass Tailwind v4 overrides */
         #pipelineSlidingDroplet {
             position: absolute;
             top: -14px;
-            left: var(--drop-position, 0%);
+            left: var(--drop-position, 10%);
             transition: left 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s ease, opacity 0.3s ease;
             transform: translateX(-50%);
             font-size: 28px;
@@ -115,27 +120,31 @@
     <div class="w-full max-w-sm flex flex-col justify-center items-center">
         <div class="adventure-card-box p-5">
             
-            <div id="innovineLogoView" class="w-full flex flex-col justify-between items-center text-center h-full flex-1 py-4">
-                <div class="my-auto space-y-6 flex flex-col items-center w-full">
-                    <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-56 h-auto object-contain mx-auto" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-4xl font-black tracking-widest text-sky-600 uppercase\'>INNOVINE</div>'">
-                    <p class="text-xs font-bold text-sky-600/80 tracking-widest uppercase">Presents</p>
-                </div>
-
-                <button id="btnFromLogoToWelcome" class="w-full btn-blue-pop text-white font-bold text-base py-3.5 rounded-xl cursor-pointer uppercase tracking-wider mt-4">
+            <div id="levelSuccessPopup" class="hidden absolute inset-0 bg-sky-900/90 z-50 rounded-[28px] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                <div class="text-7xl animate-bounce mb-2">🎉</div>
+                <h2 class="text-3xl font-black text-amber-300 tracking-wide uppercase">Yay! Success!</h2>
+                <p class="text-white font-bold text-sm mt-2 px-4 leading-relaxed">
+                    You have completely mastered this stage area! Let's unlock the next challenge.
+                </p>
+                <button id="btnDismissSuccessModal" class="mt-6 w-full max-w-[200px] btn-orange-pop text-white font-bold text-sm py-3 rounded-xl uppercase tracking-wider">
                     CONTINUE ➡️
                 </button>
+            </div>
+
+            <div id="innovineLogoView" class="w-full flex flex-col justify-center items-center h-full flex-1 py-4">
+                <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-56 h-auto object-contain mx-auto" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-4xl font-black tracking-widest text-sky-600 uppercase\'>INNOVINE</div>'">
             </div>
 
             <div id="welcomeView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-2">
                 <div class="space-y-2 mt-4">
                     <div class="text-7xl animate-bounce">🌊</div>
                     <h1 class="text-3xl font-extrabold text-sky-900 tracking-wide drop-shadow-sm">Water For All</h1>
-                    <p class="text-xs text-sky-500 font-bold tracking-widest uppercase">Premium Interactive Journey</p>
+                    <p class="text-xs text-sky-500 font-bold tracking-widest uppercase">Chapter 10 Unified Learning Game</p>
                 </div>
 
                 <div class="bg-sky-50 border border-sky-100 p-4 rounded-2xl my-4 shadow-inner">
                     <p class="text-xs font-bold text-slate-700 leading-relaxed">
-                        Trace the complete natural water cycle, purify raw pipeline streams, and conquer critical home conservation missions!
+                        Embark on an amazing 3-level journey! Master the Water Cycle, purify pipelines, and save household water resources!
                     </p>
                 </div>
 
@@ -374,7 +383,7 @@
                         percentage: "100% Full",
                         choices: [
                             { label: "🔒 Turn off the tap while brushing teeth", correct: true },
-                            { label: "🚰 Keep it running the whole time", correct: false }
+                            { label: "𚚰 Keep it running the whole time", correct: false }
                         ]
                     },
                     {
@@ -422,16 +431,23 @@
         let runningAccumulatedScore = 0;
         let playerActiveHearts = 3;
 
+        // Track level 1 successfully answered sections
+        let level1AccomplishedQuads = [];
+
         window.addEventListener('DOMContentLoaded', () => {
             setupUnifiedClickListeners();
+            executeAutoLogoTimer();
         });
 
-        function setupUnifiedClickListeners() {
-            document.getElementById('btnFromLogoToWelcome').onclick = () => {
+        // FIXED: Logo timer configuration extended to 5000 milliseconds (5 seconds)
+        function executeAutoLogoTimer() {
+            setTimeout(() => {
                 document.getElementById('innovineLogoView').classList.add('hidden');
                 document.getElementById('welcomeView').classList.remove('hidden');
-            };
+            }, 5000);
+        }
 
+        function setupUnifiedClickListeners() {
             document.getElementById('btnStartGame').onclick = () => {
                 document.getElementById('welcomeView').classList.add('hidden');
                 displayLevelBriefingScreen();
@@ -441,6 +457,16 @@
                 document.getElementById('instructionsView').classList.add('hidden');
                 document.getElementById('mainGameplayView').classList.remove('hidden');
                 renderActiveQuestionTrack();
+            };
+
+            document.getElementById('btnDismissSuccessModal').onclick = () => {
+                document.getElementById('levelSuccessPopup').classList.add('hidden');
+                
+                if (currentLevelPointer < structuredLevelsData.length) {
+                    displayLevelBriefingScreen();
+                } else {
+                    terminateAdventureSession(true);
+                }
             };
 
             document.getElementById('btnTriggerHint').onclick = () => {
@@ -461,6 +487,12 @@
                 currentQuestionPointer = 0;
                 runningAccumulatedScore = 0;
                 playerActiveHearts = 3;
+                level1AccomplishedQuads = [];
+
+                // Reset standard visuals
+                document.querySelectorAll('.border-dashed').forEach(el => {
+                    el.classList.remove('completed-environment-zone', 'active-environment-zone');
+                });
 
                 for (let i = 1; i <= 3; i++) {
                     document.getElementById(`lifeIcon${i}`).style.opacity = "1";
@@ -503,7 +535,14 @@
                 document.getElementById('layoutContainerLevel1').style.display = 'block';
                 document.getElementById('badgeContextTitle').innerText = "Water Cycle Systems Track";
                 
-                document.querySelectorAll('.border-dashed').forEach(el => el.classList.remove('active-environment-zone'));
+                // Keep completed ones green, remove temporary active highlight tags
+                document.querySelectorAll('.border-dashed').forEach(el => {
+                    el.classList.remove('active-environment-zone');
+                    if (level1AccomplishedQuads.includes(el.id)) {
+                        el.classList.add('completed-environment-zone');
+                    }
+                });
+
                 const targetedQuadNode = document.getElementById(questionData.quadTarget);
                 if (targetedQuadNode) targetedQuadNode.classList.add('active-environment-zone');
 
@@ -513,7 +552,6 @@
                 document.getElementById('layoutContainerLevel2').style.display = 'flex';
                 document.getElementById('badgeContextTitle').innerText = "Pipeline Protection System";
                 
-                // FIXED: Use inline styles driving CSS native custom properties to completely bypass Tailwind v4 overrides
                 const dropToken = document.getElementById('pipelineSlidingDroplet');
                 dropToken.style.opacity = "1";
                 dropToken.innerText = questionData.dropletVisual;
@@ -564,21 +602,28 @@
                 Array.from(optionGrid.children).forEach(button => button.disabled = true);
                 actionButtonNode.className = "w-full text-white bg-emerald-500 border border-emerald-600 py-2.5 px-3 rounded-xl font-bold text-xs text-center shadow-md animate-pulse";
                 
-                runningAccumulatedScore += 20;
+                // Award precise standard +10 marks
+                runningAccumulatedScore += 10;
                 updateScoreboardTextCounter();
 
                 const levelData = structuredLevelsData[currentLevelPointer];
                 const questionData = levelData.questions[currentQuestionPointer];
                 
-                if (levelData.levelIndex === 2) {
+                if (levelData.levelIndex === 1) {
+                    const currentQuad = document.getElementById(questionData.quadTarget);
+                    if (currentQuad) {
+                        currentQuad.classList.add('completed-environment-zone');
+                        level1AccomplishedQuads.push(questionData.quadTarget);
+                    }
+                    setTimeout(progressGameEngineFlow, 1000);
+
+                } else if (levelData.levelIndex === 2) {
                     const dropToken = document.getElementById('pipelineSlidingDroplet');
                     setTimeout(() => {
-                        // Turn blue upon validation
                         dropToken.innerText = "💧"; 
                         dropToken.style.transform = "translateX(-50%) scale(1.35)";
                         
                         setTimeout(() => {
-                            // Slide smoothly across the pipeline to its final target position
                             dropToken.style.setProperty('--drop-position', questionData.targetLeft);
                             setTimeout(() => {
                                 dropToken.style.opacity = "0";
@@ -586,12 +631,11 @@
                             }, 1300);
                         }, 400);
                     }, 300);
+
                 } else if (levelData.levelIndex === 3) {
                     document.getElementById('waterTankFluidLevel').style.height = "100%";
                     document.getElementById('tankPercentageText').innerText = "100% SAVED! 🎉";
                     setTimeout(progressGameEngineFlow, 1400);
-                } else {
-                    setTimeout(progressGameEngineFlow, 1200);
                 }
 
             } else {
@@ -633,28 +677,27 @@
             } else {
                 currentLevelPointer++;
                 currentQuestionPointer = 0;
-
-                if (currentLevelPointer < structuredLevelsData.length) {
-                    displayLevelBriefingScreen();
-                } else {
-                    terminateAdventureSession(true);
-                }
+                launchLevelSuccessModalBanner();
             }
+        }
+
+        function launchLevelSuccessModalBanner() {
+            launchConfettiBurstSequence();
+            document.getElementById('levelSuccessPopup').classList.remove('hidden');
         }
 
         function terminateAdventureSession(wonEntirely) {
             document.getElementById('mainGameplayView').classList.add('hidden');
+            document.getElementById('levelSuccessPopup').classList.add('hidden');
 
             const finalEmoji = document.getElementById('finalEmojiHeader');
             const finalTitle = document.getElementById('finalTitleHeader');
             const finalDesc = document.getElementById('finalFeedbackParagraph');
 
             if (wonEntirely) {
-                launchConfettiBurstSequence();
                 finalEmoji.innerText = "👑";
                 finalTitle.innerText = "Water Saving Hero! 🌟";
-                finalDesc.innerText = "Fantastic job! You traced the full water cycle, filtered mud, destroyed germs, and practiced wonderful water conservation habits at home!";
-                runningAccumulatedScore = 100;
+                finalDesc.innerText = "Fantastic job! You traced the water cycle, filtered mud, destroyed germs, and practiced wonderful water conservation habits at home!";
             } else {
                 finalEmoji.innerText = "🪣";
                 finalTitle.innerText = "Let's Practice Again!";
@@ -665,7 +708,7 @@
             document.getElementById('summaryScoreboardView').classList.remove('hidden');
         }
 
-        // Canvas Confetti
+        // Canvas Confetti Engine
         const partyCanvas = document.getElementById('canvasConfetti');
         const particleCtx = partyCanvas.getContext('2d');
         let particleList = [];
@@ -676,7 +719,7 @@
             partyCanvas.height = window.innerHeight;
             particleList = [];
 
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 60; i++) {
                 particleList.push({
                     posX: window.innerWidth / 2,
                     posY: window.innerHeight / 2.2,
