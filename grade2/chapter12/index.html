@@ -6,11 +6,12 @@
     <title>Shadow Match Quest</title>
     <style>
         :root {
-            --bg-space: #080c16;
-            --panel-bg: #111827;
-            --tile-front: #ffffff;
-            --tile-shadow: #cbd5e1;
-            --tile-text: #1e293b;
+            --bg-space: #0b1329;
+            --panel-bg: #1c2541;
+            --tile-front: #fcfaf2;
+            --tile-back: #e0dbcd;
+            --tile-base: #a39e8e;
+            --tile-text: #1d2d44;
             --neon-blue: #38bdf8;
             --neon-green: #4ade80;
             --neon-rose: #f43f5e;
@@ -35,7 +36,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 12px;
         }
 
         .app-shell {
@@ -44,10 +45,10 @@
             height: 100%;
             max-height: 650px;
             background: var(--panel-bg);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            border: 2px solid rgba(255,255,255,0.06);
             display: none;
             flex-direction: column;
             justify-content: space-between;
@@ -82,7 +83,7 @@
         }
 
         .game-title {
-            font-size: clamp(24px, 5vw, 36px);
+            font-size: clamp(26px, 5vw, 38px);
             font-weight: 800;
             color: var(--neon-blue);
             margin-bottom: 15px;
@@ -151,43 +152,62 @@
             letter-spacing: 1px;
         }
 
-        /* 2.5D SIMPLIFIED OVERLAPPING MAHJONG ARENA */
+        /* MAHJONG SOLITAIRE ARENA STRUCTURE */
         .mahjong-arena-container {
             flex: 1;
             position: relative;
             margin: 15px auto;
             width: 100%;
-            max-width: 500px;
+            max-width: 540px;
             min-height: 0;
         }
 
+        /* AUTHENTIC 2.5D MAHJONG TILE DESIGN */
         .tile-unit {
             position: absolute;
-            background: var(--tile-front);
+            background: linear-gradient(135deg, var(--tile-front) 0%, #f4f1e6 100%);
             color: var(--tile-text);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: clamp(28px, 6vh, 42px);
             cursor: pointer;
-            box-shadow: 0 5px 0 var(--tile-shadow), 0 6px 10px rgba(0,0,0,0.4);
-            border: 1px solid #e2e8f0;
-            transition: transform 0.1s ease, background-color 0.2s, opacity 0.3s;
-            width: 14%;
-            height: 18%;
+            
+            /* Multi-layered traditional Mahjong bone-and-bamboo look */
+            box-shadow: 
+                -1px 1px 0px #ffffff inset,
+                2px 2px 0px var(--tile-back), 
+                4px 4px 0px var(--tile-back),
+                5px 5px 0px var(--tile-base),
+                7px 7px 0px var(--tile-base),
+                9px 9px 12px rgba(0,0,0,0.5);
+                
+            border-top: 1px solid #ffffff;
+            border-left: 1px solid #ffffff;
+            border-right: 1px solid var(--tile-back);
+            border-bottom: 1px solid var(--tile-back);
+            
+            transition: transform 0.1s ease, filter 0.2s, opacity 0.3s;
+            width: 18%;
+            height: 22%;
         }
 
-        /* Overlapping visual indicator */
-        .tile-unit.blocked {
-            background: #e2e8f0;
-            box-shadow: 0 5px 0 #94a3b8, 0 6px 10px rgba(0,0,0,0.2);
+        /* Hovering state for touch or click feedback */
+        .tile-unit:hover {
+            filter: brightness(1.05);
         }
 
         .tile-unit.chosen {
-            background: #bae6fd !important;
+            background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
             border-color: var(--neon-blue);
-            transform: scale(0.95) translateY(2px) !important;
+            /* Squeeze tile downward into the board stack */
+            transform: translate(4px, 4px) !important;
+            box-shadow: 
+                1px 1px 0px #ffffff inset,
+                1px 1px 0px var(--tile-back),
+                2px 2px 0px var(--tile-base),
+                3px 3px 6px rgba(0,0,0,0.4) !important;
         }
 
         .tile-unit.hidden-match {
@@ -196,7 +216,7 @@
             opacity: 0;
         }
 
-        /* ZERO-SCROLL QUIZ OVERLAY SYSTEM */
+        /* QUIZ SCROLL-PROOF MODAL SYSTEM */
         .quiz-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -308,9 +328,9 @@
             <div class="info-card">
                 <p>Follow these rules to clear the challenge:</p>
                 <ul>
-                    <li>Match top unblocked matching pictures to clear them.</li>
-                    <li>Every 3 correct tile matches unlocks a set of 3 quiz questions!</li>
-                    <li>Clear the full board to reveal the Grand Bonus level.</li>
+                    <li>Match identical pictures on the board to clear them.</li>
+                    <li>Every 3 correct matches triggers a set of 3 quiz questions!</li>
+                    <li>Answer questions correctly to increase your total score!</li>
                 </ul>
             </div>
             <button class="action-btn" onclick="game.beginPlayfield()">PLAY NOW 🎉</button>
@@ -359,7 +379,6 @@
     <canvas id="confetti-canvas"></canvas>
 
     <script>
-        // TOTAL 10 QUESTIONS COVERED: 3 PER CYCLE, PLUS 1 WINNING BONUS MODULE
         const POOL_DATA = [
             /* Quiz 1 Trigger Questions */
             { q: "Shadows can only be made when there is a clear path of running ________.", opts: ["Wind", "Water", "Light"], ans: "Light", exp: "Light is needed to make shadows!\nWithout light, everything stays dark." },
@@ -377,19 +396,21 @@
             { q: "BONUS: True or False? Shadows have colors like bright pink or green.", opts: ["True", "False"], ans: "False", exp: "Shadows are just dark spots where light is missing.\nThey do not show beautiful patterns or bright colors." }
         ];
 
-        const EMOJI_DECK = ["🔦", "👻", "☀️", "🧱", "🪟", "📘", "💡", "🎭", "🧭"];
+        const EMOJI_DECK = ["🔦", "👻", "☀️", "🧱", "🪟", "📘", "🔦", "👻", "☀️"];
 
-        // FIXED 2.5D PYRAMID GRID COORDINATES FOR A GRADE 2 MAHJONG BOARD
+        // 2.5D BALANCED GRID COORDINATES WITH SHIFT OFFSETS FOR TIERED VISUAL OVERLAPS
         const FIXED_LAYOUT = [
-            /* BOTTOM BASE LAYER (12 Tiles) */
-            { r: 0, c: 1, z: 0 }, { r: 0, c: 2, z: 0 }, { r: 0, c: 3, z: 0 }, { r: 0, c: 4, z: 0 },
-            { r: 1, c: 1, z: 0 }, { r: 1, c: 2, z: 0 }, { r: 1, c: 3, z: 0 }, { r: 1, c: 4, z: 0 },
-            { r: 2, c: 1, z: 0 }, { r: 2, c: 2, z: 0 }, { r: 2, c: 3, z: 0 }, { r: 2, c: 4, z: 0 },
-            /* MIDDLE INTERMEDIATE LAYER (5 Tiles) */
-            { r: 0.5, c: 1.5, z: 1 }, { r: 0.5, c: 3.5, z: 1 },
-            { r: 1.5, c: 1.5, z: 1 }, { r: 1.5, c: 3.5, z: 1 },
-            /* TOP APEX CROWN TILE (1 Tile) */
-            { r: 1, c: 2.5, z: 2 }
+            /* TIER 1 - REAR STACK (6 Tiles) */
+            { r: 0, c: 0, z: 1 }, { r: 0, c: 1.3, z: 1 }, { r: 0, c: 2.6, z: 1 }, { r: 0, c: 3.9, z: 1 },
+            { r: 1.2, c: 0.3, z: 1 }, { r: 1.2, c: 3.6, z: 1 },
+            
+            /* TIER 2 - INTERMEDIATE STACK (6 Tiles) */
+            { r: 1.2, c: 1.6, z: 2 }, { r: 1.2, c: 2.9, z: 2 },
+            { r: 2.4, c: 0, z: 2 }, { r: 2.4, c: 1.3, z: 2 }, { r: 2.4, c: 2.6, z: 2 }, { r: 2.4, c: 3.9, z: 2 },
+            
+            /* TIER 3 - FOREGROUND APEX STACK (6 Tiles) */
+            { r: 0.6, c: 0.8, z: 3 }, { r: 0.6, c: 2.1, z: 3 }, { r: 0.6, c: 3.4, z: 3 },
+            { r: 1.8, c: 0.8, z: 3 }, { r: 1.8, c: 2.1, z: 3 }, { r: 1.8, c: 3.4, z: 3 }
         ];
 
         class QuestEngine {
@@ -468,48 +489,22 @@
                     div.id = `tile-unit-${tile.id}`;
                     div.innerText = tile.value;
                     
-                    // Map 2.5D coordinates to real window percentages
-                    div.style.left = `${tile.c * 16 + 10}%`;
-                    div.style.top = `${tile.r * 22 + 10}%`;
+                    // Maps traditional positioning anchors dynamically
+                    div.style.left = `${tile.c * 17 + 8}%`;
+                    div.style.top = `${tile.r * 21 + 6}%`;
                     div.style.zIndex = tile.z * 10;
                     
-                    // Add subtle offset to stacked layers for look/feel
-                    if (tile.z > 0) {
-                        div.style.transform = `translate(${-tile.z * 4}px, ${-tile.z * 4}px)`;
-                    }
+                    // Physical layer dimensional offset coordinates
+                    div.style.transform = `translate(${-tile.z * 3}px, ${-tile.z * 3}px)`;
 
                     div.onclick = () => this.onTileClick(tile);
                     tile.element = div;
                     arena.appendChild(div);
                 });
-
-                this.recalculateBlockerStates();
-            }
-
-            recalculateBlockerStates() {
-                this.tilesArray.forEach(t => {
-                    if (t.cleared) return;
-                    let isBlocked = false;
-
-                    this.tilesArray.forEach(other => {
-                        if (other.cleared || other.id === t.id) return;
-                        // A tile is blocked if an uncleared tile sits on a higher layer (z) directly overlapping it
-                        if (other.z > t.z && Math.abs(other.r - t.r) < 1 && Math.abs(other.c - t.c) < 1) {
-                            isBlocked = true;
-                        }
-                    });
-
-                    if (isBlocked) {
-                        t.element.classList.add('blocked');
-                    } else {
-                        t.element.classList.remove('blocked');
-                    }
-                    t.isBlocked = isBlocked;
-                });
             }
 
             onTileClick(tile) {
-                if (this.blockBoardInput || tile.cleared || tile.isBlocked) return;
+                if (this.blockBoardInput || tile.cleared) return;
 
                 if (this.activeSelection && this.activeSelection.id === tile.id) {
                     tile.element.classList.remove('chosen');
@@ -527,9 +522,7 @@
                     this.blockBoardInput = true;
 
                     if (first.value === second.value) {
-                        this.score += 15;
                         this.tileMatchesCount++;
-                        document.getElementById('score-label').innerText = this.score;
 
                         let currentCycleCount = this.tileMatchesCount % 3;
                         document.getElementById('match-counter').innerText = `${currentCycleCount === 0 && this.tileMatchesCount > 0 ? 3 : currentCycleCount} / 3`;
@@ -540,12 +533,10 @@
                             first.element.classList.add('hidden-match');
                             second.element.classList.add('hidden-match');
                             
-                            this.recalculateBlockerStates();
                             this.blockBoardInput = false;
                             
                             try { this.audioSuccess.play().catch(()=>{}); } catch(e){}
 
-                            // Triggers exactly 3 consecutive questions every 3 matches
                             if (this.tileMatchesCount > 0 && this.tileMatchesCount % 3 === 0) {
                                 this.triggerYayConfetti();
                                 this.quizTargetLimit = this.questionIndex + 3; 
@@ -624,11 +615,9 @@
             nextQuizOrDismiss() {
                 this.questionIndex++;
                 
-                // If we are within our batch of 3 questions, keep showing them
                 if (this.questionIndex < this.quizTargetLimit && this.questionIndex < 9) {
                     this.serveActiveQuestion();
                 } else {
-                    // Batch cleared, close modal and return to board
                     document.getElementById('quiz-panel').style.display = 'none';
                     document.getElementById('match-counter').innerText = "0 / 3";
                     this.checkVictoryStatus();
@@ -640,12 +629,10 @@
             }
 
             checkVictoryStatus() {
-                // If 9 pairs are matched and we finished the first 9 questions, pull up the 10th Grand Bonus question!
                 if (this.tileMatchesCount === 9 && this.questionIndex === 9) {
                     this.quizTargetLimit = 10;
                     this.serveActiveQuestion();
                 } 
-                // Once the 10th question is cleared, finish the game with the victory screen
                 else if (this.tileMatchesCount === 9 && this.questionIndex === 10) {
                     try { this.audioApplause.play().catch(()=>{}); } catch(e){}
                     document.getElementById('screen-playfield').style.display = 'none';
