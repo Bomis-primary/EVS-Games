@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shadow Match Quest</title>
     <style>
         :root {
@@ -26,170 +26,174 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* FULL BODY SMOOTH SCROLLING FIX */
+        /* FIXED SCREEN BODY LOCKS SCROLLBARS */
         body {
             background-color: var(--bg-space);
             color: var(--text-light);
-            min-height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 12px 8px 30px 8px;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
+            padding: 10px;
         }
 
+        /* DYNAMIC CONTAINER EXPANDS ON DESKTOP & MOBILES SEAMLESSLY */
         .app-shell {
             width: 100%;
-            max-width: 650px;
+            max-width: 900px;
+            height: 100%;
+            max-height: 650px;
             background: var(--panel-bg);
             border-radius: 16px;
             padding: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.08);
             display: none;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        /* 5-SECOND LOGO SPLASH */
+        /* PERFECTLY CENTERED SPLASH SCREEN */
         .splash-gate {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000000;
             z-index: 9999;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             transition: opacity 0.4s ease;
         }
 
         .splash-logo {
-            max-width: 240px;
-            width: 70%;
+            max-width: 280px;
+            width: 65%;
             height: auto;
         }
 
-        /* FLOW MANAGEMENT SCREENS */
         .flow-screen {
             text-align: center;
-            padding: 20px 10px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
         }
 
         .game-title {
-            font-size: 32px;
+            font-size: clamp(24px, 5vw, 36px);
             font-weight: 800;
             color: var(--neon-blue);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             letter-spacing: 1px;
             line-height: 1.2;
         }
 
         .big-emoji-hero {
-            font-size: 64px;
-            margin-bottom: 20px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            font-size: clamp(48px, 10vw, 72px);
+            margin-bottom: 15px;
         }
 
         .info-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
-            padding: 18px;
-            font-size: 16px;
-            line-height: 1.5;
+            padding: 15px;
+            font-size: clamp(14px, 2.5vw, 16px);
+            line-height: 1.4;
             color: #cbd5e1;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: left;
+            width: 100%;
+            max-width: 500px;
         }
 
         .info-card ul {
             margin-left: 20px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .info-card li {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
-        /* INTERACTION BUTTONS */
         .action-btn {
             background: linear-gradient(135deg, var(--neon-blue), #0284c7);
             color: #ffffff;
             border: none;
-            padding: 14px 36px;
-            font-size: 17px;
+            padding: 12px 30px;
+            font-size: 16px;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-            transition: transform 0.1s ease;
-            width: 85%;
-            max-width: 280px;
+            width: 80%;
+            max-width: 250px;
         }
 
-        .action-btn:active {
-            transform: scale(0.97);
-        }
-
-        /* GAME HEADER HUD */
+        /* COMPACT HUD LAYER */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid rgba(255,255,255,0.08);
-            padding-bottom: 12px;
-            margin-bottom: 16px;
+            padding-bottom: 8px;
+            height: 40px;
         }
 
         .hud-item {
-            font-size: 15px;
+            font-size: clamp(13px, 3vw, 16px);
             font-weight: bold;
         }
 
         .hearts-rack {
             color: var(--neon-rose);
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
-        /* MAHJONG INTERACTIVE BOARD LAYOUT */
+        /* AUTO-SCALING GRID FILLS REMAINING WINDOW BOUNDS */
         .mahjong-field {
+            flex: 1;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 15px 0;
-            padding: 4px;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+            min-height: 0; /* Critical fix allowing cards to scale down natively */
+        }
+
+        /* RESPONSIVE MOBILE ADJUSTMENT TO GRID STRUCTURE */
+        @media (max-width: 600px) {
+            .mahjong-field {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(6, 1fr);
+                gap: 6px;
+            }
         }
 
         .tile-unit {
             background: var(--tile-front);
             color: var(--tile-text);
-            aspect-ratio: 1 / 1.25;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 36px;
+            font-size: clamp(28px, 6vh, 42px);
             cursor: pointer;
-            box-shadow: 0 5px 0 var(--tile-shadow), 0 8px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 0 var(--tile-shadow), 0 6px 10px rgba(0,0,0,0.3);
             border: 1px solid #e2e8f0;
             transition: transform 0.1s ease, background-color 0.2s;
-            position: relative;
-        }
-
-        .tile-unit:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 var(--tile-shadow), 0 4px 6px rgba(0,0,0,0.4);
+            height: 100%;
+            width: 100%;
         }
 
         .tile-unit.chosen {
             background: #bae6fd !important;
             border-color: var(--neon-blue);
-            transform: scale(1.02) translateY(-2px);
+            transform: scale(0.96);
         }
 
         .tile-unit.hidden-match {
@@ -198,17 +202,16 @@
             opacity: 0;
         }
 
-        /* OVERLAY QUIZ MODAL CONTAINER */
+        /* SCROLL-PROOF QUIZ MODAL LAYER */
         .quiz-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(4, 6, 12, 0.95);
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(4, 6, 12, 0.96);
             z-index: 5000;
             display: none;
             justify-content: center;
-            align-items: flex-start;
-            overflow-y: auto;
-            padding: 24px 12px;
+            align-items: center;
+            padding: 10px;
         }
 
         .quiz-modal {
@@ -216,48 +219,46 @@
             border: 1.5px solid var(--neon-blue);
             border-radius: 16px;
             width: 100%;
-            max-width: 500px;
-            padding: 20px;
+            max-width: 480px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
         }
 
         .quiz-heading {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--neon-blue);
             letter-spacing: 1px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             text-transform: uppercase;
         }
 
         .question-box {
-            font-size: 18px;
+            font-size: clamp(15px, 3.5vw, 18px);
             font-weight: 600;
-            line-height: 1.4;
-            margin-bottom: 20px;
+            line-height: 1.3;
+            margin-bottom: 12px;
         }
 
         .options-box {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 8px;
         }
 
         .opt-row {
             background: rgba(255,255,255,0.04);
             border: 1.5px solid rgba(255,255,255,0.1);
             color: var(--text-light);
-            padding: 14px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             cursor: pointer;
-            text-align: left;
-            font-size: 15px;
+            font-size: clamp(13px, 3vw, 15px);
             font-weight: 600;
-            transition: background 0.2s;
         }
 
-        /* FEEDBACK GLOW STATES */
         .opt-row.right-glow {
             background: rgba(74, 222, 128, 0.2) !important;
             border-color: var(--neon-green) !important;
@@ -270,25 +271,22 @@
             color: #fecdd3;
         }
 
-        /* EXPLANATION LAYER STYLE */
         .explain-panel {
             display: none;
             background: rgba(56, 189, 248, 0.05);
             border-left: 3px solid var(--neon-blue);
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
-            font-size: 14px;
-            line-height: 1.4;
+            font-size: 13px;
+            line-height: 1.3;
             color: #e2e8f0;
-            margin-top: 10px;
-            margin-bottom: 16px;
-            text-align: left;
+            margin-top: 8px;
+            white-space: pre-line;
         }
 
-        /* CONFETTI OVERLAY ANIMATION CANVAS */
         #confetti-canvas {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none;
             z-index: 8000;
             display: none;
@@ -307,16 +305,16 @@
         <div id="screen-title" class="flow-screen">
             <div class="big-emoji-hero">🔦</div>
             <h1 class="game-title">SHADOW MATCH<br>QUEST</h1>
-            <p style="color: #94a3b8; margin-bottom: 30px; font-size: 15px;">A fun tile matching and puzzle game!</p>
+            <p style="color: #94a3b8; margin-bottom: 20px; font-size: 14px;">A fun tile matching puzzle game!</p>
             <button class="action-btn" onclick="game.showInstructions()">START GAME 🚀</button>
         </div>
 
         <div id="screen-instructions" class="flow-screen" style="display: none;">
-            <h2 class="game-title" style="font-size: 26px;">HOW TO PLAY</h2>
+            <h2 class="game-title" style="font-size: 24px;">HOW TO PLAY</h2>
             <div class="info-card">
                 <p>Follow these rules to clear the challenge:</p>
                 <ul>
-                    <li>Match matching pairs of pictures on the board.</li>
+                    <li>Match identical pairs of pictures on the board.</li>
                     <li>Every 3 correct tile matches unlocks special quiz questions!</li>
                     <li>Be careful: you have 3 hearts to pass the quiz rounds safely!</li>
                 </ul>
@@ -324,10 +322,10 @@
             <button class="action-btn" onclick="game.beginPlayfield()">PLAY NOW 🎉</button>
         </div>
 
-        <div id="screen-playfield" style="display: none;">
+        <div id="screen-playfield" style="display: none; height: 100%; flex-direction: column; justify-content: space-between;">
             <header>
                 <div class="hud-item" style="color: var(--neon-blue);">Matches: <span id="match-counter">0 / 3</span></div>
-                <div class="hud-item score-tag" style="color: var(--gold);">Score: <span id="score-label">0</span></div>
+                <div class="hud-item" style="color: var(--gold);">Score: <span id="score-label">0</span></div>
                 <div class="hud-item hearts-rack" id="hearts-box">❤️❤️❤️</div>
             </header>
 
@@ -337,14 +335,14 @@
         <div id="screen-gameover" class="flow-screen" style="display: none;">
             <div class="big-emoji-hero">👾</div>
             <h2 class="game-title" style="color: var(--neon-rose);">GAME OVER</h2>
-            <p style="margin-bottom: 25px; color: #cbd5e1;" id="gameover-msg"></p>
+            <p style="margin-bottom: 20px; color: #cbd5e1;" id="gameover-msg"></p>
             <button class="action-btn" onclick="window.location.reload()">TRY AGAIN 🔄</button>
         </div>
 
         <div id="screen-victory" class="flow-screen" style="display: none;">
             <div class="big-emoji-hero">🏆</div>
             <h2 class="game-title" style="color: var(--neon-green);">VICTORY!</h2>
-            <p style="margin-bottom: 25px; color: #cbd5e1; font-size: 18px;">Brilliant! You matched all tiles and solved every puzzle question!</p>
+            <p style="margin-bottom: 20px; color: #cbd5e1; font-size: 16px;">Brilliant! You matched all tiles and solved every puzzle question!</p>
             <button class="action-btn" onclick="window.location.reload()">PLAY AGAIN 🔄</button>
         </div>
 
@@ -356,11 +354,10 @@
             <div class="question-box" id="q-text-node"></div>
             
             <div class="options-box" id="opts-wrapper-node"></div>
-
             <div class="explain-panel" id="explain-box-node"></div>
 
-            <div style="text-align: center; display: none;" id="quiz-nav-hub">
-                <button class="action-btn" style="width: 100%; font-size: 15px; padding: 12px;" onclick="game.dismissQuizEvent()">CONTINUE GAME ➡️</button>
+            <div style="text-align: center; display: none; margin-top: 10px;" id="quiz-nav-hub">
+                <button class="action-btn" style="width: 100%; font-size: 14px; padding: 10px;" onclick="game.dismissQuizEvent()">CONTINUE GAME ➡️</button>
             </div>
         </div>
     </div>
@@ -368,7 +365,6 @@
     <canvas id="confetti-canvas"></canvas>
 
     <script>
-        // GRADE 2 QUESTION DATA BANK WITH BRIEF TWO-LINE EXPLS
         const POOL_DATA = [
             { q: "Shadows can only be made when there is a clear path of running ________.", opts: ["Wind", "Water", "Light"], ans: "Light", exp: "Light is needed to make shadows!\nWithout light, everything stays dark." },
             { q: "A dark shadow is made when a solid object completely ________ the light rays.", opts: ["Bends", "Passes", "Blocks"], ans: "Blocks", exp: "When an object blocks light, it stops the rays.\nThis casts a dark shape directly behind it." },
@@ -381,7 +377,6 @@
             { q: "Making hand shapes inside a bright flashlight beam builds shadow ________ on the wall.", opts: ["Puppets", "Paintings", "Balloons"], ans: "Puppets", exp: "Your hands block the flashlight beam cleanly.\nThis creates funny animal shapes and shapes on the wall." }
         ];
 
-        // POOL OF THEMATIC ITEM EMOJIS FOR MATCHING STAGE
         const EMOJI_DECK = ["🔦", "👻", "☀️", "🧱", "🪟", "📘", "💡", "🎭", "🧭"];
 
         class QuestEngine {
@@ -396,32 +391,30 @@
                 this.confettiParticles = [];
                 this.confettiTimer = null;
 
-                // CONNECTED SECURELY TO YOUR GITHUB FOLDER PATHS
                 this.audioSuccess = new Audio("assets/correct.mp3");
                 this.audioFail = new Audio("assets/wrong.mp3");
                 this.audioApplause = new Audio("assets/freesound_community-claps-44774.mp3");
             }
 
             init() {
-                // Precise 5 second logo display countdown
                 setTimeout(() => {
                     const gate = document.getElementById('splash');
                     gate.style.opacity = '0';
                     setTimeout(() => {
                         gate.style.display = 'none';
-                        document.getElementById('app-wrapper').style.display = 'block';
+                        document.getElementById('app-wrapper').style.display = 'flex';
                     }, 400);
                 }, 5000);
             }
 
             showInstructions() {
                 document.getElementById('screen-title').style.display = 'none';
-                document.getElementById('screen-instructions').style.display = 'block';
+                document.getElementById('screen-instructions').style.display = 'flex';
             }
 
             beginPlayfield() {
                 document.getElementById('screen-instructions').style.display = 'none';
-                document.getElementById('screen-playfield').style.display = 'block';
+                document.getElementById('screen-playfield').style.display = 'flex';
                 this.generateMahjongTiles();
             }
 
@@ -430,14 +423,12 @@
                 matrix.innerHTML = '';
                 this.activeSelection = null;
 
-                // Take 9 items, double them up to make 9 pairs (18 tiles total)
                 let deckList = [];
                 EMOJI_DECK.forEach((emoji, idx) => {
                     deckList.push({ id: idx * 2, value: emoji });
                     deckList.push({ id: idx * 2 + 1, value: emoji });
                 });
 
-                // Randomise the tiles for layout variety
                 deckList.sort(() => Math.random() - 0.5);
 
                 deckList.forEach(item => {
@@ -469,7 +460,6 @@
                     this.blockBoardInput = true;
 
                     if (targetOne.item.value === targetTwo.item.value) {
-                        // MATCH DETECTED
                         this.score += 15;
                         this.tileMatchesCount++;
                         document.getElementById('score-label').innerText = this.score;
@@ -484,7 +474,6 @@
                             
                             try { this.audioSuccess.play().catch(()=>{}); } catch(e){}
 
-                            // Evaluate pop-up triggers precisely every 3 cleared pairs
                             if (this.tileMatchesCount > 0 && this.tileMatchesCount % 3 === 0) {
                                 this.triggerYayConfetti();
                                 setTimeout(() => this.openQuizPopupEvent(), 1200);
@@ -494,7 +483,6 @@
                         }, 400);
                         this.activeSelection = null;
                     } else {
-                        // FAILED MATCH
                         setTimeout(() => {
                             targetOne.element.classList.remove('chosen');
                             targetTwo.element.classList.remove('chosen');
@@ -543,7 +531,6 @@
                     document.getElementById('score-label').innerText = this.score;
                     try { this.audioSuccess.play().catch(()=>{}); } catch(e){}
 
-                    // Format and print explanation immediately below the choice rows
                     const expNode = document.getElementById('explain-box-node');
                     expNode.innerText = explanationText;
                     expNode.style.display = 'block';
@@ -560,8 +547,8 @@
                         setTimeout(() => {
                             document.getElementById('quiz-panel').style.display = 'none';
                             document.getElementById('screen-playfield').style.display = 'none';
-                            document.getElementById('gameover-msg').innerText = `You scored ${this.score} points. Try again to clear all question modules!`;
-                            document.getElementById('screen-gameover').style.display = 'block';
+                            document.getElementById('gameover-msg').innerText = `You scored ${this.score} points.`;
+                            document.getElementById('screen-gameover').style.display = 'flex';
                         }, 1000);
                         return;
                     }
@@ -580,11 +567,10 @@
             }
 
             checkVictoryStatus() {
-                // When 9 total pairs are cleared, the tile board is clear
                 if (this.tileMatchesCount === 9) {
                     try { this.audioApplause.play().catch(()=>{}); } catch(e){}
                     document.getElementById('screen-playfield').style.display = 'none';
-                    document.getElementById('screen-victory').style.display = 'block';
+                    document.getElementById('screen-victory').style.display = 'flex';
                 }
             }
 
@@ -599,14 +585,14 @@
                 this.confettiParticles = [];
                 const colorPalette = ['#38bdf8', '#4ade80', '#f43f5e', '#fbbf24', '#a855f7'];
 
-                for (let i = 0; i < 70; i++) {
+                for (let i = 0; i < 60; i++) {
                     this.confettiParticles.push({
                         x: canvas.width / 2,
-                        y: canvas.height / 2 + 50,
-                        radius: Math.random() * 4 + 3,
+                        y: canvas.height / 2,
+                        radius: Math.random() * 3 + 3,
                         color: colorPalette[Math.floor(Math.random() * colorPalette.length)],
-                        vx: (Math.random() - 0.5) * 12,
-                        vy: (Math.random() - 0.7) * 14,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.6) * 12,
                         alpha: 1
                     });
                 }
@@ -620,8 +606,8 @@
                     this.confettiParticles.forEach(p => {
                         p.x += p.vx;
                         p.y += p.vy;
-                        p.vy += 0.3; // Gravity pull simulated
-                        p.alpha -= 0.015;
+                        p.vy += 0.25;
+                        p.alpha -= 0.02;
 
                         if (p.alpha > 0) {
                             running = true;
