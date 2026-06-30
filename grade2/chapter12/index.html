@@ -3,859 +3,650 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar Guard: Shadow Defense</title>
+    <title>Shadow Match Quest</title>
     <style>
         :root {
-            --space-bg: #090a14;
-            --neon-cyan: #00f0ff;
-            --neon-green: #39ff14;
-            --neon-pink: #ff007f;
-            --gold-glow: #fffb00;
-            --glass-panel: rgba(255, 255, 255, 0.06);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --bg-space: #080c16;
+            --panel-bg: #111827;
+            --tile-front: #ffffff;
+            --tile-shadow: #cbd5e1;
+            --tile-text: #1e293b;
+            --neon-blue: #38bdf8;
+            --neon-green: #4ade80;
+            --neon-rose: #f43f5e;
+            --gold: #fbbf24;
+            --text-light: #f8fafc;
         }
 
         * {
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        /* SCROLL FIX: Changed overflow from hidden to auto to allow natural scrolling */
-        body {
             margin: 0;
             padding: 0;
-            background: var(--space-bg);
-            color: #fff;
-            overflow-y: auto;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* FULL BODY SMOOTH SCROLLING FIX */
+        body {
+            background-color: var(--bg-space);
+            color: var(--text-light);
             min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 8px 30px 8px;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Keeps item accessible if content stretches */
-            padding-top: 20px;
-            padding-bottom: 40px;
+            align-items: flex-start;
         }
 
-        .cosmic-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
-            background-size: 350px 350px, 250px 250px;
-            z-index: -1;
+        .app-shell {
+            width: 100%;
+            max-width: 650px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+            display: none;
         }
 
-        .flow-screen {
+        /* 5-SECOND LOGO SPLASH */
+        .splash-gate {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 5000;
+            background: #000000;
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            text-align: center;
-            transition: opacity 0.5s ease;
-            overflow-y: auto;
+            transition: opacity 0.4s ease;
         }
 
-        #intro-logo-screen { 
-            background: #000000; 
-        }
-
-        /* CORRECTED FILENAME IMPLEMENTATION */
-        .innovine-logo-asset {
-            max-width: 280px;
+        .splash-logo {
+            max-width: 240px;
+            width: 70%;
             height: auto;
         }
 
-        #title-menu-screen, #instruction-flow-screen {
-            background: rgba(9, 10, 20, 0.94);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+        /* FLOW MANAGEMENT SCREENS */
+        .flow-screen {
+            text-align: center;
+            padding: 20px 10px;
         }
 
-        .title-banner {
-            font-size: 42px;
+        .game-title {
+            font-size: 32px;
             font-weight: 800;
-            background: linear-gradient(45deg, var(--neon-cyan), #fffb00, var(--neon-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 30px;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
             line-height: 1.2;
         }
 
-        .instruction-card {
-            background: var(--glass-panel);
-            border: 1px solid var(--glass-border);
-            padding: 24px;
-            border-radius: 20px;
-            max-width: 500px;
+        .big-emoji-hero {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 18px;
             font-size: 16px;
-            line-height: 1.6;
+            line-height: 1.5;
+            color: #cbd5e1;
             margin-bottom: 25px;
+            text-align: left;
         }
 
-        .instruction-card h3 { color: var(--neon-cyan); margin-top: 0; }
-        .instruction-card ul { text-align: left; margin-left: 10px; padding-left: 10px; }
-        .instruction-card li { margin-bottom: 10px; }
-
-        .game-wrapper {
-            width: 100%;
-            max-width: 850px;
-            padding: 12px;
-            display: none;
-            flex-direction: column;
-            gap: 14px;
+        .info-card ul {
+            margin-left: 20px;
+            margin-top: 10px;
         }
 
+        .info-card li {
+            margin-bottom: 8px;
+        }
+
+        /* INTERACTION BUTTONS */
+        .action-btn {
+            background: linear-gradient(135deg, var(--neon-blue), #0284c7);
+            color: #ffffff;
+            border: none;
+            padding: 14px 36px;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+            transition: transform 0.1s ease;
+            width: 85%;
+            max-width: 280px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* GAME HEADER HUD */
         header {
-            background: var(--glass-panel);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .logo-area h1 {
-            margin: 0;
-            font-size: 20px;
-            background: linear-gradient(45deg, var(--neon-cyan), var(--gold-glow));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stats-deck {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .stat-capsule {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 6px 14px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        #score-display { color: var(--neon-green); }
-        #lives-display { color: var(--neon-pink); }
-
-        .quiz-terminal {
-            background: rgba(11, 13, 28, 0.85);
-            border: 1.5px solid var(--neon-cyan);
-            border-radius: 18px;
-            padding: 18px;
-            position: relative;
-        }
-
-        .prompt-header {
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            color: var(--neon-cyan);
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .sentence-box {
-            font-size: 17px;
-            line-height: 1.5;
+            border-bottom: 2px solid rgba(255,255,255,0.08);
+            padding-bottom: 12px;
             margin-bottom: 16px;
-            background: rgba(255,255,255,0.02);
-            padding: 12px;
-            border-radius: 10px;
-            border-left: 3px solid var(--neon-cyan);
         }
 
-        .sentence-blank {
-            display: inline-block;
-            min-width: 110px;
-            border-bottom: 2px dashed rgba(255,255,255,0.5);
-            text-align: center;
-            color: var(--gold-glow);
-            font-weight: bold;
-        }
-
-        .sentence-blank.filled {
-            border-bottom-style: solid;
-            border-bottom-color: var(--neon-green);
-        }
-
-        .matrix-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-
-        .option-capsule {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-border);
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .option-capsule.success-state {
-            background: rgba(57, 255, 20, 0.15) !important;
-            border-color: var(--neon-green) !important;
-            color: var(--neon-green);
-        }
-
-        .option-capsule.error-state {
-            background: rgba(255, 0, 127, 0.15) !important;
-            border-color: var(--neon-pink) !important;
-            color: var(--neon-pink);
-        }
-
-        .hint-system { margin-top: 12px; }
-        .hint-trigger {
-            background: none;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            color: var(--neon-cyan);
-            padding: 6px 12px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .hologram-viewport {
-            background: rgba(0, 240, 255, 0.02);
-            border: 1px dashed rgba(0, 240, 255, 0.15);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #a5b4fc;
-            display: none;
-        }
-
-        .battle-arena {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            background: var(--glass-panel);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 12px;
-            position: relative;
-        }
-
-        .grid-tile {
-            aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            font-size: 26px;
-        }
-
-        .grid-tile.path-tile {
-            background: rgba(24, 28, 48, 0.7);
-            border: 1px dashed rgba(0, 240, 255, 0.15);
-        }
-
-        .grid-tile.build-tile { cursor: pointer; }
-
-        .light-beam {
-            position: absolute;
-            background: linear-gradient(90deg, rgba(255, 251, 0, 0.35), rgba(255, 251, 0, 0.02));
-            pointer-events: none;
-            z-index: 2;
-            mix-blend-mode: screen;
-        }
-
-        .shadow-cast {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.6);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .creeper-sprite {
-            z-index: 3;
-            display: inline-block;
-        }
-
-        .arsenal-dock {
-            background: var(--glass-panel);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-        }
-
-        .arsenal-card {
-            flex: 1;
-            background: rgba(0,0,0,0.25);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .arsenal-card.selected-card {
-            border-color: var(--neon-cyan);
-            background: rgba(0, 240, 255, 0.06);
-        }
-
-        .card-ico { font-size: 22px; margin-bottom: 2px; }
-        .card-name { font-size: 11px; font-weight: bold; display: block; }
-
-        .recovery-layer {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(4, 5, 12, 0.95);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            overflow-y: auto;
-        }
-
-        .recovery-pod {
-            background: rgba(14, 18, 38, 0.98);
-            border: 1.5px solid var(--neon-cyan);
-            border-radius: 20px;
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .recovery-pod h2 { margin: 0 0 10px 0; font-size: 20px; color: var(--neon-cyan); }
-        .recovery-pod p { font-size: 14px; color: #cbd5e1; line-height: 1.4; }
-
-        .action-btn {
-            background: linear-gradient(45deg, var(--neon-cyan), #0066ff);
-            border: none;
-            color: white;
-            padding: 12px 28px;
+        .hud-item {
             font-size: 15px;
             font-weight: bold;
-            border-radius: 25px;
+        }
+
+        .hearts-rack {
+            color: var(--neon-rose);
+            letter-spacing: 2px;
+        }
+
+        /* MAHJONG INTERACTIVE BOARD LAYOUT */
+        .mahjong-field {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 15px 0;
+            padding: 4px;
+        }
+
+        .tile-unit {
+            background: var(--tile-front);
+            color: var(--tile-text);
+            aspect-ratio: 1 / 1.25;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
             cursor: pointer;
+            box-shadow: 0 5px 0 var(--tile-shadow), 0 8px 12px rgba(0,0,0,0.4);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.1s ease, background-color 0.2s;
+            position: relative;
+        }
+
+        .tile-unit:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--tile-shadow), 0 4px 6px rgba(0,0,0,0.4);
+        }
+
+        .tile-unit.chosen {
+            background: #bae6fd !important;
+            border-color: var(--neon-blue);
+            transform: scale(1.02) translateY(-2px);
+        }
+
+        .tile-unit.hidden-match {
+            visibility: hidden;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* OVERLAY QUIZ MODAL CONTAINER */
+        .quiz-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 6, 12, 0.95);
+            z-index: 5000;
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            padding: 24px 12px;
+        }
+
+        .quiz-modal {
+            background: var(--panel-bg);
+            border: 1.5px solid var(--neon-blue);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .quiz-heading {
+            font-size: 13px;
+            color: var(--neon-blue);
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .question-box {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .options-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .opt-row {
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid rgba(255,255,255,0.1);
+            color: var(--text-light);
+            padding: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        /* FEEDBACK GLOW STATES */
+        .opt-row.right-glow {
+            background: rgba(74, 222, 128, 0.2) !important;
+            border-color: var(--neon-green) !important;
+            color: #bbf7d0;
+        }
+
+        .opt-row.wrong-glow {
+            background: rgba(244, 63, 94, 0.2) !important;
+            border-color: var(--neon-rose) !important;
+            color: #fecdd3;
+        }
+
+        /* EXPLANATION LAYER STYLE */
+        .explain-panel {
+            display: none;
+            background: rgba(56, 189, 248, 0.05);
+            border-left: 3px solid var(--neon-blue);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #e2e8f0;
             margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        /* CONFETTI OVERLAY ANIMATION CANVAS */
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 8000;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="cosmic-bg"></div>
+    <div id="splash" class="splash-gate">
+        <img src="assets/innovine-logo.png" alt="Logo" class="splash-logo" onerror="this.style.display='none'; document.getElementById('backup-logo').style.display='block';">
+        <div id="backup-logo" style="display:none; color: var(--neon-blue); font-size:28px; font-weight:800; letter-spacing:4px;">INNOVINE</div>
+    </div>
 
-    <div id="intro-logo-screen" class="flow-screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="innovine-logo-asset" onerror="this.style.display='none'; document.getElementById('alt-logo-fallback').style.display='block';">
-        <div id="alt-logo-fallback" style="display: none;">
-            <div style="font-size: 55px; margin-bottom: 12px;">🚀</div>
-            <h2 style="letter-spacing: 6px; color: var(--neon-cyan); font-weight: 800; font-size: 34px; margin: 0;">INNOVINE</h2>
+    <div class="app-shell" id="app-wrapper">
+
+        <div id="screen-title" class="flow-screen">
+            <div class="big-emoji-hero">🔦</div>
+            <h1 class="game-title">SHADOW MATCH<br>QUEST</h1>
+            <p style="color: #94a3b8; margin-bottom: 30px; font-size: 15px;">A fun tile matching and puzzle game!</p>
+            <button class="action-btn" onclick="game.showInstructions()">START GAME 🚀</button>
+        </div>
+
+        <div id="screen-instructions" class="flow-screen" style="display: none;">
+            <h2 class="game-title" style="font-size: 26px;">HOW TO PLAY</h2>
+            <div class="info-card">
+                <p>Follow these rules to clear the challenge:</p>
+                <ul>
+                    <li>Match matching pairs of pictures on the board.</li>
+                    <li>Every 3 correct tile matches unlocks special quiz questions!</li>
+                    <li>Be careful: you have 3 hearts to pass the quiz rounds safely!</li>
+                </ul>
+            </div>
+            <button class="action-btn" onclick="game.beginPlayfield()">PLAY NOW 🎉</button>
+        </div>
+
+        <div id="screen-playfield" style="display: none;">
+            <header>
+                <div class="hud-item" style="color: var(--neon-blue);">Matches: <span id="match-counter">0 / 3</span></div>
+                <div class="hud-item score-tag" style="color: var(--gold);">Score: <span id="score-label">0</span></div>
+                <div class="hud-item hearts-rack" id="hearts-box">❤️❤️❤️</div>
+            </header>
+
+            <div class="mahjong-field" id="tile-matrix"></div>
+        </div>
+
+        <div id="screen-gameover" class="flow-screen" style="display: none;">
+            <div class="big-emoji-hero">👾</div>
+            <h2 class="game-title" style="color: var(--neon-rose);">GAME OVER</h2>
+            <p style="margin-bottom: 25px; color: #cbd5e1;" id="gameover-msg"></p>
+            <button class="action-btn" onclick="window.location.reload()">TRY AGAIN 🔄</button>
+        </div>
+
+        <div id="screen-victory" class="flow-screen" style="display: none;">
+            <div class="big-emoji-hero">🏆</div>
+            <h2 class="game-title" style="color: var(--neon-green);">VICTORY!</h2>
+            <p style="margin-bottom: 25px; color: #cbd5e1; font-size: 18px;">Brilliant! You matched all tiles and solved every puzzle question!</p>
+            <button class="action-btn" onclick="window.location.reload()">PLAY AGAIN 🔄</button>
+        </div>
+
+    </div>
+
+    <div class="quiz-overlay" id="quiz-panel">
+        <div class="quiz-modal">
+            <div class="quiz-heading" id="quiz-lvl-heading">Question Alert</div>
+            <div class="question-box" id="q-text-node"></div>
+            
+            <div class="options-box" id="opts-wrapper-node"></div>
+
+            <div class="explain-panel" id="explain-box-node"></div>
+
+            <div style="text-align: center; display: none;" id="quiz-nav-hub">
+                <button class="action-btn" style="width: 100%; font-size: 15px; padding: 12px;" onclick="game.dismissQuizEvent()">CONTINUE GAME ➡️</button>
+            </div>
         </div>
     </div>
 
-    <div id="title-menu-screen" class="flow-screen" style="display: none; opacity: 0;">
-        <div style="font-size: 60px; margin-bottom: 10px;">☀️</div>
-        <div class="title-banner">SOLAR GUARD:<br>SHADOW DEFENSE</div>
-        <p style="max-width: 400px; color: #cbd5e1; font-size: 15px; margin-bottom: 25px; line-height: 1.5;">
-            Master the properties of light, opaque objects, and changing shadows to defend your sector!
-        </p>
-        <button class="action-btn" onclick="appEngine.showInstructionFlow()">START MISSION 🚀</button>
-    </div>
-
-    <div id="instruction-flow-screen" class="flow-screen" style="display: none;">
-        <div class="instruction-card">
-            <h3 id="instruction-title-node">📝 MISSION BRIEFING</h3>
-            <div id="instruction-text-node"></div>
-        </div>
-        <button class="action-btn" id="instruction-confirm-btn" onclick="appEngine.startGameplayAfterBriefing()">INITIALIZE INTERFACE ➡️</button>
-    </div>
-
-    <div id="recovery-modal" class="recovery-layer">
-        <div class="recovery-pod">
-            <h2 id="recovery-title">🛸 Sector File Checked</h2>
-            <p id="recovery-desc">Ready to evaluate next sector data stream layers.</p>
-            <div id="recovery-data-text" style="color: var(--gold-glow); margin: 12px 0; font-weight: bold; font-size: 14px;"></div>
-            <button class="action-btn" id="recovery-main-btn" onclick="appEngine.confirmResume()">🚀 Continue</button>
-            <button class="action-btn" id="recovery-sub-btn" style="background: rgba(255,255,255,0.08); margin-left: 8px;" onclick="appEngine.declineResume()">Restart</button>
-        </div>
-    </div>
-
-    <div class="game-wrapper" id="master-game-panel">
-        <header>
-            <div class="logo-area">
-                <h1>Solar Guard</h1>
-            </div>
-            <div class="stats-deck">
-                <div class="stat-capsule"><span id="wave-title-icon">🌅</span><span id="wave-display-text">WAVE 1</span></div>
-                <div class="stat-capsule">🏆 <span id="score-display">000</span></div>
-                <div class="stat-capsule"><span id="lives-display">❤️❤️❤️</span></div>
-            </div>
-        </header>
-
-        <section class="quiz-terminal">
-            <div class="prompt-header">🚨 SHIELD CONSOLE ACTIVATION</div>
-            <div class="sentence-box" id="sentence-prompt-container">
-                Loading database parameters...
-            </div>
-            <div class="matrix-options" id="options-grid-container"></div>
-            <div class="hint-system">
-                <button class="hint-trigger" id="hint-btn" onclick="appEngine.revealHint()">💡 ACTIVATE SCI-SCAN</button>
-                <div class="hologram-viewport" id="hint-viewport-container"></div>
-            </div>
-        </section>
-
-        <main class="battle-arena" id="arena-grid"></main>
-
-        <footer class="arsenal-dock">
-            <div class="arsenal-card selected-card" data-build-item="flashlight" onclick="appEngine.selectArsenal(this)">
-                <div class="card-ico">🔦</div>
-                <span class="card-name">Flashlight</span>
-            </div>
-            <div class="arsenal-card" data-build-item="brick" onclick="appEngine.selectArsenal(this)">
-                <div class="card-ico">🧱</div>
-                <span class="card-name">Opaque Brick</span>
-            </div>
-            <div class="arsenal-card" data-build-item="glass" onclick="appEngine.selectArsenal(this)">
-                <div class="card-ico">🪟</div>
-                <span class="card-name">Clear Glass</span>
-            </div>
-        </footer>
-    </div>
+    <canvas id="confetti-canvas"></canvas>
 
     <script>
-        // TARGETING THE EXACT SOUND FILE STRINGS FROM YOUR REPOSITORY SCREENSHOT
-        const ASSET_PATH = "assets/";
-        
-        const QUESTION_POOL = [
-            { id: 1, waveTitle: "WAVE 1", waveIcon: "🌅", sentenceBefore: "Shadows can only be formed when there is a clear path of running ", sentenceAfter: " available in the sector.", options: ["🌬️ Wind", "💧 Water", "💡 Light"], correctAnswer: "💡 Light", hint: "🌅 When morning starts, the bright sun rises and shines down. Shadows cannot appear in dark rooms where there is no light source!" },
-            { id: 2, waveTitle: "WAVE 2", waveIcon: "🧱", sentenceBefore: "A dark shadow patch is successfully made when an object completely ", sentenceAfter: " the path of light.", options: ["🔍 Bends", "🪟 Passes", "🧱 Blocks"], correctAnswer: "🧱 Blocks", hint: "🧱 When you hold your hand in front of a flashlight, it stops the beam! A shadow happens because light is blocked." },
-            { id: 3, waveTitle: "WAVE 3", waveIcon: "🧭", sentenceBefore: "An object's shadow is always cast and formed on the ", sentenceAfter: " side of the active light source.", options: ["⬆️ Same", "☁️ Sky", "➡️ Opposite"], correctAnswer: "➡️ Opposite", hint: "🔦 If a flashlight shines from the Left, the dark shadow is thrown onto the Right wall! It always points away on the opposite side." },
-            { id: 4, waveTitle: "WAVE 4", waveIcon: "🪟", sentenceBefore: "Light passes completely through a window pane because glass is a ", sentenceAfter: " material structure.", options: ["🪵 Opaque", "🌑 Dark", "🪟 Transparent"], correctAnswer: "🪟 Transparent", hint: "🪟 Clear glass doesn't make a dark shadow because it lets all light beams pass cleanly straight through without stopping them." },
-            { id: 5, waveTitle: "WAVE 5", waveIcon: "📘", sentenceBefore: "A textbook or solid brick forms a dark shadow on the ground because paper is ", sentenceAfter: " in nature.", options: ["🪟 Transparent", "🧊 Clear", "📘 Opaque"], correctAnswer: "📘 Opaque", hint: "📘 Solid objects like wood, paper, and metal are opaque bodies. They block light fully and cast dark patches." },
-            { id: 6, waveTitle: "WAVE 6", waveIcon: "☀️", sentenceBefore: "The position and length of shadows change throughout the day because the position of the ", sentenceAfter: " shifts.", options: ["🌲 Tree", "⛰️ Mountain", "☀️ Sun"], correctAnswer: "☀️ Sun", hint: "☀️ As hours pass, the sun travels in an arc from East to West across the sky, which constantly warps the shadows below." },
-            { id: 7, waveTitle: "WAVE 7", waveIcon: "📏", sentenceBefore: "In the early Morning and late Evening hours, the shadows of trees and poles are always very ", sentenceAfter: " visually.", options: ["🤏 Short", "❌ Invisible", "📏 Long"], correctAnswer: "📏 Long", hint: "🌅 When the sun is low down near the horizon in the morning or evening, it shoots flat rays that stretch shadows out long." },
-            { id: 8, waveTitle: "WAVE 8", waveIcon: "🕛", sentenceBefore: "At 🕛 Noon, when the sun stands directly above our head, the shadows are at their ", sentenceAfter: " length.", options: ["📏 Longest", "🌈 Colorful", "🤏 Shortest"], correctAnswer: "🤏 Shortest", hint: "🕛 At midday, the sun is directly on top of us. Light beams hit straight down, creating tiny, small shadows right underneath." },
-            { id: 9, waveTitle: "WAVE 9", waveIcon: "🧭", sentenceBefore: "If you stand outside at dawn facing directly towards the rising sun, your eyes look directly ", sentenceAfter: ".", options: ["⬅️ West", "⬆️ North", "➡️ East"], correctAnswer: "➡️ East", hint: "🌅 The sun always wakes up and rises in the East! Facing it means East is front, West is behind, and North is your Left arm." },
-            { id: 10, waveTitle: "WAVE 10", waveIcon: "🎭", sentenceBefore: "We can form funny animal shadow puppets on the wall screen by matching hand shapes in front of a ", sentenceAfter: " source.", options: ["🌬️ Air", "🎨 Paint", "🔦 Flashlight"], correctAnswer: "🔦 Flashlight", hint: "🎭 Your hands act as an opaque object blocking a flashlight beam to create shapes like rabbits and kangaroos on the wall!" }
+        // GRADE 2 QUESTION DATA BANK WITH BRIEF TWO-LINE EXPLS
+        const POOL_DATA = [
+            { q: "Shadows can only be made when there is a clear path of running ________.", opts: ["Wind", "Water", "Light"], ans: "Light", exp: "Light is needed to make shadows!\nWithout light, everything stays dark." },
+            { q: "A dark shadow is made when a solid object completely ________ the light rays.", opts: ["Bends", "Passes", "Blocks"], ans: "Blocks", exp: "When an object blocks light, it stops the rays.\nThis casts a dark shape directly behind it." },
+            { q: "An object's shadow is always made on the ________ side of the light source.", opts: ["Same", "Sky", "Opposite"], ans: "Opposite", exp: "Shadows fall on the opposite side of the light.\nIf light hits your left, your shadow falls on your right!" },
+            { q: "Light passes completely through glass windows because glass is ________.", opts: ["Opaque", "Dark", "Transparent"], ans: "Transparent", exp: "Transparent glass allows light to go straight through.\nBecause it does not block light, it leaves no dark shadow." },
+            { q: "A solid brick or book forms a dark shadow because it is ________.", opts: ["Transparent", "Clear", "Opaque"], ans: "Opaque", exp: "Opaque things are thick and solid.\nThey do not let any light pass through them." },
+            { q: "The size and length of shadows change because the position of the ________ moves.", opts: ["Tree", "Mountain", "Sun"], ans: "Sun", exp: "The sun travels across the sky all day.\nAs the sun moves, our shadows move and turn too." },
+            { q: "In the early morning and late evening, shadows are always very ________.", opts: ["Short", "Invisible", "Long"], ans: "Long", exp: "When the sun sits low down in the morning, it casts long beams.\nThis stretches your shadow across the ground." },
+            { q: "At noon midday, when the sun is straight above us, shadows are at their ________.", opts: ["Longest", "Colorful", "Shortest"], ans: "Shortest", exp: "At noon, the sun shines straight down from above your head.\nThis makes your shadow tiny right under your feet." },
+            { q: "Making hand shapes inside a bright flashlight beam builds shadow ________ on the wall.", opts: ["Puppets", "Paintings", "Balloons"], ans: "Puppets", exp: "Your hands block the flashlight beam cleanly.\nThis creates funny animal shapes and shapes on the wall." }
         ];
 
-        class SolarGuardEngine {
+        // POOL OF THEMATIC ITEM EMOJIS FOR MATCHING STAGE
+        const EMOJI_DECK = ["🔦", "👻", "☀️", "🧱", "🪟", "📘", "💡", "🎭", "🧭"];
+
+        class QuestEngine {
             constructor() {
-                this.gridSize = 5;
+                this.tileMatchesCount = 0;
                 this.score = 0;
                 this.lives = 3;
-                this.currentQuestionIdx = 0;
-                this.selectedTool = 'flashlight';
-                this.activeGridData = Array(5).fill(null).map(() => Array(5).fill('empty'));
-                this.wrongAttemptsForCurrentQuestion = 0;
-                this.pathRow = 2;
-                this.blockInput = false;
+                this.questionIndex = 0;
+                this.activeSelection = null;
+                this.blockBoardInput = false;
+                this.blockQuizInput = false;
+                this.confettiParticles = [];
+                this.confettiTimer = null;
 
-                // CONNECTED EXACTLY TO YOUR FILENAMES
-                this.audioCorrect = new Audio(ASSET_PATH + "correct.mp3");
-                this.audioWrong = new Audio(ASSET_PATH + "wrong.mp3");
-                this.audioVictory = new Audio(ASSET_PATH + "freesound_community-claps-44774.mp3");
+                // CONNECTED SECURELY TO YOUR GITHUB FOLDER PATHS
+                this.audioSuccess = new Audio("assets/correct.mp3");
+                this.audioFail = new Audio("assets/wrong.mp3");
+                this.audioApplause = new Audio("assets/freesound_community-claps-44774.mp3");
             }
 
             init() {
-                this.buildMapLayout();
-                
-                // Pure 5 second presentation timer
+                // Precise 5 second logo display countdown
                 setTimeout(() => {
-                    const introScreen = document.getElementById('intro-logo-screen');
-                    const titleScreen = document.getElementById('title-menu-screen');
-                    
-                    introScreen.style.opacity = '0';
+                    const gate = document.getElementById('splash');
+                    gate.style.opacity = '0';
                     setTimeout(() => {
-                        introScreen.style.display = 'none';
-                        titleScreen.style.display = 'flex';
-                        setTimeout(() => titleScreen.style.opacity = '1', 50);
-                    }, 500);
+                        gate.style.display = 'none';
+                        document.getElementById('app-wrapper').style.display = 'block';
+                    }, 400);
                 }, 5000);
             }
 
-            playSound(type) {
-                let target = null;
-                if (type === 'correct') target = this.audioCorrect;
-                if (type === 'wrong') target = this.audioWrong;
-                if (type === 'victory') target = this.audioVictory;
-                if (target) {
-                    target.currentTime = 0;
-                    target.play().catch(() => {});
-                }
+            showInstructions() {
+                document.getElementById('screen-title').style.display = 'none';
+                document.getElementById('screen-instructions').style.display = 'block';
             }
 
-            showInstructionFlow() {
-                document.getElementById('title-menu-screen').style.display = 'none';
-                this.checkSavedState();
+            beginPlayfield() {
+                document.getElementById('screen-instructions').style.display = 'none';
+                document.getElementById('screen-playfield').style.display = 'block';
+                this.generateMahjongTiles();
             }
 
-            checkSavedState() {
-                const savedProgress = localStorage.getItem('solar_guard_save_state');
-                if (savedProgress) {
-                    try {
-                        const parsed = JSON.parse(savedProgress);
-                        if (parsed.currentIdx >= 0 && parsed.currentIdx < QUESTION_POOL.length && parsed.savedLives > 0) {
-                            document.getElementById('recovery-data-text').innerText = `Wave: ${parsed.currentIdx + 1} | Score: ${parsed.savedScore} | Lives: ${parsed.savedLives}`;
-                            
-                            const mainBtn = document.getElementById('recovery-main-btn');
-                            mainBtn.innerText = "🚀 Continue Progress";
-                            mainBtn.setAttribute('onclick', 'appEngine.confirmResume()');
-                            
-                            const subBtn = document.getElementById('recovery-sub-btn');
-                            subBtn.style.display = 'inline-block';
-                            subBtn.setAttribute('onclick', 'appEngine.declineResume()');
+            generateMahjongTiles() {
+                const matrix = document.getElementById('tile-matrix');
+                matrix.innerHTML = '';
+                this.activeSelection = null;
 
-                            document.getElementById('recovery-modal').style.display = 'flex';
-                            this.cacheParsedData = parsed;
-                            return;
-                        }
-                    } catch(e) { localStorage.removeItem('solar_guard_save_state'); }
-                }
-                this.presentIntermissionBriefing(0);
-            }
+                // Take 9 items, double them up to make 9 pairs (18 tiles total)
+                let deckList = [];
+                EMOJI_DECK.forEach((emoji, idx) => {
+                    deckList.push({ id: idx * 2, value: emoji });
+                    deckList.push({ id: idx * 2 + 1, value: emoji });
+                });
 
-            confirmResume() {
-                if (this.cacheParsedData) {
-                    this.score = this.cacheParsedData.savedScore;
-                    this.currentQuestionIdx = this.cacheParsedData.currentIdx;
-                    this.lives = this.cacheParsedData.savedLives;
-                    this.updateStatsDisplay();
-                }
-                document.getElementById('recovery-modal').style.display = 'none';
-                this.loadActiveWaveLevel(this.currentQuestionIdx);
-            }
+                // Randomise the tiles for layout variety
+                deckList.sort(() => Math.random() - 0.5);
 
-            declineResume() {
-                localStorage.removeItem('solar_guard_save_state');
-                document.getElementById('recovery-modal').style.display = 'none';
-                this.presentIntermissionBriefing(0);
-            }
-
-            presentIntermissionBriefing(targetIdx) {
-                this.pendingTargetIndex = targetIdx;
-                document.getElementById('master-game-panel').style.display = 'none';
-                document.getElementById('recovery-modal').style.display = 'none';
-                
-                const panel = document.getElementById('instruction-flow-screen');
-                const title = document.getElementById('instruction-title-node');
-                const text = document.getElementById('instruction-text-node');
-                const btn = document.getElementById('instruction-confirm-btn');
-
-                panel.style.display = 'flex';
-
-                if (targetIdx === 0) {
-                    title.innerText = "🌅 WAVE 1 BRIEFING: LIGHT & SHADOWS";
-                    text.innerHTML = `
-                        <ul>
-                            <li><strong>💡 Light Rule:</strong> Shadows only form when there is light! If you go into a dark room with no light, shadows completely vanish.</li>
-                            <li><strong>🧱 Formation:</strong> Your hands, toys, and books block light rays to make dark patches on the wall.</li>
-                        </ul>`;
-                    btn.innerText = "PLAY WAVE 1 🚀";
-                } else if (targetIdx === 1) {
-                    title.innerText = "🧱 WAVE 2 BRIEFING: BLOCKS & CASTS";
-                    text.innerHTML = `
-                        <ul>
-                            <li><strong>🧱 Formation Trick:</strong> A shadow patch is formed perfectly only when an object stands in the way and <strong>BLOCKS</strong> the traveling beams.</li>
-                            <li><strong>🎯 Testing Sandbox:</strong> Select your Flashlight or Brick to paint beams and test layouts below!</li>
-                        </ul>`;
-                    btn.innerText = "START WAVE 2 ⚡";
-                } else if (targetIdx === 2) {
-                    title.innerText = "🧭 WAVE 3 BRIEFING: THE OPPOSITE SIDES";
-                    text.innerHTML = `
-                        <ul>
-                            <li><strong>🔦 Ray Directions:</strong> Shadows always land on the exact <strong>OPPOSITE</strong> side of the light source!</li>
-                            <li>If light hits from the Left side, the dark shadow stretches towards the Right wall.</li>
-                        </ul>`;
-                    btn.innerText = "START WAVE 3 🛡️";
-                } else {
-                    title.innerText = `🛰️ WAVE ${targetIdx + 1} CORE PARAMETERS`;
-                    text.innerHTML = `
-                        <ul>
-                            <li>Proceed immediately to apply structural physics parameters for shadow sector loop ${targetIdx + 1}.</li>
-                        </ul>`;
-                    btn.innerText = `INITIALIZE SYSTEM ${targetIdx + 1} ➡️`;
-                }
-            }
-
-            startGameplayAfterBriefing() {
-                document.getElementById('instruction-flow-screen').style.display = 'none';
-                document.getElementById('master-game-panel').style.display = 'flex';
-                this.loadActiveWaveLevel(this.pendingTargetIndex);
-            }
-
-            buildMapLayout() {
-                const arena = document.getElementById('arena-grid');
-                arena.innerHTML = '';
-                for (let r = 0; r < this.gridSize; r++) {
-                    for (let c = 0; c < this.gridSize; c++) {
-                        const tile = document.createElement('div');
-                        tile.id = `tile-${r}-${c}`;
-                        tile.classList.add('grid-tile');
-                        if (r === this.pathRow) {
-                            tile.classList.add('path-tile');
-                            tile.innerHTML = `<span class="creeper-sprite" id="ghost-element-${c}">👻</span>`;
-                        } else {
-                            tile.classList.add('build-tile');
-                            tile.setAttribute('onclick', `appEngine.handleTileInteraction(${r}, ${c})`);
-                        }
-                        arena.appendChild(tile);
-                    }
-                }
-            }
-
-            updateStatsDisplay() {
-                document.getElementById('score-display').innerText = String(this.score).padStart(3, '0');
-                document.getElementById('lives-display').innerText = "❤️".repeat(this.lives) + "🖤".repeat(3 - this.lives);
-            }
-
-            loadActiveWaveLevel(idx) {
-                this.currentQuestionIdx = idx;
-                if (this.currentQuestionIdx >= QUESTION_POOL.length) {
-                    this.triggerVictorySequence();
-                    return;
-                }
-                
-                this.activeQuestion = QUESTION_POOL[this.currentQuestionIdx];
-                this.wrongAttemptsForCurrentQuestion = 0;
-                
-                localStorage.setItem('solar_guard_save_state', JSON.stringify({
-                    currentIdx: this.currentQuestionIdx,
-                    savedScore: this.score,
-                    savedLives: this.lives
-                }));
-
-                document.getElementById('wave-title-icon').innerText = this.activeQuestion.waveIcon;
-                document.getElementById('wave-display-text').innerText = `${this.activeQuestion.waveTitle}`;
-                this.updateStatsDisplay();
-                
-                this.activeGridData = Array(5).fill(null).map(() => Array(5).fill('empty'));
-                this.buildMapLayout();
-                this.renderDynamicPhysicsEngine();
-
-                document.getElementById('hint-btn').style.boxShadow = 'none';
-                document.getElementById('hint-viewport-container').style.display = 'none';
-                
-                document.getElementById('sentence-prompt-container').innerHTML = `
-                    ${this.activeQuestion.sentenceBefore}<span class="sentence-blank" id="target-blank">______</span>${this.activeQuestion.sentenceAfter}
-                `;
-
-                const choices = [...this.activeQuestion.options];
-                const optionsContainer = document.getElementById('options-grid-container');
-                optionsContainer.innerHTML = '';
-                choices.forEach(opt => {
-                    const card = document.createElement('div');
-                    card.classList.add('option-capsule');
-                    card.innerText = opt;
-                    card.setAttribute('data-option-val', opt);
-                    card.setAttribute('onclick', `appEngine.processAnswer(this, '${opt.replace(/'/g, "\\'")}')`);
-                    optionsContainer.appendChild(card);
+                deckList.forEach(item => {
+                    const element = document.createElement('div');
+                    element.className = 'tile-unit';
+                    element.id = `tile-node-${item.id}`;
+                    element.innerText = item.value;
+                    element.onclick = () => this.onTileSelected(element, item);
+                    matrix.appendChild(element);
                 });
             }
 
-            selectArsenal(element) {
-                document.querySelectorAll('.arsenal-card').forEach(c => c.classList.remove('selected-card'));
-                element.classList.add('selected-card');
-                this.selectedTool = element.getAttribute('data-build-item');
-            }
+            onTileSelected(element, item) {
+                if (this.blockBoardInput || element.classList.contains('hidden-match')) return;
 
-            handleTileInteraction(row, col) {
-                if (row === this.pathRow || this.blockInput) return;
-                const targetTile = document.getElementById(`tile-${row}-${col}`);
-                
-                if (this.activeGridData[row][col] !== 'empty') {
-                    this.activeGridData[row][col] = 'empty';
-                    targetTile.innerHTML = '';
+                if (this.activeSelection && this.activeSelection.element === element) {
+                    element.classList.remove('chosen');
+                    this.activeSelection = null;
+                    return;
+                }
+
+                element.classList.add('chosen');
+
+                if (!this.activeSelection) {
+                    this.activeSelection = { element, item };
                 } else {
-                    if (this.selectedTool === 'flashlight') {
-                        this.activeGridData[row][col] = 'flashlight';
-                        targetTile.innerHTML = '🔦';
-                    } else if (this.selectedTool === 'brick') {
-                        this.activeGridData[row][col] = 'brick';
-                        targetTile.innerHTML = '🧱';
-                    } else if (this.selectedTool === 'glass') {
-                        this.activeGridData[row][col] = 'glass';
-                        targetTile.innerHTML = '🪟';
-                    }
-                }
-                this.renderDynamicPhysicsEngine();
-            }
+                    const targetOne = this.activeSelection;
+                    const targetTwo = { element, item };
+                    this.blockBoardInput = true;
 
-            renderDynamicPhysicsEngine() {
-                document.querySelectorAll('.light-beam, .shadow-cast').forEach(el => el.remove());
-                for(let c=0; c<5; c++) {
-                    const ghost = document.getElementById(`ghost-element-${c}`);
-                    if (ghost) ghost.className = 'creeper-sprite';
-                }
-                for (let r = 0; r < this.gridSize; r++) {
-                    for (let c = 0; c < this.gridSize; c++) {
-                        if (this.activeGridData[r][c] === 'flashlight') {
-                            this.castRayTracingBeams(r, c);
-                        }
-                    }
-                }
-            }
+                    if (targetOne.item.value === targetTwo.item.value) {
+                        // MATCH DETECTED
+                        this.score += 15;
+                        this.tileMatchesCount++;
+                        document.getElementById('score-label').innerText = this.score;
+                        
+                        let currentGroupCount = this.tileMatchesCount % 3;
+                        document.getElementById('match-counter').innerText = `${currentGroupCount === 0 && this.tileMatchesCount > 0 ? 3 : currentGroupCount} / 3`;
 
-            castRayTracingBeams(startRow, startCol) {
-                const arena = document.getElementById('arena-grid');
-                let lightBlocked = false;
+                        setTimeout(() => {
+                            targetOne.element.classList.add('hidden-match');
+                            targetTwo.element.classList.add('hidden-match');
+                            this.blockBoardInput = false;
+                            
+                            try { this.audioSuccess.play().catch(()=>{}); } catch(e){}
 
-                for (let c = startCol + 1; c < this.gridSize; c++) {
-                    const currentTile = document.getElementById(`tile-${startRow}-${c}`);
-                    if (!currentTile) continue;
-
-                    if (!lightBlocked) {
-                        const beam = document.createElement('div');
-                        beam.classList.add('light-beam');
-                        beam.style.width = `${currentTile.offsetWidth}px`;
-                        beam.style.height = `${currentTile.offsetHeight}px`;
-                        beam.style.left = `${currentTile.offsetLeft}px`;
-                        beam.style.top = `${currentTile.offsetTop}px`;
-                        arena.appendChild(beam);
-
-                        if (startRow === this.pathRow) {
-                            const ghost = document.getElementById(`ghost-element-${c}`);
-                            if (ghost) ghost.style.filter = "brightness(1.5)";
-                        }
-                        if (this.activeGridData[startRow][c] === 'brick') {
-                            lightBlocked = true;
-                        }
+                            // Evaluate pop-up triggers precisely every 3 cleared pairs
+                            if (this.tileMatchesCount > 0 && this.tileMatchesCount % 3 === 0) {
+                                this.triggerYayConfetti();
+                                setTimeout(() => this.openQuizPopupEvent(), 1200);
+                            } else {
+                                this.checkVictoryStatus();
+                            }
+                        }, 400);
+                        this.activeSelection = null;
                     } else {
-                        const shadow = document.createElement('div');
-                        shadow.classList.add('shadow-cast');
-                        shadow.style.width = `${currentTile.offsetWidth}px`;
-                        shadow.style.height = `${currentTile.offsetHeight}px`;
-                        shadow.style.left = `${currentTile.offsetLeft}px`;
-                        shadow.style.top = `${currentTile.offsetTop}px`;
-                        arena.appendChild(shadow);
-
-                        if (startRow === this.pathRow) {
-                            const ghost = document.getElementById(`ghost-element-${c}`);
-                            if (ghost) ghost.style.filter = "brightness(0.3)";
-                        }
+                        // FAILED MATCH
+                        setTimeout(() => {
+                            targetOne.element.classList.remove('chosen');
+                            targetTwo.element.classList.remove('chosen');
+                            this.blockBoardInput = false;
+                        }, 500);
+                        this.activeSelection = null;
                     }
                 }
             }
 
-            revealHint() {
-                const viewport = document.getElementById('hint-viewport-container');
-                viewport.innerHTML = `<span>📡 SCANNED CLUE:</span> ${this.activeQuestion.hint}`;
-                viewport.style.display = 'block';
+            openQuizPopupEvent() {
+                if (this.questionIndex >= POOL_DATA.length) {
+                    this.checkVictoryStatus();
+                    return;
+                }
+
+                this.blockQuizInput = false;
+                const data = POOL_DATA[this.questionIndex];
+                
+                document.getElementById('quiz-lvl-heading').innerText = `Bonus Quiz: Round ${this.questionIndex + 1}`;
+                document.getElementById('q-text-node').innerText = data.q;
+                document.getElementById('explain-box-node').style.display = 'none';
+                document.getElementById('quiz-nav-hub').style.display = 'none';
+
+                const wrapper = document.getElementById('opts-wrapper-node');
+                wrapper.innerHTML = '';
+
+                data.opts.forEach(optionText => {
+                    const div = document.createElement('div');
+                    div.className = 'opt-row';
+                    div.innerText = optionText;
+                    div.onclick = () => this.evaluateQuizAnswer(div, optionText, data.ans, data.exp);
+                    wrapper.appendChild(div);
+                });
+
+                document.getElementById('quiz-panel').style.display = 'flex';
             }
 
-            processAnswer(cardElement, chosenValue) {
-                if (this.blockInput) return;
+            evaluateQuizAnswer(selectedDiv, chosenText, correctText, explanationText) {
+                if (this.blockQuizInput) return;
 
-                if (chosenValue === this.activeQuestion.correctAnswer) {
-                    this.blockInput = true;
-                    this.playSound('correct');
-                    cardElement.className = 'option-capsule success-state';
-                    
-                    const blank = document.getElementById('target-blank');
-                    blank.innerText = chosenValue;
-                    blank.classList.add('filled');
+                if (chosenText === correctText) {
+                    this.blockQuizInput = true;
+                    selectedDiv.classList.add('right-glow');
+                    this.score += 25;
+                    document.getElementById('score-label').innerText = this.score;
+                    try { this.audioSuccess.play().catch(()=>{}); } catch(e){}
 
-                    this.score += 10;
-                    this.updateStatsDisplay();
+                    // Format and print explanation immediately below the choice rows
+                    const expNode = document.getElementById('explain-box-node');
+                    expNode.innerText = explanationText;
+                    expNode.style.display = 'block';
 
-                    setTimeout(() => {
-                        this.blockInput = false;
-                        const nextIndex = this.currentQuestionIdx + 1;
-                        
-                        // FIX: Level loop logic correctly progression maps
-                        const modal = document.getElementById('recovery-modal');
-                        document.getElementById('recovery-title').innerText = `🎉 Wave ${this.currentQuestionIdx + 1} Cleared!`;
-                        document.getElementById('recovery-desc').innerText = `Outstanding! You successfully unlocked the concept of ${chosenValue}. Ready for the next sector challenge?`;
-                        document.getElementById('recovery-data-text').innerText = `Total Score: ${this.score} XP`;
-                        
-                        const mainBtn = document.getElementById('recovery-main-btn');
-                        mainBtn.innerText = "Advance Next Level ➡️";
-                        mainBtn.setAttribute('onclick', `appEngine.presentIntermissionBriefing(${nextIndex})`);
-                        
-                        document.getElementById('recovery-sub-btn').style.display = 'none';
-                        modal.style.display = 'flex';
-                    }, 1400);
-
+                    document.getElementById('quiz-nav-hub').style.display = 'block';
                 } else {
-                    this.playSound('wrong');
-                    cardElement.classList.add('error-state');
-                    this.wrongAttemptsForCurrentQuestion++;
-                    
+                    selectedDiv.classList.add('wrong-glow');
                     this.lives--;
-                    this.updateStatsDisplay();
+                    this.refreshHeartsHUD();
+                    try { this.audioFail.play().catch(()=>{}); } catch(e){}
 
                     if (this.lives <= 0) {
-                        this.triggerGameOverSequence();
+                        this.blockQuizInput = true;
+                        setTimeout(() => {
+                            document.getElementById('quiz-panel').style.display = 'none';
+                            document.getElementById('screen-playfield').style.display = 'none';
+                            document.getElementById('gameover-msg').innerText = `You scored ${this.score} points. Try again to clear all question modules!`;
+                            document.getElementById('screen-gameover').style.display = 'block';
+                        }, 1000);
                         return;
                     }
-
-                    setTimeout(() => cardElement.classList.remove('error-state'), 600);
                 }
             }
 
-            triggerGameOverSequence() {
-                this.blockInput = true;
-                localStorage.removeItem('solar_guard_save_state');
-                
-                const modal = document.getElementById('recovery-modal');
-                document.getElementById('recovery-title').innerText = "❌ Shield Failure";
-                document.getElementById('recovery-desc').innerText = "The shield energy depleted completely. Let's study light sources and re-try!";
-                document.getElementById('recovery-data-text').innerText = `Final Score: ${this.score} XP`;
-                
-                const mainBtn = document.getElementById('recovery-main-btn');
-                mainBtn.innerText = "🔄 Re-Deploy Grid";
-                mainBtn.setAttribute('onclick', 'window.location.reload()');
-                document.getElementById('recovery-sub-btn').style.display = 'none';
-                
-                modal.style.display = 'flex';
+            dismissQuizEvent() {
+                document.getElementById('quiz-panel').style.display = 'none';
+                document.getElementById('match-counter').innerText = "0 / 3";
+                this.questionIndex++;
+                this.checkVictoryStatus();
             }
 
-            triggerVictorySequence() {
-                localStorage.removeItem('solar_guard_save_state');
-                this.playSound('victory');
+            refreshHeartsHUD() {
+                document.getElementById('hearts-box').innerText = "❤️".repeat(this.lives) + "🖤".repeat(3 - this.lives);
+            }
+
+            checkVictoryStatus() {
+                // When 9 total pairs are cleared, the tile board is clear
+                if (this.tileMatchesCount === 9) {
+                    try { this.audioApplause.play().catch(()=>{}); } catch(e){}
+                    document.getElementById('screen-playfield').style.display = 'none';
+                    document.getElementById('screen-victory').style.display = 'block';
+                }
+            }
+
+            triggerYayConfetti() {
+                const canvas = document.getElementById('confetti-canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.style.display = 'block';
                 
-                const modal = document.getElementById('recovery-modal');
-                document.getElementById('recovery-title').innerText = "🏆 GRAND CHAMPION!";
-                document.getElementById('recovery-desc').innerText = "Amazing work, Commander! You cleared all 10 defense sectors, mastered shadows, and fully completed Chapter 12 science parameters!";
-                document.getElementById('recovery-data-text').innerText = `Perfect Record Score: ${this.score} XP`;
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                this.confettiParticles = [];
+                const colorPalette = ['#38bdf8', '#4ade80', '#f43f5e', '#fbbf24', '#a855f7'];
+
+                for (let i = 0; i < 70; i++) {
+                    this.confettiParticles.push({
+                        x: canvas.width / 2,
+                        y: canvas.height / 2 + 50,
+                        radius: Math.random() * 4 + 3,
+                        color: colorPalette[Math.floor(Math.random() * colorPalette.length)],
+                        vx: (Math.random() - 0.5) * 12,
+                        vy: (Math.random() - 0.7) * 14,
+                        alpha: 1
+                    });
+                }
+
+                if (this.confettiTimer) cancelAnimationFrame(this.confettiTimer);
                 
-                const mainBtn = document.getElementById('recovery-main-btn');
-                mainBtn.innerText = "🚀 Run Core Simulation Again";
-                mainBtn.setAttribute('onclick', 'window.location.reload()');
-                document.getElementById('recovery-sub-btn').style.display = 'none';
-                
-                modal.style.display = 'flex';
+                const frameLoop = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    let running = false;
+
+                    this.confettiParticles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.3; // Gravity pull simulated
+                        p.alpha -= 0.015;
+
+                        if (p.alpha > 0) {
+                            running = true;
+                            ctx.beginPath();
+                            ctx.fillStyle = p.color;
+                            ctx.globalAlpha = p.alpha;
+                            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    });
+
+                    ctx.globalAlpha = 1.0;
+                    if (running) {
+                        this.confettiTimer = requestAnimationFrame(frameLoop);
+                    } else {
+                        canvas.style.display = 'none';
+                    }
+                };
+
+                frameLoop();
             }
         }
 
-        const appEngine = new SolarGuardEngine();
-        window.onload = () => appEngine.init();
+        const game = new QuestEngine();
+        window.onload = () => game.init();
     </script>
 </body>
 </html>
