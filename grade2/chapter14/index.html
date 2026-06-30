@@ -6,7 +6,13 @@
     <title>The Harmony Wheel</title>
     <style>
         :root {
-            /* High-Contrast Vibrant Kid-Friendly Wheel Segments */
+            /* Vibrant Kids-Friendly Palettes */
+            --bg-gradient: linear-gradient(135deg, #ff007f 0%, #ff7300 50%, #ffec00 100%);
+            --panel-bg: rgba(255, 255, 255, 0.96);
+            --border-primary: #ff5e00;
+            --text-dark: #0f172a;
+            
+            /* High-Contrast Wheel Segments matched directly to categories */
             --seg-hinduism: #ffedd5;
             --txt-hinduism: #ea580c;
             --seg-islam: #dcfce7;
@@ -21,86 +27,68 @@
             --txt-buddhism: #0369a1;
             --seg-zoroastrianism: #ffe4e6;
             --txt-zoroastrianism: #e11d48;
-
-            --transition-snappy: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Comic Sans MS', system-ui, -apple-system, sans-serif;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', system-ui, sans-serif;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
 
         body {
-            /* Vibrant, Cheerful Kids Sunset Sorbet Multi-blend Background */
-            background: linear-gradient(135deg, #ff007f 0%, #ff7300 50%, #ffec00 100%);
+            background: var(--bg-gradient);
             width: 100vw;
             height: 100vh;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 12px;
+        }
+
+        /* CENTRAL STATIC APPARATUS CONTAINER - PREVENTS ANY SHIFTING OR LEAKING */
+        .game-mainframe-board {
+            width: 100%;
+            max-width: 960px;
+            height: 100%;
+            max-height: 660px;
+            background: var(--panel-bg);
+            border: 6px solid var(--border-primary);
+            border-radius: 36px;
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.3);
             position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
         }
 
-        /* Ambient Animated Magical Blobs for Visual Depth */
-        .magical-glow-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.7;
-            z-index: 1;
-            animation: floatMotion 10s infinite ease-in-out;
-        }
-        .blob-pink { width: 350px; height: 350px; background: #ff007f; top: -5%; left: -5%; }
-        .blob-yellow { width: 400px; height: 400px; background: #ffec00; bottom: -5%; right: -5%; animation-delay: -3s; }
-
-        @keyframes floatMotion {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-20px, 30px) scale(1.1); }
-        }
-
-        /* FIXED LOGO SPLASH SCREEN - GUARANTEED DEAD CENTER */
+        /* FIXED LOGO SPLASH SCREEN */
         .splash-gate {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: #ffffff;
             z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
             opacity: 1;
-            transition: opacity 0.5s ease-out;
-            pointer-events: none;
+            transition: opacity 0.4s ease-out;
         }
 
         .splash-logo {
-            max-width: 280px;
-            width: 70%;
+            max-width: 320px;
+            width: 75%;
             height: auto;
             object-fit: contain;
-            display: block;
         }
 
-        /* BRAND NEW PLAYFIELD LAYOUT ARCHITECTURE (CURVED CANOPY THEME) */
-        .main-stage-wrapper {
-            position: relative;
-            z-index: 10;
-            width: 95vw;
-            height: 95vh;
-            max-width: 1200px;
-            max-height: 800px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
+        /* SCREEN FLOW ROUTERS */
         .flow-screen {
             width: 100%;
             height: 100%;
@@ -109,177 +97,144 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
-            animation: screenPopIn 0.40s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        @keyframes screenPopIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* TITLE & INSTRUCTION SCREEN UI DESIGN Elements */
-        .branding-header-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px 40px;
-            border-radius: 32px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            border: 4px solid #ff7300;
-            max-width: 600px;
-        }
-
-        .kids-title {
-            font-size: clamp(28px, 5vw, 48px);
+        /* LARGE CRISP TYPOGRAPHY ELEMENTS */
+        .kids-hero-title {
+            font-size: 42px;
             font-weight: 900;
             color: #70003c;
             line-height: 1.2;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             text-shadow: 2px 2px 0px #ffec00;
         }
 
-        .instruction-list {
-            text-align: left;
-            margin: 20px 0 30px 20px;
+        .kids-body-text {
+            font-size: 20px;
             color: #334155;
-            font-size: clamp(15px, 2.5vw, 18px);
             line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 650px;
+            text-align: left;
         }
 
-        .instruction-list li { margin-bottom: 12px; }
+        .kids-body-text li {
+            margin-bottom: 12px;
+            list-style-position: inside;
+        }
 
-        /* MAGICAL BUTTONS */
-        .action-kids-btn {
+        /* ENHANCED ACTION BUTTONS */
+        .play-action-btn {
             background: linear-gradient(135deg, #ff007f 0%, #ff5e00 100%);
             color: #ffffff;
             border: 4px solid #ffffff;
-            padding: 16px 48px;
-            font-size: clamp(16px, 3vw, 22px);
+            padding: 16px 44px;
+            font-size: 24px;
             font-weight: 900;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.4);
-            transition: var(--transition-snappy);
+            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.35);
             text-transform: uppercase;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .action-kids-btn:hover {
-            transform: scale(1.06) translateY(-3px);
-            box-shadow: 0 14px 30px rgba(255, 0, 127, 0.5);
+        .play-action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(255, 0, 127, 0.45);
         }
 
-        .action-kids-btn:active { transform: scale(0.95); }
+        .play-action-btn:active { transform: scale(0.96); }
 
-        /* PLAYFIELD CONTROLS (ONLY DISPLAYED ON THE GAMEPLAY SCREEN) */
-        .gameplay-layout-grid {
+        /* THE PLAYFIELD GRID CORES */
+        .hud-canopy-row {
             width: 100%;
-            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .hud-pill-badge {
+            background: #ff7300;
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 900;
+            padding: 10px 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 2px solid #ffffff;
+        }
+
+        /* MAXIMIZED ADAPTIVE WHEEL CANVAS HUB */
+        .wheel-workspace-zone {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .top-hud-canopy {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 700px;
-            gap: 15px;
-            z-index: 20;
-        }
-
-        .floating-hud-badge {
-            background: #ffffff;
-            border: 3px solid #ff7300;
-            padding: 10px 24px;
-            border-radius: 24px;
-            font-size: clamp(14px, 2.8vw, 19px);
-            font-weight: 900;
-            color: #70003c;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-
-        /* SCREEN OPTIMIZED MASSIVE WHEEL ARENA */
-        .giant-wheel-core-zone {
-            position: relative;
-            /* Adaptive Sizing: Scaled up immensely for Desktop, fits safe bounds on mobile */
-            width: clamp(280px, 68vh, 520px);
-            height: clamp(280px, 68vh, 520px);
-            margin: auto;
-            display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+            width: 100%;
+            min-height: 0;
         }
 
-        .wheel-sphere-shield {
-            width: 100%;
-            height: 100%;
+        .wheel-outer-rim {
+            position: relative;
+            width: clamp(260px, 48vh, 420px);
+            height: clamp(260px, 48vh, 420px);
             background: #ffffff;
             border-radius: 50%;
-            padding: 12px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            padding: 8px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.15);
             border: 6px solid #ffec00;
-            position: relative;
         }
 
-        /* Mathematical Red Pin Alignment */
-        .absolute-wheel-needle {
+        .wheel-pointer-needle {
             position: absolute;
-            top: -16px;
+            top: -14px;
             left: 50%;
             transform: translateX(-50%);
             width: 0; height: 0;
-            border-left: 18px solid transparent;
-            border-right: 18px solid transparent;
-            border-top: 34px solid #ff0055;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-top: 32px solid #ff0055;
             z-index: 50;
-            filter: drop-shadow(0 6px 6px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.2));
         }
 
         canvas#wheel-canvas-node {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            transition: transform 5s cubic-bezier(0.2, 0.95, 0.3, 1);
+            transition: transform 4.8s cubic-bezier(0.25, 1, 0.35, 1);
         }
 
-        .wheel-golden-hub {
+        .wheel-center-cap {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: clamp(50px, 12%, 70px);
-            height: clamp(50px, 12%, 70px);
+            width: 60px; height: 60px;
             background: #ffffff;
             border: 4px solid #ff7300;
             border-radius: 50%;
             z-index: 45;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: clamp(20px, 4vw, 28px);
+            font-size: 26px;
         }
 
-        .bottom-control-canopy {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            padding-top: 10px;
+        .spin-btn-layout-pad {
+            margin-top: 20px;
         }
 
-        .btn-spin-giant {
-            background: linear-gradient(135deg, #ff0055 0%, #d60047 100%);
-            box-shadow: 0 10px 25px rgba(255, 0, 85, 0.35);
-        }
-
-        /* MODAL POPUPS */
+        /* LARGE OVERLAY DIALOG MODAL GRAPHICS */
         .question-card-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(70, 0, 35, 0.45);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 999;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+            z-index: 500;
             display: none;
             justify-content: center;
             align-items: center;
@@ -288,34 +243,28 @@
 
         .question-box-modal {
             background: #ffffff;
-            border-radius: 32px;
+            border-radius: 28px;
             width: 100%;
-            max-width: 550px;
-            padding: clamp(20px, 5vw, 36px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            padding: 30px;
+            box-shadow: 0 25px 55px rgba(0,0,0,0.3);
             text-align: center;
             border: 6px solid var(--modal-accent-color, #ff007f);
-            animation: modalGrow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes modalGrow {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
         }
 
         .question-meta-header {
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             color: var(--modal-accent-color, #ff007f);
         }
 
         .question-text-arena {
-            font-size: clamp(16px, 3.5vw, 21px);
+            font-size: 24px; /* ENLARGED FOR HIGH READABILITY */
             font-weight: 800;
-            color: #0f172a;
+            color: var(--text-dark);
             line-height: 1.5;
             margin-bottom: 24px;
             white-space: pre-line;
@@ -334,11 +283,11 @@
             border: 3px solid #ffd3e3;
             padding: 16px 24px;
             border-radius: 20px;
-            font-size: clamp(15px, 3vw, 19px);
+            font-size: 22px; /* ENLARGED */
             font-weight: 800;
-            color: #1e293b;
+            color: var(--text-dark);
             cursor: pointer;
-            transition: var(--transition-snappy);
+            transition: all 0.2s ease;
         }
 
         .option-soft-row:hover {
@@ -364,9 +313,9 @@
             background: #fef9c3;
             border: 2px dashed #fef08a;
             color: #713f12;
-            padding: 14px 18px;
+            padding: 14px;
             border-radius: 16px;
-            font-size: 14.5px;
+            font-size: 16px;
             font-weight: 700;
             margin-top: 14px;
             text-align: left;
@@ -374,8 +323,8 @@
 
         .hearts-box {
             color: #ef4444;
-            font-size: 20px;
-            letter-spacing: 2px;
+            font-size: 26px;
+            letter-spacing: 3px;
         }
 
         #celebrate-canvas-layer {
@@ -389,85 +338,73 @@
 </head>
 <body>
 
-    <div class="magical-glow-blob blob-pink"></div>
-    <div class="magical-glow-blob blob-yellow"></div>
+    <div class="game-mainframe-board">
 
-    <div id="screen-splash" class="splash-gate">
-        <img src="assets/innovine-logo.png" alt="Innovine Solutions" class="splash-logo" onerror="this.parentNode.style.opacity='0'; setTimeout(()=>this.parentNode.style.display='none', 500); document.getElementById('screen-title').style.display='flex';">
-    </div>
-
-    <div class="main-stage-wrapper">
+        <div id="screen-splash" class="splash-gate">
+            <img src="assets/innovine-logo.png" alt="Innovine Solutions" class="splash-logo" onerror="this.parentNode.style.opacity='0'; setTimeout(()=>this.parentNode.style.display='none', 400); document.getElementById('screen-title').style.display='flex';">
+        </div>
 
         <div id="screen-title" class="flow-screen">
-            <div class="branding-header-card">
-                <h1 class="kids-title">✨ THE HARMONY <br>SPINNING WHEEL ✨</h1>
-                <button class="action-kids-btn" onclick="gameEngine.transitionToInstructions()">START GAME 🚀</button>
-            </div>
+            <h1 class="kids-hero-title">✨ THE HARMONY <br>SPINNING WHEEL ✨</h1>
+            <button class="play-action-btn" onclick="gameEngine.transitionToInstructions()">START GAME 🚀</button>
         </div>
 
         <div id="screen-instructions" class="flow-screen">
-            <div class="branding-header-card">
-                <h2 style="color: #c90062; margin-bottom: 10px;">How to Play! 🎉</h2>
-                <ul class="instruction-list">
-                    <li>🎡 Spin the colorful giant wheel to load a mystery religion segment.</li>
-                    <li>📖 Read the friendly 2-line story question carefully.</li>
-                    <li>💎 Every correct choice awards you <strong>+10 points</strong>.</li>
-                    <li>❤️ You get <strong>3 attempts</strong>. Clue hints will arrive if you need help!</li>
-                </ul>
-                <button class="action-kids-btn" onclick="gameEngine.transitionToPlayfield()">PLAY NOW 🎮</button>
-            </div>
+            <h1 class="kids-hero-title" style="font-size: 36px; color: #c90062;">How to Play! 🎉</h1>
+            <ul class="kids-body-text">
+                <li>🎡 Spin the colorful giant wheel to choose a mystery religion.</li>
+                <li>📖 Read the friendly story question card carefully.</li>
+                <li>💎 Every correct answer awards you <strong>+10 points</strong>.</li>
+                <li>❤️ You have <strong>3 attempts</strong>. Clue hints will arrive if you need help!</li>
+            </ul>
+            <button class="play-action-btn" onclick="gameEngine.transitionToPlayfield()">PLAY NOW 🎮</button>
         </div>
 
         <div id="screen-playfield" class="flow-screen">
-            <div class="gameplay-layout-grid">
-                
-                <div class="top-hud-canopy">
-                    <div class="floating-hud-badge" id="hud-txt-score">SCORE: 0</div>
-                    <div class="floating-hud-badge" id="hud-txt-progress">QUESTION: 1 / 11</div>
-                </div>
+            <div class="hud-canopy-row">
+                <div class="hud-pill-badge" id="hud-txt-score">SCORE: 0</div>
+                <div class="hud-pill-badge" id="hud-txt-progress">QUESTION: 1 / 11</div>
+            </div>
 
-                <div class="giant-wheel-core-zone">
-                    <div class="wheel-sphere-shield">
-                        <div class="absolute-wheel-needle"></div>
-                        <canvas id="wheel-canvas-node"></canvas>
-                        <div class="wheel-golden-hub">🕊️</div>
-                    </div>
+            <div class="wheel-workspace-zone">
+                <div class="wheel-outer-rim">
+                    <div class="wheel-pointer-needle"></div>
+                    <canvas id="wheel-canvas-node"></canvas>
+                    <div class="wheel-center-cap">🕊️</div>
                 </div>
+            </div>
 
-                <div class="bottom-control-canopy">
-                    <button class="action-kids-btn btn-spin-giant" id="spin-btn-element" onclick="gameEngine.spinTheWheel()">SPIN THE WHEEL 🎡</button>
-                </div>
+            <div class="spin-btn-layout-pad">
+                <button class="play-action-btn" id="spin-btn-element" onclick="gameEngine.spinTheWheel()">SPIN THE WHEEL 🎡</button>
             </div>
 
             <div class="question-card-overlay" id="question-modal-layer">
                 <div class="question-box-modal" id="modal-box-card">
                     <div class="question-meta-header" id="modal-meta-category">CATEGORY CHOOSE</div>
-                    <div class="question-text-arena" id="modal-question-prompt">Loading question string...</div>
+                    <div class="question-text-arena" id="modal-question-prompt">Loading puzzle prompt...</div>
                     
                     <div class="dual-options-wrapper">
                         <div class="option-soft-row" id="option-btn-0" onclick="gameEngine.submitAnswerIndex(0)">Option A</div>
                         <div class="option-soft-row" id="option-btn-1" onclick="gameEngine.submitAnswerIndex(1)">Option B</div>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #f1f5f9; padding-top:12px;">
-                        <div class="floating-hud-badge" style="font-size:12px; padding:6px 14px;" id="modal-attempts-badge">Attempts Left: 3</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #e2e8f0; padding-top:14px;">
+                        <div class="hud-pill-badge" style="font-size:14px; padding:6px 14px;" id="modal-attempts-badge">Attempts Left: 3</div>
                         <div class="hearts-box" id="modal-hearts-rack">❤️❤️❤️</div>
                     </div>
                     
-                    <div class="hint-container-drawer" id="modal-hint-box">💡 HINT: Clue data.</div>
+                    <div class="hint-container-drawer" id="modal-hint-box">💡 HINT: Clue box text.</div>
                 </div>
             </div>
         </div>
 
         <div id="screen-victory" class="flow-screen">
-            <div class="branding-header-card">
-                <div style="font-size: 64px; margin-bottom: 10px;">🏆</div>
-                <h1 class="kids-title" style="color: #16a34a; margin-bottom: 10px; text-shadow:none;">Grand Champion!</h1>
-                <p style="color: #475569; font-size: 18px; line-height: 1.5; margin-bottom: 25px;" id="victory-score-label">
-                    Fantastic! You passed all 11 rounds!
-                </p>
-                <button class="action-kids-btn" onclick="window.location.reload()">Play Again 🔄</button>
-            </div>
+            <div style="font-size: 72px; margin-bottom: 12px;">🏆</div>
+            <h1 class="kids-hero-title" style="color: #16a34a; text-shadow: none;">Grand Champion!</h1>
+            <p class="kids-body-text" style="text-align:center; font-size:22px; margin-bottom:30px;" id="victory-score-label">
+                Wonderful job! You finished all 11 challenges perfectly!
+            </p>
+            <button class="play-action-btn" onclick="window.location.reload()">Play Again 🔄</button>
         </div>
 
     </div>
@@ -587,9 +524,9 @@
                         setTimeout(() => {
                             splashScreen.style.display = 'none';
                             document.getElementById('screen-title').style.display = 'flex';
-                        }, 500);
+                        }, 400);
                     }
-                }, 5000);
+                }, 4000);
             }
 
             transitionToInstructions() {
@@ -630,7 +567,7 @@
                 ctx.clearRect(0, 0, size, size);
 
                 this.wheelSegmentsSequence.forEach((religionKey, idx) => {
-                    // Offset angles mathematically by -90 deg so slice 0 aligns flawlessly with top-center calculations
+                    // Mathematically center slices off the top 12-o'clock index point flawlessly
                     const baseArcStartAngle = (idx * radiansPerArc) - (Math.PI / 2);
                     const metaData = MASTER_RELIGIONS_MANIFEST[religionKey];
 
@@ -662,14 +599,14 @@
                         ctx.fillStyle = metaData.txtColor;
                     }
 
-                    ctx.font = "black 16px system-ui, sans-serif";
+                    ctx.font = "900 16px 'Comic Sans MS', sans-serif";
                     ctx.fillText(metaData.label, wheelRadius - 30, 0);
                     ctx.restore();
                 });
 
                 ctx.beginPath();
                 ctx.arc(centerCoord, centerCoord, wheelRadius, 0, 2 * Math.PI);
-                ctx.strokeStyle = "#ffaa00";
+                ctx.strokeStyle = "#ff7300";
                 ctx.lineWidth = 6;
                 ctx.stroke();
             }
@@ -687,7 +624,7 @@
                 const totalSegmentsCount = this.wheelSegmentsSequence.length;
                 const degreesPerSlice = 360 / totalSegmentsCount;
                 
-                // Pinpoint accurate needle targeting landing dead-center inside the target sector slice
+                // Pinpoint landing logic: calculates specific rotation angles so needle stops inside the correct spoken category segment
                 const targetSliceCenterDegrees = (segmentIndex * degreesPerSlice) + (degreesPerSlice / 2);
                 const absoluteTargetRotationValue = 360 - targetSliceCenterDegrees;
 
@@ -700,14 +637,13 @@
 
                 setTimeout(() => {
                     this.triggerActiveQuestionModal();
-                }, 5100);
+                }, 4900);
             }
 
             triggerActiveQuestionModal() {
                 this.isWheelSpinning = false;
                 this.wrongAttemptsUsed = 0;
                 this.inputLocked = false;
-                document.getElementById('spin-btn-element').disabled = false;
 
                 const metadata = MASTER_RELIGIONS_MANIFEST[this.activeQuestionData.religion];
                 const modal = document.getElementById('question-modal-layer');
@@ -746,8 +682,6 @@
                     optionBtn.classList.add('state-correct');
                     
                     this.score += 10;
-                    this.refreshHUDLabels();
-
                     try { this.audioCorrect.play().catch(()=>{}); } catch(e){}
                     try { this.audioClapping.play().catch(()=>{}); } catch(e){}
                     this.burstConfettiExplosion();
@@ -793,7 +727,10 @@
 
             advanceGameTurnFlow() {
                 this.currentQuestionIdx++;
+                document.getElementById('spin-btn-element').disabled = false;
+                
                 if (this.currentQuestionIdx < 11) {
+                    // Update HUD text counters ONLY here upon entering next question flow safely
                     this.refreshHUDLabels();
                 } else {
                     document.getElementById('screen-playfield').style.display = "none";
