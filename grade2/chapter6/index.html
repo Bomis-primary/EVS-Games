@@ -87,7 +87,8 @@
         }
 
         .falling-item {
-            transition: top 0.1s linear, left 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            /* Linear top transitions combined with smooth left repositioning for a dynamic drift effect */
+            transition: top 0.04s linear, left 0.4s ease-in-out;
         }
     </style>
 </head>
@@ -97,6 +98,7 @@
     <div class="absolute top-32 right-8 text-7xl opacity-25 bg-cloud select-none pointer-events-none" style="animation-delay: 2s;">☁️</div>
     <div class="absolute bottom-20 left-4 text-5xl opacity-20 bg-cloud select-none pointer-events-none" style="animation-delay: 4s;">☁️</div>
 
+    <audio id="soundBg" src="assets/cheerfulmusic.mp3" loop preload="auto"></audio>
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
@@ -150,7 +152,7 @@
 
             <div id="catcherAreaContainer" class="flex-1 game-viewport rounded-[40px]">
                 
-                <div id="fallingItemNode" class="absolute text-6xl falling-item select-none pointer-events-none drop-shadow-md" style="top: -70px; left: 50%;">🍏</div>
+                <div id="fallingItemNode" class="absolute text-6xl falling-item select-none pointer-events-none drop-shadow-md" style="top: -80px; left: 50%;">🍏</div>
 
                 <div id="basketCatcherNode" class="absolute bottom-4 w-20 h-16 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-2xl border-3 border-white flex items-center justify-center text-4xl shadow-lg transition-all duration-100" style="left: calc(50% - 40px);">
                     🗑️
@@ -180,7 +182,7 @@
                     </div>
 
                     <div id="answersGridSlot" class="flex flex-col space-y-3 w-full">
-                        </div>
+                    </div>
 
                     <div class="text-center pt-3 border-t-2 border-slate-100">
                         <p id="helperAlertLabel" class="text-sm font-bold text-slate-500 leading-normal min-h-[44px] flex items-center justify-center px-2">
@@ -211,8 +213,7 @@
     </div>
 
     <script>
-        // CHAPTER 6 DATA MATRIX
-        const catcherQuizDatabase = [
+        const MASTER_QUIZ_DATABASE = [
             { tag: "GARBAGE", q: "What should we use to throw away our everyday household garbage safely?", options: ["An open pile behind the house", "A covered dustbin"], ans: "A covered dustbin", hint: "Hint: Covering it keeps flies and nasty germs away!", explanation: "✨ Correct! A covered dustbin keeps bugs away and stops bad smells from spreading!" },
             { tag: "SURROUNDINGS", q: "What happens if we let garbage pile up outside our homes?", options: ["It attracts flies and cockroaches", "It makes the grass grow faster"], ans: "It attracts flies and cockroaches", hint: "Hint: Dirty piles bring unwanted insects that carry diseases!", explanation: "✨ Spot on! Piles of trash bring pests that can make your whole family sick!" },
             { tag: "WATER POLLUTION", q: "What would happen if people threw plastic bottles and garbage into rivers?", options: ["The water becomes cleaner to drink", "Water animals suffer and it gets dirty"], ans: "Water animals suffer and it gets dirty", hint: "Hint: Fish and turtles need clean water to live!", explanation: "✨ Exactly! Pollution destroys water homes and makes the water unsafe for everyone!" },
@@ -225,6 +226,7 @@
             { tag: "ECO TRAVEL", q: "To protect our surroundings from vehicle smoke on short distances, we should:", options: ["Drive a large car", "Walk or cycle instead"], ans: "Walk or cycle instead", hint: "Hint: Walking keeps your body healthy and causes zero pollution!", explanation: "✨ Brilliant! Walking short distances exercises your body and cuts down on air pollution!" }
         ];
 
+        let dynamicShuffledQuestions = [];
         let databasePointerIdx = 0;
         let internalScore = 0;
         let incorrectAttemptsCount = 0;
@@ -232,9 +234,10 @@
         let dynamicAssistanceTimerNode = null;
         
         let targetLanePosition = 1; 
-        let itemFallingTopPos = -70;
+        let itemFallingTopPos = -80; // Adjusted upwards to ensure items look like they fall from above the viewport
         let fallingProcessLoop = null;
         let currentVisualEmoji = "🍏";
+        let activeSpawnLane = 1;
 
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
@@ -248,8 +251,10 @@
             
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
-                splash.style.opacity = '0';
-                setTimeout(() => splash.style.display = 'none', 400);
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => splash.style.display = 'none', 400);
+                }
             }, 3000);
         });
 
@@ -298,9 +303,17 @@
             else canvas.classList.add('hidden');
         }
 
+        function shuffleQuestionsMatrix() {
+            dynamicShuffledQuestions = [...MASTER_QUIZ_DATABASE].sort(() => Math.random() - 0.5);
+        }
+
         function startGame() {
+            // FIRE AMBIENT MUSIC ON USER INTERACTION GESTURE FOR RELIABILITY
+            playSound('soundBg');
+
             document.getElementById('titleView').style.display = 'none';
             document.getElementById('gameView').classList.remove('hidden');
+            
             internalScore = 0;
             completedTargetsTrack = 0;
             databasePointerIdx = 0;
@@ -308,6 +321,7 @@
             document.getElementById('scoreTextValue').innerText = 0;
             document.getElementById('clearedCountValue').innerText = "0/10";
             
+            shuffleQuestionsMatrix();
             repositionBasketCatcher();
             spawnNewFallingEntity();
         }
@@ -325,35 +339,57 @@
             repositionBasketCatcher();
         }
 
+        function getLaneLeftStringValue(laneIndex) {
+            if (laneIndex === 0) return "calc(16.6% - 30px)";
+            if (laneIndex === 1) return "calc(50% - 30px)";
+            return "calc(83.3% - 30px)";
+        }
+
         function spawnNewFallingEntity() {
             if (fallingProcessLoop) clearInterval(fallingProcessLoop);
             
-            itemFallingTopPos = -70;
-            const randomLane = Math.floor(Math.random() * 3); 
+            itemFallingTopPos = -80; // Explicitly starts out-of-view above the top edge
+            activeSpawnLane = Math.floor(Math.random() * 3); 
             currentVisualEmoji = structuralEmojis[Math.floor(Math.random() * structuralEmojis.length)];
             
             const element = document.getElementById('fallingItemNode');
             element.innerText = currentVisualEmoji;
-            
-            if (randomLane === 0) element.style.left = "calc(16.6% - 30px)";
-            else if (randomLane === 1) element.style.left = "calc(50% - 30px)";
-            else if (randomLane === 2) element.style.left = "calc(83.3% - 30px)";
+            element.style.left = getLaneLeftStringValue(activeSpawnLane);
+            element.style.top = `${itemFallingTopPos}px`;
+
+            let driftDirectionSwitch = true;
 
             fallingProcessLoop = setInterval(() => {
-                itemFallingTopPos += 6;
+                // REDUCED FALLING SPEED: Lowered downward velocity step size for a much slower drop pace
+                itemFallingTopPos += 3.5;
                 element.style.top = `${itemFallingTopPos}px`;
+
+                // RANDOM DRIFT MECHANISM: Periodically alters horizontal placement positions during fall
+                if (Math.round(itemFallingTopPos) % 95 === 0) {
+                    if (driftDirectionSwitch) {
+                        // Sway to adjacent tracks dynamically
+                        if (activeSpawnLane === 1) activeSpawnLane = Math.random() > 0.5 ? 0 : 2;
+                        else activeSpawnLane = 1;
+                    } else {
+                        // Return to baseline or stay
+                        activeSpawnLane = Math.floor(Math.random() * 3);
+                    }
+                    element.style.left = getLaneLeftStringValue(activeSpawnLane);
+                    driftDirectionSwitch = !driftDirectionSwitch;
+                }
 
                 const containerHeight = document.getElementById('catcherAreaContainer').clientHeight;
                 
-                if (itemFallingTopPos >= containerHeight - 90 && itemFallingTopPos <= containerHeight - 45) {
-                    if (randomLane === targetLanePosition) {
+                // Detection hit box check against final target tracking parameters
+                if (itemFallingTopPos >= containerHeight - 95 && itemFallingTopPos <= containerHeight - 45) {
+                    if (activeSpawnLane === targetLanePosition) {
                         clearInterval(fallingProcessLoop);
                         launchQuestionModalContext();
                     }
                 }
 
                 if (itemFallingTopPos > containerHeight) {
-                    itemFallingTopPos = -70;
+                    itemFallingTopPos = -80;
                     spawnNewFallingEntity();
                 }
             }, 30);
@@ -366,7 +402,7 @@
             document.getElementById('helperAlertLabel').innerText = "Tap the best safe choice above!";
             document.getElementById('helperAlertLabel').className = "text-sm font-bold text-slate-500 leading-normal min-h-[44px] flex items-center justify-center px-2";
             
-            const itemData = catcherQuizDatabase[databasePointerIdx];
+            const itemData = dynamicShuffledQuestions[databasePointerIdx];
             document.getElementById('modalCategoryBadge').innerText = `${itemData.tag} MISSION`;
             document.getElementById('questionDisplayLabel').innerText = itemData.q;
 
@@ -491,7 +527,10 @@
         function playSound(id) {
             const trackElement = document.getElementById(id);
             if (trackElement) {
-                trackElement.load();
+                // Only load and fresh reset audio clips that aren't the background music tracker loop
+                if (id !== 'soundBg') {
+                    trackElement.load();
+                }
                 const p = trackElement.play();
                 if (p !== undefined) {
                     p.catch(err => console.log("Audio pipeline handled: ", err));
