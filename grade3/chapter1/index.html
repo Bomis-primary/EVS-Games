@@ -1,1 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nature Sudoku</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        h1, h2, h3, button, .child-font {
+            font-family: 'Fredoka', cursive;
+        }
 
+        .sudoku-box {
+            border: 3px solid #166534;
+        }
+
+        .sudoku-cell {
+            aspect-ratio: 1 / 1;
+            transition: all 0.2s ease;
+        }
+
+        .sudoku-cell:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes softGlow {
+            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; transform: scale(1); }
+            50% { border-color: #fbbf24; box-shadow: 0 0 20px #fbbf24; transform: scale(1.03); background-color: #fef3c7; }
+        }
+        .hint-glow-effect {
+            animation: softGlow 1s infinite ease-in-out !important;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-3 m-0 select-none min-h-screen">
+
+    <audio id="soundBg" src="assets/playfulsong.mp3" loop preload="auto"></audio>
+    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="soundClapping" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <canvas id="confettiLayer" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[65vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-md animate-pulse\'>✨</div>';">
+    </div>
+
+    <div class="w-full max-w-md flex flex-col items-center justify-center relative">
+
+        <div id="titleView" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[32px] p-6 text-center space-y-6 shadow-xl animate-pop">
+            <div class="space-y-2">
+                <div class="text-7xl animate-bounce">🌱🐶</div>
+                <h1 class="text-4xl font-black text-emerald-700 tracking-wide leading-tight">Nature Sudoku</h1>
+            </div>
+            
+            <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-200 text-base font-medium text-slate-600 leading-relaxed">
+                Sort out living and non-living elements side by side using smart grid logic! 🧩🌟
+            </div>
+
+            <button onclick="changeActiveView('titleView', 'instructionsView')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl text-xl tracking-wide shadow-md active:scale-95 transition-all cursor-pointer">
+                START 🚀
+            </button>
+        </div>
+
+        <div id="instructionsView" class="hidden w-full bg-white border-4 border-blue-500 rounded-[32px] p-6 text-center space-y-5 shadow-xl animate-pop">
+            <h2 class="text-3xl font-black text-blue-700 tracking-wide">How To Play 🎒</h2>
+            
+            <div class="bg-slate-50 rounded-2xl p-4 text-left space-y-3.5 border border-slate-200 text-sm font-bold text-slate-600 leading-relaxed child-font">
+                <div class="flex items-start space-x-3">
+                    <span class="text-xl">🧩</span>
+                    <span>Fill spaces so each row, column, and 2x2 box has one <b>Plant</b>, <b>Puppy</b>, <b>Sun</b>, and <b>Car</b>.</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="text-xl">💡</span>
+                    <span>Placing tokens triggers quiz questions. You have <b>2 attempts</b> per question.</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="text-xl">❤️</span>
+                    <span>Answering wrongly twice costs <b>1 life</b>. Clear the grid with your <b>3 lives</b> to win!</span>
+                </div>
+            </div>
+
+            <button onclick="launchGameplayLoop()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-4 rounded-xl text-xl shadow-md active:scale-95 transition-all cursor-pointer">
+                PLAY ▶️
+            </button>
+        </div>
+
+        <div id="gameplayView" class="hidden w-full bg-white border-4 border-emerald-600 rounded-[32px] p-4 flex flex-col space-y-4 shadow-xl animate-pop relative">
+            
+            <div class="flex justify-between items-center bg-emerald-50 p-3 rounded-2xl border border-emerald-100">
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">SCORE</p>
+                    <p id="hudScore" class="text-xl font-black text-emerald-600">0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">LIVES</p>
+                    <p id="hudHearts" class="text-base tracking-wider">❤️❤️❤️</p>
+                </div>
+                <button onclick="resetWholeGame()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform cursor-pointer">
+                    RESET 🔄
+                </button>
+            </div>
+
+            <div id="sudokuGridContainer" class="w-full grid grid-cols-2 gap-1.5 p-1 bg-emerald-800 rounded-2xl border-2 border-emerald-900">
+                </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-2">
+                <p id="dockStatusLine" class="text-xs font-bold text-slate-500">1. Tap an empty grid square above first</p>
+                
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="selectTokenFromDock('PLANT')" class="token-btn flex flex-col items-center justify-center p-2 bg-white border-2 border-slate-200 rounded-xl opacity-50 cursor-not-allowed" disabled>
+                        <span class="text-2xl">🌱</span>
+                        <span class="text-[10px] font-bold text-emerald-700 mt-1">Plant</span>
+                    </button>
+                    <button onclick="selectTokenFromDock('PUPPY')" class="token-btn flex flex-col items-center justify-center p-2 bg-white border-2 border-slate-200 rounded-xl opacity-50 cursor-not-allowed" disabled>
+                        <span class="text-2xl">🐶</span>
+                        <span class="text-[10px] font-bold text-emerald-700 mt-1">Puppy</span>
+                    </button>
+                    <button onclick="selectTokenFromDock('SUN')" class="token-btn flex flex-col items-center justify-center p-2 bg-white border-2 border-slate-200 rounded-xl opacity-50 cursor-not-allowed" disabled>
+                        <span class="text-2xl">☀️</span>
+                        <span class="text-[10px] font-bold text-emerald-700 mt-1">Sun</span>
+                    </button>
+                    <button onclick="selectTokenFromDock('CAR')" class="token-btn flex flex-col items-center justify-center p-2 bg-white border-2 border-slate-200 rounded-xl opacity-50 cursor-not-allowed" disabled>
+                        <span class="text-2xl">🚗</span>
+                        <span class="text-[10px] font-bold text-emerald-700 mt-1">Car</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="quizOverlay" class="hidden absolute inset-0 bg-emerald-950/98 rounded-[28px] z-40 p-4 flex flex-col justify-between animate-pop">
+                <div class="text-center">
+                    <span class="bg-amber-500 text-white font-black px-4 py-1 rounded-full text-xs tracking-wider uppercase">SCIENCE QUEST! 💡</span>
+                </div>
+
+                <div class="text-center flex-1 flex items-center justify-center px-1 my-2">
+                    <h2 id="quizQuestionText" class="text-sm font-bold text-white leading-relaxed">
+                        Question loading...
+                    </h2>
+                </div>
+
+                <div id="explanationBox" class="hidden bg-amber-50 border-2 border-amber-300 p-3 rounded-xl text-xs font-semibold text-amber-900 leading-relaxed mb-2 text-left animate-pop">
+                    </div>
+
+                <div id="quizOptionsContainer" class="flex flex-col space-y-2.5 w-full">
+                    </div>
+
+                <div class="text-center pt-2 mt-1 border-t border-emerald-900">
+                    <p id="quizFooterHint" class="text-xs font-bold text-emerald-300 min-h-[24px] flex items-center justify-center">
+                        Tap the best matching answer!
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="summaryView" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[32px] p-6 text-center space-y-5 shadow-xl animate-pop">
+            <div>
+                <span id="endEmoji" class="text-7xl block animate-bounce">👑</span>
+                <h2 id="endTitle" class="text-3xl font-black text-emerald-700 mt-2">Magnificent Job!</h2>
+                <p id="endDesc" class="text-sm font-medium text-slate-500 leading-relaxed px-1">You are a certified Nature Scientist! You sorted out living and non-living things perfectly! 🌟</p>
+            </div>
+
+            <div class="bg-amber-50 py-3 px-6 rounded-2xl border border-amber-200 inline-block">
+                <p class="text-xs font-bold uppercase text-amber-600 tracking-wider">Total Score</p>
+                <p id="endScoreValue" class="text-4xl font-black text-amber-500">0</p>
+            </div>
+
+            <button onclick="restartWholeGameLoop()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl text-lg shadow active:scale-95 transition-all cursor-pointer">
+                PLAY AGAIN 🔄
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const tokensConfig = {
+            'EMPTY': { symbol: '', label: '' },
+            'PLANT': { symbol: '🌱', label: 'Plant' },
+            'PUPPY': { symbol: '🐶', label: 'Puppy' },
+            'SUN':   { symbol: '☀️', label: 'Sun' },
+            'CAR':   { symbol: '🚗', label: 'Car' }
+        };
+
+        const scienceQuizQuestions = [
+            { q: "Tom has a puppy and a teddy bear. The puppy grows bigger every month, but the teddy bear stays the same size. Why?", choices: ["Toys cannot grow because they are non-living.", "The puppy is non-living.", "The teddy bear needs more food."], ans: "Toys cannot grow because they are non-living.", explanation: "Living things grow and change over time. Non-living things, like toys, always stay the same size!" },
+            { q: "Lily touches a plant, and its leaves close up quickly. When she touches her wooden desk, nothing happens. Why?", choices: ["Only plants can move.", "Living things can feel things around them.", "The desk is asleep."], ans: "Living things can feel things around them.", explanation: "Living things can feel and react when you touch them. Non-living things cannot feel anything at all." },
+            { q: "A car moves down the road and a bird flies in the sky. What is the difference in how they move?", choices: ["The bird moves on its own because it is alive.", "The car moves on its own.", "The bird needs fuel to fly."], ans: "The bird moves on its own because it is alive.", explanation: "A car needs a driver and fuel to move it. Living things like birds can move all by themselves!" },
+            { q: "Sunflowers turn their large heads to face the sun during the day. What does this tell us about plants?", choices: ["Plants show movement.", "Plants are non-living things.", "Plants do not need light."], ans: "Plants show movement.", explanation: "Even though plants are fixed in the soil, their parts can move by turning towards the warm sunlight!" },
+            { q: "If you put a green plant inside a dark cupboard with no air, it will die. Which gas does a plant need to make its food?", choices: ["Oxygen", "Carbon dioxide", "Water"], ans: "Carbon dioxide", explanation: "Plants make their own food! They take in a gas called carbon dioxide from the air to stay alive." },
+            { q: "Humans use their lungs to breathe air. Plants do not have lungs. How do they take in air through their leaves?", choices: ["Through small noses.", "Through gills like a fish.", "Through tiny holes called stomata."], ans: "Through tiny holes called stomata.", explanation: "Look closely at a leaf! It has tiny, hidden mouth-like holes called stomata to breathe in air." },
+            { q: "An oak tree lives for many years, but a small fly only lives for a few weeks. What do we call this fixed time?", choices: ["A lifespan", "Reproduction", "A game"], ans: "A lifespan", explanation: "Every living thing stays alive for a certain amount of time before it gets old and dies. This is its lifespan." },
+            { q: "Sam finds a smooth stone, a white cloud, and a plastic toy spade. Which one is a natural non-living thing?", choices: ["The plastic toy spade", "The white cloud", "The toy spade and the stone"], ans: "The white cloud", explanation: "Natural non-living things are found in nature and not made by humans. Plastic objects are man-made!" },
+            { q: "A bird lays eggs and a dog has puppies. Why can a toy doll never have any babies?", choices: ["The doll is too small.", "Non-living things cannot reproduce.", "Dolls only lay eggs."], ans: "Non-living things cannot reproduce.", explanation: "Making babies or laying eggs is called reproduction. Only living things can make new young ones!" }
+        ];
+
+        const sudokuPuzzleSolution = [
+            ['PLANT', 'PUPPY', 'SUN',   'CAR'],
+            ['SUN',   'CAR',   'PLANT', 'PUPPY'],
+            ['PUPPY', 'PLANT', 'CAR',   'SUN'],
+            ['CAR',   'SUN',   'PUPPY', 'PLANT']
+        ];
+
+        const puzzleMaskTemplate = [
+            [1, 0, 1, 0],
+            [0, 1, 0, 1],
+            [1, 0, 0, 1],
+            [0, 1, 1, 0]
+        ];
+
+        let currentActiveBoardState = [];
+        let scoreCounter = 0;
+        let healthHearts = 3;
+        let selectedRowIndex = null;
+        let selectedColIndex = null;
+        let answeredQuestionsTracker = 0;
+        
+        let questionAttemptCounter = 0; 
+        let hintTimerNode = null;
+
+        const canvas = document.getElementById('confettiLayer');
+        const ctx = canvas.getContext('2d');
+        let confettiArray = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            configureCanvasSize();
+            window.addEventListener('resize', configureCanvasSize);
+
+            // SPLASH SCREEN EXACTLY 5 SECONDS TIMER
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.classList.add('hidden');
+                    document.getElementById('titleView').classList.remove('hidden');
+                }, 500);
+            }, 5000);
+        });
+
+        function configureCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function triggerConfettiBurst() {
+            canvas.classList.remove('hidden');
+            confettiArray = [];
+            for (let i = 0; i < 35; i++) {
+                confettiArray.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 14 - 4,
+                    r: Math.random() * 4 + 4,
+                    color: `hsl(${Math.random() * 360}, 90%, 65%)`,
+                    opacity: 1
+                });
+            }
+            requestAnimationFrame(animateConfettiStep);
+        }
+
+        function animateConfettiStep() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let activeParticles = false;
+            confettiArray.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.22;
+                p.opacity -= 0.02;
+                if (p.opacity > 0) {
+                    activeParticles = true;
+                    ctx.save();
+                    ctx.globalAlpha = p.opacity;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+            if (activeParticles) requestAnimationFrame(animateConfettiStep);
+            else canvas.classList.add('hidden');
+        }
+
+        function changeActiveView(hideId, showId) {
+            document.getElementById(hideId).classList.add('hidden');
+            document.getElementById(showId).classList.remove('hidden');
+        }
+
+        function launchGameplayLoop() {
+            changeActiveView('instructionsView', 'gameplayView');
+            triggerAudioPipelineTrack('soundBg');
+            resetWholeGame();
+        }
+
+        function resetWholeGame() {
+            if (hintTimerNode) clearTimeout(hintTimerNode);
+            
+            scoreCounter = 0;
+            healthHearts = 3;
+            selectedRowIndex = null;
+            selectedColIndex = null;
+            answeredQuestionsTracker = 0;
+
+            currentActiveBoardState = [];
+            for (let r = 0; r < 4; r++) {
+                currentActiveBoardState.push([]);
+                for (let c = 0; c < 4; c++) {
+                    if (puzzleMaskTemplate[r][c] === 1) {
+                        currentActiveBoardState[r].push(sudokuPuzzleSolution[r][c]);
+                    } else {
+                        currentActiveBoardState[r].push('EMPTY');
+                    }
+                }
+            }
+
+            document.getElementById('hudScore').innerText = scoreCounter;
+            document.getElementById('hudHearts').innerText = "❤️❤️❤️";
+            document.getElementById('quizOverlay').classList.add('hidden');
+            
+            resetDockControlState();
+            renderSudokuBoardHTML();
+        }
+
+        function restartWholeGameLoop() {
+            document.getElementById('summaryView').classList.add('hidden');
+            document.getElementById('gameplayView').classList.remove('hidden');
+            resetWholeGame();
+        }
+
+        function renderSudokuBoardHTML() {
+            const gridContainer = document.getElementById('sudokuGridContainer');
+            gridContainer.innerHTML = '';
+
+            const blocksOffsets = [
+                { rStart: 0, rEnd: 2, cStart: 0, cEnd: 2 },
+                { rStart: 0, rEnd: 2, cStart: 2, cEnd: 4 },
+                { rStart: 2, rEnd: 4, cStart: 0, cEnd: 2 },
+                { rStart: 2, rEnd: 4, cStart: 2, cEnd: 4 }
+            ];
+
+            blocksOffsets.forEach(box => {
+                const boxWrapper = document.createElement('div');
+                boxWrapper.className = "grid grid-cols-2 gap-1 p-1 bg-emerald-700 rounded-xl sudoku-box";
+
+                for (let r = box.rStart; r < box.rEnd; r++) {
+                    for (let c = box.cStart; c < box.cEnd; c++) {
+                        const cellBtn = document.createElement('button');
+                        const itemKey = currentActiveBoardState[r][c];
+                        const isPreset = puzzleMaskTemplate[r][c] === 1;
+
+                        cellBtn.className = `sudoku-cell w-full text-3xl flex items-center justify-center rounded-lg shadow-sm font-bold transition-all`;
+                        
+                        if (isPreset) {
+                            cellBtn.className += " bg-emerald-100 text-slate-800 cursor-not-allowed";
+                            cellBtn.innerText = tokensConfig[itemKey].symbol;
+                        } else {
+                            if (itemKey === 'EMPTY') {
+                                cellBtn.className += " bg-white hover:bg-emerald-50 text-transparent cursor-pointer border border-dashed border-slate-300";
+                                cellBtn.innerText = "❓";
+                            } else {
+                                cellBtn.className += " bg-emerald-200 text-slate-900 cursor-pointer border border-emerald-400";
+                                cellBtn.innerText = tokensConfig[itemKey].symbol;
+                            }
+
+                            if (r === selectedRowIndex && c === selectedColIndex) {
+                                cellBtn.className += " ring-4 ring-amber-400 border-amber-400 bg-amber-50";
+                            }
+
+                            cellBtn.onclick = () => focusOnCellSquare(r, c);
+                        }
+                        boxWrapper.appendChild(cellBtn);
+                    }
+                }
+                gridContainer.appendChild(boxWrapper);
+            });
+        }
+
+        function focusOnCellSquare(r, c) {
+            if (puzzleMaskTemplate[r][c] === 1) return;
+            
+            selectedRowIndex = r;
+            selectedColIndex = c;
+            
+            document.getElementById('dockStatusLine').innerText = "2. Now choose the correct matching item below:";
+            document.getElementById('dockStatusLine').className = "text-xs font-black text-amber-600 animate-pulse";
+            
+            const itemButtons = document.querySelectorAll('.token-btn');
+            itemButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.className = "token-btn flex flex-col items-center justify-center p-2.5 bg-white border-2 border-emerald-400 rounded-xl hover:bg-emerald-50 active:scale-95 transition-all cursor-pointer opacity-100 shadow-sm";
+            });
+
+            renderSudokuBoardHTML();
+        }
+
+        function resetDockControlState() {
+            selectedRowIndex = null;
+            selectedColIndex = null;
+            document.getElementById('dockStatusLine').innerText = "1. Tap an empty grid square above first";
+            document.getElementById('dockStatusLine').className = "text-xs font-bold text-slate-500";
+
+            const itemButtons = document.querySelectorAll('.token-btn');
+            itemButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.className = "token-btn flex flex-col items-center justify-center p-2 bg-white border-2 border-slate-200 rounded-xl opacity-50 cursor-not-allowed";
+            });
+        }
+
+        function selectTokenFromDock(tokenKey) {
+            if (selectedRowIndex === null || selectedColIndex === null) return;
+
+            const expectedAnswer = sudokuPuzzleSolution[selectedRowIndex][selectedColIndex];
+
+            if (tokenKey === expectedAnswer) {
+                currentActiveBoardState[selectedRowIndex][selectedColIndex] = tokenKey;
+                scoreCounter += 10;
+                document.getElementById('hudScore').innerText = scoreCounter;
+                triggerConfettiBurst();
+                triggerAudioPipelineTrack('soundCorrect');
+
+                resetDockControlState();
+                renderSudokuBoardHTML();
+
+                const filledCellsCount = currentActiveBoardState.flat().filter(x => x !== 'EMPTY').length;
+                const totalPresetCount = puzzleMaskTemplate.flat().filter(x => x === 1).length;
+                const placedByPlayer = filledCellsCount - totalPresetCount;
+
+                if (placedByPlayer > 0 && placedByPlayer % 2 === 0) {
+                    setTimeout(() => {
+                        triggerScienceQuestionModal();
+                    }, 400);
+                } else {
+                    checkSudokuVictoryConditions();
+                }
+
+            } else {
+                triggerAudioPipelineTrack('soundWrong');
+                document.getElementById('dockStatusLine').innerText = "❌ That item doesn't fit here! Try another symbol.";
+                document.getElementById('dockStatusLine').className = "text-xs font-black text-rose-500 animate-bounce";
+            }
+        }
+
+        function triggerScienceQuestionModal() {
+            if (hintTimerNode) clearTimeout(hintTimerNode);
+            
+            questionAttemptCounter = 1; 
+            document.getElementById('explanationBox').classList.add('hidden');
+
+            const qIndex = answeredQuestionsTracker % scienceQuizQuestions.length;
+            const dataObj = scienceQuizQuestions[qIndex];
+
+            document.getElementById('quizQuestionText').innerText = dataObj.q;
+            document.getElementById('quizFooterHint').innerText = "Attempt 1 of 2 • Tap the correct option!";
+            document.getElementById('quizFooterHint').className = "text-xs font-bold text-emerald-300 min-h-[24px] flex items-center justify-center";
+
+            const optionsBox = document.getElementById('quizOptionsContainer');
+            optionsBox.innerHTML = '';
+
+            dataObj.choices.forEach(choice => {
+                const optBtn = document.createElement('button');
+                optBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 px-4 text-left rounded-xl border border-slate-700 text-sm active:scale-[0.99] transition-all cursor-pointer quiz-item-node child-font";
+                optBtn.innerText = choice;
+                
+                if (choice === dataObj.ans) {
+                    optBtn.setAttribute('data-is-correct-truth', 'true');
+                }
+
+                optBtn.onclick = () => verifyQuizSubmission(choice, optBtn, dataObj);
+                optionsBox.appendChild(optBtn);
+            });
+
+            document.getElementById('quizOverlay').classList.remove('hidden');
+
+            // 12-Second Automatic Glow Help Trigger
+            hintTimerNode = setTimeout(() => {
+                const rightChoiceBtn = document.querySelector('.quiz-item-node[data-is-correct-truth="true"]');
+                if (rightChoiceBtn) {
+                    rightChoiceBtn.classList.add('hint-glow-effect');
+                    document.getElementById('quizFooterHint').innerText = "✨ Need help? Tap the glowing golden answer choice!";
+                    document.getElementById('quizFooterHint').className = "text-xs font-black text-amber-400 text-center animate-pulse min-h-[24px] flex items-center justify-center";
+                }
+            }, 12000);
+        }
+
+        function verifyQuizSubmission(chosenText, selectedButtonNode, dataObj) {
+            if (hintTimerNode) clearTimeout(hintTimerNode);
+            const allOptionNodes = document.querySelectorAll('.quiz-item-node');
+
+            if (chosenText === dataObj.ans) {
+                allOptionNodes.forEach(n => n.disabled = true);
+                selectedButtonNode.className = "w-full bg-emerald-600 text-white font-black py-3 px-4 text-center rounded-xl text-sm border-2 border-emerald-400 shadow child-font";
+                
+                scoreCounter += 10;
+                document.getElementById('hudScore').innerText = scoreCounter;
+                answeredQuestionsTracker++;
+                triggerConfettiBurst();
+                triggerAudioPipelineTrack('soundCorrect');
+
+                document.getElementById('quizFooterHint').innerText = "🎉 Brilliant! Correct (+10 Score)!";
+                document.getElementById('quizFooterHint').className = "text-xs font-black text-emerald-400 text-center min-h-[24px] flex items-center justify-center";
+
+                setTimeout(() => {
+                    document.getElementById('quizOverlay').classList.add('hidden');
+                    checkSudokuVictoryConditions();
+                }, 2000);
+
+            } else {
+                triggerAudioPipelineTrack('soundWrong');
+
+                if (questionAttemptCounter === 1) {
+                    // ATTEMPT 1: Show Hint Box with explanation
+                    questionAttemptCounter = 2;
+                    selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-sm border border-rose-900 opacity-60 cursor-not-allowed child-font";
+                    selectedButtonNode.disabled = true;
+
+                    const explanationBox = document.getElementById('explanationBox');
+                    explanationBox.innerHTML = `💡 <b>Hint:</b> ${dataObj.explanation}`;
+                    explanationBox.classList.remove('hidden');
+
+                    document.getElementById('quizFooterHint').innerText = "Attempt 2 of 2 • Use the hint above!";
+                    document.getElementById('quizFooterHint').className = "text-xs font-black text-amber-400 text-center min-h-[24px] flex items-center justify-center";
+
+                    hintTimerNode = setTimeout(() => {
+                        const rightChoiceBtn = document.querySelector('.quiz-item-node[data-is-correct-truth="true"]');
+                        if (rightChoiceBtn) rightChoiceBtn.classList.add('hint-glow-effect');
+                    }, 12000);
+
+                } else {
+                    // ATTEMPT 2: Deduct Heart
+                    selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-sm border border-rose-900 opacity-60 cursor-not-allowed child-font";
+                    allOptionNodes.forEach(n => n.disabled = true);
+
+                    healthHearts--;
+                    refreshHeartsHUDDisplay();
+
+                    document.getElementById('quizFooterHint').innerText = `Incorrect! Moving back to the gridboard.`;
+                    document.getElementById('quizFooterHint').className = "text-xs font-bold text-rose-400 text-center min-h-[24px] flex items-center justify-center";
+
+                    setTimeout(() => {
+                        document.getElementById('quizOverlay').classList.add('hidden');
+                        if (healthHearts <= 0) {
+                            exitGameWorkflow(false);
+                        } else {
+                            checkSudokuVictoryConditions();
+                        }
+                    }, 2200);
+                }
+            }
+        }
+
+        function refreshHeartsHUDDisplay() {
+            let str = "";
+            for (let i = 0; i < 3; i++) {
+                str += (i < healthHearts) ? "❤️" : "🖤";
+            }
+            document.getElementById('hudHearts').innerText = str;
+        }
+
+        function checkSudokuVictoryConditions() {
+            const isBoardFullyFilled = currentActiveBoardState.flat().every(cell => cell !== 'EMPTY');
+            if (isBoardFullyFilled && healthHearts > 0) {
+                exitGameWorkflow(true);
+            }
+        }
+
+        function exitGameWorkflow(isSuccessOutcome) {
+            if (hintTimerNode) clearTimeout(hintTimerNode);
+            
+            document.getElementById('gameplayView').classList.add('hidden');
+            document.getElementById('endScoreValue').innerText = scoreCounter;
+
+            if (isSuccessOutcome) {
+                triggerAudioPipelineTrack('soundClapping');
+                document.getElementById('endEmoji').innerText = "👑";
+                document.getElementById('endTitle').innerText = "Magnificent Job!";
+                document.getElementById('endDesc').innerText = "You are a certified Nature Scientist! You sorted out living and non-living things perfectly! 🌟";
+            } else {
+                document.getElementById('endEmoji').innerText = "🔬";
+                document.getElementById('endTitle').innerText = "Keep on Exploring!";
+                document.getElementById('endDesc').innerText = "Don't worry, try again to practice and learn more about wonderful living and non-living things!";
+            }
+
+            document.getElementById('summaryView').classList.remove('hidden');
+        }
+
+        function triggerAudioPipelineTrack(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id !== 'soundBg') el.load();
+                el.play().catch(e => console.log("Audio play caught: ", e));
+            }
+        }
+    </script>
+</body>
+</html>
