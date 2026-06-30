@@ -75,7 +75,7 @@
             overflow: hidden;
         }
 
-        /* 5-SECOND TIMED LOGO GATEWAY */
+        /* 5-SECOND TIMO LOGO GATEWAY */
         .splash-gate {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -253,6 +253,7 @@
             gap: clamp(10px, 2.5vw, 16px);
             min-height: 0;
             overflow-y: auto;
+            padding: 4px;
         }
 
         @media (max-width: 580px) {
@@ -267,14 +268,14 @@
             border-radius: var(--radius-inner);
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between; /* Splitting space between emoji and bottom banner spacing */
             align-items: center;
-            aspect-ratio: 1.1;
+            padding: 10px 4px;
+            min-height: 105px;
             cursor: pointer;
             transition: var(--transition-smooth);
             box-shadow: 0 3px 6px rgba(0,0,0,0.01);
             position: relative;
-            overflow: hidden;
         }
 
         .profile-card:hover {
@@ -283,32 +284,38 @@
             transform: translateY(-2px);
         }
 
+        .profile-card .emoji-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         .profile-card .emoji-view {
-            font-size: clamp(38px, 7vh, 52px);
+            font-size: clamp(38px, 6vh, 48px);
             transition: transform 0.2s ease;
         }
 
-        /* DYNAMIC POST-ANSWER IDENTITY REVEAL COMPONENT */
+        /* DYNAMIC POST-ANSWER IDENTITY REVEAL COMPONENT - REMOVED CLIPPING/OVERFLOW STRIPS */
         .reveal-identity-banner {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            width: calc(100% - 8px);
             background: var(--brand-lavender-banner);
             color: #ffffff;
-            font-size: clamp(11px, 2.2vw, 13px);
+            font-size: clamp(11px, 2vw, 13px);
             font-weight: 800;
             text-align: center;
-            padding: 5px 2px;
+            padding: 6px 2px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            animation: slideBannerUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border-radius: 8px;
+            margin-top: 4px;
+            animation: popBannerUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             z-index: 10;
         }
 
-        @keyframes slideBannerUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+        @keyframes popBannerUp {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         /* LOGICAL FEEDBACK SYSTEM MODIFIERS */
@@ -504,11 +511,16 @@
                     card.className = 'profile-card';
                     card.id = `card-id-${item.id}`;
 
+                    const emojiContainer = document.createElement('div');
+                    emojiContainer.className = 'emoji-container';
+
                     const emojiSpan = document.createElement('span');
                     emojiSpan.className = 'emoji-view';
                     emojiSpan.innerText = item.emoji;
 
-                    card.appendChild(emojiSpan);
+                    emojiContainer.appendChild(emojiSpan);
+                    card.appendChild(emojiContainer);
+                    
                     card.onclick = () => this.handleCardSelection(card, item.id);
                     gridNode.appendChild(card);
                 });
@@ -523,7 +535,12 @@
 
                 MASTER_RIDDLES.forEach(item => {
                     const el = document.getElementById(`card-id-${item.id}`);
-                    if (el) el.classList.remove('glowing-hint');
+                    if (el) {
+                        el.classList.remove('glowing-hint');
+                        // Remove old identity banners from previously correct cards if applicable
+                        const oldBanner = el.querySelector('.reveal-identity-banner');
+                        if (oldBanner) oldBanner.remove();
+                    }
                 });
 
                 const targetIndex = this.caseOrder[this.currentCaseIndex];
@@ -554,7 +571,7 @@
                     cardElement.style.background = 'var(--pastel-green)';
                     cardElement.style.borderColor = 'var(--pastel-green-dark)';
                     
-                    // POST-ANSWER REVEAL BANNER
+                    // POST-ANSWER REVEAL BANNER (Appended securely inside the layout framework)
                     const identityBanner = document.createElement('div');
                     identityBanner.className = 'reveal-identity-banner';
                     identityBanner.innerText = activeCaseData.label;
@@ -565,7 +582,6 @@
                         cardElement.classList.add('card-faded-out');
                         setTimeout(() => {
                             this.currentCaseIndex++;
-                            // FIXED SECOND HIDDEN TYPO HERE (Changed MASTER_RIDRLES to MASTER_RIDDLES)
                             if (this.currentCaseIndex < MASTER_RIDDLES.length) {
                                 this.loadActiveCase();
                             } else {
