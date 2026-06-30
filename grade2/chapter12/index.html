@@ -15,43 +15,6 @@
             --glass-border: rgba(255, 255, 255, 0.12);
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-            100% { transform: translateY(0px); }
-        }
-
-        @keyframes beamPulse {
-            0%, 100% { opacity: 0.25; }
-            50% { opacity: 0.5; }
-        }
-
-        @keyframes pointFloat {
-            0% { transform: translateY(0px) scale(0.8); opacity: 0; }
-            20% { opacity: 1; transform: translateY(-15px) scale(1.2); }
-            100% { transform: translateY(-50px) scale(1); opacity: 0; }
-        }
-
-        @keyframes urgentPulse {
-            0%, 100% { box-shadow: 0 0 4px var(--gold-glow); transform: scale(1); }
-            50% { box-shadow: 0 0 20px var(--gold-glow); transform: scale(1.04); }
-        }
-
-        @keyframes correctGlow {
-            0%, 100% { border-color: rgba(57, 255, 20, 0.3); box-shadow: 0 0 5px rgba(57, 255, 20, 0.2); }
-            50% { border-color: var(--neon-green); box-shadow: 0 0 20px var(--neon-green); }
-        }
-
-        @keyframes logoFadeIn {
-            0% { opacity: 0; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes confet {
-            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-
         * {
             box-sizing: border-box;
             user-select: none;
@@ -59,16 +22,19 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
+        /* SCROLL FIX: Changed overflow from hidden to auto to allow natural scrolling */
         body {
             margin: 0;
             padding: 0;
             background: var(--space-bg);
             color: #fff;
-            overflow: hidden;
+            overflow-y: auto;
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Keeps item accessible if content stretches */
+            padding-top: 20px;
+            padding-bottom: 40px;
         }
 
         .cosmic-bg {
@@ -81,7 +47,6 @@
             z-index: -1;
         }
 
-        /* Full Screen Screen Engine Flow Panels */
         .flow-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -93,21 +58,21 @@
             padding: 20px;
             text-align: center;
             transition: opacity 0.5s ease;
+            overflow-y: auto;
         }
 
-        /* FIXED: Clean background for your asset image */
         #intro-logo-screen { 
             background: #000000; 
         }
 
+        /* CORRECTED FILENAME IMPLEMENTATION */
         .innovine-logo-asset {
             max-width: 280px;
             height: auto;
-            animation: logoFadeIn 1.2s ease-out forwards;
         }
 
         #title-menu-screen, #instruction-flow-screen {
-            background: rgba(9, 10, 20, 0.92);
+            background: rgba(9, 10, 20, 0.94);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
         }
@@ -119,7 +84,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 30px;
-            text-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
             line-height: 1.2;
         }
 
@@ -132,14 +96,12 @@
             font-size: 16px;
             line-height: 1.6;
             margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .instruction-card h3 { color: var(--neon-cyan); margin-top: 0; }
         .instruction-card ul { text-align: left; margin-left: 10px; padding-left: 10px; }
         .instruction-card li { margin-bottom: 10px; }
 
-        /* Game Board Wrapper */
         .game-wrapper {
             width: 100%;
             max-width: 850px;
@@ -250,17 +212,6 @@
             transition: all 0.2s ease;
         }
 
-        @media (hover: hover) {
-            .option-capsule:hover {
-                background: rgba(255,255,255,0.1);
-                transform: translateY(-2px);
-            }
-        }
-
-        .option-capsule.glow-assistance {
-            animation: correctGlow 1.5s infinite ease-in-out;
-        }
-
         .option-capsule.success-state {
             background: rgba(57, 255, 20, 0.15) !important;
             border-color: var(--neon-green) !important;
@@ -283,12 +234,6 @@
             cursor: pointer;
             font-size: 11px;
             font-weight: 600;
-        }
-
-        .hint-trigger.urgent-flash {
-            animation: urgentPulse 1s infinite ease-in-out;
-            color: var(--gold-glow);
-            border-color: var(--gold-glow);
         }
 
         .hologram-viewport {
@@ -339,7 +284,6 @@
             background: linear-gradient(90deg, rgba(255, 251, 0, 0.35), rgba(255, 251, 0, 0.02));
             pointer-events: none;
             z-index: 2;
-            animation: beamPulse 1.5s infinite ease-in-out;
             mix-blend-mode: screen;
         }
 
@@ -351,13 +295,9 @@
         }
 
         .creeper-sprite {
-            animation: float 2s infinite ease-in-out;
             z-index: 3;
             display: inline-block;
         }
-
-        .creeper-sprite.hit-flash { filter: drop-shadow(0 0 10px var(--neon-pink)) brightness(1.3); }
-        .creeper-sprite.shadow-healed { filter: drop-shadow(0 0 10px var(--neon-green)); }
 
         .arsenal-dock {
             background: var(--glass-panel);
@@ -388,17 +328,6 @@
         .card-ico { font-size: 22px; margin-bottom: 2px; }
         .card-name { font-size: 11px; font-weight: bold; display: block; }
 
-        .floating-xp {
-            position: fixed;
-            font-weight: 900;
-            font-size: 22px;
-            color: var(--neon-green);
-            text-shadow: 0 0 8px var(--neon-green);
-            pointer-events: none;
-            z-index: 999;
-            animation: pointFloat 0.8s forwards ease-out;
-        }
-
         .recovery-layer {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -408,6 +337,7 @@
             justify-content: center;
             align-items: center;
             padding: 15px;
+            overflow-y: auto;
         }
 
         .recovery-pod {
@@ -434,21 +364,6 @@
             cursor: pointer;
             margin-top: 10px;
             box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
-        }
-
-        .confetti-particle {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            z-index: 6000;
-            pointer-events: none;
-            animation: confet 2.5s linear forwards;
         }
     </style>
 </head>
@@ -457,10 +372,10 @@
     <div class="cosmic-bg"></div>
 
     <div id="intro-logo-screen" class="flow-screen">
-        <img src="./assets/innovine.png" alt="Innovine Logo" class="innovine-logo-asset" onerror="this.style.display='none'; document.getElementById('alt-logo-fallback').style.display='block';">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="innovine-logo-asset" onerror="this.style.display='none'; document.getElementById('alt-logo-fallback').style.display='block';">
         <div id="alt-logo-fallback" style="display: none;">
-            <div style="font-size: 50px; margin-bottom: 10px;">🚀</div>
-            <h2 style="letter-spacing: 5px; color: var(--neon-cyan); font-weight: 800; font-size: 32px; margin: 0;">INNOVINE</h2>
+            <div style="font-size: 55px; margin-bottom: 12px;">🚀</div>
+            <h2 style="letter-spacing: 6px; color: var(--neon-cyan); font-weight: 800; font-size: 34px; margin: 0;">INNOVINE</h2>
         </div>
     </div>
 
@@ -483,8 +398,8 @@
 
     <div id="recovery-modal" class="recovery-layer">
         <div class="recovery-pod">
-            <h2 id="recovery-title">🛸 Sector File Recovered</h2>
-            <p id="recovery-desc">Your strategic game file data has been restored successfully.</p>
+            <h2 id="recovery-title">🛸 Sector File Checked</h2>
+            <p id="recovery-desc">Ready to evaluate next sector data stream layers.</p>
             <div id="recovery-data-text" style="color: var(--gold-glow); margin: 12px 0; font-weight: bold; font-size: 14px;"></div>
             <button class="action-btn" id="recovery-main-btn" onclick="appEngine.confirmResume()">🚀 Continue</button>
             <button class="action-btn" id="recovery-sub-btn" style="background: rgba(255,255,255,0.08); margin-left: 8px;" onclick="appEngine.declineResume()">Restart</button>
@@ -534,7 +449,8 @@
     </div>
 
     <script>
-        const ASSET_PATH = "./assets/";
+        // TARGETING THE EXACT SOUND FILE STRINGS FROM YOUR REPOSITORY SCREENSHOT
+        const ASSET_PATH = "assets/";
         
         const QUESTION_POOL = [
             { id: 1, waveTitle: "WAVE 1", waveIcon: "🌅", sentenceBefore: "Shadows can only be formed when there is a clear path of running ", sentenceAfter: " available in the sector.", options: ["🌬️ Wind", "💧 Water", "💡 Light"], correctAnswer: "💡 Light", hint: "🌅 When morning starts, the bright sun rises and shines down. Shadows cannot appear in dark rooms where there is no light source!" },
@@ -561,6 +477,7 @@
                 this.pathRow = 2;
                 this.blockInput = false;
 
+                // CONNECTED EXACTLY TO YOUR FILENAMES
                 this.audioCorrect = new Audio(ASSET_PATH + "correct.mp3");
                 this.audioWrong = new Audio(ASSET_PATH + "wrong.mp3");
                 this.audioVictory = new Audio(ASSET_PATH + "freesound_community-claps-44774.mp3");
@@ -569,7 +486,7 @@
             init() {
                 this.buildMapLayout();
                 
-                // FORCE THE INNOVINE INTRO IMAGE SCREEN TO REMAIN ACTIVE FOR EXACTLY 5 SECONDS
+                // Pure 5 second presentation timer
                 setTimeout(() => {
                     const introScreen = document.getElementById('intro-logo-screen');
                     const titleScreen = document.getElementById('title-menu-screen');
@@ -606,6 +523,15 @@
                         const parsed = JSON.parse(savedProgress);
                         if (parsed.currentIdx >= 0 && parsed.currentIdx < QUESTION_POOL.length && parsed.savedLives > 0) {
                             document.getElementById('recovery-data-text').innerText = `Wave: ${parsed.currentIdx + 1} | Score: ${parsed.savedScore} | Lives: ${parsed.savedLives}`;
+                            
+                            const mainBtn = document.getElementById('recovery-main-btn');
+                            mainBtn.innerText = "🚀 Continue Progress";
+                            mainBtn.setAttribute('onclick', 'appEngine.confirmResume()');
+                            
+                            const subBtn = document.getElementById('recovery-sub-btn');
+                            subBtn.style.display = 'inline-block';
+                            subBtn.setAttribute('onclick', 'appEngine.declineResume()');
+
                             document.getElementById('recovery-modal').style.display = 'flex';
                             this.cacheParsedData = parsed;
                             return;
@@ -635,6 +561,8 @@
             presentIntermissionBriefing(targetIdx) {
                 this.pendingTargetIndex = targetIdx;
                 document.getElementById('master-game-panel').style.display = 'none';
+                document.getElementById('recovery-modal').style.display = 'none';
+                
                 const panel = document.getElementById('instruction-flow-screen');
                 const title = document.getElementById('instruction-title-node');
                 const text = document.getElementById('instruction-text-node');
@@ -651,23 +579,28 @@
                         </ul>`;
                     btn.innerText = "PLAY WAVE 1 🚀";
                 } else if (targetIdx === 1) {
-                    title.innerText = "🕛 WAVE 2 BRIEFING: TIMES OF THE DAY";
+                    title.innerText = "🧱 WAVE 2 BRIEFING: BLOCKS & CASTS";
                     text.innerHTML = `
                         <ul>
-                            <li><strong>🌅 Morning & Evening:</strong> The sun sits low in the sky, shooting long flat rays that make shadows extra <strong>LONG</strong>!</li>
-                            <li><strong>🕛 Noon Midday:</strong> The sun stands directly above your head! The light hits straight down, making shadows very <strong>SHORT</strong>.</li>
+                            <li><strong>🧱 Formation Trick:</strong> A shadow patch is formed perfectly only when an object stands in the way and <strong>BLOCKS</strong> the traveling beams.</li>
+                            <li><strong>🎯 Testing Sandbox:</strong> Select your Flashlight or Brick to paint beams and test layouts below!</li>
                         </ul>`;
-                    btn.innerText = "START LEVEL 2 ⚡";
+                    btn.innerText = "START WAVE 2 ⚡";
                 } else if (targetIdx === 2) {
-                    title.innerText = "🧭 WAVE 3 BRIEFING: THE COMPASS RULES";
+                    title.innerText = "🧭 WAVE 3 BRIEFING: THE OPPOSITE SIDES";
                     text.innerHTML = `
                         <ul>
-                            <li><strong>🌅 Face the Sunrise:</strong> The sun always rises in the <strong>EAST</strong>. If you look straight at it in the morning, East is in front of you!</li>
-                            <li><strong>⬅️ Behind & Sides:</strong> <strong>WEST</strong> is behind your back, your Left arm points <strong>NORTH</strong>, and your Right arm points <strong>SOUTH</strong>.</li>
+                            <li><strong>🔦 Ray Directions:</strong> Shadows always land on the exact <strong>OPPOSITE</strong> side of the light source!</li>
+                            <li>If light hits from the Left side, the dark shadow stretches towards the Right wall.</li>
                         </ul>`;
-                    btn.innerText = "START LEVEL 3 🛡️";
+                    btn.innerText = "START WAVE 3 🛡️";
                 } else {
-                    this.startGameplayAfterBriefing();
+                    title.innerText = `🛰️ WAVE ${targetIdx + 1} CORE PARAMETERS`;
+                    text.innerHTML = `
+                        <ul>
+                            <li>Proceed immediately to apply structural physics parameters for shadow sector loop ${targetIdx + 1}.</li>
+                        </ul>`;
+                    btn.innerText = `INITIALIZE SYSTEM ${targetIdx + 1} ➡️`;
                 }
             }
 
@@ -726,7 +659,7 @@
                 this.buildMapLayout();
                 this.renderDynamicPhysicsEngine();
 
-                document.getElementById('hint-btn').classList.remove('urgent-flash');
+                document.getElementById('hint-btn').style.boxShadow = 'none';
                 document.getElementById('hint-viewport-container').style.display = 'none';
                 
                 document.getElementById('sentence-prompt-container').innerHTML = `
@@ -808,7 +741,7 @@
 
                         if (startRow === this.pathRow) {
                             const ghost = document.getElementById(`ghost-element-${c}`);
-                            if (ghost) ghost.classList.add('hit-flash');
+                            if (ghost) ghost.style.filter = "brightness(1.5)";
                         }
                         if (this.activeGridData[startRow][c] === 'brick') {
                             lightBlocked = true;
@@ -824,10 +757,7 @@
 
                         if (startRow === this.pathRow) {
                             const ghost = document.getElementById(`ghost-element-${c}`);
-                            if (ghost) {
-                                ghost.classList.remove('hit-flash');
-                                ghost.classList.add('shadow-healed');
-                            }
+                            if (ghost) ghost.style.filter = "brightness(0.3)";
                         }
                     }
                 }
@@ -837,22 +767,6 @@
                 const viewport = document.getElementById('hint-viewport-container');
                 viewport.innerHTML = `<span>📡 SCANNED CLUE:</span> ${this.activeQuestion.hint}`;
                 viewport.style.display = 'block';
-            }
-
-            triggerConfettiBurst() {
-                const colors = ['#00f0ff', '#39ff14', '#ff007f', '#fffb00', '#ff9f00'];
-                for (let i = 0; i < 40; i++) {
-                    const particle = document.createElement('div');
-                    particle.classList.add('confetti-particle');
-                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    particle.style.left = Math.random() * 100 + 'vw';
-                    particle.style.top = '-10px';
-                    particle.style.transform = `scale(${Math.random() * 0.6 + 0.5})`;
-                    particle.style.animationDelay = Math.random() * 0.4 + 's';
-                    particle.style.animationDuration = Math.random() * 1.5 + 1.5 + 's';
-                    document.body.appendChild(particle);
-                    setTimeout(() => particle.remove(), 3000);
-                }
             }
 
             processAnswer(cardElement, chosenValue) {
@@ -867,7 +781,6 @@
                     blank.innerText = chosenValue;
                     blank.classList.add('filled');
 
-                    this.createFloatingPointsNotification(cardElement);
                     this.score += 10;
                     this.updateStatsDisplay();
 
@@ -875,24 +788,18 @@
                         this.blockInput = false;
                         const nextIndex = this.currentQuestionIdx + 1;
                         
-                        // Triggers level victory popup sequence on current index 0 (Wave 1) or index 1 (Wave 2)
-                        if (this.currentQuestionIdx === 0 || this.currentQuestionIdx === 1) {
-                            this.triggerConfettiBurst();
-                            
-                            const modal = document.getElementById('recovery-modal');
-                            document.getElementById('recovery-title').innerText = "🎉 YAY! Sector Clear!";
-                            document.getElementById('recovery-desc').innerText = `Outstanding work! You completely neutralized the shadows in this zone.`;
-                            document.getElementById('recovery-data-text').innerText = `Bonus data streams active!`;
-                            
-                            const mainBtn = document.getElementById('recovery-main-btn');
-                            mainBtn.innerText = "Advance Next Level ➡️";
-                            mainBtn.setAttribute('onclick', `appEngine.presentIntermissionBriefing(${nextIndex})`);
-                            document.getElementById('recovery-sub-btn').style.display = 'none';
-                            
-                            modal.style.display = 'flex';
-                        } else {
-                            this.loadActiveWaveLevel(nextIndex);
-                        }
+                        // FIX: Level loop logic correctly progression maps
+                        const modal = document.getElementById('recovery-modal');
+                        document.getElementById('recovery-title').innerText = `🎉 Wave ${this.currentQuestionIdx + 1} Cleared!`;
+                        document.getElementById('recovery-desc').innerText = `Outstanding! You successfully unlocked the concept of ${chosenValue}. Ready for the next sector challenge?`;
+                        document.getElementById('recovery-data-text').innerText = `Total Score: ${this.score} XP`;
+                        
+                        const mainBtn = document.getElementById('recovery-main-btn');
+                        mainBtn.innerText = "Advance Next Level ➡️";
+                        mainBtn.setAttribute('onclick', `appEngine.presentIntermissionBriefing(${nextIndex})`);
+                        
+                        document.getElementById('recovery-sub-btn').style.display = 'none';
+                        modal.style.display = 'flex';
                     }, 1400);
 
                 } else {
@@ -908,27 +815,8 @@
                         return;
                     }
 
-                    if (this.wrongAttemptsForCurrentQuestion >= 2) {
-                        document.getElementById('hint-btn').classList.add('urgent-flash');
-                        document.querySelectorAll('.option-capsule').forEach(el => {
-                            if (el.getAttribute('data-option-val') === this.activeQuestion.correctAnswer) {
-                                el.classList.add('glow-assistance');
-                            }
-                        });
-                    }
                     setTimeout(() => cardElement.classList.remove('error-state'), 600);
                 }
-            }
-
-            createFloatingPointsNotification(element) {
-                const rect = element.getBoundingClientRect();
-                const xpNode = document.createElement('div');
-                xpNode.classList.add('floating-xp');
-                xpNode.innerText = '+10 XP';
-                xpNode.style.left = `${rect.left + (rect.width/2) - 20}px`;
-                xpNode.style.top = `${rect.top}px`;
-                document.body.appendChild(xpNode);
-                setTimeout(() => xpNode.remove(), 800);
             }
 
             triggerGameOverSequence() {
@@ -951,7 +839,6 @@
             triggerVictorySequence() {
                 localStorage.removeItem('solar_guard_save_state');
                 this.playSound('victory');
-                this.triggerConfettiBurst();
                 
                 const modal = document.getElementById('recovery-modal');
                 document.getElementById('recovery-title').innerText = "🏆 GRAND CHAMPION!";
