@@ -44,7 +44,7 @@
         }
 
         @keyframes scaleIn {
-            0% { transform: scale(0.95); opacity: 0; }
+            0 { transform: scale(0.95); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
         .animate-pop {
@@ -61,6 +61,16 @@
 </head>
 <body class="flex flex-col items-center justify-center p-3 min-h-screen select-none">
 
+    <div id="innovineSplash" class="fixed inset-0 bg-emerald-900 z-50 flex flex-col items-center justify-center text-center p-6 transition-all duration-500">
+        <div class="space-y-4 animate-pop">
+            <div class="text-white text-6xl font-black tracking-widest uppercase drop-shadow-md">
+                INNOVINE
+            </div>
+            <div class="w-16 h-1.5 bg-amber-400 mx-auto rounded-full animate-pulse"></div>
+            <p class="text-emerald-200 text-sm font-semibold tracking-wider uppercase">Loading Game Experience...</p>
+        </div>
+    </div>
+
     <audio id="soundBg" src="assets/playfulsong.mp3" loop preload="auto"></audio>
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
@@ -68,7 +78,7 @@
 
     <canvas id="confettiLayer" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <div class="w-full max-w-md flex flex-col items-center justify-center relative">
+    <div id="mainAppWrapper" class="w-full max-w-md hidden flex flex-col items-center justify-center relative">
 
         <div id="titleView" class="w-full bg-white border-4 border-emerald-500 rounded-[32px] p-6 text-center space-y-6 shadow-xl animate-pop">
             <div class="space-y-2">
@@ -275,7 +285,7 @@
         let selectedColIndex = null;
         
         let activeQuizQueue = []; 
-        let shuffledQuestionsPool = []; // Non-repeating global game pool
+        let shuffledQuestionsPool = []; 
         let isBonusPhase = false;
         let completedQuadrantsMask = [false, false, false, false]; 
 
@@ -293,9 +303,21 @@
 
             const nameInput = document.getElementById('studentNameInput');
             const nameText = document.getElementById('printNameText');
-            nameInput.addEventListener('input', () => {
-                nameText.innerText = nameInput.value || "Certified Explorer";
-            });
+            if (nameInput) {
+                nameInput.addEventListener('input', () => {
+                    nameText.innerText = nameInput.value || "Certified Explorer";
+                });
+            }
+
+            // 5-SECOND SPLASH SCREEN TIMER LOGIC
+            setTimeout(() => {
+                const splash = document.getElementById('innovineSplash');
+                splash.classList.add('opacity-0');
+                setTimeout(() => {
+                    splash.classList.add('hidden');
+                    document.getElementById('mainAppWrapper').classList.remove('hidden');
+                }, 500);
+            }, 5000);
         });
 
         function configureCanvasSize() {
@@ -365,7 +387,6 @@
             isBonusPhase = false;
             completedQuadrantsMask = [false, false, false, false];
 
-            // Initialize global non-repeating shuffled question pool
             shuffledQuestionsPool = [...scienceQuizQuestions];
             for (let i = shuffledQuestionsPool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -527,7 +548,6 @@
             });
 
             if (freshlyCompletedCount > 0) {
-                // Pull 2 completely unique questions from the remaining pool
                 for(let k = 0; k < 2; k++) {
                     if (shuffledQuestionsPool.length > 0) {
                         activeQuizQueue.push(shuffledQuestionsPool.shift());
