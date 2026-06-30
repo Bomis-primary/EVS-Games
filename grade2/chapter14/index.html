@@ -1,1 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Harmony Wheel</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fff5f5 0%, #f0fdf4 50%, #eff6ff 100%);
+            --panel-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            
+            /* Pastel Wheel Active Segment Colors */
+            --seg-hinduism: #ffedd5;
+            --txt-hinduism: #ea580c;
+            --seg-islam: #dcfce7;
+            --txt-islam: #16a34a;
+            --seg-christianity: #dbeafe;
+            --txt-christianity: #2563eb;
+            --seg-sikhism: #fef9c3;
+            --txt-sikhism: #ca8a04;
+            --seg-jainism: #f3e8ff;
+            --txt-jainism: #9333ea;
+            --seg-buddhism: #e0f2fe;
+            --txt-buddhism: #0369a1;
+            --seg-zoroastrianism: #ffe4e6;
+            --txt-zoroastrianism: #e11d48;
 
+            --radius-outer: 32px;
+            --radius-inner: 18px;
+            --shadow-premium: 0 20px 40px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0,0,0,0.02);
+            --transition-soft: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(10px, 4vw, 24px);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 840px;
+            height: 100%;
+            max-height: 660px;
+            background: var(--panel-bg);
+            border-radius: var(--radius-outer);
+            padding: clamp(16px, 4vw, 28px);
+            box-shadow: var(--shadow-premium);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* SCREEN SYSTEM STATE MANAGEMENT */
+        .flow-screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: screenFadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes screenFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* SCREEN 1: SPLASH GATEWAY */
+        .splash-gate {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.6s ease;
+        }
+
+        .splash-logo {
+            max-width: 280px;
+            width: 60%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* CELEBRATORY SOFT BUTTONS */
+        .soft-btn {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            color: #ffffff;
+            border: none;
+            padding: clamp(14px, 3.5vw, 18px) clamp(36px, 8vw, 54px);
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 700;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.2);
+            transition: var(--transition-soft);
+        }
+
+        .soft-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(2, 132, 199, 0.3);
+        }
+
+        .soft-btn:active {
+            transform: translateY(0) scale(0.97);
+        }
+
+        .game-title {
+            font-size: clamp(34px, 7vw, 48px);
+            font-weight: 900;
+            color: #0c4a6e;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 12px rgba(12, 74, 110, 0.05);
+        }
+
+        /* INSTRUCTIONS FRAME CONTAINER */
+        .kids-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px dashed #bae6fd;
+            border-radius: var(--radius-inner);
+            padding: clamp(20px, 5vw, 32px);
+            max-width: 560px;
+            width: 100%;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.01);
+        }
+
+        .kids-card h2 {
+            color: #0369a1;
+            font-size: clamp(22px, 4vw, 26px);
+            margin-bottom: 16px;
+        }
+
+        .kids-card ul {
+            text-align: left;
+            margin-left: 20px;
+            color: #475569;
+            font-size: clamp(15px, 3vw, 17px);
+            line-height: 1.6;
+        }
+
+        .kids-card li {
+            margin-bottom: 10px;
+        }
+
+        /* GAME LAYOUT DESIGN ELEMENTS */
+        .hud-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .hud-badge {
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* WHEEL PLAYFIELD CONTAINER */
+        .wheel-workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            min-height: 0;
+        }
+
+        .wheel-container-outer {
+            position: relative;
+            width: clamp(260px, 52vh, 350px);
+            height: clamp(260px, 52vh, 350px);
+            border-radius: 50%;
+            padding: 10px;
+            background: #ffffff;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12);
+            border: 4px solid #f1f5f9;
+        }
+
+        .wheel-pin-indicator {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-top: 30px solid #ef4444;
+            z-index: 30;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.15));
+        }
+
+        canvas#wheel-canvas-node {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: transform 4.5s cubic-bezier(0.1, 0.8, 0.25, 1);
+        }
+
+        .wheel-hub-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px; height: 60px;
+            background: #ffffff;
+            border: 4px solid #e2e8f0;
+            border-radius: 50%;
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+        }
+
+        .btn-spin-trigger {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            box-shadow: 0 6px 20px rgba(225, 29, 72, 0.25);
+            flex-shrink: 0;
+        }
+
+        /* INTERACTIVE QUESTION OVERLAY DRAWERS */
+        .question-card-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .question-box-modal {
+            background: #ffffff;
+            border-radius: var(--radius-outer);
+            width: 100%;
+            max-width: 520px;
+            padding: clamp(20px, 5vw, 32px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            border: 4px solid var(--modal-accent-color, #0284c7);
+            animation: modalPopUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes modalPopUp {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .question-meta-header {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            color: var(--modal-accent-color, #0284c7);
+        }
+
+        .question-text-arena {
+            font-size: clamp(16px, 3.5vw, 19px);
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .dual-options-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .option-soft-row {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 16px;
+            border-radius: var(--radius-inner);
+            font-size: clamp(15px, 3vw, 17px);
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            transition: var(--transition-soft);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+        }
+
+        .option-soft-row:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        /* QUESTION FLOW MODIFIERS */
+        .option-soft-row.state-correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+        }
+
+        .option-soft-row.state-incorrect {
+            background: #ffe4e6 !important;
+            border-color: #f43f5e !important;
+            color: #b91c1c !important;
+        }
+
+        .hint-container-drawer {
+            display: none;
+            background: #fef9c3;
+            border: 1px solid #fef08a;
+            color: #854d0e;
+            padding: 12px 16px;
+            border-radius: var(--radius-inner);
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-top: 14px;
+            text-align: left;
+            animation: slideDownIn 0.3s ease-out;
+        }
+
+        @keyframes slideDownIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* HUD ATTENTIONS SYSTEMS */
+        .hearts-box {
+            color: #ef4444;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        /* CELEBRATORY OVERLAYS NODES */
+        #celebrate-canvas-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="screen-splash" class="splash-gate">
+        <img src="assets/innovine-logo.png" alt="Innovine Solutions" class="splash-logo" onerror="this.parentNode.style.display='none'; document.getElementById('screen-title').style.display='flex';">
+    </div>
+
+    <div class="app-container">
+
+        <div id="screen-title" class="flow-screen">
+            <h1 class="game-title">✨ THE HARMONY <br>SPINNING WHEEL ✨</h1>
+            <button class="soft-btn" onclick="gameEngine.transitionToInstructions()">START GAME 🚀</button>
+        </div>
+
+        <div id="screen-instructions" class="flow-screen">
+            <div class="kids-card">
+                <h2>How to Play! 🎉</h2>
+                <ul>
+                    <li>Spin the colorful wheel to pick a mystery religion segment.</li>
+                    <li>Read the story question carefully and select the correct answer!</li>
+                    <li>Every correct answer earns you <strong>+10 points</strong>.</li>
+                    <li>You have <strong>3 attempts</strong> for each question. If you get stuck, a friendly hint will appear!</li>
+                    <li>Answer all 11 questions to complete the Harmony Challenge!</li>
+                </ul>
+            </div>
+            <button class="soft-btn" onclick="gameEngine.transitionToPlayfield()">PLAY NOW 🎮</button>
+        </div>
+
+        <div id="screen-playfield" class="flow-screen">
+            <div class="hud-row">
+                <div class="hud-badge" id="hud-txt-score">SCORE: 0</div>
+                <div class="hud-badge" id="hud-txt-progress">QUESTION: 1 / 11</div>
+            </div>
+
+            <div class="wheel-workspace">
+                <div class="wheel-container-outer">
+                    <div class="wheel-pin-indicator"></div>
+                    <canvas id="wheel-canvas-node"></canvas>
+                    <div class="wheel-hub-center">🕊️</div>
+                </div>
+                <button class="soft-btn btn-spin-trigger" id="spin-btn-element" onclick="gameEngine.spinTheWheel()">SPIN THE WHEEL 🎡</button>
+            </div>
+
+            <div class="question-card-overlay" id="question-modal-layer">
+                <div class="question-box-modal" id="modal-box-card">
+                    <div class="question-meta-header" id="modal-meta-category">HINDUISM CHOOSE</div>
+                    <div class="question-text-arena" id="modal-question-prompt">Loading question scenario string framework...</div>
+                    <div class="dual-options-wrapper">
+                        <div class="option-soft-row" id="option-btn-0" onclick="gameEngine.submitAnswerIndex(0)">Option A</div>
+                        <div class="option-soft-row" id="option-btn-1" onclick="gameEngine.submitAnswerIndex(1)">Option B</div>
+                    </div>
+                    <div class="hud-row" style="margin-bottom: 0; padding-top: 8px;">
+                        <div class="hud-badge" style="font-size:12px;" id="modal-attempts-badge">Attempts Left: 3</div>
+                        <div class="hearts-box" id="modal-hearts-rack">❤️❤️❤️</div>
+                    </div>
+                    <div class="hint-container-drawer" id="modal-hint-box">💡 HINT: Sample helper clue string.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-victory" class="flow-screen">
+            <div style="font-size: clamp(64px, 12vh, 80px); margin-bottom: 12px;">🏆</div>
+            <h1 class="game-title" style="color: #16a34a; margin-bottom: 12px;">Grand Harmony Champion!</h1>
+            <p style="color: var(--text-muted); font-size: clamp(15px, 3vw, 17px); max-width: 500px; line-height: 1.5; margin-bottom: 30px;" id="victory-score-label">
+                Wonderful job! You completed all 11 challenges perfectly and learned about different places of worship!
+            </p>
+            <button class="soft-btn" onclick="window.location.reload()">Play Again 🔄</button>
+        </div>
+
+    </div>
+
+    <canvas id="celebrate-canvas-layer"></canvas>
+
+    <script>
+        // IMMUTABLE STRUCT MANIFEST SPECIFICATIONS (SCENARIO REASONING EN-UK IMPLEMENTATION)
+        const MASTER_RELIGIONS_MANIFEST = {
+            "hinduism": { label: "HINDUISM", activeColor: "#ffedd5", txtColor: "#ea580c" },
+            "islam": { label: "ISLAM", activeColor: "#dcfce7", txtColor: "#16a34a" },
+            "christianity": { label: "CHRISTIANITY", activeColor: "#dbeafe", txtColor: "#2563eb" },
+            "sikhism": { label: "SIKHISM", activeColor: "#fef9c3", txtColor: "#ca8a04" },
+            "jainism": { label: "JAINISM", activeColor: "#f3e8ff", txtColor: "#9333ea" },
+            "buddhism": { label: "BUDDHISM", activeColor: "#e0f2fe", txtColor: "#0369a1" },
+            "zoroastrianism": { label: "ZOROASTRIANISM", activeColor: "#ffe4e6", txtColor: "#e11d48" }
+        };
+
+        const MASTER_TRIVIA_QUESTIONS = [
+            {
+                religion: "hinduism",
+                q: "Diya hears a loud temple bell ringing and smells beautiful fresh flowers.\nWhere is she walking with her family to say her prayers?",
+                options: ["Temple", "Mosque"], correctIdx: 0,
+                hint: "It is a peaceful place where a Pujari sings holy aartis!"
+            },
+            {
+                religion: "hinduism",
+                q: "Rohan is helping his mother light bright clay diyas all around the dark balcony.\nWhich joyful festival are they celebrating tonight?",
+                options: ["Christmas", "Diwali"], correctIdx: 1,
+                hint: "This festival celebrates the victory of sparkly lights over darkness!"
+            },
+            {
+                religion: "islam",
+                q: "Kabir washes his hands and face before laying down a clean, beautiful small mat.\nWhat holy prayer is he getting ready to offer?",
+                options: ["Namaz", "Gurbani"], correctIdx: 0,
+                hint: "It is a peaceful prayer offered five times a day facing toward Mecca."
+            },
+            {
+                religion: "islam",
+                q: "Zainab opens a beautifully written holy book to read a story about kindness on Eid.\nWhich sacred book is she holding?",
+                options: ["Bible", "Quran"], correctIdx: 1,
+                hint: "This holy book teaches sharing and love to all Muslim families!"
+            },
+            {
+                religion: "christianity",
+                q: "Mary walks inside a peaceful building and sees a kind man in long robes leading the prayers.\nWho is this holy helper?",
+                options: ["Priest", "Pandit"], correctIdx: 0,
+                hint: "This helper guides everyone in singing cheerful church hymns!"
+            },
+            {
+                religion: "christianity",
+                q: "John is hanging sparkly silver stars and red glass balls on a pine tree in winter.\nWhich merry festival is he getting ready for?",
+                options: ["Dussehra", "Christmas"], correctIdx: 1,
+                hint: "Look for the winter festival where Santa Claus brings gifts!"
+            },
+            {
+                religion: "sikhism",
+                q: "Simran walks into a grand building and hears beautiful holy kirtan music playing.\nWhere is she going to eat a tasty free meal from the big Langar kitchen?",
+                options: ["Gurudwara", "Temple"], correctIdx: 0,
+                hint: "This place has a community kitchen that feeds everyone together!"
+            },
+            {
+                religion: "sikhism",
+                q: "Balveer is decorating his home with flowers because it is the birthday of the very first holy Guru who started Sikhism.\nWhose birthday is it?",
+                options: ["Guru Nanak Dev", "Lord Rama"], correctIdx: 0,
+                hint: "We call this happy birthday festival Gurpurab!"
+            },
+            {
+                religion: "jainism",
+                q: "Aarav visits a quiet, peaceful building where people are taught to never hurt even a tiny little bug.\nWhat is this place of worship called?",
+                options: ["Derasar", "Church"], correctIdx: 0,
+                hint: "It is a special, beautiful temple followed by Jain families."
+            },
+            {
+                religion: "buddhism",
+                q: "Tenzing spins a row of beautiful, large prayer wheels outside a quiet building high up in the mountains.\nWhere do the peaceful monks live and meditate?",
+                options: ["Mosque", "Monastery"], correctIdx: 1,
+                hint: "It is a very calm mountain home for Buddhist monks."
+            },
+            {
+                religion: "zoroastrianism",
+                q: "Roxanne watches a priest place dry wood into a sacred container to keep a warm, holy fire burning.\nWhich place of worship is she visiting?",
+                options: ["Agiyari", "Gurudwara"], correctIdx: 0,
+                hint: "It is also called the Fire Temple, where Parsi families go to pray."
+            }
+        ];
+
+        class HarmonyWheelEngine {
+            constructor() {
+                this.score = 0;
+                this.currentQuestionIdx = 0;
+                this.wrongAttemptsUsed = 0;
+                this.isWheelSpinning = false;
+                this.currentWheelRotationDegrees = 0;
+                this.inputLocked = false;
+                
+                // Track completed religion states to dynamically toggle them black
+                this.completedReligions = new Set();
+                this.wheelSegmentsSequence = ["hinduism", "islam", "christianity", "sikhism", "jainism", "buddhism", "zoroastrianism"];
+                this.activeQuestionData = null;
+
+                // Absolute Audio File System Assets Maps
+                this.audioBg = new Audio("assets/cheerfulmusic.mp3");
+                this.audioBg.loop = true;
+                this.audioCorrect = new Audio("assets/correct.mp3");
+                this.audioWrong = new Audio("assets/wrong.mp3");
+                this.audioClapping = new Audio("assets/freesound_community-claps-44774.mp3");
+
+                // Confetti Engine Canvas Parameters
+                this.confettiParticles = [];
+                this.confettiFrameId = null;
+
+                // Randomise entire game sequence collection array safely
+                this.shuffledQuestionsArray = [...MASTER_TRIVIA_QUESTIONS].sort(() => Math.random() - 0.5);
+            }
+
+            initSplashScreenGate() {
+                // Precision 5-Second Interactive Splash transition gateway block
+                setTimeout(() => {
+                    const splashScreen = document.getElementById('screen-splash');
+                    if (splashScreen) {
+                        splashScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            splashScreen.style.display = 'none';
+                            document.getElementById('screen-title').style.display = 'flex';
+                        }, 600);
+                    }
+                }, 5000);
+            }
+
+            transitionToInstructions() {
+                // Try initiating autoplay safely within user action gesture thread bounds
+                this.startBackgroundAudioLoop();
+                document.getElementById('screen-title').style.display = 'none';
+                document.getElementById('screen-instructions').style.display = 'flex';
+            }
+
+            transitionToPlayfield() {
+                this.startBackgroundAudioLoop();
+                document.getElementById('screen-instructions').style.display = 'none';
+                document.getElementById('screen-playfield').style.display = 'flex';
+                this.drawWheelGraphicsLayout();
+                this.refreshHUDLabels();
+            }
+
+            startBackgroundAudioLoop() {
+                try {
+                    this.audioBg.play().catch(() => {
+                        console.log("Audio waiting for core gesture context release interaction.");
+                    });
+                } catch(e) {}
+            }
+
+            refreshHUDLabels() {
+                document.getElementById('hud-txt-score').innerText = `SCORE: ${this.score}`;
+                document.getElementById('hud-txt-progress').innerText = `QUESTION: ${this.currentQuestionIdx + 1} / 11`;
+            }
+
+            drawWheelGraphicsLayout() {
+                const canvas = document.getElementById('wheel-canvas-node');
+                const ctx = canvas.getContext('2d');
+                const size = 360;
+                canvas.width = size;
+                canvas.height = size;
+
+                const segmentsCount = this.wheelSegmentsSequence.length;
+                const radiansPerArc = (2 * Math.PI) / segmentsCount;
+                const centerCoord = size / 2;
+                const wheelRadius = centerCoord - 8;
+
+                ctx.clearRect(0, 0, size, size);
+
+                this.wheelSegmentsSequence.forEach((religionKey, idx) => {
+                    const baseArcStartAngle = idx * radiansPerArc;
+                    const metaData = MASTER_RELIGIONS_MANIFEST[religionKey];
+
+                    ctx.beginPath();
+                    ctx.moveTo(centerCoord, centerCoord);
+                    ctx.arc(centerCoord, centerCoord, wheelRadius, baseArcStartAngle, baseArcStartAngle + radiansPerArc);
+                    ctx.closePath();
+
+                    // Rule check: If religion has been completed, turn its background segment black
+                    if (this.completedReligions.has(religionKey)) {
+                        ctx.fillStyle = "#1e293b"; // Rich soft black
+                        ctx.strokeStyle = "#475569";
+                    } else {
+                        ctx.fillStyle = metaData.activeColor;
+                        ctx.strokeStyle = "#ffffff";
+                    }
+
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    // Render inner text labels
+                    ctx.save();
+                    ctx.translate(centerCoord, centerCoord);
+                    ctx.rotate(baseArcStartAngle + radiansPerArc / 2);
+                    ctx.textAlign = "right";
+                    
+                    if (this.completedReligions.has(religionKey)) {
+                        ctx.fillStyle = "#94a3b8"; // Muted text for black segments
+                    } else {
+                        ctx.fillStyle = metaData.txtColor;
+                    }
+
+                    ctx.font = "bold 11px system-ui, sans-serif";
+                    ctx.fillText(metaData.label, wheelRadius - 20, 4);
+                    ctx.restore();
+                });
+            }
+
+            spinTheWheel() {
+                if (this.isWheelSpinning || this.currentQuestionIdx >= 11) return;
+
+                this.isWheelSpinning = true;
+                document.getElementById('spin-btn-element').disabled = true;
+
+                // Load active target question details to align stopping position accurately
+                this.activeQuestionData = this.shuffledQuestionsArray[this.currentQuestionIdx];
+                const targetKey = this.activeQuestionData.religion;
+                const segmentIndex = this.wheelSegmentsSequence.indexOf(targetKey);
+
+                // Calculations matching wheel segment geometry
+                const totalSegmentsCount = this.wheelSegmentsSequence.length;
+                const degreesPerSlice = 360 / totalSegmentsCount;
+                
+                // Pin pointer is locked strictly at top centre node (-90 degree angular coordinate offset)
+                const targetSliceCenterDegrees = (segmentIndex * degreesPerSlice) + (degreesPerSlice / 2);
+                const absoluteTargetRotationValue = (360 - targetSliceCenterDegrees) + 90;
+
+                const fullRotationSpinsCount = 5; 
+                this.currentWheelRotationDegrees += (fullRotationSpinsCount * 360) + 
+                    (absoluteTargetRotationValue - (this.currentWheelRotationDegrees % 360));
+
+                const wheelCanvas = document.getElementById('wheel-canvas-node');
+                wheelCanvas.style.transform = `rotate(${this.currentWheelRotationDegrees}deg)`;
+
+                // Dynamic timeout handler mapped perfectly to transition easing mechanics
+                setTimeout(() => {
+                    this.triggerActiveQuestionModal();
+                }, 4600);
+            }
+
+            triggerActiveQuestionModal() {
+                this.isWheelSpinning = false;
+                this.wrongAttemptsUsed = 0;
+                this.inputLocked = false;
+                document.getElementById('spin-btn-element').disabled = false;
+
+                const metadata = MASTER_RELIGIONS_MANIFEST[this.activeQuestionData.religion];
+                const modal = document.getElementById('question-modal-layer');
+                
+                document.getElementById('modal-box-card').style.setProperty('--modal-accent-color', metadata.txtColor);
+                document.getElementById('modal-meta-category').innerText = `${metadata.label} CHALLENGE`;
+                document.getElementById('modal-question-prompt').innerText = this.activeQuestionData.q;
+                
+                // Clear state styling flags on rows
+                for (let i = 0; i <= 1; i++) {
+                    const btn = document.getElementById(`option-btn-${i}`);
+                    btn.innerText = this.activeQuestionData.options[i];
+                    btn.className = "option-soft-row";
+                    btn.style.pointerEvents = "auto";
+                }
+
+                document.getElementById('modal-hint-box').style.display = "none";
+                this.updateAttemptsModalHUD();
+
+                modal.style.display = "flex";
+            }
+
+            updateAttemptsModalHUD() {
+                const remainingAttempts = 3 - this.wrongAttemptsUsed;
+                document.getElementById('modal-attempts-badge').innerText = `Attempts Left: ${remainingAttempts}`;
+                document.getElementById('modal-hearts-rack').innerText = "❤️".repeat(remainingAttempts) + "🖤".repeat(this.wrongAttemptsUsed);
+            }
+
+            submitAnswerIndex(selectedIndex) {
+                if (this.inputLocked) return;
+
+                const correctIndex = this.activeQuestionData.correctIdx;
+                const optionBtn = document.getElementById(`option-btn-${selectedIndex}`);
+
+                if (selectedIndex === correctIndex) {
+                    // Correct Answer execution tree
+                    this.inputLocked = true;
+                    optionBtn.classList.add('state-correct');
+                    
+                    // Award points
+                    this.score += 10;
+                    this.refreshHUDLabels();
+
+                    // Play celebration effects and sounds
+                    try { this.audioCorrect.play().catch(()=>{}); } catch(e){}
+                    try { this.audioClapping.play().catch(()=>{}); } catch(e){}
+                    this.burstConfettiExplosion();
+
+                    // If this was the last question for this religion category, add it to the completed black list
+                    const targetCategory = this.activeQuestionData.religion;
+                    const remainingCategoryQuestions = this.shuffledQuestionsArray
+                        .slice(this.currentQuestionIdx + 1)
+                        .some(q => q.religion === targetCategory);
+
+                    if (!remainingCategoryQuestions) {
+                        this.completedReligions.add(targetCategory);
+                    }
+
+                    setTimeout(() => {
+                        document.getElementById('question-modal-layer').style.display = "none";
+                        this.drawWheelGraphicsLayout();
+                        this.advanceGameTurnFlow();
+                    }, 2000);
+
+                } else {
+                    // Incorrect Answer execution tree
+                    this.wrongAttemptsUsed++;
+                    optionBtn.classList.add('state-incorrect');
+                    optionBtn.style.pointerEvents = "none";
+                    
+                    try { this.audioWrong.play().catch(()=>{}); } catch(e){}
+                    this.updateAttemptsModalHUD();
+
+                    // Trigger the hint system
+                    const hintBox = document.getElementById('modal-hint-box');
+                    hintBox.innerText = `💡 HINT: ${this.activeQuestionData.hint}`;
+                    hintBox.style.display = "block";
+
+                    // Check if attempts threshold is exceeded
+                    if (this.wrongAttemptsUsed >= 3) {
+                        this.inputLocked = true;
+                        
+                        // Highlight the correct answer row automatically
+                        document.getElementById(`option-btn-${correctIndex}`).classList.add('state-correct');
+
+                        setTimeout(() => {
+                            document.getElementById('question-modal-layer').style.display = "none";
+                            this.advanceGameTurnFlow();
+                        }, 2500);
+                    }
+                }
+            }
+
+            advanceGameTurnFlow() {
+                this.currentQuestionIdx++;
+                if (this.currentQuestionIdx < 11) {
+                    this.refreshHUDLabels();
+                } else {
+                    // Game Over / Victory Condition Reached
+                    document.getElementById('screen-playfield').style.display = "none";
+                    document.getElementById('victory-score-label').innerText = `Amazing work! You scored ${this.score} out of 110 points and successfully completed the challenge!`;
+                    document.getElementById('screen-victory').style.display = "flex";
+                    this.triggerContinuousVictoryConfetti();
+                }
+            }
+
+            burstConfettiExplosion() {
+                const canvas = document.getElementById('celebrate-canvas-layer');
+                const ctx = canvas.getContext('2d');
+                canvas.style.display = "block";
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                this.confettiParticles = [];
+                const colorPalette = ['#38bdf8', '#4ade80', '#fbbf24', '#f43f5e', '#c084fc', '#ff7849'];
+
+                for (let i = 0; i < 60; i++) {
+                    this.confettiParticles.push({
+                        x: canvas.width / 2,
+                        y: canvas.height * 0.5,
+                        r: Math.random() * 4 + 3,
+                        color: colorPalette[Math.floor(Math.random() * colorPalette.length)],
+                        vx: (Math.random() - 0.5) * 14,
+                        vy: (Math.random() - 0.7) * 16,
+                        alpha: 1
+                    });
+                }
+
+                if (this.confettiFrameId) cancelAnimationFrame(this.confettiFrameId);
+
+                const renderLoop = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    let activeElementsExist = false;
+
+                    this.confettiParticles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.35; // Gravity pull force acceleration
+                        p.alpha -= 0.02;
+
+                        if (p.alpha > 0) {
+                            activeElementsExist = true;
+                            ctx.beginPath();
+                            ctx.fillStyle = p.color;
+                            ctx.globalAlpha = p.alpha;
+                            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    });
+
+                    ctx.globalAlpha = 1.0;
+                    if (activeElementsExist) {
+                        this.confettiFrameId = requestAnimationFrame(renderLoop);
+                    } else {
+                        canvas.style.display = "none";
+                    }
+                };
+                renderLoop();
+            }
+
+            triggerContinuousVictoryConfetti() {
+                const canvas = document.getElementById('celebrate-canvas-layer');
+                const ctx = canvas.getContext('2d');
+                canvas.style.display = "block";
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                this.confettiParticles = [];
+                const colorPalette = ['#38bdf8', '#4ade80', '#fbbf24', '#f43f5e', '#c084fc'];
+
+                const spawnLoop = () => {
+                    if (document.getElementById('screen-victory').style.display === 'none') return;
+                    for (let i = 0; i < 6; i++) {
+                        this.confettiParticles.push({
+                            x: Math.random() * canvas.width,
+                            y: -10,
+                            r: Math.random() * 3 + 3,
+                            color: colorPalette[Math.floor(Math.random() * colorPalette.length)],
+                            vx: (Math.random() - 0.5) * 4,
+                            vy: Math.random() * 3 + 3,
+                            alpha: 1
+                        });
+                    }
+                    setTimeout(spawnLoop, 250);
+                };
+                spawnLoop();
+
+                const renderLoop = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    this.confettiParticles.forEach((p, index) => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        if (p.y > canvas.height) {
+                            this.confettiParticles.splice(index, 1);
+                        } else {
+                            ctx.beginPath();
+                            ctx.fillStyle = p.color;
+                            ctx.globalAlpha = p.alpha;
+                            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    });
+                    ctx.globalAlpha = 1.0;
+                    requestAnimationFrame(renderLoop);
+                };
+                renderLoop();
+            }
+        }
+
+        const gameEngine = new HarmonyWheelEngine();
+        window.onload = () => {
+            gameEngine.initSplashScreenGate();
+        };
+    </script>
+</body>
+</html>
