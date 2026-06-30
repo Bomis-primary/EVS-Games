@@ -26,7 +26,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* FIXED SCREEN BODY LOCKS SCROLLBARS */
         body {
             background-color: var(--bg-space);
             color: var(--text-light);
@@ -39,7 +38,6 @@
             padding: 10px;
         }
 
-        /* DYNAMIC CONTAINER EXPANDS ON DESKTOP & MOBILES SEAMLESSLY */
         .app-shell {
             width: 100%;
             max-width: 900px;
@@ -53,9 +51,9 @@
             display: none;
             flex-direction: column;
             justify-content: space-between;
+            position: relative;
         }
 
-        /* PERFECTLY CENTERED SPLASH SCREEN */
         .splash-gate {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -134,7 +132,6 @@
             max-width: 250px;
         }
 
-        /* COMPACT HUD LAYER */
         header {
             display: flex;
             justify-content: space-between;
@@ -154,27 +151,18 @@
             letter-spacing: 1px;
         }
 
-        /* AUTO-SCALING GRID FILLS REMAINING WINDOW BOUNDS */
-        .mahjong-field {
+        /* 2.5D SIMPLIFIED OVERLAPPING MAHJONG ARENA */
+        .mahjong-arena-container {
             flex: 1;
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 8px;
-            margin: 10px 0;
-            min-height: 0; /* Critical fix allowing cards to scale down natively */
-        }
-
-        /* RESPONSIVE MOBILE ADJUSTMENT TO GRID STRUCTURE */
-        @media (max-width: 600px) {
-            .mahjong-field {
-                grid-template-columns: repeat(3, 1fr);
-                grid-template-rows: repeat(6, 1fr);
-                gap: 6px;
-            }
+            position: relative;
+            margin: 15px auto;
+            width: 100%;
+            max-width: 500px;
+            min-height: 0;
         }
 
         .tile-unit {
+            position: absolute;
             background: var(--tile-front);
             color: var(--tile-text);
             border-radius: 8px;
@@ -183,17 +171,23 @@
             align-items: center;
             font-size: clamp(28px, 6vh, 42px);
             cursor: pointer;
-            box-shadow: 0 4px 0 var(--tile-shadow), 0 6px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 0 var(--tile-shadow), 0 6px 10px rgba(0,0,0,0.4);
             border: 1px solid #e2e8f0;
-            transition: transform 0.1s ease, background-color 0.2s;
-            height: 100%;
-            width: 100%;
+            transition: transform 0.1s ease, background-color 0.2s, opacity 0.3s;
+            width: 14%;
+            height: 18%;
+        }
+
+        /* Overlapping visual indicator */
+        .tile-unit.blocked {
+            background: #e2e8f0;
+            box-shadow: 0 5px 0 #94a3b8, 0 6px 10px rgba(0,0,0,0.2);
         }
 
         .tile-unit.chosen {
             background: #bae6fd !important;
             border-color: var(--neon-blue);
-            transform: scale(0.96);
+            transform: scale(0.95) translateY(2px) !important;
         }
 
         .tile-unit.hidden-match {
@@ -202,7 +196,7 @@
             opacity: 0;
         }
 
-        /* SCROLL-PROOF QUIZ MODAL LAYER */
+        /* ZERO-SCROLL QUIZ OVERLAY SYSTEM */
         .quiz-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -314,9 +308,9 @@
             <div class="info-card">
                 <p>Follow these rules to clear the challenge:</p>
                 <ul>
-                    <li>Match identical pairs of pictures on the board.</li>
-                    <li>Every 3 correct tile matches unlocks special quiz questions!</li>
-                    <li>Be careful: you have 3 hearts to pass the quiz rounds safely!</li>
+                    <li>Match top unblocked matching pictures to clear them.</li>
+                    <li>Every 3 correct tile matches unlocks a set of 3 quiz questions!</li>
+                    <li>Clear the full board to reveal the Grand Bonus level.</li>
                 </ul>
             </div>
             <button class="action-btn" onclick="game.beginPlayfield()">PLAY NOW 🎉</button>
@@ -324,12 +318,12 @@
 
         <div id="screen-playfield" style="display: none; height: 100%; flex-direction: column; justify-content: space-between;">
             <header>
-                <div class="hud-item" style="color: var(--neon-blue);">Matches: <span id="match-counter">0 / 3</span></div>
+                <div class="hud-item" style="color: var(--neon-blue);">Matches Found: <span id="match-counter">0 / 3</span></div>
                 <div class="hud-item" style="color: var(--gold);">Score: <span id="score-label">0</span></div>
                 <div class="hud-item hearts-rack" id="hearts-box">❤️❤️❤️</div>
             </header>
 
-            <div class="mahjong-field" id="tile-matrix"></div>
+            <div class="mahjong-arena-container" id="tile-arena"></div>
         </div>
 
         <div id="screen-gameover" class="flow-screen" style="display: none;">
@@ -357,7 +351,7 @@
             <div class="explain-panel" id="explain-box-node"></div>
 
             <div style="text-align: center; display: none; margin-top: 10px;" id="quiz-nav-hub">
-                <button class="action-btn" style="width: 100%; font-size: 14px; padding: 10px;" onclick="game.dismissQuizEvent()">CONTINUE GAME ➡️</button>
+                <button class="action-btn" style="width: 100%; font-size: 14px; padding: 10px;" id="quiz-continue-btn" onclick="game.nextQuizOrDismiss()">CONTINUE ➡️</button>
             </div>
         </div>
     </div>
@@ -365,29 +359,53 @@
     <canvas id="confetti-canvas"></canvas>
 
     <script>
+        // TOTAL 10 QUESTIONS COVERED: 3 PER CYCLE, PLUS 1 WINNING BONUS MODULE
         const POOL_DATA = [
+            /* Quiz 1 Trigger Questions */
             { q: "Shadows can only be made when there is a clear path of running ________.", opts: ["Wind", "Water", "Light"], ans: "Light", exp: "Light is needed to make shadows!\nWithout light, everything stays dark." },
             { q: "A dark shadow is made when a solid object completely ________ the light rays.", opts: ["Bends", "Passes", "Blocks"], ans: "Blocks", exp: "When an object blocks light, it stops the rays.\nThis casts a dark shape directly behind it." },
             { q: "An object's shadow is always made on the ________ side of the light source.", opts: ["Same", "Sky", "Opposite"], ans: "Opposite", exp: "Shadows fall on the opposite side of the light.\nIf light hits your left, your shadow falls on your right!" },
+            /* Quiz 2 Trigger Questions */
             { q: "Light passes completely through glass windows because glass is ________.", opts: ["Opaque", "Dark", "Transparent"], ans: "Transparent", exp: "Transparent glass allows light to go straight through.\nBecause it does not block light, it leaves no dark shadow." },
             { q: "A solid brick or book forms a dark shadow because it is ________.", opts: ["Transparent", "Clear", "Opaque"], ans: "Opaque", exp: "Opaque things are thick and solid.\nThey do not let any light pass through them." },
             { q: "The size and length of shadows change because the position of the ________ moves.", opts: ["Tree", "Mountain", "Sun"], ans: "Sun", exp: "The sun travels across the sky all day.\nAs the sun moves, our shadows move and turn too." },
+            /* Quiz 3 Trigger Questions */
             { q: "In the early morning and late evening, shadows are always very ________.", opts: ["Short", "Invisible", "Long"], ans: "Long", exp: "When the sun sits low down in the morning, it casts long beams.\nThis stretches your shadow across the ground." },
             { q: "At noon midday, when the sun is straight above us, shadows are at their ________.", opts: ["Longest", "Colorful", "Shortest"], ans: "Shortest", exp: "At noon, the sun shines straight down from above your head.\nThis makes your shadow tiny right under your feet." },
-            { q: "Making hand shapes inside a bright flashlight beam builds shadow ________ on the wall.", opts: ["Puppets", "Paintings", "Balloons"], ans: "Puppets", exp: "Your hands block the flashlight beam cleanly.\nThis creates funny animal shapes and shapes on the wall." }
+            { q: "Making hand shapes inside a bright flashlight beam builds shadow ________ on the wall.", opts: ["Puppets", "Paintings", "Balloons"], ans: "Puppets", exp: "Your hands block the flashlight beam cleanly.\nThis creates funny animal shapes and shapes on the wall." },
+            /* 10th Grand Finale Bonus Question */
+            { q: "BONUS: True or False? Shadows have colors like bright pink or green.", opts: ["True", "False"], ans: "False", exp: "Shadows are just dark spots where light is missing.\nThey do not show beautiful patterns or bright colors." }
         ];
 
         const EMOJI_DECK = ["🔦", "👻", "☀️", "🧱", "🪟", "📘", "💡", "🎭", "🧭"];
+
+        // FIXED 2.5D PYRAMID GRID COORDINATES FOR A GRADE 2 MAHJONG BOARD
+        const FIXED_LAYOUT = [
+            /* BOTTOM BASE LAYER (12 Tiles) */
+            { r: 0, c: 1, z: 0 }, { r: 0, c: 2, z: 0 }, { r: 0, c: 3, z: 0 }, { r: 0, c: 4, z: 0 },
+            { r: 1, c: 1, z: 0 }, { r: 1, c: 2, z: 0 }, { r: 1, c: 3, z: 0 }, { r: 1, c: 4, z: 0 },
+            { r: 2, c: 1, z: 0 }, { r: 2, c: 2, z: 0 }, { r: 2, c: 3, z: 0 }, { r: 2, c: 4, z: 0 },
+            /* MIDDLE INTERMEDIATE LAYER (5 Tiles) */
+            { r: 0.5, c: 1.5, z: 1 }, { r: 0.5, c: 3.5, z: 1 },
+            { r: 1.5, c: 1.5, z: 1 }, { r: 1.5, c: 3.5, z: 1 },
+            /* TOP APEX CROWN TILE (1 Tile) */
+            { r: 1, c: 2.5, z: 2 }
+        ];
 
         class QuestEngine {
             constructor() {
                 this.tileMatchesCount = 0;
                 this.score = 0;
                 this.lives = 3;
+                
                 this.questionIndex = 0;
+                this.quizTargetLimit = 0; 
+                
                 this.activeSelection = null;
                 this.blockBoardInput = false;
                 this.blockQuizInput = false;
+                this.tilesArray = [];
+                
                 this.confettiParticles = [];
                 this.confettiTimer = null;
 
@@ -415,77 +433,130 @@
             beginPlayfield() {
                 document.getElementById('screen-instructions').style.display = 'none';
                 document.getElementById('screen-playfield').style.display = 'flex';
-                this.generateMahjongTiles();
+                this.generateMahjongPyramid();
             }
 
-            generateMahjongTiles() {
-                const matrix = document.getElementById('tile-matrix');
-                matrix.innerHTML = '';
+            generateMahjongPyramid() {
+                const arena = document.getElementById('tile-arena');
+                arena.innerHTML = '';
                 this.activeSelection = null;
+                this.tilesArray = [];
 
                 let deckList = [];
-                EMOJI_DECK.forEach((emoji, idx) => {
-                    deckList.push({ id: idx * 2, value: emoji });
-                    deckList.push({ id: idx * 2 + 1, value: emoji });
+                EMOJI_DECK.forEach(emoji => {
+                    deckList.push(emoji);
+                    deckList.push(emoji);
                 });
-
                 deckList.sort(() => Math.random() - 0.5);
 
-                deckList.forEach(item => {
-                    const element = document.createElement('div');
-                    element.className = 'tile-unit';
-                    element.id = `tile-node-${item.id}`;
-                    element.innerText = item.value;
-                    element.onclick = () => this.onTileSelected(element, item);
-                    matrix.appendChild(element);
+                FIXED_LAYOUT.forEach((pos, idx) => {
+                    const tileObj = {
+                        id: idx,
+                        value: deckList[idx],
+                        r: pos.r,
+                        c: pos.c,
+                        z: pos.z,
+                        cleared: false,
+                        element: null
+                    };
+                    this.tilesArray.push(tileObj);
+                });
+
+                this.tilesArray.forEach(tile => {
+                    const div = document.createElement('div');
+                    div.className = 'tile-unit';
+                    div.id = `tile-unit-${tile.id}`;
+                    div.innerText = tile.value;
+                    
+                    // Map 2.5D coordinates to real window percentages
+                    div.style.left = `${tile.c * 16 + 10}%`;
+                    div.style.top = `${tile.r * 22 + 10}%`;
+                    div.style.zIndex = tile.z * 10;
+                    
+                    // Add subtle offset to stacked layers for look/feel
+                    if (tile.z > 0) {
+                        div.style.transform = `translate(${-tile.z * 4}px, ${-tile.z * 4}px)`;
+                    }
+
+                    div.onclick = () => this.onTileClick(tile);
+                    tile.element = div;
+                    arena.appendChild(div);
+                });
+
+                this.recalculateBlockerStates();
+            }
+
+            recalculateBlockerStates() {
+                this.tilesArray.forEach(t => {
+                    if (t.cleared) return;
+                    let isBlocked = false;
+
+                    this.tilesArray.forEach(other => {
+                        if (other.cleared || other.id === t.id) return;
+                        // A tile is blocked if an uncleared tile sits on a higher layer (z) directly overlapping it
+                        if (other.z > t.z && Math.abs(other.r - t.r) < 1 && Math.abs(other.c - t.c) < 1) {
+                            isBlocked = true;
+                        }
+                    });
+
+                    if (isBlocked) {
+                        t.element.classList.add('blocked');
+                    } else {
+                        t.element.classList.remove('blocked');
+                    }
+                    t.isBlocked = isBlocked;
                 });
             }
 
-            onTileSelected(element, item) {
-                if (this.blockBoardInput || element.classList.contains('hidden-match')) return;
+            onTileClick(tile) {
+                if (this.blockBoardInput || tile.cleared || tile.isBlocked) return;
 
-                if (this.activeSelection && this.activeSelection.element === element) {
-                    element.classList.remove('chosen');
+                if (this.activeSelection && this.activeSelection.id === tile.id) {
+                    tile.element.classList.remove('chosen');
                     this.activeSelection = null;
                     return;
                 }
 
-                element.classList.add('chosen');
+                tile.element.classList.add('chosen');
 
                 if (!this.activeSelection) {
-                    this.activeSelection = { element, item };
+                    this.activeSelection = tile;
                 } else {
-                    const targetOne = this.activeSelection;
-                    const targetTwo = { element, item };
+                    const first = this.activeSelection;
+                    const second = tile;
                     this.blockBoardInput = true;
 
-                    if (targetOne.item.value === targetTwo.item.value) {
+                    if (first.value === second.value) {
                         this.score += 15;
                         this.tileMatchesCount++;
                         document.getElementById('score-label').innerText = this.score;
-                        
-                        let currentGroupCount = this.tileMatchesCount % 3;
-                        document.getElementById('match-counter').innerText = `${currentGroupCount === 0 && this.tileMatchesCount > 0 ? 3 : currentGroupCount} / 3`;
+
+                        let currentCycleCount = this.tileMatchesCount % 3;
+                        document.getElementById('match-counter').innerText = `${currentCycleCount === 0 && this.tileMatchesCount > 0 ? 3 : currentCycleCount} / 3`;
 
                         setTimeout(() => {
-                            targetOne.element.classList.add('hidden-match');
-                            targetTwo.element.classList.add('hidden-match');
+                            first.cleared = true;
+                            second.cleared = true;
+                            first.element.classList.add('hidden-match');
+                            second.element.classList.add('hidden-match');
+                            
+                            this.recalculateBlockerStates();
                             this.blockBoardInput = false;
                             
                             try { this.audioSuccess.play().catch(()=>{}); } catch(e){}
 
+                            // Triggers exactly 3 consecutive questions every 3 matches
                             if (this.tileMatchesCount > 0 && this.tileMatchesCount % 3 === 0) {
                                 this.triggerYayConfetti();
-                                setTimeout(() => this.openQuizPopupEvent(), 1200);
-                            } else {
-                                this.checkVictoryStatus();
+                                this.quizTargetLimit = this.questionIndex + 3; 
+                                setTimeout(() => this.serveActiveQuestion(), 1200);
                             }
                         }, 400);
                         this.activeSelection = null;
                     } else {
                         setTimeout(() => {
-                            targetOne.element.classList.remove('chosen');
-                            targetTwo.element.classList.remove('chosen');
+                            first.element.classList.remove('chosen');
+                            second.element.classList.remove('chosen');
                             this.blockBoardInput = false;
                         }, 500);
                         this.activeSelection = null;
@@ -493,16 +564,11 @@
                 }
             }
 
-            openQuizPopupEvent() {
-                if (this.questionIndex >= POOL_DATA.length) {
-                    this.checkVictoryStatus();
-                    return;
-                }
-
+            serveActiveQuestion() {
                 this.blockQuizInput = false;
                 const data = POOL_DATA[this.questionIndex];
                 
-                document.getElementById('quiz-lvl-heading').innerText = `Bonus Quiz: Round ${this.questionIndex + 1}`;
+                document.getElementById('quiz-lvl-heading').innerText = `Challenge Question: Round ${this.questionIndex + 1} / 10`;
                 document.getElementById('q-text-node').innerText = data.q;
                 document.getElementById('explain-box-node').style.display = 'none';
                 document.getElementById('quiz-nav-hub').style.display = 'none';
@@ -514,14 +580,14 @@
                     const div = document.createElement('div');
                     div.className = 'opt-row';
                     div.innerText = optionText;
-                    div.onclick = () => this.evaluateQuizAnswer(div, optionText, data.ans, data.exp);
+                    div.onclick = () => this.verifyAnswer(div, optionText, data.ans, data.exp);
                     wrapper.appendChild(div);
                 });
 
                 document.getElementById('quiz-panel').style.display = 'flex';
             }
 
-            evaluateQuizAnswer(selectedDiv, chosenText, correctText, explanationText) {
+            verifyAnswer(selectedDiv, chosenText, correctText, explanationText) {
                 if (this.blockQuizInput) return;
 
                 if (chosenText === correctText) {
@@ -547,7 +613,7 @@
                         setTimeout(() => {
                             document.getElementById('quiz-panel').style.display = 'none';
                             document.getElementById('screen-playfield').style.display = 'none';
-                            document.getElementById('gameover-msg').innerText = `You scored ${this.score} points.`;
+                            document.getElementById('gameover-msg').innerText = `You reached a high score of ${this.score} points!`;
                             document.getElementById('screen-gameover').style.display = 'flex';
                         }, 1000);
                         return;
@@ -555,11 +621,18 @@
                 }
             }
 
-            dismissQuizEvent() {
-                document.getElementById('quiz-panel').style.display = 'none';
-                document.getElementById('match-counter').innerText = "0 / 3";
+            nextQuizOrDismiss() {
                 this.questionIndex++;
-                this.checkVictoryStatus();
+                
+                // If we are within our batch of 3 questions, keep showing them
+                if (this.questionIndex < this.quizTargetLimit && this.questionIndex < 9) {
+                    this.serveActiveQuestion();
+                } else {
+                    // Batch cleared, close modal and return to board
+                    document.getElementById('quiz-panel').style.display = 'none';
+                    document.getElementById('match-counter').innerText = "0 / 3";
+                    this.checkVictoryStatus();
+                }
             }
 
             refreshHeartsHUD() {
@@ -567,7 +640,13 @@
             }
 
             checkVictoryStatus() {
-                if (this.tileMatchesCount === 9) {
+                // If 9 pairs are matched and we finished the first 9 questions, pull up the 10th Grand Bonus question!
+                if (this.tileMatchesCount === 9 && this.questionIndex === 9) {
+                    this.quizTargetLimit = 10;
+                    this.serveActiveQuestion();
+                } 
+                // Once the 10th question is cleared, finish the game with the victory screen
+                else if (this.tileMatchesCount === 9 && this.questionIndex === 10) {
                     try { this.audioApplause.play().catch(()=>{}); } catch(e){}
                     document.getElementById('screen-playfield').style.display = 'none';
                     document.getElementById('screen-victory').style.display = 'flex';
