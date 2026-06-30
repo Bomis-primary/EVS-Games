@@ -1,1 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Festival Brick Adventure - Chapter 15</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=VT323&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        h1, h2, h3, .child-font {
+            font-family: 'Fredoka', cursive;
+        }
 
+        .retro-font {
+            font-family: 'VT323', monospace;
+        }
+
+        /* Simulated plastic hand-held console body casing */
+        .console-case {
+            background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+            box-shadow: 0 20px 0 #ca8a04, 0 25px 40px rgba(0, 0, 0, 0.5);
+            border: 4px solid #fef08a;
+        }
+
+        /* Dark modern retro screen casing overlay */
+        .lcd-screen {
+            background-color: #172554;
+            box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.8), 0 2px 2px rgba(255, 255, 255, 0.1);
+            border: 6px solid #1e3a8a;
+        }
+
+        /* Background grid placeholder spots when empty */
+        .pixel-off {
+            background-color: #020617;
+            border: 1px solid #0f172a;
+        }
+
+        /* Colorful candy piece classes with clear distinct borders */
+        .piece-I { background-color: #f97316; border: 2px solid #fdba74; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); } /* Saffron */
+        .piece-O { background-color: #eab308; border: 2px solid #fef08a; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); } /* Marigold */
+        .piece-T { background-color: #0284c7; border: 2px solid #7dd3fc; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); } /* Peacock Blue */
+        .piece-S { background-color: #ec4899; border: 2px solid #fbcfe8; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); } /* Rose Pink */
+        .piece-Z { background-color: #22c55e; border: 2px solid #86efac; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); } /* Emerald Green */
+        .piece-J { background-color: #a855f7; border: 2px solid #d8b4fe; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); } /* Purple */
+        .piece-L { background-color: #06b6d4; border: 2px solid #a5f3fc; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); } /* Cyan */
+
+        /* Styled physical D-Pad action keys */
+        .retro-pad-btn {
+            background: linear-gradient(to bottom, #dc2626 0%, #b91c1c 100%);
+            box-shadow: 0 5px 0 #991b1b, 0 6px 8px rgba(0,0,0,0.4);
+            transition: all 0.05s ease;
+        }
+        .retro-pad-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #991b1b, 0 3px 4px rgba(0,0,0,0.4);
+        }
+
+        .rotate-action-btn {
+            background: linear-gradient(to bottom, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 0 #1e40af, 0 8px 10px rgba(0,0,0,0.4);
+        }
+        .rotate-action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1e40af, 0 3px 4px rgba(0,0,0,0.4);
+        }
+
+        /* 12-second automated glowing system hint button style */
+        @keyframes softGlowHint {
+            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 10px #f59e0b; transform: scale(1); }
+            50% { border-color: #fbbf24; box-shadow: 0 0 25px #fbbf24; transform: scale(1.02); background-color: #fef3c7; color: #b45309; }
+        }
+        .correct-answer-glow {
+            animation: softGlowHint 1s infinite ease-in-out !important;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-scale {
+            animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-2 m-0 select-none min-h-screen">
+
+    <audio id="soundBg" src="assets/playfulsong.mp3" loop preload="auto"></audio>
+    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="soundClapping" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <div id="splashScreen" class="fixed inset-0 bg-[#ffffff] flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[65vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-md\'>✨</div>';">
+    </div>
+
+    <div class="w-full max-w-xs flex flex-col items-center relative justify-center">
+        
+        <div id="titleView" class="hidden w-full bg-white border-4 border-amber-400 rounded-[36px] p-6 text-center space-y-6 z-30 animate-scale shadow-xl">
+            <div class="space-y-2">
+                <div class="text-6xl animate-bounce">🏮</div>
+                <h1 class="text-3xl font-black text-amber-600 tracking-wide leading-none">Festival Adventure!</h1>
+                <p class="text-xs text-slate-400 uppercase font-bold tracking-widest child-font">Chapter 15: Festivals in India</p>
+            </div>
+            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-sm font-medium text-slate-600 child-font">
+                Learn about amazing Indian festivals while stacking falling colorful bricks! 🧱✨
+            </div>
+            <button onclick="showInstructionScreen()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-black py-4 rounded-2xl shadow-md uppercase tracking-wider text-lg transition-transform active:scale-95 child-font cursor-pointer">
+                START GAME 🚀
+            </button>
+        </div>
+
+        <div id="instructionsView" class="hidden w-full bg-white border-4 border-blue-400 rounded-[36px] p-6 text-center space-y-5 z-30 animate-scale shadow-xl">
+            <h2 class="text-2xl font-bold text-blue-600 tracking-wide">How to Play 🎒</h2>
+            
+            <div class="bg-slate-50 rounded-2xl p-4 text-left space-y-3 border border-slate-200 text-xs font-semibold text-slate-600 child-font">
+                <div class="flex items-start space-x-2">
+                    <span class="text-base">🧱</span>
+                    <span>Move and turn falling color blocks using buttons or keyboard!</span>
+                </div>
+                <div class="flex items-start space-x-2">
+                    <span class="text-base">🔒</span>
+                    <span>Every time <b>3 bricks lock safely</b> in place, a fun festive popup question will appear!</span>
+                </div>
+                <div class="flex items-start space-x-2">
+                    <span class="text-base">❤️</span>
+                    <span>You have <b>3 lives</b>. Answer carefully to beat the level challenge!</span>
+                </div>
+            </div>
+
+            <button onclick="launchCoreGameplay()" class="w-full bg-gradient-to-r from-emerald-500 to-green-500 text-white font-black py-4 rounded-2xl shadow-md uppercase tracking-wider text-lg transition-transform active:scale-95 child-font cursor-pointer">
+                PLAY NOW! ▶️
+            </button>
+        </div>
+
+        <div id="scoreView" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[36px] p-6 text-center space-y-5 z-30 animate-scale shadow-xl">
+            <div class="space-y-1">
+                <span id="victoryEmojiBox" class="text-6xl block animate-bounce">👑</span>
+                <h2 id="victoryStatusTitle" class="text-2xl font-black text-emerald-600">Wonderful Job!</h2>
+                <p id="victoryStatusDesc" class="text-xs text-slate-500 font-bold px-2 child-font">You know so much about the beautiful festivals celebrated across India! 🌟</p>
+            </div>
+            <div class="bg-amber-50 py-3 px-4 rounded-xl border border-amber-200 inline-block">
+                <p class="text-[10px] font-black uppercase text-amber-600 tracking-wider child-font">Final Score</p>
+                <p class="text-3xl font-black text-amber-500 child-font" id="finalScoreLabelField">0</p>
+            </div>
+            <button onclick="restartWholeGameLoop()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl uppercase tracking-wider transition-all child-font cursor-pointer">
+                PLAY AGAIN 🔄
+            </button>
+        </div>
+
+        <div id="consoleShellCasing" class="hidden w-full console-case rounded-[36px] p-4 flex flex-col space-y-4 relative animate-scale z-10">
+            
+            <div class="text-center">
+                <h1 class="retro-font text-2xl font-black italic tracking-widest text-blue-900 drop-shadow-sm uppercase">BRICK ADVENTURE</h1>
+                <div class="text-[9px] font-bold text-yellow-900 tracking-widest -mt-1 opacity-80 child-font">CHAPTER 15: FESTIVALS IN INDIA</div>
+            </div>
+
+            <div class="lcd-screen rounded-xl p-2 flex justify-between space-x-2 relative">
+                
+                <div id="matrixContainer" class="grid grid-cols-10 gap-[1px] w-[150px] h-[300px] bg-[#020617] p-[1px] border border-blue-950">
+                    </div>
+
+                <div class="flex-1 flex flex-col justify-between items-center text-slate-200 retro-font py-1">
+                    
+                    <div class="text-center w-full">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 child-font">SCORE</div>
+                        <div id="scoreLabelDisplay" class="text-xl font-bold tracking-wider text-yellow-400">00000</div>
+                    </div>
+
+                    <div class="text-center w-full">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5 child-font">LIVES</div>
+                        <div id="heartsContainerBox" class="flex items-center justify-center space-x-0.5 text-xs">
+                            ❤️❤️❤️
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="text-[11px] font-bold uppercase tracking-wider mb-0.5 text-slate-400 child-font">NEXT</div>
+                        <div id="previewContainer" class="grid grid-cols-4 gap-[1px] w-[40px] h-[40px] bg-[#020617] p-[1px] border border-blue-950">
+                            </div>
+                    </div>
+
+                    <div class="text-center py-1 bg-blue-950/60 rounded border border-blue-800 w-full px-0.5">
+                        <div class="text-[9px] font-bold text-slate-400 leading-none child-font">QUEST</div>
+                        <div id="questProgressLabel" class="text-sm font-bold text-cyan-400 mt-0.5">0 / 12</div>
+                    </div>
+                </div>
+
+                <div id="questionModalOverlay" class="hidden absolute inset-0 bg-blue-950/95 z-40 rounded-lg flex flex-col justify-between p-3 animate-scale">
+                    
+                    <div class="text-center">
+                        <span id="modalCategoryBadge" class="bg-amber-500 text-white px-3 py-0.5 rounded-full text-[10px] font-extrabold tracking-widest uppercase child-font">DIWALI CHALLENGE</span>
+                    </div>
+
+                    <div class="text-center flex-1 flex items-center justify-center py-1">
+                        <h2 id="questionDisplayLabel" class="text-xs font-bold text-white leading-normal px-1 child-font">
+                            Look! Rohan is lighting tiny clay lamps around his house. He is eating sweet laddoos with his family. What festival is this?
+                        </h2>
+                    </div>
+
+                    <div id="answersGridSlot" class="flex flex-col space-y-1.5 w-full">
+                        </div>
+
+                    <div class="text-center pt-2 border-t border-blue-900 mt-1">
+                        <p id="helperAlertLabel" class="text-[10px] font-bold text-slate-400 leading-tight min-h-[24px] flex items-center justify-center px-1 child-font">
+                            Tap the best choice!
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flex flex-col space-y-2 pt-1">
+                
+                <div class="flex justify-between items-center px-1">
+                    
+                    <div class="relative w-24 h-24 flex items-center justify-center">
+                        <div class="w-7 h-7 bg-yellow-700/20 rounded"></div>
+                        
+                        <button onclick="handleButtonInput('up')" class="absolute top-0 w-8 h-8 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs">▲</button>
+                        <button onclick="handleButtonInput('left')" class="absolute left-0 w-8 h-8 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs">◀</button>
+                        <button onclick="handleButtonInput('right')" class="absolute right-0 w-8 h-8 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs">▶</button>
+                        <button onclick="handleButtonInput('down')" class="absolute bottom-0 w-8 h-8 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs">▼</button>
+                    </div>
+
+                    <div class="flex flex-col items-center space-y-1 mr-2">
+                        <button onclick="handleButtonInput('rotate')" class="w-14 h-14 rotate-action-btn rounded-full flex items-center justify-center text-white font-black text-lg border-t-2 border-blue-300 active:scale-95 transition-transform">
+                            ↻
+                        </button>
+                        <span class="retro-font text-[10px] font-black tracking-wider text-blue-900 uppercase">ROTATE</span>
+                    </div>
+
+                </div>
+
+                <div class="flex justify-center space-x-8 pt-1">
+                    <div class="flex flex-col items-center space-y-0.5">
+                        <button onclick="togglePauseState()" class="w-6 h-6 bg-zinc-700 rounded-full border-b-2 border-zinc-900 active:border-b-0 active:translate-y-[2px] transition-all shadow"></button>
+                        <span class="retro-font text-[10px] font-black text-yellow-900 tracking-wider">PAUSE</span>
+                    </div>
+                    <div class="flex flex-col items-center space-y-0.5">
+                        <button onclick="restartWholeGameLoop()" class="w-6 h-6 bg-zinc-700 rounded-full border-b-2 border-zinc-900 active:border-b-0 active:translate-y-[2px] transition-all shadow"></button>
+                        <span class="retro-font text-[10px] font-black text-yellow-900 tracking-wider">RESET</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const GRID_COLUMNS = 10;
+        const GRID_ROWS = 20;
+
+        // CHAPTER 15 CHILD-FRIENDLY QUESTION BANK (GRADE 2 SIMPLIFIED UK ENGLISH)
+        const chapter15QuizDatabase = [
+            { tag: "DIWALI", q: "Look! Rohan is lighting tiny clay lamps around his house. He is eating sweet laddoos with his family. What festival is this?", options: ["Diwali", "Christmas", "Holi"], ans: "Diwali" },
+            { tag: "HOLI", q: "Lily is playing with bright pink, red, and yellow powders. She splashes her friends with a water gun! What festival of colors is this?", options: ["Eid", "Holi", "Onam"], ans: "Holi" },
+            { tag: "EID-UL-FITR", q: "Zayn sees a beautiful crescent moon in the night sky. The next morning, he wears a new cap and eats sweet pudding. What festival is this?", options: ["Eid-ul-Fitr", "Dussehra", "Republic Day"], ans: "Eid-ul-Fitr" },
+            { tag: "CHRISTMAS", q: "Mary is hanging small bells and stars on a green pine tree. She is waiting for Santa Claus to bring her a gift! What festival is it?", options: ["Gurpurab", "Ganesh Chaturthi", "Christmas"], ans: "Christmas" },
+            { tag: "GANESH CHATURTHI", q: "Aarav is clapping and singing songs for the wise elephant god. He is eating a sweet modak dumpling. Which festival is this?", options: ["Durga Puja", "Ganesh Chaturthi", "Bihu"], ans: "Ganesh Chaturthi" },
+            { tag: "DURGA PUJA", q: "Joy hears loud traditional 'Dhak' drums beating inside a big, decorated tent. Everyone is looking at a beautiful goddess. What festival is it?", options: ["Durga Puja", "Raksha Bandhan", "Christmas"], ans: "Durga Puja" },
+            { tag: "GURPURAB", q: "Simran walks into a beautifully lit Gurdwara. She sits on a clean floor with many people to share a free meal called Langar. What festival is this?", options: ["Holi", "Gurpurab", "Pongal"], ans: "Gurpurab" },
+            { tag: "RAKSHA BANDHAN", q: "Isha ties a colorful, shiny thread around her brother’s wrist. Her brother gives her a gift box and says he will protect her. What is this thread called?", options: ["A Rakhi", "A Garland", "A Ribbon"], ans: "A Rakhi" },
+            { tag: "REPUBLIC DAY", q: "On 26th January, Kabir watches a grand parade with soldiers and bands. Everyone salutes the flying Tricolour flag. What special day is it?", options: ["Independence Day", "Republic Day", "Gandhi Jayanti"], ans: "Republic Day" },
+            { tag: "PONGAL", q: "Amma cooks fresh harvest rice in a pot over a wood fire. When the warm milk boils and overflows, everyone cheers happily! What festival is this?", options: ["Pongal", "Eid", "Diwali"], ans: "Pongal" },
+            { tag: "ONAM", q: "Meera makes a beautiful flower carpet design called a Pookalam on her doorstep to welcome a kind king to Kerala. What harvest festival is this?", options: ["Christmas", "Onam", "Gurpurab"], ans: "Onam" },
+            { tag: "HORNBILL FESTIVAL", q: "Tenzing goes to Nagaland. He sees tribal dancers wearing beautiful feathers and playing big drums at a festival named after a special forest bird. What is it called?", options: ["The Peacock Festival", "The Hornbill Festival", "The Parrot Festival"], ans: "The Hornbill Festival" }
+        ];
+
+        // ENGINE SYSTEM STATE VARIABLES
+        let internalStaticPlayField = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLUMNS).fill(0));
+        let activeTickIntervalLoop = null;
+        let isGameCurrentlyRunning = false;
+        let isEngineOverState = false;
+
+        let accumulatedScorePoints = 0;
+        let userHeartsRemaining = 3;
+        let answeredQuestionsCounter = 0;
+        let bricksDroppedPlacementTracker = 0; // Triggers trivia modal pop up at value 3
+        
+        let activeGlowHintTimerNode = null;
+
+        const TETROMINO_SHAPES = {
+            'I': [[1, 1, 1, 1]],
+            'O': [[1, 1], [1, 1]],
+            'T': [[0, 1, 0], [1, 1, 1]],
+            'S': [[0, 1, 1], [1, 1, 0]],
+            'Z': [[1, 1, 0], [0, 1, 1]],
+            'J': [[1, 0, 0], [1, 1, 1]],
+            'L': [[0, 0, 1], [1, 1, 1]]
+        };
+
+        let currentActivePiece = null;
+        let upcomingQueuedPiece = null;
+
+        let visualGridCacheCells = [];
+        let visualPreviewCacheCells = [];
+
+        // CONFETTI GRAPHICS VARIABLE CONFIGS
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            syncCanvasWindowDimensions();
+            window.addEventListener('resize', syncCanvasWindowDimensions);
+            assembleHTMLGridBoards();
+
+            // FIXED SPLASH TIMEOUT (5 SECONDS EXACTLY)
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('titleView').classList.remove('hidden');
+                }, 500);
+            }, 5000);
+
+            // COMPUTER TACTILE KEYBOARD COMPATIBILITY LISTENERS
+            window.addEventListener('keydown', (e) => {
+                if (!isGameCurrentlyRunning || isEngineOverState || document.getElementById('questionModalOverlay').classList.contains('hidden') === false) return;
+                
+                if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') handleButtonInput('left');
+                else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') handleButtonInput('right');
+                else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') handleButtonInput('rotate');
+                else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') handleButtonInput('up');
+                else if (e.key === ' ' || e.key.toLowerCase() === 'f') handleButtonInput('down');
+            });
+        });
+
+        function syncCanvasWindowDimensions() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function triggerConfettiBurst() {
+            canvas.classList.remove('hidden');
+            confettiParticles = [];
+            for (let i = 0; i < 35; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 14 - 4,
+                    size: Math.random() * 4 + 4,
+                    color: `hsl(${Math.random() * 360}, 90%, 65%)`,
+                    alpha: 1
+                });
+            }
+            requestAnimationFrame(renderConfettiAnimationStep);
+        }
+
+        function renderConfettiAnimationStep() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let componentsAreAlive = false;
+            confettiParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.22;
+                p.alpha -= 0.025;
+                if (p.alpha > 0) {
+                    componentsAreAlive = true;
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+            if (componentsAreAlive) requestAnimationFrame(renderConfettiAnimationStep);
+            else canvas.classList.add('hidden');
+        }
+
+        function showInstructionScreen() {
+            document.getElementById('titleView').classList.add('hidden');
+            document.getElementById('instructionsView').classList.remove('hidden');
+            triggerAudioPipelineTrack('soundBg');
+        }
+
+        function launchCoreGameplay() {
+            document.getElementById('instructionsView').classList.add('hidden');
+            document.getElementById('consoleShellCasing').classList.remove('hidden');
+            restartWholeGameLoop();
+            resumeEngineTicker();
+        }
+
+        function assembleHTMLGridBoards() {
+            const container = document.getElementById('matrixContainer');
+            container.innerHTML = "";
+            visualGridCacheCells = [];
+
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < GRID_COLUMNS; c++) {
+                    const d = document.createElement('div');
+                    d.className = "pixel-off w-full h-full rounded-[1px]";
+                    container.appendChild(d);
+                    visualGridCacheCells.push(d);
+                }
+            }
+
+            const previewBox = document.getElementById('previewContainer');
+            previewBox.innerHTML = "";
+            visualPreviewCacheCells = [];
+
+            for (let i = 0; i < 4 * 4; i++) {
+                const pCell = document.createElement('div');
+                pCell.className = "pixel-off w-full h-full rounded-[1px]";
+                previewBox.appendChild(pCell);
+                visualPreviewCacheCells.push(pCell);
+            }
+        }
+
+        function restartWholeGameLoop() {
+            if (activeTickIntervalLoop) clearInterval(activeTickIntervalLoop);
+            if (activeGlowHintTimerNode) clearTimeout(activeGlowHintTimerNode);
+            
+            internalStaticPlayField = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLUMNS).fill(0));
+            accumulatedScorePoints = 0;
+            userHeartsRemaining = 3;
+            answeredQuestionsCounter = 0;
+            bricksDroppedPlacementTracker = 0;
+            isEngineOverState = false;
+            isGameCurrentlyRunning = false;
+
+            document.getElementById('questionModalOverlay').classList.add('hidden');
+            refreshHeartsMeterHUD();
+            updateScoreDisplays();
+            
+            upcomingQueuedPiece = calculateRandomPieceBlueprint();
+            cycleNextSpawnPiece();
+            repaintDeviceLCDViewports();
+            
+            if(document.getElementById('consoleShellCasing').classList.contains('hidden') === false) {
+                resumeEngineTicker();
+            }
+        }
+
+        function resumeEngineTicker() {
+            isGameCurrentlyRunning = true;
+            activeTickIntervalLoop = setInterval(() => {
+                applyGravityStepTick();
+            }, 800);
+        }
+
+        function togglePauseState() {
+            if (isEngineOverState) return;
+            if (isGameCurrentlyRunning) {
+                isGameCurrentlyRunning = false;
+                clearInterval(activeTickIntervalLoop);
+            } else {
+                resumeEngineTicker();
+            }
+        }
+
+        function refreshHeartsMeterHUD() {
+            let heartString = "";
+            for (let i = 0; i < 3; i++) {
+                heartString += (i < userHeartsRemaining) ? "❤️" : "🖤";
+            }
+            document.getElementById('heartsContainerBox').innerText = heartString;
+        }
+
+        function updateScoreDisplays() {
+            document.getElementById('scoreLabelDisplay').innerText = String(accumulatedScorePoints).padStart(5, '0');
+            document.getElementById('questProgressLabel').innerText = `${answeredQuestionsCounter} / 12`;
+        }
+
+        function calculateRandomPieceBlueprint() {
+            const tokens = Object.keys(TETROMINO_SHAPES);
+            const chosenKey = tokens[Math.floor(Math.random() * tokens.length)];
+            const shapeMatrix = TETROMINO_SHAPES[chosenKey];
+            
+            return {
+                type: chosenKey,
+                shape: shapeMatrix,
+                r: 0,
+                c: Math.floor((GRID_COLUMNS - shapeMatrix[0].length) / 2)
+            };
+        }
+
+        function cycleNextSpawnPiece() {
+            currentActivePiece = upcomingQueuedPiece;
+            upcomingQueuedPiece = calculateRandomPieceBlueprint();
+
+            if (detectMatrixCollisions(currentActivePiece.shape, currentActivePiece.r, currentActivePiece.c)) {
+                isEngineOverState = true;
+                isGameCurrentlyRunning = false;
+                clearInterval(activeTickIntervalLoop);
+                triggerEndGameFinishedView(false);
+            }
+
+            repaintPreviewBoxViewport();
+        }
+
+        function handleButtonInput(action) {
+            if (!isGameCurrentlyRunning || isEngineOverState || !document.getElementById('questionModalOverlay').classList.contains('hidden')) return;
+
+            if (action === 'left') {
+                if (!detectMatrixCollisions(currentActivePiece.shape, currentActivePiece.r, currentActivePiece.c - 1)) {
+                    currentActivePiece.c--;
+                }
+            } else if (action === 'right') {
+                if (!detectMatrixCollisions(currentActivePiece.shape, currentActivePiece.r, currentActivePiece.c + 1)) {
+                    currentActivePiece.c++;
+                }
+            } else if (action === 'up') {
+                applyGravityStepTick();
+            } else if (action === 'down') {
+                while (!detectMatrixCollisions(currentActivePiece.shape, currentActivePiece.r + 1, currentActivePiece.c)) {
+                    currentActivePiece.r++;
+                }
+                applyGravityStepTick();
+                return;
+            } else if (action === 'rotate') {
+                const rotated = computeMatrixRotation(currentActivePiece.shape);
+                if (!detectMatrixCollisions(rotated, currentActivePiece.r, currentActivePiece.c)) {
+                    currentActivePiece.shape = rotated;
+                }
+            }
+
+            repaintDeviceLCDViewports();
+        }
+
+        function computeMatrixRotation(matrix) {
+            const rCount = matrix.length;
+            const cCount = matrix[0].length;
+            let target = Array.from({ length: cCount }, () => Array(rCount).fill(0));
+            for (let r = 0; r < rCount; r++) {
+                for (let c = 0; c < cCount; c++) {
+                    target[c][rCount - 1 - r] = matrix[r][c];
+                }
+            }
+            return target;
+        }
+
+        function detectMatrixCollisions(shape, offsetRow, offsetCol) {
+            for (let r = 0; r < shape.length; r++) {
+                for (let c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c] !== 0) {
+                        let targetR = offsetRow + r;
+                        let targetC = offsetCol + c;
+
+                        if (targetC < 0 || targetC >= GRID_COLUMNS || targetR >= GRID_ROWS) {
+                            return true;
+                        }
+                        if (targetR >= 0 && internalStaticPlayField[targetR][targetC] !== 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function applyGravityStepTick() {
+            if (!isGameCurrentlyRunning || isEngineOverState) return;
+
+            if (!detectMatrixCollisions(currentActivePiece.shape, currentActivePiece.r + 1, currentActivePiece.c)) {
+                currentActivePiece.r++;
+            } else {
+                stampPieceIntoStaticField();
+                evaluateLineClears();
+                
+                bricksDroppedPlacementTracker++;
+                
+                if (bricksDroppedPlacementTracker >= 3) {
+                    bricksDroppedPlacementTracker = 0; 
+                    clearInterval(activeTickIntervalLoop);
+                    triggerTriviaQuestionPopupModal();
+                } else {
+                    cycleNextSpawnPiece();
+                }
+            }
+            repaintDeviceLCDViewports();
+        }
+
+        function stampPieceIntoStaticField() {
+            for (let r = 0; r < currentActivePiece.shape.length; r++) {
+                for (let c = 0; c < currentActivePiece.shape[r].length; c++) {
+                    if (currentActivePiece.shape[r][c] !== 0) {
+                        let targetRow = currentActivePiece.r + r;
+                        let targetCol = currentActivePiece.c + c;
+                        if (targetRow >= 0 && targetRow < GRID_ROWS) {
+                            internalStaticPlayField[targetRow][targetCol] = currentActivePiece.type;
+                        }
+                    }
+                }
+            }
+        }
+
+        function evaluateLineClears() {
+            for (let r = GRID_ROWS - 1; r >= 0; r--) {
+                if (internalStaticPlayField[r].every(val => val !== 0)) {
+                    internalStaticPlayField.splice(r, 1);
+                    internalStaticPlayField.unshift(Array(GRID_COLUMNS).fill(0));
+                    accumulatedScorePoints += 50;
+                    r++;
+                }
+            }
+            updateScoreDisplays();
+        }
+
+        function triggerTriviaQuestionPopupModal() {
+            if (activeGlowHintTimerNode) clearTimeout(activeGlowHintTimerNode);
+
+            // Loop database questions continuously if player continues far
+            const currentItemIndex = answeredQuestionsCounter % chapter15QuizDatabase.length;
+            const dataObj = chapter15QuizDatabase[currentItemIndex];
+
+            document.getElementById('modalCategoryBadge').innerText = `${dataObj.tag} CHALLENGE`;
+            document.getElementById('questionDisplayLabel').innerText = dataObj.q;
+            document.getElementById('helperAlertLabel').innerText = "Tap the best sweet choice above! 🌟";
+            document.getElementById('helperAlertLabel').className = "text-[10px] font-bold text-slate-400 text-center child-font";
+
+            const slot = document.getElementById('answersGridSlot');
+            slot.innerHTML = "";
+
+            dataObj.options.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = "w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 px-3 text-left rounded-xl border border-slate-700 text-xs active:scale-[0.99] transition-all cursor-pointer trivia-item-btn child-font";
+                b.innerText = opt;
+                if(opt === dataObj.ans) {
+                    b.setAttribute('data-target-truth', 'true');
+                }
+                b.onclick = () => submitUserTriviaSelection(opt, b, dataObj);
+                slot.appendChild(b);
+            });
+
+            document.getElementById('questionModalOverlay').classList.remove('hidden');
+
+            // 12-SECOND GLOW HINT TRIGGER SYSTEM
+            activeGlowHintTimerNode = setTimeout(() => {
+                const targetTrueBtn = document.querySelector('.trivia-item-btn[data-target-truth="true"]');
+                if (targetTrueBtn) {
+                    targetTrueBtn.classList.add('correct-answer-glow');
+                    document.getElementById('helperAlertLabel').innerText = "✨ Need help? Tap the glowing golden button!";
+                    document.getElementById('helperAlertLabel').className = "text-[10px] font-extrabold text-amber-400 text-center child-font animate-pulse";
+                }
+            }, 12000);
+        }
+
+        function submitUserTriviaSelection(selectedOption, clickedButtonNode, dataObj) {
+            if (activeGlowHintTimerNode) clearTimeout(activeGlowHintTimerNode);
+            const itemsList = document.querySelectorAll('.trivia-item-btn');
+
+            if (selectedOption === dataObj.ans) {
+                itemsList.forEach(btn => btn.disabled = true);
+                clickedButtonNode.className = "w-full bg-emerald-600 text-white font-bold py-2 px-3 text-center rounded-xl text-xs shadow border border-emerald-400 child-font";
+                
+                triggerAudioPipelineTrack('soundCorrect');
+                triggerConfettiBurst();
+
+                accumulatedScorePoints += 100;
+                answeredQuestionsCounter++;
+                updateScoreDisplays();
+
+                document.getElementById('helperAlertLabel').innerText = "🎉 Super! That is the correct answer!";
+                document.getElementById('helperAlertLabel').className = "text-[10px] font-black text-emerald-400 text-center child-font";
+
+                setTimeout(() => {
+                    document.getElementById('questionModalOverlay').add;
+                    document.getElementById('questionModalOverlay').classList.add('hidden');
+                    
+                    if (answeredQuestionsCounter >= 12) {
+                        triggerEndGameFinishedView(true);
+                    } else {
+                        cycleNextSpawnPiece();
+                        resumeEngineTicker();
+                    }
+                }, 2500);
+
+            } else {
+                triggerAudioPipelineTrack('soundWrong');
+                clickedButtonNode.className = "w-full bg-rose-950/40 text-rose-400 line-through font-semibold py-2 px-3 text-center rounded-xl text-xs border border-rose-900 opacity-60 cursor-not-allowed child-font";
+                clickedButtonNode.disabled = true;
+
+                userHeartsRemaining--;
+                refreshHeartsMeterHUD();
+
+                if (userHeartsRemaining <= 0) {
+                    itemsList.forEach(btn => btn.disabled = true);
+                    document.getElementById('helperAlertLabel').innerText = `Ouch! The correct answer was: ${dataObj.ans}`;
+                    document.getElementById('helperAlertLabel').className = "text-[10px] font-bold text-rose-400 text-center child-font";
+                    
+                    setTimeout(() => {
+                        document.getElementById('questionModalOverlay').classList.add('hidden');
+                        triggerEndGameFinishedView(false);
+                    }, 2500);
+                } else {
+                    document.getElementById('helperAlertLabel').innerText = "❌ Try another choice!";
+                    document.getElementById('helperAlertLabel').className = "text-[10px] font-bold text-rose-400 text-center child-font";
+                    
+                    // Restart 12-second hint countdown timer for remaining buttons
+                    activeGlowHintTimerNode = setTimeout(() => {
+                        const targetTrueBtn = document.querySelector('.trivia-item-btn[data-target-truth="true"]');
+                        if (targetTrueBtn) {
+                            targetTrueBtn.classList.add('correct-answer-glow');
+                        }
+                    }, 12000);
+                }
+            }
+        }
+
+        function triggerEndGameFinishedView(isWinState) {
+            if (activeTickIntervalLoop) clearInterval(activeTickIntervalLoop);
+            if (activeGlowHintTimerNode) clearTimeout(activeGlowHintTimerNode);
+            isEngineOverState = true;
+            isGameCurrentlyRunning = false;
+
+            document.getElementById('consoleShellCasing').style.display = 'none';
+            
+            if (isWinState) {
+                triggerAudioPipelineTrack('soundClapping');
+                document.getElementById('victoryEmojiBox').innerText = "👑";
+                document.getElementById('victoryStatusTitle').innerText = "Wonderful Job!";
+                document.getElementById('victoryStatusDesc').innerText = "You completed all 12 festive quests successfully! You are an Indian Culture Expert! ✨";
+            } else {
+                document.getElementById('victoryEmojiBox').innerText = "🎮";
+                document.getElementById('victoryStatusTitle').innerText = "Game Over!";
+                document.getElementById('victoryStatusDesc').innerText = "Don't worry, try again to learn more about the beautiful festivals of India!";
+            }
+
+            document.getElementById('finalScoreLabelField').innerText = accumulatedScorePoints;
+            document.getElementById('scoreView').classList.remove('hidden');
+        }
+
+        function repaintDeviceLCDViewports() {
+            let bufferGrid = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLUMNS).fill(0));
+
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < GRID_COLUMNS; c++) {
+                    bufferGrid[r][c] = internalStaticPlayField[r][c];
+                }
+            }
+
+            if (currentActivePiece && !isEngineOverState) {
+                for (let r = 0; r < currentActivePiece.shape.length; r++) {
+                    for (let c = 0; c < currentActivePiece.shape[r].length; c++) {
+                        if (currentActivePiece.shape[r][c] !== 0) {
+                            let itemRow = currentActivePiece.r + r;
+                            let itemCol = currentActivePiece.c + c;
+                            if (itemRow >= 0 && itemRow < GRID_ROWS && itemCol >= 0 && itemCol < GRID_COLUMNS) {
+                                bufferGrid[itemRow][itemCol] = currentActivePiece.type;
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < GRID_COLUMNS; c++) {
+                    let idx = r * GRID_COLUMNS + c;
+                    let typeToken = bufferGrid[r][c];
+                    
+                    if (typeToken !== 0) {
+                        visualGridCacheCells[idx].className = `w-full h-full rounded-[1px] piece-${typeToken}`;
+                    } else {
+                        visualGridCacheCells[idx].className = "pixel-off w-full h-full rounded-[1px]";
+                    }
+                }
+            }
+        }
+
+        function repaintPreviewBoxViewport() {
+            visualPreviewCacheCells.forEach(cell => cell.className = "pixel-off w-full h-full rounded-[1px]");
+            if (!upcomingQueuedPiece) return;
+
+            const shape = upcomingQueuedPiece.shape;
+            const sRows = shape.length;
+            const sCols = shape[0].length;
+
+            const rOffset = Math.floor((4 - sRows) / 2);
+            const cOffset = Math.floor((4 - sCols) / 2);
+
+            for (let r = 0; r < sRows; r++) {
+                for (let c = 0; c < sCols; c++) {
+                    if (shape[r][c] !== 0) {
+                        let previewIndex = (rOffset + r) * 4 + (cOffset + c);
+                        if (previewIndex >= 0 && previewIndex < 16) {
+                            visualPreviewCacheCells[previewIndex].className = `w-full h-full rounded-[1px] piece-${upcomingQueuedPiece.type}`;
+                        }
+                    }
+                }
+            }
+        }
+
+        function triggerAudioPipelineTrack(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id !== 'soundBg') el.load();
+                el.play().catch(e => console.log("Audio native play skipped safely: ", e));
+            }
+        }
+    </script>
+</body>
+</html>
