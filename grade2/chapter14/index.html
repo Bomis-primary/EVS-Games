@@ -6,13 +6,11 @@
     <title>The Harmony Wheel</title>
     <style>
         :root {
-            /* Vibrant Kids-Friendly Palettes */
             --bg-gradient: linear-gradient(135deg, #ff007f 0%, #ff7300 50%, #ffec00 100%);
             --panel-bg: rgba(255, 255, 255, 0.96);
             --border-primary: #ff5e00;
             --text-dark: #0f172a;
             
-            /* High-Contrast Wheel Segments matched directly to categories */
             --seg-hinduism: #ffedd5;
             --txt-hinduism: #ea580c;
             --seg-islam: #dcfce7;
@@ -49,7 +47,6 @@
             padding: 12px;
         }
 
-        /* CENTRAL STATIC APPARATUS CONTAINER - PREVENTS ANY SHIFTING OR LEAKING */
         .game-mainframe-board {
             width: 100%;
             max-width: 960px;
@@ -68,7 +65,6 @@
             padding: 24px;
         }
 
-        /* FIXED LOGO SPLASH SCREEN */
         .splash-gate {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -88,7 +84,6 @@
             object-fit: contain;
         }
 
-        /* SCREEN FLOW ROUTERS */
         .flow-screen {
             width: 100%;
             height: 100%;
@@ -99,7 +94,6 @@
             text-align: center;
         }
 
-        /* LARGE CRISP TYPOGRAPHY ELEMENTS */
         .kids-hero-title {
             font-size: 42px;
             font-weight: 900;
@@ -123,7 +117,6 @@
             list-style-position: inside;
         }
 
-        /* ENHANCED ACTION BUTTONS */
         .play-action-btn {
             background: linear-gradient(135deg, #ff007f 0%, #ff5e00 100%);
             color: #ffffff;
@@ -145,7 +138,6 @@
 
         .play-action-btn:active { transform: scale(0.96); }
 
-        /* THE PLAYFIELD GRID CORES */
         .hud-canopy-row {
             width: 100%;
             display: flex;
@@ -165,7 +157,6 @@
             border: 2px solid #ffffff;
         }
 
-        /* MAXIMIZED ADAPTIVE WHEEL CANVAS HUB */
         .wheel-workspace-zone {
             flex: 1;
             display: flex;
@@ -179,8 +170,8 @@
 
         .wheel-outer-rim {
             position: relative;
-            width: clamp(260px, 48vh, 420px);
-            height: clamp(260px, 48vh, 420px);
+            width: clamp(280px, 50vh, 440px);
+            height: clamp(280px, 50vh, 440px);
             background: #ffffff;
             border-radius: 50%;
             padding: 8px;
@@ -212,7 +203,7 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 60px; height: 60px;
+            width: 64px; height: 64px;
             background: #ffffff;
             border: 4px solid #ff7300;
             border-radius: 50%;
@@ -221,14 +212,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 26px;
+            font-size: 28px;
         }
 
         .spin-btn-layout-pad {
             margin-top: 20px;
         }
 
-        /* LARGE OVERLAY DIALOG MODAL GRAPHICS */
         .question-card-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -253,7 +243,7 @@
         }
 
         .question-meta-header {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1.5px;
@@ -262,7 +252,7 @@
         }
 
         .question-text-arena {
-            font-size: 24px; /* ENLARGED FOR HIGH READABILITY */
+            font-size: 24px;
             font-weight: 800;
             color: var(--text-dark);
             line-height: 1.5;
@@ -283,7 +273,7 @@
             border: 3px solid #ffd3e3;
             padding: 16px 24px;
             border-radius: 20px;
-            font-size: 22px; /* ENLARGED */
+            font-size: 22px;
             font-weight: 800;
             color: var(--text-dark);
             cursor: pointer;
@@ -315,7 +305,7 @@
             color: #713f12;
             padding: 14px;
             border-radius: 16px;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             margin-top: 14px;
             text-align: left;
@@ -389,7 +379,7 @@
                     </div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #e2e8f0; padding-top:14px;">
-                        <div class="hud-pill-badge" style="font-size:14px; padding:6px 14px;" id="modal-attempts-badge">Attempts Left: 3</div>
+                        <div class="hud-pill-badge" style="font-size:16px; padding:6px 14px;" id="modal-attempts-badge">Attempts Left: 3</div>
                         <div class="hearts-box" id="modal-hearts-rack">❤️❤️❤️</div>
                     </div>
                     
@@ -567,7 +557,6 @@
                 ctx.clearRect(0, 0, size, size);
 
                 this.wheelSegmentsSequence.forEach((religionKey, idx) => {
-                    // Mathematically center slices off the top 12-o'clock index point flawlessly
                     const baseArcStartAngle = (idx * radiansPerArc) - (Math.PI / 2);
                     const metaData = MASTER_RELIGIONS_MANIFEST[religionKey];
 
@@ -587,10 +576,21 @@
                     ctx.lineWidth = 5;
                     ctx.stroke();
 
+                    // FIXED ALIGNMENT: Drawing text horizontally right-side up relative to its spoke slice vector path
                     ctx.save();
                     ctx.translate(centerCoord, centerCoord);
-                    ctx.rotate(baseArcStartAngle + radiansPerArc / 2);
-                    ctx.textAlign = "right";
+                    
+                    const midAngle = baseArcStartAngle + radiansPerArc / 2;
+                    ctx.rotate(midAngle);
+                    
+                    ctx.translate(wheelRadius - 75, 0);
+                    
+                    // Automatically counter-rotates text if it hits bottom half zones so words never display flipped upside down
+                    if (midAngle > 0 && midAngle < Math.PI) {
+                        ctx.rotate(Math.PI);
+                    }
+
+                    ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     
                     if (this.completedReligions.has(religionKey)) {
@@ -599,8 +599,9 @@
                         ctx.fillStyle = metaData.txtColor;
                     }
 
-                    ctx.font = "900 16px 'Comic Sans MS', sans-serif";
-                    ctx.fillText(metaData.label, wheelRadius - 30, 0);
+                    // Boosted label thickness and font clarity sizing scale
+                    ctx.font = "900 17px 'Comic Sans MS', sans-serif";
+                    ctx.fillText(metaData.label, 0, 0);
                     ctx.restore();
                 });
 
@@ -624,7 +625,6 @@
                 const totalSegmentsCount = this.wheelSegmentsSequence.length;
                 const degreesPerSlice = 360 / totalSegmentsCount;
                 
-                // Pinpoint landing logic: calculates specific rotation angles so needle stops inside the correct spoken category segment
                 const targetSliceCenterDegrees = (segmentIndex * degreesPerSlice) + (degreesPerSlice / 2);
                 const absoluteTargetRotationValue = 360 - targetSliceCenterDegrees;
 
@@ -727,12 +727,10 @@
 
             advanceGameTurnFlow() {
                 this.currentQuestionIdx++;
+                this.refreshHUDLabels();
                 document.getElementById('spin-btn-element').disabled = false;
                 
-                if (this.currentQuestionIdx < 11) {
-                    // Update HUD text counters ONLY here upon entering next question flow safely
-                    this.refreshHUDLabels();
-                } else {
+                if (this.currentQuestionIdx >= 11) {
                     document.getElementById('screen-playfield').style.display = "none";
                     document.getElementById('victory-score-label').innerText = `Amazing work! You scored ${this.score} out of 110 points!`;
                     document.getElementById('screen-victory').style.display = "flex";
