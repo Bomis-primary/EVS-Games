@@ -75,7 +75,7 @@
             overflow: hidden;
         }
 
-        /* 5-SECOND SPLASH PORTAL GATEWAY */
+        /* 5-SECOND TIMED LOGO GATEWAY */
         .splash-gate {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -436,7 +436,6 @@
     <canvas id="celebration-canvas"></canvas>
 
     <script>
-        // STRUCTURAL CONTENT DICTIONARY (UK ENGLISH CONTEXT CHECKED)
         const MASTER_RIDDLES = [
             { id: "potter", label: "Potter", emoji: "🏺", riddle: "I spin wet clay on my large wheel to shape beautiful pots, diyas, and vases. Who am I?", hint: "Look for the clay worker spinning a big round wheel!" },
             { id: "tailor", label: "Tailor", emoji: "🪡", riddle: "I use sharp scissors, measuring tape, and a sewing machine to stitch your beautiful clothes. Who am I?", hint: "This helper uses threads and needles to mend outfits!" },
@@ -462,7 +461,7 @@
                 this.caseOrder = [];
                 this.solvedItemsList = new Set();
 
-                // Dynamic Audio Anchors
+                // Audio Assets
                 this.audioCorrect = new Audio("assets/correct.mp3");
                 this.audioWrong = new Audio("assets/wrong.mp3");
                 this.audioClaps = new Audio("assets/freesound_community-claps-44774.mp3");
@@ -472,7 +471,6 @@
             }
 
             init() {
-                // Fixed exactly to a 5-second logo delay sequence window
                 setTimeout(() => {
                     const splash = document.getElementById('splash-screen');
                     splash.style.opacity = '0';
@@ -482,8 +480,8 @@
                     }, 600);
                 }, 5000);
 
-                // Fully randomized map tracking indexes array
-                this.caseOrder = [...Array(MASTER_RIDRLES = MASTER_RIDDLES.length).keys()].sort(() => Math.random() - 0.5);
+                // FIXED TYPO HERE (Changed MASTER_RIDRLES to MASTER_RIDDLES)
+                this.caseOrder = [...Array(MASTER_RIDDLES.length).keys()].sort(() => Math.random() - 0.5);
             }
 
             transitionToInstructions() {
@@ -524,7 +522,6 @@
                 const hintDrawer = document.getElementById('hint-drawer-node');
                 hintDrawer.style.display = 'none';
 
-                // Clean glowing outline properties from the selection matrix elements
                 MASTER_RIDDLES.forEach(item => {
                     const el = document.getElementById(`card-id-${item.id}`);
                     if (el) el.classList.remove('glowing-hint');
@@ -549,29 +546,27 @@
                     this.blockInput = true;
                     this.solvedItemsList.add(correctId);
                     
-                    // Increment scoring ledger (+10 per solved question)
                     this.score += 10;
                     document.getElementById('hud-score-label').innerText = `Score: ${this.score}`;
                     
                     try { this.audioCorrect.play().catch(()=>{}); } catch(e){}
                     this.triggerConfettiBurst();
 
-                    // Apply visual correct frames
                     cardElement.style.background = 'var(--pastel-green)';
                     cardElement.style.borderColor = 'var(--pastel-green-dark)';
                     
-                    // POST-ANSWER IDENTITY REVEAL: Build and mount the beautiful lavender banner underneath the card
+                    // POST-ANSWER REVEAL BANNER
                     const identityBanner = document.createElement('div');
                     identityBanner.className = 'reveal-identity-banner';
                     identityBanner.innerText = activeCaseData.label;
                     cardElement.appendChild(identityBanner);
 
-                    // Pause execution state loop for exactly 1.5 seconds so children can view the revealed identity label
+                    // 1.5 Second learning pause state
                     setTimeout(() => {
                         cardElement.classList.add('card-faded-out');
                         setTimeout(() => {
                             this.currentCaseIndex++;
-                            if (this.currentCaseIndex < MASTER_RIDDLES.length) {
+                            if (this.currentCaseIndex < MASTER_RIDRLES = MASTER_RIDDLES.length) {
                                 this.loadActiveCase();
                             } else {
                                 this.triggerVictoryScreen();
@@ -603,7 +598,7 @@
                         cardElement.classList.remove('incorrect-shake');
                         this.blockInput = false;
 
-                        // STRIKT CHECK: Prompt the yellow text layout clue drawer EXACTLY after 2 wrong attempts
+                        // Hint pop up logic strict parameter check
                         if (this.wrongAttemptsOnCurrentCase >= 2) {
                             const hintDrawer = document.getElementById('hint-drawer-node');
                             hintDrawer.innerText = `💡 HINT: ${activeCaseData.hint}`;
