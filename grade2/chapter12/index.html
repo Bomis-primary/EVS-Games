@@ -1,1 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Guard: Shadow Defense</title>
+    <style>
+        :root {
+            --space-bg: #090a14;
+            --neon-cyan: #00f0ff;
+            --neon-green: #39ff14;
+            --neon-pink: #ff007f;
+            --gold-glow: #fffb00;
+            --glass-panel: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.12);
+        }
 
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes beamPulse {
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pointFloat {
+            0% { transform: translateY(0px) scale(0.8); opacity: 0; }
+            20% { opacity: 1; transform: translateY(-15px) scale(1.2); }
+            100% { transform: translateY(-50px) scale(1); opacity: 0; }
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% { box-shadow: 0 0 4px var(--gold-glow); transform: scale(1); }
+            50% { box-shadow: 0 0 20px var(--gold-glow); transform: scale(1.04); }
+        }
+
+        @keyframes correctGlow {
+            0%, 100% { border-color: rgba(57, 255, 20, 0.3); box-shadow: 0 0 5px rgba(57, 255, 20, 0.2); }
+            50% { border-color: var(--neon-green); box-shadow: 0 0 20px var(--neon-green); }
+        }
+
+        @keyframes logoFadeIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes confet {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--space-bg);
+            color: #fff;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cosmic-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+            background-size: 350px 350px, 250px 250px;
+            z-index: -1;
+        }
+
+        /* Full Screen Screen Engine Flow Panels */
+        .flow-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        /* FIXED: Clean background for your asset image */
+        #intro-logo-screen { 
+            background: #000000; 
+        }
+
+        .innovine-logo-asset {
+            max-width: 280px;
+            height: auto;
+            animation: logoFadeIn 1.2s ease-out forwards;
+        }
+
+        #title-menu-screen, #instruction-flow-screen {
+            background: rgba(9, 10, 20, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .title-banner {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--neon-cyan), #fffb00, var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            line-height: 1.2;
+        }
+
+        .instruction-card {
+            background: var(--glass-panel);
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            border-radius: 20px;
+            max-width: 500px;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .instruction-card h3 { color: var(--neon-cyan); margin-top: 0; }
+        .instruction-card ul { text-align: left; margin-left: 10px; padding-left: 10px; }
+        .instruction-card li { margin-bottom: 10px; }
+
+        /* Game Board Wrapper */
+        .game-wrapper {
+            width: 100%;
+            max-width: 850px;
+            padding: 12px;
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        header {
+            background: var(--glass-panel);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .logo-area h1 {
+            margin: 0;
+            font-size: 20px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--gold-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-deck {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-capsule {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        #score-display { color: var(--neon-green); }
+        #lives-display { color: var(--neon-pink); }
+
+        .quiz-terminal {
+            background: rgba(11, 13, 28, 0.85);
+            border: 1.5px solid var(--neon-cyan);
+            border-radius: 18px;
+            padding: 18px;
+            position: relative;
+        }
+
+        .prompt-header {
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            color: var(--neon-cyan);
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .sentence-box {
+            font-size: 17px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.02);
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        .sentence-blank {
+            display: inline-block;
+            min-width: 110px;
+            border-bottom: 2px dashed rgba(255,255,255,0.5);
+            text-align: center;
+            color: var(--gold-glow);
+            font-weight: bold;
+        }
+
+        .sentence-blank.filled {
+            border-bottom-style: solid;
+            border-bottom-color: var(--neon-green);
+        }
+
+        .matrix-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .option-capsule {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .option-capsule:hover {
+                background: rgba(255,255,255,0.1);
+                transform: translateY(-2px);
+            }
+        }
+
+        .option-capsule.glow-assistance {
+            animation: correctGlow 1.5s infinite ease-in-out;
+        }
+
+        .option-capsule.success-state {
+            background: rgba(57, 255, 20, 0.15) !important;
+            border-color: var(--neon-green) !important;
+            color: var(--neon-green);
+        }
+
+        .option-capsule.error-state {
+            background: rgba(255, 0, 127, 0.15) !important;
+            border-color: var(--neon-pink) !important;
+            color: var(--neon-pink);
+        }
+
+        .hint-system { margin-top: 12px; }
+        .hint-trigger {
+            background: none;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--neon-cyan);
+            padding: 6px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .hint-trigger.urgent-flash {
+            animation: urgentPulse 1s infinite ease-in-out;
+            color: var(--gold-glow);
+            border-color: var(--gold-glow);
+        }
+
+        .hologram-viewport {
+            background: rgba(0, 240, 255, 0.02);
+            border: 1px dashed rgba(0, 240, 255, 0.15);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #a5b4fc;
+            display: none;
+        }
+
+        .battle-arena {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            background: var(--glass-panel);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 12px;
+            position: relative;
+        }
+
+        .grid-tile {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-size: 26px;
+        }
+
+        .grid-tile.path-tile {
+            background: rgba(24, 28, 48, 0.7);
+            border: 1px dashed rgba(0, 240, 255, 0.15);
+        }
+
+        .grid-tile.build-tile { cursor: pointer; }
+
+        .light-beam {
+            position: absolute;
+            background: linear-gradient(90deg, rgba(255, 251, 0, 0.35), rgba(255, 251, 0, 0.02));
+            pointer-events: none;
+            z-index: 2;
+            animation: beamPulse 1.5s infinite ease-in-out;
+            mix-blend-mode: screen;
+        }
+
+        .shadow-cast {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.6);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .creeper-sprite {
+            animation: float 2s infinite ease-in-out;
+            z-index: 3;
+            display: inline-block;
+        }
+
+        .creeper-sprite.hit-flash { filter: drop-shadow(0 0 10px var(--neon-pink)) brightness(1.3); }
+        .creeper-sprite.shadow-healed { filter: drop-shadow(0 0 10px var(--neon-green)); }
+
+        .arsenal-dock {
+            background: var(--glass-panel);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .arsenal-card {
+            flex: 1;
+            background: rgba(0,0,0,0.25);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .arsenal-card.selected-card {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 240, 255, 0.06);
+        }
+
+        .card-ico { font-size: 22px; margin-bottom: 2px; }
+        .card-name { font-size: 11px; font-weight: bold; display: block; }
+
+        .floating-xp {
+            position: fixed;
+            font-weight: 900;
+            font-size: 22px;
+            color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+            pointer-events: none;
+            z-index: 999;
+            animation: pointFloat 0.8s forwards ease-out;
+        }
+
+        .recovery-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 5, 12, 0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .recovery-pod {
+            background: rgba(14, 18, 38, 0.98);
+            border: 1.5px solid var(--neon-cyan);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .recovery-pod h2 { margin: 0 0 10px 0; font-size: 20px; color: var(--neon-cyan); }
+        .recovery-pod p { font-size: 14px; color: #cbd5e1; line-height: 1.4; }
+
+        .action-btn {
+            background: linear-gradient(45deg, var(--neon-cyan), #0066ff);
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .confetti-particle {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 6000;
+            pointer-events: none;
+            animation: confet 2.5s linear forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cosmic-bg"></div>
+
+    <div id="intro-logo-screen" class="flow-screen">
+        <img src="./assets/innovine.png" alt="Innovine Logo" class="innovine-logo-asset" onerror="this.style.display='none'; document.getElementById('alt-logo-fallback').style.display='block';">
+        <div id="alt-logo-fallback" style="display: none;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🚀</div>
+            <h2 style="letter-spacing: 5px; color: var(--neon-cyan); font-weight: 800; font-size: 32px; margin: 0;">INNOVINE</h2>
+        </div>
+    </div>
+
+    <div id="title-menu-screen" class="flow-screen" style="display: none; opacity: 0;">
+        <div style="font-size: 60px; margin-bottom: 10px;">☀️</div>
+        <div class="title-banner">SOLAR GUARD:<br>SHADOW DEFENSE</div>
+        <p style="max-width: 400px; color: #cbd5e1; font-size: 15px; margin-bottom: 25px; line-height: 1.5;">
+            Master the properties of light, opaque objects, and changing shadows to defend your sector!
+        </p>
+        <button class="action-btn" onclick="appEngine.showInstructionFlow()">START MISSION 🚀</button>
+    </div>
+
+    <div id="instruction-flow-screen" class="flow-screen" style="display: none;">
+        <div class="instruction-card">
+            <h3 id="instruction-title-node">📝 MISSION BRIEFING</h3>
+            <div id="instruction-text-node"></div>
+        </div>
+        <button class="action-btn" id="instruction-confirm-btn" onclick="appEngine.startGameplayAfterBriefing()">INITIALIZE INTERFACE ➡️</button>
+    </div>
+
+    <div id="recovery-modal" class="recovery-layer">
+        <div class="recovery-pod">
+            <h2 id="recovery-title">🛸 Sector File Recovered</h2>
+            <p id="recovery-desc">Your strategic game file data has been restored successfully.</p>
+            <div id="recovery-data-text" style="color: var(--gold-glow); margin: 12px 0; font-weight: bold; font-size: 14px;"></div>
+            <button class="action-btn" id="recovery-main-btn" onclick="appEngine.confirmResume()">🚀 Continue</button>
+            <button class="action-btn" id="recovery-sub-btn" style="background: rgba(255,255,255,0.08); margin-left: 8px;" onclick="appEngine.declineResume()">Restart</button>
+        </div>
+    </div>
+
+    <div class="game-wrapper" id="master-game-panel">
+        <header>
+            <div class="logo-area">
+                <h1>Solar Guard</h1>
+            </div>
+            <div class="stats-deck">
+                <div class="stat-capsule"><span id="wave-title-icon">🌅</span><span id="wave-display-text">WAVE 1</span></div>
+                <div class="stat-capsule">🏆 <span id="score-display">000</span></div>
+                <div class="stat-capsule"><span id="lives-display">❤️❤️❤️</span></div>
+            </div>
+        </header>
+
+        <section class="quiz-terminal">
+            <div class="prompt-header">🚨 SHIELD CONSOLE ACTIVATION</div>
+            <div class="sentence-box" id="sentence-prompt-container">
+                Loading database parameters...
+            </div>
+            <div class="matrix-options" id="options-grid-container"></div>
+            <div class="hint-system">
+                <button class="hint-trigger" id="hint-btn" onclick="appEngine.revealHint()">💡 ACTIVATE SCI-SCAN</button>
+                <div class="hologram-viewport" id="hint-viewport-container"></div>
+            </div>
+        </section>
+
+        <main class="battle-arena" id="arena-grid"></main>
+
+        <footer class="arsenal-dock">
+            <div class="arsenal-card selected-card" data-build-item="flashlight" onclick="appEngine.selectArsenal(this)">
+                <div class="card-ico">🔦</div>
+                <span class="card-name">Flashlight</span>
+            </div>
+            <div class="arsenal-card" data-build-item="brick" onclick="appEngine.selectArsenal(this)">
+                <div class="card-ico">🧱</div>
+                <span class="card-name">Opaque Brick</span>
+            </div>
+            <div class="arsenal-card" data-build-item="glass" onclick="appEngine.selectArsenal(this)">
+                <div class="card-ico">🪟</div>
+                <span class="card-name">Clear Glass</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const ASSET_PATH = "./assets/";
+        
+        const QUESTION_POOL = [
+            { id: 1, waveTitle: "WAVE 1", waveIcon: "🌅", sentenceBefore: "Shadows can only be formed when there is a clear path of running ", sentenceAfter: " available in the sector.", options: ["🌬️ Wind", "💧 Water", "💡 Light"], correctAnswer: "💡 Light", hint: "🌅 When morning starts, the bright sun rises and shines down. Shadows cannot appear in dark rooms where there is no light source!" },
+            { id: 2, waveTitle: "WAVE 2", waveIcon: "🧱", sentenceBefore: "A dark shadow patch is successfully made when an object completely ", sentenceAfter: " the path of light.", options: ["🔍 Bends", "🪟 Passes", "🧱 Blocks"], correctAnswer: "🧱 Blocks", hint: "🧱 When you hold your hand in front of a flashlight, it stops the beam! A shadow happens because light is blocked." },
+            { id: 3, waveTitle: "WAVE 3", waveIcon: "🧭", sentenceBefore: "An object's shadow is always cast and formed on the ", sentenceAfter: " side of the active light source.", options: ["⬆️ Same", "☁️ Sky", "➡️ Opposite"], correctAnswer: "➡️ Opposite", hint: "🔦 If a flashlight shines from the Left, the dark shadow is thrown onto the Right wall! It always points away on the opposite side." },
+            { id: 4, waveTitle: "WAVE 4", waveIcon: "🪟", sentenceBefore: "Light passes completely through a window pane because glass is a ", sentenceAfter: " material structure.", options: ["🪵 Opaque", "🌑 Dark", "🪟 Transparent"], correctAnswer: "🪟 Transparent", hint: "🪟 Clear glass doesn't make a dark shadow because it lets all light beams pass cleanly straight through without stopping them." },
+            { id: 5, waveTitle: "WAVE 5", waveIcon: "📘", sentenceBefore: "A textbook or solid brick forms a dark shadow on the ground because paper is ", sentenceAfter: " in nature.", options: ["🪟 Transparent", "🧊 Clear", "📘 Opaque"], correctAnswer: "📘 Opaque", hint: "📘 Solid objects like wood, paper, and metal are opaque bodies. They block light fully and cast dark patches." },
+            { id: 6, waveTitle: "WAVE 6", waveIcon: "☀️", sentenceBefore: "The position and length of shadows change throughout the day because the position of the ", sentenceAfter: " shifts.", options: ["🌲 Tree", "⛰️ Mountain", "☀️ Sun"], correctAnswer: "☀️ Sun", hint: "☀️ As hours pass, the sun travels in an arc from East to West across the sky, which constantly warps the shadows below." },
+            { id: 7, waveTitle: "WAVE 7", waveIcon: "📏", sentenceBefore: "In the early Morning and late Evening hours, the shadows of trees and poles are always very ", sentenceAfter: " visually.", options: ["🤏 Short", "❌ Invisible", "📏 Long"], correctAnswer: "📏 Long", hint: "🌅 When the sun is low down near the horizon in the morning or evening, it shoots flat rays that stretch shadows out long." },
+            { id: 8, waveTitle: "WAVE 8", waveIcon: "🕛", sentenceBefore: "At 🕛 Noon, when the sun stands directly above our head, the shadows are at their ", sentenceAfter: " length.", options: ["📏 Longest", "🌈 Colorful", "🤏 Shortest"], correctAnswer: "🤏 Shortest", hint: "🕛 At midday, the sun is directly on top of us. Light beams hit straight down, creating tiny, small shadows right underneath." },
+            { id: 9, waveTitle: "WAVE 9", waveIcon: "🧭", sentenceBefore: "If you stand outside at dawn facing directly towards the rising sun, your eyes look directly ", sentenceAfter: ".", options: ["⬅️ West", "⬆️ North", "➡️ East"], correctAnswer: "➡️ East", hint: "🌅 The sun always wakes up and rises in the East! Facing it means East is front, West is behind, and North is your Left arm." },
+            { id: 10, waveTitle: "WAVE 10", waveIcon: "🎭", sentenceBefore: "We can form funny animal shadow puppets on the wall screen by matching hand shapes in front of a ", sentenceAfter: " source.", options: ["🌬️ Air", "🎨 Paint", "🔦 Flashlight"], correctAnswer: "🔦 Flashlight", hint: "🎭 Your hands act as an opaque object blocking a flashlight beam to create shapes like rabbits and kangaroos on the wall!" }
+        ];
+
+        class SolarGuardEngine {
+            constructor() {
+                this.gridSize = 5;
+                this.score = 0;
+                this.lives = 3;
+                this.currentQuestionIdx = 0;
+                this.selectedTool = 'flashlight';
+                this.activeGridData = Array(5).fill(null).map(() => Array(5).fill('empty'));
+                this.wrongAttemptsForCurrentQuestion = 0;
+                this.pathRow = 2;
+                this.blockInput = false;
+
+                this.audioCorrect = new Audio(ASSET_PATH + "correct.mp3");
+                this.audioWrong = new Audio(ASSET_PATH + "wrong.mp3");
+                this.audioVictory = new Audio(ASSET_PATH + "freesound_community-claps-44774.mp3");
+            }
+
+            init() {
+                this.buildMapLayout();
+                
+                // FORCE THE INNOVINE INTRO IMAGE SCREEN TO REMAIN ACTIVE FOR EXACTLY 5 SECONDS
+                setTimeout(() => {
+                    const introScreen = document.getElementById('intro-logo-screen');
+                    const titleScreen = document.getElementById('title-menu-screen');
+                    
+                    introScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        introScreen.style.display = 'none';
+                        titleScreen.style.display = 'flex';
+                        setTimeout(() => titleScreen.style.opacity = '1', 50);
+                    }, 500);
+                }, 5000);
+            }
+
+            playSound(type) {
+                let target = null;
+                if (type === 'correct') target = this.audioCorrect;
+                if (type === 'wrong') target = this.audioWrong;
+                if (type === 'victory') target = this.audioVictory;
+                if (target) {
+                    target.currentTime = 0;
+                    target.play().catch(() => {});
+                }
+            }
+
+            showInstructionFlow() {
+                document.getElementById('title-menu-screen').style.display = 'none';
+                this.checkSavedState();
+            }
+
+            checkSavedState() {
+                const savedProgress = localStorage.getItem('solar_guard_save_state');
+                if (savedProgress) {
+                    try {
+                        const parsed = JSON.parse(savedProgress);
+                        if (parsed.currentIdx >= 0 && parsed.currentIdx < QUESTION_POOL.length && parsed.savedLives > 0) {
+                            document.getElementById('recovery-data-text').innerText = `Wave: ${parsed.currentIdx + 1} | Score: ${parsed.savedScore} | Lives: ${parsed.savedLives}`;
+                            document.getElementById('recovery-modal').style.display = 'flex';
+                            this.cacheParsedData = parsed;
+                            return;
+                        }
+                    } catch(e) { localStorage.removeItem('solar_guard_save_state'); }
+                }
+                this.presentIntermissionBriefing(0);
+            }
+
+            confirmResume() {
+                if (this.cacheParsedData) {
+                    this.score = this.cacheParsedData.savedScore;
+                    this.currentQuestionIdx = this.cacheParsedData.currentIdx;
+                    this.lives = this.cacheParsedData.savedLives;
+                    this.updateStatsDisplay();
+                }
+                document.getElementById('recovery-modal').style.display = 'none';
+                this.loadActiveWaveLevel(this.currentQuestionIdx);
+            }
+
+            declineResume() {
+                localStorage.removeItem('solar_guard_save_state');
+                document.getElementById('recovery-modal').style.display = 'none';
+                this.presentIntermissionBriefing(0);
+            }
+
+            presentIntermissionBriefing(targetIdx) {
+                this.pendingTargetIndex = targetIdx;
+                document.getElementById('master-game-panel').style.display = 'none';
+                const panel = document.getElementById('instruction-flow-screen');
+                const title = document.getElementById('instruction-title-node');
+                const text = document.getElementById('instruction-text-node');
+                const btn = document.getElementById('instruction-confirm-btn');
+
+                panel.style.display = 'flex';
+
+                if (targetIdx === 0) {
+                    title.innerText = "🌅 WAVE 1 BRIEFING: LIGHT & SHADOWS";
+                    text.innerHTML = `
+                        <ul>
+                            <li><strong>💡 Light Rule:</strong> Shadows only form when there is light! If you go into a dark room with no light, shadows completely vanish.</li>
+                            <li><strong>🧱 Formation:</strong> Your hands, toys, and books block light rays to make dark patches on the wall.</li>
+                        </ul>`;
+                    btn.innerText = "PLAY WAVE 1 🚀";
+                } else if (targetIdx === 1) {
+                    title.innerText = "🕛 WAVE 2 BRIEFING: TIMES OF THE DAY";
+                    text.innerHTML = `
+                        <ul>
+                            <li><strong>🌅 Morning & Evening:</strong> The sun sits low in the sky, shooting long flat rays that make shadows extra <strong>LONG</strong>!</li>
+                            <li><strong>🕛 Noon Midday:</strong> The sun stands directly above your head! The light hits straight down, making shadows very <strong>SHORT</strong>.</li>
+                        </ul>`;
+                    btn.innerText = "START LEVEL 2 ⚡";
+                } else if (targetIdx === 2) {
+                    title.innerText = "🧭 WAVE 3 BRIEFING: THE COMPASS RULES";
+                    text.innerHTML = `
+                        <ul>
+                            <li><strong>🌅 Face the Sunrise:</strong> The sun always rises in the <strong>EAST</strong>. If you look straight at it in the morning, East is in front of you!</li>
+                            <li><strong>⬅️ Behind & Sides:</strong> <strong>WEST</strong> is behind your back, your Left arm points <strong>NORTH</strong>, and your Right arm points <strong>SOUTH</strong>.</li>
+                        </ul>`;
+                    btn.innerText = "START LEVEL 3 🛡️";
+                } else {
+                    this.startGameplayAfterBriefing();
+                }
+            }
+
+            startGameplayAfterBriefing() {
+                document.getElementById('instruction-flow-screen').style.display = 'none';
+                document.getElementById('master-game-panel').style.display = 'flex';
+                this.loadActiveWaveLevel(this.pendingTargetIndex);
+            }
+
+            buildMapLayout() {
+                const arena = document.getElementById('arena-grid');
+                arena.innerHTML = '';
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        const tile = document.createElement('div');
+                        tile.id = `tile-${r}-${c}`;
+                        tile.classList.add('grid-tile');
+                        if (r === this.pathRow) {
+                            tile.classList.add('path-tile');
+                            tile.innerHTML = `<span class="creeper-sprite" id="ghost-element-${c}">👻</span>`;
+                        } else {
+                            tile.classList.add('build-tile');
+                            tile.setAttribute('onclick', `appEngine.handleTileInteraction(${r}, ${c})`);
+                        }
+                        arena.appendChild(tile);
+                    }
+                }
+            }
+
+            updateStatsDisplay() {
+                document.getElementById('score-display').innerText = String(this.score).padStart(3, '0');
+                document.getElementById('lives-display').innerText = "❤️".repeat(this.lives) + "🖤".repeat(3 - this.lives);
+            }
+
+            loadActiveWaveLevel(idx) {
+                this.currentQuestionIdx = idx;
+                if (this.currentQuestionIdx >= QUESTION_POOL.length) {
+                    this.triggerVictorySequence();
+                    return;
+                }
+                
+                this.activeQuestion = QUESTION_POOL[this.currentQuestionIdx];
+                this.wrongAttemptsForCurrentQuestion = 0;
+                
+                localStorage.setItem('solar_guard_save_state', JSON.stringify({
+                    currentIdx: this.currentQuestionIdx,
+                    savedScore: this.score,
+                    savedLives: this.lives
+                }));
+
+                document.getElementById('wave-title-icon').innerText = this.activeQuestion.waveIcon;
+                document.getElementById('wave-display-text').innerText = `${this.activeQuestion.waveTitle}`;
+                this.updateStatsDisplay();
+                
+                this.activeGridData = Array(5).fill(null).map(() => Array(5).fill('empty'));
+                this.buildMapLayout();
+                this.renderDynamicPhysicsEngine();
+
+                document.getElementById('hint-btn').classList.remove('urgent-flash');
+                document.getElementById('hint-viewport-container').style.display = 'none';
+                
+                document.getElementById('sentence-prompt-container').innerHTML = `
+                    ${this.activeQuestion.sentenceBefore}<span class="sentence-blank" id="target-blank">______</span>${this.activeQuestion.sentenceAfter}
+                `;
+
+                const choices = [...this.activeQuestion.options];
+                const optionsContainer = document.getElementById('options-grid-container');
+                optionsContainer.innerHTML = '';
+                choices.forEach(opt => {
+                    const card = document.createElement('div');
+                    card.classList.add('option-capsule');
+                    card.innerText = opt;
+                    card.setAttribute('data-option-val', opt);
+                    card.setAttribute('onclick', `appEngine.processAnswer(this, '${opt.replace(/'/g, "\\'")}')`);
+                    optionsContainer.appendChild(card);
+                });
+            }
+
+            selectArsenal(element) {
+                document.querySelectorAll('.arsenal-card').forEach(c => c.classList.remove('selected-card'));
+                element.classList.add('selected-card');
+                this.selectedTool = element.getAttribute('data-build-item');
+            }
+
+            handleTileInteraction(row, col) {
+                if (row === this.pathRow || this.blockInput) return;
+                const targetTile = document.getElementById(`tile-${row}-${col}`);
+                
+                if (this.activeGridData[row][col] !== 'empty') {
+                    this.activeGridData[row][col] = 'empty';
+                    targetTile.innerHTML = '';
+                } else {
+                    if (this.selectedTool === 'flashlight') {
+                        this.activeGridData[row][col] = 'flashlight';
+                        targetTile.innerHTML = '🔦';
+                    } else if (this.selectedTool === 'brick') {
+                        this.activeGridData[row][col] = 'brick';
+                        targetTile.innerHTML = '🧱';
+                    } else if (this.selectedTool === 'glass') {
+                        this.activeGridData[row][col] = 'glass';
+                        targetTile.innerHTML = '🪟';
+                    }
+                }
+                this.renderDynamicPhysicsEngine();
+            }
+
+            renderDynamicPhysicsEngine() {
+                document.querySelectorAll('.light-beam, .shadow-cast').forEach(el => el.remove());
+                for(let c=0; c<5; c++) {
+                    const ghost = document.getElementById(`ghost-element-${c}`);
+                    if (ghost) ghost.className = 'creeper-sprite';
+                }
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        if (this.activeGridData[r][c] === 'flashlight') {
+                            this.castRayTracingBeams(r, c);
+                        }
+                    }
+                }
+            }
+
+            castRayTracingBeams(startRow, startCol) {
+                const arena = document.getElementById('arena-grid');
+                let lightBlocked = false;
+
+                for (let c = startCol + 1; c < this.gridSize; c++) {
+                    const currentTile = document.getElementById(`tile-${startRow}-${c}`);
+                    if (!currentTile) continue;
+
+                    if (!lightBlocked) {
+                        const beam = document.createElement('div');
+                        beam.classList.add('light-beam');
+                        beam.style.width = `${currentTile.offsetWidth}px`;
+                        beam.style.height = `${currentTile.offsetHeight}px`;
+                        beam.style.left = `${currentTile.offsetLeft}px`;
+                        beam.style.top = `${currentTile.offsetTop}px`;
+                        arena.appendChild(beam);
+
+                        if (startRow === this.pathRow) {
+                            const ghost = document.getElementById(`ghost-element-${c}`);
+                            if (ghost) ghost.classList.add('hit-flash');
+                        }
+                        if (this.activeGridData[startRow][c] === 'brick') {
+                            lightBlocked = true;
+                        }
+                    } else {
+                        const shadow = document.createElement('div');
+                        shadow.classList.add('shadow-cast');
+                        shadow.style.width = `${currentTile.offsetWidth}px`;
+                        shadow.style.height = `${currentTile.offsetHeight}px`;
+                        shadow.style.left = `${currentTile.offsetLeft}px`;
+                        shadow.style.top = `${currentTile.offsetTop}px`;
+                        arena.appendChild(shadow);
+
+                        if (startRow === this.pathRow) {
+                            const ghost = document.getElementById(`ghost-element-${c}`);
+                            if (ghost) {
+                                ghost.classList.remove('hit-flash');
+                                ghost.classList.add('shadow-healed');
+                            }
+                        }
+                    }
+                }
+            }
+
+            revealHint() {
+                const viewport = document.getElementById('hint-viewport-container');
+                viewport.innerHTML = `<span>📡 SCANNED CLUE:</span> ${this.activeQuestion.hint}`;
+                viewport.style.display = 'block';
+            }
+
+            triggerConfettiBurst() {
+                const colors = ['#00f0ff', '#39ff14', '#ff007f', '#fffb00', '#ff9f00'];
+                for (let i = 0; i < 40; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('confetti-particle');
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.left = Math.random() * 100 + 'vw';
+                    particle.style.top = '-10px';
+                    particle.style.transform = `scale(${Math.random() * 0.6 + 0.5})`;
+                    particle.style.animationDelay = Math.random() * 0.4 + 's';
+                    particle.style.animationDuration = Math.random() * 1.5 + 1.5 + 's';
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), 3000);
+                }
+            }
+
+            processAnswer(cardElement, chosenValue) {
+                if (this.blockInput) return;
+
+                if (chosenValue === this.activeQuestion.correctAnswer) {
+                    this.blockInput = true;
+                    this.playSound('correct');
+                    cardElement.className = 'option-capsule success-state';
+                    
+                    const blank = document.getElementById('target-blank');
+                    blank.innerText = chosenValue;
+                    blank.classList.add('filled');
+
+                    this.createFloatingPointsNotification(cardElement);
+                    this.score += 10;
+                    this.updateStatsDisplay();
+
+                    setTimeout(() => {
+                        this.blockInput = false;
+                        const nextIndex = this.currentQuestionIdx + 1;
+                        
+                        // Triggers level victory popup sequence on current index 0 (Wave 1) or index 1 (Wave 2)
+                        if (this.currentQuestionIdx === 0 || this.currentQuestionIdx === 1) {
+                            this.triggerConfettiBurst();
+                            
+                            const modal = document.getElementById('recovery-modal');
+                            document.getElementById('recovery-title').innerText = "🎉 YAY! Sector Clear!";
+                            document.getElementById('recovery-desc').innerText = `Outstanding work! You completely neutralized the shadows in this zone.`;
+                            document.getElementById('recovery-data-text').innerText = `Bonus data streams active!`;
+                            
+                            const mainBtn = document.getElementById('recovery-main-btn');
+                            mainBtn.innerText = "Advance Next Level ➡️";
+                            mainBtn.setAttribute('onclick', `appEngine.presentIntermissionBriefing(${nextIndex})`);
+                            document.getElementById('recovery-sub-btn').style.display = 'none';
+                            
+                            modal.style.display = 'flex';
+                        } else {
+                            this.loadActiveWaveLevel(nextIndex);
+                        }
+                    }, 1400);
+
+                } else {
+                    this.playSound('wrong');
+                    cardElement.classList.add('error-state');
+                    this.wrongAttemptsForCurrentQuestion++;
+                    
+                    this.lives--;
+                    this.updateStatsDisplay();
+
+                    if (this.lives <= 0) {
+                        this.triggerGameOverSequence();
+                        return;
+                    }
+
+                    if (this.wrongAttemptsForCurrentQuestion >= 2) {
+                        document.getElementById('hint-btn').classList.add('urgent-flash');
+                        document.querySelectorAll('.option-capsule').forEach(el => {
+                            if (el.getAttribute('data-option-val') === this.activeQuestion.correctAnswer) {
+                                el.classList.add('glow-assistance');
+                            }
+                        });
+                    }
+                    setTimeout(() => cardElement.classList.remove('error-state'), 600);
+                }
+            }
+
+            createFloatingPointsNotification(element) {
+                const rect = element.getBoundingClientRect();
+                const xpNode = document.createElement('div');
+                xpNode.classList.add('floating-xp');
+                xpNode.innerText = '+10 XP';
+                xpNode.style.left = `${rect.left + (rect.width/2) - 20}px`;
+                xpNode.style.top = `${rect.top}px`;
+                document.body.appendChild(xpNode);
+                setTimeout(() => xpNode.remove(), 800);
+            }
+
+            triggerGameOverSequence() {
+                this.blockInput = true;
+                localStorage.removeItem('solar_guard_save_state');
+                
+                const modal = document.getElementById('recovery-modal');
+                document.getElementById('recovery-title').innerText = "❌ Shield Failure";
+                document.getElementById('recovery-desc').innerText = "The shield energy depleted completely. Let's study light sources and re-try!";
+                document.getElementById('recovery-data-text').innerText = `Final Score: ${this.score} XP`;
+                
+                const mainBtn = document.getElementById('recovery-main-btn');
+                mainBtn.innerText = "🔄 Re-Deploy Grid";
+                mainBtn.setAttribute('onclick', 'window.location.reload()');
+                document.getElementById('recovery-sub-btn').style.display = 'none';
+                
+                modal.style.display = 'flex';
+            }
+
+            triggerVictorySequence() {
+                localStorage.removeItem('solar_guard_save_state');
+                this.playSound('victory');
+                this.triggerConfettiBurst();
+                
+                const modal = document.getElementById('recovery-modal');
+                document.getElementById('recovery-title').innerText = "🏆 GRAND CHAMPION!";
+                document.getElementById('recovery-desc').innerText = "Amazing work, Commander! You cleared all 10 defense sectors, mastered shadows, and fully completed Chapter 12 science parameters!";
+                document.getElementById('recovery-data-text').innerText = `Perfect Record Score: ${this.score} XP`;
+                
+                const mainBtn = document.getElementById('recovery-main-btn');
+                mainBtn.innerText = "🚀 Run Core Simulation Again";
+                mainBtn.setAttribute('onclick', 'window.location.reload()');
+                document.getElementById('recovery-sub-btn').style.display = 'none';
+                
+                modal.style.display = 'flex';
+            }
+        }
+
+        const appEngine = new SolarGuardEngine();
+        window.onload = () => appEngine.init();
+    </script>
+</body>
+</html>
