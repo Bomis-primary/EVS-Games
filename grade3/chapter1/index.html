@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nature Sudoku</title>
+    <title>Nature Sudoku Explorer</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
@@ -18,12 +18,12 @@
             box-sizing: border-box;
         }
         
-        h1, h2, h3, button, .child-font {
+        h1, h2, h3, button, input, .child-font {
             font-family: 'Fredoka', cursive;
         }
 
         .sudoku-box {
-            border: 3px solid #166534;
+            border: 4px solid #166534;
         }
 
         .sudoku-cell {
@@ -36,8 +36,8 @@
         }
 
         @keyframes softGlow {
-            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; transform: scale(1); }
-            50% { border-color: #fbbf24; box-shadow: 0 0 20px #fbbf24; transform: scale(1.03); background-color: #fef3c7; }
+            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 12px #f59e0b; transform: scale(1); }
+            50% { border-color: #fbbf24; box-shadow: 0 0 24px #fbbf24; transform: scale(1.02); background-color: #fef3c7; }
         }
         .hint-glow-effect {
             animation: softGlow 1s infinite ease-in-out !important;
@@ -50,6 +50,13 @@
         .animate-pop {
             animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+
+        @media print {
+            body * { visibility: hidden; }
+            #certificatePrintArea, #certificatePrintArea * { visibility: visible; }
+            #certificatePrintArea { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-3 min-h-screen select-none">
@@ -61,25 +68,27 @@
 
     <canvas id="confettiLayer" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500 opacity-100">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[65vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-md animate-pulse\'>✨</div>';">
-    </div>
-
     <div class="w-full max-w-md flex flex-col items-center justify-center relative">
 
-        <div id="titleView" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[32px] p-6 text-center space-y-6 shadow-xl animate-pop">
+        <div id="titleView" class="w-full bg-white border-4 border-emerald-500 rounded-[32px] p-6 text-center space-y-6 shadow-xl animate-pop">
             <div class="space-y-2">
                 <div class="text-7xl animate-bounce">🌱🐶</div>
                 <h1 class="text-4xl font-black text-emerald-700 tracking-wide leading-tight">Nature Sudoku</h1>
+                <p class="text-sm font-bold text-emerald-600 bg-emerald-50 inline-block px-3 py-1 rounded-full">Grade 3 Science Edition</p>
             </div>
             
             <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-200 text-base font-medium text-slate-600 leading-relaxed">
-                Sort out living and non-living elements side by side using smart grid logic! 🧩🌟
+                Complete quadrants to unlock science quiz checkpoints, score points, and win a certificate! 🧩🌟
             </div>
 
-            <button onclick="changeActiveView('titleView', 'instructionsView')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl text-xl tracking-wide shadow-md active:scale-95 transition-all cursor-pointer">
-                START 🚀
-            </button>
+            <div class="space-y-3">
+                <button onclick="changeActiveView('titleView', 'instructionsView')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl text-2xl tracking-wide shadow-md active:scale-95 transition-all cursor-pointer block">
+                    START NEW GAME 🚀
+                </button>
+                <button id="resumeGameBtn" onclick="loadSavedGameSession()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl text-xl tracking-wide shadow-sm active:scale-95 transition-all cursor-pointer hidden">
+                    RESUME SAVED GAME ⏱️
+                </button>
+            </div>
         </div>
 
         <div id="instructionsView" class="hidden w-full bg-white border-4 border-blue-500 rounded-[32px] p-6 text-center space-y-5 shadow-xl animate-pop">
@@ -92,11 +101,11 @@
                 </div>
                 <div class="flex items-start space-x-3">
                     <span class="text-xl">💡</span>
-                    <span>Placing tokens triggers quiz questions. You have <b>2 attempts</b> per question.</span>
+                    <span>Completing any 2x2 grid quadrant opens a **2-Question Quiz**. Each right answer gives **+20 points**!</span>
                 </div>
                 <div class="flex items-start space-x-3">
                     <span class="text-xl">❤️</span>
-                    <span>Answering wrongly twice costs <b>1 life</b>. Clear the grid with your <b>3 lives</b> to win!</span>
+                    <span>You have <b>3 lives</b>. Miss two answers on a quest, and you lose 1 life!</span>
                 </div>
             </div>
 
@@ -116,12 +125,17 @@
                     <p class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">LIVES</p>
                     <p id="hudHearts" class="text-base tracking-wider">❤️❤️❤️</p>
                 </div>
-                <button onclick="resetWholeGame()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform cursor-pointer">
-                    RESET 🔄
-                </button>
+                <div class="flex space-x-1">
+                    <button onclick="saveCurrentGameSession()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg active:scale-95 transition-transform cursor-pointer">
+                        SAVE 💾
+                    </button>
+                    <button onclick="resetWholeGame()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg active:scale-95 transition-transform cursor-pointer">
+                        RESET 🔄
+                    </button>
+                </div>
             </div>
 
-            <div id="sudokuGridContainer" class="w-full grid grid-cols-2 gap-1.5 p-1 bg-emerald-800 rounded-2xl border-2 border-emerald-900">
+            <div id="sudokuGridContainer" class="w-full grid grid-cols-2 gap-2 p-1.5 bg-emerald-800 rounded-2xl border-2 border-emerald-900">
                 </div>
 
             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-2">
@@ -147,25 +161,25 @@
                 </div>
             </div>
 
-            <div id="quizOverlay" class="hidden absolute inset-0 bg-emerald-950 rounded-[28px] z-40 p-4 flex flex-col justify-between animate-pop">
+            <div id="quizOverlay" class="hidden absolute inset-0 bg-emerald-950 rounded-[28px] z-40 p-5 flex flex-col justify-between animate-pop">
                 <div class="text-center">
-                    <span class="bg-amber-500 text-white font-black px-4 py-1 rounded-full text-xs tracking-wider uppercase">SCIENCE QUEST! 💡</span>
+                    <span id="quizBadge" class="bg-amber-500 text-white font-black px-4 py-1 rounded-full text-xs tracking-wider uppercase">SCIENCE QUEST! 💡</span>
                 </div>
 
-                <div class="text-center flex-1 flex items-center justify-center px-1 my-2">
-                    <h2 id="quizQuestionText" class="text-sm font-bold text-white leading-relaxed">
+                <div class="text-center flex-1 flex items-center justify-center px-1 my-3">
+                    <h2 id="quizQuestionText" class="text-xl font-bold text-white leading-snug">
                         Question loading...
                     </h2>
                 </div>
 
-                <div id="explanationBox" class="hidden bg-amber-50 border-2 border-amber-300 p-3 rounded-xl text-xs font-semibold text-amber-900 leading-relaxed mb-2 text-left animate-pop">
+                <div id="explanationBox" class="hidden bg-amber-50 border-2 border-amber-300 p-3 rounded-xl text-sm font-semibold text-amber-900 leading-relaxed mb-3 text-left animate-pop">
                     </div>
 
-                <div id="quizOptionsContainer" class="flex flex-col space-y-2.5 w-full">
+                <div id="quizOptionsContainer" class="flex flex-col space-y-3 w-full">
                     </div>
 
-                <div class="text-center pt-2 mt-1 border-t border-emerald-900">
-                    <p id="quizFooterHint" class="text-xs font-bold text-emerald-300 min-h-[24px] flex items-center justify-center">
+                <div class="text-center pt-3 mt-2 border-t border-emerald-900">
+                    <p id="quizFooterHint" class="text-sm font-bold text-emerald-300 min-h-[24px] flex items-center justify-center">
                         Tap the best matching answer!
                     </p>
                 </div>
@@ -173,21 +187,42 @@
 
         </div>
 
-        <div id="summaryView" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[32px] p-6 text-center space-y-5 shadow-xl animate-pop">
-            <div>
-                <span id="endEmoji" class="text-7xl block animate-bounce">👑</span>
-                <h2 id="endTitle" class="text-3xl font-black text-emerald-700 mt-2">Magnificent Job!</h2>
-                <p id="endDesc" class="text-sm font-medium text-slate-500 leading-relaxed px-1">You are a certified Nature Scientist! You sorted out living and non-living things perfectly! 🌟</p>
+        <div id="summaryView" class="hidden w-full bg-white border-4 border-amber-400 rounded-[32px] p-5 text-center space-y-6 shadow-2xl animate-pop">
+            
+            <div id="certificatePrintArea" class="bg-gradient-to-b from-amber-50 to-white border-4 border-double border-amber-500 rounded-2xl p-5 space-y-4 shadow-sm">
+                <div class="text-5xl animate-pulse">🏆</div>
+                <h2 class="text-3xl font-black text-amber-800 tracking-wide uppercase">Certificate of Completion</h2>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Presented Proudly To</p>
+                
+                <div class="px-4 no-print">
+                    <input type="text" id="studentNameInput" placeholder="Type Your Name Here ✏️" class="w-full border-b-2 border-dashed border-amber-500 text-center text-xl font-black text-slate-800 focus:outline-none focus:border-amber-600 bg-transparent py-1">
+                </div>
+                <p id="printNameText" class="text-2xl font-black text-emerald-700 hidden underline decoration-amber-500 decoration-wavy"></p>
+
+                <p class="text-sm font-medium text-slate-600 leading-relaxed max-w-xs mx-auto">
+                    For masterfully sorting out the grid coordinates of <b>Living & Non-Living Systems</b> and perfectly clearing all Chapter Checkpoints!
+                </p>
+
+                <div class="pt-2 border-t border-dashed border-slate-200 flex justify-between items-center text-left text-[10px] font-bold text-slate-400">
+                    <div>
+                        <p>TOPIC: GRADE 3 NATURE SCIENCE</p>
+                        <p>SCORE achieved: <span id="endScoreValue" class="text-amber-600 font-bold">0</span> XP</p>
+                    </div>
+                    <div class="text-right">
+                        <p>RANK: CERTIFIED EXPLORER</p>
+                        <p>STATUS: VERIFIED ✔️</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-amber-50 py-3 px-6 rounded-2xl border border-amber-200 inline-block">
-                <p class="text-xs font-bold uppercase text-amber-600 tracking-wider">Total Score</p>
-                <p id="endScoreValue" class="text-4xl font-black text-amber-500">0</p>
+            <div class="space-y-2.5 no-print">
+                <button onclick="window.print()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl text-lg shadow active:scale-95 transition-all cursor-pointer flex items-center justify-center space-x-2">
+                    <span>💾 SAVE / PRINT DIPLOMA</span>
+                </button>
+                <button onclick="restartWholeGameLoop()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-lg shadow active:scale-95 transition-all cursor-pointer">
+                    PLAY AGAIN 🔄
+                </button>
             </div>
-
-            <button onclick="restartWholeGameLoop()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl text-lg shadow active:scale-95 transition-all cursor-pointer">
-                PLAY AGAIN 🔄
-            </button>
         </div>
 
     </div>
@@ -202,16 +237,23 @@
         };
 
         const scienceQuizQuestions = [
-            { q: "Tom has a puppy and a teddy bear. The puppy grows bigger every month, but the teddy bear stays the same size. Why?", choices: ["Toys cannot grow because they are non-living.", "The puppy is non-living.", "The teddy bear needs more food."], ans: "Toys cannot grow because they are non-living.", explanation: "Living things grow and change over time. Non-living things, like toys, always stay the same size!" },
-            { q: "Lily touches a plant, and its leaves close up quickly. When she touches her wooden desk, nothing happens. Why?", choices: ["Only plants can move.", "Living things can feel things around them.", "The desk is asleep."], ans: "Living things can feel things around them.", explanation: "Living things can feel and react when you touch them. Non-living things cannot feel anything at all." },
-            { q: "A car moves down the road and a bird flies in the sky. What is the difference in how they move?", choices: ["The bird moves on its own because it is alive.", "The car moves on its own.", "The bird needs fuel to fly."], ans: "The bird moves on its own because it is alive.", explanation: "A car needs a driver and fuel to move it. Living things like birds can move all by themselves!" },
-            { q: "Sunflowers turn their large heads to face the sun during the day. What does this tell us about plants?", choices: ["Plants show movement.", "Plants are non-living things.", "Plants do not need light."], ans: "Plants show movement.", explanation: "Even though plants are fixed in the soil, their parts can move by turning towards the warm sunlight!" },
-            { q: "If you put a green plant inside a dark cupboard with no air, it will die. Which gas does a plant need to make its food?", choices: ["Oxygen", "Carbon dioxide", "Water"], ans: "Carbon dioxide", explanation: "Plants make their own food! They take in a gas called carbon dioxide from the air to stay alive." },
-            { q: "Humans use their lungs to breathe air. Plants do not have lungs. How do they take in air through their leaves?", choices: ["Through small noses.", "Through gills like a fish.", "Through tiny holes called stomata."], ans: "Through tiny holes called stomata.", explanation: "Look closely at a leaf! It has tiny, hidden mouth-like holes called stomata to breathe in air." },
-            { q: "An oak tree lives for many years, but a small fly only lives for a few weeks. What do we call this fixed time?", choices: ["A lifespan", "Reproduction", "A game"], ans: "A lifespan", explanation: "Every living thing stays alive for a certain amount of time before it gets old and dies. This is its lifespan." },
-            { q: "Sam finds a smooth stone, a white cloud, and a plastic toy spade. Which one is a natural non-living thing?", choices: ["The plastic toy spade", "The white cloud", "The toy spade and the stone"], ans: "The white cloud", explanation: "Natural non-living things are found in nature and not made by humans. Plastic objects are man-made!" },
-            { q: "A bird lays eggs and a dog has puppies. Why can a toy doll never have any babies?", choices: ["The doll is too small.", "Non-living things cannot reproduce.", "Dolls only lay eggs."], ans: "Non-living things cannot reproduce.", explanation: "Making babies or laying eggs is called reproduction. Only living things can make new young ones!" }
+            { q: "Tom has a puppy and a teddy bear. The puppy grows bigger every month, but the teddy bear stays the same size. Why?", choices: ["Toys cannot grow because they are non-living.", "The puppy is non-living.", "The teddy bear needs more food."], ans: "Toys cannot grow because they are non-living.", explanation: "Living things grow and change over time using energy. Non-living things, like toys, always stay the same size!" },
+            { q: "Lily touches a plant, and its leaves close up quickly. When she touches her wooden desk, nothing happens. Why?", choices: ["Only plants can move.", "Living things can feel things around them.", "The desk is asleep."], ans: "Living things can feel things around them.", explanation: "Living things sense and react to things around them (like touch or light). Non-living things cannot feel anything at all." },
+            { q: "A car moves down the road and a bird flies in the sky. What is the difference in how they move?", choices: ["The bird moves on its own because it is alive.", "The car moves on its own.", "The bird needs fuel to fly."], ans: "The bird moves on its own because it is alive.", explanation: "A car needs a driver and fuel to force it to move. Living things like birds move all by themselves to find food or safety!" },
+            { q: "Sunflowers turn their large heads to face the sun during the day. What does this tell us about plants?", choices: ["Plants show movement.", "Plants are non-living things.", "Plants do not need light."], ans: "Plants show movement.", explanation: "Even though plants are fixed securely in the soil, their parts can still move by turning towards warm sunlight!" },
+            { q: "If you put a green plant inside a dark cupboard with no air, it will die. Which gas does a plant need from the air to make its food?", choices: ["Oxygen", "Carbon dioxide", "Water"], ans: "Carbon dioxide", explanation: "Plants make their own food! They take in a special gas called carbon dioxide from the air to stay healthy and alive." },
+            { q: "Humans use their lungs to breathe air. Plants do not have lungs. How do they take in air through their leaves?", choices: ["Through small noses.", "Through gills like a fish.", "Through tiny holes called stomata."], ans: "Through tiny holes called stomata.", explanation: "Look closely at a leaf! It has microscopic, hidden mouth-like holes called stomata to breathe in gases from the air." },
+            { q: "An oak tree lives for many years, but a small fly only lives for a few weeks. What do we call this fixed time a living thing stays alive?", choices: ["A lifespan", "Reproduction", "A game"], ans: "A lifespan", explanation: "Every living thing stays alive for a certain amount of time before it gets old and dies. This cycle is its lifespan." },
+            { q: "Sam finds a smooth stone, a white cloud, and a plastic toy spade. Which one is a natural non-living thing?", choices: ["The plastic toy spade", "The white cloud", "The toy spade and the stone"], ans: "The white cloud", explanation: "Natural non-living things are found freely in nature and not made by humans. Plastic objects are man-made!" },
+            { q: "A bird lays eggs and a dog has puppies. Why can a toy doll never have any babies?", choices: ["The doll is too small.", "Non-living things cannot reproduce.", "Dolls only lay eggs."], ans: "Non-living things cannot reproduce.", explanation: "Making babies or laying eggs is called reproduction. Only living things can make new young ones of their own kind!" }
         ];
+
+        const bonusQuestion = {
+            q: "👑 BONUS QUEST: Which of these things goes through excretion (throwing away unwanted waste from its body)?",
+            choices: ["A living horse running in a field", "A computer monitor screen", "A piece of natural white chalk"],
+            ans: "A living horse running in a field",
+            explanation: "Excretion means removing unwanted waste from the body. Only living things produce and remove waste items!"
+        };
 
         const sudokuPuzzleSolution = [
             ['PLANT', 'PUPPY', 'SUN',   'CAR'],
@@ -232,8 +274,11 @@
         let healthHearts = 3;
         let selectedRowIndex = null;
         let selectedColIndex = null;
-        let answeredQuestionsTracker = 0;
         
+        let activeQuizQueue = []; 
+        let isBonusPhase = false;
+        let completedQuadrantsMask = [false, false, false, false]; 
+
         let questionAttemptCounter = 0; 
         let hintTimerNode = null;
 
@@ -244,16 +289,14 @@
         window.addEventListener('DOMContentLoaded', () => {
             configureCanvasSize();
             window.addEventListener('resize', configureCanvasSize);
+            evaluateResumeButtonVisibility();
 
-            // FIXED SPLASH SCREEN VISIBILITY HANDLER (5 SECONDS EXACTLY)
-            setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
-                splash.style.opacity = '0';
-                setTimeout(() => {
-                    splash.classList.add('hidden');
-                    document.getElementById('titleView').classList.remove('hidden');
-                }, 500);
-            }, 5000);
+            // Setup input listener to handle printing layout styles cleanly
+            const nameInput = document.getElementById('studentNameInput');
+            const nameText = document.getElementById('printNameText');
+            nameInput.addEventListener('input', () => {
+                nameText.innerText = nameInput.value || "Certified Explorer";
+            });
         });
 
         function configureCanvasSize() {
@@ -264,12 +307,12 @@
         function triggerConfettiBurst() {
             canvas.classList.remove('hidden');
             confettiArray = [];
-            for (let i = 0; i < 35; i++) {
+            for (let i = 0; i < 40; i++) {
                 confettiArray.push({
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 14,
-                    vy: (Math.random() - 0.5) * 14 - 4,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.5) * 15 - 5,
                     r: Math.random() * 4 + 4,
                     color: `hsl(${Math.random() * 360}, 90%, 65%)`,
                     opacity: 1
@@ -319,7 +362,9 @@
             healthHearts = 3;
             selectedRowIndex = null;
             selectedColIndex = null;
-            answeredQuestionsTracker = 0;
+            activeQuizQueue = [];
+            isBonusPhase = false;
+            completedQuadrantsMask = [false, false, false, false];
 
             currentActiveBoardState = [];
             for (let r = 0; r < 4; r++) {
@@ -352,15 +397,15 @@
             gridContainer.innerHTML = '';
 
             const blocksOffsets = [
-                { rStart: 0, rEnd: 2, cStart: 0, cEnd: 2 },
-                { rStart: 0, rEnd: 2, cStart: 2, cEnd: 4 },
-                { rStart: 2, rEnd: 4, cStart: 0, cEnd: 2 },
-                { rStart: 2, rEnd: 4, cStart: 2, cEnd: 4 }
+                { id: 0, rStart: 0, rEnd: 2, cStart: 0, cEnd: 2 }, // Top-Left
+                { id: 1, rStart: 0, rEnd: 2, cStart: 2, cEnd: 4 }, // Top-Right
+                { id: 2, rStart: 2, rEnd: 4, cStart: 0, cEnd: 2 }, // Bottom-Left
+                { id: 3, rStart: 2, rEnd: 4, cStart: 2, cEnd: 4 }  // Bottom-Right
             ];
 
             blocksOffsets.forEach(box => {
                 const boxWrapper = document.createElement('div');
-                boxWrapper.className = "grid grid-cols-2 gap-1 p-1 bg-emerald-700 rounded-xl sudoku-box";
+                boxWrapper.className = `grid grid-cols-2 gap-1 p-1 bg-emerald-700 rounded-xl sudoku-box`;
 
                 for (let r = box.rStart; r < box.rEnd; r++) {
                     for (let c = box.cStart; c < box.cEnd; c++) {
@@ -433,25 +478,14 @@
 
             if (tokenKey === expectedAnswer) {
                 currentActiveBoardState[selectedRowIndex][selectedColIndex] = tokenKey;
-                scoreCounter += 10;
-                document.getElementById('hudScore').innerText = scoreCounter;
                 triggerConfettiBurst();
                 triggerAudioPipelineTrack('soundCorrect');
 
                 resetDockControlState();
                 renderSudokuBoardHTML();
 
-                const filledCellsCount = currentActiveBoardState.flat().filter(x => x !== 'EMPTY').length;
-                const totalPresetCount = puzzleMaskTemplate.flat().filter(x => x === 1).length;
-                const placedByPlayer = filledCellsCount - totalPresetCount;
-
-                if (placedByPlayer > 0 && placedByPlayer % 2 === 0) {
-                    setTimeout(() => {
-                        triggerScienceQuestionModal();
-                    }, 400);
-                } else {
-                    checkSudokuVictoryConditions();
-                }
+                // Quadrant Completion Evaluation System
+                evaluateQuadrantCompletionTriggers();
 
             } else {
                 triggerAudioPipelineTrack('soundWrong');
@@ -460,25 +494,76 @@
             }
         }
 
-        function triggerScienceQuestionModal() {
+        function evaluateQuadrantCompletionTriggers() {
+            const blocksOffsets = [
+                { id: 0, rStart: 0, rEnd: 2, cStart: 0, cEnd: 2 },
+                { id: 1, rStart: 0, rEnd: 2, cStart: 2, cEnd: 4 },
+                { id: 2, rStart: 2, rEnd: 4, cStart: 0, cEnd: 2 },
+                { id: 3, rStart: 2, rEnd: 4, cStart: 2, cEnd: 4 }
+            ];
+
+            let freshlyCompletedCount = 0;
+
+            blocksOffsets.forEach(box => {
+                if (!completedQuadrantsMask[box.id]) {
+                    let isComplete = true;
+                    for (let r = box.rStart; r < box.rEnd; r++) {
+                        for (let c = box.cStart; c < box.cEnd; c++) {
+                            if (currentActiveBoardState[r][c] === 'EMPTY') {
+                                isComplete = false;
+                            }
+                        }
+                    }
+                    if (isComplete) {
+                        completedQuadrantsMask[box.id] = true;
+                        freshlyCompletedCount++;
+                    }
+                }
+            });
+
+            if (freshlyCompletedCount > 0) {
+                // Queue exactly 2 questions per quadrant completed
+                const qStartIndex = Math.floor(Math.random() * (scienceQuizQuestions.length - 2));
+                activeQuizQueue.push(scienceQuizQuestions[qStartIndex]);
+                activeQuizQueue.push(scienceQuizQuestions[qStartIndex + 1]);
+                
+                setTimeout(() => {
+                    consumeQuizQueueEngine();
+                }, 400);
+            } else {
+                checkSudokuVictoryConditions();
+            }
+        }
+
+        function consumeQuizQueueEngine() {
+            if (activeQuizQueue.length > 0) {
+                const nextQuestionObj = activeQuizQueue.shift();
+                loadQuizModalUI(nextQuestionObj);
+            } else {
+                document.getElementById('quizOverlay').classList.add('hidden');
+                checkSudokuVictoryConditions();
+            }
+        }
+
+        function loadQuizModalUI(dataObj) {
             if (hintTimerNode) clearTimeout(hintTimerNode);
             
             questionAttemptCounter = 1; 
             document.getElementById('explanationBox').classList.add('hidden');
+            document.getElementById('quizBadge').innerText = isBonusPhase ? "👑 FINAL BONUS QUEST!" : "SCIENCE QUEST! 💡";
 
-            const qIndex = answeredQuestionsTracker % scienceQuizQuestions.length;
-            const dataObj = scienceQuizQuestions[qIndex];
-
+            // Enforced large font metrics
             document.getElementById('quizQuestionText').innerText = dataObj.q;
-            document.getElementById('quizFooterHint').innerText = "Attempt 1 of 2 • Tap the correct option!";
-            document.getElementById('quizFooterHint').className = "text-xs font-bold text-emerald-300 min-h-[24px] flex items-center justify-center";
+            document.getElementById('quizFooterHint').innerText = "Attempt 1 of 2 • Tap the best matching answer!";
+            document.getElementById('quizFooterHint').className = "text-sm font-bold text-emerald-300 min-h-[24px] flex items-center justify-center";
 
             const optionsBox = document.getElementById('quizOptionsContainer');
             optionsBox.innerHTML = '';
 
             dataObj.choices.forEach(choice => {
                 const optBtn = document.createElement('button');
-                optBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 px-4 text-left rounded-xl border border-slate-700 text-sm active:scale-[0.99] transition-all cursor-pointer quiz-item-node child-font";
+                // Enforced large font button styles
+                optBtn.className = "w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3.5 px-4 text-left rounded-xl border border-slate-700 text-lg active:scale-[0.99] transition-all cursor-pointer quiz-item-node child-font";
                 optBtn.innerText = choice;
                 
                 if (choice === dataObj.ans) {
@@ -491,13 +576,13 @@
 
             document.getElementById('quizOverlay').classList.remove('hidden');
 
-            // 12-Second Automatic Glow Help Trigger
+            // 12-Second Help Glow Timer
             hintTimerNode = setTimeout(() => {
                 const rightChoiceBtn = document.querySelector('.quiz-item-node[data-is-correct-truth="true"]');
                 if (rightChoiceBtn) {
                     rightChoiceBtn.classList.add('hint-glow-effect');
-                    document.getElementById('quizFooterHint').innerText = "✨ Need help? Tap the glowing golden answer choice!";
-                    document.getElementById('quizFooterHint').className = "text-xs font-black text-amber-400 text-center animate-pulse min-h-[24px] flex items-center justify-center";
+                    document.getElementById('quizFooterHint').innerText = "✨ Need help? Tap the golden glowing choice!";
+                    document.getElementById('quizFooterHint').className = "text-sm font-black text-amber-400 text-center animate-pulse min-h-[24px] flex items-center justify-center";
                 }
             }, 12000);
         }
@@ -508,37 +593,39 @@
 
             if (chosenText === dataObj.ans) {
                 allOptionNodes.forEach(n => n.disabled = true);
-                selectedButtonNode.className = "w-full bg-emerald-600 text-white font-black py-3 px-4 text-center rounded-xl text-sm border-2 border-emerald-400 shadow child-font";
+                selectedButtonNode.className = "w-full bg-emerald-600 text-white font-black py-4 px-4 text-center rounded-xl text-lg border-2 border-emerald-400 shadow child-font";
                 
-                scoreCounter += 10;
+                scoreCounter += 20; // Upgraded +20 configuration
                 document.getElementById('hudScore').innerText = scoreCounter;
-                answeredQuestionsTracker++;
                 triggerConfettiBurst();
                 triggerAudioPipelineTrack('soundCorrect');
 
-                document.getElementById('quizFooterHint').innerText = "🎉 Brilliant! Correct (+10 Score)!";
-                document.getElementById('quizFooterHint').className = "text-xs font-black text-emerald-400 text-center min-h-[24px] flex items-center justify-center";
+                document.getElementById('quizFooterHint').innerText = "🎉 Brilliant! Correct (+20 Score)!";
+                document.getElementById('quizFooterHint').className = "text-sm font-black text-emerald-400 text-center min-h-[24px] flex items-center justify-center";
 
                 setTimeout(() => {
-                    document.getElementById('quizOverlay').classList.add('hidden');
-                    checkSudokuVictoryConditions();
+                    if (isBonusPhase) {
+                        isBonusPhase = false;
+                        exitGameWorkflow(true);
+                    } else {
+                        consumeQuizQueueEngine();
+                    }
                 }, 2000);
 
             } else {
                 triggerAudioPipelineTrack('soundWrong');
 
                 if (questionAttemptCounter === 1) {
-                    // ATTEMPT 1: Show Hint Box with explanation
                     questionAttemptCounter = 2;
-                    selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-sm border border-rose-900 opacity-60 cursor-not-allowed child-font";
+                    selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-md border border-rose-900 opacity-60 cursor-not-allowed child-font";
                     selectedButtonNode.disabled = true;
 
                     const explanationBox = document.getElementById('explanationBox');
                     explanationBox.innerHTML = `💡 <b>Hint:</b> ${dataObj.explanation}`;
                     explanationBox.classList.remove('hidden');
 
-                    document.getElementById('quizFooterHint').innerText = "Attempt 2 of 2 • Use the hint above!";
-                    document.getElementById('quizFooterHint').className = "text-xs font-black text-amber-400 text-center min-h-[24px] flex items-center justify-center";
+                    document.getElementById('quizFooterHint').innerText = "Attempt 2 of 2 • Use the hint box above!";
+                    document.getElementById('quizFooterHint').className = "text-sm font-black text-amber-400 text-center min-h-[24px] flex items-center justify-center";
 
                     hintTimerNode = setTimeout(() => {
                         const rightChoiceBtn = document.querySelector('.quiz-item-node[data-is-correct-truth="true"]');
@@ -546,22 +633,25 @@
                     }, 12000);
 
                 } else {
-                    // ATTEMPT 2: Deduct Heart
-                    selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-sm border border-rose-900 opacity-60 cursor-not-allowed child-font";
+                    selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-md border border-rose-900 opacity-60 cursor-not-allowed child-font";
                     allOptionNodes.forEach(n => n.disabled = true);
 
                     healthHearts--;
                     refreshHeartsHUDDisplay();
 
-                    document.getElementById('quizFooterHint').innerText = `Incorrect! Moving back to the gridboard.`;
+                    document.getElementById('quizFooterHint').innerText = `Incorrect! Resuming your gridboard.`;
                     document.getElementById('quizFooterHint').className = "text-xs font-bold text-rose-400 text-center min-h-[24px] flex items-center justify-center";
 
                     setTimeout(() => {
-                        document.getElementById('quizOverlay').classList.add('hidden');
                         if (healthHearts <= 0) {
                             exitGameWorkflow(false);
                         } else {
-                            checkSudokuVictoryConditions();
+                            if (isBonusPhase) {
+                                isBonusPhase = false;
+                                exitGameWorkflow(true);
+                            } else {
+                                consumeQuizQueueEngine();
+                            }
                         }
                     }, 2200);
                 }
@@ -579,7 +669,9 @@
         function checkSudokuVictoryConditions() {
             const isBoardFullyFilled = currentActiveBoardState.flat().every(cell => cell !== 'EMPTY');
             if (isBoardFullyFilled && healthHearts > 0) {
-                exitGameWorkflow(true);
+                // Launch Bonus phase sequence
+                isBonusPhase = true;
+                loadQuizModalUI(bonusQuestion);
             }
         }
 
@@ -587,27 +679,71 @@
             if (hintTimerNode) clearTimeout(hintTimerNode);
             
             document.getElementById('gameplayView').classList.add('hidden');
+            document.getElementById('quizOverlay').classList.add('hidden');
             document.getElementById('endScoreValue').innerText = scoreCounter;
+
+            // Clear any local save files upon game wrap up
+            localStorage.removeItem('natureSudokuSaveData');
+            evaluateResumeButtonVisibility();
 
             if (isSuccessOutcome) {
                 triggerAudioPipelineTrack('soundClapping');
-                document.getElementById('endEmoji').innerText = "👑";
-                document.getElementById('endTitle').innerText = "Magnificent Job!";
-                document.getElementById('endDesc').innerText = "You are a certified Nature Scientist! You sorted out living and non-living things perfectly! 🌟";
+                document.getElementById('printNameText').innerText = "Certified Explorer";
+                document.getElementById('studentNameInput').value = "";
+                document.getElementById('summaryView').classList.remove('hidden');
             } else {
-                document.getElementById('endEmoji').innerText = "🔬";
-                document.getElementById('endTitle').innerText = "Keep on Exploring!";
-                document.getElementById('endDesc').innerText = "Don't worry, try again to practice and learn more about wonderful living and non-living things!";
+                alert(`Game Over! You ran out of lives. Keep exploring to master living and non-living elements!`);
+                location.reload();
             }
+        }
 
-            document.getElementById('summaryView').classList.remove('hidden');
+        /* 💾 LOCAL STORAGE SAVE & RESUME UTILITIES */
+        function saveCurrentGameSession() {
+            const saveData = {
+                board: currentActiveBoardState,
+                score: scoreCounter,
+                hearts: healthHearts,
+                quadrants: completedQuadrantsMask
+            };
+            localStorage.setItem('natureSudokuSaveData', JSON.stringify(saveData));
+            evaluateResumeButtonVisibility();
+            alert("🎯 Game Saved! You can turn off your device and tap 'RESUME SAVED GAME' later to continue!");
+        }
+
+        function loadSavedGameSession() {
+            const standardRaw = localStorage.getItem('natureSudokuSaveData');
+            if (!standardRaw) return;
+
+            const parsed = JSON.parse(standardRaw);
+            currentActiveBoardState = parsed.board;
+            scoreCounter = parsed.score;
+            healthHearts = parsed.hearts;
+            completedQuadrantsMask = parsed.quadrants;
+
+            document.getElementById('hudScore').innerText = scoreCounter;
+            refreshHeartsHUDDisplay();
+            
+            changeActiveView('titleView', 'gameplayView');
+            triggerAudioPipelineTrack('soundBg');
+            resetDockControlState();
+            renderSudokuBoardHTML();
+        }
+
+        function evaluateResumeButtonVisibility() {
+            const record = localStorage.getItem('natureSudokuSaveData');
+            const btn = document.getElementById('resumeGameBtn');
+            if (record) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
         }
 
         function triggerAudioPipelineTrack(id) {
             const el = document.getElementById(id);
             if (el) {
                 if (id !== 'soundBg') el.load();
-                el.play().catch(e => console.log("Audio play caught: ", e));
+                el.play().catch(e => console.log("Audio pipeline active: ", e));
             }
         }
     </script>
