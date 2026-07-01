@@ -253,11 +253,17 @@
             { id: 15, q: "Imagine if all the green plants in a big park vanished! Soon, the grasshoppers would have no food, then the frogs would have no food, and then the snakes would have no food too. Why does this happen?", a: ["Because all animals depend on plants directly or indirectly", "Because plants are eaten by scavengers"], c: "Because all animals depend on plants directly or indirectly", h: "Every wild creature connects to green plants because only flora builds standard energy layers." }
         ];
 
+        // ADDED EXTRA EXPANDED SHORTCUT PORTALS SO LADDERS POP UP MORE OFTEN
         const shortcutPortalsMap = {
+            4: { target: 22, type: "ladder", msg: "Found fertile plant saplings! Shortcut up! 🪜" },
             12: { target: 29, type: "ladder", msg: "Discovered pristine natural grasslands! Shortcut up! 🪜" },
-            26: { target: 35, type: "ladder", msg: "Healthy herbivorous ecosystem balance! Shortcut up! 🪜" },
+            26: { target: 47, type: "ladder", msg: "Healthy herbivorous ecosystem balance! Shortcut up! 🪜" },
             42: { target: 63, type: "ladder", msg: "Active conservation park protection! Shortcut up! 🪜" },
+            54: { target: 75, type: "ladder", msg: "Balanced forest flora replenishment! Shortcut up! 🪜" },
             62: { target: 82, type: "ladder", msg: "Perfect food chain sequence flow! Shortcut up! 🪜" },
+            71: { target: 92, type: "ladder", msg: "Protected scavenger refuge site! Shortcut up! 🪜" },
+            
+            21: { target: 3,  type: "snake",  msg: "Encountered wild wildfire zones! Slipped back... 🐍" },
             33: { target: 8,  type: "snake",  msg: "Encountered wildlife poaching hazards! Slipped down... 🐍" },
             52: { target: 13, type: "snake",  msg: "Destructive habitat land clearing! Slipped down... 🐍" },
             77: { target: 44, type: "snake",  msg: "Illegal forest lumber logging zone! Slipped down... 🐍" },
@@ -269,6 +275,7 @@
         let totalRemainingLives = 3;
         let isDiceLocked = false;
         let randomizedQuestionsQueue = [];
+        let answeredQuestionsRegistry = []; // NEW: Keeps track of items solved within current game cycle
 
         window.onload = function() {
             setTimeout(() => {
@@ -321,6 +328,7 @@
             totalScoreCount = 0;
             totalRemainingLives = 3;
             randomizedQuestionsQueue = [];
+            answeredQuestionsRegistry = [];
 
             generateBoardGridTiles();
             syncDashboardStatsUI();
@@ -421,9 +429,18 @@
             }, 1200); 
         }
 
+        // GUARANTEES ALL 15 QUESTIONS FINISH SYSTEMATICALLY WITHOUT LEAVING ANY BEHIND
         function pullNextUniqueTriviaItem() {
             if (randomizedQuestionsQueue.length === 0) {
-                randomizedQuestionsQueue = [...clearCurriculumMasterPool].sort(() => Math.random() - 0.5);
+                // Filter down to questions that have not yet been successfully delivered this session
+                let unassignedSet = clearCurriculumMasterPool.filter(q => !answeredQuestionsRegistry.includes(q.id));
+                
+                // If everything was exhausted, refresh the cycle clean
+                if (unassignedSet.length === 0) {
+                    answeredQuestionsRegistry = [];
+                    unassignedSet = [...clearCurriculumMasterPool];
+                }
+                randomizedQuestionsQueue = unassignedSet.sort(() => Math.random() - 0.5);
             }
             return randomizedQuestionsQueue.pop();
         }
@@ -468,7 +485,7 @@
 
             buttonsArray.forEach(choice => {
                 gridContainer.innerHTML += `
-                    <button onclick="evaluateUserChoiceAnswer('${choice.replace(/'/g, "\\'")}', '${questionData.c.replace(/'/g, "\\'")}', '${questionData.h.replace(/'/g, "\\'")}')"
+                    <button onclick="evaluateUserChoiceAnswer(${questionData.id}, '${choice.replace(/'/g, "\\'")}', '${questionData.c.replace(/'/g, "\\'")}', '${questionData.h.replace(/'/g, "\\'")}')"
                         class="w-full p-3.5 border-4 border-slate-200 bg-slate-50 hover:bg-amber-100 hover:border-amber-400 rounded-xl text-sm font-black transition-all cursor-pointer text-slate-800 text-left">
                         ${choice}
                     </button>
@@ -476,13 +493,21 @@
             });
         }
 
-        function evaluateUserChoiceAnswer(chosenOption, correctSolution, referenceHint) {
+        function evaluateUserChoiceAnswer(questionId, chosenOption, correctSolution, referenceHint) {
             const matchesPerfectly = (chosenOption === correctSolution);
             const activePortal = shortcutPortalsMap[playerPosition];
 
             if (matchesPerfectly) {
                 document.getElementById('audioCorrect').play().catch(() => {});
-                totalScoreCount += 20;
+                
+                // CRITICAL FIXED POINT WEIGHT REDIRECT
+                totalScoreCount += 20; 
+                
+                // Track question completion so it is checked off the full list
+                if (!answeredQuestionsRegistry.includes(questionId)) {
+                    answeredQuestionsRegistry.push(questionId);
+                }
+                
                 try { confetti({ particleCount: 25, spread: 50, origin: { y: 0.7 } }); } catch(err){}
 
                 if (activePortal && activePortal.type === "ladder") {
