@@ -23,28 +23,26 @@
 
         .shelf-item {
             transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s ease;
-        }
-        .shelf-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.12);
+            will-change: transform;
         }
         
-        /* CORRECT OPTION: TARGETED DOWNWARD DROP INTO BASKET */
+        /* Hardware-accelerated correct option fall into basket */
         @keyframes itemDropToBasket {
-            0% { transform: scale(1) translateY(0); opacity: 1; }
-            30% { transform: scale(0.9) translateY(-10px); opacity: 0.9; }
-            100% { transform: scale(0.2) translateY(240px); opacity: 0; }
+            0% { transform: scale(1) translate3d(0, 0, 0); opacity: 1; }
+            40% { transform: scale(0.8) translate3d(0, 20px, 0); opacity: 0.9; }
+            100% { transform: scale(0.1) translate3d(0, 180px, 0); opacity: 0; }
         }
         .animate-drop-basket {
-            animation: itemDropToBasket 0.6s forwards cubic-bezier(0.55, 0.055, 0.675, 0.19);
+            animation: itemDropToBasket 0.55s forwards cubic-bezier(0.55, 0.055, 0.675, 0.19);
             pointer-events: none;
+            z-index: 30;
         }
 
-        /* WRONG OPTION: ERGONOMIC SHAKE ANIMATION */
+        /* Hardware-accelerated shake error */
         @keyframes cardShakeError {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            20%, 60% { transform: translate3d(-8px, 0, 0); }
+            40%, 80% { transform: translate3d(8px, 0, 0); }
         }
         .animate-shake-error {
             animation: cardShakeError 0.4s ease-in-out;
@@ -57,6 +55,11 @@
         }
         .success-wiggle {
             animation: basketWiggle 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        #basketWrapper {
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform;
         }
     </style>
 </head>
@@ -72,67 +75,86 @@
     </div>
 
     <div id="screenTitle" class="fixed inset-0 bg-gradient-to-br from-[#ffd54f] via-[#ff7043] to-[#26a69a] flex flex-col items-center justify-center p-6 z-40 text-center text-white transition-opacity duration-300">
-        <div class="space-y-8 max-w-md bg-white/10 backdrop-blur-xl p-10 rounded-[48px] border border-white/20 shadow-[0_32px_64px_-15px_rgba(0,0,0,0.3)]">
-            <h1 class="text-6xl font-black tracking-tight drop-shadow-md text-yellow-50">BASKET RUSH!</h1>
-            <p class="text-lg font-medium text-white/90 leading-relaxed">Read the questions carefully, pick the right answer card from the shelf, and fill up your delivery basket!</p>
-            <button onclick="goToInstructionsScreen()" class="w-full bg-white hover:bg-yellow-50 text-orange-600 text-xl font-bold px-8 py-4 rounded-2xl shadow-xl transform hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer tracking-wide">
+        <div class="space-y-8 max-w-md w-full bg-white/10 backdrop-blur-xl p-6 sm:p-10 rounded-[48px] border border-white/20 shadow-[0_32px_64px_-15px_rgba(0,0,0,0.3)]">
+            <h1 class="text-5xl sm:text-6xl font-black tracking-tight drop-shadow-md text-yellow-50">BASKET RUSH!</h1>
+            <p class="text-sm sm:text-lg font-medium text-white/90 leading-relaxed">Read the questions carefully, pick the right answer card from the shelf, and fill up your delivery basket!</p>
+            <button onclick="goToInstructionsScreen()" class="w-full bg-white hover:bg-yellow-50 text-orange-600 text-lg sm:text-xl font-bold px-8 py-4 rounded-2xl shadow-xl transform hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer tracking-wide">
                 START ▶
             </button>
         </div>
     </div>
 
     <div id="screenInstructions" class="hidden fixed inset-0 bg-slate-950/40 backdrop-blur-xl flex items-center justify-center p-4 z-30">
-        <div class="bg-white/90 backdrop-blur-md border border-white/40 rounded-[40px] w-full max-w-md p-8 shadow-[0_32px_64px_-15px_rgba(0,0,0,0.25)] space-y-6 text-slate-800">
+        <div class="bg-white/90 backdrop-blur-md border border-white/40 rounded-[40px] w-full max-w-md p-6 sm:p-8 shadow-[0_32px_64px_-15px_rgba(0,0,0,0.25)] space-y-6 text-slate-800">
             <h2 class="text-3xl font-black text-center text-slate-900 tracking-tight">How To Play</h2>
-            <div class="space-y-4 text-sm font-semibold text-slate-600 leading-relaxed">
-                <div class="flex items-center gap-4 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-100">
-                    <div class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center font-bold shadow-sm">1</div>
+            <div class="space-y-4 text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed">
+                <div class="flex items-center gap-4 bg-amber-50/60 p-3 rounded-2xl border border-amber-100">
+                    <div class="w-8 h-8 shrink-0 rounded-full bg-amber-400 text-white flex items-center justify-center font-bold shadow-sm">1</div>
                     <p>Read the question displayed in the top dark banner carefully.</p>
                 </div>
-                <div class="flex items-center gap-4 bg-sky-50/60 p-3.5 rounded-2xl border border-sky-100">
-                    <div class="w-8 h-8 rounded-full bg-sky-400 text-white flex items-center justify-center font-bold shadow-sm">2</div>
+                <div class="flex items-center gap-4 bg-sky-50/60 p-3 rounded-2xl border border-sky-100">
+                    <div class="w-8 h-8 shrink-0 rounded-full bg-sky-400 text-white flex items-center justify-center font-bold shadow-sm">2</div>
                     <p>Look at the three choice cards sitting directly on the row shelf.</p>
                 </div>
-                <div class="flex items-center gap-4 bg-emerald-50/60 p-3.5 rounded-2xl border border-emerald-100">
-                    <div class="w-8 h-8 rounded-full bg-emerald-400 text-white flex items-center justify-center font-bold shadow-sm">3</div>
-                    <p>Click the correct card to drop it directly into your delivery basket!</p>
+                <div class="flex items-center gap-4 bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100">
+                    <div class="w-8 h-8 shrink-0 rounded-full bg-emerald-400 text-white flex items-center justify-center font-bold shadow-sm">3</div>
+                    <p>Click the correct card! The basket will slide under it to catch it!</p>
                 </div>
             </div>
-            <button onclick="launchMainGameEngine()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white text-lg font-bold px-8 py-4 rounded-2xl shadow-lg shadow-teal-500/20 active:scale-95 transition-transform cursor-pointer">
+            <button onclick="launchMainGameEngine()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white text-base sm:text-lg font-bold px-8 py-4 rounded-2xl shadow-lg shadow-teal-500/20 active:scale-95 transition-transform cursor-pointer">
                 PLAY GAME 🎮
             </button>
         </div>
     </div>
 
-    <div class="w-full max-w-4xl premium-blur border border-white/60 rounded-3xl p-4 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] flex justify-between items-center z-10">
-        <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">BASKET RUSH!</h2>
-        <div class="bg-slate-900 text-white text-xs font-bold uppercase tracking-wider px-5 py-2 rounded-full shadow-md">
+    <div id="screenGameOver" class="hidden fixed inset-0 bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#334155] flex flex-col items-center justify-center p-6 z-50 text-center text-white">
+        <div class="space-y-6 max-w-md w-full bg-white/5 border border-white/10 backdrop-blur-2xl p-6 sm:p-8 rounded-[48px] shadow-2xl flex flex-col items-center">
+            <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-amber-400 drop-shadow">🎉 Game Completed!</h2>
+            <p class="text-sm sm:text-base text-slate-300 font-medium">Excellent work! You filled your basket with all correct options.</p>
+            
+            <div class="bg-black/30 border border-white/10 rounded-3xl p-5 w-full text-center my-2">
+                <span class="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Your Total Score</span>
+                <span id="finalScoreDisplay" class="text-4xl sm:text-5xl font-black text-emerald-400">0</span>
+                <span class="text-slate-400 text-xl font-bold"> / 120</span>
+            </div>
+
+            <button onclick="restartGameFromSummary()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white text-lg sm:text-xl font-bold py-4 rounded-2xl shadow-xl shadow-orange-500/20 transform hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer">
+                🔄 PLAY AGAIN
+            </button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-4xl premium-blur border border-white/60 rounded-3xl p-4 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] flex justify-between items-center z-10 gap-2">
+        <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 tracking-tight whitespace-nowrap">BASKET RUSH!</h2>
+        <div class="bg-slate-900 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-4 sm:playing-5 py-2 rounded-full shadow-md">
             Score: <span id="scoreTrackerField" class="font-black text-amber-400">0</span> / 120
         </div>
     </div>
 
-    <div class="w-full max-w-4xl bg-white/40 border border-white/80 rounded-[48px] p-6 md:p-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] my-4 flex flex-col items-center justify-between gap-6 min-h-[510px] relative">
+    <div id="mainPlayContainer" class="w-full max-w-4xl bg-white/40 border border-white/80 rounded-[32px] sm:rounded-[48px] p-4 sm:p-6 md:p-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] my-3 flex flex-col items-center justify-between gap-5 min-h-[520px] relative">
         
-        <div class="w-full bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 text-center shadow-lg relative overflow-hidden">
+        <div class="w-full bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-center shadow-lg relative overflow-hidden shrink-0">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent)]"></div>
-            <h3 id="mainQuestionTextDisplay" class="text-base sm:text-lg font-semibold text-white leading-relaxed px-2">Loading Question...</h3>
+            <h3 id="mainQuestionTextDisplay" class="text-sm sm:text-base md:text-lg font-semibold text-white leading-relaxed px-1 sm:px-2">Loading Question...</h3>
         </div>
 
-        <div id="shelfItemsGrid" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-5 px-1 z-10"></div>
+        <div id="shelfItemsGrid" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 px-1 z-10 relative"></div>
 
-        <div id="inlineHintDrawer" class="hidden w-full bg-amber-50/90 border border-amber-200/60 rounded-2xl p-4 text-center">
+        <div id="inlineHintDrawer" class="hidden w-full bg-amber-50/90 border border-amber-200/60 rounded-2xl p-4 text-center shrink-0">
             <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">💡 Hint</span>
             <p id="inlineHintText" class="text-xs font-semibold text-slate-600 mt-1 leading-relaxed"></p>
         </div>
 
-        <div id="basketWrapper" class="w-full max-w-xs bg-gradient-to-b from-amber-800 to-amber-900 rounded-2xl p-4 text-center text-white shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] relative flex flex-col items-center border border-amber-700/50 z-0">
-            <div class="absolute -top-3 w-[94%] h-5 bg-amber-700 rounded-full border-2 border-amber-900/40 shadow-inner"></div>
-            <span class="text-xs font-bold tracking-widest uppercase text-amber-200/90 mt-2">Your Basket</span>
-            <div id="basketItemsBadge" class="text-[10px] bg-black/20 px-3 py-0.5 rounded-full font-bold mt-1 text-amber-100">0 / 12 Loaded</div>
+        <div class="w-full flex items-center justify-center relative mt-2 min-h-[96px] shrink-0">
+            <div id="basketWrapper" class="w-full max-w-xs bg-gradient-to-b from-amber-800 to-amber-900 rounded-2xl p-4 text-center text-white shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] relative flex flex-col items-center border border-amber-700/50 z-0">
+                <div class="absolute -top-3 w-[94%] h-5 bg-amber-700 rounded-full border-2 border-amber-900/40 shadow-inner"></div>
+                <span class="text-xs font-bold tracking-widest uppercase text-amber-200/90 mt-2">Your Basket</span>
+                <div id="basketItemsBadge" class="text-[10px] bg-black/20 px-3 py-0.5 rounded-full font-bold mt-1 text-amber-100">0 / 12 Loaded</div>
+            </div>
         </div>
     </div>
 
-    <div id="statusAlertField" class="w-full max-w-4xl text-center text-xs font-medium text-slate-500 py-3 bg-white/50 border border-white rounded-2xl shadow-sm tracking-wide transition-all duration-300">
+    <div id="statusAlertField" class="w-full max-w-4xl text-center text-[11px] sm:text-xs font-medium text-slate-500 py-3 bg-white/50 border border-white rounded-2xl shadow-sm tracking-wide transition-all duration-300 px-2 shrink-0">
         Read the question above and click the correct card option from the shelf.
     </div>
 
@@ -161,19 +183,24 @@
         window.onload = function() {
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
-                splash.style.opacity = '0';
-                setTimeout(() => { splash.classList.add('hidden'); }, 300);
+                if(splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.classList.add('hidden'); }, 300);
+                }
             }, 5000);
         };
 
         function goToInstructionsScreen() {
-            document.getElementById('audioBg').play().catch(() => {});
+            // Unlock audio playback safely via explicit click mapping for older iOS/Android constraints
+            const bgAudio = document.getElementById('audioBg');
+            if (bgAudio) { bgAudio.play().catch(() => {}); }
             document.getElementById('screenTitle').classList.add('hidden');
             document.getElementById('screenInstructions').classList.remove('hidden');
         }
 
         function launchMainGameEngine() {
             document.getElementById('screenInstructions').classList.add('hidden');
+            document.getElementById('screenGameOver').classList.add('hidden');
             
             randomizedDeckArray = [...masterCardCatalogBase];
             randomizedDeckArray.sort(() => Math.random() - 0.5);
@@ -185,11 +212,16 @@
         }
 
         function loadNextRecipeRoundLevel() {
+            const basket = document.getElementById('basketWrapper');
+            if(basket) basket.style.transform = "translate3d(0px, 0px, 0px)";
+
             if (currentRecipeIndex >= randomizedDeckArray.length) {
-                document.getElementById('audioClaps').play();
+                const claps = document.getElementById('audioClaps');
+                if(claps) claps.play().catch(() => {});
                 triggerGrandWinConfettiShower();
-                logActionAlert("🏆 Superb! You answered every question correctly and packed the basket!");
-                setTimeout(() => { launchMainGameEngine(); }, 6000);
+                
+                document.getElementById('finalScoreDisplay').innerText = cumulativePointsScore;
+                document.getElementById('screenGameOver').classList.remove('hidden');
                 return;
             }
 
@@ -200,6 +232,8 @@
             document.getElementById('basketItemsBadge').innerText = `${currentRecipeIndex} / 12 Loaded`;
 
             optionCardsMap = [...currentQuestionObject.a];
+            optionCardsMap.sort(() => Math.random() - 0.5);
+
             const themes = [
                 { color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20" },
                 { color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20" },
@@ -212,56 +246,72 @@
             optionCardsMap.forEach((optionText, idx) => {
                 const style = themes[idx % themes.length];
                 shelfRow.innerHTML += `
-                    <div id="option-card-${idx}" onclick="evaluateDirectCardChoice(${idx})" class="shelf-item bg-gradient-to-br ${style.color} ${style.shadow} border border-white/30 rounded-3xl p-5 text-white shadow-xl cursor-pointer text-center flex items-center justify-center min-h-[110px] relative overflow-hidden group">
+                    <div id="option-card-${idx}" onclick="evaluateDirectCardChoice(${idx}, this)" class="shelf-item bg-gradient-to-br ${style.color} ${style.shadow} border border-white/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-white shadow-xl cursor-pointer text-center flex items-center justify-center min-h-[90px] sm:min-h-[110px] relative overflow-hidden group">
                         <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors"></div>
-                        <p class="text-sm sm:text-base font-bold tracking-wide drop-shadow-sm leading-snug">${optionText}</p>
+                        <p class="text-xs sm:text-sm md:text-base font-bold tracking-wide drop-shadow-sm leading-snug">${optionText}</p>
                     </div>
                 `;
             });
         }
 
-        function evaluateDirectCardChoice(selectedCardIdx) {
+        function evaluateDirectCardChoice(selectedCardIdx, cardElement) {
             const chosenOptionText = optionCardsMap[selectedCardIdx];
             const currentQuestionObject = randomizedDeckArray[currentRecipeIndex];
-            const targetCardElement = document.getElementById(`option-card-${selectedCardIdx}`);
+            const basket = document.getElementById('basketWrapper');
+
+            if (basket && cardElement) {
+                const containerRect = document.getElementById('mainPlayContainer').getBoundingClientRect();
+                const cardRect = cardElement.getBoundingClientRect();
+                const containerCenterX = containerRect.left + (containerRect.width / 2);
+                const cardCenterX = cardRect.left + (cardRect.width / 2);
+                const targetShiftX = cardCenterX - containerCenterX;
+                
+                // Pure hardware-accelerated 3D transforms for lag-free sliding on slow mobile engines
+                basket.style.transform = `translate3d(${targetShiftX}px, 0px, 0px)`;
+            }
 
             if (chosenOptionText === currentQuestionObject.c) {
-                document.getElementById('audioCorrect').play();
+                const sndCorrect = document.getElementById('audioCorrect');
+                if(sndCorrect) sndCorrect.play().catch(() => {});
                 triggerSingleItemBurstConfetti();
 
                 cumulativePointsScore += 10;
                 document.getElementById('scoreTrackerField').innerText = cumulativePointsScore;
                 logActionAlert("✨ Wonderful! Correct card answer loaded into the basket.");
 
-                const basket = document.getElementById('basketWrapper');
-                if (basket) {
-                    basket.classList.add('success-wiggle');
-                    setTimeout(() => basket.classList.remove('success-wiggle'), 500);
-                }
-
-                // Dropping selected card straight down into basket
-                if (targetCardElement) { targetCardElement.classList.add('animate-drop-basket'); }
+                setTimeout(() => {
+                    if (cardElement) { cardElement.classList.add('animate-drop-basket'); }
+                    if (basket) {
+                        basket.classList.add('success-wiggle');
+                        setTimeout(() => basket.classList.remove('success-wiggle'), 500);
+                    }
+                }, 150);
 
                 setTimeout(() => {
                     currentRecipeIndex++;
                     loadNextRecipeRoundLevel();
-                }, 600);
+                }, 750);
             } else {
-                // Play audio asset, run hardware vibration, and trigger shake animation sequence
-                document.getElementById('audioWrong').play();
+                const sndWrong = document.getElementById('audioWrong');
+                if(sndWrong) sndWrong.play().catch(() => {});
+                
+                // Safe check fallback for hardware haptics API constraints on old models
                 if (navigator.vibrate) { navigator.vibrate(200); }
                 
-                if (targetCardElement) {
-                    targetCardElement.classList.add('animate-shake-error');
-                    setTimeout(() => targetCardElement.classList.remove('animate-shake-error'), 400);
+                if (cardElement) {
+                    cardElement.classList.add('animate-shake-error');
+                    setTimeout(() => cardElement.classList.remove('animate-shake-error'), 400);
                 }
 
                 logActionAlert("❌ Incorrect option. Read the question carefully and try again!");
 
-                // Show descriptive hints immediately
                 document.getElementById('inlineHintText').innerText = currentQuestionObject.h;
                 document.getElementById('inlineHintDrawer').classList.remove('hidden');
             }
+        }
+
+        function restartGameFromSummary() {
+            launchMainGameEngine();
         }
 
         function logActionAlert(msg) {
@@ -269,17 +319,21 @@
         }
 
         function triggerSingleItemBurstConfetti() {
-            confetti({ particleCount: 25, spread: 40, origin: { y: 0.8 } });
+            try {
+                confetti({ particleCount: 20, spread: 35, origin: { y: 0.8 } });
+            } catch(e) {}
         }
 
         function triggerGrandWinConfettiShower() {
-            let duration = 4 * 1000;
-            let end = Date.now() + duration;
-            (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 0.85 } });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 0.85 } });
-                if (Date.now() < end) { requestAnimationFrame(frame); }
-            }());
+            try {
+                let duration = 3.5 * 1000;
+                let end = Date.now() + duration;
+                (function frame() {
+                    confetti({ particleCount: 4, angle: 60, spread: 50, origin: { x: 0, y: 0.85 } });
+                    confetti({ particleCount: 4, angle: 120, spread: 50, origin: { x: 1, y: 0.85 } });
+                    if (Date.now() < end) { requestAnimationFrame(frame); }
+                }());
+            } catch(e) {}
         }
     </script>
 </body>
