@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Food UNO Challenge!</title>
+    <title>Food Uno - Basket Rush!</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -14,27 +14,26 @@
             background: linear-gradient(135deg, #fef08a 0%, #bbf7d0 50%, #93c5fd 100%);
             -webkit-tap-highlight-color: transparent;
         }
+        h1, h2, h3, button, .font-fun { font-family: 'Fredoka', cursive; }
         
-        h1, h2, h3, button, .font-fun {
-            font-family: 'Fredoka', cursive;
+        .shelf-item {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        .uno-card {
-            aspect-ratio: 2 / 3;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15), inset 0 0 15px rgba(255,255,255,0.3);
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+        .shelf-item:hover {
+            transform: scale(1.06) translateY(-4px);
         }
-
-        .oval-center {
-            border-radius: 50%;
-            transform: rotate(-20deg);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(2px);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        
+        @keyframes itemDropToBasket {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            50% { transform: scale(0.6) translateY(120px); opacity: 0.6; }
+            100% { transform: scale(0) translateY(280px); opacity: 0; }
+        }
+        .animate-drop-basket {
+            animation: itemDropToBasket 0.6s forwards cubic-bezier(0.55, 0.055, 0.675, 0.19);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-3 select-none">
+<body class="min-h-screen flex flex-col items-center justify-between p-3 select-none overflow-x-hidden">
 
     <audio id="audioBg" src="./assets/playfulsong.mp3" loop></audio>
     <audio id="audioCorrect" src="./assets/correct.mp3"></audio>
@@ -48,7 +47,7 @@
     <div id="screenTitle" class="hidden fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-red-500 flex flex-col items-center justify-center p-6 z-40 text-center text-white">
         <div class="space-y-6 max-w-md bg-white/20 backdrop-blur-md p-8 rounded-[40px] border-4 border-white shadow-2xl">
             <h1 class="text-6xl font-black drop-shadow-lg tracking-wider transform -rotate-3 text-yellow-100">FOOD UNO 🃏</h1>
-            <p class="text-lg font-bold">The delicious card matching challenge game!</p>
+            <p class="text-lg font-bold">The ultimate matching basket game!</p>
             <button onclick="goToInstructionsScreen()" class="w-full bg-yellow-300 hover:bg-yellow-400 text-slate-800 text-2xl font-black px-8 py-4 rounded-2xl shadow-xl transform hover:scale-105 active:scale-95 transition-all tracking-wide cursor-pointer">
                 START ▶
             </button>
@@ -56,132 +55,85 @@
     </div>
 
     <div id="screenInstructions" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-30">
-        <div class="bg-white border-4 border-slate-800 rounded-[36px] w-full max-w-xl p-6 shadow-2xl space-y-4 text-slate-800 max-h-[95vh] overflow-y-auto">
-            <h2 class="text-3xl font-black text-center text-orange-500 border-b-4 border-dashed border-slate-100 pb-2">How To Play 📜</h2>
-            
+        <div class="bg-white border-4 border-slate-800 rounded-[36px] w-full max-w-md p-6 shadow-2xl space-y-4 text-slate-800">
+            <h2 class="text-3xl font-black text-center text-orange-500 pb-2 border-b-4 border-dashed border-slate-100">How To Play 📜</h2>
             <ul class="space-y-3 text-sm font-bold leading-relaxed">
-                <li class="flex items-start gap-2.5 bg-rose-50 p-2.5 rounded-xl"><span class="text-lg">🃏</span> Match your cards by Color or Food Group category with the card in the center pile.</li>
-                <li class="flex items-start gap-2.5 bg-blue-50 p-2.5 rounded-xl"><span class="text-lg">❓</span> Click a matching card to answer its quiz puzzle. Get it right for <span class="text-emerald-600 font-extrabold">+10 Points</span>!</li>
-                <li class="flex items-start gap-2.5 bg-amber-50 p-2.5 rounded-xl"><span class="text-lg">⚠️</span> Be careful! Wrong answers add 1 penalty card to your hand.</li>
-                <li class="flex items-start gap-2.5 bg-purple-50 p-2.5 rounded-xl"><span class="text-lg">⚡</span> Action cards let you Skip the AI's turn or force it to draw 2 cards!</li>
-                <li class="flex items-start gap-2.5 bg-yellow-50 p-2.5 rounded-xl"><span class="text-lg">📢</span> When down to 2 cards, play one and click the flashing <span class="text-red-500 font-extrabold">"SAY UNO!"</span> button immediately!</li>
+                <li class="flex items-start gap-2.5 bg-rose-50 p-3 rounded-xl"><span class="text-lg">🎯</span> Look at the Target Recipe Goal at the top of the screen.</li>
+                <li class="flex items-start gap-2.5 bg-blue-50 p-3 rounded-xl"><span class="text-lg">🛒</span> Click the food item card below that matches the goal!</li>
+                <li class="flex items-start gap-2.5 bg-emerald-50 p-3 rounded-xl"><span class="text-lg">❓</span> Answer the simple question correctly to get <span class="text-emerald-600 font-extrabold">+10 Points</span>!</li>
+                <li class="flex items-start gap-2.5 bg-amber-50 p-3 rounded-xl"><span class="text-lg">🏆</span> Collect all 12 food items to win the game!</li>
             </ul>
-
             <button onclick="launchMainGameEngine()" class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white text-xl font-black px-8 py-4 rounded-2xl shadow-md active:scale-95 transition-transform cursor-pointer">
                 PLAY GAME 🎮
             </button>
         </div>
     </div>
 
-    <div class="w-full max-w-4xl bg-white/90 border-4 border-slate-800 rounded-3xl p-4 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div class="flex items-center gap-3">
-            <h2 class="text-3xl font-black text-slate-800 tracking-tight">FOOD UNO 🃏</h2>
-            <div class="bg-indigo-600 text-white font-black text-sm px-4 py-1 rounded-full shadow">
-                SCORE: <span id="currentScoreField">0</span> PTS
-            </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <div class="bg-amber-100 border-2 border-amber-400 rounded-2xl px-4 py-1 text-center">
-                <span class="text-[9px] font-black text-amber-800 block uppercase tracking-wider">Draw Pile</span>
-                <span id="deckCounter" class="text-lg font-black text-slate-800">0</span>
-            </div>
-            <button onclick="humanDrawsCard()" id="drawBtn" class="bg-gradient-to-b from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black px-5 py-3 rounded-2xl shadow-md active:scale-95 transition-transform cursor-pointer tracking-wide text-sm">
-                DRAW CARD ➕
-            </button>
+    <div class="w-full max-w-4xl bg-white/90 border-4 border-slate-800 rounded-3xl p-4 shadow-xl flex justify-between items-center">
+        <h2 class="text-2xl font-black text-slate-800 tracking-tight">FOOD UNO</h2>
+        <div class="bg-indigo-600 text-white font-black text-sm px-5 py-1.5 rounded-full shadow">
+            SCORE: <span id="scoreTrackerField">0</span> / 120 PTS
         </div>
     </div>
 
-    <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6 my-4 items-center w-full">
+    <div class="w-full max-w-4xl bg-white/60 border-4 border-slate-800 rounded-[40px] p-6 shadow-xl my-4 flex flex-col items-center justify-between gap-6 min-h-[460px] relative">
         
-        <div class="md:col-span-1 flex flex-col gap-4">
-            <div class="bg-slate-800 text-white rounded-2xl p-3 shadow-lg flex items-center justify-between border-2 border-slate-600">
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">🤖</span>
-                    <div>
-                        <div class="text-xs font-black uppercase tracking-wider text-slate-400">Opponent</div>
-                        <div class="text-sm font-bold">Kitchen Computer</div>
-                    </div>
-                </div>
-                <div id="aiHandBadge" class="bg-red-500 text-white text-xs font-black px-3 py-1.5 rounded-full">
-                    5 Cards Left
-                </div>
-            </div>
-
-            <div class="bg-white/50 border-4 border-dashed border-slate-400/60 rounded-[36px] p-6 flex flex-col items-center justify-center min-h-[220px] relative">
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Discard Pile</span>
-                <div id="discardPileSlot"></div>
-
-                <button id="sayUnoBtn" onclick="registerUserUnoVoice()" class="hidden absolute -bottom-2 animate-bounce bg-red-600 hover:bg-red-700 border-4 border-white text-white text-lg font-black px-5 py-2.5 rounded-2xl shadow-2xl tracking-wider cursor-pointer z-20">
-                    📢 SAY UNO!
-                </button>
-                <button id="catchAiBtn" onclick="catchComputerFailure()" class="hidden absolute -bottom-2 animate-pulse bg-amber-500 hover:bg-amber-600 border-4 border-white text-slate-900 text-xs font-black px-4 py-2.5 rounded-2xl shadow-2xl tracking-wider cursor-pointer z-20">
-                    🚨 CATCH COMPUTER!
-                </button>
-            </div>
+        <div class="w-full bg-gradient-to-r from-amber-400 to-orange-400 border-4 border-slate-800 rounded-2xl p-4 text-center text-slate-900 shadow-md">
+            <span class="text-[10px] font-black uppercase tracking-widest bg-white/40 px-3 py-0.5 rounded-full">Target Recipe Goal</span>
+            <h3 id="recipeTargetPrompt" class="text-lg sm:text-xl font-black mt-1 text-white drop-shadow">Loading Next Target...</h3>
         </div>
 
-        <div class="md:col-span-2 bg-white border-4 border-slate-800 rounded-[36px] p-4 shadow-2xl flex flex-col justify-between min-h-[300px]">
-            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-2 mb-2">
-                <span class="text-xs font-black text-slate-500 uppercase tracking-wider">Your Active Hand:</span>
-                <span id="playerHandCounter" class="bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full">0 Cards</span>
-            </div>
+        <div id="shelfItemsGrid" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 px-2"></div>
 
-            <div id="playerHandRow" class="flex flex-wrap gap-2.5 items-center justify-start overflow-x-auto py-3 max-h-[240px]"></div>
+        <div class="w-full max-w-xs bg-amber-800 border-4 border-slate-900 rounded-b-3xl rounded-t-xl p-3 text-center text-white shadow-2xl relative flex flex-col items-center">
+            <div class="absolute -top-4 w-11/12 h-6 border-4 border-slate-900 bg-amber-700 rounded-full shadow-inner"></div>
+            <span class="text-2xl mt-1">🧺</span>
+            <span class="text-xs font-black tracking-widest uppercase text-amber-200">Your Basket</span>
+            <div id="basketItemsBadge" class="text-[10px] bg-black/20 px-3 py-0.5 rounded-full font-bold mt-1">0 / 12 Packed</div>
         </div>
     </div>
 
-    <div id="gameStatusAlert" class="w-full max-w-4xl text-center text-xs font-black text-slate-600 uppercase tracking-wider py-2 bg-white/60 rounded-xl border border-slate-300">
-        Game Loading...
+    <div id="statusAlertField" class="w-full max-w-4xl text-center text-xs font-black text-slate-600 uppercase tracking-wider py-2.5 bg-white/80 rounded-2xl border border-slate-300">
+        Click a matching food item from the row above!
     </div>
 
     <div id="triviaModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-white border-4 border-slate-900 rounded-[36px] w-full max-w-md p-6 shadow-2xl space-y-4">
+        <div id="modalContainerFrame" class="bg-white border-4 border-slate-900 rounded-[36px] w-full max-w-md p-6 shadow-2xl space-y-4 text-slate-800">
             <div class="text-center">
-                <span id="modalBadge" class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-amber-100 text-amber-800">
-                    Assessment
-                </span>
-                <h3 id="modalCardHeader" class="text-2xl font-black text-slate-800 mt-2">Validation</h3>
+                <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-black/10">Quiz Time</span>
+                <h3 id="modalHeaderTitle" class="text-2xl font-black mt-2">Question</h3>
             </div>
-
-            <div id="modalQuestionBox" class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-center text-base font-bold text-slate-800 font-fun leading-relaxed"></div>
-
-            <div id="modalOptionsContainer" class="flex flex-col gap-2.5"></div>
-
-            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
-                <span class="text-[10px] font-black text-indigo-700 block uppercase tracking-wider">💡 Study Hint:</span>
-                <p id="modalHintBox" class="text-xs font-bold text-slate-600 mt-0.5"></p>
+            <div id="modalQuestionText" class="bg-white/90 border-2 border-slate-100 rounded-2xl p-4 text-center text-sm font-bold leading-relaxed shadow-inner"></div>
+            <div id="modalOptionsBox" class="flex flex-col gap-2"></div>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+                <span class="text-[10px] font-black text-indigo-700 block uppercase tracking-wider">💡 Helpful Hint:</span>
+                <p id="modalHintText" class="text-xs font-medium text-slate-600 mt-0.5"></p>
             </div>
         </div>
     </div>
 
     <script>
-        // Full Curriculum Curated Balanced 12-Question Deck Array Matrix
         const original12CardCatalog = [
-            { id: 1, name: "Boiling", color: "bg-rose-500", text: "text-rose-500", category: "Cooking", isSpecial: false, isDifficult: false, symbol: "🍲", q: "Rahul wants to make hard-boiled eggs and rice for lunch. What does he need to use to cook them?", a: ["A very hot oven", "Bubbling hot water", "Lots of frying oil"], c: "Bubbling hot water", h: "Think about how rice swims in a pot of water on the stove until it gets soft!" },
-            { id: 2, name: "Steaming", color: "bg-rose-500", text: "text-rose-500", category: "Cooking", isSpecial: false, isDifficult: true, symbol: "💨", q: "Tina's grandmother told her to eat fluffy Idlis and Momos because they are healthy and cooked without any oil. How are these foods made?", a: ["Using hot steam vapor", "Deep frying in a pan", "Roasting over charcoal"], c: "Using hot steam vapor", h: "Look closely at the card! These foods are cooked by the hot cloud of steam that rises from hot water." },
-            { id: 3, name: "Frying", color: "bg-rose-500", text: "text-rose-500", category: "Cooking", isSpecial: false, isDifficult: false, symbol: "🍳", q: "Rohan loves crunchy, crispy samosas and puris. What do we use to cook these treats?", a: ["Ice cold water", "Just dry oven air", "Deep hot oil or ghee"], c: "Deep hot oil or ghee", h: "To make food super crunchy and golden brown, it needs to take a quick dip in hot oil!" },
-            { id: 4, name: "Wheat Land", color: "bg-blue-500", text: "text-blue-500", category: "Staples", isSpecial: false, isDifficult: false, symbol: "🌾", q: "Simran lives in Punjab where the soil is perfect for growing wheat. Which food will her family most likely make as their daily staple?", a: ["Hot Chapatis and Rotis", "Steamed Rice balls", "Coconut puddings"], c: "Hot Chapatis and Rotis", h: "Wheat grains are ground into flour to roll out soft, round rotis!" },
-            { id: 5, name: "Coastal Diet", color: "bg-blue-500", text: "text-blue-500", category: "Staples", isSpecial: false, isDifficult: true, symbol: "🐟", q: "Kabir is visiting his cousins in Kerala near the sea. They take him to a restaurant. What local staple food will they most likely order?", a: ["Wheat Bajra roti", "Rice and Fish curry", "Baked sweet biscuits"], c: "Rice and Fish curry", h: "Places near the ocean have plenty of water for rice fields and lots of fresh fish from the sea!" },
-            { id: 6, name: "Desert Grains", color: "bg-blue-500", text: "text-blue-500", category: "Staples", isSpecial: false, isDifficult: true, symbol: "🏜️", q: "Aarav's family lives in a beautiful village in Rajasthan where the soil is very sandy and it rarely rains. Which grains do they grow instead of rice?", a: ["Only apples", "Jowar and Bajra", "Pineapples"], c: "Jowar and Bajra", h: "Some tough grains do not need much water to grow and thrive beautifully in dry, sunny deserts." },
-            { id: 7, name: "Mountain Fruits", color: "bg-emerald-500", text: "text-emerald-500", category: "Fruits", isSpecial: false, isDifficult: false, symbol: "🍎", q: "Meera is traveling to the cold, beautiful mountains of Himachal Pradesh. Which fresh fruit will she find growing on trees everywhere?", a: ["Crisp red apples", "Yellow bananas", "Tropical coconuts"], c: "Crisp red apples", h: "This crunchy fruit loves cold weather and grows beautifully on hilly mountain slopes!" },
-            { id: 8, name: "Desert Apricots", color: "bg-emerald-500", text: "text-emerald-500", category: "Fruits", isSpecial: false, isDifficult: true, symbol: "🍑", q: "Tenzin lives in the cold, high-altitude desert of Ladakh. He wants to pick the most famous local orange-colored fruit. What is it?", a: ["Sweet Apricots", "Juicy Watermelons", "Fresh Mangoes"], c: "Sweet Apricots", h: "This is a small, sweet stone fruit that loves the unique cold climate of Ladakh." },
-            { id: 9, name: "Coastal Palms", color: "bg-emerald-500", text: "text-emerald-500", category: "Fruits", isSpecial: false, isDifficult: false, symbol: "🌴", q: "If you walk along the sunny sandy beaches of Goa, which giant trees will you see everywhere providing refreshing water?", a: ["Apple trees", "Coconut palms", "Wheat fields"], c: "Coconut palms", h: "Look up high! These big green nuts grow on tall palm trees right next to the sea." },
-            { id: 10, name: "The Kadahi", color: "bg-amber-500", text: "text-amber-500", category: "Tools", isSpecial: false, isDifficult: false, symbol: "🥘", q: "Mother wants to make deep-fried pakoras for a rainy day. Which deep, curved metal pan will she pull out of the cabinet?", a: ["A Kadahi", "A flat Tawa", "A plastic bowl"], c: "A Kadahi", h: "This deep round pan safely holds hot oil so snacks can fry without spilling out." },
-            { id: 11, name: "Sun Power", color: "bg-amber-500", text: "text-amber-500", category: "Tools", isSpecial: true, isDifficult: true, symbol: "☀️", q: "Sana's school wants to cook food using clean energy without using any gas cylinders or firewood. Which tool should they place out in the yard?", a: ["A microwave", "A Solar Cooker", "A clay tandoor"], c: "A Solar Cooker", h: "This magical cooking box has mirrors and uses the warm rays of the sun to heat food safely!" },
-            { id: 12, name: "Haldi Power", color: "bg-amber-500", text: "text-amber-500", category: "Tools", isSpecial: true, isDifficult: false, symbol: "🧪", q: "Whenever Arjun gets a small scrape or cold, his grandfather mixes a bright yellow spice into his warm milk to help him heal. What is this spice?", a: ["Haldi (Turmeric)", "Black Pepper", "Sugar"], c: "Haldi (Turmeric)", h: "This beautiful yellow powder is found in every Indian kitchen and helps our bodies stay strong!" }
+            { id: 1, name: "Rice & Eggs", color: "bg-rose-500", category: "Boiling", symbol: "🍲", q: "Rahul wants to make boiled eggs and soft rice for lunch. What does he need to cook them?", a: ["A very hot baking oven", "A pot of bubbling hot water", "A frying pan filled with oil"], c: "A pot of bubbling hot water", h: "Rice swims in a deep pot of water on the stove until it gets soft!" },
+            { id: 2, name: "Soft Idlis", color: "bg-rose-500", category: "Steaming", symbol: "💨", q: "Tina's grandmother makes soft Idlis and Momos with zero oil. How are these healthy snacks cooked?", a: ["Using hot steam from boiling water", "Deep-frying them in hot ghee", "Roasting them over black coals"], c: "Using hot steam from boiling water", h: "These foods cook using only the hot cloud of steam rising inside the pot!" },
+            { id: 3, name: "Crispy Samosas", color: "bg-rose-500", category: "Frying", symbol: "🍳", q: "Rohan loves crunchy, golden samosas and puris. How does the chef cook these crispy treats?", a: ["By soaking them in cold water", "By dropping them in very hot oil", "By leaving them in the cold air"], c: "By dropping them in very hot oil", h: "To make a snack super crunchy on the outside, we always fry it in hot oil!" },
+            { id: 4, name: "Wheat Flour", color: "bg-blue-500", category: "Punjab State Grains", symbol: "🌾", q: "Simran lives in Punjab where farmers grow lots of golden wheat. What daily food does her family make with it?", a: ["Soft, round Rotis and Chapatis", "Sweet coconut pudding", "Plain white rice balls"], c: "Soft, round Rotis and Chapatis", h: "Wheat grains are ground into flour to roll out soft, warm rotis!" },
+            { id: 5, name: "Rice & Fish Curry", color: "bg-blue-500", category: "Coastal Foods", symbol: "🐟", q: "Kabir is visiting Kerala right next to the big ocean. What local meal will he see people eating the most?", a: ["Dry millet bajra rotis", "Fresh Rice and Fish curry", "Sweet bakery biscuits"], c: "Fresh Rice and Fish curry", h: "Places near the sea have lots of water for rice fields, and fishermen catch fresh fish every day!" },
+            { id: 6, name: "Jowar & Bajra", color: "bg-blue-500", category: "Desert Grains", symbol: "🏜️", q: "Aarav lives in a warm village in Rajasthan where it rarely rains. What grains does his family grow instead of rice?", a: ["Crisp red apples", "Jowar and Bajra millets", "Sweet pineapples"], c: "Jowar and Bajra millets", h: "These strong grains do not need much water to grow under a hot desert sun!" },
+            { id: 7, name: "Mountain Apples", color: "bg-emerald-500", category: "Mountain Fruits", symbol: "🍎", q: "Meera is traveling up into the cold hills of Himachal Pradesh. Which fruit grows on trees all around her?", a: ["Crisp red apples", "Bright yellow bananas", "Brown tropical coconuts"], c: "Crisp red apples", h: "This crunchy, juicy fruit loves cold weather and mountain air!" },
+            { id: 8, name: "Golden Apricots", color: "bg-emerald-500", category: "Cold Desert Treats", symbol: "🍑", q: "Tenzin lives in the cold, rocky desert of Ladakh. What is the name of the sweet, orange fruit grown by local farmers?", a: ["A sweet mountain Apricot", "A giant green watermelon", "A yellow tropical mango"], c: "A sweet mountain Apricot", h: "This is a small fruit with soft skin that thrives in the high, cold mountains!" },
+            { id: 9, name: "Fresh Coconuts", color: "bg-emerald-500", category: "Coastal Trees", symbol: "🌴", q: "You are walking on a sandy beach in sunny Goa. What giant trees do you see holding green nuts filled with sweet water?", a: ["Small strawberry bushes", "Tall Coconut palm trees", "Green wheat plants"], c: "Tall Coconut palm trees", h: "Look way up high! These large nuts grow right near the ocean waves." },
+            { id: 10, name: "The Metal Kadahi", color: "bg-amber-500", category: "Kitchen Tools", symbol: "🥘", q: "Mother wants to fry up some hot pakoras for tea time. Which deep, curved metal pan will she use?", a: ["A deep, round Kadahi", "A flat baking tray", "A plastic soup bowl"], c: "A deep, round Kadahi", h: "This round pan holds hot oil safely inside so snacks can fry beautifully." },
+            { id: 11, name: "The Solar Cooker", color: "bg-amber-500", category: "Sun Powered Tools", symbol: "☀️", q: "Sana's school wants to cook lunch outside using clean energy without using gas, coal, or wood. What box should they use?", a: ["An electric microwave oven", "A mirror Solar Cooker box", "A clay tandoor oven"], c: "A mirror Solar Cooker box", h: "This clever box uses shiny mirrors to catch the hot rays of the sun to heat food for free!" },
+            { id: 12, name: "Bright Haldi", color: "bg-amber-500", category: "Healthy Spices", symbol: "🧪", q: "When Arjun gets a scrape or a cold, his grandfather mixes a bright yellow spice into his warm milk. What is this spice?", a: ["Haldi (Turmeric powder)", "Spicy Black Pepper", "Sweet white sugar"], c: "Haldi (Turmeric powder)", h: "This yellow powder is found in every kitchen and helps our bodies stay strong and heal!" }
         ];
 
-        let centralMainDeck = [];
-        let humanPlayerHand = [];
-        let aiOpponentHand = [];
-        let topDiscardedCard = {};
-        
-        let globalCumulativeScore = 0;
-        let activeSelectedHandIndex = null;
-        let hasClickedUnoThisTurn = false;
-        let unoWindowTimeout = null;
+        let currentRecipeIndex = 0;
+        let cumulativePointsScore = 0;
+        let activeDisplayedItems = [];
+        let currentlySelectedCardData = null;
 
-        // SYSTEM LOAD AUTOMATION SPLASH ROUTER
+        // SPLASH SCREEN ROUTING LOGIC
         window.onload = function() {
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
@@ -190,11 +142,10 @@
                     splash.classList.add('hidden');
                     document.getElementById('screenTitle').classList.remove('hidden');
                 }, 700);
-            }, 5000); // Strict 5 second branding display layout
+            }, 5000);
         };
 
         function goToInstructionsScreen() {
-            // Trigger audio channels initialization safely via click context
             document.getElementById('audioBg').play().catch(() => {});
             document.getElementById('screenTitle').classList.add('hidden');
             document.getElementById('screenInstructions').classList.remove('hidden');
@@ -202,128 +153,71 @@
 
         function launchMainGameEngine() {
             document.getElementById('screenInstructions').classList.add('hidden');
-            beginUnoEngine();
+            currentRecipeIndex = 0;
+            cumulativePointsScore = 0;
+            document.getElementById('scoreTrackerField').innerText = cumulativePointsScore;
+            loadNextRecipeRoundLevel();
         }
 
-        function beginUnoEngine() {
-            // Re-shuffle a doubled pack for deep dynamic range
-            centralMainDeck = [...original12CardCatalog, ...original12CardCatalog]
-                .sort(() => Math.random() - 0.5);
-
-            humanPlayerHand = [];
-            aiOpponentHand = [];
-            globalCumulativeScore = 0;
-            document.getElementById('currentScoreField').innerText = globalCumulativeScore;
-
-            // Deal hands (5 cards each)
-            for(let i=0; i<5; i++) {
-                humanPlayerHand.push(centralMainDeck.pop());
-                aiOpponentHand.push(centralMainDeck.pop());
-            }
-
-            // Pop starting anchor card onto discard pile
-            topDiscardedCard = centralMainDeck.pop();
-            logActionAlert("Match either Color or Food Group Category to play!");
-            updateBoardLayout();
-        }
-
-        function createCardUIString(card, index, playerType) {
-            const isHuman = (playerType === 'human');
-            let isValidMatch = false;
-
-            if (isHuman) {
-                const sameColor = card.color === topDiscardedCard.color;
-                const sameCategory = card.category === topDiscardedCard.category;
-                isValidMatch = sameColor || sameCategory;
-            }
-
-            const interactionClick = (isHuman && isValidMatch) ? `onclick="openQuestionPortal(${index})"` : '';
-            const stylisticOpacity = (isHuman && !isValidMatch) ? 'opacity-40 scale-95 cursor-not-allowed' : 'hover:-translate-y-3 cursor-pointer';
-            
-            return `
-                <div ${interactionClick} class="uno-card w-24 sm:w-28 border-4 border-white rounded-2xl flex flex-col justify-between p-2.5 text-white shadow-lg relative shrink-0 ${card.color} ${stylisticOpacity}">
-                    <div class="flex justify-between items-center text-[9px] font-black tracking-wider uppercase opacity-90">
-                        <span>${card.category}</span>
-                        <span>${card.symbol}</span>
-                    </div>
-                    
-                    <div class="oval-center w-full h-16 my-auto flex flex-col items-center justify-center text-center p-1">
-                        <div class="text-[11px] font-black tracking-tight leading-none drop-shadow-md uppercase">${card.name}</div>
-                    </div>
-
-                    <div class="flex justify-between items-end">
-                        <span class="text-xs opacity-60">${card.isSpecial ? '⚡' : '★'}</span>
-                        <span class="text-xs font-black bg-black/10 px-2 py-0.5 rounded-full">${card.symbol}</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        function updateBoardLayout() {
-            document.getElementById('deckCounter').innerText = centralMainDeck.length;
-            document.getElementById('aiHandBadge').innerText = `${aiOpponentHand.length} Cards Left`;
-            document.getElementById('playerHandCounter').innerText = `${humanPlayerHand.length} Cards`;
-
-            document.getElementById('discardPileSlot').innerHTML = createCardUIString(topDiscardedCard, null, 'discard');
-
-            const row = document.getElementById('playerHandRow');
-            row.innerHTML = '';
-            humanPlayerHand.forEach((card, idx) => {
-                row.innerHTML += createCardUIString(card, idx, 'human');
-            });
-
-            // Evaluate game over conditions
-            if (humanPlayerHand.length === 0) {
+        function loadNextRecipeRoundLevel() {
+            if (currentRecipeIndex >= original12CardCatalog.length) {
                 document.getElementById('audioClaps').play();
-                triggerMassConfettiExplosion();
-                logActionAlert("🎉 Victory! You cleared your hand and won Food UNO! 🏆");
-                setTimeout(() => { beginUnoEngine(); }, 5000);
-                return;
-            } else if (aiOpponentHand.length === 0) {
-                logActionAlert("🤖 Game Over! The Kitchen Computer won this match.");
-                setTimeout(() => { beginUnoEngine(); }, 4000);
+                triggerGrandWinConfettiShower();
+                logActionAlert("🏆 Brilliant! You completed all recipes and filled your basket! 🌟");
+                setTimeout(() => { launchMainGameEngine(); }, 6000);
                 return;
             }
 
-            // Evaluate AI declaration windows for catching system
-            if (aiOpponentHand.length === 1) {
-                document.getElementById('catchAiBtn').classList.remove('hidden');
-            } else {
-                document.getElementById('catchAiBtn').classList.add('hidden');
+            const activeTargetItem = original12CardCatalog[currentRecipeIndex];
+            document.getElementById('recipeTargetPrompt').innerText = `Find: "${activeTargetItem.category}" Item!`;
+            document.getElementById('basketItemsBadge').innerText = `${currentRecipeIndex} / 12 Packed`;
+
+            let incorrectPool = original12CardCatalog.filter(card => card.id !== activeTargetItem.id);
+            incorrectPool.sort(() => Math.random() - 0.5);
+
+            activeDisplayedItems = [activeTargetItem, incorrectPool[0], incorrectPool[1]];
+            activeDisplayedItems.sort(() => Math.random() - 0.5);
+
+            const shelfRow = document.getElementById('shelfItemsGrid');
+            shelfRow.innerHTML = '';
+
+            activeDisplayedItems.forEach((item, shelfIdx) => {
+                shelfRow.innerHTML += `
+                    <div id="shelf-card-${shelfIdx}" onclick="processShelfSelection(${shelfIdx})" class="shelf-item ${item.color} border-4 border-slate-800 rounded-3xl p-4 text-white shadow-lg cursor-pointer text-center flex flex-col justify-between items-center h-44">
+                        <span class="text-4xl my-auto drop-shadow-md">${item.symbol}</span>
+                        <h4 class="text-sm font-black tracking-wide uppercase leading-tight drop-shadow">${item.name}</h4>
+                        <span class="text-[9px] bg-black/10 px-3 py-0.5 rounded-full font-bold uppercase tracking-wider mt-1">${item.category}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function processShelfSelection(idx) {
+            const chosenItem = activeDisplayedItems[idx];
+            const activeTargetItem = original12CardCatalog[currentRecipeIndex];
+
+            if (chosenItem.id !== activeTargetItem.id) {
+                document.getElementById('audioWrong').play();
+                logActionAlert(`❌ Oops! "${chosenItem.name}" is not the right card for our recipe goal.`);
+                return;
             }
-        }
 
-        function logActionAlert(msg) {
-            document.getElementById('gameStatusAlert').innerText = msg;
-        }
+            currentlySelectedCardData = { item: chosenItem, elementId: `shelf-card-${idx}` };
 
-        function humanDrawsCard() {
-            if (centralMainDeck.length === 0) return;
-            humanPlayerHand.push(centralMainDeck.pop());
-            logActionAlert("You drew a card from the deck pile.");
-            updateBoardLayout();
-            
-            setTimeout(executeAiTurnSequence, 1500);
-        }
+            // Open popup layout with matching background color theme rules
+            const frame = document.getElementById('modalContainerFrame');
+            frame.className = `w-full max-w-md p-6 shadow-2xl space-y-4 border-4 border-slate-900 rounded-[36px] ${chosenItem.color} text-white`;
 
-        function openQuestionPortal(idx) {
-            activeSelectedHandIndex = idx;
-            hasClickedUnoThisTurn = false;
-            const card = humanPlayerHand[idx];
+            document.getElementById('modalHeaderTitle').innerText = `${chosenItem.name}`;
+            document.getElementById('modalQuestionText').innerText = chosenItem.q;
+            document.getElementById('modalHintText').innerText = chosenItem.h;
 
-            document.getElementById('modalCardHeader').innerText = `${card.name} Assessment`;
-            document.getElementById('modalQuestionBox').innerText = card.q;
-            document.getElementById('modalHintBox').innerText = card.h;
-            
-            const badge = document.getElementById('modalBadge');
-            badge.innerText = `${card.category} Group ${card.isDifficult ? '🔥 (Difficult)' : '🍏 (Easy)'}`;
+            const box = document.getElementById('modalOptionsBox');
+            box.innerHTML = '';
 
-            const container = document.getElementById('modalOptionsContainer');
-            container.innerHTML = '';
-
-            card.a.forEach(opt => {
-                container.innerHTML += `
-                    <button onclick="evaluatePortalAnswer('${opt.replace(/'/g, "\\'")}')" class="w-full text-left bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 hover:border-amber-400 p-3 rounded-xl text-xs font-black text-slate-700 transition-colors cursor-pointer font-fun">
+            chosenItem.a.forEach(opt => {
+                box.innerHTML += `
+                    <button onclick="evaluateBasketTriviaAnswer('${opt.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-yellow-100 p-3.5 rounded-2xl text-xs font-black text-slate-800 transition-transform active:scale-95 cursor-pointer font-fun shadow-md">
                         ${opt}
                     </button>
                 `;
@@ -332,132 +226,46 @@
             document.getElementById('triviaModal').classList.remove('hidden');
         }
 
-        function evaluatePortalAnswer(selectedText) {
-            const card = humanPlayerHand[activeSelectedHandIndex];
+        function evaluateBasketTriviaAnswer(selectedAnswer) {
             document.getElementById('triviaModal').classList.add('hidden');
+            const data = currentlySelectedCardData.item;
 
-            if (selectedText === card.c) {
+            if (selectedAnswer === data.c) {
                 document.getElementById('audioCorrect').play();
-                
-                // Add points
-                globalCumulativeScore += 10;
-                document.getElementById('currentScoreField').innerText = globalCumulativeScore;
+                triggerSingleItemBurstConfetti();
 
-                // Scenario-based difficult question success bonus award
-                if (card.isDifficult) {
-                    triggerSingleCardConfettiBurst();
-                    logActionAlert(`🌟 Amazing! Correct answer to a tough scenario puzzle! +10 Pts.`);
-                } else {
-                    logActionAlert(`✨ Correct! Played ${card.name}. +10 Pts.`);
-                }
-                
-                // Advance card to discard pile
-                topDiscardedCard = humanPlayerHand.splice(activeSelectedHandIndex, 1)[0];
+                cumulativePointsScore += 10;
+                document.getElementById('scoreTrackerField').innerText = cumulativePointsScore;
+                logActionAlert(`✨ Awesome! "${data.name}" dropped into your basket! +10 Pts.`);
 
-                // UNO Reflex Logic Window Evaluation Check
-                if (humanPlayerHand.length === 1) {
-                    triggerUnoDeclarationAlertWindow();
-                } else {
-                    processPostCardPlayLogic(card);
-                }
+                const el = document.getElementById(currentlySelectedCardData.elementId);
+                if (el) { el.classList.add('animate-drop-basket'); }
+
+                setTimeout(() => {
+                    currentRecipeIndex++;
+                    loadNextRecipeRoundLevel();
+                }, 700);
             } else {
                 document.getElementById('audioWrong').play();
-                logActionAlert(`❌ Not quite! Correct answer: "${card.c}". Added 1 penalty card.`);
-                humanPlayerHand.push(centralMainDeck.pop());
-                updateBoardLayout();
-                
-                setTimeout(executeAiTurnSequence, 2000);
+                logActionAlert(`❌ Incorrect answer! The item fell off the basket. Let's try again!`);
             }
-            activeSelectedHandIndex = null;
+            currentlySelectedCardData = null;
         }
 
-        function triggerUnoDeclarationAlertWindow() {
-            document.getElementById('sayUnoBtn').classList.remove('hidden');
-            updateBoardLayout();
-
-            unoWindowTimeout = setTimeout(() => {
-                // If student fails to click inside 3 seconds
-                if (!hasClickedUnoThisTurn) {
-                    document.getElementById('sayUnoBtn').classList.add('hidden');
-                    logActionAlert("💥 Caught! You forgot to say UNO! Draw 2 penalty cards!");
-                    humanPlayerHand.push(centralMainDeck.pop());
-                    humanPlayerHand.push(centralMainDeck.pop());
-                    updateBoardLayout();
-                    setTimeout(executeAiTurnSequence, 2000);
-                }
-            }, 3000);
+        function logActionAlert(msg) {
+            document.getElementById('statusAlertField').innerText = msg;
         }
 
-        function registerUserUnoVoice() {
-            hasClickedUnoThisTurn = true;
-            clearTimeout(unoWindowTimeout);
-            document.getElementById('sayUnoBtn').classList.add('hidden');
-            logActionAlert("📢 You declared UNO! beautifully! Safe matching turn.");
-            
-            // Resume pipeline flow
-            const playedCard = topDiscardedCard;
-            processPostCardPlayLogic(playedCard);
+        function triggerSingleItemBurstConfetti() {
+            confetti({ particleCount: 40, spread: 40, origin: { y: 0.75 } });
         }
 
-        function catchComputerFailure() {
-            if (aiOpponentHand.length === 1) {
-                document.getElementById('catchAiBtn').classList.add('hidden');
-                logActionAlert("🚨 Great reflexes! You caught the Computer forgetting UNO! It draws 2 cards!");
-                aiOpponentHand.push(centralMainDeck.pop());
-                aiOpponentHand.push(centralMainDeck.pop());
-                updateBoardLayout();
-            }
-        }
-
-        function processPostCardPlayLogic(card) {
-            updateBoardLayout();
-            if (humanPlayerHand.length === 0) return;
-
-            if (card.isSpecial) {
-                logActionAlert(`⚡ Special Action! AI turn skipped by ${card.name}! Play again!`);
-            } else {
-                setTimeout(executeAiTurnSequence, 1500);
-            }
-        }
-
-        function executeAiTurnSequence() {
-            if (humanPlayerHand.length === 0 || aiOpponentHand.length === 0) return;
-
-            let matchIdx = aiOpponentHand.findIndex(card => 
-                card.color === topDiscardedCard.color || card.category === topDiscardedCard.category
-            );
-
-            if (matchIdx !== -1) {
-                const aiCard = aiOpponentHand.splice(matchIdx, 1)[0];
-                topDiscardedCard = aiCard;
-                logActionAlert(`🤖 AI played matching card: ${aiCard.name}`);
-                updateBoardLayout();
-
-                if (aiCard.isSpecial) {
-                    setTimeout(() => {
-                        logActionAlert(`💥 AI used Special Action ${aiCard.name}! Your turn is skipped!`);
-                        setTimeout(executeAiTurnSequence, 2000);
-                    }, 1200);
-                }
-            } else {
-                aiOpponentHand.push(centralMainDeck.pop());
-                logActionAlert("🤖 AI had no match and drew 1 card from the pile.");
-                updateBoardLayout();
-            }
-        }
-
-        // CONFETTI CELEBRATION ENGINES
-        function triggerSingleCardConfettiBurst() {
-            confetti({ particleCount: 60, spread: 40, origin: { y: 0.7 } });
-        }
-
-        function triggerMassConfettiExplosion() {
-            let duration = 3 * 1000;
+        function triggerGrandWinConfettiShower() {
+            let duration = 4 * 1000;
             let end = Date.now() + duration;
-
             (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                confetti({ particleCount: 6, angle: 55, spread: 60, origin: { x: 0, y: 0.8 } });
+                confetti({ particleCount: 6, angle: 125, spread: 60, origin: { x: 1, y: 0.8 } });
                 if (Date.now() < end) { requestAnimationFrame(frame); }
             }());
         }
