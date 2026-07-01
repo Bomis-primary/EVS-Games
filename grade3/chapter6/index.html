@@ -6,18 +6,18 @@
     <title>Avian Cloud Quest</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
         
         body, html {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #2c3e50;
-            font-family: 'Press Start 2P', monospace;
+            background-color: #1e293b;
+            font-family: 'Fredoka', sans-serif;
             user-select: none;
         }
 
-        /* Fixed Aspect-Ratio Viewport Mocking the Uploaded Reference Screenshot */
+        /* Responsive Premium Arcade Viewport */
         .arcade-container {
             width: 100%;
             max-width: 450px;
@@ -25,45 +25,44 @@
             max-height: 800px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            border: 6px solid #1a1a1a;
-            background-color: #70c5ce;
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
+            border: 8px solid #2d3748;
+            border-radius: 24px;
+            background: linear-gradient(to bottom, #7dbec7 0%, #a4dede 100%);
         }
 
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            image-rendering: pixelated;
         }
 
-        .pixel-card {
-            border: 4px solid #000;
-            box-shadow: 5px 5px 0px #000;
+        /* Clean Child-friendly Soft UI design elements */
+        .premium-card {
+            border-radius: 20px;
+            box-shadow: 0 12px 0px #cbd5e1, 0 20px 25px -5px rgba(0,0,0,0.1);
         }
         
-        .pixel-btn {
-            border: 4px solid #000;
-            box-shadow: 0px 4px 0px #000;
-            transition: transform 0.05s, box-shadow 0.05s;
+        .premium-btn {
+            border-radius: 16px;
+            transition: all 0.1s ease;
         }
-        .pixel-btn:active {
+        .premium-btn:active {
             transform: translateY(4px);
-            box-shadow: 0px 0px 0px #000;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen w-screen bg-[#1e293b]">
+<body class="flex items-center justify-center min-h-screen w-screen bg-[#0f172a]">
 
     <audio id="sndCorrect" src="./assets/correct.mp3"></audio>
     <audio id="sndWrong" src="./assets/wrong.mp3"></audio>
     <audio id="sndClaps" src="./assets/freesound_community-claps-44774.mp3"></audio>
 
-    <div id="screenSplash" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[100] transition-opacity duration-700">
-        <div class="text-center space-y-4 max-w-xs">
-            <img src="./assets/innovine-logo.png" alt="Logo" class="w-48 mx-auto object-contain">
-            <div class="w-32 h-2 bg-slate-200 mx-auto overflow-hidden relative">
-                <div class="absolute inset-y-0 left-0 bg-sky-400 w-1/2 animate-infinite-scroll"></div>
+    <div id="screenSplash" class="fixed inset-0 bg-[#e2f4f5] flex flex-col items-center justify-center z-[100] transition-opacity duration-700">
+        <div class="text-center space-y-6 max-w-xs">
+            <div class="text-4xl animate-bounce">🐤</div>
+            <div class="w-32 h-3 bg-slate-200 mx-auto rounded-full overflow-hidden relative">
+                <div class="absolute inset-y-0 left-0 bg-sky-400 w-1/2 rounded-full animate-pulse"></div>
             </div>
         </div>
     </div>
@@ -72,54 +71,54 @@
         
         <canvas id="gameCanvas" width="450" height="800"></canvas>
 
-        <div id="screenTitle" class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-6 z-20">
-            <div class="bg-[#fcf8f2] pixel-card p-6 w-full text-center space-y-6">
-                <h1 class="text-lg font-black text-slate-800 leading-tight uppercase tracking-wider">
-                    AVIAN<br><span class="text-sky-500">CLOUD QUEST</span>
+        <div id="screenTitle" class="absolute inset-0 bg-black/10 flex flex-col items-center justify-center p-6 z-20">
+            <div class="bg-white/95 backdrop-blur-md premium-card p-8 w-full text-center space-y-6 border-4 border-white">
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight leading-tight">
+                    AVIAN<br><span class="text-sky-500 text-4xl">CLOUD QUEST</span>
                 </h1>
-                <p class="text-[8px] text-slate-500 tracking-normal">ANATOMY & FLIGHT LESSON</p>
-                <button onclick="showInstructions()" class="w-full bg-amber-500 text-white text-[11px] font-bold py-4 pixel-btn cursor-pointer uppercase">
-                    START QUEST
+                <p class="text-sm font-medium text-slate-500 bg-slate-100 rounded-full py-1 px-4 inline-block">Anatomy & Flight Lesson</p>
+                <button onclick="showInstructions()" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 text-lg font-extrabold py-4 px-6 premium-btn shadow-[0_6px_0_#d97706] cursor-pointer">
+                    START QUEST ✨
                 </button>
             </div>
         </div>
 
-        <div id="screenInstructions" class="hidden absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-6 z-20">
-            <div class="bg-white pixel-card p-6 w-full space-y-4">
-                <h2 class="text-[12px] font-bold text-center text-emerald-600 uppercase">MISSION OBJECTIVE</h2>
-                <div class="space-y-3 text-[8px] text-slate-600 leading-relaxed">
-                    <p>• Press <span class="font-bold text-black">SPACEBAR</span> or tap the screen to flap and jump.</p>
-                    <p>• Navigate safely between the classic green pipe systems.</p>
-                    <p>• Intercept floating vocabulary clouds to test your avian knowledge.</p>
+        <div id="screenInstructions" class="hidden absolute inset-0 bg-black/20 flex flex-col items-center justify-center p-6 z-20">
+            <div class="bg-white premium-card p-6 w-full space-y-5 border-4 border-white">
+                <h2 class="text-xl font-black text-center text-emerald-500 tracking-tight">MISSION OBJECTIVE 🚀</h2>
+                <div class="space-y-3 text-sm font-medium text-slate-600 leading-relaxed">
+                    <p class="flex items-center gap-2">👉 <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-300 font-bold text-black text-xs">SPACE</span> or <span class="font-bold text-black">TAP SCREEN</span> to flap wings.</p>
+                    <p class="flex items-center gap-2">👉 Guide your cute bird safely through the pipes.</p>
+                    <p class="flex items-center gap-2">👉 Catch floating cloud questions to gain points!</p>
                 </div>
-                <button onclick="startGameEngine()" class="w-full bg-emerald-500 text-white text-[11px] font-bold py-3 pixel-btn cursor-pointer uppercase">
-                    LET'S FLY
+                <button onclick="startGameEngine()" class="w-full bg-emerald-400 hover:bg-emerald-500 text-slate-900 text-lg font-extrabold py-3 premium-btn shadow-[0_6px_0_#059669] cursor-pointer">
+                    LET'S FLY! 🎈
                 </button>
             </div>
         </div>
 
-        <div id="modalQuiz" class="hidden absolute inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-            <div id="modalCard" class="bg-white border-4 border-black p-5 w-full text-center space-y-4">
-                <div class="inline-block px-3 py-1 bg-sky-100 border-2 border-black text-sky-700 font-bold text-[8px] uppercase" id="modalCloudTerm">
-                    TERM
+        <div id="modalQuiz" class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-5 z-50">
+            <div id="modalCard" class="bg-white rounded-3xl p-6 w-full text-center space-y-5 border-4 border-sky-300 shadow-2xl transform scale-100 transition-transform duration-200">
+                <div class="inline-block px-4 py-1.5 bg-sky-100 rounded-full text-sky-700 font-extrabold text-xs tracking-wide uppercase" id="modalCloudTerm">
+                    ☁️ Cloud Vocabulary
                 </div>
-                <p id="modalPrompt" class="text-[10px] text-slate-800 font-bold leading-normal"></p>
-                <div id="modalChoices" class="flex flex-col gap-2 pt-2"></div>
+                <p id="modalPrompt" class="text-base text-slate-800 font-bold leading-snug px-2"></p>
+                <div id="modalChoices" class="flex flex-col gap-3 pt-2"></div>
             </div>
         </div>
 
-        <div id="screenGameOver" class="hidden absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-6 z-40">
-            <div class="bg-white pixel-card p-6 w-full text-center space-y-4">
-                <h2 class="text-sm font-black text-sky-600 uppercase">QUEST COMPLETE</h2>
-                <p class="text-slate-500 text-[8px]">You processed all core vocabulary units successfully!</p>
+        <div id="screenGameOver" class="hidden absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-6 z-40">
+            <div class="bg-white premium-card p-8 w-full text-center space-y-6 border-4 border-white">
+                <h2 class="text-3xl font-black text-sky-500">QUEST COMPLETE! 🎉</h2>
+                <p class="text-slate-500 font-medium text-sm">Amazing! You processed all core bird modules perfectly.</p>
                 
-                <div class="bg-slate-50 border-2 border-black p-3">
-                    <span class="text-[8px] text-slate-400 block uppercase mb-1">SCORE ACCUMULATED</span>
-                    <span id="txtFinalScore" class="text-xl font-bold text-emerald-600">0</span>
+                <div class="bg-emerald-50 rounded-2xl border-2 border-emerald-200 p-4">
+                    <span class="text-xs text-emerald-600 font-bold tracking-wider block mb-1">YOUR HIGH SCORE</span>
+                    <span id="txtFinalScore" class="text-4xl font-black text-emerald-600">0</span>
                 </div>
 
-                <button onclick="restartQuest()" class="w-full bg-emerald-400 text-white text-[10px] font-bold py-3 pixel-btn uppercase">
-                    PLAY AGAIN
+                <button onclick="restartQuest()" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 text-lg font-extrabold py-4 premium-btn shadow-[0_6px_0_#d97706]">
+                    PLAY AGAIN 🔄
                 </button>
             </div>
         </div>
@@ -130,35 +129,29 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Prevent browser anti-aliasing to preserve pure pixel aesthetics
-        ctx.imageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
-        ctx.mozImageSmoothingEnabled = false;
-
-        // Dynamic Image References
-        const imgBackground = new Image();
-        imgBackground.src = './assets/image_2651fe.png';
-
         let state = "SPLASH";
         let score = 0;
         let activeIndex = 0;
         
         let pipeArray = [];
         let cloudArray = [];
-        let backgroundScrollX = 0;
+        let particles = [];
+        let decorClouds = []; // Aesthetic dynamic background clouds
+        
         let targetFpsInterval = 1000 / 60;
         let lastEngineFrameTime = 0;
+        let wingFlapTimer = 0;
 
-        // Accurate Flappy Movement Matrix
+        // Vector/Canvas Rendered Premium Child-Friendly Flappy Bird Meta
         let avatarBird = {
-            x: 90,
+            x: 100,
             y: 300,
-            radius: 14,
-            width: 34,
-            height: 24,
-            gravity: 0.38,
+            radius: 17,
+            width: 44,
+            height: 34,
+            gravity: 0.35,
             velocity: 0,
-            jumpForce: -7.0
+            jumpForce: -6.8
         };
 
         // Complete Avian Text Module Payload
@@ -177,13 +170,28 @@
         ];
 
         window.onload = function() {
-            // Screen Tap or Click Event Handler
+            // Screen Event Handlers
             canvas.addEventListener('mousedown', executeFlapAction);
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                executeFlapAction();
+            }, {passive: false});
+
             window.addEventListener('keydown', function(e) {
                 if(e.key === " " || e.key === "ArrowUp") executeFlapAction();
             });
 
-            // Auto dismiss splash screen
+            // Initialize procedural premium background element decoration clouds
+            for(let i=0; i<5; i++){
+                decorClouds.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * 250,
+                    size: Math.random() * 40 + 30,
+                    speed: Math.random() * 0.3 + 0.1
+                });
+            }
+
+            // Dismiss splash screen smoothly
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
                 splash.classList.add('opacity-0');
@@ -191,7 +199,7 @@
                     splash.remove();
                     state = "TITLE";
                 }, 700);
-            }, 3500);
+            }, 2000);
 
             requestAnimationFrame(renderLoop);
         };
@@ -215,7 +223,8 @@
             activeIndex = 0;
             pipeArray = [];
             cloudArray = [];
-            avatarBird.y = 250;
+            particles = [];
+            avatarBird.y = 300;
             avatarBird.velocity = 0;
 
             generateNextCloud();
@@ -227,130 +236,223 @@
                 concludeQuest();
                 return;
             }
-            // Spawn clouds with distinct safe intervals ahead
             cloudArray.push({
-                x: canvas.width + 100,
-                y: Math.floor(Math.random() * 220) + 180,
-                width: 140,
-                height: 60,
+                x: canvas.width + 120,
+                y: Math.floor(Math.random() * 200) + 200,
+                width: 130,
+                height: 55,
                 data: questionBank[activeIndex]
             });
+        }
+
+        // Child friendly visual fx: spawn stars when winning points
+        function createStars(x, y) {
+            for(let i=0; i<12; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    size: Math.random() * 6 + 4,
+                    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                    alpha: 1
+                });
+            }
         }
 
         function renderLoop(timestamp) {
             requestAnimationFrame(renderLoop);
 
-            // Frame throttling to enforce consistent movement performance across monitors
             let dynamicDelta = timestamp - lastEngineFrameTime;
             if (dynamicDelta < targetFpsInterval) return;
             lastEngineFrameTime = timestamp - (dynamicDelta % targetFpsInterval);
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            wingFlapTimer += 0.15;
 
-            // 1. RENDER BACKGROUND ASSET MATCHING THE ENTIRE CANVA DIMENSION
-            if (imgBackground.complete && imgBackground.naturalWidth !== 0) {
-                ctx.drawImage(imgBackground, 0, 0, canvas.width, canvas.height);
-            } else {
-                // Hard fallbacks to match the palette exactly if assets lag loading
-                ctx.fillStyle = "#70c5ce"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = "#ced69c"; ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
-            }
+            // 1. SKY GRADIENT BACKGROUND (Matching standard asset values cleanly)
+            let bgGrd = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGrd.addColorStop(0, '#7bc3cc');
+            bgGrd.addColorStop(0.7, '#9edbe3');
+            bgGrd.addColorStop(1, '#bfe9ed');
+            ctx.fillStyle = bgGrd;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // Render background decorative moving clouds
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            decorClouds.forEach(dc => {
+                if(state === "PLAYING") dc.x -= dc.speed;
+                if(dc.x + dc.size * 2 < 0) dc.x = canvas.width + dc.size;
+                ctx.beginPath();
+                ctx.arc(dc.x, dc.y, dc.size, 0, Math.PI * 2);
+                ctx.arc(dc.x + dc.size*0.6, dc.y - dc.size*0.2, dc.size*0.8, 0, Math.PI * 2);
+                ctx.arc(dc.x - dc.size*0.6, dc.y - dc.size*0.1, dc.size*0.7, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 2. TIMING & PHYSICS ENGINE
             if (state === "PLAYING") {
-                // Handle Movement Physics
                 avatarBird.velocity += avatarBird.gravity;
                 avatarBird.y += avatarBird.velocity;
 
-                // Ceiling & Floor Collision Constraints
                 if (avatarBird.y < 0) { avatarBird.y = 0; avatarBird.velocity = 0; }
                 if (avatarBird.y > canvas.height - 120 - avatarBird.height) {
                     avatarBird.y = canvas.height - 120 - avatarBird.height;
                 }
 
-                // Procedural generation of obstacles based on distance
-                if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < canvas.width - 260) {
+                // Procedural Pipe Generation
+                if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < canvas.width - 250) {
                     let gapSize = 190;
-                    let minH = 80;
-                    let maxH = canvas.height - gapSize - 240;
+                    let minH = 90;
+                    let maxH = canvas.height - gapSize - 220;
                     let topH = Math.floor(Math.random() * (maxH - minH)) + minH;
+                    
+                    // The reference image features alternating classic green & unique checkered challenge pipes
+                    let isCheckered = (pipeArray.length % 3 === 2); 
 
                     pipeArray.push({
                         x: canvas.width,
                         topHeight: topH,
                         bottomY: topH + gapSize,
-                        width: 70
+                        width: 78,
+                        checkered: isCheckered
                     });
                 }
             }
 
-            // 2. DRAW THE PLAYER BIRD
-            ctx.fillStyle = "#fc9f19";
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 3;
-            ctx.fillRect(avatarBird.x, avatarBird.y, avatarBird.width, avatarBird.height);
-            ctx.strokeRect(avatarBird.x, avatarBird.y, avatarBird.width, avatarBird.height);
-            
-            // Eye Details
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(avatarBird.x + 22, avatarBird.y + 4, 6, 6);
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(avatarBird.x + 26, avatarBird.y + 6, 2, 2);
-
-            // 3. DRAW AND MANAGE PIPES
+            // 3. PIPES GENERATION (Pure Vector Match to the Reference Image)
             pipeArray.forEach((pipe, i) => {
-                if (state === "PLAYING") pipe.x -= 2;
+                if (state === "PLAYING") pipe.x -= 2.2;
 
-                ctx.fillStyle = "#73bf2e";
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 4;
+                if (pipe.checkered) {
+                    // Checkered Pipe Style Pattern
+                    ctx.save();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = "#334155";
+                    
+                    // Top pipe main column
+                    ctx.fillStyle = "#e2e8f0";
+                    ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+                    ctx.strokeRect(pipe.x, -5, pipe.width, pipe.topHeight + 5);
+                    
+                    // Render Checkerboard details inside
+                    ctx.fillStyle = "#475569";
+                    let size = 13;
+                    for (let col = pipe.x; col < pipe.x + pipe.width; col += size * 2) {
+                        for (let row = 0; row < pipe.topHeight; row += size * 2) {
+                            ctx.fillRect(col, row, size, size);
+                            ctx.fillRect(col + size, row + size, size, size);
+                        }
+                    }
+                    
+                    // Top Pipe Cap Rim
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
+                    ctx.strokeRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
+                    ctx.fillStyle = "#334155";
+                    for(let r=pipe.x-4; r < pipe.x+pipe.width+4; r+=size*2){
+                        ctx.fillRect(r, pipe.topHeight - 24, size, 12);
+                        ctx.fillRect(r + size, pipe.topHeight - 12, size, 12);
+                    }
 
-                // Render Top Obstacle Channel
-                ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
-                ctx.strokeRect(pipe.x, -2, pipe.width, pipe.topHeight + 2);
-                // Rim Cap Top
-                ctx.fillStyle = "#9ae445";
-                ctx.fillRect(pipe.x - 3, pipe.topHeight - 22, pipe.width + 6, 22);
-                ctx.strokeRect(pipe.x - 3, pipe.topHeight - 22, pipe.width + 6, 22);
+                    // Bottom pipe main column
+                    let bH = canvas.height - pipe.bottomY;
+                    ctx.fillStyle = "#e2e8f0";
+                    ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, bH);
+                    ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, bH + 5);
+                    for (let col = pipe.x; col < pipe.x + pipe.width; col += size * 2) {
+                        for (let row = pipe.bottomY; row < canvas.height; row += size * 2) {
+                            ctx.fillRect(col, row, size, size);
+                            ctx.fillRect(col + size, row + size, size, size);
+                        }
+                    }
 
-                // Render Bottom Obstacle Channel
-                let bH = canvas.height - pipe.bottomY;
-                ctx.fillStyle = "#73bf2e";
-                ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, bH);
-                ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, bH + 2);
-                // Rim Cap Bottom
-                ctx.fillStyle = "#9ae445";
-                ctx.fillRect(pipe.x - 3, pipe.bottomY, pipe.width + 6, 22);
-                ctx.strokeRect(pipe.x - 3, pipe.bottomY, pipe.width + 6, 22);
+                    // Bottom Pipe Cap Rim
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
+                    ctx.strokeRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
+                    ctx.fillStyle = "#334155";
+                    for(let r=pipe.x-4; r < pipe.x+pipe.width+4; r+=size*2){
+                        ctx.fillRect(r, pipe.bottomY, size, 12);
+                        ctx.fillRect(r + size, pipe.bottomY + 12, size, 12);
+                    }
+                    ctx.restore();
 
-                // Safe clean up optimization loop
+                } else {
+                    // Standard Premium Bright Green Pipes Matrix
+                    ctx.save();
+                    ctx.lineWidth = 3.5;
+                    ctx.strokeStyle = "#14532d";
+
+                    // Top Base Pipe
+                    let topGrd = ctx.createLinearGradient(pipe.x, 0, pipe.x + pipe.width, 0);
+                    topGrd.addColorStop(0, '#22c55e');
+                    topGrd.addColorStop(0.3, '#4ade80');
+                    topGrd.addColorStop(0.7, '#22c55e');
+                    topGrd.addColorStop(1, '#15803d');
+                    ctx.fillStyle = topGrd;
+                    ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+                    ctx.strokeRect(pipe.x, -5, pipe.width, pipe.topHeight + 5);
+
+                    // Top Rim Cap
+                    ctx.fillRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
+                    ctx.strokeRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
+
+                    // Bottom Base Pipe
+                    let bH = canvas.height - pipe.bottomY;
+                    let btmGrd = ctx.createLinearGradient(pipe.x, 0, pipe.x + pipe.width, 0);
+                    btmGrd.addColorStop(0, '#22c55e');
+                    btmGrd.addColorStop(0.3, '#4ade80');
+                    btmGrd.addColorStop(0.7, '#22c55e');
+                    btmGrd.addColorStop(1, '#15803d');
+                    ctx.fillStyle = btmGrd;
+                    ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, bH);
+                    ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, bH + 5);
+
+                    // Bottom Rim Cap
+                    ctx.fillRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
+                    ctx.strokeRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
+                    ctx.restore();
+                }
+
                 if (pipe.x + pipe.width < 0) pipeArray.splice(i, 1);
             });
 
-            // 4. DRAW VOCABULARY CLOUDS
+            // 4. DRAW PREMIUM FLOATING CLOUDS
             cloudArray.forEach((cloud, idx) => {
-                if (state === "PLAYING") cloud.x -= 2;
+                if (state === "PLAYING") cloud.x -= 2.2;
 
+                ctx.save();
+                // Smooth bubble white cloud border styling
                 ctx.fillStyle = "#ffffff";
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 3;
+                ctx.shadowColor = 'rgba(14, 165, 233, 0.2)';
+                ctx.shadowBlur = 15;
                 
-                // Draw clean pixel block clouds
-                ctx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
-                ctx.strokeRect(cloud.x, cloud.y, cloud.width, cloud.height);
+                ctx.beginPath();
+                ctx.roundRect(cloud.x, cloud.y, cloud.width, cloud.height, 20);
+                ctx.fill();
+                ctx.shadowColor = 'transparent'; // Reset
 
-                ctx.fillStyle = "#1e3a8a";
-                ctx.font = "8px 'Press Start 2P', sans-serif";
+                // Structural border line outer outline
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#bae6fd';
+                ctx.stroke();
+
+                // Typography interior properties setup
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 13px 'Fredoka', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText(cloud.data.term, cloud.x + (cloud.width / 2), cloud.y + (cloud.height / 2));
+                ctx.restore();
 
-                // AABB Collision Detection Setup
-                let hasCollided = (avatarBird.x + avatarBird.width > cloud.x &&
-                                   avatarBird.x < cloud.x + cloud.width &&
-                                   avatarBird.y + avatarBird.height > cloud.y &&
-                                   avatarBird.y < cloud.y + cloud.height);
+                // AABB Precise Collision Matrix Tracking
+                let hasCollided = (avatarBird.x + avatarBird.width - 5 > cloud.x &&
+                                   avatarBird.x + 5 < cloud.x + cloud.width &&
+                                   avatarBird.y + avatarBird.height - 5 > cloud.y &&
+                                   avatarBird.y + 5 < cloud.y + cloud.height);
 
                 if (hasCollided) {
+                    createStars(cloud.x + cloud.width/2, cloud.y + cloud.height/2);
                     cloudArray.splice(idx, 1);
                     launchQuizModal(cloud.data);
                 }
@@ -362,15 +464,87 @@
                 }
             });
 
-            // Score HUD Overlay Layout
+            // Particle Effects Engine Processing Loop
+            particles.forEach((p, index) => {
+                p.x += p.vx; p.y += p.vy; p.alpha -= 0.02;
+                if(p.alpha <= 0) particles.splice(index, 1);
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // 5. DRAW THE CHILD-FRIENDLY SMOOTH AVATAR BIRD (Vector Matching Uploaded Reference)
+            ctx.save();
+            ctx.translate(avatarBird.x + avatarBird.width / 2, avatarBird.y + avatarBird.height / 2);
+            
+            // Subtly rotate based on current velocity trends
+            let flightAngle = Math.min(Math.max(avatarBird.velocity * 0.04, -0.4), 0.7);
+            ctx.rotate(flightAngle);
+
+            // Yellow Body Shape
+            ctx.fillStyle = "#facc15"; 
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(0, 0, avatarBird.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Big expressively round animated Eye
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(6, -4, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#000000";
+            ctx.beginPath();
+            ctx.arc(8, -4, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Large Iconic Red Flappy Beak Profile
+            ctx.fillStyle = "#ef4444"; 
+            ctx.beginPath();
+            ctx.ellipse(15, 4, 10, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            // Lip partition line segment
+            ctx.beginPath();
+            ctx.moveTo(7, 4);
+            ctx.lineTo(24, 4);
+            ctx.stroke();
+
+            // Animated Wing Configuration Flaps
+            ctx.fillStyle = "#eab308";
+            let wingOffset = Math.sin(wingFlapTimer) * 5;
+            ctx.beginPath();
+            ctx.ellipse(-10, 2, 9, 6 + wingOffset, Math.PI/6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Ground Floor Strip Layout Design
+            ctx.fillStyle = "#dcdca4";
+            ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
+            ctx.fillStyle = "#539e33";
+            ctx.fillRect(0, canvas.height - 120, canvas.width, 14);
+
+            // Premium HUD Display Score Overlay
             if (state === "PLAYING" || state === "MODAL") {
+                ctx.save();
                 ctx.fillStyle = "#ffffff";
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 4;
-                ctx.font = "24px 'Press Start 2P', sans-serif";
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 8;
+                ctx.font = "900 42px 'Fredoka', sans-serif";
+                ctx.textBaseline = "top";
                 ctx.textAlign = "center";
-                ctx.strokeText(score, canvas.width / 2, 70);
-                ctx.fillText(score, canvas.width / 2, 70);
+                ctx.fillText(score, canvas.width / 2, 40);
+                ctx.restore();
             }
         }
 
@@ -382,17 +556,18 @@
             const btnBox = document.getElementById('modalChoices');
             btnBox.innerHTML = '';
 
-            // Layout questions inside pixel buttons matching the theme
+            // Premium Child-Friendly soft curved choice layouts
             data.choices.forEach(option => {
                 btnBox.innerHTML += `
                     <button onclick="checkAnswer('${option.replace(/'/g, "\\'")}', '${data.answer.replace(/'/g, "\\")}')"
-                        class="w-full text-left p-3 bg-slate-50 border-2 border-black font-bold text-[8px] text-slate-700 active:bg-sky-100 cursor-pointer">
-                        ■ ${option}
+                        class="w-full text-left p-4 bg-slate-50 hover:bg-sky-50 border-2 border-slate-200 hover:border-sky-400 font-bold text-sm text-slate-700 rounded-2xl cursor-pointer transition-all">
+                        ✨ ${option}
                     </button>
                 `;
             });
 
-            document.getElementById('modalQuiz').classList.remove('hidden');
+            const m = document.getElementById('modalQuiz');
+            m.classList.remove('hidden');
         }
 
         function checkAnswer(chosen, realAnswer) {
