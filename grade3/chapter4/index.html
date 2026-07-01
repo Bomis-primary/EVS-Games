@@ -124,37 +124,42 @@
         <div id="modalContainerFrame" class="bg-white border border-slate-100 rounded-[40px] w-full max-w-md p-6 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] space-y-5 text-slate-800 transition-all duration-300 transform scale-100">
             <div class="text-center space-y-1">
                 <span class="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest bg-slate-100 text-slate-500 border border-slate-200/60">Verification Question</span>
-                <h3 id="modalHeaderTitle" class="text-2xl font-black text-slate-900 tracking-tight">Food Item</h3>
             </div>
             <div id="modalQuestionText" class="bg-slate-50 rounded-2xl p-5 text-center text-sm font-semibold text-slate-700 leading-relaxed border border-slate-100"></div>
             <div id="modalOptionsBox" class="flex flex-col gap-2.5"></div>
+            <div id="modalHintDrawer" class="hidden bg-amber-50/80 border border-amber-100/70 rounded-2xl p-4 transition-all duration-300">
+                <span class="text-[10px] font-bold text-amber-800 block uppercase tracking-wider">💡 Stuck? Here is a Tip:</span>
+                <p id="modalHintText" class="text-xs font-medium text-slate-600 mt-1 leading-relaxed"></p>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        // MASTER CURATED 12 QUESTION DECK (TEXT EXCLUSIVE - CATEGORY FILTER ONLY)
-        const original12CardCatalog = [
-            { id: 1, name: "Rice and Eggs", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Boiling", q: "Rahul wants to make boiled eggs and soft rice for lunch. What does he need to cook them?", a: ["A very hot baking oven", "A pot of bubbling hot water", "A frying pan filled with oil"], c: "A pot of bubbling hot water" },
-            { id: 2, name: "Soft Idlis", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Steaming", q: "Tina's grandmother makes soft Idlis and Momos with zero oil. How are these healthy snacks cooked?", a: ["Using hot steam from boiling water", "Deep-frying them in hot ghee", "Roasting them over black coals"], c: "Using hot steam from boiling water" },
-            { id: 3, name: "Crispy Samosas", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Frying", q: "Rohan loves crunchy, golden samosas and puris. How does the chef cook these crispy treats?", a: ["By soaking them in cold water", "By dropping them in very hot oil", "By leaving them in the cold air"], c: "By dropping them in very hot oil" },
-            { id: 4, name: "Wheat Flour", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Punjab State Grains", q: "Simran lives in Punjab where farmers grow lots of golden wheat. What daily food does her family make with it?", a: ["Soft, round Rotis and Chapatis", "Sweet coconut pudding", "Plain white rice balls"], c: "Soft, round Rotis and Chapatis" },
-            { id: 5, name: "Rice and Fish Curry", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Coastal Foods", q: "Kabir is visiting Kerala right next to the big ocean. What local meal will he see people eating the most?", a: ["Dry millet bajra rotis", "Fresh Rice and Fish curry", "Sweet bakery biscuits"], c: "Fresh Rice and Fish curry" },
-            { id: 6, name: "Jowar and Bajra", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Desert Grains", q: "Aarav lives in a warm village in Rajasthan where it rarely rains. What grains does his family grow instead of rice?", a: ["Crisp red apples", "Jowar and Bajra millets", "Sweet pineapples"], c: "Jowar and Bajra millets" },
-            { id: 7, name: "Mountain Apples", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Mountain Fruits", q: "Meera is traveling up into the cold hills of Himachal Pradesh. Which fruit grows on trees all around her?", a: ["Crisp red apples", "Bright yellow bananas", "Brown tropical coconuts"], c: "Crisp red apples" },
-            { id: 8, name: "Golden Apricots", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Cold Desert Treats", q: "Tenzin lives in the cold, rocky desert of Ladakh. What is the name of the sweet, orange fruit grown by local farmers?", a: ["A sweet mountain Apricot", "A giant green watermelon", "A yellow tropical mango"], c: "A sweet mountain Apricot" },
-            { id: 9, name: "Fresh Coconuts", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Coastal Trees", q: "You are walking on a sandy beach in sunny Goa. What giant trees do you see holding green nuts filled with sweet water?", a: ["Small strawberry bushes", "Tall Coconut palm trees", "Green wheat plants"], c: "Tall Coconut palm trees" },
-            { id: 10, name: "The Metal Kadahi", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Kitchen Tools", q: "Mother wants to fry up some hot pakoras for tea time. Which deep, curved metal pan will she use?", a: ["A deep, round Kadahi", "A flat baking tray", "A plastic soup bowl"], c: "A deep, round Kadahi" },
-            { id: 11, name: "The Solar Cooker", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Sun Powered Tools", q: "Sana's school wants to cook lunch outside using clean energy without using gas, coal, or wood. What box should they use?", a: ["An electric microwave oven", "A mirror Solar Cooker box", "A clay tandoor oven"], c: "A mirror Solar Cooker box" },
-            { id: 12, name: "Bright Haldi", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Healthy Spices", q: "When Arjun gets a scrape or a cold, his grandfather mixes a bright yellow spice into his warm milk. What is this spice?", a: ["Haldi (Turmeric powder)", "Spicy Black Pepper", "Sweet white sugar"], c: "Haldi (Turmeric powder)" }
+        // MASTER CURATED DECK
+        const masterCardCatalogBase = [
+            { id: 1, name: "Rice and Eggs", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Boiling", q: "Rahul wants to make boiled eggs and soft rice safely without mixing them up. What open kitchen tool can boil both items in water?", a: ["A flat baking tray", "A deep pot on a stove burner", "A frying pan filled with oil"], c: "A deep pot on a stove burner", h: "Both whole eggs and white rice grains can easily drop into a deep pot of boiling water on the stove!" },
+            { id: 2, name: "Soft Idlis", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Steaming", q: "Tina's grandmother makes soft Idlis and Momos with zero oil. How are these healthy snacks cooked?", a: ["Using hot steam from boiling water", "Deep-frying them in hot ghee", "Roasting them over black coals"], c: "Using hot steam from boiling water", h: "These soft snacks cook cleanly using just the hot, moist cloud of vapor trapped inside the pot!" },
+            { id: 3, name: "Crispy Samosas", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Frying", q: "Rohan loves crunchy, golden samosas and puris. How does the chef cook these crispy treats?", a: ["By soaking them in cold water", "By dropping them in very hot oil", "By leaving them in the cold air"], c: "By dropping them in very hot oil", h: "To make standard savory crusts turn crispy, we submerge them in hot oils." },
+            { id: 4, name: "Wheat Flour", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Punjab State Grains", q: "Simran lives in Punjab where farmers grow lots of golden wheat. What daily food does her family make with it?", a: ["Soft, round Rotis and Chapatis", "Sweet coconut pudding", "Plain white rice balls"], c: "Soft, round Rotis and Chapatis", h: "Wheat grains are milled into standard flour to roll out soft flatbreads!" },
+            { id: 5, name: "Rice and Fish Curry", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Coastal Foods", q: "Kabir is visiting Kerala right next to the big ocean. What local meal will he see people eating the most?", a: ["Dry millet bajra rotis", "Fresh Rice and Fish curry", "Sweet bakery biscuits"], c: "Fresh Rice and Fish curry", h: "Coastal zones harvest plenty of freshwater rice and catch marine life daily!" },
+            { id: 6, name: "Jowar and Bajra", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Desert Grains", q: "Aarav lives in a warm village in Rajasthan where it rarely rains. What grains does his family grow instead of rice?", a: ["Crisp red apples", "Jowar and Bajra millets", "Sweet pineapples"], c: "Jowar and Bajra millets", h: "Millets have deep roots that flourish inside dry soils with very little rainfall." },
+            { id: 7, name: "Mountain Apples", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Mountain Fruits", q: "Meera is traveling up into the cold hills of Himachal Pradesh. Which fruit grows on trees all around her?", a: ["Crisp red apples", "Bright yellow bananas", "Brown tropical coconuts"], c: "Crisp red apples", h: "This crunchy orchard fruit grows well in cooler northern mountain regions." },
+            { id: 8, name: "Golden Apricots", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Cold Desert Treats", q: "Tenzin lives in the cold, rocky desert of Ladakh. What is the name of the sweet, orange fruit grown by local farmers?", a: ["A sweet mountain Apricot", "A giant green watermelon", "A yellow tropical mango"], c: "A sweet mountain Apricot", h: "This small stone fruit grows on hardy high-altitude trees!" },
+            { id: 9, name: "Fresh Coconuts", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Coastal Trees", q: "You are walking on a sandy beach in sunny Goa. What giant trees do you see holding green nuts filled with sweet water?", a: ["Small strawberry bushes", "Tall Coconut palm trees", "Green wheat plants"], c: "Tall Coconut palm trees", h: "These iconic, towering palms line warm sandy sea coasts everywhere." },
+            { id: 10, name: "The Metal Kadahi", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Kitchen Tools", q: "Mother wants to fry up some hot pakoras for tea time. Which deep, curved metal pan will she use?", a: ["A deep, round Kadahi", "A flat baking tray", "A plastic soup bowl"], c: "A deep, round Kadahi", h: "This traditional curved metal pan holds pooling oil safely over high flames." },
+            { id: 11, name: "The Solar Cooker", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Sun Powered Tools", q: "Sana's school wants to cook lunch outside using clean energy without using gas, coal, or wood. What box should they use?", a: ["An electric microwave oven", "A mirror Solar Cooker box", "A clay tandoor oven"], c: "A mirror Solar Cooker box", h: "This insulated box traps intense heat reflections directly from sunshine!" },
+            { id: 12, name: "Bright Haldi", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Healthy Spices", q: "When Arjun gets a scrape or a cold, his grandfather mixes a bright yellow spice into his warm milk. What is this spice?", a: ["Haldi (Turmeric powder)", "Spicy Black Pepper", "Sweet white sugar"], c: "Haldi (Turmeric powder)", h: "This intense golden root spice is used in households to help soothe aches." }
         ];
 
+        let randomizedDeckArray = [];
         let currentRecipeIndex = 0;
         let cumulativePointsScore = 0;
         let activeDisplayedItems = [];
         let currentlySelectedCardData = null;
+        let currentQuestionWrongAttemptsCounter = 0;
 
-        // SEAMLESS LAUNCH COOLDOWN TIMER ENGINE
+        // FIXED UNTOUCHED 5-SECOND COOLDOWN DELAY CONTROLLER
         window.onload = function() {
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
@@ -171,8 +176,14 @@
             document.getElementById('screenInstructions').classList.remove('hidden');
         }
 
+        // FULLY RANDOMIZE DECK ON START
         function launchMainGameEngine() {
             document.getElementById('screenInstructions').classList.add('hidden');
+            
+            // Generate deep copy and randomize order completely
+            randomizedDeckArray = [...masterCardCatalogBase];
+            randomizedDeckArray.sort(() => Math.random() - 0.5);
+
             currentRecipeIndex = 0;
             cumulativePointsScore = 0;
             document.getElementById('scoreTrackerField').innerText = cumulativePointsScore;
@@ -180,7 +191,7 @@
         }
 
         function loadNextRecipeRoundLevel() {
-            if (currentRecipeIndex >= original12CardCatalog.length) {
+            if (currentRecipeIndex >= randomizedDeckArray.length) {
                 document.getElementById('audioClaps').play();
                 triggerGrandWinConfettiShower();
                 logActionAlert("🏆 Flawless! You found every single match and packed your basket!");
@@ -188,11 +199,13 @@
                 return;
             }
 
-            const activeTargetItem = original12CardCatalog[currentRecipeIndex];
+            // Sync targets directly from the newly randomized array path
+            const activeTargetItem = randomizedDeckArray[currentRecipeIndex];
             document.getElementById('recipeTargetPrompt').innerText = `Find: "${activeTargetItem.category}" Item!`;
             document.getElementById('basketItemsBadge').innerText = `${currentRecipeIndex} / 12 Loaded`;
 
-            let incorrectPool = original12CardCatalog.filter(card => card.id !== activeTargetItem.id);
+            // Filter wrong pools from randomized sequence variables
+            let incorrectPool = randomizedDeckArray.filter(card => card.id !== activeTargetItem.id);
             incorrectPool.sort(() => Math.random() - 0.5);
 
             activeDisplayedItems = [activeTargetItem, incorrectPool[0], incorrectPool[1]];
@@ -213,7 +226,7 @@
 
         function processShelfSelection(idx) {
             const chosenItem = activeDisplayedItems[idx];
-            const activeTargetItem = original12CardCatalog[currentRecipeIndex];
+            const activeTargetItem = randomizedDeckArray[currentRecipeIndex];
 
             if (chosenItem.id !== activeTargetItem.id) {
                 document.getElementById('audioWrong').play();
@@ -222,12 +235,11 @@
             }
 
             currentlySelectedCardData = { item: chosenItem, elementId: `shelf-card-${idx}` };
+            currentQuestionWrongAttemptsCounter = 0; 
 
-            const frame = document.getElementById('modalContainerFrame');
-            frame.className = `bg-gradient-to-b from-white to-slate-50 border border-slate-200 rounded-[40px] w-full max-w-md p-6 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.25)] space-y-5 text-slate-800 transition-all duration-300`;
-
-            document.getElementById('modalHeaderTitle').innerText = `${chosenItem.name}`;
+            document.getElementById('modalHintDrawer').classList.add('hidden');
             document.getElementById('modalQuestionText').innerText = chosenItem.q;
+            document.getElementById('modalHintText').innerText = chosenItem.h;
 
             const box = document.getElementById('modalOptionsBox');
             box.innerHTML = '';
@@ -244,10 +256,10 @@
         }
 
         function evaluateBasketTriviaAnswer(selectedAnswer) {
-            document.getElementById('triviaModal').classList.add('hidden');
             const data = currentlySelectedCardData.item;
 
             if (selectedAnswer === data.c) {
+                document.getElementById('triviaModal').classList.add('hidden');
                 document.getElementById('audioCorrect').play();
                 triggerSingleItemBurstConfetti();
 
@@ -268,11 +280,16 @@
                     currentRecipeIndex++;
                     loadNextRecipeRoundLevel();
                 }, 750);
+                currentlySelectedCardData = null;
             } else {
                 document.getElementById('audioWrong').play();
-                logActionAlert("❌ That wasn't the right answer. The item fell off the shelf! Try again.");
+                currentQuestionWrongAttemptsCounter++;
+                logActionAlert("❌ That wasn't the right answer. Try again!");
+
+                if (currentQuestionWrongAttemptsCounter >= 2) {
+                    document.getElementById('modalHintDrawer').classList.remove('hidden');
+                }
             }
-            currentlySelectedCardData = null;
         }
 
         function logActionAlert(msg) {
