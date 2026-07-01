@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grade 3: Plant Parts Illustrated Bingo</title>
+    <title>Plant Parts Bingo Challenge!</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            background: linear-gradient(135deg, #ffedd5 0%, #fef08a 50%, #dcfce7 100%);
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
@@ -21,39 +21,45 @@
 
         .bingo-card-cell {
             aspect-ratio: 1 / 1;
-            transition: all 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.25);
         }
 
         .bingo-card-cell:active {
-            transform: scale(0.94);
+            transform: scale(0.92);
         }
 
-        @keyframes callerGlow {
-            0%, 100% { box-shadow: 0 0 10px #d97706; transform: scale(1); }
-            50% { box-shadow: 0 0 22px #fbbf24; transform: scale(1.02); }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.6); }
         }
         .caller-attention-box {
-            animation: callerGlow 2s infinite ease-in-out;
+            animation: pulseGlow 2.5s infinite ease-in-out;
         }
 
         @keyframes hintFlash {
-            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 4px #f59e0b; transform: scale(1); }
-            50% { border-color: #ef4444; box-shadow: 0 0 20px #f59e0b, inset 0 0 10px #f59e0b; transform: scale(1.03); }
+            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; background-color: #fef3c7; transform: scale(1); }
+            50% { border-color: #ef4444; box-shadow: 0 0 25px #ef4444; background-color: #fee2e2; transform: scale(1.05); }
         }
         .glowing-hint {
-            animation: hintFlash 1.2s infinite ease-in-out !important;
-            border-width: 4px !important;
-            z-index: 10;
+            animation: hintFlash 1s infinite ease-in-out !important;
+            border-width: 5px !important;
+            z-index: 20;
         }
+
+        /* Color variations for text buttons */
+        .color-variant-0 { border-color: #38bdf8; color: #0369a1; }
+        .color-variant-1 { border-color: #f472b6; color: #be185d; }
+        .color-variant-2 { border-color: #fbbf24; color: #b45309; }
+        .color-variant-3 { border-color: #c084fc; color: #6b21a8; }
+        .color-variant-4 { border-color: #4ade80; color: #15803d; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-3 min-h-screen select-none relative">
 
-    <div id="splashLayer" class="fixed inset-0 bg-emerald-950 z-50 flex flex-col items-center justify-center text-center p-6 transition-all duration-500">
-        <div class="space-y-6 flex flex-col items-center">
-            <img src="../../assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-xs object-contain drop-shadow-xl" onerror="this.src='assets/innovine-logo.png'"/>
-            <div class="w-16 h-1 bg-yellow-400 rounded-full animate-pulse"></div>
-            <p class="text-emerald-300 text-xs font-semibold tracking-widest uppercase">EVS Illustrated Learning Architecture</p>
+    <div id="splashLayer" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center text-center p-6 transition-all duration-500">
+        <div class="space-y-4 flex flex-col items-center">
+            <img src="../../assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-xs object-contain" onerror="this.src='assets/innovine-logo.png'"/>
+            <div class="w-12 h-1.5 bg-amber-400 rounded-full animate-bounce mt-4"></div>
         </div>
     </div>
 
@@ -65,108 +71,103 @@
 
     <div id="mainViewport" class="w-full max-w-md hidden flex flex-col items-center justify-center">
 
-        <div id="screenWelcome" class="w-full bg-white border-4 border-emerald-600 rounded-[36px] p-6 text-center space-y-6 shadow-xl">
+        <div id="screenWelcome" class="w-full bg-white border-4 border-amber-400 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
             <div class="space-y-2">
-                <div class="text-7xl animate-bounce">🎨</div>
-                <h1 class="text-4xl font-black text-emerald-800 tracking-wide">Plant Parts Bingo</h1>
-                <p class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full inline-block font-bold">Grade 3 • Picture Match Edition</p>
+                <div class="text-7xl animate-bounce">🌱</div>
+                <h1 class="text-4xl font-black text-emerald-600 tracking-wide">Plant Parts Bingo</h1>
+                <p class="text-sm bg-orange-100 text-orange-700 px-4 py-1 rounded-full inline-block font-black">Grade 3 Challenge!</p>
             </div>
 
-            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-slate-600 text-sm font-medium leading-relaxed font-fun">
-                Welcome to Nature's Lab Room! Ready to put your botany research eyes to the test?
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-amber-900 text-base font-bold font-fun leading-relaxed">
+                Can you match the words to the plant riddles? Let's find out!
             </div>
 
-            <button onclick="changeScreenView('screenWelcome', 'screenRules')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl text-xl shadow active:scale-95 transition-transform cursor-pointer">
+            <button onclick="changeScreenView('screenWelcome', 'screenRules')" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black py-4 rounded-2xl text-2xl shadow-lg active:scale-95 transition-transform cursor-pointer tracking-wider">
                 START GAME 🚀
             </button>
         </div>
 
-        <div id="screenRules" class="hidden w-full bg-white border-4 border-amber-500 rounded-[36px] p-6 text-center space-y-6 shadow-xl">
-            <h2 class="text-2xl font-black text-amber-800">How to Play! 🎯</h2>
+        <div id="screenRules" class="hidden w-full bg-white border-4 border-sky-400 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
+            <h2 class="text-3xl font-black text-sky-600">How to Play! 🎯</h2>
 
-            <div class="text-left space-y-4 text-sm font-bold text-slate-600 font-fun">
-                <div class="flex items-center space-x-3 bg-amber-50 p-3 rounded-xl border border-amber-200">
-                    <span class="text-2xl">📢</span>
-                    <span>Read the plant riddle inside the top yellow box carefully.</span>
+            <div class="text-left space-y-4 text-base font-bold text-slate-700 font-fun">
+                <div class="flex items-center space-x-3 bg-amber-50 p-3 rounded-xl border-2 border-amber-200">
+                    <span class="text-3xl">📢</span>
+                    <span>Read the riddle inside the top yellow box carefully!</span>
                 </div>
-                <div class="flex items-center space-x-3 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
-                    <span class="text-2xl">🖼️</span>
-                    <span>Find and tap the matching illustration drawn on your grid.</span>
+                <div class="flex items-center space-x-3 bg-sky-50 p-3 rounded-xl border-2 border-sky-200">
+                    <span class="text-3xl">🔤</span>
+                    <span>Tap the word button that correctly answers the question.</span>
                 </div>
-                <div class="flex items-center space-x-3 bg-rose-50 p-3 rounded-xl border border-rose-200">
-                    <span class="text-2xl">❤️</span>
-                    <span>Watch your health! You have 3 lives to hit a Bingo line.</span>
+                <div class="flex items-center space-x-3 bg-rose-50 p-3 rounded-xl border-2 border-rose-200">
+                    <span class="text-3xl">❤️</span>
+                    <span>Watch out! You have 3 lives to make a straight line.</span>
                 </div>
             </div>
 
-            <button onclick="launchIllustratedEngine()" class="w-full bg-gradient-to-r from-amber-500 to-emerald-600 text-white font-bold py-4 rounded-2xl text-xl shadow active:scale-95 transition-transform cursor-pointer">
+            <button onclick="launchIllustratedEngine()" class="w-full bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-black py-4 rounded-2xl text-2xl shadow-lg active:scale-95 transition-transform cursor-pointer tracking-wider">
                 PLAY NOW ▶️
             </button>
         </div>
 
-        <div id="screenGameplay" class="hidden w-full bg-white border-4 border-emerald-600 rounded-[36px] p-4 flex flex-col space-y-4 shadow-xl relative">
+        <div id="screenGameplay" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[40px] p-4 flex flex-col space-y-4 shadow-2xl relative">
             
-            <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-2.5 rounded-2xl">
+            <div class="flex justify-between items-center bg-gradient-to-r from-emerald-500 to-teal-500 p-3 rounded-2xl text-white shadow-inner">
                 <div>
-                    <span class="text-[9px] block text-slate-400 font-bold tracking-widest">BOTANY XP</span>
-                    <span id="scoreTracker" class="text-base font-black text-emerald-600">0</span>
+                    <span class="text-[10px] block font-black uppercase opacity-90 tracking-widest">SCORE</span>
+                    <span id="scoreTracker" class="text-xl font-black">0</span>
                 </div>
                 <div class="flex flex-col items-center">
-                    <span class="text-[9px] block text-slate-400 font-bold tracking-widest mb-0.5">HEALTH</span>
-                    <div id="heartsContainer" class="flex space-x-1 text-base tracking-tight">
+                    <span class="text-[10px] block font-black uppercase opacity-90 tracking-widest mb-0.5">LIVES</span>
+                    <div id="heartsContainer" class="flex space-x-1 text-lg">
                         ❤️❤️❤️
                     </div>
                 </div>
-                <div class="text-right">
-                    <span class="text-[9px] block text-slate-400 font-bold tracking-widest">CHAPTER 2</span>
-                    <span class="text-xs font-black text-emerald-800">Parts of Plants</span>
-                </div>
             </div>
 
-            <div class="w-full bg-amber-50 border-2 border-amber-400 rounded-2xl p-3.5 text-center shadow-sm caller-attention-box">
-                <div class="text-[10px] font-black text-amber-700 tracking-wider uppercase mb-1">📢 Solve This Riddle:</div>
-                <p id="clueTextDisplay" class="text-sm font-bold text-amber-950 leading-snug min-h-[56px] flex items-center justify-center font-fun px-1">
-                    Constructing game vector models...
+            <div class="w-full bg-amber-100 border-4 border-amber-400 rounded-2xl p-4 text-center shadow-md caller-attention-box">
+                <div class="text-[11px] font-black text-amber-700 tracking-wider uppercase mb-1">🤔 Riddle Question:</div>
+                <p id="clueTextDisplay" class="text-base font-black text-amber-950 leading-snug min-h-[56px] flex items-center justify-center font-fun">
+                    Loading puzzle text...
                 </p>
             </div>
 
-            <div id="bingoGridDeck" class="grid grid-cols-3 gap-3 p-3 bg-slate-100 border-2 border-slate-200 rounded-2xl shadow-inner">
-                </div>
+            <div class="relative">
+                <div id="bingoGridDeck" class="grid grid-cols-3 gap-3 p-3 bg-slate-50 border-4 border-slate-200 rounded-2xl shadow-inner">
+                    </div>
+            </div>
 
-            <p id="systemActionLabel" class="text-center text-xs font-bold text-slate-400 py-0.5 min-h-[16px]">
-                Tap the picture that matches the riddle above!
+            <p id="systemActionLabel" class="text-center text-xs font-black text-slate-400 py-1 min-h-[20px] font-fun uppercase tracking-wide">
+                Tap the matching plant part name!
             </p>
 
         </div>
 
-        <div id="screenGameOver" class="hidden w-full bg-white border-4 border-rose-600 rounded-[36px] p-6 text-center space-y-6 shadow-2xl">
+        <div id="screenGameOver" class="hidden w-full bg-white border-4 border-rose-500 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
             <div class="space-y-2">
                 <div class="text-7xl">💔</div>
-                <h2 class="text-3xl font-black text-rose-800 tracking-wide uppercase">Out of Lives!</h2>
-                <p class="text-xs bg-rose-100 text-rose-800 px-4 py-1 rounded-full inline-block font-bold">Don't give up! Try again to score a Bingo!</p>
+                <h2 class="text-3xl font-black text-rose-600 tracking-wide uppercase">Out of Lives!</h2>
+                <p class="text-sm bg-rose-100 text-rose-800 px-4 py-1.5 rounded-full inline-block font-black">Don't worry, you can try again!</p>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-4 rounded-2xl text-xl shadow active:scale-95 transition-transform cursor-pointer">
+            <button onclick="location.reload()" class="w-full bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-transform cursor-pointer">
                 TRY AGAIN 🔄
             </button>
         </div>
 
-        <div id="screenVictory" class="hidden w-full bg-white border-4 border-emerald-600 rounded-[36px] p-6 text-center space-y-6 shadow-2xl">
+        <div id="screenVictory" class="hidden w-full bg-white border-4 border-teal-500 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
             <div class="space-y-2">
-                <div class="text-7xl">🎉🏆</div>
-                <h2 class="text-3xl font-black text-emerald-800 tracking-wide uppercase">Bingo Complete!</h2>
-                <p class="text-xs bg-amber-100 text-amber-800 px-4 py-1 rounded-full inline-block font-bold">Excellent Work, Junior Botanist!</p>
+                <div class="text-7xl animate-bounce">🏆🎉</div>
+                <h2 class="text-3xl font-black text-teal-600 tracking-wide uppercase">Super Clear!</h2>
+                <p class="text-sm bg-teal-100 text-teal-800 px-4 py-1.5 rounded-full inline-block font-black">You matched all items perfectly!</p>
             </div>
 
-            <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-2">
-                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Final Laboratory Report</p>
-                <div class="text-5xl font-black text-emerald-600"><span id="finalScoreText">0</span> <span class="text-sm font-bold text-slate-400">XP</span></div>
-                <p class="text-xs font-medium text-slate-600 leading-relaxed font-fun pt-2">
-                    You masterfully identified plant organs, tracked root systems, and solved riddles to link 3 icons in a perfect row!
-                </p>
+            <div class="bg-amber-50 border-2 border-amber-300 p-5 rounded-2xl space-y-2">
+                <p class="text-slate-500 text-xs font-black uppercase tracking-wider">Final Star Points</p>
+                <div class="text-5xl font-black text-emerald-600"><span id="finalScoreText">0</span></div>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl text-xl shadow active:scale-95 transition-transform cursor-pointer">
+            <button onclick="location.reload()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-transform cursor-pointer">
                 PLAY A NEW ROUND 🔄
             </button>
         </div>
@@ -174,115 +175,16 @@
     </div>
 
     <script>
-        const vectorBingoCatalog = [
-            { 
-                term: "Tap Root", 
-                clue: "I am a thick, strong main root that grows straight down deep into the soil. I also have tiny side roots growing out of me. Who am I?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.strokeStyle = marked ? "#ffffff" : "#78350f";
-                    ctx.lineWidth = 5;
-                    ctx.beginPath();
-                    ctx.moveTo(w/2, h*0.2); ctx.quadraticCurveTo(w/2 + 4, h*0.5, w/2 - 2, h*0.85); ctx.stroke();
-                    ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.moveTo(w/2, h*0.4); ctx.lineTo(w/2 - 22, h*0.48); ctx.moveTo(w/2, h*0.5); ctx.lineTo(w/2 + 24, h*0.58);
-                    ctx.moveTo(w/2, h*0.65); ctx.lineTo(w/2 - 18, h*0.72); ctx.moveTo(w/2, h*0.72); ctx.lineTo(w/2 + 16, h*0.78); ctx.stroke();
-                }
-            },
-            { 
-                term: "Fibrous Root", 
-                clue: "We are a big, bushy bunch of thin, hair-like roots! We all grow out together from the bottom of the stem. Who are we?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.strokeStyle = marked ? "#ffffff" : "#854d0e";
-                    ctx.lineWidth = 2.5;
-                    ctx.beginPath();
-                    for(let i=0; i<10; i++) {
-                        ctx.moveTo(w/2 - 15 + (i*3), h*0.25);
-                        ctx.quadraticCurveTo(w/2 - 35 + (Math.random()*70), h*0.55, w/2 - 25 + (Math.random()*50), h*0.85);
-                    }
-                    ctx.stroke();
-                }
-            },
-            { 
-                term: "Trunk", 
-                clue: "I am the very thick, woody, dark brown main stem of a giant banyan or mango tree. Kids love to hug me! What am I?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.fillStyle = marked ? "#ffffff" : "#451a03";
-                    ctx.fillRect(w*0.35, h*0.3, w*0.3, h*0.6);
-                    if(!marked) {
-                        ctx.strokeStyle = "#78350f"; ctx.lineWidth = 2;
-                        ctx.beginPath(); ctx.moveTo(w*0.45, h*0.4); ctx.lineTo(w*0.45, h*0.7); ctx.moveTo(w*0.55, h*0.5); ctx.lineTo(w*0.55, h*0.8); ctx.stroke();
-                    }
-                }
-            },
-            { 
-                term: "Climbers", 
-                clue: "My green stem is too soft and weak to stand up on its own! I need to wrap and curl around a wooden stick to climb up high. What am I?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.strokeStyle = marked ? "#ffffff" : "#b45309"; ctx.lineWidth = 4;
-                    ctx.beginPath(); ctx.moveTo(w/2, h*0.9); ctx.lineTo(w/2, h*0.1); ctx.stroke();
-                    ctx.strokeStyle = marked ? "#e0f2fe" : "#15803d"; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(w/2 - 15, h*0.85); ctx.bezierCurveTo(w/2 + 20, h*0.65, w/2 - 20, h*0.45, w/2 + 15, h*0.2); ctx.stroke();
-                }
-            },
-            { 
-                term: "Stomata", 
-                clue: "We are tiny, microscopic breathing pores hidden under the leaf. We open up like little mouths to let air pass in and out! What are we?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.strokeStyle = marked ? "#ffffff" : "#166534"; ctx.lineWidth = 3;
-                    ctx.fillStyle = marked ? "transparent" : "#bbf7d0";
-                    ctx.beginPath();
-                    ctx.arc(w/2 - 8, h/2, 16, Math.PI*0.5, Math.PI*1.5); ctx.quadraticCurveTo(w/2 - 2, h/2, w/2 - 8, h/2 + 16); ctx.fill(); ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(w/2 + 8, h/2, 16, Math.PI*1.5, Math.PI*0.5); ctx.quadraticCurveTo(w/2 + 2, h/2, w/2 + 8, h/2 - 16); ctx.fill(); ctx.stroke();
-                }
-            },
-            { 
-                term: "Leaf Blade", 
-                clue: "I am the wide, flat, and broad green surface part of the leaf that catches the sunlight. What am I called?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.fillStyle = marked ? "#ffffff" : "#22c55e";
-                    ctx.strokeStyle = marked ? "#10b981" : "#166534"; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(w*0.2, h*0.5); ctx.quadraticCurveTo(w*0.5, h*0.1, w*0.8, h*0.5); ctx.quadraticCurveTo(w*0.5, h*0.9, w*0.2, h*0.5); ctx.fill(); ctx.stroke();
-                    ctx.strokeStyle = marked ? "#ef4444" : "#15803d";
-                    ctx.beginPath(); ctx.moveTo(w*0.2, h*0.5); ctx.lineTo(w*0.8, h*0.5); ctx.stroke();
-                }
-            },
-            { 
-                term: "Photosynthesis", 
-                clue: "This is the magic kitchen trick! It is the process where a green leaf uses sunlight, water, and air to cook yummy food. What is it?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.fillStyle = marked ? "#ffffff" : "#eab308";
-                    ctx.beginPath(); ctx.arc(w*0.3, h*0.3, 10, 0, Math.PI*2); ctx.fill();
-                    ctx.strokeStyle = marked ? "#ffffff" : "#15803d"; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(w*0.5, h*0.7); ctx.quadraticCurveTo(w*0.7, h*0.5, w*0.8, h*0.7); ctx.quadraticCurveTo(w*0.7, h*0.85, w*0.5, h*0.7); ctx.stroke();
-                }
-            },
-            { 
-                term: "Seed Germination", 
-                clue: "Wake up, little plant! This is the journey where a sleeping baby plant inside a dry seed sprouts and grows into a seedling. What is it?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.fillStyle = marked ? "#ffffff" : "#a16207";
-                    ctx.beginPath(); ctx.arc(w/2, h*0.7, 12, 0, Math.PI*2); ctx.fill();
-                    ctx.strokeStyle = marked ? "#f0fdf4" : "#22c55e"; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(w/2, h*0.65); ctx.quadraticCurveTo(w/2 + 10, h*0.45, w/2 - 5, h*0.25); ctx.stroke();
-                }
-            },
-            { 
-                term: "Beautiful Flower", 
-                clue: "I am the brightest, prettiest part of the plant. Bees love to visit my colorful petals before I turn into a juicy fruit! What am I?",
-                draw: (ctx, w, h, marked) => {
-                    ctx.fillStyle = marked ? "#ffffff" : "#ec4899";
-                    for(let i=0; i<5; i++) {
-                        ctx.beginPath(); ctx.arc(w/2 + Math.cos(i * 1.25)*14, h/2 + Math.sin(i * 1.25)*14, 11, 0, Math.PI*2); ctx.fill();
-                    }
-                    ctx.fillStyle = marked ? "#ec4899" : "#eab308";
-                    ctx.beginPath(); ctx.arc(w/2, h/2, 8, 0, Math.PI*2); ctx.fill();
-                }
-            }
+        const gameCatalog = [
+            { term: "Tap Root", clue: "I am a thick, strong main root that grows straight down deep into the soil. I also have tiny side roots." },
+            { term: "Fibrous Root", clue: "We are a big, bushy bunch of thin, hair-like roots! We all grow out together from the bottom of the stem." },
+            { term: "Trunk", clue: "I am the very thick, woody, dark brown main stem of a giant banyan or mango tree." },
+            { term: "Climbers", clue: "My green stem is too soft and weak to stand on its own! I need to wrap around a stick to climb." },
+            { term: "Stomata", clue: "We are tiny, hidden breathing pores under the leaf. We open up like little mouths to let air pass!" },
+            { term: "Leaf Blade", clue: "I am the wide, flat, and broad green surface part of the leaf that catches the sunlight." },
+            { term: "Photosynthesis", clue: "This is the food-making trick! It is the process where a green leaf uses sunlight and air to cook." },
+            { term: "Germination", clue: "Wake up! This is the journey where a sleeping baby plant inside a seed sprouts and grows." },
+            { term: "Flower", clue: "I am the brightest, prettiest part of the plant. Bees love to visit my colorful petals!" }
         ];
 
         let activeGridData = [];
@@ -291,26 +193,26 @@
         let runningScore = 0;
         let livesLeft = 3;
         let incorrectAttemptsOnCurrentQuestion = 0;
-        let isBingoCompleted = false;
+        let triggeredLinesSet = new Set();
 
         const canvasElement = document.getElementById('confettiCanvas');
         const canvasCtx = canvasElement.getContext('2d');
         let particlesArray = [];
 
         window.addEventListener('DOMContentLoaded', () => {
-            syncCanvasMetrics();
-            window.addEventListener('resize', syncCanvasMetrics);
+            canvasElement.width = window.innerWidth;
+            canvasElement.height = window.innerHeight;
+            
+            // 5 second brand logo splash timeout
             setTimeout(() => {
                 const splash = document.getElementById('splashLayer');
                 splash.classList.add('opacity-0');
-                setTimeout(() => { splash.classList.add('hidden'); document.getElementById('mainViewport').classList.remove('hidden'); }, 500);
+                setTimeout(() => { 
+                    splash.classList.add('hidden'); 
+                    document.getElementById('mainViewport').classList.remove('hidden'); 
+                }, 500);
             }, 5000);
         });
-
-        function syncCanvasMetrics() {
-            canvasElement.width = window.innerWidth;
-            canvasElement.height = window.innerHeight;
-        }
 
         function playAudioEffect(id) {
             const el = document.getElementById(id);
@@ -323,8 +225,8 @@
             for (let i = 0; i < 40; i++) {
                 particlesArray.push({
                     x: window.innerWidth / 2, y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15 - 3,
-                    r: Math.random() * 4 + 4, color: `hsl(${Math.random() * 360}, 90%, 60%)`, alpha: 1
+                    vx: (Math.random() - 0.5) * 16, vy: (Math.random() - 0.5) * 16 - 3,
+                    r: Math.random() * 5 + 4, color: `hsl(${Math.random() * 360}, 95%, 65%)`, alpha: 1
                 });
             }
             requestAnimationFrame(renderConfettiFrame);
@@ -334,7 +236,7 @@
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             let active = false;
             particlesArray.forEach(p => {
-                p.x += p.vx; p.y += p.vy; p.vy += 0.22; p.alpha -= 0.02;
+                p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.alpha -= 0.02;
                 if (p.alpha > 0) {
                     active = true; canvasCtx.save(); canvasCtx.globalAlpha = p.alpha;
                     canvasCtx.fillStyle = p.color; canvasCtx.beginPath(); canvasCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2); canvasCtx.fill(); canvasCtx.restore();
@@ -360,18 +262,19 @@
         function launchIllustratedEngine() {
             changeScreenView('screenRules', 'screenGameplay');
             
-            runningScore = 0; currentSequenceIndex = 0; isBingoCompleted = false; livesLeft = 3; incorrectAttemptsOnCurrentQuestion = 0;
+            runningScore = 0; currentSequenceIndex = 0; livesLeft = 3; incorrectAttemptsOnCurrentQuestion = 0;
+            triggeredLinesSet.clear();
             document.getElementById('scoreTracker').innerText = runningScore;
             updateHeartsDisplay();
 
-            activeGridData = [...vectorBingoCatalog];
+            activeGridData = [...gameCatalog];
             for (let i = activeGridData.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [activeGridData[i], activeGridData[j]] = [activeGridData[j], activeGridData[i]];
             }
-            activeGridData = activeGridData.map(item => ({ ...item, marked: false }));
+            activeGridData = activeGridData.map((item, idx) => ({ ...item, marked: false, colorId: idx % 5 }));
 
-            callerSequence = [...vectorBingoCatalog];
+            callerSequence = [...gameCatalog];
             for (let i = callerSequence.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [callerSequence[i], callerSequence[j]] = [callerSequence[j], callerSequence[i]];
@@ -390,31 +293,22 @@
             activeGridData.forEach((cellData, index) => {
                 const containerButton = document.createElement('button');
                 
-                let dynamicClasses = "bingo-card-cell w-full bg-white border-2 border-slate-300 rounded-2xl p-1.5 flex flex-col items-center justify-between shadow-sm cursor-pointer hover:bg-emerald-50";
+                // Playful default style configs
+                let styleClasses = `bingo-card-cell w-full bg-white border-4 rounded-3xl p-2 flex items-center justify-center text-center shadow-md text-sm font-black tracking-tight cursor-pointer font-fun transition-all color-variant-${cellData.colorId}`;
                 
                 if (cellData.marked) {
-                    dynamicClasses = "bingo-card-cell w-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-2 border-emerald-400 rounded-2xl p-1.5 flex flex-col items-center justify-between shadow-md transform scale-95 cursor-not-allowed";
+                    styleClasses = "bingo-card-cell w-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-4 border-emerald-300 rounded-3xl p-2 flex flex-col items-center justify-center text-center shadow-inner text-sm font-black transform scale-95 cursor-not-allowed";
                 } else if (incorrectAttemptsOnCurrentQuestion >= 2 && cellData.term === currentTargetTerm) {
-                    dynamicClasses = "bingo-card-cell w-full bg-white border-2 rounded-2xl p-1.5 flex flex-col items-center justify-between shadow-lg cursor-pointer glowing-hint";
+                    styleClasses = "bingo-card-cell w-full text-sm font-black tracking-tight rounded-3xl p-2 flex items-center justify-center text-center cursor-pointer font-fun glowing-hint";
                 }
 
-                containerButton.className = dynamicClasses;
-
-                const canvasThumb = document.createElement('canvas');
-                canvasThumb.width = 80;
-                canvasThumb.height = 70;
-                canvasThumb.className = "w-full h-16 object-contain rounded-lg";
+                containerButton.className = styleClasses;
                 
-                const ctx = canvasThumb.getContext('2d');
-                ctx.clearRect(0, 0, 80, 70);
-                cellData.draw(ctx, 80, 70, cellData.marked);
-
-                const captionLabel = document.createElement('span');
-                captionLabel.className = `text-[9px] font-black tracking-tight mt-1 text-center font-fun ${cellData.marked ? 'text-emerald-100' : 'text-slate-600'}`;
-                captionLabel.innerText = cellData.term;
-
-                containerButton.appendChild(canvasThumb);
-                containerButton.appendChild(captionLabel);
+                if (cellData.marked) {
+                    containerButton.innerHTML = `<div><div class="text-xs uppercase opacity-80 tracking-wider">Done</div><div class="text-xs truncate">${cellData.term}</div></div>`;
+                } else {
+                    containerButton.innerText = cellData.term;
+                }
                 
                 containerButton.onclick = () => validateCardSelection(index);
                 targetDeck.appendChild(containerButton);
@@ -424,11 +318,17 @@
         function presentCurrentDescriptionCall() {
             if (currentSequenceIndex < callerSequence.length) {
                 document.getElementById('clueTextDisplay').innerText = callerSequence[currentSequenceIndex].clue;
+            } else {
+                // All riddles completed successfully
+                setTimeout(() => {
+                    changeScreenView('screenGameplay', 'screenVictory');
+                    document.getElementById('finalScoreText').innerText = runningScore;
+                }, 1000);
             }
         }
 
         function validateCardSelection(clickedIndex) {
-            if (isBingoCompleted || livesLeft <= 0) return;
+            if (livesLeft <= 0) return;
 
             const selectedCell = activeGridData[clickedIndex];
             const activeCallTarget = callerSequence[currentSequenceIndex];
@@ -443,22 +343,22 @@
                 runningScore += 20;
                 document.getElementById('scoreTracker').innerText = runningScore;
 
-                document.getElementById('systemActionLabel').innerText = `🎉 Amazing! '${selectedCell.term}' matched successfully!`;
-                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-emerald-600 animate-pulse";
+                document.getElementById('systemActionLabel').innerText = `✨ Right! That is ${selectedCell.term}!`;
+                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-emerald-600 animate-pulse font-fun uppercase tracking-wide";
 
                 incorrectAttemptsOnCurrentQuestion = 0; 
                 renderVisualBingoBoard();
+                
+                // Check if this answer creates a new row line
                 evaluateMatrixLines();
 
-                if (!isBingoCompleted) {
-                    currentSequenceIndex++;
-                    setTimeout(() => {
-                        document.getElementById('systemActionLabel').innerText = "Tap the picture that matches the riddle above!";
-                        document.getElementById('systemActionLabel').className = "text-center text-xs font-bold text-slate-400 py-0.5";
-                        presentCurrentDescriptionCall();
-                        renderVisualBingoBoard(); 
-                    }, 1600);
-                }
+                currentSequenceIndex++;
+                setTimeout(() => {
+                    document.getElementById('systemActionLabel').innerText = "Tap the matching plant part name!";
+                    document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-slate-400 py-1 font-fun uppercase tracking-wide";
+                    presentCurrentDescriptionCall();
+                    renderVisualBingoBoard(); 
+                }, 1600);
             } else {
                 playAudioEffect('sndWrong');
                 
@@ -473,41 +373,42 @@
                     return;
                 }
 
-                document.getElementById('systemActionLabel').innerText = "❌ Look closer at the drawing shapes! Try another thumbnail.";
-                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-rose-500 animate-bounce";
+                document.getElementById('systemActionLabel').innerText = "❌ Try another word card below!";
+                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-rose-500 animate-bounce font-fun uppercase tracking-wide";
                 
                 renderVisualBingoBoard();
             }
         }
 
         function evaluateMatrixLines() {
-            const lineWinningVectors = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                [0, 4, 8], [2, 4, 6]
+            const lines = [
+                { ids: [0, 1, 2], label: "Row 1" },
+                { ids: [3, 4, 5], label: "Row 2" },
+                { ids: [6, 7, 8], label: "Row 3" },
+                { ids: [0, 3, 6], label: "Column 1" },
+                { ids: [1, 4, 7], label: "Column 2" },
+                { ids: [2, 5, 8], label: "Column 3" },
+                { ids: [0, 4, 8], label: "Diagonal 1" },
+                { ids: [2, 4, 6], label: "Diagonal 2" }
             ];
 
-            for (let v of lineWinningVectors) {
-                if (activeGridData[v[0]].marked && activeGridData[v[1]].marked && activeGridData[v[2]].marked) {
-                    triggerBingoVictory();
-                    break;
+            lines.forEach((line, index) => {
+                if (!triggeredLinesSet.has(index)) {
+                    if (activeGridData[line.ids[0]].marked && activeGridData[line.ids[1]].marked && activeGridData[line.ids[2]].marked) {
+                        triggeredLinesSet.add(index);
+                        
+                        // Halt game with applause track
+                        playAudioEffect('sndClaps');
+                        triggerConfettiBurst();
+                        
+                        runningScore += 50; // Bonus Points for full line match
+                        document.getElementById('scoreTracker').innerText = runningScore;
+                        
+                        document.getElementById('systemActionLabel').innerText = "🎉 BINGO MATCH! APPLAUSE TRACK PLAYING! 🎉";
+                        document.getElementById('systemActionLabel').className = "text-center text-sm font-black text-amber-500 animate-bounce font-fun tracking-wide";
+                    }
                 }
-            }
-        }
-
-        function triggerBingoVictory() {
-            isBingoCompleted = true;
-            playAudioEffect('sndClaps');
-            triggerConfettiBurst();
-
-            document.getElementById('systemActionLabel').innerText = "🎉 BINGO COMPLETE! You found 3 matching pictures in a row!";
-            document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-amber-500 animate-bounce";
-
-            setTimeout(() => {
-                document.getElementById('screenGameplay').classList.add('hidden');
-                document.getElementById('finalScoreText').innerText = runningScore;
-                document.getElementById('screenVictory').classList.remove('hidden');
-            }, 2000);
+            });
         }
     </script>
 </body>
