@@ -1,1 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avian Cloud Quest</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght=500;600;700;900&family=Plus+Jakarta+Sans:wght=700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+            background-color: #d0f2ff;
+        }
+        h1, h2, h3, button, .cute-font { font-family: 'Fredoka', cursive; }
+        
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
 
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation { animation: gentleFloat 4s ease-in-out infinite; }
+
+        @keyframes cardShake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-6px, 0); }
+            75% { transform: translate(6px, 0); }
+        }
+        .shake-effect { animation: cardShake 0.15s ease-in-out 2; }
+    </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden select-none">
+
+    <audio id="sndCorrect" src="./assets/correct.mp3"></audio>
+    <audio id="sndWrong" src="./assets/wrong.mp3"></audio>
+    <audio id="sndClaps" src="./assets/freesound_community-claps-44774.mp3"></audio>
+
+    <div id="screenSplash" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[100] transition-opacity duration-700 ease-out">
+        <div class="text-center space-y-6 max-w-xs">
+            <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-full h-auto object-contain mx-auto px-4">
+            <div class="flex items-center justify-center gap-2 pt-4">
+                <div class="w-5 h-5 border-4 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase">Loading Adventure...</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="screenTitle" class="hidden fixed inset-0 bg-gradient-to-b from-[#bfe9ff] via-[#e1f5fe] to-[#fffde7] flex flex-col items-center justify-center p-4 z-50 text-center">
+        <div class="space-y-8 max-w-sm w-full bg-white/95 border-8 border-[#64b5f6] p-8 rounded-[40px] shadow-2xl float-animation">
+            <h1 class="text-4xl sm:text-5xl font-black text-[#1976d2] tracking-tight leading-tight uppercase drop-shadow-sm">
+                Avian Cloud Quest
+            </h1>
+            <button onclick="showInstructionsScreen()" class="w-full bg-gradient-to-r from-[#ffb74d] to-[#ff9800] text-white text-2xl font-black py-4 rounded-3xl shadow-xl active:scale-95 transition-transform cursor-pointer border-b-8 border-[#e65100] uppercase tracking-wide">
+                START
+            </button>
+        </div>
+    </div>
+
+    <div id="screenInstructions" class="hidden fixed inset-0 bg-gradient-to-b from-[#e1f5fe] to-[#e8f5e9] flex flex-col items-center justify-center p-4 z-50 text-center">
+        <div class="space-y-6 max-w-md w-full bg-white border-8 border-[#81c784] p-8 rounded-[40px] shadow-2xl text-left">
+            <div class="text-center">
+                <h2 class="text-3xl font-black text-[#388e3c] uppercase tracking-wide">How To Play</h2>
+            </div>
+            
+            <div class="space-y-4 text-slate-600 font-bold text-sm sm:text-base leading-relaxed pt-2">
+                <div class="flex gap-3 items-center">
+                    <span class="text-2xl">🎮</span>
+                    <p>Use the <strong class="text-slate-900">UP & DOWN Buttons</strong> to steer your bird smoothly up or down!</p>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <span class="text-2xl">🌲</span>
+                    <p>Avoid hitting the <strong class="text-slate-900">Tree Columns</strong>. Hitting them triggers a wrong sound!</p>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <span class="text-2xl">☁️</span>
+                    <p>Fly directly into <strong class="text-slate-900">Vocabulary Clouds</strong> to open a pairing challenge!</p>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <span class="text-2xl">⭐</span>
+                    <p>Each correct pair awards you exactly <span class="text-[#2e7d32] font-black">+10 Points</span>.</p>
+                </div>
+            </div>
+
+            <button onclick="startActualGameplay()" class="w-full mt-4 bg-gradient-to-r from-[#66bb6a] to-[#26a69a] text-white text-xl font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-transform cursor-pointer border-b-6 border-[#2e7d32] uppercase text-center tracking-wide">
+                PLAY
+            </button>
+        </div>
+    </div>
+
+    <div id="gameUiControls" class="hidden">
+        <div class="absolute top-4 left-4 right-4 z-40 max-w-xs mx-auto bg-white/90 backdrop-blur border-4 border-[#64b5f6] rounded-2xl p-3 flex justify-center items-center shadow-md">
+            <div class="text-slate-800 text-lg font-black cute-font tracking-wide">
+                SCORE: <span id="hudScoreDisplay" class="text-[#2e7d32] font-black text-2xl pl-1">0</span>
+            </div>
+        </div>
+
+        <div class="absolute bottom-6 left-0 right-0 z-40 flex justify-center gap-8 px-6">
+            <button id="btnFlyUp" class="w-20 h-20 bg-gradient-to-b from-[#4fc3f7] to-[#0288d1] text-white border-b-8 border-[#01579b] text-4xl rounded-3xl shadow-2xl active:scale-90 active:border-b-4 transition-all cursor-pointer flex items-center justify-center">▲</button>
+            <button id="btnFlyDown" class="w-20 h-20 bg-gradient-to-b from-[#81c784] to-[#388e3c] text-white border-b-8 border-[#1b5e20] text-4xl rounded-3xl shadow-2xl active:scale-90 active:border-b-4 transition-all cursor-pointer flex items-center justify-center">▼</button>
+        </div>
+    </div>
+
+    <div id="modalQuiz" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div id="modalCard" class="bg-white border-8 border-[#4fc3f7] rounded-[40px] w-full max-w-md p-6 sm:p-8 shadow-2xl space-y-5 text-center">
+            <span id="modalCloudWord" class="text-sm font-black uppercase tracking-widest px-6 py-2 rounded-full inline-block bg-sky-50 text-[#0288d1] cute-font">CLOUD TERM</span>
+            <h3 id="modalPromptText" class="text-base sm:text-lg font-black text-slate-800 leading-snug pt-1">Match the correct option:</h3>
+            
+            <div id="modalChoicesContainer" class="grid grid-cols-1 gap-3 pt-2"></div>
+        </div>
+    </div>
+
+    <div id="screenGameOver" class="hidden fixed inset-0 bg-gradient-to-b from-[#bfe9ff] via-[#e8f5e9] to-[#fffde7] flex flex-col items-center justify-center p-4 z-50 text-center">
+        <div class="space-y-6 max-w-sm w-full bg-white border-8 border-[#ffb74d] p-8 rounded-[40px] shadow-2xl flex flex-col items-center text-slate-800">
+            <h2 class="text-4xl font-black text-[#0288d1] uppercase tracking-wide cute-font">QUEST DONE!</h2>
+            <p class="text-sm font-bold text-slate-500 leading-relaxed max-w-xs">Super flying! You crossed all 12 educational clouds safely.</p>
+            
+            <div class="bg-amber-50/60 border-4 border-dashed border-[#ffb74d] rounded-3xl p-5 w-full">
+                <span class="text-xs font-black text-amber-600 block mb-1 uppercase tracking-widest cute-font">Final Score</span>
+                <span id="finalScoreDisplay" class="text-5xl font-black text-[#2e7d32] cute-font">0</span>
+                <span class="text-slate-700 text-lg font-black block mt-1 cute-font">Points</span>
+            </div>
+
+            <button onclick="resetAndRestartEntireGame()" class="w-full bg-gradient-to-r from-[#66bb6a] to-[#26a69a] text-white text-xl font-black py-4 rounded-2xl shadow-xl cursor-pointer border-b-6 border-[#2e7d32] uppercase tracking-wide">
+                PLAY AGAIN
+            </button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // --- PRE-LOAD IMAGE OBJECT MAPS DIRECTLY LINKED TO YOUR UPLOADED FILE PATH NAMES ---
+        const imgBirdAsset = new Image();
+        imgBirdAsset.src = './assets/image_264dbe.png'; 
+
+        const imgBgAsset = new Image();
+        imgBgAsset.src = './assets/image_2651fe.png';
+
+        const cloudsCurriculumDatabase = [
+            { term: "Upstroke", prompt: "Pair the correct wing movement for this flight term:", choices: ["Wings move upward and forward", "Wings move downward and backward"], correct: "Wings move upward and forward" },
+            { term: "Downstroke", prompt: "Pair the correct wing movement for this flight term:", choices: ["Wings move downward and backward", "Wings move upward and forward"], correct: "Wings move downward and backward" },
+            { term: "Down Feathers", prompt: "Pair the correct purpose for these soft feathers:", choices: ["Keeps the bird's body warm", "Helps the bird lift and steer in flight"], correct: "Keeps the bird's body warm" },
+            { term: "Flight Feathers", prompt: "Pair the correct purpose for these large wing feathers:", choices: ["Helps the bird lift and steer", "Keeps the bird warm during cold nights"], correct: "Helps the bird lift and steer" },
+            { term: "Chisel Beak", prompt: "Pair the correct feeding habit for a Woodpecker:", choices: ["Drilling tree bark to find insects", "Sucking sweet nectar out of flowers"], correct: "Drilling tree bark to find insects" },
+            { term: "Hooked Beak", prompt: "Pair the correct food habit for an Eagle or Hawk:", choices: ["Tearing the flesh of small prey", "Cracking hard nuts and seeds open"], correct: "Tearing the flesh of small prey" },
+            { term: "Straw Beak", prompt: "Pair the correct feeding style for a Hummingbird:", choices: ["Sucking sweet nectar from flowers", "Filtering mud and water to find worms"], correct: "Sucking sweet nectar from flowers" },
+            { term: "Webbed Feet", prompt: "Pair the correct swimming adaptation for a Duck:", choices: ["Pushing water like paddles or oars", "Climbing upright onto vertical tree trunks"], correct: "Pushing water like paddles or oars" },
+            { term: "Tailorbird", prompt: "Pair the correct nesting architecture built by this bird:", choices: ["Stitching broad leaves together with silk", "Weaving a bottle-shaped hanging nest"], correct: "Stitching broad leaves together with silk" },
+            { term: "Weaver Bird", prompt: "Pair the correct nesting architecture built by this bird:", choices: ["Weaving a bottle-shaped hanging nest", "Stitching broad leaves together with silk"], correct: "Weaving a bottle-shaped hanging nest" },
+            { term: "Talons", prompt: "Pair the correct description for an Eagle's sharp claws:", choices: ["Holding onto active prey tightly", "Walking on soft, muddy pond floors"], correct: "Holding onto active prey tightly" },
+            { term: "Hollow Bones", prompt: "Pair the correct structural feature that helps all birds fly:", choices: ["Making the bird's body light weight", "Making the body heavy and sturdy"], correct: "Making the bird's body light weight" }
+        ];
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameState = "SPLASH"; 
+        let currentGameScore = 0;
+        let databasePointerIndex = 0;
+        
+        let dynamicCloudsList = [];
+        let passiveObstacleColumnsList = [];
+
+        let scrollSpeed = 2.4;
+        let lastColumnSpawnTime = 0;
+        const columnSpawnInterval = 3000;
+        let backgroundScrollX = 0;
+
+        let cuteBird = {
+            x: 160,
+            y: 250,
+            radius: 25,
+            speedY: 5.2
+        };
+
+        let controlMoveUpActive = false;
+        let controlMoveDownActive = false;
+
+        window.onload = function() {
+            setCanvasDimensions();
+            window.addEventListener('resize', setCanvasDimensions);
+
+            const upBtn = document.getElementById('btnFlyUp');
+            const downBtn = document.getElementById('btnFlyDown');
+
+            upBtn.addEventListener('mousedown', () => controlMoveUpActive = true);
+            upBtn.addEventListener('mouseup', () => controlMoveUpActive = false);
+            upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); controlMoveUpActive = true; });
+            upBtn.addEventListener('touchend', () => controlMoveUpActive = false);
+
+            downBtn.addEventListener('mousedown', () => controlMoveDownActive = true);
+            downBtn.addEventListener('mouseup', () => controlMoveDownActive = false);
+            downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); controlMoveDownActive = true; });
+            downBtn.addEventListener('touchend', () => controlMoveDownActive = false);
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === "ArrowUp") controlMoveUpActive = true;
+                if (e.key === "ArrowDown") controlMoveDownActive = true;
+            });
+            window.addEventListener('keyup', (e) => {
+                if (e.key === "ArrowUp") controlMoveUpActive = false;
+                if (e.key === "ArrowDown") controlMoveDownActive = false;
+            });
+
+            setTimeout(() => {
+                const splash = document.getElementById('screenSplash');
+                splash.classList.add('opacity-0');
+                setTimeout(() => {
+                    splash.remove();
+                    gameState = "TITLE";
+                    document.getElementById('screenTitle').classList.remove('hidden');
+                }, 700);
+            }, 5000);
+        };
+
+        function setCanvasDimensions() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function showInstructionsScreen() {
+            document.getElementById('screenTitle').classList.add('hidden');
+            document.getElementById('screenInstructions').classList.remove('hidden');
+            gameState = "INSTRUCTIONS";
+        }
+
+        function startActualGameplay() {
+            document.getElementById('screenInstructions').classList.add('hidden');
+            document.getElementById('gameUiControls').classList.remove('hidden');
+
+            currentGameScore = 0;
+            databasePointerIndex = 0;
+            dynamicCloudsList = [];
+            passiveObstacleColumnsList = [];
+            
+            cuteBird.y = canvas.height / 2;
+            lastColumnSpawnTime = Date.now();
+
+            document.getElementById('hudScoreDisplay').innerText = currentGameScore;
+            spawnNextTargetCloud();
+            gameState = "PLAYING";
+
+            requestAnimationFrame(mainProcessingLoopEngine);
+        }
+
+        function spawnNextTargetCloud() {
+            if (databasePointerIndex >= cloudsCurriculumDatabase.length) {
+                triggerQuestCompletionSequence();
+                return;
+            }
+            let currentQuestObject = cloudsCurriculumDatabase[databasePointerIndex];
+            dynamicCloudsList.push({
+                x: canvas.width + 120,
+                y: Math.random() * (canvas.height - 380) + 140,
+                w: 190,
+                h: 95,
+                termLabel: currentQuestObject.term,
+                payload: currentQuestObject
+            });
+        }
+
+        function spawnPassiveObstacleColumn() {
+            let colWidth = 75;
+            let gapHeight = 255; 
+            let minTopHeight = 100;
+            let maxTopHeight = canvas.height - gapHeight - 160;
+            let topHeight = Math.random() * (maxTopHeight - minTopHeight) + minTopHeight;
+
+            passiveObstacleColumnsList.push({
+                x: canvas.width + colWidth,
+                topY: 0,
+                topH: topHeight,
+                bottomY: topHeight + gapHeight,
+                bottomH: canvas.height - (topHeight + gapHeight),
+                w: colWidth,
+                hasTriggeredSoundThisPass: false
+            });
+        }
+
+        function mainProcessingLoopEngine() {
+            if (gameState !== "PLAYING" && gameState !== "MODAL") return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Scroll backdrop landscape layout variables
+            if (gameState === "PLAYING") {
+                backgroundScrollX -= (scrollSpeed * 0.4);
+                if (backgroundScrollX <= -canvas.width) backgroundScrollX = 0;
+            }
+
+            // Draw custom reference file landscape if loaded properly
+            if (imgBgAsset.complete && imgBgAsset.naturalWidth !== 0) {
+                ctx.drawImage(imgBgAsset, backgroundScrollX, 0, canvas.width, canvas.height);
+                ctx.drawImage(imgBgAsset, backgroundScrollX + canvas.width, 0, canvas.width, canvas.height);
+            } else {
+                // Procedural fallbacks
+                let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                skyGrad.addColorStop(0, '#bfe9ff'); skyGrad.addColorStop(1, '#fffde7');
+                ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            if (gameState === "PLAYING") {
+                if (controlMoveUpActive) cuteBird.y -= cuteBird.speedY;
+                if (controlMoveDownActive) cuteBird.y += cuteBird.speedY;
+
+                if (cuteBird.y < cuteBird.radius + 60) cuteBird.y = cuteBird.radius + 60;
+                if (cuteBird.y > canvas.height - cuteBird.radius - 110) cuteBird.y = canvas.height - cuteBird.radius - 110;
+            }
+
+            // Draw custom reference file bird avatar if loaded properly
+            if (imgBirdAsset.complete && imgBirdAsset.naturalWidth !== 0) {
+                ctx.drawImage(imgBirdAsset, cuteBird.x - cuteBird.radius, cuteBird.y - cuteBird.radius, cuteBird.radius * 2, cuteBird.radius * 2);
+            } else {
+                // Procedural fallback graphic
+                ctx.fillStyle = "#fff176"; ctx.beginPath(); ctx.arc(cuteBird.x, cuteBird.y, cuteBird.radius, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // Move & Draw Columns
+            if (gameState === "PLAYING" && Date.now() - lastColumnSpawnTime > columnSpawnInterval) {
+                spawnPassiveObstacleColumn();
+                lastColumnSpawnTime = Date.now();
+            }
+
+            passiveObstacleColumnsList.forEach((col, cIndex) => {
+                if (gameState === "PLAYING") col.x -= scrollSpeed;
+
+                ctx.fillStyle = "#a1887f"; ctx.fillRect(col.x, col.topY, col.w, col.topH);
+                ctx.fillRect(col.x, col.bottomY, col.w, col.bottomH);
+
+                let hitTopColumn = checkCircleToRectangleCollision(cuteBird.x, cuteBird.y, cuteBird.radius, col.x, col.topY, col.w, col.topH);
+                let hitBottomColumn = checkCircleToRectangleCollision(cuteBird.x, cuteBird.y, cuteBird.radius, col.x, col.bottomY, col.w, col.bottomH);
+
+                if (hitTopColumn || hitBottomColumn) {
+                    if (!col.hasTriggeredSoundThisPass) {
+                        document.getElementById('sndWrong').play().catch(() => {});
+                        col.hasTriggeredSoundThisPass = true; 
+                    }
+                }
+                if (col.x + col.w < 0) passiveObstacleColumnsList.splice(cIndex, 1);
+            });
+
+            // Move & Draw Clouds
+            dynamicCloudsList.forEach((cloud, index) => {
+                if (gameState === "PLAYING") cloud.x -= scrollSpeed;
+
+                ctx.fillStyle = "#ffffff";
+                let r = cloud.h / 2;
+                ctx.beginPath();
+                ctx.arc(cloud.x + r, cloud.y + r, r, Math.PI * 0.5, Math.PI * 1.5);
+                ctx.arc(cloud.x + cloud.w / 2, cloud.y + r * 0.6, r * 1.1, Math.PI * 1.0, Math.PI * 2.0);
+                ctx.arc(cloud.x + cloud.w - r, cloud.y + r, r, Math.PI * 1.5, Math.PI * 0.5);
+                ctx.closePath(); ctx.fill();
+
+                ctx.fillStyle = "#1565c0"; ctx.font = "900 16px 'Fredoka', sans-serif";
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(cloud.termLabel, cloud.x + cloud.w / 2, cloud.y + cloud.h / 2);
+
+                if (checkCircleToRectangleCollision(cuteBird.x, cuteBird.y, cuteBird.radius - 2, cloud.x, cloud.y, cloud.w, cloud.h)) {
+                    dynamicCloudsList.splice(index, 1);
+                    launchInteractivePairingModal(cloud.payload);
+                }
+                if (cloud.x + cloud.w < 0) {
+                    dynamicCloudsList.splice(index, 1);
+                    databasePointerIndex++; spawnNextTargetCloud();
+                }
+            });
+
+            requestAnimationFrame(mainProcessingLoopEngine);
+        }
+
+        function checkCircleToRectangleCollision(cx, cy, radius, rx, ry, rw, rh) {
+            let closestX = Math.max(rx, Math.min(cx, rx + rw));
+            let closestY = Math.max(ry, Math.min(cy, ry + rh));
+            return ((cx - closestX)**2 + (cy - closestY)**2) < (radius * radius);
+        }
+
+        function launchInteractivePairingModal(payload) {
+            gameState = "MODAL";
+            document.getElementById('modalCloudWord').innerText = `☁️ CLOUD: ${payload.term}`;
+            document.getElementById('modalPromptText').innerText = payload.prompt;
+            const listGrid = document.getElementById('modalChoicesContainer');
+            listGrid.innerHTML = '';
+
+            let choicesCopy = [...payload.choices].sort(() => Math.random() - 0.5);
+            choicesCopy.forEach(optionText => {
+                listGrid.innerHTML += `
+                    <button onclick="evaluateUserChoiceMatch('${optionText.replace(/'/g, "\\'")}', '${payload.correct.replace(/'/g, "\\'")}')"
+                        class="w-full text-left p-4 bg-slate-50 border-4 border-slate-200 hover:bg-sky-50 hover:border-[#64b5f6] rounded-2xl text-sm font-black text-slate-700 transition-all cursor-pointer">
+                        🔹 ${optionText}
+                    </button>
+                `;
+            });
+            document.getElementById('modalQuiz').classList.remove('hidden');
+        }
+
+        function evaluateUserChoiceMatch(selected, idealTargetValue) {
+            if (selected === idealTargetValue) {
+                document.getElementById('sndCorrect').play().catch(() => {});
+                currentGameScore += 10;
+                document.getElementById('hudScoreDisplay').innerText = currentGameScore;
+                databasePointerIndex++;
+                setTimeout(() => {
+                    document.getElementById('modalQuiz').classList.add('hidden');
+                    gameState = "PLAYING"; spawnNextTargetCloud();
+                    requestAnimationFrame(mainProcessingLoopEngine);
+                }, 500);
+            } else {
+                document.getElementById('sndWrong').play().catch(() => {});
+                let elementCard = document.getElementById('modalCard');
+                elementCard.classList.add('shake-effect');
+                setTimeout(() => elementCard.classList.remove('shake-effect'), 350);
+            }
+        }
+
+        function triggerQuestCompletionSequence() {
+            gameState = "GAMEOVER";
+            document.getElementById('sndClaps').play().catch(() => {});
+            document.getElementById('gameUiControls').classList.add('hidden');
+            document.getElementById('screenGameOver').classList.remove('hidden');
+            document.getElementById('finalScoreDisplay').innerText = currentGameScore;
+        }
+
+        function resetAndRestartEntireGame() {
+            document.getElementById('screenGameOver').classList.add('hidden');
+            startActualGameplay();
+        }
+    </script>
+</body>
+</html>
