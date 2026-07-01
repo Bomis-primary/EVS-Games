@@ -100,6 +100,8 @@
 
     <div id="screenTitle" class="fixed inset-0 bg-gradient-to-br from-green-600 via-amber-400 to-emerald-700 flex flex-col items-center justify-center p-4 z-50 text-center">
         <div class="space-y-6 max-w-md w-full bg-white border-8 border-amber-500 p-6 sm:p-8 rounded-[36px] shadow-2xl">
+            <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="h-10 mx-auto object-contain mb-2">
+            
             <div class="space-y-2">
                 <span class="text-xs font-black tracking-widest text-emerald-800 bg-emerald-100 px-4 py-1.5 rounded-full uppercase">Wildlife Board Game</span>
                 <h1 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">WILDLIFE SAFARI</h1>
@@ -157,7 +159,10 @@
     </div>
 
     <div class="w-full max-w-lg bg-white border-4 border-slate-950 rounded-xl p-2.5 shadow-sm flex justify-between items-center gap-2">
-        <h2 class="text-base font-black text-emerald-700 tracking-tight uppercase">🐾 ECO SAFARI</h2>
+        <div class="flex items-center gap-2">
+            <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="h-6 object-contain">
+            <h2 class="text-sm sm:text-base font-black text-emerald-700 tracking-tight uppercase">🐾 ECO SAFARI</h2>
+        </div>
         <div class="flex items-center gap-1.5 text-xs font-black">
             <span id="heartsHealthField" class="bg-rose-50 px-2 py-1 rounded-md text-sm">❤️❤️❤️</span>
             <span class="bg-slate-950 text-white px-2 py-1 rounded-md">Tile: <span id="lblTile" class="text-amber-400">1</span></span>
@@ -187,7 +192,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        // 15 BRAND NEW GRADED CASE-BASED SHORT STORIES
+        // DATA OBJECT ARRAYS BASED EXCLUSIVELY ON IN-IMAGE EVS TEXTBOOKS
         const clearCurriculumMasterPool = [
             { id: 1, q: "Rohan visited a farm and saw cows, goats, and big elephants munching happily on green grass and leaves. What group do these plant-eating animals belong to?", a: ["Herbivorous Animals", "Carnivorous Animals"], c: "Herbivorous Animals", h: "Herbivorous animals spend their day feeding entirely on fresh plants, leaves and fruits." },
             { id: 2, q: "In a nature video, a powerful lion and a fast tiger are hunting to find flesh from other animals for their dinner. What group do these meat-eating hunters belong to?", a: ["Carnivorous Animals", "Omnivorous Animals"], c: "Carnivorous Animals", h: "Carnivorous hunters survive by hunting and eating the flesh of other animals." },
@@ -352,7 +357,10 @@
                         currentTick++;
                     } else {
                         clearInterval(stepIntervalLoop);
-                        processDestinationLandingActions();
+                        // FIXED: Added a tiny window delay here so token finishes landing physically on portal tiles before modal blocks it
+                        setTimeout(() => {
+                            processDestinationLandingActions();
+                        }, 300);
                     }
                 }, 250); 
             }, 1200); 
@@ -401,7 +409,7 @@
             const gridContainer = document.getElementById('modalOptionsGrid');
             gridContainer.innerHTML = '';
 
-            // SHUFFLE AND RANDOMIZE BUTTON PLACEMENTS EVERY TIME
+            // SHUFFLE CHOSEN OPTIONS
             const buttonsArray = [...questionData.a].sort(() => Math.random() - 0.5);
 
             buttonsArray.forEach(choice => {
@@ -473,6 +481,7 @@
             }
         }
 
+        // BACKEND STORAGE PERSISTENCE SYNC HOOKS
         function writeCurrentStateToStorage() {
             localStorage.setItem('ecoSafari_v5_tile', playerPosition);
             localStorage.setItem('ecoSafari_v5_score', totalScoreCount);
@@ -508,7 +517,6 @@
             localStorage.clear();
         }
 
-        // DOM dynamic layout resizing hooks inside standard grid wrappers
         function logStatus(txt) {
             document.getElementById('statusAlertField').innerText = txt;
         }
