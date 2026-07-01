@@ -31,7 +31,8 @@
             overflow: hidden;
             background-color: #70c5ce;
             display: flex;
-            flex-col: justify-between;
+            flex-direction: column;
+            justify-between: space-between;
         }
 
         @media (min-height: 821px) {
@@ -72,28 +73,20 @@
     <audio id="sndWrong" src="./assets/wrong.mp3" preload="auto"></audio>
     <audio id="sndClaps" src="./assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
-    <div class="arcade-container flex flex-col justify-between">
+    <div class="arcade-container">
         
         <div class="relative w-full flex-grow overflow-hidden bg-[#70c5ce]">
             <canvas id="gameCanvas" width="440" height="640"></canvas>
 
-            <div id="screenSplash" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 z-50 transition-opacity duration-500">
-                <div class="text-center space-y-6 w-full max-w-xs">
-                    <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-48 mx-auto object-contain">
-                    <div class="w-36 h-3 bg-slate-200 mx-auto border-2 border-black p-0.5 relative">
-                        <div class="h-full bg-sky-400 animate-[pulse_1.5s_infinite]" style="width: 100%"></div>
-                    </div>
-                </div>
+            <div id="screenSplash" class="absolute inset-0 bg-white flex items-center justify-center p-6 z-50 transition-opacity duration-500">
+                <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="max-w-xs max-h-[70%] w-auto h-auto object-contain object-center">
             </div>
 
             <div id="screenTitle" class="hidden absolute inset-0 bg-black/20 flex flex-col items-center justify-center p-5 z-20">
-                <div class="bg-[#fcf8f2] pixel-card p-5 w-full text-center space-y-5">
+                <div class="bg-[#fcf8f2] pixel-card p-5 w-full text-center space-y-6">
                     <h1 class="text-[15px] font-black text-slate-800 leading-tight uppercase tracking-wide">
                         AVIAN<br><span class="text-sky-500 text-[18px]">CLOUD QUEST</span>
                     </h1>
-                    <div class="text-xs bg-amber-100 text-amber-800 border-2 border-amber-400 py-1 px-2 inline-block rounded">
-                        GRADE 3 • CHAPTER 6
-                    </div>
                     <button onclick="showInstructions()" class="w-full bg-amber-500 text-white text-[11px] font-bold py-3.5 pixel-btn cursor-pointer uppercase">
                         START QUEST
                     </button>
@@ -141,7 +134,7 @@
             </div>
         </div>
 
-        <div class="bg-amber-900 border-t-4 border-black p-3 flex gap-3 items-center justify-center z-30">
+        <div id="controlsDeck" class="hidden bg-amber-900 border-t-4 border-black p-3 flex gap-3 items-center justify-center z-30">
             <button id="btnMoveUp" class="pixel-btn bg-sky-500 hover:bg-sky-400 text-white text-[10px] font-bold py-4 flex-1 rounded cursor-pointer select-none tracking-tighter">
                 ▲ GLIDE UP
             </button>
@@ -174,7 +167,6 @@
         let inputUpActive = false;
         let inputDownActive = false;
 
-        // Pixel Accurate Layout Bird Setup Tracking Reference Model Image Dimensions
         let avatarBird = {
             x: 75,
             y: 240,
@@ -203,7 +195,7 @@
             window.addEventListener('resize', autoResizeCanvasViewport);
             autoResizeCanvasViewport();
 
-            // Screen 1 Layout: Force Splash display for exactly 5000 milliseconds (5 seconds)
+            // SCREEN 1: plain background showing the logo in the middle for exactly 5 seconds
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
                 if(splash) {
@@ -229,21 +221,18 @@
             const btnUp = document.getElementById('btnMoveUp');
             const btnDown = document.getElementById('btnMoveDown');
 
-            // Set Up Active Handling Toggles
             btnUp.addEventListener('mousedown', () => inputUpActive = true);
             btnUp.addEventListener('mouseup', () => inputUpActive = false);
             btnUp.addEventListener('mouseleave', () => inputUpActive = false);
             btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); inputUpActive = true; }, { passive: false });
             btnUp.addEventListener('touchend', (e) => { e.preventDefault(); inputUpActive = false; }, { passive: false });
 
-            // Set Down Active Handling Toggles
             btnDown.addEventListener('mousedown', () => inputDownActive = true);
             btnDown.addEventListener('mouseup', () => inputDownActive = false);
             btnDown.addEventListener('mouseleave', () => inputDownActive = false);
             btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); inputDownActive = true; }, { passive: false });
             btnDown.addEventListener('touchend', (e) => { e.preventDefault(); inputDownActive = false; }, { passive: false });
 
-            // Keyboard Arrow Fail-Safe Toggles
             window.addEventListener('keydown', (e) => {
                 if (e.key === "ArrowUp" || e.key === "w" || e.key === " ") inputUpActive = true;
                 if (e.key === "ArrowDown" || e.key === "s") inputDownActive = true;
@@ -260,6 +249,18 @@
             state = "INSTRUCTIONS";
         }
 
+        function updateControlsDeckVisibility() {
+            const deck = document.getElementById('controlsDeck');
+            if (state === "PLAYING") {
+                deck.classList.remove('hidden');
+                deck.classList.add('flex');
+            } else {
+                deck.classList.add('hidden');
+                deck.classList.remove('flex');
+            }
+            autoResizeCanvasViewport();
+        }
+
         function startGameEngine() {
             document.getElementById('screenInstructions').classList.add('hidden');
             score = 0;
@@ -270,6 +271,7 @@
             avatarBird.y = 240;
             generateNextCloud();
             state = "PLAYING";
+            updateControlsDeckVisibility();
         }
 
         function generateNextCloud() {
@@ -286,42 +288,34 @@
             });
         }
 
-        // --- ART RENDERING ENGINE ---
-
         function drawOriginalPixelBird(ctx, birdX, birdY) {
             ctx.save();
             ctx.translate(birdX, birdY);
 
-            // Black outer outline box boundary layer
             ctx.fillStyle = "#000000";
             ctx.fillRect(2, 0, 32, 26);
             ctx.fillRect(0, 4, 38, 18);
 
-            // Yellow Primary Main Body Base
             ctx.fillStyle = "#fcd34d";
             ctx.fillRect(4, 2, 28, 22);
             ctx.fillRect(2, 6, 34, 14);
 
-            // Shaded Belly Profile Accent Area
             ctx.fillStyle = "#f59e0b";
             ctx.fillRect(4, 18, 24, 6);
             ctx.fillRect(22, 14, 8, 4);
 
-            // Classic Oversized Anime Eye Structure
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(20, 4, 12, 10);
             ctx.fillStyle = "#000000";
-            ctx.fillRect(26, 6, 4, 6); // Pupil
+            ctx.fillRect(26, 6, 4, 6);
 
-            // Retro Thick Orange/Scarlet Beak Lip Lines
             ctx.fillStyle = "#ef4444";
             ctx.fillRect(24, 12, 14, 8);
             ctx.fillStyle = "#f97316";
             ctx.fillRect(26, 14, 10, 4);
             ctx.fillStyle = "#000000";
-            ctx.fillRect(24, 15, 14, 2); // Lip break separation divider line
+            ctx.fillRect(24, 15, 14, 2);
 
-            // Flutter Wing Setup
             let flapFactor = Math.sin(animationTick * 0.25) > 0 ? 0 : 4;
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(4, 10 + flapFactor, 10, 6);
@@ -336,23 +330,19 @@
         function drawThickBrownPipe(ctx, pipe) {
             ctx.save();
 
-            // Set up arcade brown palettes
             let colorDarkBorder = "#3e2723";
             let colorMainBrown = "#795548";
             let colorLightGlint = "#a1887f";
             let colorShadowTrim = "#5d4037";
 
-            // 1. TOP VERTICAL COLUMN CHANNEL
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
             
-            // Highlight vertical texture banding accents
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, 0, 10, pipe.topHeight);
             ctx.fillStyle = colorShadowTrim;
             ctx.fillRect(pipe.x + pipe.width - 14, 0, 8, pipe.topHeight);
 
-            // Top Cap End Rim Bar Overlay
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
             ctx.fillStyle = colorLightGlint;
@@ -360,24 +350,20 @@
             ctx.fillStyle = colorShadowTrim;
             ctx.fillRect(pipe.x + pipe.width - 10, pipe.topHeight - 22, 12, 20);
 
-            // Outlines Boundary Strips
             ctx.lineWidth = 4;
             ctx.strokeStyle = colorDarkBorder;
             ctx.strokeRect(pipe.x, -10, pipe.width, pipe.topHeight + 10);
             ctx.strokeRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
 
-            // 2. BOTTOM VERTICAL COLUMN CHANNEL
             let bottomHeight = canvas.height - pipe.bottomY;
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight);
             
-            // Texture banding
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, pipe.bottomY, 10, bottomHeight);
             ctx.fillStyle = colorShadowTrim;
             ctx.fillRect(pipe.x + pipe.width - 14, pipe.bottomY, 8, bottomHeight);
 
-            // Bottom Cap End Rim Bar Overlay
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
             ctx.fillStyle = colorLightGlint;
@@ -385,14 +371,11 @@
             ctx.fillStyle = colorShadowTrim;
             ctx.fillRect(pipe.x + pipe.width - 10, pipe.bottomY + 2, 12, 20);
 
-            // Boundary outlines
             ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight + 10);
             ctx.strokeRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
 
             ctx.restore();
         }
-
-        // --- CORE PERFORMANCE APPLICATION GAME LOOP ENGINE ---
 
         function renderEngineLoop(timestamp) {
             requestAnimationFrame(renderEngineLoop);
@@ -404,22 +387,18 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             animationTick++;
 
-            // Backdrop clean canvas colors fills
             ctx.fillStyle = "#70c5ce";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Flight state processing physics triggers
             if (state === "PLAYING") {
                 if (inputUpActive) avatarBird.y -= avatarBird.speed;
                 if (inputDownActive) avatarBird.y += avatarBird.speed;
 
-                // Safety constraints boundary clamping
                 if (avatarBird.y < 2) avatarBird.y = 2;
                 if (avatarBird.y > canvas.height - 35 - avatarBird.height) {
                     avatarBird.y = canvas.height - 35 - avatarBird.height;
                 }
 
-                // Append obstacle columns
                 if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < canvas.width - 220) {
                     let clearanceGap = 165;
                     let minimumAllowedH = 60;
@@ -435,24 +414,21 @@
                 }
             }
 
-            // Pipe Rendering and Collision Check Logic
             pipeArray.forEach((pipe, i) => {
                 if (state === "PLAYING") pipe.x -= 2.0;
                 drawThickBrownPipe(ctx, pipe);
 
-                // Precise AABB Collision Box Detection Matrix
                 let hitTop = (avatarBird.x + 4 < pipe.x + pipe.width && avatarBird.x + avatarBird.width - 4 > pipe.x && avatarBird.y + 4 < pipe.topHeight);
                 let hitBottom = (avatarBird.x + 4 < pipe.x + pipe.width && avatarBird.x + avatarBird.width - 4 > pipe.x && avatarBird.y + avatarBird.height - 4 > pipe.bottomY);
 
                 if (state === "PLAYING" && (hitTop || hitBottom)) {
                     document.getElementById('sndWrong').play().catch(()=>{});
                     lives--;
-                    screenFlashTick = 12; // Triggers damage flash effect frames
+                    screenFlashTick = 12;
 
                     if (lives <= 0) {
                         concludeQuestEngine();
                     } else {
-                        // Quick safe respawn reset handling clear loop
                         avatarBird.y = 240;
                         pipeArray = [];
                         inputUpActive = false;
@@ -463,11 +439,9 @@
                 if (pipe.x + pipe.width < 0) pipeArray.splice(i, 1);
             });
 
-            // Target Vocabulary Clouds Processing Systems
             cloudArray.forEach((cloud, idx) => {
                 if (state === "PLAYING") cloud.x -= 2.0;
 
-                // Retro Clean Block Style Text Cloud Canvas Design
                 ctx.save();
                 ctx.fillStyle = "#ffffff";
                 ctx.strokeStyle = "#000000";
@@ -499,26 +473,21 @@
                 }
             });
 
-            // Draw player character onto screen canvas workspace layout context
             drawOriginalPixelBird(ctx, avatarBird.x, avatarBird.y);
 
-            // Ground Level Frame Rendering
             ctx.fillStyle = "#558b2f";
             ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
             ctx.fillStyle = "#000000";
             ctx.fillRect(0, canvas.height - 30, canvas.width, 4);
 
-            // Red screen flash on damage
             if (screenFlashTick > 0) {
                 ctx.fillStyle = `rgba(239, 68, 68, ${screenFlashTick / 12 * 0.45})`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 screenFlashTick--;
             }
 
-            // Real-Time Heads-Up Status Panel HUD Layout Grid Rendering
             if (state === "PLAYING" || state === "MODAL") {
                 ctx.save();
-                // 1. Current Active Marks Points Score Display Tracking Numbers
                 ctx.fillStyle = "#ffffff";
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 4;
@@ -527,7 +496,6 @@
                 ctx.strokeText(`SCORE:${score}`, 16, 32);
                 ctx.fillText(`SCORE:${score}`, 16, 32);
 
-                // 2. Active Heart Lives Display Systems Output Layout Block Configuration
                 let lifeHearts = "";
                 for(let h = 0; h < lives; h++) lifeHearts += "❤️";
                 ctx.textAlign = "right";
@@ -540,6 +508,7 @@
 
         function launchVocabularyModal(data) {
             state = "MODAL";
+            updateControlsDeckVisibility();
             document.getElementById('modalCloudTerm').innerText = `☁️ MOVEMENT: ${data.term}`;
             document.getElementById('modalPrompt').innerText = data.prompt;
             
@@ -561,11 +530,12 @@
         function evaluateResponse(chosen, realCorrectAnswer) {
             if (chosen === realCorrectAnswer) {
                 document.getElementById('sndCorrect').play().catch(()=>{});
-                score += 10; // Increments points by exactly +10 marks per correct item answer
+                score += 10;
                 activeIndex++;
                 
                 document.getElementById('modalQuiz').classList.add('hidden');
                 state = "PLAYING";
+                updateControlsDeckVisibility();
                 generateNextCloud();
             } else {
                 document.getElementById('sndWrong').play().catch(()=>{});
@@ -577,6 +547,7 @@
 
         function concludeQuestEngine() {
             state = "GAMEOVER";
+            updateControlsDeckVisibility();
             document.getElementById('sndClaps').play().catch(()=>{});
             document.getElementById('txtFinalScore').innerText = score;
             document.getElementById('modalQuiz').classList.add('hidden');
