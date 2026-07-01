@@ -2,360 +2,287 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jungle Adventure: Snakes & Ladders</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Wildlife Safari: Snakes & Ladders</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at center, #fffee7 0%, #fff176 100%);
-            -webkit-tap-highlight-color: transparent;
+            background: radial-gradient(circle at center, #fffee7 0%, #ffeb3b 100%);
         }
-        h1, h2, h3, button, .font-fun { font-family: 'Fredoka', cursive; }
+        h1, h2, h3, button { font-family: 'Fredoka', cursive; }
         
-        /* Large Board Scrollable Window Area Layout */
+        /* Fixed Scroll Bar Area Window for Big Board Layout viewports */
         .scroll-wrapper {
-            max-height: 60vh;
+            max-height: 55vh;
             overflow-y: auto;
-            border-radius: 28px;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.15);
-            padding: 8px;
-            background: #ffffff;
-            border: 6px solid #4caf50;
+            border-radius: 24px;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.2);
+            padding: 10px;
+            background: #2e7d32;
+            border: 8px solid #1b5e20;
         }
 
-        /* Large Child-Friendly 10x10 Matrix Cell Frame Styles */
+        /* 10x10 Micro-Grid Cell Layout Styles */
         .board-cell {
             aspect-ratio: 1;
-            transition: all 0.2s ease;
-            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.12);
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15);
+            font-size: 14px;
+            font-weight: 900;
         }
 
-        /* Funky Elastic Character Token Transitions */
+        /* Token Piece Transition Curves */
         #playerToken {
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            will-change: transform, left, top;
-            z-index: 30;
+            transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 40;
         }
 
-        /* Ultra-Expressive Colorful Board Custom Tile Theme Filters */
-        .tile-c1 { background-color: #ff8a80; text-shadow: 1px 1px #ffcdd2; } /* Coral Red */
-        .tile-c2 { background-color: #80d8ff; text-shadow: 1px 1px #e1f5fe; } /* Sky Blue */
-        .tile-c3 { background-color: #b9f6ca; text-shadow: 1px 1px #e8f5e9; } /* Mint Green */
-        .tile-c4 { background-color: #ffe57f; text-shadow: 1px 1px #fffde7; } /* Cream Yellow */
-        .tile-c5 { background-color: #f48fb1; text-shadow: 1px 1px #fce4ec; } /* Candy Pink */
+        /* Ultra Bright Distinct Board Grid Palette Elements */
+        .tile-red { background-color: #ff3d00; color: #ffffff; }
+        .tile-yellow { background-color: #ffea00; color: #212121; }
+        .tile-blue { background-color: #00b0ff; color: #ffffff; }
+        .tile-green { background-color: #00e676; color: #212121; }
+        .tile-orange { background-color: #ff9100; color: #ffffff; }
 
-        /* High Visibility Accent Border Indicators */
-        .ladder-tile-frame { border: 3.5px solid #2e7d32 !important; background: #e8f5e9 !important; }
-        .snake-tile-frame { border: 3.5px solid #c62828 !important; background: #ffebee !important; }
-
-        /* Hardware Accelerated Device Vibrating Shaking Animations */
-        @keyframes kidsCardVibrate {
-            0%, 100% { transform: translate3d(0, 0, 0); }
-            15%, 45%, 75% { transform: translate3d(-10px, 0, 0); }
-            30%, 60%, 90% { transform: translate3d(10px, 0, 0); }
+        @keyframes vibrate {
+            0%, 100% { transform: translate(0, 0); }
+            20%, 60% { transform: translate(-6px, 0); }
+            40%, 80% { transform: translate(6px, 0); }
         }
-        .vibrate-shake-animation {
-            animation: kidsCardVibrate 0.45s cubic-bezier(.36,.07,.19,.97) both;
-        }
+        .vibrate-error { animation: vibrate 0.3s linear; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-4 select-none overflow-x-hidden">
+<body class="min-h-screen flex flex-col items-center justify-between p-4 select-none overflow-x-hidden">
 
     <audio id="audioBg" src="./assets/snakegamesound.mp3" loop></audio>
     <audio id="audioCorrect" src="./assets/correct.mp3"></audio>
     <audio id="audioWrong" src="./assets/wrong.mp3"></audio>
     <audio id="audioClaps" src="./assets/freesound_community-claps-44774.mp3"></audio>
 
-    <div id="screenSplash" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 transition-opacity duration-500 pointer-events-none">
-        <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-80 max-w-xs object-contain">
-    </div>
-
-    <div id="diceFlashOverlay" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-50 text-center animate-fade-in">
-        <div class="bg-amber-400 border-8 border-white rounded-[50px] p-8 max-w-xs w-full transform scale-110 shadow-2xl space-y-4">
-            <span class="text-xs font-black tracking-widest text-amber-950 uppercase block">YOU ROLLED A:</span>
-            <div id="diceFlashValue" class="text-8xl font-black text-stone-950 drop-shadow-md my-2">⚄</div>
-            <div id="diceFlashNum" class="text-3xl font-black text-amber-900 uppercase">NUMBER 5!</div>
+    <div id="diceFlashOverlay" class="hidden fixed inset-0 bg-stone-900/80 backdrop-blur-md flex flex-col items-center justify-center z-50 text-center">
+        <div class="bg-white border-8 border-orange-500 rounded-[40px] p-8 max-w-xs w-full transform scale-110 shadow-2xl space-y-4">
+            <span class="text-sm font-black text-stone-400 tracking-widest uppercase block">YOUR SAFARI DICE ROLLED:</span>
+            <div id="diceFlashValue" class="text-9xl font-black text-orange-600 drop-shadow-md my-2">⚀</div>
+            <div id="diceFlashNum" class="text-4xl font-black text-stone-900 uppercase">1</div>
         </div>
     </div>
 
-    <div id="screenTitle" class="fixed inset-0 bg-gradient-to-b from-sky-400 via-emerald-400 to-yellow-300 flex flex-col items-center justify-center p-6 z-40 text-center transition-opacity duration-300">
-        <div class="space-y-6 max-w-md w-full bg-white border-8 border-amber-400 p-8 rounded-[50px] shadow-2xl">
+    <div id="screenTitle" class="fixed inset-0 bg-gradient-to-br from-green-500 via-yellow-400 to-emerald-600 flex flex-col items-center justify-center p-6 z-40 text-center">
+        <div class="space-y-6 max-w-md w-full bg-white border-8 border-orange-400 p-8 rounded-[44px] shadow-2xl">
             <div class="space-y-1">
-                <span class="text-xs font-black tracking-widest text-emerald-700 bg-emerald-100 px-4 py-1.5 rounded-full uppercase">SUPER FUN EDITION</span>
-                <h1 class="text-5xl sm:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-pink-500 to-red-600 drop-shadow">ECO SAFARI</h1>
+                <span class="text-xs font-black tracking-widest text-green-700 bg-green-100 px-4 py-1.5 rounded-full uppercase">Grade 3 EVS Chapter 5</span>
+                <h1 class="text-4xl sm:text-5xl font-black text-stone-900 tracking-tight">WILDLIFE SAFARI</h1>
             </div>
             
-            <p class="text-base font-bold text-stone-600 leading-snug px-1">
-                Welcome Safari Explorer! Roll the big dice, watch the number flash, and test your animal wisdom to win!
+            <p class="text-sm font-bold text-stone-600 leading-relaxed">
+                Roll the big flash dice, solve animal food habit questions, and race to Tile 100!
             </p>
             
-            <div id="resumeStateBox" class="hidden bg-emerald-50 border-4 border-dashed border-emerald-300 rounded-3xl p-4 text-left space-y-2">
-                <p class="text-xs font-black text-emerald-800 text-center">🔄 Found an Unfinished Safari Adventure!</p>
-                <div class="flex justify-around text-xs font-black text-stone-700">
+            <div id="resumeStateBox" class="hidden bg-emerald-50 border-4 border-dashed border-emerald-300 rounded-2xl p-4 text-left space-y-2">
+                <p class="text-xs font-black text-emerald-800 text-center">🔄 Found Previous Safari Session Data</p>
+                <div class="flex justify-around text-xs font-bold text-stone-600">
                     <span id="savedTileLbl">Tile: 1</span>
                     <span id="savedScoreLbl">Score: 0</span>
                     <span id="savedLivesLbl">Lives: ❤️❤️❤️</span>
                 </div>
-                <button onclick="loadSavedGameSession()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-400 text-stone-900 text-xs font-black py-2.5 rounded-xl transition-all cursor-pointer shadow-md">
-                    CONTINUE PREVIOUS TOUR 🚀
+                <button onclick="loadSavedGameSession()" class="w-full bg-emerald-500 text-white text-xs font-black py-2.5 rounded-xl shadow cursor-pointer uppercase">
+                    Continue Previous Tour 🚀
                 </button>
             </div>
 
-            <button onclick="goToInstructionsScreen()" class="w-full bg-gradient-to-r from-pink-500 to-orange-500 text-white text-2xl font-black py-4 rounded-3xl shadow-xl transform active:scale-95 transition-all cursor-pointer tracking-wider border-b-8 border-pink-700">
-                NEW SAFARI GAME 🎲
+            <button onclick="launchBrandNewSafariSession()" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-2xl font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-transform cursor-pointer border-b-8 border-red-700">
+                PLAY NEW GAME 🎲
             </button>
         </div>
     </div>
 
-    <div id="screenInstructions" class="hidden fixed inset-0 bg-stone-950/60 backdrop-blur-xl flex items-center justify-center p-4 z-40">
-        <div class="bg-white border-8 border-orange-400 rounded-[50px] w-full max-w-md p-6 sm:p-8 shadow-2xl space-y-5 text-stone-800">
-            <h2 class="text-4xl font-black text-center text-orange-500 tracking-tight">How to Play ⭐</h2>
+    <div id="questionModal" class="hidden fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4 z-40">
+        <div id="modalCardBody" class="bg-white border-8 border-blue-500 rounded-[36px] w-full max-w-md p-6 shadow-2xl space-y-6">
+            <div class="text-center space-y-2">
+                <span id="modalBadge" class="text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full block mx-auto w-max bg-blue-100 text-blue-800">⭐ QUESTION</span>
+                <div class="text-xs font-black text-stone-400 uppercase tracking-widest pt-2">NAME THE FOLLOWING:</div>
+                <h3 id="modalQuestionText" class="text-lg sm:text-xl font-black text-stone-900 leading-snug px-1"></h3>
+            </div>
             
-            <div class="space-y-3.5 text-sm font-bold text-stone-600 leading-snug">
-                <div class="flex items-center gap-3 bg-sky-50 p-3 rounded-2xl border border-sky-100">
-                    <span class="w-7 h-7 shrink-0 rounded-full bg-sky-400 text-white flex items-center justify-center font-black text-xs">1</span>
-                    <p>Roll the action dice and watch your lucky number flash on the screen!</p>
-                </div>
-                <div class="flex items-center gap-3 bg-amber-50 p-3 rounded-2xl border border-amber-100">
-                    <span class="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-stone-900 flex items-center justify-center font-black text-xs">2</span>
-                    <p>Answer the <b>"Name the Following"</b> question at your destination tile.</p>
-                </div>
-                <div class="flex items-center gap-3 bg-emerald-50 p-3 rounded-2xl border border-emerald-100">
-                    <span class="w-7 h-7 shrink-0 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs">🪜</span>
-                    <p>Get a correct answer on a green box to climb up the shortcut ladder!</p>
-                </div>
-                <div class="flex items-center gap-3 bg-rose-50 p-3 rounded-2xl border border-rose-100">
-                    <span class="w-7 h-7 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-xs">🐍</span>
-                    <p>Miss a question on a red hazard box to slide down the snake tail!</p>
-                </div>
+            <div id="modalOptionsGrid" class="grid grid-cols-1 gap-3 pt-1"></div>
+
+            <div id="modalHintDrawer" class="hidden bg-amber-50 border-2 border-amber-300 rounded-xl p-3 text-center text-xs font-bold text-stone-600 leading-normal"></div>
+        </div>
+    </div>
+
+    <div id="screenGameOver" class="hidden fixed inset-0 bg-gradient-to-b from-stone-900 to-stone-950 flex flex-col items-center justify-center p-6 z-50 text-center">
+        <div class="space-y-6 max-w-md w-full bg-white border-8 border-yellow-400 p-8 rounded-[40px] shadow-2xl flex flex-col items-center text-stone-800">
+            <h2 id="gameOverTitle" class="text-4xl font-black text-red-500">Safari Over!</h2>
+            <p id="gameOverDesc" class="text-sm font-bold text-stone-600 leading-relaxed"></p>
+            
+            <div class="bg-yellow-50 border-4 border-dashed border-yellow-200 rounded-2xl p-4 w-full">
+                <span class="text-xs font-bold text-stone-400 block mb-1 uppercase">Final Score Result</span>
+                <span id="finalScoreDisplay" class="text-4xl font-black text-green-600">0</span> <span class="text-stone-700 text-xl font-black">Points</span>
             </div>
 
-            <button onclick="launchFreshGameEngine()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xl font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform cursor-pointer border-b-6 border-emerald-700">
-                START NOW! 🎉
+            <button onclick="triggerFullGameReset()" class="w-full bg-green-500 hover:bg-green-600 text-white text-xl font-black py-4 rounded-xl shadow-lg cursor-pointer transition-transform border-b-4 border-green-700">
+                PLAY FRESH TOUR
             </button>
         </div>
     </div>
 
-    <div id="questionModal" class="hidden fixed inset-0 bg-stone-950/70 backdrop-blur-md flex items-center justify-center p-4 z-40">
-        <div id="modalCardBody" class="bg-white border-8 border-sky-400 rounded-[44px] w-full max-w-md p-6 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto">
-            <div class="text-center space-y-1">
-                <span id="modalBadge" class="text-xs font-black uppercase tracking-wider px-5 py-2 rounded-full block mx-auto w-max shadow-sm"></span>
-                <div class="text-xs font-extrabold text-stone-400 tracking-widest uppercase pt-3">WHO AM I?</div>
-                <h3 id="modalQuestionText" class="text-xl sm:text-2xl font-black text-stone-900 px-1 leading-snug"></h3>
-            </div>
-            
-            <div id="modalOptionsGrid" class="grid grid-cols-1 gap-4 pt-1"></div>
-
-            <div id="modalHintDrawer" class="hidden bg-amber-50 border-4 border-dashed border-amber-300 rounded-2xl p-4 text-center">
-                <span class="text-xs font-black text-amber-800 uppercase tracking-wider block">💡 SAFARI FIELD GUIDE HELP</span>
-                <p id="modalHintText" class="text-sm font-bold text-stone-600 mt-1 leading-relaxed"></p>
-            </div>
-        </div>
-    </div>
-
-    <div id="screenGameOver" class="hidden fixed inset-0 bg-gradient-to-b from-purple-600 via-pink-500 to-amber-300 flex flex-col items-center justify-center p-6 z-50 text-center text-white">
-        <div class="space-y-6 max-w-md w-full bg-white border-8 border-yellow-400 p-8 rounded-[50px] shadow-2xl flex flex-col items-center text-stone-800">
-            <h2 id="gameOverTitle" class="text-5xl font-black text-pink-500 tracking-tight">Safari Over!</h2>
-            <p id="gameOverDesc" class="text-base font-bold text-stone-600 leading-relaxed"></p>
-            
-            <div class="bg-yellow-50 border-4 border-dashed border-yellow-300 rounded-3xl p-4 w-full text-center">
-                <span class="text-xs uppercase tracking-widest text-stone-400 font-bold block mb-1">Final Score Summary</span>
-                <span id="finalScoreDisplay" class="text-5xl font-black text-emerald-600">0</span> <span class="text-stone-700 text-2xl font-black">Points</span>
-            </div>
-
-            <button onclick="triggerFullGameReset()" class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-white text-xl font-black py-4 rounded-2xl shadow-lg cursor-pointer transform active:scale-95 transition-transform border-b-6 border-emerald-700">
-                🔄 PLAY AGAIN
-            </button>
-        </div>
-    </div>
-
-    <div class="w-full max-w-xl bg-white border-4 border-stone-900 rounded-2xl p-3 shadow-md flex justify-between items-center z-10 gap-3 shrink-0">
-        <h2 class="text-xl font-black text-pink-500 tracking-tight leading-none">🌈 ECO SAFARI</h2>
-        <div class="flex items-center gap-1.5 text-xs font-black">
-            <span id="heartsHealthField" class="text-rose-500 bg-rose-50 px-2.5 py-1.5 rounded-xl border border-rose-100 text-base">❤️❤️❤️</span>
-            <span class="bg-stone-900 text-white px-2.5 py-1.5 rounded-xl">Tile: <span id="lblTile" class="text-yellow-400">1</span></span>
-            <span class="bg-stone-900 text-white px-2.5 py-1.5 rounded-xl">Score: <span id="lblScore" class="text-emerald-400">0</span></span>
+    <div class="w-full max-w-xl bg-white border-4 border-stone-900 rounded-2xl p-3 shadow-md flex justify-between items-center z-10 gap-2 shrink-0">
+        <h2 class="text-lg font-black text-green-600 tracking-tight">🦒 ECO TOUR</h2>
+        <div class="flex items-center gap-1 text-xs font-black">
+            <span id="heartsHealthField" class="bg-rose-50 px-2 py-1 rounded-lg text-sm">❤️❤️❤️</span>
+            <span class="bg-stone-900 text-white px-2 py-1 rounded-lg">Tile: <span id="lblTile" class="text-yellow-400">1</span></span>
+            <span class="bg-stone-900 text-white px-2 py-1 rounded-lg">Points: <span id="lblScore" class="text-green-400">0</span></span>
         </div>
     </div>
 
     <div class="w-full max-w-xl shrink-0 px-1">
         <div class="scroll-wrapper">
-            <div id="boardContainer" class="w-full relative overflow-hidden bg-stone-50 rounded-xl p-0.5">
-                <div id="boardGrid" class="grid grid-cols-10 gap-1 w-full h-full text-[11px] font-black text-stone-900"></div>
-                <div id="playerToken" class="absolute w-[8.4%] h-[8.4%] bg-gradient-to-b from-purple-500 to-indigo-600 border-4 border-white rounded-full shadow-2xl flex items-center justify-center text-white text-base font-black">🤠</div>
+            <div id="boardContainer" class="w-full relative overflow-hidden bg-white rounded-xl">
+                <div id="boardGrid" class="grid grid-cols-10 gap-0.5 w-full h-full font-black text-stone-900"></div>
+                <div id="playerToken" class="absolute w-[9%] h-[9%] bg-white border-4 border-purple-600 rounded-full shadow-2xl flex items-center justify-center text-base">🤠</div>
             </div>
         </div>
     </div>
 
-    <div class="w-full max-w-xl bg-white border-4 border-stone-900 rounded-2xl p-3 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-        <div id="statusAlertField" class="text-xs font-extrabold text-stone-500 text-center sm:text-left leading-tight max-w-xs">
-            Tap Roll Dice to start your journey! Progress auto-saved safely.
+    <div class="w-full max-w-xl bg-white border-4 border-stone-900 rounded-2xl p-3 shadow-md flex items-center justify-between gap-3 shrink-0">
+        <div id="statusAlertField" class="text-xs font-bold text-stone-500 max-w-xs leading-tight">
+            Roll the action dice to start your wilderness adventure tracking!
         </div>
         
-        <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
-            <button onclick="persistSessionStateToStorage(true)" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-black px-3 py-3 rounded-xl border border-stone-200 transition-all cursor-pointer">
-                💾 SAVE
-            </button>
-            <button onclick="triggerFullGameReset()" class="bg-stone-100 hover:bg-stone-200 text-rose-500 text-xs font-black px-3 py-3 rounded-xl border border-stone-200 transition-all cursor-pointer">
-                🔄 RESET
-            </button>
-
-            <div class="w-[2px] h-6 bg-stone-200 mx-0.5"></div>
-
-            <div id="diceDisplay" class="w-10 h-10 bg-indigo-600 text-white font-black text-xl rounded-xl flex items-center justify-center shadow-md border-b-4 border-indigo-900 select-none">⚀</div>
-            <button id="btnRoll" onclick="executeDiceRollTurn()" class="bg-gradient-to-r from-pink-500 to-orange-500 text-white text-xs font-black px-4 py-3.5 rounded-xl shadow-md active:scale-95 transition-transform cursor-pointer tracking-wider uppercase border-b-4 border-pink-700">
-                ROLL DICE 🎲
+        <div class="flex items-center gap-2 shrink-0">
+            <button onclick="triggerFullGameReset()" class="bg-stone-100 text-red-500 text-xs font-black p-3 rounded-xl border border-stone-200 cursor-pointer">RESET</button>
+            <div id="diceDisplay" class="w-10 h-10 bg-purple-600 text-white font-black text-xl rounded-xl flex items-center justify-center shadow-inner">⚀</div>
+            <button id="btnRoll" onclick="executeDiceRollSequence()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-black px-4 py-3 rounded-xl shadow active:scale-95 transition-transform cursor-pointer uppercase border-b-4 border-orange-700">
+                ROLL 🎲
             </button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        // High Interest "Name the Following" Educational Deck Mapping Chapter 5 Concept Data
-        const masterChapterCurriculumDeck = [
-            { id: 1, type: "normal", q: "Animals that feed strictly on plants, raw grasses, fresh fruits, and forest vegetables.", a: ["Herbivorous Animals", "Carnivorous Animals"], c: "Herbivorous Animals", h: "Cows, zebras, and deer have broad back teeth specifically suited for grinding down plant fibers." },
-            { id: 2, type: "normal", q: "Animals that survive primarily by hunting and eating the flesh of other wild creatures.", a: ["Carnivorous Animals", "Omnivorous Animals"], c: "Carnivorous Animals", h: "Lions, tigers, leopards, and eagles belong to this group." },
-            { id: 3, type: "normal", q: "Animals that depend structurally on both plant products and animal materials for daily nourishment.", a: ["Omnivorous Animals", "Herbivorous Animals"], c: "Omnivorous Animals", h: "Human beings, forest bears, and crows fall within this mixed dietary bracket." },
-            { id: 4, type: "normal", q: "Ecosystem cleaners that eat dead matter, decaying plants, or raw remains of hunted animals.", a: ["Scavengers", "Rodents"], c: "Scavengers", h: "Vultures and hyenas perform a critical role in cleaning nature by removing organic remains." },
-            { id: 5, type: "snake", q: "Reptiles lacking chewing or biting teeth that swallow their captured prey completely whole.", a: ["Snakes and Lizards", "Cows and Buffaloes"], c: "Snakes and Lizards", h: "They are built with extremely flexible jaw structures to ingest large meals whole." },
-            { id: 6, type: "normal", q: "Creatures possessing long, sticky darting tongues engineered to snap up flying insects instantly.", a: ["Frogs and Lizards", "Cats and Tigers"], c: "Frogs and Lizards", h: "They stick out their long tongue to entrap bugs, then roll it safely back inside." },
-            { id: 7, type: "ladder", q: "Apex hunters armed with sharp, curved front teeth (canines) engineered cleanly to tear tough flesh.", a: ["Tigers and Lions", "Rabbits and Rats"], c: "Tigers and Lions", h: "Their long, pointed canines match powerful jaw grips built for flesh-tearing tasks." },
-            { id: 8, type: "ladder", q: "The process where ruminants swallow vegetation quickly, storing it, then chewing it slowly later.", a: ["Chewing the cud", "Gnawing fruits"], c: "Chewing the cud", h: "This is also called rumination. Cows and goats do this while resting comfortably." },
-            { id: 9, type: "normal", q: "Scientific group classification name assigned to cud-chewing mammals like camels, giraffes, and cows.", a: ["Ruminants", "Rodents"], c: "Ruminants", h: "Ruminants have complex multi-chambered stomachs designed to ferment raw foliage carefully." },
-            { id: 10, type: "normal", q: "Mammals utilizing a long, muscular nose trunk to tear off tall tree branches and drink water.", a: ["Elephants", "Leopards"], c: "Elephants", h: "The long trunk operates cleanly like a versatile hand arm to feed easily." },
-            { id: 11, type: "normal", q: "Animals like rats, mice, and rabbits that break tough nutshells using highly chiselled front teeth.", a: ["Gnawers", "Scavengers"], c: "Gnawers", h: "Also known as rodents, their strong front teeth grow continuously to support persistent chewing." },
-            { id: 12, type: "normal", q: "The fluid motion where household cats and dogs lick up water or milk using swift tongue scoops.", a: ["Lapping", "Sucking"], c: "Lapping", h: "Their tongues fold into tiny spoon shapes to lift fluids cleanly into their mouths." },
-            { id: 13, type: "snake", q: "The long, thin, hollow tube used by butterflies and mosquitoes to draw liquid meals directly.", a: ["Proboscis", "Canines"], c: "Proboscis", h: "It functions exactly like a drinking straw to draw nectar out from deep inside flower cups." },
-            { id: 14, type: "ladder", q: "The continuous linear network chain illustrating who eats whom within a specific ecosystem zone.", a: ["Food Chain", "Life Cycle"], c: "Food Chain", h: "A food chain always anchors its base on green plants that generate energy from sunlight." },
-            { id: 15, type: "snake", q: "The illegal human practice of tracking and killing rare forest wildlife for commercial skin or horn trade.", a: ["Poaching", "Deforestation"], c: "Poaching", h: "Poaching directly drives endangered animals into complete global extinction." }
+        // STRICT UNIQUE 12 QUESTIONS POOL DIRECTLY FROM LESSON READING MATERIALS
+        const cleanCurriculumMasterPool = [
+            { id: 1, q: "Animals that eat only plants, grasses, fruits and vegetables are called herbivorous animals.", a: ["Herbivorous Animals", "Carnivorous Animals"], c: "Herbivorous Animals", h: "Examples include cows, goats, rabbits, deer, grasshoppers, and elephants." },
+            { id: 2, q: "Animals that eat the flesh of other animals are called carnivorous animals.", a: ["Carnivorous Animals", "Omnivorous Animals"], c: "Carnivorous Animals", h: "Examples include lions, tigers, leopards, crocodiles, sharks, eagles, hawks, and owls." },
+            { id: 3, q: "Animals that depend on both plants and animals for their food are called omnivorous animals.", a: ["Omnivorous Animals", "Scavengers"], c: "Omnivorous Animals", h: "Examples include dogs, crows, pigs, rats, bears, and human beings." },
+            { id: 4, q: "Animals that eat dead and decaying plants or animal material, and remains of hunted animals.", a: ["Scavengers", "Herbivorous Animals"], c: "Scavengers", h: "Examples include vultures and hyenas that help keep the forest clean." },
+            { id: 5, q: "Animals that swallow their entire food whole without biting or chewing it because they do not have biting or chewing teeth.", a: ["Snakes and Lizards", "Frogs and Toads"], c: "Snakes and Lizards", h: "They have a small mouth but can open their jaws very wide to swallow large prey whole." },
+            { id: 6, q: "Animals that use a long and sticky tongue to catch insects, rolling it back inside their mouths.", a: ["Frogs and Lizards", "Cats and Dogs"], c: "Frogs and Lizards", h: "They stick out their long tongue to catch insects instantly." },
+            { id: 7, q: "Carnivorous animals possessing sharp, pointed and curved front teeth (canines) to tear flesh.", a: ["Tigers and Lions", "Cows and Buffaloes"], c: "Tigers and Lions", h: "They also have flat, broad back teeth (premolars and molars) to grind and chew food." },
+            { id: 8, q: "The process where animals swallow grass without chewing it first, and later bring it back to chew it slowly.", a: ["Chewing the cud", "Lapping fluid"], c: "Chewing the cud", h: "Also known as rumination, this is common in cud-chewing animals like cows, buffaloes, goats, giraffes, and camels." },
+            { id: 9, q: "Animals that break open and eat grains, nuts and fruits using very sharp front teeth, also called rodents.", a: ["Gnawers", "Scavengers"], c: "Gnawers", h: "Examples include rats, mice, squirrels, and rabbits." },
+            { id: 10, q: "The action where animals drink water or other liquid food with quick movements of their tongue.", a: ["Lapping", "Sucking"], c: "Lapping", h: "Cats, dogs, cows, tigers, bears, and lions use this method to drink liquid food." },
+            { id: 11, q: "A long, thin and hollow tube used by insects like butterflies, honey bees, and mosquitoes to suck food, working like a straw.", a: ["Proboscis", "Canines"], c: "Proboscis", h: "Butterflies and honey bees use it to suck nectar from flowers, while mosquitoes suck blood." },
+            { id: 12, q: "The continuous network mapping where plants are eaten by animals, and those animals are eaten by other animals.", a: ["Food Chain", "Life Cycle"], c: "Food Chain", h: "A food chain always begins with green plants because all animals depend on plants directly or indirectly." }
         ];
 
-        // System Layout Shortcut Portal Matrix Configurations
-        const boardPortalsMap = {
-            14: { target: 36, type: "ladder", label: "Herbivore Nutrition Surge! 🪜" },
-            28: { target: 55, type: "ladder", label: "Healthy Food Chain Flow! 🪜" },
-            42: { target: 73, type: "ladder", label: "Project Tiger Protection Reserve! 🪜" },
-            62: { target: 94, type: "ladder", label: "Ruminant Energy Boost! 🪜" },
-            32: { target: 7,  type: "snake",  label: "Apex Predator Ambush! 🐍" },
-            53: { target: 19, type: "snake",  label: "Scavenger Habitat Degradation! 🐍" },
-            77: { target: 46, type: "snake",  label: "Poaching Threat Encountered! 🐍" },
-            97: { target: 65, type: "snake",  label: "Extinction Habitat Hazard! 🐍" }
+        // FIXED LADDER & SNAKE MAP: TRAPPED PATHWAYS TERMINATE PERFECTLY AT PRECISE TILE TARGET HOOKS
+        const fixedPortalsMap = {
+            12: { target: 29, type: "ladder", msg: "Found a healthy food path! Ladder up! 🪜" },
+            26: { target: 35, type: "ladder", msg: "Herbivore energy surge! Ladder up! 🪜" },
+            42: { target: 63, type: "ladder", msg: "Project Tiger Protection zone! Ladder up! 🪜" },
+            62: { target: 82, type: "ladder", msg: "Balanced Food Chain flow! Ladder up! 🪜" },
+            33: { target: 8,  type: "snake",  msg: "Oh no! Poaching hazard threat! Slide down... 🐍" },
+            52: { target: 13, type: "snake",  msg: "Habitat destruction danger! Slide down... 🐍" },
+            77: { target: 44, type: "snake",  msg: "Illegal forest logging trap! Slide down... 🐍" },
+            97: { target: 65, type: "snake",  msg: "Extinction risk encounter! Slide down... 🐍" }
         };
 
         let playerPosition = 1;
         let totalScoreCount = 0;
         let totalRemainingLives = 3;
         let isDiceLocked = false;
-        let randomizedActiveDeck = [];
+        
+        let exhaustedQuestionQueue = [];
 
         window.onload = function() {
-            // Screen 1 Splash Timer Loop Deferral
-            setTimeout(() => {
-                const splash = document.getElementById('screenSplash');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(() => splash.classList.add('hidden'), 500);
-                }
-                checkForSavedSessionState();
-            }, 5000);
+            checkForSavedSessionState();
         };
 
         function checkForSavedSessionState() {
-            if (localStorage.getItem('ecoSafari_tile')) {
-                document.getElementById('savedTileLbl').innerText = "Tile: " + localStorage.getItem('ecoSafari_tile');
-                document.getElementById('savedScoreLbl').innerText = "Score: " + localStorage.getItem('ecoSafari_score');
-                let livesCount = parseInt(localStorage.getItem('ecoSafari_lives') || "3");
-                document.getElementById('savedLivesLbl').innerText = "Lives: " + "❤️".repeat(livesCount);
+            if (localStorage.getItem('ecoSafari_v2_tile')) {
+                document.getElementById('savedTileLbl').innerText = "Tile: " + localStorage.getItem('ecoSafari_v2_tile');
+                document.getElementById('savedScoreLbl').innerText = "Score: " + localStorage.getItem('ecoSafari_v2_score');
+                let count = parseInt(localStorage.getItem('ecoSafari_v2_lives') || "3");
+                document.getElementById('savedLivesLbl').innerText = "Lives: " + "❤️".repeat(count);
                 document.getElementById('resumeStateBox').classList.remove('hidden');
             }
         }
 
         function loadSavedGameSession() {
-            playerPosition = parseInt(localStorage.getItem('ecoSafari_tile') || "1");
-            totalScoreCount = parseInt(localStorage.getItem('ecoSafari_score') || "0");
-            totalRemainingLives = parseInt(localStorage.getItem('ecoSafari_lives') || "3");
+            playerPosition = parseInt(localStorage.getItem('ecoSafari_v2_tile') || "1");
+            totalScoreCount = parseInt(localStorage.getItem('ecoSafari_v2_score') || "0");
+            totalRemainingLives = parseInt(localStorage.getItem('ecoSafari_v2_lives') || "3");
             
             document.getElementById('screenTitle').classList.add('hidden');
-            initializeLayoutGridComponents();
+            buildVisualBoardGrid();
             syncDashboardStatsUI();
-            repositionPlayerTokenPositionUI(true);
+            repositionTokenOnGrid(true);
             
             document.getElementById('audioBg').play().catch(() => {});
-            logStatus("Welcome back! Your previous safari journey has been restored.");
+            logStatus("Safari checkpoint restored! Keep exploring.");
         }
 
-        function goToInstructionsScreen() {
-            // Enforce clean session setup when choosing New Game option path
-            localStorage.clear();
+        /* FIX: NEW GAME TRIGGER WIPE OUT PREVIOUS GAME SECTIONS INSTANTLY */
+        function launchBrandNewSafariSession() {
+            localStorage.clear(); 
             document.getElementById('resumeStateBox').classList.add('hidden');
-            
             document.getElementById('screenTitle').classList.add('hidden');
-            document.getElementById('screenInstructions').classList.remove('hidden');
-        }
-
-        function launchFreshGameEngine() {
-            document.getElementById('screenInstructions').classList.add('hidden');
-            localStorage.clear();
             
             playerPosition = 1;
             totalScoreCount = 0;
             totalRemainingLives = 3;
+            exhaustedQuestionQueue = [];
 
-            initializeLayoutGridComponents();
+            buildVisualBoardGrid();
             syncDashboardStatsUI();
-            repositionPlayerTokenPositionUI(true);
+            repositionTokenOnGrid(true);
 
             document.getElementById('audioBg').play().catch(() => {});
-            logStatus("Safari ready! Roll the colorful dice to move.");
+            logStatus("New game started! Roll the big dice to start your tour.");
         }
 
-        function initializeLayoutGridComponents() {
+        function buildVisualBoardGrid() {
             const grid = document.getElementById('boardGrid');
             grid.innerHTML = '';
             
-            // Build the classic zigzag 10x10 alternating grid pathway
-            for (let row = 9; row >= 0; row--) {
-                let rowTilesArr = [];
-                for (let col = 0; col < 10; col++) {
-                    let calculatedId = (row % 2 === 1) ? (row * 10 + (10 - col)) : (row * 10 + col + 1);
-                    rowTilesArr.push(calculatedId);
+            const tileColors = ['tile-red', 'tile-yellow', 'tile-blue', 'tile-green', 'tile-orange'];
+            
+            // Generate standard boustrophedon layout zigzag path rows
+            for (let r = 9; r >= 0; r--) {
+                let rowArray = [];
+                for (let c = 0; c < 10; c++) {
+                    let tileId = (r % 2 === 1) ? (r * 10 + (10 - c)) : (r * 10 + c + 1);
+                    rowArray.push(tileId);
                 }
                 
-                rowTilesArr.forEach(id => {
-                    // Cyclic alternating color mapping for kids
-                    let colorIndex = (id % 5) + 1;
-                    let decorativeStyleClass = `tile-c${colorIndex}`;
-                    let customIconTag = "";
+                rowArray.forEach(id => {
+                    let styleClass = tileColors[id % 5];
+                    let iconOverlay = "";
                     
-                    if (boardPortalsMap[id]) {
-                        if (boardPortalsMap[id].type === "ladder") {
-                            decorativeStyleClass = "ladder-tile_frame text-emerald-900 font-black scale-[0.98]";
-                            customIconTag = "🪜";
+                    if (fixedPortalsMap[id]) {
+                        if (fixedPortalsMap[id].type === "ladder") {
+                            styleClass = "bg-emerald-100 border-4 border-dashed border-emerald-600 text-emerald-900";
+                            iconOverlay = "🪜";
                         } else {
-                            decorativeStyleClass = "snake-tile_frame text-rose-900 font-black scale-[0.98]";
-                            customIconTag = "🐍";
+                            styleClass = "bg-rose-100 border-4 border-dashed border-rose-600 text-rose-900";
+                            iconOverlay = "🐍";
                         }
                     } else if (id === 100) {
-                        decorativeStyleClass = "bg-gradient-to-br from-yellow-400 to-amber-500 text-stone-900 font-black border-4 border-yellow-200 animate-pulse";
-                        customIconTag = "🏆";
+                        styleClass = "bg-gradient-to-tr from-yellow-400 to-amber-500 text-stone-900 border-4 border-yellow-200 animate-pulse";
+                        iconOverlay = "🏆";
                     }
 
                     grid.innerHTML += `
-                        <div id="tile-${id}" class="board-cell flex flex-col justify-between p-1.5 rounded-xl border-2 border-white/60 ${decorativeStyleClass}">
-                            <span class="leading-none text-[12px] sm:text-[14px] font-black">${id}</span>
-                            <span class="text-sm sm:text-base self-end leading-none">${customIconTag}</span>
+                        <div id="tile-${id}" class="board-cell flex flex-col justify-between p-1 rounded border border-white/40 ${styleClass}">
+                            <span>${id}</span>
+                            <span class="text-sm self-end">${iconOverlay}</span>
                         </div>
                     `;
                 });
             }
-            shuffleLocalCurriculumDeck();
-        }
-
-        function shuffleLocalCurriculumDeck() {
-            randomizedActiveDeck = [...masterChapterCurriculumDeck].sort(() => Math.random() - 0.5);
         }
 
         function syncDashboardStatsUI() {
@@ -364,216 +291,205 @@
             document.getElementById('heartsHealthField').innerText = "❤️".repeat(totalRemainingLives);
         }
 
-        function repositionPlayerTokenPositionUI(shouldScrollIntoView) {
+        function repositionTokenOnGrid(scrollToTarget) {
             const targetCell = document.getElementById(`tile-${playerPosition}`);
             const token = document.getElementById('playerToken');
             if (targetCell && token) {
-                token.style.left = `${targetCell.offsetLeft + (targetCell.offsetWidth * 0.08)}px`;
-                token.style.top = `${targetCell.offsetTop + (targetCell.offsetHeight * 0.08)}px`;
+                token.style.left = `${targetCell.offsetLeft + (targetCell.offsetWidth * 0.05)}px`;
+                token.style.top = `${targetCell.offsetTop + (targetCell.offsetHeight * 0.05)}px`;
                 
-                if (shouldScrollIntoView) {
+                if (scrollToTarget) {
                     targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         }
 
-        function executeDiceRollTurn() {
+        /* FIX: SYNCED DICE AND STEPS CODE CHAIN MECHANISM */
+        function executeDiceRollSequence() {
             if (isDiceLocked) return;
             isDiceLocked = true;
 
-            const rollOutputValue = Math.floor(Math.random() * 6) + 1;
-            const diceFaceSymbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
-            const diceLabelText = ["NUMBER 1", "NUMBER 2", "NUMBER 3", "NUMBER 4", "NUMBER 5", "NUMBER 6"];
+            const rolledNum = Math.floor(Math.random() * 6) + 1;
+            const diceFaces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
             
-            // Activate Jumbo Dice Flash Overlay Screen
-            document.getElementById('diceFlashValue').innerText = diceFaceSymbols[rollOutputValue - 1];
-            document.getElementById('diceFlashNum').innerText = diceLabelText[rollOutputValue - 1] + "! 🎲";
-            const flashOverlay = document.getElementById('diceFlashOverlay');
-            flashOverlay.classList.remove('hidden');
+            // Flash Number clearly on screen for child verification
+            document.getElementById('diceFlashValue').innerText = diceFaces[rolledNum - 1];
+            document.getElementById('diceFlashNum').innerText = "NUMBER " + rolledNum + "!";
+            const overlay = document.getElementById('diceFlashOverlay');
+            overlay.classList.remove('hidden');
 
-            // Hold display frame to let student register the number clearly
             setTimeout(() => {
-                flashOverlay.classList.add('hidden');
-                document.getElementById('diceDisplay').innerText = diceFaceSymbols[rollOutputValue - 1];
+                overlay.classList.add('hidden');
+                document.getElementById('diceDisplay').innerText = diceFaces[rolledNum - 1];
                 
-                let stepsMade = 0;
-                let timelineTicker = setInterval(() => {
-                    if (stepsMade < rollOutputValue && playerPosition < 100) {
+                let stepsTaken = 0;
+                let stepTimer = setInterval(() => {
+                    if (stepsTaken < rolledNum && playerPosition < 100) {
                         playerPosition++;
-                        repositionPlayerTokenPositionUI(true); // Smoothly center token via auto scroll bar adjustments
+                        repositionTokenOnGrid(true); // Center scrollbar dynamically to trace path
                         document.getElementById('lblTile').innerText = playerPosition;
-                        stepsMade++;
+                        stepsTaken++;
                     } else {
-                        clearInterval(timelineTicker);
-                        evaluateTargetLandingRules();
+                        clearInterval(stepTimer);
+                        processLandingTileEvent();
                     }
-                }, 280);
-            }, 1800);
+                }, 300); // Clean mechanical sync movement delay
+            }, 1400); // Verification Flash hold duration
         }
 
-        function evaluateTargetLandingRules() {
+        /* FIX: SEQUENTIAL QUESTION SELECTION ALGORITHM WITHOUT DUPLICATION REPEATS */
+        function getNextUnusedQuestion() {
+            if (exhaustedQuestionQueue.length === 0) {
+                // Refill and reshuffle when all 12 items have been served
+                exhaustedQuestionQueue = [...cleanCurriculumMasterPool].sort(() => Math.random() - 0.5);
+            }
+            return exhaustedQuestionQueue.pop();
+        }
+
+        function processLandingTileEvent() {
             if (playerPosition >= 100) {
-                triggerFinalVictoryScreen(true);
+                triggerFinalGameEnding(true);
                 return;
             }
 
-            let activePortal = boardPortalsMap[playerPosition];
-            let targetQuestionObj;
-
-            if (activePortal) {
-                targetQuestionObj = randomizedActiveDeck.find(q => q.type === activePortal.type) || randomizedActiveDeck[0];
-            } else {
-                targetQuestionObj = randomizedActiveDeck.find(q => q.type === "normal") || randomizedActiveDeck[0];
-            }
-
-            presentQuestionModalWindow(targetQuestionObj, activePortal);
+            const portal = fixedPortalsMap[playerPosition];
+            const currentQuestion = getNextUnusedQuestion();
+            
+            triggerQuestionModalWindow(currentQuestion, portal);
         }
 
-        function presentQuestionModalWindow(questionObj, portalConfig) {
+        function triggerQuestionModalWindow(questionObj, portalObj) {
             const modal = document.getElementById('questionModal');
             const badge = document.getElementById('modalBadge');
-            const container = document.getElementById('modalCardBody');
-
-            container.classList.remove('vibrate-shake-animation');
             document.getElementById('modalHintDrawer').classList.add('hidden');
             modal.classList.remove('hidden');
 
-            if (portalConfig) {
-                if (portalConfig.type === "ladder") {
-                    badge.innerText = "🪜 LADDER BOOST: " + portalConfig.label;
-                    badge.className = "text-xs font-black uppercase tracking-wider px-5 py-2 rounded-full bg-emerald-500 text-white";
+            if (portalObj) {
+                if (portalObj.type === "ladder") {
+                    badge.innerText = "🪜 LADDER SHORTCUT OPPORTUNITY";
+                    badge.className = "text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full bg-green-500 text-white";
                 } else {
-                    badge.innerText = "🐍 SNAKE WARNING: " + portalConfig.label;
-                    badge.className = "text-xs font-black uppercase tracking-wider px-5 py-2 rounded-full bg-rose-500 text-white";
+                    badge.innerText = "🐍 SNAKE ZONE CHALLENGE";
+                    badge.className = "text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full bg-red-500 text-white";
                 }
             } else {
                 badge.innerText = "⭐ WILDLIFE STEPPING TILE";
-                badge.className = "text-xs font-black uppercase tracking-wider px-5 py-2 rounded-full bg-indigo-100 text-indigo-800";
+                badge.className = "text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full bg-blue-500 text-white";
             }
 
             document.getElementById('modalQuestionText').innerText = questionObj.q;
 
-            const choicesArr = [...questionObj.a];
             const optionsGrid = document.getElementById('modalOptionsGrid');
             optionsGrid.innerHTML = '';
 
-            // Render highly clickable child-friendly jumbo answer cards
-            choicesArr.forEach(choiceText => {
+            questionObj.a.forEach(opt => {
                 optionsGrid.innerHTML += `
-                    <button onclick="evaluateSelectedOptionChoice('${choiceText.replace(/'/g, "\\'")}', '${questionObj.c.replace(/'/g, "\\'")}', '${questionObj.h.replace(/'/g, "\\'")}')" 
-                        class="w-full text-center p-4.5 border-4 border-stone-200 bg-stone-50 hover:bg-emerald-100 hover:border-emerald-400 rounded-2xl text-base sm:text-lg font-black transition-all text-stone-800 cursor-pointer active:scale-[0.98] shadow-sm">
-                        ${choiceText}
+                    <button onclick="checkSelectedChoiceAnswer('${opt.replace(/'/g, "\\'")}', '${questionObj.c.replace(/'/g, "\\'")}', '${questionObj.h.replace(/'/g, "\\Recursive")}')"
+                        class="w-full p-4 border-4 border-stone-200 bg-stone-50 hover:bg-yellow-100 hover:border-yellow-400 rounded-xl text-base font-black transition-all cursor-pointer text-stone-800">
+                        ${opt}
                     </button>
                 `;
             });
         }
 
-        function evaluateSelectedOptionChoice(selectedText, correctText, diagnosticHint) {
-            const isAnswerCorrect = (selectedText === correctText);
-            const activePortal = boardPortalsMap[playerPosition];
+        function checkSelectedChoiceAnswer(selected, correct, helpText) {
+            const isCorrect = (selected === correct);
+            const portal = fixedPortalsMap[playerPosition];
 
-            if (isAnswerCorrect) {
+            if (isCorrect) {
                 document.getElementById('audioCorrect').play().catch(() => {});
                 totalScoreCount += 20;
-                
-                try { confetti({ particleCount: 20, spread: 50, origin: { y: 0.65 } }); } catch(e){}
+                try { confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } }); } catch(e){}
 
-                if (activePortal && activePortal.type === "ladder") {
-                    playerPosition = activePortal.target; // Perfectly route player piece along the designated shortcut coordinates
-                    logStatus(`✨ Amazing job! You climbed straight up into Tile ${playerPosition}!`);
+                /* FIX: LADDERS CLIMB PERFECT TO DESTINATION SQUARES UPON CORRECT ANSWERS */
+                if (portal && portal.type === "ladder") {
+                    playerPosition = portal.target;
+                    logStatus(`🪜 Brilliant! ${portal.msg} Climbed to Tile ${playerPosition}`);
                 } else {
-                    logStatus("✨ Terrific answer! Your position is safe on this tile.");
+                    logStatus("✨ Correct answer! Your coin is safe on this safari square.");
                 }
 
-                persistSessionStateToStorage(false);
+                saveGameStateToLocalStorage();
                 setTimeout(() => {
                     document.getElementById('questionModal').classList.add('hidden');
-                    repositionPlayerTokenPositionUI(true);
+                    repositionTokenOnGrid(true);
                     syncDashboardStatsUI();
                     isDiceLocked = false;
                 }, 800);
-
             } else {
                 document.getElementById('audioWrong').play().catch(() => {});
-                if (navigator.vibrate) navigator.vibrate(250);
-
-                // Instantly trigger the physics-safe vibrating animation
-                const container = document.getElementById('modalCardBody');
-                container.classList.add('vibrate-shake-animation');
-                setTimeout(() => container.classList.remove('vibrate-shake-animation'), 460);
+                document.getElementById('modalCardBody').classList.add('vibrate-error');
+                setTimeout(() => document.getElementById('modalCardBody').classList.remove('vibrate-error'), 400);
 
                 totalRemainingLives--;
                 syncDashboardStatsUI();
 
-                if (activePortal && activePortal.type === "snake") {
-                    playerPosition = activePortal.target; // Perfectly drop player down to bottom matrix portal
-                    logStatus(`❌ Wrong answer! Slid down the snake to Tile ${playerPosition}!`);
+                /* FIX: SNAKES SLIDE PERFECT TO LOWER DESTINATION SQUARES UPON WRONG ANSWERS */
+                if (portal && portal.type === "snake") {
+                    playerPosition = portal.target;
+                    logStatus(`🐍 Oops! ${portal.msg} Slid down to Tile ${playerPosition}`);
                 } else {
-                    logStatus("❌ Oops! Look at the guidance helper notes below.");
+                    logStatus("❌ Incorrect answer! Check out the safari field guide facts.");
                 }
 
-                document.getElementById('modalHintText').innerText = diagnosticHint;
+                document.getElementById('modalHintDrawer').innerText = "📖 FIELD GUIDE FACT: " + helpText;
                 document.getElementById('modalHintDrawer').classList.remove('hidden');
 
-                persistSessionStateToStorage(false);
+                saveGameStateToLocalStorage();
 
                 if (totalRemainingLives <= 0) {
                     setTimeout(() => {
                         document.getElementById('questionModal').classList.add('hidden');
-                        triggerFinalVictoryScreen(false);
-                    }, 3500);
+                        triggerFinalGameEnding(false);
+                    }, 3000);
                     return;
                 }
 
                 setTimeout(() => {
                     document.getElementById('questionModal').classList.add('hidden');
-                    repositionPlayerTokenPositionUI(true);
+                    repositionTokenOnGrid(true);
                     isDiceLocked = false;
-                }, 3800);
+                }, 3200);
             }
-            shuffleLocalCurriculumDeck();
         }
 
-        function persistSessionStateToStorage(explicitUserClick) {
-            localStorage.setItem('ecoSafari_tile', playerPosition);
-            localStorage.setItem('ecoSafari_score', totalScoreCount);
-            localStorage.setItem('ecoSafari_lives', totalRemainingLives);
-            if (explicitUserClick) {
-                logStatus("💾 Progress checkpoint saved successfully!");
-            }
+        function saveGameStateToLocalStorage() {
+            localStorage.setItem('ecoSafari_v2_tile', playerPosition);
+            localStorage.setItem('ecoSafari_v2_score', totalScoreCount);
+            localStorage.setItem('ecoSafari_v2_lives', totalRemainingLives);
         }
 
         function triggerFullGameReset() {
             localStorage.clear();
             document.getElementById('screenGameOver').classList.add('hidden');
             document.getElementById('questionModal').classList.add('hidden');
-            launchFreshGameEngine();
+            launchBrandNewSafariSession();
         }
 
-        function triggerFinalVictoryScreen(isSuccessfulWin) {
+        function triggerFinalGameEnding(won) {
             document.getElementById('screenGameOver').classList.remove('hidden');
             document.getElementById('finalScoreDisplay').innerText = totalScoreCount;
 
-            if (isSuccessfulWin) {
+            if (won) {
                 document.getElementById('audioClaps').play().catch(() => {});
-                document.getElementById('gameOverTitle').innerText = "🏆 SAFARI WINNER!";
-                document.getElementById('gameOverDesc').innerText = "Fantastic job! You navigated all squares successfully and reached the victory line at Tile 100!";
+                document.getElementById('gameOverTitle').innerText = "🏆 SAFARI CHAMPION!";
+                document.getElementById('gameOverDesc').innerText = "Incredible job! You successfully completed your trek across all 100 tiles!";
                 
-                let timeoutEnd = Date.now() + (4 * 1000);
-                (function loopFrame() {
-                    confetti({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0, y: 0.85 } });
-                    confetti({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1, y: 0.85 } });
-                    if (Date.now() < timeoutEnd) requestAnimationFrame(loopFrame);
+                let end = Date.now() + (3 * 1000);
+                (function frame() {
+                    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+                    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                    if (Date.now() < end) requestAnimationFrame(frame);
                 }());
             } else {
                 document.getElementById('gameOverTitle').innerText = "💔 OUT OF LIVES";
-                document.getElementById('gameOverDesc').innerText = "You ran out of health hearts. Let's restart a fresh safari tour to try again!";
+                document.getElementById('gameOverDesc').innerText = "Your health hearts ran out. Let's start a fresh safari tour to reinforce our natural science facts!";
             }
             localStorage.clear();
         }
 
-        function logStatus(msg) {
-            document.getElementById('statusAlertField').innerText = msg;
+        function logStatus(txt) {
+            document.getElementById('statusAlertField').innerText = txt;
         }
     </script>
 </body>
