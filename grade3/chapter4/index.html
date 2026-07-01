@@ -3,130 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Basket Rush! - EVS Grade 3</title>
+    <title>Basket Rush!</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #fef08a 0%, #bbf7d0 50%, #93c5fd 100%);
+            background: radial-gradient(circle at top left, #fff9e6 0%, #e8f5e9 40%, #e3f2fd 100%);
             -webkit-tap-highlight-color: transparent;
         }
         h1, h2, h3, button, .font-fun { font-family: 'Fredoka', cursive; }
         
+        .premium-blur {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
         .shelf-item {
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         .shelf-item:hover {
-            transform: scale(1.06) translateY(-4px);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
         }
         
+        @keyframes basketWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            20%, 60% { transform: rotate(4deg); }
+            40%, 80% { transform: rotate(-4deg); }
+        }
+        .success-wiggle {
+            animation: basketWiggle 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
         @keyframes itemDropToBasket {
             0% { transform: scale(1) translateY(0); opacity: 1; }
-            50% { transform: scale(0.6) translateY(120px); opacity: 0.6; }
-            100% { transform: scale(0) translateY(280px); opacity: 0; }
+            40% { transform: scale(0.8) translateY(60px); opacity: 0.8; }
+            100% { transform: scale(0.1) translateY(320px); opacity: 0; }
         }
         .animate-drop-basket {
-            animation: itemDropToBasket 0.6s forwards cubic-bezier(0.55, 0.055, 0.675, 0.19);
+            animation: itemDropToBasket 0.7s forwards cubic-bezier(0.6, -0.28, 0.735, 0.045);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-3 select-none overflow-x-hidden">
+<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-6 select-none overflow-x-hidden">
 
     <audio id="audioBg" src="./assets/playfulsong.mp3" loop></audio>
     <audio id="audioCorrect" src="./assets/correct.mp3"></audio>
     <audio id="audioWrong" src="./assets/wrong.mp3"></audio>
     <audio id="audioClaps" src="./assets/freesound_community-claps-44774.mp3"></audio>
 
-    <div id="screenSplash" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 transition-opacity duration-700">
-        <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-xs object-contain animate-bounce">
+    <div id="screenSplash" class="fixed inset-0 bg-[#fbfbfd] flex flex-col items-center justify-center z-50 transition-opacity duration-700">
+        <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-xs object-contain pointer-events-none select-none">
     </div>
 
-    <div id="screenTitle" class="hidden fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-emerald-500 flex flex-col items-center justify-center p-6 z-40 text-center text-white">
-        <div class="space-y-6 max-w-md bg-white/20 backdrop-blur-md p-8 rounded-[40px] border-4 border-white shadow-2xl">
-            <h1 class="text-5xl font-black drop-shadow-lg tracking-wider transform -rotate-3 text-yellow-100">BASKET RUSH! 🧺</h1>
-            <p class="text-base font-bold uppercase tracking-wider text-emerald-900">Chapter 4: The Food We Eat</p>
-            <button onclick="goToInstructionsScreen()" class="w-full bg-yellow-300 hover:bg-yellow-400 text-slate-800 text-2xl font-black px-8 py-4 rounded-2xl shadow-xl transform hover:scale-105 active:scale-95 transition-all tracking-wide cursor-pointer">
+    <div id="screenTitle" class="hidden fixed inset-0 bg-gradient-to-br from-[#ffd54f] via-[#ff7043] to-[#26a69a] flex flex-col items-center justify-center p-6 z-40 text-center text-white">
+        <div class="space-y-8 max-w-md bg-white/10 backdrop-blur-xl p-10 rounded-[48px] border border-white/20 shadow-[0_32px_64px_-15px_rgba(0,0,0,0.3)]">
+            <h1 class="text-6xl font-black tracking-tight drop-shadow-md text-yellow-50">BASKET RUSH!</h1>
+            <p class="text-lg font-medium text-white/90 leading-relaxed">Collect healthy ingredients, solve kitchen puzzles, and load your delivery basket!</p>
+            <button onclick="goToInstructionsScreen()" class="w-full bg-white hover:bg-yellow-50 text-orange-600 text-xl font-bold px-8 py-4 rounded-2xl shadow-xl transform hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer tracking-wide">
                 START ▶
             </button>
         </div>
     </div>
 
-    <div id="screenInstructions" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-30">
-        <div class="bg-white border-4 border-slate-800 rounded-[36px] w-full max-w-md p-6 shadow-2xl space-y-4 text-slate-800">
-            <h2 class="text-3xl font-black text-center text-orange-500 pb-2 border-b-4 border-dashed border-slate-100">How To Play 📜</h2>
-            <ul class="space-y-3 text-sm font-bold leading-relaxed">
-                <li class="flex items-start gap-2.5 bg-rose-50 p-3 rounded-xl"><span class="text-lg">🎯</span> Look at the Target Recipe Goal at the top of the screen.</li>
-                <li class="flex items-start gap-2.5 bg-blue-50 p-3 rounded-xl"><span class="text-lg">🛒</span> Click the food item card below that matches the goal!</li>
-                <li class="flex items-start gap-2.5 bg-emerald-50 p-3 rounded-xl"><span class="text-lg">❓</span> Answer the simple question correctly to get <span class="text-emerald-600 font-extrabold">+10 Points</span>!</li>
-                <li class="flex items-start gap-2.5 bg-amber-50 p-3 rounded-xl"><span class="text-lg">🏆</span> Collect all 12 food items to win the game!</li>
-            </ul>
-            <button onclick="launchMainGameEngine()" class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white text-xl font-black px-8 py-4 rounded-2xl shadow-md active:scale-95 transition-transform cursor-pointer">
+    <div id="screenInstructions" class="hidden fixed inset-0 bg-slate-950/40 backdrop-blur-xl flex items-center justify-center p-4 z-30">
+        <div class="bg-white/90 backdrop-blur-md border border-white/40 rounded-[40px] w-full max-w-md p-8 shadow-[0_32px_64px_-15px_rgba(0,0,0,0.25)] space-y-6 text-slate-800">
+            <h2 class="text-3xl font-black text-center text-slate-900 tracking-tight">How To Play</h2>
+            <div class="space-y-4 text-sm font-semibold text-slate-600 leading-relaxed">
+                <div class="flex items-center gap-4 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-100">
+                    <div class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center font-bold shadow-sm">1</div>
+                    <p>Check the target recipe goal displayed at the top.</p>
+                </div>
+                <div class="flex items-center gap-4 bg-sky-50/60 p-3.5 rounded-2xl border border-sky-100">
+                    <div class="w-8 h-8 rounded-full bg-sky-400 text-white flex items-center justify-center font-bold shadow-sm">2</div>
+                    <p>Find and click the matching food item from the row shelf.</p>
+                </div>
+                <div class="flex items-center gap-4 bg-emerald-50/60 p-3.5 rounded-2xl border border-emerald-100">
+                    <div class="w-8 h-8 rounded-full bg-emerald-400 text-white flex items-center justify-center font-bold shadow-sm">3</div>
+                    <p>Answer the pop-up question correctly to load your basket.</p>
+                </div>
+            </div>
+            <button onclick="launchMainGameEngine()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-lg font-bold px-8 py-4 rounded-2xl shadow-lg shadow-teal-500/20 active:scale-95 transition-transform cursor-pointer">
                 PLAY GAME 🎮
             </button>
         </div>
     </div>
 
-    <div class="w-full max-w-4xl bg-white/90 border-4 border-slate-800 rounded-3xl p-4 shadow-xl flex justify-between items-center">
-        <h2 class="text-2xl font-black text-slate-800 tracking-tight">BASKET RUSH! 🧺</h2>
-        <div class="bg-indigo-600 text-white font-black text-sm px-5 py-1.5 rounded-full shadow">
-            SCORE: <span id="scoreTrackerField">0</span> / 120 PTS
+    <div class="w-full max-w-4xl premium-blur border border-white/60 rounded-3xl p-4 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] flex justify-between items-center z-10">
+        <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">BASKET RUSH!</h2>
+        <div class="bg-slate-900 text-white text-xs font-bold uppercase tracking-wider px-5 py-2 rounded-full shadow-md">
+            Score: <span id="scoreTrackerField" class="font-black text-amber-400">0</span> / 120
         </div>
     </div>
 
-    <div class="w-full max-w-4xl bg-white/60 border-4 border-slate-800 rounded-[40px] p-6 shadow-xl my-4 flex flex-col items-center justify-between gap-6 min-h-[460px] relative">
+    <div class="w-full max-w-4xl bg-white/40 border border-white/80 rounded-[48px] p-6 md:p-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] my-4 flex flex-col items-center justify-between gap-8 min-h-[490px] relative">
         
-        <div class="w-full bg-gradient-to-r from-amber-400 to-orange-400 border-4 border-slate-800 rounded-2xl p-4 text-center text-slate-900 shadow-md">
-            <span class="text-[10px] font-black uppercase tracking-widest bg-white/40 px-3 py-0.5 rounded-full">Target Recipe Goal</span>
-            <h3 id="recipeTargetPrompt" class="text-lg sm:text-xl font-black mt-1 text-white drop-shadow">Loading Next Target...</h3>
+        <div class="w-full bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-5 text-center shadow-lg relative overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent)]"></div>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/5">Recipe Target</span>
+            <h3 id="recipeTargetPrompt" class="text-xl sm:text-2xl font-bold mt-2 text-white tracking-wide">Loading Level...</h3>
         </div>
 
-        <div id="shelfItemsGrid" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 px-2"></div>
+        <div id="shelfItemsGrid" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-5 px-1"></div>
 
-        <div class="w-full max-w-xs bg-amber-800 border-4 border-slate-900 rounded-b-3xl rounded-t-xl p-3 text-center text-white shadow-2xl relative flex flex-col items-center">
-            <div class="absolute -top-4 w-11/12 h-6 border-4 border-slate-900 bg-amber-700 rounded-full shadow-inner"></div>
-            <span class="text-2xl mt-1">🧺</span>
-            <span class="text-xs font-black tracking-widest uppercase text-amber-200">Your Basket</span>
-            <div id="basketItemsBadge" class="text-[10px] bg-black/20 px-3 py-0.5 rounded-full font-bold mt-1">0 / 12 Packed</div>
+        <div id="basketWrapper" class="w-full max-w-xs bg-gradient-to-b from-amber-800 to-amber-900 rounded-2xl p-4 text-center text-white shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] relative flex flex-col items-center border border-amber-700/50">
+            <div class="absolute -top-3 w-[94%] h-5 bg-amber-700 rounded-full border-2 border-amber-900/40 shadow-inner"></div>
+            <span class="text-xs font-bold tracking-widest uppercase text-amber-200/90 mt-2">Your Basket</span>
+            <div id="basketItemsBadge" class="text-[10px] bg-black/20 px-3 py-0.5 rounded-full font-bold mt-1 text-amber-100">0 / 12 Loaded</div>
         </div>
     </div>
 
-    <div id="statusAlertField" class="w-full max-w-4xl text-center text-xs font-black text-slate-600 uppercase tracking-wider py-2.5 bg-white/80 rounded-2xl border border-slate-300">
-        Click a matching food item from the row above!
+    <div id="statusAlertField" class="w-full max-w-4xl text-center text-xs font-medium text-slate-500 py-3 bg-white/50 border border-white rounded-2xl shadow-sm tracking-wide transition-all duration-300">
+        Select the item from the shelf that matches the target.
     </div>
 
-    <div id="triviaModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div id="modalContainerFrame" class="bg-white border-4 border-slate-900 rounded-[36px] w-full max-w-md p-6 shadow-2xl space-y-4 text-slate-800">
-            <div class="text-center">
-                <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-black/10">Quiz Time</span>
-                <h3 id="modalHeaderTitle" class="text-2xl font-black mt-2">Question</h3>
+    <div id="triviaModal" class="hidden fixed inset-0 bg-slate-950/30 backdrop-blur-xl flex items-center justify-center p-4 z-50">
+        <div id="modalContainerFrame" class="bg-white border border-slate-100 rounded-[40px] w-full max-w-md p-6 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] space-y-5 text-slate-800 transition-all duration-300 transform scale-100">
+            <div class="text-center space-y-1">
+                <span class="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest bg-slate-100 text-slate-500 border border-slate-200/60">Verification Question</span>
+                <h3 id="modalHeaderTitle" class="text-2xl font-black text-slate-900 tracking-tight">Food Item</h3>
             </div>
-            <div id="modalQuestionText" class="bg-white/90 border-2 border-slate-100 rounded-2xl p-4 text-center text-sm font-bold leading-relaxed shadow-inner font-fun"></div>
-            <div id="modalOptionsBox" class="flex flex-col gap-2"></div>
-            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
-                <span class="text-[10px] font-black text-indigo-700 block uppercase tracking-wider">💡 Helpful Hint:</span>
-                <p id="modalHintText" class="text-xs font-medium text-slate-600 mt-0.5"></p>
+            <div id="modalQuestionText" class="bg-slate-50 rounded-2xl p-5 text-center text-sm font-semibold text-slate-700 leading-relaxed border border-slate-100"></div>
+            <div id="modalOptionsBox" class="flex flex-col gap-2.5"></div>
+            <div class="bg-amber-50/80 border border-amber-100/70 rounded-2xl p-4">
+                <span class="text-[10px] font-bold text-amber-800 block uppercase tracking-wider">Helpful Tip</span>
+                <p id="modalHintText" class="text-xs font-medium text-slate-600 mt-1 leading-relaxed"></p>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        // IMMUTABLE SIMPLIFIED 12-QUESTION BANK FOR GRADE 3
+        // MASTER CURATED 12 QUESTION DECK (TEXT EXCLUSIVE - PREMIUM UI)
         const original12CardCatalog = [
-            { id: 1, name: "Rice & Eggs", color: "bg-rose-500", category: "Boiling", symbol: "🍲", q: "Rahul wants to make boiled eggs and soft rice for lunch. What does he need to cook them?", a: ["A very hot baking oven", "A pot of bubbling hot water", "A frying pan filled with oil"], c: "A pot of bubbling hot water", h: "Rice swims in a deep pot of water on the stove until it gets soft!" },
-            { id: 2, name: "Soft Idlis", color: "bg-rose-500", category: "Steaming", symbol: "💨", q: "Tina's grandmother makes soft Idlis and Momos with zero oil. How are these healthy snacks cooked?", a: ["Using hot steam from boiling water", "Deep-frying them in hot ghee", "Roasting them over black coals"], c: "Using hot steam from boiling water", h: "These foods cook using only the hot cloud of steam rising inside the pot!" },
-            { id: 3, name: "Crispy Samosas", color: "bg-rose-500", category: "Frying", symbol: "🍳", q: "Rohan loves crunchy, golden samosas and puris. How does the chef cook these crispy treats?", a: ["By soaking them in cold water", "By dropping them in very hot oil", "By leaving them in the cold air"], c: "By dropping them in very hot oil", h: "To make a snack super crunchy on the outside, we always fry it in hot oil!" },
-            { id: 4, name: "Wheat Flour", color: "bg-blue-500", category: "Punjab State Grains", symbol: "🌾", q: "Simran lives in Punjab where farmers grow lots of golden wheat. What daily food does her family make with it?", a: ["Soft, round Rotis and Chapatis", "Sweet coconut pudding", "Plain white rice balls"], c: "Soft, round Rotis and Chapatis", h: "Wheat grains are ground into flour to roll out soft, warm rotis!" },
-            { id: 5, name: "Rice & Fish Curry", color: "bg-blue-500", category: "Coastal Foods", symbol: "🐟", q: "Kabir is visiting Kerala right next to the big ocean. What local meal will he see people eating the most?", a: ["Dry millet bajra rotis", "Fresh Rice and Fish curry", "Sweet bakery biscuits"], c: "Fresh Rice and Fish curry", h: "Places near the sea have lots of water for rice fields, and fishermen catch fresh fish every day!" },
-            { id: 6, name: "Jowar & Bajra", color: "bg-blue-500", category: "Desert Grains", symbol: "🏜️", q: "Aarav lives in a warm village in Rajasthan where it rarely rains. What grains does his family grow instead of rice?", a: ["Crisp red apples", "Jowar and Bajra millets", "Sweet pineapples"], c: "Jowar and Bajra millets", h: "These strong grains do not need much water to grow under a hot desert sun!" },
-            { id: 7, name: "Mountain Apples", color: "bg-emerald-500", category: "Mountain Fruits", symbol: "🍎", q: "Meera is traveling up into the cold hills of Himachal Pradesh. Which fruit grows on trees all around her?", a: ["Crisp red apples", "Bright yellow bananas", "Brown tropical coconuts"], c: "Crisp red apples", h: "This crunchy, juicy fruit loves cold weather and mountain air!" },
-            { id: 8, name: "Golden Apricots", color: "bg-emerald-500", category: "Cold Desert Treats", symbol: "🍑", q: "Tenzin lives in the cold, rocky desert of Ladakh. What is the name of the sweet, orange fruit grown by local farmers?", a: ["A sweet mountain Apricot", "A giant green watermelon", "A yellow tropical mango"], c: "A sweet mountain Apricot", h: "This is a small fruit with soft skin that thrives in the high, cold mountains!" },
-            { id: 9, name: "Fresh Coconuts", color: "bg-emerald-500", category: "Coastal Trees", symbol: "🌴", q: "You are walking on a sandy beach in sunny Goa. What giant trees do you see holding green nuts filled with sweet water?", a: ["Small strawberry bushes", "Tall Coconut palm trees", "Green wheat plants"], c: "Tall Coconut palm trees", h: "Look way up high! These large nuts grow right near the ocean waves." },
-            { id: 10, name: "The Metal Kadahi", color: "bg-amber-500", category: "Kitchen Tools", symbol: "🥘", q: "Mother wants to fry up some hot pakoras for tea time. Which deep, curved metal pan will she use?", a: ["A deep, round Kadahi", "A flat baking tray", "A plastic soup bowl"], c: "A deep, round Kadahi", h: "This round pan holds hot oil safely inside so snacks can fry beautifully." },
-            { id: 11, name: "The Solar Cooker", color: "bg-amber-500", category: "Sun Powered Tools", symbol: "☀️", q: "Sana's school wants to cook lunch outside using clean energy without using gas, coal, or wood. What box should they use?", a: ["An electric microwave oven", "A mirror Solar Cooker box", "A clay tandoor oven"], c: "A mirror Solar Cooker box", h: "This clever box uses shiny mirrors to catch the hot rays of the sun to heat food for free!" },
-            { id: 12, name: "Bright Haldi", color: "bg-amber-500", category: "Healthy Spices", symbol: "🧪", q: "When Arjun gets a scrape or a cold, his grandfather mixes a bright yellow spice into his warm milk. What is this spice?", a: ["Haldi (Turmeric powder)", "Spicy Black Pepper", "Sweet white sugar"], c: "Haldi (Turmeric powder)", h: "This yellow powder is found in every kitchen and helps our bodies stay strong and heal!" }
+            { id: 1, name: "Rice and Eggs", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Boiling", q: "Rahul wants to make boiled eggs and soft rice for lunch. What does he need to cook them?", a: ["A very hot baking oven", "A pot of bubbling hot water", "A frying pan filled with oil"], c: "A pot of bubbling hot water", h: "Rice swims in a deep pot of water on the stove until it gets soft!" },
+            { id: 2, name: "Soft Idlis", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Steaming", q: "Tina's grandmother makes soft Idlis and Momos with zero oil. How are these healthy snacks cooked?", a: ["Using hot steam from boiling water", "Deep-frying them in hot ghee", "Roasting them over black coals"], c: "Using hot steam from boiling water", h: "These foods cook using only the hot cloud of steam rising inside the pot!" },
+            { id: 3, name: "Crispy Samosas", color: "from-rose-400 to-rose-500", shadow: "shadow-rose-500/20", category: "Frying", q: "Rohan loves crunchy, golden samosas and puris. How does the chef cook these crispy treats?", a: ["By soaking them in cold water", "By dropping them in very hot oil", "By leaving them in the cold air"], c: "By dropping them in very hot oil", h: "To make a snack super crunchy on the outside, we always fry it in hot oil!" },
+            { id: 4, name: "Wheat Flour", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Punjab State Grains", q: "Simran lives in Punjab where farmers grow lots of golden wheat. What daily food does her family make with it?", a: ["Soft, round Rotis and Chapatis", "Sweet coconut pudding", "Plain white rice balls"], c: "Soft, round Rotis and Chapatis", h: "Wheat grains are ground into flour to roll out soft, warm rotis!" },
+            { id: 5, name: "Rice and Fish Curry", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Coastal Foods", q: "Kabir is visiting Kerala right next to the big ocean. What local meal will he see people eating the most?", a: ["Dry millet bajra rotis", "Fresh Rice and Fish curry", "Sweet bakery biscuits"], c: "Fresh Rice and Fish curry", h: "Places near the sea have lots of water for rice fields, and fishermen catch fresh fish every day!" },
+            { id: 6, name: "Jowar and Bajra", color: "from-blue-400 to-blue-500", shadow: "shadow-blue-500/20", category: "Desert Grains", q: "Aarav lives in a warm village in Rajasthan where it rarely rains. What grains does his family grow instead of rice?", a: ["Crisp red apples", "Jowar and Bajra millets", "Sweet pineapples"], c: "Jowar and Bajra millets", h: "These strong grains do not need much water to grow under a hot desert sun!" },
+            { id: 7, name: "Mountain Apples", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Mountain Fruits", q: "Meera is traveling up into the cold hills of Himachal Pradesh. Which fruit grows on trees all around her?", a: ["Crisp red apples", "Bright yellow bananas", "Brown tropical coconuts"], c: "Crisp red apples", h: "This crunchy, juicy fruit loves cold weather and mountain air!" },
+            { id: 8, name: "Golden Apricots", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Cold Desert Treats", q: "Tenzin lives in the cold, rocky desert of Ladakh. What is the name of the sweet, orange fruit grown by local farmers?", a: ["A sweet mountain Apricot", "A giant green watermelon", "A yellow tropical mango"], c: "A sweet mountain Apricot", h: "This is a small fruit with soft skin that thrives in the high, cold mountains!" },
+            { id: 9, name: "Fresh Coconuts", color: "from-emerald-400 to-emerald-500", shadow: "shadow-emerald-500/20", category: "Coastal Trees", q: "You are walking on a sandy beach in sunny Goa. What giant trees do you see holding green nuts filled with sweet water?", a: ["Small strawberry bushes", "Tall Coconut palm trees", "Green wheat plants"], c: "Tall Coconut palm trees", h: "Look way up high! These large nuts grow right near the ocean waves." },
+            { id: 10, name: "The Metal Kadahi", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Kitchen Tools", q: "Mother wants to fry up some hot pakoras for tea time. Which deep, curved metal pan will she use?", a: ["A deep, round Kadahi", "A flat baking tray", "A plastic soup bowl"], c: "A deep, round Kadahi", h: "This round pan holds hot oil safely inside so snacks can fry beautifully." },
+            { id: 11, name: "The Solar Cooker", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Sun Powered Tools", q: "Sana's school wants to cook lunch outside using clean energy without using gas, coal, or wood. What box should they use?", a: ["An electric microwave oven", "A mirror Solar Cooker box", "A clay tandoor oven"], c: "A mirror Solar Cooker box", h: "This clever box uses shiny mirrors to catch the hot rays of the sun to heat food for free!" },
+            { id: 12, name: "Bright Haldi", color: "from-amber-400 to-amber-500", shadow: "shadow-amber-500/20", category: "Healthy Spices", q: "When Arjun gets a scrape or a cold, his grandfather mixes a bright yellow spice into his warm milk. What is this spice?", a: ["Haldi (Turmeric powder)", "Spicy Black Pepper", "Sweet white sugar"], c: "Haldi (Turmeric powder)", h: "This yellow powder is found in every kitchen and helps our bodies stay strong and heal!" }
         ];
 
         let currentRecipeIndex = 0;
@@ -134,7 +158,7 @@
         let activeDisplayedItems = [];
         let currentlySelectedCardData = null;
 
-        // SPLASH SCREEN CONTROL ROUTING
+        // FIXED UNTOUCHED 5-SECOND INTRO DELAY CONTROLLER
         window.onload = function() {
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
@@ -164,14 +188,14 @@
             if (currentRecipeIndex >= original12CardCatalog.length) {
                 document.getElementById('audioClaps').play();
                 triggerGrandWinConfettiShower();
-                logActionAlert("🏆 Brilliant! You completed all recipes and filled your basket! 🌟");
+                logActionAlert("🏆 Flawless! You found every single match and packed your basket!");
                 setTimeout(() => { launchMainGameEngine(); }, 6000);
                 return;
             }
 
             const activeTargetItem = original12CardCatalog[currentRecipeIndex];
             document.getElementById('recipeTargetPrompt').innerText = `Find: "${activeTargetItem.category}" Item!`;
-            document.getElementById('basketItemsBadge').innerText = `${currentRecipeIndex} / 12 Packed`;
+            document.getElementById('basketItemsBadge').innerText = `${currentRecipeIndex} / 12 Loaded`;
 
             let incorrectPool = original12CardCatalog.filter(card => card.id !== activeTargetItem.id);
             incorrectPool.sort(() => Math.random() - 0.5);
@@ -184,10 +208,10 @@
 
             activeDisplayedItems.forEach((item, shelfIdx) => {
                 shelfRow.innerHTML += `
-                    <div id="shelf-card-${shelfIdx}" onclick="processShelfSelection(${shelfIdx})" class="shelf-item ${item.color} border-4 border-slate-800 rounded-3xl p-4 text-white shadow-lg cursor-pointer text-center flex flex-col justify-between items-center h-44">
-                        <span class="text-4xl my-auto drop-shadow-md">${item.symbol}</span>
-                        <h4 class="text-sm font-black tracking-wide uppercase leading-tight drop-shadow">${item.name}</h4>
-                        <span class="text-[9px] bg-black/10 px-3 py-0.5 rounded-full font-bold uppercase tracking-wider mt-1">${item.category}</span>
+                    <div id="shelf-card-${shelfIdx}" onclick="processShelfSelection(${shelfIdx})" class="shelf-item bg-gradient-to-br ${item.color} ${item.shadow} border border-white/30 rounded-3xl p-6 text-white shadow-xl cursor-pointer text-center flex flex-col justify-center items-center h-44 relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors"></div>
+                        <h4 class="text-2xl font-bold tracking-tight drop-shadow">${item.name}</h4>
+                        <span class="text-[10px] bg-black/15 px-3 py-1 rounded-full font-bold uppercase tracking-widest mt-3 border border-white/10">${item.category}</span>
                     </div>
                 `;
             });
@@ -199,14 +223,15 @@
 
             if (chosenItem.id !== activeTargetItem.id) {
                 document.getElementById('audioWrong').play();
-                logActionAlert(`❌ Oops! "${chosenItem.name}" is not the right item for our active target.`);
+                logActionAlert(`❌ That's not a match for "${activeTargetItem.category}". Take another look!`);
                 return;
             }
 
             currentlySelectedCardData = { item: chosenItem, elementId: `shelf-card-${idx}` };
 
+            // Apply target color theme to verification modal frame
             const frame = document.getElementById('modalContainerFrame');
-            frame.className = `w-full max-w-md p-6 shadow-2xl space-y-4 border-4 border-slate-900 rounded-[36px] ${chosenItem.color} text-white`;
+            frame.className = `bg-gradient-to-b from-white to-slate-50 border border-slate-200 rounded-[40px] w-full max-w-md p-6 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.25)] space-y-5 text-slate-800 transition-all duration-300`;
 
             document.getElementById('modalHeaderTitle').innerText = `${chosenItem.name}`;
             document.getElementById('modalQuestionText').innerText = chosenItem.q;
@@ -217,7 +242,7 @@
 
             chosenItem.a.forEach(opt => {
                 box.innerHTML += `
-                    <button onclick="evaluateBasketTriviaAnswer('${opt.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-yellow-100 p-3.5 rounded-2xl text-xs font-black text-slate-800 transition-transform active:scale-95 cursor-pointer font-fun shadow-md">
+                    <button onclick="evaluateBasketTriviaAnswer('${opt.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-slate-50 border border-slate-200/80 p-4 rounded-2xl text-xs font-bold text-slate-700 hover:text-slate-900 transition-all active:scale-[0.98] cursor-pointer font-fun shadow-sm hover:shadow-md">
                         ${opt}
                     </button>
                 `;
@@ -236,7 +261,13 @@
 
                 cumulativePointsScore += 10;
                 document.getElementById('scoreTrackerField').innerText = cumulativePointsScore;
-                logActionAlert(`✨ Awesome! "${data.name}" dropped into your basket! +10 Pts.`);
+                logActionAlert(`✨ Correct! ${data.name} loaded safely into the basket.`);
+
+                const basket = document.getElementById('basketWrapper');
+                if (basket) {
+                    basket.classList.add('success-wiggle');
+                    setTimeout(() => basket.classList.remove('success-wiggle'), 600);
+                }
 
                 const el = document.getElementById(currentlySelectedCardData.elementId);
                 if (el) { el.classList.add('animate-drop-basket'); }
@@ -244,10 +275,10 @@
                 setTimeout(() => {
                     currentRecipeIndex++;
                     loadNextRecipeRoundLevel();
-                }, 700);
+                }, 750);
             } else {
                 document.getElementById('audioWrong').play();
-                logActionAlert(`❌ Incorrect answer! The item fell off the basket. Let's try again!`);
+                logActionAlert("❌ That wasn't the right answer. The item fell off the shelf! Try again.");
             }
             currentlySelectedCardData = null;
         }
@@ -257,15 +288,15 @@
         }
 
         function triggerSingleItemBurstConfetti() {
-            confetti({ particleCount: 40, spread: 40, origin: { y: 0.75 } });
+            confetti({ particleCount: 30, spread: 45, origin: { y: 0.8 } });
         }
 
         function triggerGrandWinConfettiShower() {
             let duration = 4 * 1000;
             let end = Date.now() + duration;
             (function frame() {
-                confetti({ particleCount: 6, angle: 55, spread: 60, origin: { x: 0, y: 0.8 } });
-                confetti({ particleCount: 6, angle: 125, spread: 60, origin: { x: 1, y: 0.8 } });
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 0.85 } });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 0.85 } });
                 if (Date.now() < end) { requestAnimationFrame(frame); }
             }());
         }
