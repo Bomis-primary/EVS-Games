@@ -30,7 +30,7 @@
             background-color: #70c5ce;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-between: space-between;
         }
 
         @media (min-height: 821px) {
@@ -156,7 +156,7 @@
         
         let pipeArray = [];
         let cloudArray = [];
-        let confettiArray = []; // Container for active confetti particles
+        let confettiArray = [];
         let screenFlashTick = 0;
         let freezeFrameTimer = 0;
         
@@ -167,15 +167,14 @@
         let inputUpActive = false;
         let inputDownActive = false;
 
-        // Reduced bird and obstacle pace variables for a friendly student experience
         let avatarBird = {
             x: 75,
             y: 240,
             width: 38,
             height: 26,
-            speed: 3.5  // Slower movement handling rate (was 4.5)
+            speed: 3.5
         };
-        const gameScrollSpeed = 1.4; // Gentle scroll pace (was 2.0)
+        const gameScrollSpeed = 1.4; // Soft pace for students
 
         const questionBank = [
             { term: "Upstroke", prompt: "Identify the correct wing movement profile:", choices: ["Wings move upward and forward", "Wings move downward and backward"], answer: "Wings move upward and forward" },
@@ -197,7 +196,7 @@
             window.addEventListener('resize', autoResizeCanvasViewport);
             autoResizeCanvasViewport();
 
-            // SCREEN 1: Force Plain White Centered Logo Splash for exactly 5 seconds
+            // SCREEN 1: Plain Background Splash Screen displaying for 5 seconds
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
                 if(splash) {
@@ -284,7 +283,7 @@
                 concludeQuestEngine();
                 return;
             }
-            cloudArray = []; // Wipe arrays to secure index updates cleanly
+            cloudArray = []; // Wipe arrays clean to secure precise indexing paths
             cloudArray.push({
                 x: canvas.width + 60,
                 y: Math.floor(Math.random() * 150) + 160,
@@ -294,19 +293,18 @@
             });
         }
 
-        // Trigger particles engine for the correct answer burst celebration
         function spawnConfettiShower() {
             const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ff7849'];
-            for (let i = 0; i < 70; i++) {
+            for (let i = 0; i < 75; i++) {
                 confettiArray.push({
-                    x: canvas.width / 2 + (Math.random() * 40 - 20),
-                    y: canvas.height / 3 + (Math.random() * 40 - 20),
-                    size: Math.random() * 7 + 5,
+                    x: canvas.width / 2 + (Math.random() * 50 - 25),
+                    y: canvas.height / 3 + (Math.random() * 50 - 25),
+                    size: Math.random() * 8 + 5,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    vx: (Math.random() * 6 - 3),
-                    vy: (Math.random() * -5 - 3),
+                    vx: (Math.random() * 7 - 3.5),
+                    vy: (Math.random() * -6 - 3),
                     rotation: Math.random() * 360,
-                    rotationSpeed: Math.random() * 4 - 2
+                    rotationSpeed: Math.random() * 5 - 2.5
                 });
             }
         }
@@ -352,7 +350,6 @@
 
         function drawThickBrownPipe(ctx, pipe) {
             ctx.save();
-
             let colorDarkBorder = "#3e2723";
             let colorMainBrown = "#795548";
             let colorLightGlint = "#a1887f";
@@ -360,7 +357,6 @@
 
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
-            
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, 0, 10, pipe.topHeight);
             ctx.fillStyle = colorShadowTrim;
@@ -368,11 +364,6 @@
 
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
-            ctx.fillStyle = colorLightGlint;
-            ctx.fillRect(pipe.x - 2, pipe.topHeight - 22, 10, 20);
-            ctx.fillStyle = colorShadowTrim;
-            ctx.fillRect(pipe.x + pipe.width - 10, pipe.topHeight - 22, 12, 20);
-
             ctx.lineWidth = 4;
             ctx.strokeStyle = colorDarkBorder;
             ctx.strokeRect(pipe.x, -10, pipe.width, pipe.topHeight + 10);
@@ -381,7 +372,6 @@
             let bottomHeight = canvas.height - pipe.bottomY;
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight);
-            
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, pipe.bottomY, 10, bottomHeight);
             ctx.fillStyle = colorShadowTrim;
@@ -389,14 +379,8 @@
 
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
-            ctx.fillStyle = colorLightGlint;
-            ctx.fillRect(pipe.x - 2, pipe.bottomY + 2, 10, 20);
-            ctx.fillStyle = colorShadowTrim;
-            ctx.fillRect(pipe.x + pipe.width - 10, pipe.bottomY + 2, 12, 20);
-
             ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight + 10);
             ctx.strokeRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
-
             ctx.restore();
         }
 
@@ -408,13 +392,11 @@
             lastEngineFrameTime = timestamp - (delta % targetFpsInterval);
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             if (freezeFrameTimer === 0) animationTick++;
 
             ctx.fillStyle = "#70c5ce";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Permit flight movement during confetti tracking state to prevent jarring snaps
             let standardPlay = (state === "PLAYING" || state === "CONFETTI");
 
             if (standardPlay && freezeFrameTimer === 0) {
@@ -426,7 +408,6 @@
                     avatarBird.y = canvas.height - 35 - avatarBird.height;
                 }
 
-                // Append obstacle pipes at a comfortable distance
                 if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < canvas.width - 240) {
                     let clearanceGap = 165;
                     let minimumAllowedH = 60;
@@ -442,7 +423,7 @@
                 }
             }
 
-            // Pipe systems running at gameScrollSpeed
+            // Pipe rendering loop
             pipeArray.forEach((pipe, i) => {
                 if (standardPlay && freezeFrameTimer === 0) pipe.x -= gameScrollSpeed;
                 drawThickBrownPipe(ctx, pipe);
@@ -450,20 +431,17 @@
                 let hitTop = (avatarBird.x + 4 < pipe.x + pipe.width && avatarBird.x + avatarBird.width - 4 > pipe.x && avatarBird.y + 4 < pipe.topHeight);
                 let hitBottom = (avatarBird.x + 4 < pipe.x + pipe.width && avatarBird.x + avatarBird.width - 4 > pipe.x && avatarBird.y + avatarBird.height - 4 > pipe.bottomY);
 
-                // Stop right there if column is hit, trigger wrong sound
                 if (standardPlay && (hitTop || hitBottom) && freezeFrameTimer === 0) {
                     document.getElementById('sndWrong').play().catch(()=>{});
                     lives--;
                     screenFlashTick = 12;
-                    freezeFrameTimer = 50; // Lock and freeze instantly at point of collision
+                    freezeFrameTimer = 50; // Freeze bird instantly at position of crash
                     inputUpActive = false;
                     inputDownActive = false;
                 }
-
                 if (pipe.x + pipe.width < 0) pipeArray.splice(i, 1);
             });
 
-            // Post-crash freeze timer tracking
             if (freezeFrameTimer > 0) {
                 freezeFrameTimer--;
                 if (freezeFrameTimer === 0) {
@@ -476,7 +454,7 @@
                 }
             }
 
-            // Cloud modules processing loop
+            // Cloud logic loop
             cloudArray.forEach((cloud, idx) => {
                 if (standardPlay && freezeFrameTimer === 0) cloud.x -= gameScrollSpeed;
 
@@ -511,11 +489,11 @@
                 }
             });
 
-            // Live Render Confetti Overlay
+            // Confetti render calculations
             confettiArray.forEach((p, idx) => {
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.12; // Gravity simulation component
+                p.vy += 0.12; 
                 p.rotation += p.rotationSpeed;
 
                 ctx.save();
@@ -528,7 +506,7 @@
                 if (p.y > canvas.height) confettiArray.splice(idx, 1);
             });
 
-            // Safely restore play engine if confetti completes
+            // Once the confetti elements vanish completely, proceed seamlessly to the next cloud item
             if (state === "CONFETTI" && confettiArray.length === 0) {
                 state = "PLAYING";
                 generateNextCloud();
@@ -536,7 +514,6 @@
 
             drawOriginalPixelBird(ctx, avatarBird.x, avatarBird.y);
 
-            // Ground base layout
             ctx.fillStyle = "#558b2f";
             ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
             ctx.fillStyle = "#000000";
@@ -548,7 +525,6 @@
                 screenFlashTick--;
             }
 
-            // Persistent Dashboard HUD
             if (standardPlay || state === "MODAL") {
                 ctx.save();
                 ctx.fillStyle = "#ffffff";
@@ -572,6 +548,11 @@
         function launchVocabularyModal(data) {
             state = "MODAL";
             updateControlsDeckVisibility();
+            
+            // CRITICAL STEP: Immediately wipe out the cloud array here so it vanishes completely 
+            // from behind the modal banner while the user answers the question.
+            cloudArray = [];
+
             document.getElementById('modalCloudTerm').innerText = `☁️ MOVEMENT: ${data.term}`;
             document.getElementById('modalPrompt').innerText = data.prompt;
             
@@ -594,11 +575,11 @@
             if (chosen === realCorrectAnswer) {
                 document.getElementById('sndCorrect').play().catch(()=>{});
                 score += 10;
-                activeIndex++; // Progress item index forward smoothly
+                activeIndex++; // Safely advance index tracking forwards
                 
                 document.getElementById('modalQuiz').classList.add('hidden');
                 
-                // Set state to CONFETTI and pop the celebration shower
+                // Transition directly into the confetti burst cycle
                 state = "CONFETTI";
                 updateControlsDeckVisibility();
                 spawnConfettiShower();
