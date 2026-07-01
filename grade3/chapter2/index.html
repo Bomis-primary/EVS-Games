@@ -46,7 +46,15 @@
             z-index: 20;
         }
 
-        /* Color variations for text buttons */
+        @keyframes bannerPop {
+            0% { transform: scale(0.6) rotate(-4deg); opacity: 0; }
+            70% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .animate-banner {
+            animation: bannerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+        }
+
         .color-variant-0 { border-color: #38bdf8; color: #0369a1; }
         .color-variant-1 { border-color: #f472b6; color: #be185d; }
         .color-variant-2 { border-color: #fbbf24; color: #b45309; }
@@ -75,7 +83,7 @@
             <div class="space-y-2">
                 <div class="text-7xl animate-bounce">🌱</div>
                 <h1 class="text-4xl font-black text-emerald-600 tracking-wide">Plant Parts Bingo</h1>
-                <p class="text-sm bg-orange-100 text-orange-700 px-4 py-1 rounded-full inline-block font-black">Grade 3 Challenge!</p>
+                <p class="text-sm bg-orange-100 text-orange-700 px-4 py-1 rounded-full inline-block font-black">Challenge Puzzle!</p>
             </div>
 
             <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-amber-900 text-base font-bold font-fun leading-relaxed">
@@ -135,6 +143,15 @@
             <div class="relative">
                 <div id="bingoGridDeck" class="grid grid-cols-3 gap-3 p-3 bg-slate-50 border-4 border-slate-200 rounded-2xl shadow-inner">
                     </div>
+
+                <div id="bingoLineBanner" class="hidden absolute inset-0 bg-slate-900/40 rounded-2xl flex items-center justify-center p-4 z-30">
+                    <div class="bg-gradient-to-b from-yellow-300 to-amber-500 border-4 border-white rounded-3xl p-6 text-center shadow-2xl w-full max-w-[280px] animate-banner">
+                        <div class="text-5xl mb-2 animate-bounce">🎉🏆</div>
+                        <h3 class="text-2xl font-black text-amber-950 uppercase tracking-tight">BINGO!</h3>
+                        <p class="text-xs font-bold text-amber-900 bg-white/60 px-3 py-1 rounded-full inline-block mt-1 font-fun">Line Match Complete!</p>
+                        <div class="text-sm font-black text-white mt-3 uppercase tracking-wider animate-pulse">Resuming Game...</div>
+                    </div>
+                </div>
             </div>
 
             <p id="systemActionLabel" class="text-center text-xs font-black text-slate-400 py-1 min-h-[20px] font-fun uppercase tracking-wide">
@@ -194,6 +211,7 @@
         let livesLeft = 3;
         let incorrectAttemptsOnCurrentQuestion = 0;
         let triggeredLinesSet = new Set();
+        let isHaltedForBanner = false;
 
         const canvasElement = document.getElementById('confettiCanvas');
         const canvasCtx = canvasElement.getContext('2d');
@@ -203,7 +221,6 @@
             canvasElement.width = window.innerWidth;
             canvasElement.height = window.innerHeight;
             
-            // 5 second brand logo splash timeout
             setTimeout(() => {
                 const splash = document.getElementById('splashLayer');
                 splash.classList.add('opacity-0');
@@ -264,7 +281,9 @@
             
             runningScore = 0; currentSequenceIndex = 0; livesLeft = 3; incorrectAttemptsOnCurrentQuestion = 0;
             triggeredLinesSet.clear();
+            isHaltedForBanner = false;
             document.getElementById('scoreTracker').innerText = runningScore;
+            document.getElementById('bingoLineBanner').classList.add('hidden');
             updateHeartsDisplay();
 
             activeGridData = [...gameCatalog];
@@ -293,7 +312,6 @@
             activeGridData.forEach((cellData, index) => {
                 const containerButton = document.createElement('button');
                 
-                // Playful default style configs
                 let styleClasses = `bingo-card-cell w-full bg-white border-4 rounded-3xl p-2 flex items-center justify-center text-center shadow-md text-sm font-black tracking-tight cursor-pointer font-fun transition-all color-variant-${cellData.colorId}`;
                 
                 if (cellData.marked) {
@@ -319,7 +337,6 @@
             if (currentSequenceIndex < callerSequence.length) {
                 document.getElementById('clueTextDisplay').innerText = callerSequence[currentSequenceIndex].clue;
             } else {
-                // All riddles completed successfully
                 setTimeout(() => {
                     changeScreenView('screenGameplay', 'screenVictory');
                     document.getElementById('finalScoreText').innerText = runningScore;
@@ -328,7 +345,7 @@
         }
 
         function validateCardSelection(clickedIndex) {
-            if (livesLeft <= 0) return;
+            if (livesLeft <= 0 || isHaltedForBanner) return;
 
             const selectedCell = activeGridData[clickedIndex];
             const activeCallTarget = callerSequence[currentSequenceIndex];
@@ -349,16 +366,20 @@
                 incorrectAttemptsOnCurrentQuestion = 0; 
                 renderVisualBingoBoard();
                 
-                // Check if this answer creates a new row line
-                evaluateMatrixLines();
+                // Track if a line was linked
+                let lineCreated = evaluateMatrixLines();
 
                 currentSequenceIndex++;
+                
+                // Adjust delay to wait nicely if a line banner is showing
+                let nextActionDelay = lineCreated ? 3200 : 1600;
+
                 setTimeout(() => {
                     document.getElementById('systemActionLabel').innerText = "Tap the matching plant part name!";
                     document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-slate-400 py-1 font-fun uppercase tracking-wide";
                     presentCurrentDescriptionCall();
                     renderVisualBingoBoard(); 
-                }, 1600);
+                }, nextActionDelay);
             } else {
                 playAudioEffect('sndWrong');
                 
@@ -392,23 +413,39 @@
                 { ids: [2, 4, 6], label: "Diagonal 2" }
             ];
 
-            lines.forEach((line, index) => {
-                if (!triggeredLinesSet.has(index)) {
+            let foundNewLine = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                if (!triggeredLinesSet.has(i)) {
+                    let line = lines[i];
                     if (activeGridData[line.ids[0]].marked && activeGridData[line.ids[1]].marked && activeGridData[line.ids[2]].marked) {
-                        triggeredLinesSet.add(index);
+                        triggeredLinesSet.add(i);
+                        foundNewLine = true;
                         
-                        // Halt game with applause track
+                        // Stop layout inputs momentarily
+                        isHaltedForBanner = true;
+                        
                         playAudioEffect('sndClaps');
                         triggerConfettiBurst();
                         
-                        runningScore += 50; // Bonus Points for full line match
-                        document.getElementById('scoreTracker').innerText = runningScore;
+                        // Show congratulations overlay banner
+                        const banner = document.getElementById('bingoLineBanner');
+                        banner.classList.remove('hidden');
                         
-                        document.getElementById('systemActionLabel').innerText = "🎉 BINGO MATCH! APPLAUSE TRACK PLAYING! 🎉";
+                        document.getElementById('systemActionLabel').innerText = "🎉 BINGO LINE COMPLETE! 🎉";
                         document.getElementById('systemActionLabel').className = "text-center text-sm font-black text-amber-500 animate-bounce font-fun tracking-wide";
+
+                        // Auto resume loop after 2.5 seconds
+                        setTimeout(() => {
+                            banner.classList.add('hidden');
+                            isHaltedForBanner = false;
+                        }, 2500);
+
+                        break; // Trigger one line celebration banner at a time
                     }
                 }
-            });
+            }
+            return foundNewLine;
         }
     </script>
 </body>
