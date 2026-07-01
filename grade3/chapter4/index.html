@@ -1,1 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Food UNO Challenge!</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fef08a 0%, #bbf7d0 50%, #93c5fd 100%);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        h1, h2, h3, button, .font-fun {
+            font-family: 'Fredoka', cursive;
+        }
 
+        .uno-card {
+            aspect-ratio: 2 / 3;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15), inset 0 0 15px rgba(255,255,255,0.3);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+        }
+
+        .oval-center {
+            border-radius: 50%;
+            transform: rotate(-20deg);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(2px);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-3 select-none">
+
+    <audio id="audioBg" src="./assets/playfulsong.mp3" loop></audio>
+    <audio id="audioCorrect" src="./assets/correct.mp3"></audio>
+    <audio id="audioWrong" src="./assets/wrong.mp3"></audio>
+    <audio id="audioClaps" src="./assets/freesound_community-claps-44774.mp3"></audio>
+
+    <div id="screenSplash" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 transition-opacity duration-700">
+        <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-xs object-contain animate-bounce">
+    </div>
+
+    <div id="screenTitle" class="hidden fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-red-500 flex flex-col items-center justify-center p-6 z-40 text-center text-white">
+        <div class="space-y-6 max-w-md bg-white/20 backdrop-blur-md p-8 rounded-[40px] border-4 border-white shadow-2xl">
+            <h1 class="text-6xl font-black drop-shadow-lg tracking-wider transform -rotate-3 text-yellow-100">FOOD UNO 🃏</h1>
+            <p class="text-lg font-bold">The delicious card matching challenge game!</p>
+            <button onclick="goToInstructionsScreen()" class="w-full bg-yellow-300 hover:bg-yellow-400 text-slate-800 text-2xl font-black px-8 py-4 rounded-2xl shadow-xl transform hover:scale-105 active:scale-95 transition-all tracking-wide cursor-pointer">
+                START ▶
+            </button>
+        </div>
+    </div>
+
+    <div id="screenInstructions" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-30">
+        <div class="bg-white border-4 border-slate-800 rounded-[36px] w-full max-w-xl p-6 shadow-2xl space-y-4 text-slate-800 max-h-[95vh] overflow-y-auto">
+            <h2 class="text-3xl font-black text-center text-orange-500 border-b-4 border-dashed border-slate-100 pb-2">How To Play 📜</h2>
+            
+            <ul class="space-y-3 text-sm font-bold leading-relaxed">
+                <li class="flex items-start gap-2.5 bg-rose-50 p-2.5 rounded-xl"><span class="text-lg">🃏</span> Match your cards by Color or Food Group category with the card in the center pile.</li>
+                <li class="flex items-start gap-2.5 bg-blue-50 p-2.5 rounded-xl"><span class="text-lg">❓</span> Click a matching card to answer its quiz puzzle. Get it right for <span class="text-emerald-600 font-extrabold">+10 Points</span>!</li>
+                <li class="flex items-start gap-2.5 bg-amber-50 p-2.5 rounded-xl"><span class="text-lg">⚠️</span> Be careful! Wrong answers add 1 penalty card to your hand.</li>
+                <li class="flex items-start gap-2.5 bg-purple-50 p-2.5 rounded-xl"><span class="text-lg">⚡</span> Action cards let you Skip the AI's turn or force it to draw 2 cards!</li>
+                <li class="flex items-start gap-2.5 bg-yellow-50 p-2.5 rounded-xl"><span class="text-lg">📢</span> When down to 2 cards, play one and click the flashing <span class="text-red-500 font-extrabold">"SAY UNO!"</span> button immediately!</li>
+            </ul>
+
+            <button onclick="launchMainGameEngine()" class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white text-xl font-black px-8 py-4 rounded-2xl shadow-md active:scale-95 transition-transform cursor-pointer">
+                PLAY GAME 🎮
+            </button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-4xl bg-white/90 border-4 border-slate-800 rounded-3xl p-4 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">FOOD UNO 🃏</h2>
+            <div class="bg-indigo-600 text-white font-black text-sm px-4 py-1 rounded-full shadow">
+                SCORE: <span id="currentScoreField">0</span> PTS
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="bg-amber-100 border-2 border-amber-400 rounded-2xl px-4 py-1 text-center">
+                <span class="text-[9px] font-black text-amber-800 block uppercase tracking-wider">Draw Pile</span>
+                <span id="deckCounter" class="text-lg font-black text-slate-800">0</span>
+            </div>
+            <button onclick="humanDrawsCard()" id="drawBtn" class="bg-gradient-to-b from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black px-5 py-3 rounded-2xl shadow-md active:scale-95 transition-transform cursor-pointer tracking-wide text-sm">
+                DRAW CARD ➕
+            </button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6 my-4 items-center w-full">
+        
+        <div class="md:col-span-1 flex flex-col gap-4">
+            <div class="bg-slate-800 text-white rounded-2xl p-3 shadow-lg flex items-center justify-between border-2 border-slate-600">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🤖</span>
+                    <div>
+                        <div class="text-xs font-black uppercase tracking-wider text-slate-400">Opponent</div>
+                        <div class="text-sm font-bold">Kitchen Computer</div>
+                    </div>
+                </div>
+                <div id="aiHandBadge" class="bg-red-500 text-white text-xs font-black px-3 py-1.5 rounded-full">
+                    5 Cards Left
+                </div>
+            </div>
+
+            <div class="bg-white/50 border-4 border-dashed border-slate-400/60 rounded-[36px] p-6 flex flex-col items-center justify-center min-h-[220px] relative">
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Discard Pile</span>
+                <div id="discardPileSlot"></div>
+
+                <button id="sayUnoBtn" onclick="registerUserUnoVoice()" class="hidden absolute -bottom-2 animate-bounce bg-red-600 hover:bg-red-700 border-4 border-white text-white text-lg font-black px-5 py-2.5 rounded-2xl shadow-2xl tracking-wider cursor-pointer z-20">
+                    📢 SAY UNO!
+                </button>
+                <button id="catchAiBtn" onclick="catchComputerFailure()" class="hidden absolute -bottom-2 animate-pulse bg-amber-500 hover:bg-amber-600 border-4 border-white text-slate-900 text-xs font-black px-4 py-2.5 rounded-2xl shadow-2xl tracking-wider cursor-pointer z-20">
+                    🚨 CATCH COMPUTER!
+                </button>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 bg-white border-4 border-slate-800 rounded-[36px] p-4 shadow-2xl flex flex-col justify-between min-h-[300px]">
+            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-2 mb-2">
+                <span class="text-xs font-black text-slate-500 uppercase tracking-wider">Your Active Hand:</span>
+                <span id="playerHandCounter" class="bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full">0 Cards</span>
+            </div>
+
+            <div id="playerHandRow" class="flex flex-wrap gap-2.5 items-center justify-start overflow-x-auto py-3 max-h-[240px]"></div>
+        </div>
+    </div>
+
+    <div id="gameStatusAlert" class="w-full max-w-4xl text-center text-xs font-black text-slate-600 uppercase tracking-wider py-2 bg-white/60 rounded-xl border border-slate-300">
+        Game Loading...
+    </div>
+
+    <div id="triviaModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white border-4 border-slate-900 rounded-[36px] w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div class="text-center">
+                <span id="modalBadge" class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-amber-100 text-amber-800">
+                    Assessment
+                </span>
+                <h3 id="modalCardHeader" class="text-2xl font-black text-slate-800 mt-2">Validation</h3>
+            </div>
+
+            <div id="modalQuestionBox" class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-center text-base font-bold text-slate-800 font-fun leading-relaxed"></div>
+
+            <div id="modalOptionsContainer" class="flex flex-col gap-2.5"></div>
+
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+                <span class="text-[10px] font-black text-indigo-700 block uppercase tracking-wider">💡 Study Hint:</span>
+                <p id="modalHintBox" class="text-xs font-bold text-slate-600 mt-0.5"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Full Curriculum Curated Balanced 12-Question Deck Array Matrix
+        const original12CardCatalog = [
+            { id: 1, name: "Boiling", color: "bg-rose-500", text: "text-rose-500", category: "Cooking", isSpecial: false, isDifficult: false, symbol: "🍲", q: "Rahul wants to make hard-boiled eggs and rice for lunch. What does he need to use to cook them?", a: ["A very hot oven", "Bubbling hot water", "Lots of frying oil"], c: "Bubbling hot water", h: "Think about how rice swims in a pot of water on the stove until it gets soft!" },
+            { id: 2, name: "Steaming", color: "bg-rose-500", text: "text-rose-500", category: "Cooking", isSpecial: false, isDifficult: true, symbol: "💨", q: "Tina's grandmother told her to eat fluffy Idlis and Momos because they are healthy and cooked without any oil. How are these foods made?", a: ["Using hot steam vapor", "Deep frying in a pan", "Roasting over charcoal"], c: "Using hot steam vapor", h: "Look closely at the card! These foods are cooked by the hot cloud of steam that rises from hot water." },
+            { id: 3, name: "Frying", color: "bg-rose-500", text: "text-rose-500", category: "Cooking", isSpecial: false, isDifficult: false, symbol: "🍳", q: "Rohan loves crunchy, crispy samosas and puris. What do we use to cook these treats?", a: ["Ice cold water", "Just dry oven air", "Deep hot oil or ghee"], c: "Deep hot oil or ghee", h: "To make food super crunchy and golden brown, it needs to take a quick dip in hot oil!" },
+            { id: 4, name: "Wheat Land", color: "bg-blue-500", text: "text-blue-500", category: "Staples", isSpecial: false, isDifficult: false, symbol: "🌾", q: "Simran lives in Punjab where the soil is perfect for growing wheat. Which food will her family most likely make as their daily staple?", a: ["Hot Chapatis and Rotis", "Steamed Rice balls", "Coconut puddings"], c: "Hot Chapatis and Rotis", h: "Wheat grains are ground into flour to roll out soft, round rotis!" },
+            { id: 5, name: "Coastal Diet", color: "bg-blue-500", text: "text-blue-500", category: "Staples", isSpecial: false, isDifficult: true, symbol: "🐟", q: "Kabir is visiting his cousins in Kerala near the sea. They take him to a restaurant. What local staple food will they most likely order?", a: ["Wheat Bajra roti", "Rice and Fish curry", "Baked sweet biscuits"], c: "Rice and Fish curry", h: "Places near the ocean have plenty of water for rice fields and lots of fresh fish from the sea!" },
+            { id: 6, name: "Desert Grains", color: "bg-blue-500", text: "text-blue-500", category: "Staples", isSpecial: false, isDifficult: true, symbol: "🏜️", q: "Aarav's family lives in a beautiful village in Rajasthan where the soil is very sandy and it rarely rains. Which grains do they grow instead of rice?", a: ["Only apples", "Jowar and Bajra", "Pineapples"], c: "Jowar and Bajra", h: "Some tough grains do not need much water to grow and thrive beautifully in dry, sunny deserts." },
+            { id: 7, name: "Mountain Fruits", color: "bg-emerald-500", text: "text-emerald-500", category: "Fruits", isSpecial: false, isDifficult: false, symbol: "🍎", q: "Meera is traveling to the cold, beautiful mountains of Himachal Pradesh. Which fresh fruit will she find growing on trees everywhere?", a: ["Crisp red apples", "Yellow bananas", "Tropical coconuts"], c: "Crisp red apples", h: "This crunchy fruit loves cold weather and grows beautifully on hilly mountain slopes!" },
+            { id: 8, name: "Desert Apricots", color: "bg-emerald-500", text: "text-emerald-500", category: "Fruits", isSpecial: false, isDifficult: true, symbol: "🍑", q: "Tenzin lives in the cold, high-altitude desert of Ladakh. He wants to pick the most famous local orange-colored fruit. What is it?", a: ["Sweet Apricots", "Juicy Watermelons", "Fresh Mangoes"], c: "Sweet Apricots", h: "This is a small, sweet stone fruit that loves the unique cold climate of Ladakh." },
+            { id: 9, name: "Coastal Palms", color: "bg-emerald-500", text: "text-emerald-500", category: "Fruits", isSpecial: false, isDifficult: false, symbol: "🌴", q: "If you walk along the sunny sandy beaches of Goa, which giant trees will you see everywhere providing refreshing water?", a: ["Apple trees", "Coconut palms", "Wheat fields"], c: "Coconut palms", h: "Look up high! These big green nuts grow on tall palm trees right next to the sea." },
+            { id: 10, name: "The Kadahi", color: "bg-amber-500", text: "text-amber-500", category: "Tools", isSpecial: false, isDifficult: false, symbol: "🥘", q: "Mother wants to make deep-fried pakoras for a rainy day. Which deep, curved metal pan will she pull out of the cabinet?", a: ["A Kadahi", "A flat Tawa", "A plastic bowl"], c: "A Kadahi", h: "This deep round pan safely holds hot oil so snacks can fry without spilling out." },
+            { id: 11, name: "Sun Power", color: "bg-amber-500", text: "text-amber-500", category: "Tools", isSpecial: true, isDifficult: true, symbol: "☀️", q: "Sana's school wants to cook food using clean energy without using any gas cylinders or firewood. Which tool should they place out in the yard?", a: ["A microwave", "A Solar Cooker", "A clay tandoor"], c: "A Solar Cooker", h: "This magical cooking box has mirrors and uses the warm rays of the sun to heat food safely!" },
+            { id: 12, name: "Haldi Power", color: "bg-amber-500", text: "text-amber-500", category: "Tools", isSpecial: true, isDifficult: false, symbol: "🧪", q: "Whenever Arjun gets a small scrape or cold, his grandfather mixes a bright yellow spice into his warm milk to help him heal. What is this spice?", a: ["Haldi (Turmeric)", "Black Pepper", "Sugar"], c: "Haldi (Turmeric)", h: "This beautiful yellow powder is found in every Indian kitchen and helps our bodies stay strong!" }
+        ];
+
+        let centralMainDeck = [];
+        let humanPlayerHand = [];
+        let aiOpponentHand = [];
+        let topDiscardedCard = {};
+        
+        let globalCumulativeScore = 0;
+        let activeSelectedHandIndex = null;
+        let hasClickedUnoThisTurn = false;
+        let unoWindowTimeout = null;
+
+        // SYSTEM LOAD AUTOMATION SPLASH ROUTER
+        window.onload = function() {
+            setTimeout(() => {
+                const splash = document.getElementById('screenSplash');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.classList.add('hidden');
+                    document.getElementById('screenTitle').classList.remove('hidden');
+                }, 700);
+            }, 5000); // Strict 5 second branding display layout
+        };
+
+        function goToInstructionsScreen() {
+            // Trigger audio channels initialization safely via click context
+            document.getElementById('audioBg').play().catch(() => {});
+            document.getElementById('screenTitle').classList.add('hidden');
+            document.getElementById('screenInstructions').classList.remove('hidden');
+        }
+
+        function launchMainGameEngine() {
+            document.getElementById('screenInstructions').classList.add('hidden');
+            beginUnoEngine();
+        }
+
+        function beginUnoEngine() {
+            // Re-shuffle a doubled pack for deep dynamic range
+            centralMainDeck = [...original12CardCatalog, ...original12CardCatalog]
+                .sort(() => Math.random() - 0.5);
+
+            humanPlayerHand = [];
+            aiOpponentHand = [];
+            globalCumulativeScore = 0;
+            document.getElementById('currentScoreField').innerText = globalCumulativeScore;
+
+            // Deal hands (5 cards each)
+            for(let i=0; i<5; i++) {
+                humanPlayerHand.push(centralMainDeck.pop());
+                aiOpponentHand.push(centralMainDeck.pop());
+            }
+
+            // Pop starting anchor card onto discard pile
+            topDiscardedCard = centralMainDeck.pop();
+            logActionAlert("Match either Color or Food Group Category to play!");
+            updateBoardLayout();
+        }
+
+        function createCardUIString(card, index, playerType) {
+            const isHuman = (playerType === 'human');
+            let isValidMatch = false;
+
+            if (isHuman) {
+                const sameColor = card.color === topDiscardedCard.color;
+                const sameCategory = card.category === topDiscardedCard.category;
+                isValidMatch = sameColor || sameCategory;
+            }
+
+            const interactionClick = (isHuman && isValidMatch) ? `onclick="openQuestionPortal(${index})"` : '';
+            const stylisticOpacity = (isHuman && !isValidMatch) ? 'opacity-40 scale-95 cursor-not-allowed' : 'hover:-translate-y-3 cursor-pointer';
+            
+            return `
+                <div ${interactionClick} class="uno-card w-24 sm:w-28 border-4 border-white rounded-2xl flex flex-col justify-between p-2.5 text-white shadow-lg relative shrink-0 ${card.color} ${stylisticOpacity}">
+                    <div class="flex justify-between items-center text-[9px] font-black tracking-wider uppercase opacity-90">
+                        <span>${card.category}</span>
+                        <span>${card.symbol}</span>
+                    </div>
+                    
+                    <div class="oval-center w-full h-16 my-auto flex flex-col items-center justify-center text-center p-1">
+                        <div class="text-[11px] font-black tracking-tight leading-none drop-shadow-md uppercase">${card.name}</div>
+                    </div>
+
+                    <div class="flex justify-between items-end">
+                        <span class="text-xs opacity-60">${card.isSpecial ? '⚡' : '★'}</span>
+                        <span class="text-xs font-black bg-black/10 px-2 py-0.5 rounded-full">${card.symbol}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateBoardLayout() {
+            document.getElementById('deckCounter').innerText = centralMainDeck.length;
+            document.getElementById('aiHandBadge').innerText = `${aiOpponentHand.length} Cards Left`;
+            document.getElementById('playerHandCounter').innerText = `${humanPlayerHand.length} Cards`;
+
+            document.getElementById('discardPileSlot').innerHTML = createCardUIString(topDiscardedCard, null, 'discard');
+
+            const row = document.getElementById('playerHandRow');
+            row.innerHTML = '';
+            humanPlayerHand.forEach((card, idx) => {
+                row.innerHTML += createCardUIString(card, idx, 'human');
+            });
+
+            // Evaluate game over conditions
+            if (humanPlayerHand.length === 0) {
+                document.getElementById('audioClaps').play();
+                triggerMassConfettiExplosion();
+                logActionAlert("🎉 Victory! You cleared your hand and won Food UNO! 🏆");
+                setTimeout(() => { beginUnoEngine(); }, 5000);
+                return;
+            } else if (aiOpponentHand.length === 0) {
+                logActionAlert("🤖 Game Over! The Kitchen Computer won this match.");
+                setTimeout(() => { beginUnoEngine(); }, 4000);
+                return;
+            }
+
+            // Evaluate AI declaration windows for catching system
+            if (aiOpponentHand.length === 1) {
+                document.getElementById('catchAiBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('catchAiBtn').classList.add('hidden');
+            }
+        }
+
+        function logActionAlert(msg) {
+            document.getElementById('gameStatusAlert').innerText = msg;
+        }
+
+        function humanDrawsCard() {
+            if (centralMainDeck.length === 0) return;
+            humanPlayerHand.push(centralMainDeck.pop());
+            logActionAlert("You drew a card from the deck pile.");
+            updateBoardLayout();
+            
+            setTimeout(executeAiTurnSequence, 1500);
+        }
+
+        function openQuestionPortal(idx) {
+            activeSelectedHandIndex = idx;
+            hasClickedUnoThisTurn = false;
+            const card = humanPlayerHand[idx];
+
+            document.getElementById('modalCardHeader').innerText = `${card.name} Assessment`;
+            document.getElementById('modalQuestionBox').innerText = card.q;
+            document.getElementById('modalHintBox').innerText = card.h;
+            
+            const badge = document.getElementById('modalBadge');
+            badge.innerText = `${card.category} Group ${card.isDifficult ? '🔥 (Difficult)' : '🍏 (Easy)'}`;
+
+            const container = document.getElementById('modalOptionsContainer');
+            container.innerHTML = '';
+
+            card.a.forEach(opt => {
+                container.innerHTML += `
+                    <button onclick="evaluatePortalAnswer('${opt.replace(/'/g, "\\'")}')" class="w-full text-left bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 hover:border-amber-400 p-3 rounded-xl text-xs font-black text-slate-700 transition-colors cursor-pointer font-fun">
+                        ${opt}
+                    </button>
+                `;
+            });
+
+            document.getElementById('triviaModal').classList.remove('hidden');
+        }
+
+        function evaluatePortalAnswer(selectedText) {
+            const card = humanPlayerHand[activeSelectedHandIndex];
+            document.getElementById('triviaModal').classList.add('hidden');
+
+            if (selectedText === card.c) {
+                document.getElementById('audioCorrect').play();
+                
+                // Add points
+                globalCumulativeScore += 10;
+                document.getElementById('currentScoreField').innerText = globalCumulativeScore;
+
+                // Scenario-based difficult question success bonus award
+                if (card.isDifficult) {
+                    triggerSingleCardConfettiBurst();
+                    logActionAlert(`🌟 Amazing! Correct answer to a tough scenario puzzle! +10 Pts.`);
+                } else {
+                    logActionAlert(`✨ Correct! Played ${card.name}. +10 Pts.`);
+                }
+                
+                // Advance card to discard pile
+                topDiscardedCard = humanPlayerHand.splice(activeSelectedHandIndex, 1)[0];
+
+                // UNO Reflex Logic Window Evaluation Check
+                if (humanPlayerHand.length === 1) {
+                    triggerUnoDeclarationAlertWindow();
+                } else {
+                    processPostCardPlayLogic(card);
+                }
+            } else {
+                document.getElementById('audioWrong').play();
+                logActionAlert(`❌ Not quite! Correct answer: "${card.c}". Added 1 penalty card.`);
+                humanPlayerHand.push(centralMainDeck.pop());
+                updateBoardLayout();
+                
+                setTimeout(executeAiTurnSequence, 2000);
+            }
+            activeSelectedHandIndex = null;
+        }
+
+        function triggerUnoDeclarationAlertWindow() {
+            document.getElementById('sayUnoBtn').classList.remove('hidden');
+            updateBoardLayout();
+
+            unoWindowTimeout = setTimeout(() => {
+                // If student fails to click inside 3 seconds
+                if (!hasClickedUnoThisTurn) {
+                    document.getElementById('sayUnoBtn').classList.add('hidden');
+                    logActionAlert("💥 Caught! You forgot to say UNO! Draw 2 penalty cards!");
+                    humanPlayerHand.push(centralMainDeck.pop());
+                    humanPlayerHand.push(centralMainDeck.pop());
+                    updateBoardLayout();
+                    setTimeout(executeAiTurnSequence, 2000);
+                }
+            }, 3000);
+        }
+
+        function registerUserUnoVoice() {
+            hasClickedUnoThisTurn = true;
+            clearTimeout(unoWindowTimeout);
+            document.getElementById('sayUnoBtn').classList.add('hidden');
+            logActionAlert("📢 You declared UNO! beautifully! Safe matching turn.");
+            
+            // Resume pipeline flow
+            const playedCard = topDiscardedCard;
+            processPostCardPlayLogic(playedCard);
+        }
+
+        function catchComputerFailure() {
+            if (aiOpponentHand.length === 1) {
+                document.getElementById('catchAiBtn').classList.add('hidden');
+                logActionAlert("🚨 Great reflexes! You caught the Computer forgetting UNO! It draws 2 cards!");
+                aiOpponentHand.push(centralMainDeck.pop());
+                aiOpponentHand.push(centralMainDeck.pop());
+                updateBoardLayout();
+            }
+        }
+
+        function processPostCardPlayLogic(card) {
+            updateBoardLayout();
+            if (humanPlayerHand.length === 0) return;
+
+            if (card.isSpecial) {
+                logActionAlert(`⚡ Special Action! AI turn skipped by ${card.name}! Play again!`);
+            } else {
+                setTimeout(executeAiTurnSequence, 1500);
+            }
+        }
+
+        function executeAiTurnSequence() {
+            if (humanPlayerHand.length === 0 || aiOpponentHand.length === 0) return;
+
+            let matchIdx = aiOpponentHand.findIndex(card => 
+                card.color === topDiscardedCard.color || card.category === topDiscardedCard.category
+            );
+
+            if (matchIdx !== -1) {
+                const aiCard = aiOpponentHand.splice(matchIdx, 1)[0];
+                topDiscardedCard = aiCard;
+                logActionAlert(`🤖 AI played matching card: ${aiCard.name}`);
+                updateBoardLayout();
+
+                if (aiCard.isSpecial) {
+                    setTimeout(() => {
+                        logActionAlert(`💥 AI used Special Action ${aiCard.name}! Your turn is skipped!`);
+                        setTimeout(executeAiTurnSequence, 2000);
+                    }, 1200);
+                }
+            } else {
+                aiOpponentHand.push(centralMainDeck.pop());
+                logActionAlert("🤖 AI had no match and drew 1 card from the pile.");
+                updateBoardLayout();
+            }
+        }
+
+        // CONFETTI CELEBRATION ENGINES
+        function triggerSingleCardConfettiBurst() {
+            confetti({ particleCount: 60, spread: 40, origin: { y: 0.7 } });
+        }
+
+        function triggerMassConfettiExplosion() {
+            let duration = 3 * 1000;
+            let end = Date.now() + duration;
+
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) { requestAnimationFrame(frame); }
+            }());
+        }
+    </script>
+</body>
+</html>
