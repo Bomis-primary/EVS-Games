@@ -3,10 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Tactile Measurement Lab</title>
+    <title>The Ultimate Interactive Measurement Lab</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-mint: #10bHere is the fully upgraded, modular code. It builds the 4 completely distinct interactive mini-game arenas directly inside the central canvas, links them to the randomized 12-question engine, and handles all the visual states (pouring, balancing, stretching, and heating) based on what type of science lab is active.
+
+You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantly on any computer, tablet, or smartphone.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Ultimate Interactive Measurement Lab</title>
+    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+    <link href="[https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap)" rel="stylesheet">
     
     <style>
         :root {
@@ -14,8 +31,8 @@
             --electric-tangerine: #f59e0b;
             --coral-pink: #ef476f;
             --cyber-blue: #0ea5e9;
+            --purple-glow: #a855f7;
             --text-light: #ffffff;
-            --panel-bg: rgba(255, 255, 255, 0.08);
         }
 
         * {
@@ -28,7 +45,7 @@
 
         body {
             font-family: 'Fredoka', sans-serif;
-            background-color: #0b0f19;
+            background-color: #090d16;
             color: var(--text-light);
             min-height: 100vh;
             display: flex;
@@ -42,18 +59,18 @@
             max-width: 600px;
             height: 100vh;
             max-height: 850px;
-            background: linear-gradient(135deg, #1e1b4b, #312e81, #4f46e5);
+            background: linear-gradient(135deg, #0f172a, #1e1b4b, #2e1065);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.7);
             display: flex;
             flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         @media (min-height: 851px) {
             #game-container {
-                border-radius: 28px;
-                border: 4px solid rgba(255, 255, 255, 0.15);
+                border-radius: 32px;
+                border: 4px solid rgba(255, 255, 255, 0.12);
             }
         }
 
@@ -70,7 +87,7 @@
             padding: 24px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
+            transition: opacity 0.3s ease;
         }
 
         .screen.active {
@@ -81,21 +98,21 @@
 
         /* Splash Screen */
         #splash-screen { background: #ffffff; }
-        #splash-screen img { max-width: 65%; max-height: 50%; object-fit: contain; }
+        #splash-screen img { max-width: 60%; max-height: 45%; object-fit: contain; }
 
         h1 {
-            font-size: 2.6rem;
+            font-size: 2.8rem;
             text-align: center;
-            margin-bottom: 32px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            line-height: 1.2;
+            margin-bottom: 24px;
+            text-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            line-height: 1.15;
         }
 
         .cute-btn {
             background: var(--neon-mint);
             color: white;
             border: none;
-            padding: 16px 44px;
+            padding: 16px 48px;
             font-size: 1.4rem;
             font-weight: 700;
             border-radius: 50px;
@@ -109,27 +126,28 @@
             box-shadow: 0 2px 0 #047857;
         }
 
-        /* Gameplay Layout updates */
+        /* Top HUD Row */
         #game-header {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 16px;
-            background: rgba(15, 23, 42, 0.6);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.7);
             position: absolute;
             top: 0;
             left: 0;
             z-index: 20;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .hud-pill {
             font-size: 0.95rem;
             font-weight: 700;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.12);
             padding: 6px 14px;
-            border-radius: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         #work-desk {
@@ -138,167 +156,253 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 80px 10px 20px 10px;
+            padding: 85px 12px 24px 12px;
         }
 
         .problem-bubble {
-            background: var(--panel-bg);
-            border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 20px;
             padding: 16px;
             text-align: center;
             font-size: 1.1rem;
             font-weight: 600;
+            line-height: 1.4;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
         }
 
-        /* Central Droppable Laboratory Target Target Space */
-        #testing-zone {
+        /* Dynamic Lab Interaction Zone */
+        #lab-sandbox-arena {
             width: 100%;
-            height: 220px;
-            background: rgba(15, 23, 42, 0.4);
-            border: 3px dashed rgba(255, 255, 255, 0.25);
+            height: 240px;
+            background: rgba(10, 15, 30, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
-            transition: all 0.2s ease;
-            margin: 14px 0;
+            margin: 16px 0;
+            overflow: hidden;
         }
 
-        #testing-zone.drag-over {
-            background: rgba(14, 165, 233, 0.15);
-            border-color: var(--cyber-blue);
-            transform: scale(1.02);
-        }
-
-        #testing-zone.correct-flash {
-            background: rgba(16, 185, 129, 0.25);
-            border-color: var(--neon-mint);
-        }
-
-        #testing-zone.wrong-flash {
-            background: rgba(239, 71, 111, 0.25);
-            border-color: var(--coral-pink);
-            animation: shake 0.4s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-
-        #drop-target-label {
-            position: absolute;
-            bottom: 12px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* Tool Bench Shelf & Draggable Objects */
-        #tool-shelf-wrapper {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 16px 10px;
-            width: 100%;
-        }
-
-        .shelf-title {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 700;
-        }
-
-        #tool-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .draggable-tool-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 16px;
-            padding: 10px 4px;
+        /* 🔬 MINI-GAME 1: Length Slider Tape */
+        .slider-wrapper {
+            width: 85%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            cursor: grab;
+            gap: 15px;
+        }
+        .tape-display {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--electric-tangerine);
+            background: rgba(0,0,0,0.3);
+            padding: 4px 16px;
+            border-radius: 10px;
+        }
+        .custom-range {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 20px;
+            border-radius: 10px;
+            background: #fde047;
+            outline: none;
+            border: 2px solid #ca8a04;
+        }
+        .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--coral-pink);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        /* 🔬 MINI-GAME 2: Capacity Pouring Simulator */
+        .beaker-frame {
+            width: 75px;
+            height: 160px;
+            border: 4px solid #94a3b8;
+            border-top: none;
+            border-radius: 0 0 16px 16px;
             position: relative;
-            touch-action: none; /* Prevents default mobile page scrolling while dragging */
-            transition: border-color 0.2s, background 0.2s;
+            background: rgba(255,255,255,0.05);
+        }
+        .beaker-frame::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(to bottom, transparent, transparent 18px, rgba(255,255,255,0.2) 18px, rgba(255,255,255,0.2) 20px);
+        }
+        .beaker-liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, #0284c7, #0ea5e9);
+            height: 10%;
+            transition: height 0.1s ease;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.6);
+        }
+        .pour-btn {
+            position: absolute;
+            right: 25px;
+            background: var(--cyber-blue);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #0369a1;
+        }
+        .pour-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0369a1; }
+
+        /* 🔬 MINI-GAME 3: Weight Balance Scale */
+        .balance-base {
+            width: 220px;
+            height: 8px;
+            background: #475569;
+            position: relative;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            justify-content: space-between;
+        }
+        .balance-pillar {
+            width: 10px;
+            height: 80px;
+            background: #64748b;
+            position: absolute;
+            bottom: -80px;
+            left: calc(50% - 5px);
+            z-index: -1;
+        }
+        .pan-left, .pan-right {
+            width: 55px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #64748b;
+            border-radius: 0 0 50% 50%;
+            position: absolute;
+            top: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem;
+        }
+        .pan-left { left: -10px; }
+        .pan-right { right: -10px; }
+
+        /* 🔬 MINI-GAME 4: Temperature Thermal Slider */
+        .thermo-layout-box {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            width: 80%;
+            justify-content: center;
+        }
+        .thermo-tube {
+            width: 26px;
+            height: 150px;
+            background: rgba(255,255,255,0.05);
+            border: 3px solid #cbd5e1;
+            border-radius: 15px;
+            position: relative;
+            padding: 2px;
+        }
+        .thermo-bulb {
+            width: 40px;
+            height: 40px;
+            background: var(--coral-pink);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -25px;
+            left: -10px;
+            border: 3px solid #cbd5e1;
+            z-index: 2;
+        }
+        .thermo-mercury {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, #dc2626, var(--coral-pink));
+            height: 25%;
+            border-radius: 10px;
+            transition: height 0.3s cubic-bezier(0.1, 0.8, 0.3, 1);
         }
 
-        .draggable-tool-card:active {
-            cursor: grabbing;
+        /* Options Grid Button Layout */
+        #options-wrapper-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            width: 100%;
         }
 
-        .draggable-tool-card .tool-icon {
-            font-size: 2.2rem;
-            margin-bottom: 6px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-            transition: transform 0.1s;
-        }
-
-        .draggable-tool-card .tool-name {
-            font-size: 0.75rem;
+        .action-choice-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            padding: 15px 20px;
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #cbd5e1;
-            text-align: center;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s ease;
         }
 
-        /* Custom Vector CSS Lab Simulators inside Central Window */
-        .vector-ruler {
-            width: 140px; height: 24px; background: #fde047;
-            border: 2px solid #ca8a04; border-radius: 4px; position: relative;
-        }
-        .vector-ruler::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 8px;
-            background: repeating-linear-gradient(90deg, #ca8a04, #ca8a04 2px, transparent 2px, transparent 10px);
+        .action-choice-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
-        .vector-cylinder {
-            width: 45px; height: 100px; border: 3px solid #94a3b8;
-            border-top: none; border-radius: 0 0 10px 10px; position: relative; background: rgba(255,255,255,0.1);
-        }
-        .vector-water {
-            position: absolute; bottom: 0; left: 0; width: 100%; background: var(--cyber-blue);
-            height: 65%; border-radius: 0 0 6px 6px; box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
-        }
-
-        .vector-scale {
-            width: 100px; height: 6px; background: #64748b; position: relative; display: flex; justify-content: space-between;
-        }
-        .vector-pan {
-            width: 35px; height: 22px; background: rgba(255,255,255,0.15); border: 2px solid #64748b; border-radius: 0 0 50% 50%; margin-top: 6px;
+        .action-choice-btn .badge-icon {
+            font-size: 1.6rem;
+            background: rgba(255,255,255,0.1);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
         }
 
-        .vector-thermometer {
-            width: 16px; height: 90px; background: rgba(255,255,255,0.1); border-radius: 8px; border: 2px solid #94a3b8; position: relative;
-        }
-        .vector-mercury {
-            position: absolute; bottom: 0; left: 0; width: 100%; background: var(--coral-pink); height: 55%; border-radius: 4px;
+        .action-choice-btn.success-glow {
+            background: #065f46 !important;
+            border-color: var(--neon-mint) !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
         }
 
-        #end-screen p { font-size: 1.25rem; text-align: center; margin-bottom: 30px; color: #cbd5e1; }
+        .action-choice-btn.fail-glow {
+            background: #991b1b !important;
+            border-color: var(--coral-pink) !important;
+            box-shadow: 0 0 15px rgba(239, 71, 111, 0.4);
+        }
+
+        #end-screen p { font-size: 1.3rem; text-align: center; margin-bottom: 32px; color: #cbd5e1; }
     </style>
 </head>
 <body>
 
     <div id="game-container">
         
-        <!-- SCREEN 1: Splash Screen -->
+        <!-- SCREEN 1: Branding Splash Preloader -->
         <div id="splash-screen" class="screen active">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('alt-logo-text').style.display='block';">
             <h2 id="alt-logo-text" style="color: #1e1b4b; display:none; font-size: 2.5rem; font-weight:700;">Innovine</h2>
@@ -306,128 +410,170 @@
 
         <!-- SCREEN 2: Main Menu -->
         <div id="menu-screen" class="screen">
-            <h1>The Tactile<br>Laboratory!</h1>
-            <button class="cute-btn" onclick="goToScreen('instructions-screen')">Enter Lab</button>
+            <h1>The Adaptive<br>Science Lab!</h1>
+            <button class="cute-btn" onclick="goToScreen('instructions-screen')">Start Journey</button>
         </div>
 
-        <!-- SCREEN 3: Instructions -->
+        <!-- SCREEN 3: Educational Context Overview -->
         <div id="instructions-screen" class="screen">
-            <div style="background: rgba(255,255,255,0.1); padding: 24px; border-radius: 20px; margin-bottom: 30px; text-align: center; line-height: 1.6;">
-                <p style="font-size: 1.3rem; margin-bottom: 12px; color: var(--electric-tangerine);">🔬 <strong>Hands-on Research Mode!</strong></p>
-                <p>Don't just click answers—grab the actual tools from your workstation laboratory shelf below!</p>
+            <div style="background: rgba(255,255,255,0.08); padding: 24px; border-radius: 24px; margin-bottom: 32px; line-height: 1.5;">
+                <p style="font-size: 1.25rem; color: var(--electric-tangerine); margin-bottom: 12px; font-weight: 600;">🔬 Active Measurement Criteria:</p>
+                <p>Every assignment changes your lab environment! You will pour liquids, scale lengths, calculate weights, and read real thermal elements.</p>
                 <br>
-                <p>👉 <strong>Drag and Drop</strong> the instrument straight into the dashed testing square to process the target item.</p>
+                <p>⚠️ <strong>Warning:</strong> The questions and answers shuffle randomly every single game to test your true skills!</p>
             </div>
-            <button class="cute-btn" onclick="startGame()">Play! 🎮</button>
+            <button class="cute-btn" onclick="initializeNewGameSession()">Launch Lab 🚀</button>
         </div>
 
-        <!-- SCREEN 4: Interactive Arena -->
+        <!-- SCREEN 4: Dynamic Gameplay Workspace -->
         <div id="game-screen" class="screen">
             <div id="game-header">
-                <div id="discipline-pill" class="hud-pill">Loading Lab...</div>
-                <div id="score-pill" class="hud-pill">⭐ Score: 0</div>
-                <div id="lives-bar">
-                    <span id="h1">❤️</span><span id="h2">❤️</span><span id="h3">❤️</span>
-                </div>
+                <div id="discipline-pill" class="hud-pill">Length Lab</div>
+                <div id="score-pill" class="hud-pill">⭐ Marks: 0</div>
+                <div id="round-pill" class="hud-pill">Progress: 1/12</div>
             </div>
 
             <div id="work-desk">
-                <!-- Question Block -->
-                <div class="problem-bubble" id="problem-text">Reading lab experiment details...</div>
+                <!-- Question text descriptor -->
+                <div class="problem-bubble" id="problem-text">Loading workspace variable parameters...</div>
                 
-                <!-- Central Droppable Target Box -->
-                <div id="testing-zone">
-                    <div id="visual-canvas-area"></div>
-                    <div id="drop-target-label">Drop Core Tool Here</div>
-                </div>
+                <!-- Central Interactive Lab Arena Sandbox (Changes structural content via JS injections) -->
+                <div id="lab-sandbox-arena"></div>
 
-                <!-- Interactive Shelf Component -->
-                <div id="tool-shelf-wrapper">
-                    <div class="shelf-title">Laboratory Tool Bench</div>
-                    <div id="tool-grid">
-                        
-                        <div class="draggable-tool-card" data-tool="Ruler" id="tool-ruler">
-                            <div class="tool-icon">📏</div>
-                            <div class="tool-name">Ruler</div>
-                        </div>
-
-                        <div class="draggable-tool-card" data-tool="Cylinder" id="tool-cylinder">
-                            <div class="tool-icon">🧪</div>
-                            <div class="tool-name">Cylinder</div>
-                        </div>
-
-                        <div class="draggable-tool-card" data-tool="Scale" id="tool-scale">
-                            <div class="tool-icon">⚖️</div>
-                            <div class="tool-name">Balance</div>
-                        </div>
-
-                        <div class="draggable-tool-card" data-tool="Thermometer" id="tool-thermometer">
-                            <div class="tool-icon">🌡️</div>
-                            <div class="tool-name">Thermometer</div>
-                        </div>
-
-                    </div>
-                </div>
+                <!-- Randomized Choice Node Elements -->
+                <div id="options-wrapper-grid"></div>
             </div>
         </div>
 
-        <!-- SCREEN 5: Score summary -->
+        <!-- SCREEN 5: Performance Evaluation Screen -->
         <div id="end-screen" class="screen">
-            <h1 id="end-title">Evaluation Complete</h1>
-            <p id="end-msg">Loading records...</p>
-            <button class="cute-btn" style="background: var(--electric-tangerine); box-shadow: 0 6px 0 #b45309;" onclick="startGame()">Research Again</button>
+            <h1 id="end-title">Lab Diagnosis</h1>
+            <p id="end-msg">Compiling metric records...</p>
+            <button class="cute-btn" style="background: var(--electric-tangerine); box-shadow: 0 6px 0 #b45309;" onclick="initializeNewGameSession()">Restart Evaluation</button>
         </div>
 
     </div>
 
-    <!-- AUDIO CHANNELS -->
+    <!-- NATIVE SYSTEM AUDIO ASSET PIPELINES -->
     <audio id="sound-bg" src="assets/acousticmusic.mp3" loop preload="auto"></audio>
     <audio id="sound-correct" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="sound-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="sound-victory" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <script>
-        // Game items mapped specifically to require one of the 4 key structural tools
-        const scientificDatabase = [
+        // Full comprehensive Grade 3 database containing 12 highly contextual metrics
+        const baseMasterDatabase = [
+            // LENGTH DISCIPLINE GROUP
             {
-                labType: "Length Lab",
-                targetTool: "Ruler",
-                visual: '<div class="vector-ruler"></div>',
-                problem: "Maya needs to find the length of a small school writing pencil accurately. Drag the correct measuring device to her workstation!"
+                labMode: "Length Lab",
+                mechanic: "length",
+                badge: "📏",
+                problem: "An engineer needs to sketch a small ladybug. What standard unit matches the length of this tiny insect?",
+                choices: ["Millimetres (mm)", "Metres (m)", "Kilometres (km)"],
+                answer: "Millimetres (mm)"
             },
             {
-                labType: "Capacity Lab",
-                targetTool: "Cylinder",
-                visual: '<div class="vector-cylinder"><div class="vector-water"></div></div>',
-                problem: "A chemistry teacher wants to isolate exactly 45mL of fluid compound for a classroom science experiment. Drop the correct container tool down."
+                labMode: "Length Lab",
+                mechanic: "length",
+                badge: "🚌",
+                problem: "Your school bus drives down a long road to pick up children. What unit tracks the actual length of a large bus?",
+                choices: ["Metres (m)", "Millimetres (mm)", "Grams (g)"],
+                answer: "Metres (m)"
             },
             {
-                labType: "Weight Lab",
-                targetTool: "Scale",
-                visual: '<div class="vector-scale"><div class="vector-pan"></div><div class="vector-pan"></div></div>',
-                problem: "Rohan needs to find out if a packet of dal from the supermarket shelf is heavy or light. Which tool balances weights to show mass?"
+                labMode: "Length Lab",
+                mechanic: "length",
+                badge: "🌍",
+                problem: "A high-speed train travels from New Delhi all the way to Mumbai. Which unit calculates this long distance?",
+                choices: ["Kilometres (km)", "Centimetres (cm)", "Litres (L)"],
+                answer: "Kilometres (km)"
+            },
+            // CAPACITY DISCIPLINE GROUP
+            {
+                labMode: "Capacity Lab",
+                mechanic: "capacity",
+                badge: "🧪",
+                problem: "You are pouring liquid medicine into a tiny dropper. What volume scale is used for very small amounts of liquid?",
+                choices: ["Millilitres (mL)", "Litres (L)", "Kilograms (kg)"],
+                answer: "Millilitres (mL)"
             },
             {
-                labType: "Temperature Lab",
-                targetTool: "Thermometer",
-                visual: '<div class="vector-thermometer"><div class="vector-mercury"></div></div>',
-                problem: "A student feels warm and unwell. The school nurse must check their thermal body heat in degrees Celsius (°C). Grab the correct tool."
+                labMode: "Capacity Lab",
+                mechanic: "capacity",
+                badge: "🪣",
+                problem: "A large bucket is filled to the top with soapy water to wash a car. What unit best measures this large volume?",
+                choices: ["Litres (L)", "Millilitres (mL)", "Metres (m)"],
+                answer: "Litres (L)"
+            },
+            {
+                labMode: "Capacity Lab",
+                mechanic: "capacity",
+                badge: "🥛",
+                problem: "Let's test fluid science parameters: How many Millilitres (mL) are required to create 1 full Litre (L)?",
+                choices: ["1,000 mL", "100 mL", "10 mL"],
+                answer: "1,000 mL"
+            },
+            // WEIGHT DISCIPLINE GROUP
+            {
+                labMode: "Weight Lab",
+                mechanic: "weight",
+                badge: "🪙",
+                problem: "You pick up a shiny copper coin from the table. It feels incredibly light! What unit tracks this small mass?",
+                choices: ["Grams (g)", "Kilograms (kg)", "Millilitres (mL)"],
+                answer: "Grams (g)"
+            },
+            {
+                labMode: "Weight Lab",
+                mechanic: "weight",
+                badge: "🍉",
+                problem: "Your mother brings home a massive, heavy whole watermelon from the market. Which unit tracks its weight?",
+                choices: ["Kilograms (kg)", "Grams (g)", "Centimetres (cm)"],
+                answer: "Kilograms (kg)"
+            },
+            {
+                labMode: "Weight Lab",
+                mechanic: "weight",
+                badge: "⚖️",
+                problem: "To balance a scale perfectly, how many standard Grams (g) equal exactly 1 Kilogram (kg)?",
+                choices: ["1,000 grams", "500 grams", "100 grams"],
+                answer: "1,000 grams"
+            },
+            // TEMPERATURE DISCIPLINE GROUP
+            {
+                labMode: "Temperature Lab",
+                mechanic: "temperature",
+                badge: "🌡️",
+                problem: "What scientific instrument is built to measure the speed of heat particles or thermal temperature?",
+                choices: ["Thermometer", "Common Balance", "Measuring Cylinder"],
+                answer: "Thermometer"
+            },
+            {
+                labMode: "Temperature Lab",
+                mechanic: "temperature",
+                badge: "🔥",
+                problem: "Water is heated on a stove until it bubbles intensely and converts to steam. What is the boiling point of pure water?",
+                choices: ["100°C", "0°C", "37°C"],
+                answer: "100°C"
+            },
+            {
+                labMode: "Temperature Lab",
+                mechanic: "temperature",
+                badge: "🧊",
+                problem: "Ice cubes are forming inside a deep freezer tray. At what metric temperature threshold does liquid water freeze?",
+                choices: ["0°C", "10°C", "100°C"],
+                answer: "0°C"
             }
         ];
 
-        let activeIndex = 0;
-        let score = 0;
-        let lives = 3;
-        let animationLock = false;
-
-        // Active tracking properties for Mobile Drag Coordinates
-        let activeDraggedNode = null;
-        let startX = 0;
-        let startY = 0;
+        // Runtime State Arrays
+        let randomizedActiveQueue = [];
+        let executionIndex = 0;
+        let runningScore = 0;
+        let interactiveLock = false;
+        let fluidIntervalTimer = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => { goToScreen('menu-screen'); }, 5000);
-            initializeDragMechanics();
+            setTimeout(() => { goToScreen('menu-screen'); }, 4000);
         });
 
         function goToScreen(id) {
@@ -435,197 +581,192 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function startGame() {
-            score = 0;
-            lives = 3;
-            activeIndex = 0;
-            animationLock = false;
-            updateHudDisplay();
-            loadLabExperiment();
+        // --- RANDOMIZATION ENGINE (Fisher-Yates Algorithm) ---
+        function shuffleAnyArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initializeNewGameSession() {
+            runningScore = 0;
+            executionIndex = 0;
+            interactiveLock = false;
+            
+            // Deep copy and fully randomize the order of the 12 master questions
+            randomizedActiveQueue = shuffleAnyArray(JSON.parse(JSON.stringify(baseMasterDatabase)));
+            
             playAudioTrack('sound-bg');
+            updateInterfaceHud();
+            renderActiveLabRound();
             goToScreen('game-screen');
         }
 
-        function loadLabExperiment() {
-            animationLock = false;
-            const currentItem = scientificDatabase[activeIndex];
+        function renderActiveLabRound() {
+            interactiveLock = false;
+            if(fluidIntervalTimer) clearInterval(fluidIntervalTimer);
+
+            const activeDataObj = randomizedActiveQueue[executionIndex];
             
-            document.getElementById('discipline-pill').innerText = currentItem.labType;
-            document.getElementById('problem-text').innerText = `Task ${activeIndex + 1}/${scientificDatabase.length}: ${currentItem.problem}`;
-            document.getElementById('visual-canvas-area').innerHTML = currentItem.visual;
-            
-            // Clear out any leftover visual flash configurations
-            const dropZone = document.getElementById('testing-zone');
-            dropZone.className = '';
-        }
+            // Set HUD elements
+            document.getElementById('discipline-pill').innerText = activeDataObj.labMode;
+            document.getElementById('round-pill').innerText = `Progress: ${executionIndex + 1}/12`;
+            document.getElementById('problem-text').innerText = activeDataObj.problem;
 
-        /* 
-           UNIVERSAL INPUT ENGINE
-           Combines desktop mouse drag-and-drop APIs with touch events for mobile devices.
-        */
-        function initializeDragMechanics() {
-            const tools = document.querySelectorAll('.draggable-tool-card');
-            const dropZone = document.getElementById('testing-zone');
+            // Inject the dedicated interactive sandbox layout container
+            injectSandboxMechanic(activeDataObj.mechanic);
 
-            // --- DESKTOP MOUSE EVENTS ---
-            tools.forEach(tool => {
-                tool.setAttribute('draggable', 'true');
-                tool.addEventListener('dragstart', (e) => {
-                    if (animationLock) { e.preventDefault(); return; }
-                    e.dataTransfer.setData('text/plain', tool.getAttribute('data-tool'));
-                });
-            });
+            // Shuffling multi-choice options dynamically
+            const shuffledChoices = shuffleAnyArray([...activeDataObj.choices]);
+            const optionsContainer = document.getElementById('options-wrapper-grid');
+            optionsContainer.innerHTML = '';
 
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                if (!animationLock) dropZone.classList.add('drag-over');
-            });
-
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('drag-over');
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('drag-over');
-                if (animationLock) return;
-
-                const droppedTool = e.dataTransfer.getData('text/plain');
-                evaluateDroppedTool(droppedTool);
-            });
-
-            // --- MOBILE / TABLET TOUCH ENGINE ---
-            tools.forEach(tool => {
-                tool.addEventListener('touchstart', handleTouchStart, { passive: false });
-                tool.addEventListener('touchmove', handleTouchMove, { passive: false });
-                tool.addEventListener('touchend', handleTouchEnd, { passive: false });
+            shuffledChoices.forEach(textChoice => {
+                const choiceBtn = document.createElement('button');
+                choiceBtn.className = 'action-choice-btn';
+                choiceBtn.innerHTML = `
+                    <span class="badge-icon">${activeDataObj.badge}</span>
+                    <span>${textChoice}</span>
+                `;
+                choiceBtn.onclick = () => evaluateUserSelection(choiceBtn, textChoice, activeDataObj.answer);
+                optionsContainer.appendChild(choiceBtn);
             });
         }
 
-        function handleTouchStart(e) {
-            if (animationLock) return;
-            activeDraggedNode = e.currentTarget;
-            const touchLocation = e.touches[0];
-            
-            // Record original layout placement coordinates
-            startX = touchLocation.clientX;
-            startY = touchLocation.clientY;
-            
-            activeDraggedNode.style.zIndex = '100';
-            activeDraggedNode.style.transition = 'none';
-        }
+        // Switches specific simulation graphic panels inside the workspace layout
+        function injectSandboxMechanic(type) {
+            const arena = document.getElementById('lab-sandbox-arena');
+            arena.innerHTML = '';
 
-        function handleTouchMove(e) {
-            if (!activeDraggedNode || animationLock) return;
-            e.preventDefault(); // Prevents modern phone screen scrolling mechanics while moving objects
-            
-            const touchLocation = e.touches[0];
-            const deltaX = touchLocation.clientX - startX;
-            const deltaY = touchLocation.clientY - startY;
-            
-            activeDraggedNode.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.1)`;
-        }
-
-        function handleTouchEnd(e) {
-            if (!activeDraggedNode) return;
-            
-            const dropZone = document.getElementById('testing-zone');
-            const zoneRect = dropZone.getBoundingClientRect();
-            
-            // Read terminal fingers end coordinate map pointers
-            const finalTouch = e.changedTouches[0];
-            const posX = finalTouch.clientX;
-            const posY = finalTouch.clientY;
-
-            // Simple boundary detection checking if coordinate pointer is over testing box
-            const isInsideTargetZone = (
-                posX >= zoneRect.left &&
-                posX <= zoneRect.right &&
-                posY >= zoneRect.top &&
-                posY <= zoneRect.bottom
-            );
-
-            // Clean inline transformations completely 
-            activeDraggedNode.style.transition = 'transform 0.2s ease';
-            activeDraggedNode.style.transform = 'none';
-            activeDraggedNode.style.zIndex = '1';
-
-            if (isInsideTargetZone && !animationLock) {
-                const toolName = activeDraggedNode.getAttribute('data-tool');
-                evaluateDroppedTool(toolName);
+            if (type === 'length') {
+                arena.innerHTML = `
+                    <div class="slider-wrapper">
+                        <div class="tape-display" id="tape-val">50m</div>
+                        <input type="range" class="custom-range" min="1" max="100" value="50" oninput="document.getElementById('tape-val').innerText = this.value + (executionIndex === 0 ? 'mm' : executionIndex === 1 ? 'm' : 'km')">
+                    </div>
+                `;
+            } else if (type === 'capacity') {
+                arena.innerHTML = `
+                    <div class="beaker-frame">
+                        <div class="beaker-liquid" id="liquid-pour"></div>
+                    </div>
+                    <button class="pour-btn" onmousedown="startPourLiquid()" onmouseup=\"stopPourLiquid()\" ontouchstart=\"startPourLiquid()\" ontouchend=\"stopPourLiquid()\">HOLD<br>POUR</button>
+                `;
+            } else if (type === 'weight') {
+                arena.innerHTML = `
+                    <div class="balance-base" id="scale-beam">
+                        <div class="pan-left">📦</div>
+                        <div class="pan-right" id="scale-weight-pan">❓</div>
+                        <div class="balance-pillar"></div>
+                    </div>
+                `;
+            } else if (type === 'temperature') {
+                arena.innerHTML = `
+                    <div class="thermo-layout-box">
+                        <div class="thermo-tube">
+                            <div class="thermo-mercury" id="mercury-line"></div>
+                            <div class="thermo-bulb"></div>
+                        </div>
+                        <input type="range" style="transform: rotate(-90deg); width: 120px;" min="10" max="100" value="25" oninput="document.getElementById('mercury-line').style.height = this.value + '%'">
+                    </div>
+                `;
             }
-
-            activeDraggedNode = null;
         }
 
-        // Core business logic computing answers on collision drops
-        function evaluateDroppedTool(toolName) {
-            animationLock = true;
-            const targetAnswer = scientificDatabase[activeIndex].targetTool;
-            const dropZone = document.getElementById('testing-zone');
+        // Handles pouring simulations for fluid labs
+        function startPourLiquid() {
+            if(interactiveLock) return;
+            const fluidNode = document.getElementById('liquid-pour');
+            let currentPctHeight = parseFloat(fluidNode.style.height) || 10;
+            
+            fluidIntervalTimer = setInterval(() => {
+                if(currentPctHeight < 90) {
+                    currentPctHeight += 2.5;
+                    fluidNode.style.height = currentPctHeight + '%';
+                }
+            }, 35);
+        }
+        function stopPourLiquid() { clearInterval(fluidIntervalTimer); }
 
-            if (toolName === targetAnswer) {
+        function evaluateUserSelection(buttonElement, clickedText, clearCorrectAnswer) {
+            if (interactiveLock) return;
+            interactiveLock = true;
+            clearInterval(fluidIntervalTimer);
+
+            // Animate physics changes right inside the interactive container view
+            triggerSandboxVisualResolution(clickedText === clearCorrectAnswer);
+
+            if (clickedText === clearCorrectAnswer) {
                 playAudioTrack('sound-correct');
-                dropZone.classList.add('correct-flash');
-                score += 20;
-                updateHudDisplay();
-
-                setTimeout(() => {
-                    activeIndex++;
-                    if (activeIndex < scientificDatabase.length) {
-                        loadLabExperiment();
-                    } else {
-                        triggerGameEnd(true);
-                    }
-                }, 1300);
-
+                buttonElement.classList.add('success-glow');
+                runningScore += 20;
+                updateInterfaceHud();
             } else {
                 playAudioTrack('sound-wrong');
-                dropZone.classList.add('wrong-flash');
-                lives--;
-                updateHudDisplay();
-
-                setTimeout(() => {
-                    dropZone.classList.remove('wrong-flash');
-                    if (lives <= 0) {
-                        triggerGameEnd(false);
-                    } else {
-                        // Advance to let them continue exploration mechanics
-                        activeIndex++;
-                        if (activeIndex < scientificDatabase.length) {
-                            loadLabExperiment();
-                        } else {
-                            triggerGameEnd(true);
-                        }
+                buttonElement.classList.add('fail-glow');
+                
+                // Expose the proper choice instantly
+                const children = document.getElementById('options-wrapper-grid').children;
+                for(let child of children) {
+                    if(child.innerText.includes(clearCorrectAnswer)) {
+                        child.classList.add('success-glow');
                     }
-                }, 1300);
+                }
+            }
+
+            // Move to next randomized question index systematically
+            setTimeout(() => {
+                executionIndex++;
+                if (executionIndex < randomizedActiveQueue.length) {
+                    renderActiveLabRound();
+                } else {
+                    displayFinalReportCard();
+                }
+            }, 1800);
+        }
+
+        // Triggers custom animations depending on whether the answer was correct or not
+        function triggerSandboxVisualResolution(isCorrect) {
+            const activeDataObj = randomizedActiveQueue[executionIndex];
+            
+            if(activeDataObj.mechanic === 'weight') {
+                const beam = document.getElementById('scale-beam');
+                const rightPan = document.getElementById('scale-weight-pan');
+                if(isCorrect) {
+                    beam.style.transform = 'rotate(0deg)';
+                    rightPan.innerText = '⚖️';
+                } else {
+                    beam.style.transform = 'rotate(-14deg)';
+                    rightPan.innerText = '❌';
+                }
+            }
+            if(activeDataObj.mechanic === 'capacity' && isCorrect) {
+                const fluidNode = document.getElementById('liquid-pour');
+                if (fluidNode) fluidNode.style.height = '70%';
+            }
+            if(activeDataObj.mechanic === 'temperature' && isCorrect) {
+                const mercuryNode = document.getElementById('mercury-line');
+                if (mercuryNode) mercuryNode.style.height = '85%';
             }
         }
 
-        function updateHudDisplay() {
-            document.getElementById('score-pill').innerText = `⭐ Score: ${score}`;
-            let heartString = '';
-            for(let i=0; i<3; i++) {
-                heartString += (i < lives) ? '❤️' : '🖤';
-            }
-            document.getElementById('lives-bar').innerHTML = heartString;
+        function updateInterfaceHud() {
+            document.getElementById('score-pill').innerText = `⭐ Marks: ${runningScore}`;
         }
 
-        function triggerGameEnd(isSuccess) {
+        function displayFinalReportCard() {
             const title = document.getElementById('end-title');
             const msg = document.getElementById('end-msg');
             
             const bgMusic = document.getElementById('sound-bg');
             if (bgMusic) bgMusic.pause();
+            playAudioTrack('sound-victory');
 
-            if (isSuccess && lives > 0) {
-                playAudioTrack('sound-victory');
-                title.innerText = "Lab Expert! 🏆";
-                msg.innerHTML = `Fantastic job! You matched all lab equipment accurately using manual mechanics.<br><br><strong>Final Score: ${score} Marks!</strong>`;
-            } else {
-                title.innerText = "Lab Closed! 🔬";
-                msg.innerHTML = `Keep practicing your instrument tracking!<br>You finished with <strong>${score} marks</strong>.`;
-            }
+            title.innerText = "Research Concluded!";
+            msg.innerHTML = `The dynamic 12-station lab circuit is complete!<br><br>Your Final Standing:<br><strong style="font-size:2rem; color:var(--neon-mint);">${runningScore} / 240 Total Marks</strong><br><br>Hit restart to get a completely new set of shuffled challenges.`;
+            
             goToScreen('end-screen');
         }
 
