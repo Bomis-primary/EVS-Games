@@ -385,23 +385,20 @@
         let activeSelectedTile = null;
         let interactiveLock = false;
         let quizWrongAttemptCounter = 0;
+        let questionsAnsweredInBatch = 0; // Tracks consecutive questions asked
 
-        // FIXED LOGIC: Triggers immediately after page is processed. No waiting for audio/images.
+        // Show Innovine Logo for exactly 5 seconds, then reveal Title Screen
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             const titleScreen = document.getElementById('title-screen');
             
-            // Set the title screen to visible so it is waiting underneath
             titleScreen.style.display = 'flex'; 
-            
-            // Trigger the fade animation
             splash.style.opacity = '0';
             
-            // Clean up the splash screen after fade completes
             setTimeout(() => {
                 splash.style.display = 'none';
             }, 400); 
-        }, 5000); // Wait 5 seconds to show the Innovine logo
+        }, 5000);
 
         function goToInstructions() {
             document.getElementById('title-screen').style.display = 'none';
@@ -410,7 +407,7 @@
 
         function bootstrapEnginePlay() {
             document.getElementById('instruction-screen').style.display = 'none';
-            shuffleUtility(textbookQAData);
+            shuffleUtility(textbookQAData); // Randomizes the 12 questions globally
             generateCandyBoard();
         }
 
@@ -562,7 +559,9 @@
                     setTimeout(() => { processBoardMatches(chainMatches); }, 300);
                 } else {
                     interactiveLock = false;
+                    // Trigger the batch of 3 questions every 3 matches
                     if (successfulMatchesCount > 0 && successfulMatchesCount % 3 === 0) {
+                        questionsAnsweredInBatch = 0; // Reset batch counter
                         triggerEVSQuestionGateway();
                     }
                 }
@@ -586,7 +585,7 @@
             holder.innerHTML = '';
 
             let scrambledChoices = [...currentQA.choices];
-            shuffleUtility(scrambledChoices);
+            shuffleUtility(scrambledChoices); // Randomizes the options for this question
 
             scrambledChoices.forEach(choice => {
                 const btn = document.createElement('button');
@@ -608,12 +607,21 @@
                 document.getElementById('runtime-score-label').innerText = runningScore;
 
                 quizIndexTracker++;
+                questionsAnsweredInBatch++; // Count successful answers in this batch
+
                 setTimeout(() => {
-                    document.getElementById('quiz-gateway-overlay').style.display = 'none';
                     if (quizIndexTracker >= 12) {
+                        // All 12 questions answered
+                        document.getElementById('quiz-gateway-overlay').style.display = 'none';
                         concludeMatchGameSession();
+                    } else if (questionsAnsweredInBatch < 3) {
+                        // Still need to ask more questions in this 3-question batch
+                        triggerEVSQuestionGateway();
+                    } else {
+                        // 3 questions answered, close overlay and return to game
+                        document.getElementById('quiz-gateway-overlay').style.display = 'none';
                     }
-                }, 1500);
+                }, 1000);
             } else {
                 quizWrongAttemptCounter++;
                 btnElement.disabled = true;
