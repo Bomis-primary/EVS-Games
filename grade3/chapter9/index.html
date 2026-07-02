@@ -312,7 +312,7 @@
         <div id="instruction-screen">
             <h2 style="margin-bottom: 14px; font-weight: 700; font-size: 1.8rem;">How To Play</h2>
             <p style="font-size: 1.25rem; line-height: 1.4; color: #6a4459; margin-bottom: 28px; padding: 0 10px;">
-                Swap colourful candy pieces to line up 3 matching items. Every 3 successful matches triggers a quick EVS challenge check card!
+                Swap colourful candy pieces to line up 3 matching items. Every 3 successful matches triggers a batch of 3 EVS challenge questions!
             </p>
             <button class="sweet-btn" onclick="bootstrapEnginePlay()">START</button>
         </div>
@@ -385,19 +385,15 @@
         let activeSelectedTile = null;
         let interactiveLock = false;
         let quizWrongAttemptCounter = 0;
-        let questionsAnsweredInBatch = 0; // Tracks consecutive questions asked
+        let questionsAnsweredInBatch = 0; 
 
-        // Show Innovine Logo for exactly 5 seconds, then reveal Title Screen
+        // Logo displays for 5s[cite: 1]
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             const titleScreen = document.getElementById('title-screen');
-            
             titleScreen.style.display = 'flex'; 
             splash.style.opacity = '0';
-            
-            setTimeout(() => {
-                splash.style.display = 'none';
-            }, 400); 
+            setTimeout(() => { splash.style.display = 'none'; }, 400); 
         }, 5000);
 
         function goToInstructions() {
@@ -407,7 +403,7 @@
 
         function bootstrapEnginePlay() {
             document.getElementById('instruction-screen').style.display = 'none';
-            shuffleUtility(textbookQAData); // Randomizes the 12 questions globally
+            shuffleUtility(textbookQAData); 
             generateCandyBoard();
         }
 
@@ -418,13 +414,10 @@
 
             for (let i = 0; i < matrixRows * matrixCols; i++) {
                 let randomCandy = candyPalette[Math.floor(Math.random() * candyPalette.length)];
-                
                 while (checkForInitialMatches(i, randomCandy)) {
                     randomCandy = candyPalette[Math.floor(Math.random() * candyPalette.length)];
                 }
-
                 boardStateArray.push(randomCandy);
-
                 const tile = document.createElement('div');
                 tile.className = 'grid-tile-item';
                 tile.id = `tile-${i}`;
@@ -438,7 +431,6 @@
         function checkForInitialMatches(index, candy) {
             let row = Math.floor(index / matrixCols);
             let col = index % matrixCols;
-            
             if (col >= 2) {
                 if (boardStateArray[index - 1] === candy && boardStateArray[index - 2] === candy) return true;
             }
@@ -451,14 +443,12 @@
         function onTileInteraction(tile) {
             if (interactiveLock) return;
             const targetIndex = parseInt(tile.dataset.index);
-
             if (!activeSelectedTile) {
                 activeSelectedTile = tile;
                 tile.classList.add('item-highlighted');
             } else {
                 const previousIndex = parseInt(activeSelectedTile.dataset.index);
                 activeSelectedTile.classList.remove('item-highlighted');
-
                 if (verifyAdjacency(previousIndex, targetIndex)) {
                     executeTileSwap(previousIndex, targetIndex);
                 }
@@ -474,13 +464,10 @@
 
         function executeTileSwap(idx1, idx2) {
             interactiveLock = true;
-            
             let temp = boardStateArray[idx1];
             boardStateArray[idx1] = boardStateArray[idx2];
             boardStateArray[idx2] = temp;
-
             updateBoardUI();
-
             setTimeout(() => {
                 let matchesFound = searchAllBoardMatches();
                 if (matchesFound.length > 0) {
@@ -503,7 +490,6 @@
 
         function searchAllBoardMatches() {
             let matchedIndices = new Set();
-
             for (let r = 0; r < matrixRows; r++) {
                 for (let c = 0; c < matrixCols - 2; c++) {
                     let base = r * matrixCols + c;
@@ -512,7 +498,6 @@
                     }
                 }
             }
-
             for (let c = 0; c < matrixCols; c++) {
                 for (let r = 0; r < matrixRows - 2; r++) {
                     let base = r * matrixCols + c;
@@ -527,41 +512,26 @@
         function processBoardMatches(indicesArray) {
             successfulMatchesCount++;
             document.getElementById('matches-countdown').innerText = Math.max(0, 3 - (successfulMatchesCount % 3));
-
-            indicesArray.forEach(idx => {
-                const el = document.getElementById(`tile-${idx}`);
-                el.innerText = '✨';
-            });
-
+            indicesArray.forEach(idx => { document.getElementById(`tile-${idx}`).innerText = '✨'; });
             document.getElementById('snd-correct').play().catch(()=>{});
-
             setTimeout(() => {
                 for (let c = 0; c < matrixCols; c++) {
                     let colValues = [];
                     for (let r = 0; r < matrixRows; r++) {
                         let base = r * matrixCols + c;
-                        if (!indicesArray.includes(base)) {
-                            colValues.push(boardStateArray[base]);
-                        }
+                        if (!indicesArray.includes(base)) { colValues.push(boardStateArray[base]); }
                     }
-                    while (colValues.length < matrixRows) {
-                        colValues.unshift(candyPalette[Math.floor(Math.random() * candyPalette.length)]);
-                    }
-                    for (let r = 0; r < matrixRows; r++) {
-                        boardStateArray[r * matrixCols + c] = colValues[r];
-                    }
+                    while (colValues.length < matrixRows) { colValues.unshift(candyPalette[Math.floor(Math.random() * candyPalette.length)]); }
+                    for (let r = 0; r < matrixRows; r++) { boardStateArray[r * matrixCols + c] = colValues[r]; }
                 }
-                
                 updateBoardUI();
-
                 let chainMatches = searchAllBoardMatches();
                 if (chainMatches.length > 0) {
                     setTimeout(() => { processBoardMatches(chainMatches); }, 300);
                 } else {
                     interactiveLock = false;
-                    // Trigger the batch of 3 questions every 3 matches
                     if (successfulMatchesCount > 0 && successfulMatchesCount % 3 === 0) {
-                        questionsAnsweredInBatch = 0; // Reset batch counter
+                        questionsAnsweredInBatch = 0; 
                         triggerEVSQuestionGateway();
                     }
                 }
@@ -573,20 +543,15 @@
                 concludeMatchGameSession();
                 return;
             }
-
             quizWrongAttemptCounter = 0;
             document.getElementById('quiz-inline-hint-panel').style.display = 'none';
-            
             const currentQA = textbookQAData[quizIndexTracker];
             document.getElementById('quiz-badge-step').innerText = `EVS CHALLENGE: ${quizIndexTracker + 1} / 12`;
             document.getElementById('quiz-question-header').innerText = currentQA.q;
-
             const holder = document.getElementById('quiz-options-holder');
             holder.innerHTML = '';
-
             let scrambledChoices = [...currentQA.choices];
-            shuffleUtility(scrambledChoices); // Randomizes the options for this question
-
+            shuffleUtility(scrambledChoices); 
             scrambledChoices.forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'quiz-choice-row-btn';
@@ -594,7 +559,6 @@
                 btn.onclick = () => verifyQuizSubmission(btn, choice, currentQA);
                 holder.appendChild(btn);
             });
-
             document.getElementById('quiz-gateway-overlay').style.display = 'flex';
         }
 
@@ -602,23 +566,17 @@
             if (selectedText === qaObject.answer) {
                 btnElement.classList.add('correct-glow');
                 document.getElementById('snd-correct').play().catch(()=>{});
-                
                 runningScore += 20;
                 document.getElementById('runtime-score-label').innerText = runningScore;
-
                 quizIndexTracker++;
-                questionsAnsweredInBatch++; // Count successful answers in this batch
-
+                questionsAnsweredInBatch++;
                 setTimeout(() => {
                     if (quizIndexTracker >= 12) {
-                        // All 12 questions answered
                         document.getElementById('quiz-gateway-overlay').style.display = 'none';
                         concludeMatchGameSession();
                     } else if (questionsAnsweredInBatch < 3) {
-                        // Still need to ask more questions in this 3-question batch
                         triggerEVSQuestionGateway();
                     } else {
-                        // 3 questions answered, close overlay and return to game
                         document.getElementById('quiz-gateway-overlay').style.display = 'none';
                     }
                 }, 1000);
@@ -627,15 +585,12 @@
                 btnElement.disabled = true;
                 btnElement.classList.add('wrong-glow');
                 document.getElementById('snd-wrong').play().catch(()=>{});
-
                 if (quizWrongAttemptCounter === 1) {
                     document.getElementById('hint-text-string').innerText = qaObject.hint;
                     document.getElementById('quiz-inline-hint-panel').style.display = 'block';
                 }
-
                 vitalHearts--;
                 renderHeartsHUD();
-
                 if (vitalHearts <= 0) {
                     setTimeout(() => {
                         document.getElementById('quiz-gateway-overlay').style.display = 'none';
@@ -656,11 +611,7 @@
         function concludeMatchGameSession() {
             document.getElementById('diagnostic-score-screen').style.display = 'flex';
             document.getElementById('snd-cheer').play().catch(()=>{});
-
-            if(vitalHearts <= 0) {
-                document.getElementById('game-end-emoji').innerText = '❌';
-            }
-
+            if(vitalHearts <= 0) { document.getElementById('game-end-emoji').innerText = '❌'; }
             document.getElementById('rep-answered').innerText = `${quizIndexTracker} / 12`;
             document.getElementById('rep-score').innerText = `${runningScore} Points`;
         }
