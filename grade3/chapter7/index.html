@@ -1,1 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Air, Water and Soil - Puzzle Adventure</title>
+    <!-- Beautiful, cute, child-friendly rounded font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #d4fc79 100%);
+            --primary-blue: #4a90e2;
+            --primary-green: #56ab2f;
+            --accent-yellow: #ffd166;
+            --coral-pink: #ff6b6b;
+            --text-dark: #2c3e50;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #74ebe7 0%, #48c6ef 40%, #6fd873 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Responsive Container */
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            max-height: 700px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 820px) {
+            #game-container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Screen 1: Splash Screen */
+        #splash-screen {
+            background: #ffffff;
+        }
+        #splash-screen img {
+            max-width: 70%;
+            max-height: 60%;
+            object-fit: contain;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Typography & Universal Cute Buttons */
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 3px 3px 0px var(--primary-blue), 5px 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        .cute-btn {
+            background: #ffffff;
+            color: var(--primary-blue);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.4rem;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0px #357abd, 0 15px 25px rgba(0,0,0,0.15);
+            transition: all 0.1s ease;
+            transform: translateY(0);
+        }
+
+        .cute-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0px #357abd, 0 5px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Screen 3: Instructions Box */
+        .info-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border: 3px dashed var(--primary-green);
+        }
+
+        .info-card p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        /* Screen 4: Gameplay Elements */
+        #game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .hud-item {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px 15px;
+            border-radius: 15px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        #lives-display {
+            display: flex;
+            gap: 5px;
+            font-size: 1.5rem;
+        }
+
+        .heart {
+            color: var(--coral-pink);
+            text-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .heart.lost {
+            transform: scale(0);
+            opacity: 0.3;
+        }
+
+        /* Puzzle Arena layout */
+        #puzzle-zone {
+            width: 280px;
+            height: 280px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.3);
+            border: 6px solid #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            overflow: hidden;
+            margin-top: 40px;
+        }
+
+        .puzzle-piece {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            border: 1px dashed rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.7);
+            transition: transform 0.2s ease, filter 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .puzzle-piece::before {
+            content: '?';
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            position: absolute;
+            z-index: 2;
+            transition: opacity 0.3s ease;
+        }
+
+        .puzzle-piece.solved::before {
+            opacity: 0;
+        }
+
+        .puzzle-piece:hover:not(.solved) {
+            transform: scale(1.02);
+            filter: brightness(1.05);
+        }
+
+        .puzzle-piece.solved {
+            cursor: default;
+            border: none;
+            background-color: transparent;
+        }
+
+        .puzzle-img-back {
+            position: absolute;
+            width: 268px; /* 280 - 12px borders */
+            height: 268px;
+            object-fit: cover;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .puzzle-piece.solved .puzzle-img-back {
+            opacity: 1;
+        }
+
+        /* Mapping piece grid corners */
+        #piece-0 .puzzle-img-back { top: 0; left: 0; }
+        #piece-1 .puzzle-img-back { top: 0; left: -134px; }
+        #piece-2 .puzzle-img-back { top: -134px; left: 0; }
+        #piece-3 .puzzle-img-back { top: -134px; left: -134px; }
+
+        /* Banner Popup Modal */
+        #question-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 15px;
+        }
+
+        #question-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-banner {
+            background: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 5px solid var(--accent-yellow);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        #question-modal.active .modal-banner {
+            transform: scale(1);
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background: #f0f4f8;
+            border: 3px solid #d0dbe5;
+            padding: 14px 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-radius: 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background: #e1e9f0;
+            border-color: var(--primary-blue);
+        }
+
+        /* Glowing Hint Mechanic */
+        .hint-box {
+            margin-top: 15px;
+            background: #fff9db;
+            border: 2px dashed #fcc419;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #665000;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+
+        .glow-hint {
+            animation: pulse-glow 1.5s infinite alternate;
+            border-color: #ffd166 !important;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px #ffd166; background-color: #fff9db; }
+            100% { box-shadow: 0 0 20px #fcc419; background-color: #fff3bf; }
+        }
+
+        /* Confetti Overlay Canvas */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 150;
+        }
+
+        /* Completion Screen Overlay */
+        .victory-title {
+            color: #fff;
+            text-shadow: 2px 2px 0px var(--primary-green);
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Canvas for full screen particle confetti explosions -->
+        <canvas id="confetti-canvas"></canvas>
+
+        <!-- SCREEN 1: Splash Screen (Innovine) -->
+        <div id="splash-screen" class="screen active">
+            <!-- Asset file loaded precisely as indexed in image_6ccb02.png -->
+            <img src="EVS-Games/grade3/chapter7/assets/innovine-logo.png" alt="Innovine Logo">
+        </div>
+
+        <!-- SCREEN 2: Main Menu Screen -->
+        <div id="menu-screen" class="screen">
+            <h1>Air, Water &amp; Soil<br>Puzzle Quest!</h1>
+            <button class="cute-btn" onclick="goToScreen('instructions-screen')">Start Game</button>
+        </div>
+
+        <!-- SCREEN 3: Instructions Screen -->
+        <div id="instructions-screen" class="screen">
+            <div class="info-card">
+                <p>🌟 <strong>How to Play:</strong></p>
+                <p>1. Click any blank puzzle box to see a secret question banenr.</p>
+                <p>2. Choose the correct answer to make magic confetti fly and reveal the hidden photo!</p>
+                <p>3. Watch out! You have 3 lives. Missing two answers back-to-back unlocks a glowing hint!</p>
+            </div>
+            <button class="cute-btn" onclick="startGame()">Play! 🎮</button>
+        </div>
+
+        <!-- SCREEN 4: Gameplay Screen -->
+        <div id="game-screen" class="screen">
+            <div id="game-header">
+                <div id="level-display" class="hud-item">Level 1: Air</div>
+                <div id="lives-display">
+                    <span class="heart" id="heart-1">❤️</span>
+                    <span class="heart" id="heart-2">❤️</span>
+                    <span class="heart" id="heart-3">❤️</span>
+                </div>
+            </div>
+
+            <!-- The puzzle building grid -->
+            <div id="puzzle-zone">
+                <div class="puzzle-piece" id="piece-0" onclick="clickPiece(0)"><img class="puzzle-img-back" id="img-0"></div>
+                <div class="puzzle-piece" id="piece-1" onclick="clickPiece(1)"><img class="puzzle-img-back" id="img-1"></div>
+                <div class="puzzle-piece" id="piece-2" onclick="clickPiece(2)"><img class="puzzle-img-back" id="img-2"></div>
+                <div class="puzzle-piece" id="piece-3" onclick="clickPiece(3)"><img class="puzzle-img-back" id="img-3"></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: Victory Level / Game Over State Screen -->
+        <div id="end-screen" class="screen">
+            <h2 id="end-title" class="victory-title">Level Complete!</h2>
+            <p id="end-message" style="color:white; margin-bottom:30px; font-size:1.2rem; text-align:center;"></p>
+            <button id="end-btn" class="cute-btn" onclick="handleEndAction()">Next Level</button>
+        </div>
+
+        <!-- POPUP MODAL BANNER FOR QUESTIONS -->
+        <div id="question-modal">
+            <div class="modal-banner">
+                <div class="question-text" id="modal-q-text">Question text goes here?</div>
+                <div class="options-container" id="modal-options">
+                    <!-- Dynamic option buttons injected here -->
+                </div>
+                <div class="hint-box" id="modal-hint-box">
+                    💡 <strong>Hint:</strong> <span id="modal-hint-text">Hint content...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO FILES COMPATIBLE WITH ASSETS SPECIFIED IN image_6ccb02.png -->
+    <audio id="snd-correct" src="EVS-Games/grade3/chapter7/assets/correct.mp3" preload="auto"></audio>
+    <audio id="snd-wrong" src="EVS-Games/grade3/chapter7/assets/wrong.mp3" preload="auto"></audio>
+    <audio id="snd-victory" src="EVS-Games/grade3/chapter7/assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <script>
+        // Data Configuration Object matching standard UK Grade 3 curriculum guidelines 
+        const gameData = {
+            levels: [
+                {
+                    name: "Level 1: Air",
+                    image: "EVS-Games/grade3/chapter7/assets/air.png",
+                    questions: [
+                        {
+                            q: "Rohan is trying to light a campfire on a windy day, so he completely blocks all sides of the wood with thick wooden boards. What will most likely happen to his fire?",
+                            options: ["It will slowly go out because it needs air to burn.", "It will grow much bigger instantly.", "It will change colour from orange to bright green."],
+                            correct: "It will slowly go out because it needs air to burn.",
+                            hint: "Think about what a fire needs to stay alive! If you trap it in a tight box with no air moving inside, it can't breathe."
+                        },
+                        {
+                            q: "Imagine trapping a small patch of clean air inside an empty jar. Even though your eyes cannot see anything inside, this invisible air is actually...",
+                            options: ["A mixture of different gases like Nitrogen and Oxygen.", "Only pure water drops and nothing else.", "Solid rock pieces floating around."],
+                            correct: "A mixture of different gases like Nitrogen and Oxygen.",
+                            hint: "Air isn't just one single thing! It is a big team of invisible gases working together to surround our planet."
+                        },
+                        {
+                            q: "Maya goes for a morning walk in a busy city centre full of packed traffic. Across town, Leo goes for a walk inside a thick forest. How does the air feel different for them?",
+                            options: ["Leo breathes in fresh, clean air, while Maya breathes in smoke and dust.", "Maya breathes in fresh air, while Leo breathes in vehicle smoke.", "Both of them breathe in exactly the same clean air."],
+                            correct: "Leo breathes in fresh, clean air, while Maya breathes in smoke and dust.",
+                            hint: "Think about what cars and factory chimneys release into the sky. Trees help clear this up, but heavy traffic makes the air dirty!"
+                        },
+                        {
+                            q: "A local school wants to reduce the amount of dirty exhaust gas in the air around their playground. Which plan helps them solve this best?",
+                            options: ["Asking parents to share cars or let children ride bicycles to school.", "Burning all the dry leaves in the school garden every afternoon.", "Using more aerosol spray cans inside the classrooms."],
+                            correct: "Asking parents to share cars or let children ride bicycles to school.",
+                            hint: "To keep the sky clean, we want fewer cars running on the road. Sharing a ride or pedalling on two wheels keeps nasty smoke away!"
+                        }
+                    ]
+                },
+                {
+                    name: "Level 2: Water",
+                    image: "EVS-Games/grade3/chapter7/assets/water.png",
+                    questions: [
+                        {
+                            q: "A satellite takes a clear photograph of our world from high up in space, and the picture shows that nearly the whole globe looks bright blue. This happens because...",
+                            options: ["Most of the Earth's surface is covered by deep oceans and seas.", "The land is covered in large blue flowers.", "The sky paints the grass blue every day."],
+                            correct: "Most of the Earth's surface is covered by deep oceans and seas.",
+                            hint: "Think about how much space huge oceans and rolling waves take up compared to the small patches of dry land we walk on!"
+                        },
+                        {
+                            q: "During a hot sunny afternoon, Aarav spills a small cup of water on the dry pavement outside. An hour later, the wet patch has completely disappeared. Where did the water go?",
+                            options: ["The warm sun heated it up and turned it into invisible water vapor gas.", "The water froze instantly into a solid block of clear ice.", "The water droplets grew wings and flew away as tiny birds."],
+                            correct: "The warm sun heated it up and turned it into invisible water vapor gas.",
+                            hint: "When liquid water gets warm, it changes its state and climbs up into the sky. This is called evaporation!"
+                        },
+                        {
+                            q: "Tiny, invisible water steam rises up from a lake and touches a freezing cold layer of air high up in the sky. What change will happen next?",
+                            options: ["It cools down and turns back into tiny liquid drops to create clouds.", "It stays as a gas and vanishes into outer space forever.", "It gets hotter and turns into dry soil particles."],
+                            correct: "It cools down and turns back into tiny liquid drops to create clouds.",
+                            hint: "Think about what happens when warm steam touches a cold mirror in the bathroom—it turns back into wet, watery drops!"
+                        },
+                        {
+                            q: "A village experiences heavy rain showers every week, but during the summer, their wells dry up. How can they use their textbook lessons to save water for the dry months?",
+                            options: ["By setting up pipes on roofs to collect and store rainwater in large tanks.", "By letting all the taps run continuously throughout the day.", "By boiling all the lake water until it disappears."],
+                            correct: "By setting up pipes on roofs to collect and store rainwater in large tanks.",
+                            hint: "They need a smart system to catch the heavy rain falling on their homes before it runs away into the dirt!"
+                        }
+                    ]
+                },
+                {
+                    name: "Level 3: Soil",
+                    image: "EVS-Games/grade3/chapter7/assets/soil.png",
+                    questions: [
+                        {
+                            q: "Strong wind blows against a giant mountain, and heavy rain pours down on its rocks for hundreds of years. Over a very long time, these rocks will...",
+                            options: ["Slowly crack and break down to form new, soft soil.", "Turn into fluffy white clouds and float away.", "Melt down into liquid water and disappear."],
+                            correct: "Slowly crack and break down to form new, soft soil.",
+                            hint: "Nature uses the sun, wind, and rain like a slow hammer, grinding hard boulders down into fine powder over millions of years!"
+                        },
+                        {
+                            q: "Diya wants to mold a mini toy house and a cute clay pot for her art class. She needs a type of soil that holds shapes perfectly and feels very sticky when she adds water. Which soil should she dig up?",
+                            options: ["Sticky Clayey Soil from the riverbank.", "Grainy Sandy Soil from the beach.", "Powdery Loamy Soil from the farm."],
+                            correct: "Sticky Clayey Soil from the riverbank.",
+                            hint: "Think about which soil particles press together so tightly that they trap water and turn into a squishy paste, perfect for bricks and pottery!"
+                        },
+                        {
+                            q: "A farmer wants to grow healthy, strong wheat plants. He needs a soil that contains lots of dead leaves and plant nutrients (humus), allows air inside, and doesn't get completely flooded. Which soil is best?",
+                            options: ["Balanced Loamy Soil because it is the perfect mix for plant roots.", "Pure Sandy Soil because it drains all the water away instantly.", "Tightly packed Clayey Soil because it is very hard and sticky."],
+                            correct: "Balanced Loamy Soil because it is the perfect mix for plant roots.",
+                            hint: "The ideal soil for gardening is a super-balanced mixture. It holds just enough water for drinking, but leaves enough air pockets for roots to breathe!"
+                        },
+                        {
+                            q: "If a heavy machine drives over a garden and packs the soil down so hard that all the tiny air holes and water spaces are crushed, what will happen to the earthworms living inside?",
+                            options: ["They will struggle to breathe and find food because their shelter is ruined.", "They will build houses out of bricks and stay happy.", "They will quickly turn into tiny insects and fly away."],
+                            correct: "They will struggle to breathe and find food because their shelter is ruined.",
+                            hint: "Earthworms need loose, healthy soil with plenty of spaces to crawl through, breathe air, and find bits of nutrients to stay alive."
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Game State Variables
+        let currentLevelIndex = 0;
+        let lives = 3;
+        let consecutiveWrongCount = 0;
+        let selectedPieceIndex = null;
+        let activeLevelQuestions = [];
+        let solvedPieces = [false, false, false, false];
+
+        // Confetti Canvas System
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 5 Second Hold for Innovine Splash Screen Layout
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                goToScreen('menu-screen');
+            }, 5000);
+        });
+
+        function goToScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startGame() {
+            currentLevelIndex = 0;
+            lives = 3;
+            updateLivesUI();
+            loadLevel(currentLevelIndex);
+            goToScreen('game-screen');
+        }
+
+        // Setup Level Architecture with Randomisation
+        function loadLevel(levelIdx) {
+            const level = gameData.levels[levelIdx];
+            document.getElementById('level-display').innerText = level.name;
+            consecutiveWrongCount = 0;
+            solvedPieces = [false, false, false, false];
+
+            // Shuffling and randomising assignment maps
+            activeLevelQuestions = [...level.questions];
+            shuffleArray(activeLevelQuestions);
+
+            // Populate background puzzle partition references
+            for(let i=0; i<4; i++) {
+                const pieceNode = document.getElementById(`piece-${i}`);
+                pieceNode.classList.remove('solved');
+                const imgNode = document.getElementById(`img-${i}`);
+                imgNode.src = level.image;
+            }
+        }
+
+        function clickPiece(index) {
+            if (solvedPieces[index]) return;
+            selectedPieceIndex = index;
+            
+            const questionData = activeLevelQuestions[index];
+            document.getElementById('modal-q-text').innerText = questionData.q;
+            
+            // Randomise multiple choice options sequence mapping
+            let optionsShuffled = [...questionData.options];
+            shuffleArray(optionsShuffled);
+
+            const optionsContainer = document.getElementById('modal-options');
+            optionsContainer.innerHTML = '';
+
+            optionsShuffled.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, questionData.correct, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Evaluate Back-To-Back Wrong Answer Metrics for Help Glowing Output Trigger
+            const hintBox = document.getElementById('modal-hint-box');
+            if (consecutiveWrongCount >= 2) {
+                document.getElementById('modal-hint-text').innerText = questionData.hint;
+                hintBox.style.display = 'block';
+                // Make correct answer option button glow inside the view
+                Array.from(optionsContainer.children).forEach(button => {
+                    if (button.innerText === questionData.correct) {
+                        button.classList.add('glow-hint');
+                    }
+                });
+            } else {
+                hintBox.style.display = 'none';
+            }
+
+            document.getElementById('question-modal').classList.add('active');
+        }
+
+        function checkAnswer(chosen, correct, clickedButton) {
+            const modal = document.getElementById('question-modal');
+            
+            if (chosen === correct) {
+                // Correct answer selected -> Fire confetti trigger
+                playSound('snd-correct');
+                consecutiveWrongCount = 0;
+                solvedPieces[selectedPieceIndex] = true;
+                document.getElementById(`piece-${selectedPieceIndex}`).classList.add('solved');
+                
+                modal.classList.remove('active');
+                triggerConfettiExplosion();
+                
+                // Assess if board partition quadrant grid complete
+                if (solvedPieces.every(p => p === true)) {
+                    setTimeout(triggerLevelComplete, 1200);
+                }
+            } else {
+                // Incorrect answer selected
+                playSound('snd-wrong');
+                consecutiveWrongCount++;
+                lives--;
+                updateLivesUI();
+                modal.classList.remove('active');
+
+                if (lives <= 0) {
+                    setTimeout(triggerGameOver, 600);
+                }
+            }
+        }
+
+        function updateLivesUI() {
+            for (let i = 1; i <= 3; i++) {
+                const heart = document.getElementById(`heart-${i}`);
+                if (i <= lives) {
+                    heart.classList.remove('lost');
+                } else {
+                    heart.classList.add('lost');
+                }
+            }
+        }
+
+        function triggerLevelComplete() {
+            playSound('snd-victory');
+            const endTitle = document.getElementById('end-title');
+            const endMessage = document.getElementById('end-message');
+            const endBtn = document.getElementById('end-btn');
+
+            endTitle.innerText = "Fantastic Job! 🎉";
+            endMessage.innerText = `You revealed the beautiful picture for ${gameData.levels[currentLevelIndex].name}!`;
+            
+            if (currentLevelIndex < gameData.levels.length - 1) {
+                endBtn.innerText = "Next Level";
+            } else {
+                endBtn.innerText = "Play Again";
+            }
+            goToScreen('end-screen');
+        }
+
+        function triggerGameOver() {
+            const endTitle = document.getElementById('end-title');
+            const endMessage = document.getElementById('end-message');
+            const endBtn = document.getElementById('end-btn');
+
+            endTitle.innerText = "Game Over! 🎈";
+            endMessage.innerText = "Don't worry, nature takes time! Let's try again to solve the puzzles.";
+            endBtn.innerText = "Restart Game";
+            goToScreen('end-screen');
+        }
+
+        function handleEndAction() {
+            const btnText = document.getElementById('end-btn').innerText;
+            if (btnText === "Next Level") {
+                currentLevelIndex++;
+                loadLevel(currentLevelIndex);
+                goToScreen('game-screen');
+            } else {
+                startGame();
+            }
+        }
+
+        // Robust cross-browser HTML5 Audio playback helper
+        function playSound(id) {
+            const aud = document.getElementById(id);
+            if (aud) {
+                aud.currentTime = 0;
+                aud.play().catch(() => { /* Handle silent safari mobile restrictions safely */ });
+            }
+        }
+
+        // Utility Arrays Shuffling Randomizer Utility (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // High Performance lightweight particle canvas loop for rendering Confetti
+        function triggerConfettiExplosion() {
+            const colors = ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#ffffff'];
+            for (let i = 0; i < 80; i++) {
+                confettiParticles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.7) * 14,
+                    size: Math.random() * 8 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = confettiParticles.length - 1; i >= 0; i--) {
+                const p = confettiParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.3; // Gravity pull force acceleration
+                p.rotation += p.rotationSpeed;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+
+                // Drop off-screen array clean elements up safely
+                if (p.y > canvas.height || p.x < 0 || p.x > canvas.width) {
+                    confettiParticles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateConfetti);
+        }
+        requestAnimationFrame(animateConfetti);
+    </script>
+</body>
+</html>
