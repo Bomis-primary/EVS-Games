@@ -156,7 +156,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 20px;
+            padding: 15px 20px;
             position: absolute;
             top: 0;
             left: 0;
@@ -192,27 +192,28 @@
             opacity: 0.3;
         }
 
-        /* Puzzle Arena layout */
+        /* Fully Dynamic & Scaling Puzzle Arena */
         #puzzle-zone {
-            width: 280px;
-            height: 280px;
+            width: 85vw;
+            max-width: 420px;
+            aspect-ratio: 1 / 1;
             position: relative;
             background: rgba(255, 255, 255, 0.3);
             border: 6px solid #fff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 20px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.18);
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(2, 1fr);
             overflow: hidden;
-            margin-top: 40px;
+            margin-top: 50px;
         }
 
         .puzzle-piece {
             position: relative;
             cursor: pointer;
             overflow: hidden;
-            border: 1px dashed rgba(255, 255, 255, 0.5);
+            border: 1.5px dashed rgba(255, 255, 255, 0.6);
             background-color: rgba(255, 255, 255, 0.7);
             transition: transform 0.2s ease, filter 0.3s ease;
             display: flex;
@@ -222,12 +223,13 @@
 
         .puzzle-piece::before {
             content: '?';
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             color: var(--primary-blue);
             position: absolute;
             z-index: 2;
             transition: opacity 0.3s ease;
+            text-shadow: 1px 1px 4px rgba(255,255,255,0.8);
         }
 
         .puzzle-piece.solved::before {
@@ -245,10 +247,11 @@
             background-color: transparent;
         }
 
+        /* Fluidly responsive multi-quadrant image layout */
         .puzzle-img-back {
             position: absolute;
-            width: 268px; /* 280 - 12px borders */
-            height: 268px;
+            width: 200%;
+            height: 200%;
             object-fit: cover;
             pointer-events: none;
             opacity: 0;
@@ -259,11 +262,11 @@
             opacity: 1;
         }
 
-        /* Mapping piece grid corners */
+        /* Shift the full-size images using pure percentages to guarantee a perfect fit */
         #piece-0 .puzzle-img-back { top: 0; left: 0; }
-        #piece-1 .puzzle-img-back { top: 0; left: -134px; }
-        #piece-2 .puzzle-img-back { top: -134px; left: 0; }
-        #piece-3 .puzzle-img-back { top: -134px; left: -134px; }
+        #piece-1 .puzzle-img-back { top: 0; left: -100%; }
+        #piece-2 .puzzle-img-back { top: -100%; left: 0; }
+        #piece-3 .puzzle-img-back { top: -100%; left: -100%; }
 
         /* Banner Popup Modal */
         #question-modal {
@@ -399,7 +402,6 @@
 
         <!-- SCREEN 1: Splash Screen (Innovine) -->
         <div id="splash-screen" class="screen active">
-            <!-- Short relative asset path to correctly locate file -->
             <img src="assets/innovine-logo.png" alt="Innovine Logo">
         </div>
 
@@ -431,7 +433,7 @@
                 </div>
             </div>
 
-            <!-- The puzzle building grid -->
+            <!-- Optimized Grid Layout Container for Full Visibility -->
             <div id="puzzle-zone">
                 <div class="puzzle-piece" id="piece-0" onclick="clickPiece(0)"><img class="puzzle-img-back" id="img-0"></div>
                 <div class="puzzle-piece" id="piece-1" onclick="clickPiece(1)"><img class="puzzle-img-back" id="img-1"></div>
@@ -461,13 +463,13 @@
         </div>
     </div>
 
-    <!-- AUDIO FILES UPDATED WITH CORRECT RELATIVE ASSET FOLDER SCHEME -->
+    <!-- AUDIO FILES -->
     <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="snd-victory" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <script>
-        // Updated Data Configuration with direct relative folder linking
+        // Data Configuration
         const gameData = {
             levels: [
                 {
@@ -583,7 +585,7 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // 5 Second Hold for Innovine Splash Screen Layout
+        // 5 Second Splash Intro Holds
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 goToScreen('menu-screen');
