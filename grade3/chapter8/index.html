@@ -10,23 +10,6 @@
     
     <style>
         :root {
-            --neon-mint: #10bHere is the fully upgraded, modular code. It builds the 4 completely distinct interactive mini-game arenas directly inside the central canvas, links them to the randomized 12-question engine, and handles all the visual states (pouring, balancing, stretching, and heating) based on what type of science lab is active.
-
-You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantly on any computer, tablet, or smartphone.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Ultimate Interactive Measurement Lab</title>
-    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-    <link href="[https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap)" rel="stylesheet">
-    
-    <style>
-        :root {
             --neon-mint: #10b981;
             --electric-tangerine: #f59e0b;
             --coral-pink: #ef476f;
@@ -74,46 +57,44 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             }
         }
 
+        /* FIXED STRUCTURAL SCREEN MANAGEMENT */
         .screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
+            display: none; /* Changed from opacity to none to keep text from stacking up */
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 24px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+            padding: 28px;
+            text-align: center;
         }
 
         .screen.active {
-            opacity: 1;
-            pointer-events: auto;
+            display: flex; /* Dynamically renders only the active block */
             z-index: 10;
         }
 
-        /* Splash Screen */
+        /* Splash Screen Branding Layer */
         #splash-screen { background: #ffffff; }
-        #splash-screen img { max-width: 60%; max-height: 45%; object-fit: contain; }
+        #splash-screen img { max-width: 70%; max-height: 45%; object-fit: contain; margin-bottom: 20px; }
 
         h1 {
-            font-size: 2.8rem;
+            font-size: 2.6rem;
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             text-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
-            line-height: 1.15;
+            line-height: 1.2;
         }
 
         .cute-btn {
             background: var(--neon-mint);
             color: white;
             border: none;
-            padding: 16px 48px;
-            font-size: 1.4rem;
+            padding: 16px 44px;
+            font-size: 1.35rem;
             font-weight: 700;
             border-radius: 50px;
             cursor: pointer;
@@ -133,7 +114,7 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             justify-content: space-between;
             align-items: center;
             padding: 16px;
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.85);
             position: absolute;
             top: 0;
             left: 0;
@@ -142,7 +123,7 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
         }
 
         .hud-pill {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
             background: rgba(255, 255, 255, 0.12);
             padding: 6px 14px;
@@ -163,11 +144,11 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 20px;
-            padding: 16px;
+            padding: 18px;
             text-align: center;
             font-size: 1.1rem;
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.45;
             box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
         }
 
@@ -395,7 +376,7 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             box-shadow: 0 0 15px rgba(239, 71, 111, 0.4);
         }
 
-        #end-screen p { font-size: 1.3rem; text-align: center; margin-bottom: 32px; color: #cbd5e1; }
+        #end-screen p { font-size: 1.3rem; text-align: center; margin-bottom: 32px; color: #cbd5e1; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -404,23 +385,23 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
         
         <!-- SCREEN 1: Branding Splash Preloader -->
         <div id="splash-screen" class="screen active">
+            <!-- Fixed fallback logic so layout centers perfectly regardless of missing local image paths -->
             <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('alt-logo-text').style.display='block';">
-            <h2 id="alt-logo-text" style="color: #1e1b4b; display:none; font-size: 2.5rem; font-weight:700;">Innovine</h2>
+            <h2 id="alt-logo-text" style="color: #1e1b4b; display:none; font-size: 3rem; font-weight:700; letter-spacing: 1px;">INNOVINE<br><span style="font-size:1.5rem; font-weight:400; color:#475569;">SOLUTIONS</span></h2>
         </div>
 
         <!-- SCREEN 2: Main Menu -->
         <div id="menu-screen" class="screen">
-            <h1>The Adaptive<br>Science Lab!</h1>
+            <h1 style="color: var(--purple-glow);">The Adaptive<br>Science Lab!</h1>
             <button class="cute-btn" onclick="goToScreen('instructions-screen')">Start Journey</button>
         </div>
 
         <!-- SCREEN 3: Educational Context Overview -->
         <div id="instructions-screen" class="screen">
-            <div style="background: rgba(255,255,255,0.08); padding: 24px; border-radius: 24px; margin-bottom: 32px; line-height: 1.5;">
-                <p style="font-size: 1.25rem; color: var(--electric-tangerine); margin-bottom: 12px; font-weight: 600;">🔬 Active Measurement Criteria:</p>
-                <p>Every assignment changes your lab environment! You will pour liquids, scale lengths, calculate weights, and read real thermal elements.</p>
-                <br>
-                <p>⚠️ <strong>Warning:</strong> The questions and answers shuffle randomly every single game to test your true skills!</p>
+            <div style="background: rgba(255,255,255,0.06); padding: 24px; border-radius: 24px; margin-bottom: 32px; text-align: left; border: 1px solid rgba(255,255,255,0.12);">
+                <p style="font-size: 1.3rem; color: var(--electric-tangerine); margin-bottom: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">🔬 Active Measurement Criteria:</p>
+                <p style="font-size: 1.05rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 16px;">Every assignment changes your lab environment! You will pour liquids, scale lengths, calculate weights, and read real thermal elements.</p>
+                <p style="font-size: 1.05rem; line-height: 1.5; color: #cbd5e1;">⚠️ <strong>Warning:</strong> The questions and answers shuffle randomly every single game to test your true skills!</p>
             </div>
             <button class="cute-btn" onclick="initializeNewGameSession()">Launch Lab 🚀</button>
         </div>
@@ -434,13 +415,12 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             </div>
 
             <div id="work-desk">
-                <!-- Question text descriptor -->
                 <div class="problem-bubble" id="problem-text">Loading workspace variable parameters...</div>
                 
-                <!-- Central Interactive Lab Arena Sandbox (Changes structural content via JS injections) -->
+                <!-- Central Simulation Container -->
                 <div id="lab-sandbox-arena"></div>
 
-                <!-- Randomized Choice Node Elements -->
+                <!-- Interactive Multi-choice Buttons -->
                 <div id="options-wrapper-grid"></div>
             </div>
         </div>
@@ -454,16 +434,14 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
 
     </div>
 
-    <!-- NATIVE SYSTEM AUDIO ASSET PIPELINES -->
+    <!-- AUDIO ASSET RUNTIME PIPELINES -->
     <audio id="sound-bg" src="assets/acousticmusic.mp3" loop preload="auto"></audio>
     <audio id="sound-correct" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="sound-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="sound-victory" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <script>
-        // Full comprehensive Grade 3 database containing 12 highly contextual metrics
         const baseMasterDatabase = [
-            // LENGTH DISCIPLINE GROUP
             {
                 labMode: "Length Lab",
                 mechanic: "length",
@@ -488,7 +466,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
                 choices: ["Kilometres (km)", "Centimetres (cm)", "Litres (L)"],
                 answer: "Kilometres (km)"
             },
-            // CAPACITY DISCIPLINE GROUP
             {
                 labMode: "Capacity Lab",
                 mechanic: "capacity",
@@ -513,7 +490,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
                 choices: ["1,000 mL", "100 mL", "10 mL"],
                 answer: "1,000 mL"
             },
-            // WEIGHT DISCIPLINE GROUP
             {
                 labMode: "Weight Lab",
                 mechanic: "weight",
@@ -538,7 +514,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
                 choices: ["1,000 grams", "500 grams", "100 grams"],
                 answer: "1,000 grams"
             },
-            // TEMPERATURE DISCIPLINE GROUP
             {
                 labMode: "Temperature Lab",
                 mechanic: "temperature",
@@ -565,23 +540,23 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             }
         ];
 
-        // Runtime State Arrays
         let randomizedActiveQueue = [];
         let executionIndex = 0;
         let runningScore = 0;
         let interactiveLock = false;
         let fluidIntervalTimer = null;
 
+        // Auto transition out of logo screen
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => { goToScreen('menu-screen'); }, 4000);
+            setTimeout(() => { goToScreen('menu-screen'); }, 3000);
         });
 
+        // FIXED DISPLAY CONTAINER ROUTER
         function goToScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'flex';
         }
 
-        // --- RANDOMIZATION ENGINE (Fisher-Yates Algorithm) ---
         function shuffleAnyArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -595,7 +570,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             executionIndex = 0;
             interactiveLock = false;
             
-            // Deep copy and fully randomize the order of the 12 master questions
             randomizedActiveQueue = shuffleAnyArray(JSON.parse(JSON.stringify(baseMasterDatabase)));
             
             playAudioTrack('sound-bg');
@@ -610,15 +584,12 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
 
             const activeDataObj = randomizedActiveQueue[executionIndex];
             
-            // Set HUD elements
             document.getElementById('discipline-pill').innerText = activeDataObj.labMode;
             document.getElementById('round-pill').innerText = `Progress: ${executionIndex + 1}/12`;
             document.getElementById('problem-text').innerText = activeDataObj.problem;
 
-            // Inject the dedicated interactive sandbox layout container
             injectSandboxMechanic(activeDataObj.mechanic);
 
-            // Shuffling multi-choice options dynamically
             const shuffledChoices = shuffleAnyArray([...activeDataObj.choices]);
             const optionsContainer = document.getElementById('options-wrapper-grid');
             optionsContainer.innerHTML = '';
@@ -635,7 +606,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             });
         }
 
-        // Switches specific simulation graphic panels inside the workspace layout
         function injectSandboxMechanic(type) {
             const arena = document.getElementById('lab-sandbox-arena');
             arena.innerHTML = '';
@@ -643,8 +613,8 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             if (type === 'length') {
                 arena.innerHTML = `
                     <div class="slider-wrapper">
-                        <div class="tape-display" id="tape-val">50m</div>
-                        <input type="range" class="custom-range" min="1" max="100" value="50" oninput="document.getElementById('tape-val').innerText = this.value + (executionIndex === 0 ? 'mm' : executionIndex === 1 ? 'm' : 'km')">
+                        <div class="tape-display" id="tape-val">50</div>
+                        <input type="range" class="custom-range" min="1" max="100" value="50" oninput="document.getElementById('tape-val').innerText = this.value">
                     </div>
                 `;
             } else if (type === 'capacity') {
@@ -652,11 +622,11 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
                     <div class="beaker-frame">
                         <div class="beaker-liquid" id="liquid-pour"></div>
                     </div>
-                    <button class="pour-btn" onmousedown="startPourLiquid()" onmouseup=\"stopPourLiquid()\" ontouchstart=\"startPourLiquid()\" ontouchend=\"stopPourLiquid()\">HOLD<br>POUR</button>
+                    <button class="pour-btn" onmousedown="startPourLiquid()" onmouseup="stopPourLiquid()" ontouchstart="startPourLiquid()" ontouchend="stopPourLiquid()">HOLD<br>POUR</button>
                 `;
             } else if (type === 'weight') {
                 arena.innerHTML = `
-                    <div class="balance-base" id="scale-beam">
+                    <div class="balance-base" id="scale-beam" style="transform: rotate(12deg);">
                         <div class="pan-left">📦</div>
                         <div class="pan-right" id="scale-weight-pan">❓</div>
                         <div class="balance-pillar"></div>
@@ -666,7 +636,7 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
                 arena.innerHTML = `
                     <div class="thermo-layout-box">
                         <div class="thermo-tube">
-                            <div class="thermo-mercury" id="mercury-line"></div>
+                            <div class="thermo-mercury" id="mercury-line" style="height: 25%;"></div>
                             <div class="thermo-bulb"></div>
                         </div>
                         <input type="range" style="transform: rotate(-90deg); width: 120px;" min="10" max="100" value="25" oninput="document.getElementById('mercury-line').style.height = this.value + '%'">
@@ -675,7 +645,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             }
         }
 
-        // Handles pouring simulations for fluid labs
         function startPourLiquid() {
             if(interactiveLock) return;
             const fluidNode = document.getElementById('liquid-pour');
@@ -695,7 +664,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             interactiveLock = true;
             clearInterval(fluidIntervalTimer);
 
-            // Animate physics changes right inside the interactive container view
             triggerSandboxVisualResolution(clickedText === clearCorrectAnswer);
 
             if (clickedText === clearCorrectAnswer) {
@@ -707,7 +675,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
                 playAudioTrack('sound-wrong');
                 buttonElement.classList.add('fail-glow');
                 
-                // Expose the proper choice instantly
                 const children = document.getElementById('options-wrapper-grid').children;
                 for(let child of children) {
                     if(child.innerText.includes(clearCorrectAnswer)) {
@@ -716,7 +683,6 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
                 }
             }
 
-            // Move to next randomized question index systematically
             setTimeout(() => {
                 executionIndex++;
                 if (executionIndex < randomizedActiveQueue.length) {
@@ -727,19 +693,20 @@ You can save this as an `.html` file (e.g., `lab_game.html`) and run it instantl
             }, 1800);
         }
 
-        // Triggers custom animations depending on whether the answer was correct or not
         function triggerSandboxVisualResolution(isCorrect) {
             const activeDataObj = randomizedActiveQueue[executionIndex];
             
             if(activeDataObj.mechanic === 'weight') {
                 const beam = document.getElementById('scale-beam');
                 const rightPan = document.getElementById('scale-weight-pan');
-                if(isCorrect) {
-                    beam.style.transform = 'rotate(0deg)';
-                    rightPan.innerText = '⚖️';
-                } else {
-                    beam.style.transform = 'rotate(-14deg)';
-                    rightPan.innerText = '❌';
+                if(beam) {
+                    if(isCorrect) {
+                        beam.style.transform = 'rotate(0deg)';
+                        rightPan.innerText = '⚖️';
+                    } else {
+                        beam.style.transform = 'rotate(-14deg)';
+                        rightPan.innerText = '❌';
+                    }
                 }
             }
             if(activeDataObj.mechanic === 'capacity' && isCorrect) {
