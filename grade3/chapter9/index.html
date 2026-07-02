@@ -1,1 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Inventors' Workshop: Forces & Phenomena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --steam-brass: #d4af37;
+            --steam-copper: #b87333;
+            --steam-bronze: #cd7f32;
+            --parchment: #f4ecd8;
+            --ink-dark: #2c1d11;
+            --glow-amber: #ff9f1c;
+            --glow-green: #2ec4b6;
+            --glow-red: #e71d36;
+            --workshop-bg: #1a120b;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--workshop-bg);
+            background-image: radial-gradient(circle at center, #2c1e13 0%, #120a05 100%);
+            color: var(--ink-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            overflow-x: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 680px;
+            height: 620px;
+            background: #eedebe;
+            border: 10px double var(--steam-copper);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(44, 29, 17, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 1. INNOVINE LOGO SPLASH */
+        #splash-screen {
+            position: absolute;
+            inset: 0;
+            background: #0d0906;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        #splash-screen img {
+            max-width: 220px;
+            width: 80%;
+            height: auto;
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        /* 2. TITLE SCREEN */
+        #title-screen {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #2c1e13, #1c120a);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .title-gear-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .main-game-title {
+            font-size: 2.4rem;
+            color: var(--parchment);
+            text-shadow: 0 4px 0 var(--steam-copper), 0 0 20px rgba(255,159,28,0.4);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        /* 3. INSTRUCTION SCREEN */
+        #instruction-screen {
+            position: absolute;
+            inset: 0;
+            background: #fdf6e2;
+            z-index: 80;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            box-shadow: inset 0 0 60px rgba(44, 29, 17, 0.2);
+        }
+
+        .scroll-box {
+            background: #f4ecd8;
+            border: 3px dashed var(--steam-bronze);
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 85%;
+            margin-bottom: 24px;
+            color: #4a321a;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        /* STEAM BUTTONS */
+        .steam-btn {
+            background: linear-gradient(180deg, #e5a93b 0%, #b87333 100%);
+            border: 3px solid #663e1a;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            padding: 12px 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #5c3412, 0 10px 20px rgba(0,0,0,0.4);
+            transition: transform 0.1s;
+        }
+
+        .steam-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #5c3412, 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* 4. MAIN GAME LAB HUD */
+        #hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2c1d11;
+            padding: 10px 16px;
+            color: var(--parchment);
+            border-bottom: 4px solid var(--steam-copper);
+        }
+
+        .hud-metric {
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
+
+        .hearts-box {
+            display: flex;
+            gap: 4px;
+            color: var(--glow-red);
+            font-size: 1.3rem;
+            text-shadow: 0 0 5px rgba(231, 29, 54, 0.5);
+        }
+
+        /* VIEWPORT ARENA */
+        #gameplay-arena {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        #question-scroll-panel {
+            background: #f7eed7;
+            border: 2px solid #dcd0b4;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: center;
+            color: #3d2816;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 14px;
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #interactive-simulation-bay {
+            flex: 1;
+            background: #17100a;
+            border: 4px solid #3d2816;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        /* ACTION INPUT CONSOLE */
+        #console-input-tray {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .choices-layout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            width: 100%;
+        }
+
+        .option-dial-btn {
+            background: linear-gradient(180deg, #fbf7ed 0%, #eadabe 100%);
+            border: 2px solid #855b38;
+            border-radius: 12px;
+            padding: 12px 10px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--ink-dark);
+            cursor: pointer;
+            box-shadow: 0 4px 0 #855b38;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .option-dial-btn:hover:not(:disabled) {
+            background: #f3e5c8;
+            border-color: var(--steam-copper);
+        }
+
+        .option-dial-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: translateY(4px);
+        }
+
+        .option-dial-btn.success-glow {
+            background: var(--glow-green) !important;
+            color: white !important;
+            border-color: #1a746b !important;
+            box-shadow: 0 4px 0 #1a746b !important;
+        }
+
+        .option-dial-btn.error-glow {
+            background: var(--glow-red) !important;
+            color: white !important;
+            border-color: #921221 !important;
+            box-shadow: 0 4px 0 #921221 !important;
+        }
+
+        /* HINT ACCORDION POPUP */
+        #steampunk-hint-capsule {
+            background: #fffae0;
+            border: 2px solid var(--steam-brass);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            color: #63431a;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(255,159,28,0.2);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* VISUAL GAMEPLAY ASSETS IN BAY */
+        .vector-torch-beam {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.94);
+            mix-blend-mode: multiply;
+            pointer-events: none;
+        }
+        .reveal-item { font-size: 4rem; position: absolute; }
+        .shadow-backdrop { font-size: 4.2rem; position: absolute; right: 40px; opacity: 0.15; filter: brightness(0); transition: all 0.3s; }
+        
+        .orbit-track { display: flex; justify-content: center; align-items: center; gap: 24px; color: white; width: 100%; }
+        .node-body { width: 75px; height: 75px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; background: #221810; border: 2px dashed #523b29; }
+        .node-body.active-slot { border-color: var(--steam-brass); background: #3b2a1c; color: var(--steam-brass); font-weight: 700; font-size: 1.8rem; }
+
+        .oscilloscope-screen { width: 85%; height: 80px; background: #0b221e; border: 3px solid #22443f; border-radius: 12px; position: relative; overflow: hidden; }
+        .sine-wave-line { position: absolute; width: 200%; height: 3px; background: #39ff14; top: 50%; left: 0; transform: translateY(-50%); }
+        .sine-wave-line.rugged { background: #ff3131; }
+
+        .piston-shaft { width: 120px; height: 30px; background: #4a5568; border-bottom: 4px solid #2d3748; position: absolute; top: 10px; transition: transform 0.2s ease; }
+        .press-base { font-size: 4.5rem; position: absolute; bottom: 15px; transition: transform 0.2s ease; transform-origin: bottom center; }
+
+        /* 5. FINAL EVALUATION REPORT */
+        #diagnostic-report-screen {
+            position: absolute;
+            inset: 0;
+            background: #f4ecd8;
+            z-index: 110;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.15);
+        }
+
+        .parchment-report-card {
+            width: 90%;
+            background: #fffdf6;
+            border: 2px solid var(--steam-bronze);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: left;
+            margin: 16px 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .report-metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #dcd0b4;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* KEYFRAMES & UTILITIES */
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(0.96); opacity: 0.85; }
+            50% { transform: scale(1.02); opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* RESPONSIVE SCALE FOR SMALL DEVICES */
+        @media (max-height: 640px), (max-width: 480px) {
+            #game-container { height: 100vh; border-radius: 0; border-width: 4px; }
+            .main-game-title { font-size: 1.8rem; }
+            #interactive-simulation-bay { height: 220px; }
+            .option-dial-btn { padding: 10px 6px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+
+        <!-- STAGE 1: INNOVINE CINEMATIC LOGO LOADING -->
+        <div id="splash-screen">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo">
+        </div>
+
+        <!-- STAGE 2: STEAMPUNK WORKSHOP TITLE HUB -->
+        <div id="title-screen" style="display: none;">
+            <div class="title-gear-container">
+                <span style="font-size: 5rem; display: block; animation: pulseGlow 3s infinite;">⚙️</span>
+            </div>
+            <h1 class="main-game-title">Sci-Lab Quest:<br>Forces & Phenomena</h1>
+            <button class="steam-btn" style="margin-top: 30px;" onclick="advanceToInstructions()">START</button>
+        </div>
+
+        <!-- STAGE 3: INTERACTIVE BLUEPRINT RULES -->
+        <div id="instruction-screen" style="display: none;">
+            <h2 style="color: var(--steam-copper); margin-bottom: 12px; font-size: 1.6rem;">Workshop Briefing</h2>
+            <div class="scroll-box">
+                Welcome, Junior Assistant! Your task is simple. Examine the live experiments running inside our automated bay, then input your conclusions using the dial buttons below. Watch out—wrong answers stress our equipment!
+            </div>
+            <button class="steam-btn" onclick="commenceWorkshopQuest()">PLAY</button>
+        </div>
+
+        <!-- STAGE 4: EVALUATION ASSESSMENT HUD & VIEWPORT -->
+        <div id="hud-header">
+            <div class="hud-metric">Task: <span id="progress-meter">1 / 12</span></div>
+            <div class="hearts-box" id="mechanical-hearts">❤️ ❤️ ❤️</div>
+            <div class="hud-metric">Score: <span id="live-score-counter" style="color: var(--steam-brass);">0</span></div>
+        </div>
+
+        <div id="gameplay-arena">
+            <div id="question-scroll-panel">Loading scientific mechanics...</div>
+            
+            <div id="interactive-simulation-bay">
+                <!-- Live interactive context modules injected here dynamically -->
+            </div>
+
+            <div id="console-input-tray">
+                <div id="steampunk-hint-capsule">🛠️ <strong>Hint:</strong> <span id="hint-text-box"></span></div>
+                <div id="choices-grid-box" class="choices-layout-grid"></div>
+            </div>
+        </div>
+
+        <!-- STAGE 5: TEACHER PERFORMANCE REVIEWS -->
+        <div id="diagnostic-report-screen">
+            <h2 style="color: var(--steam-copper); font-size: 1.8rem; margin-bottom: 4px;">Assessment Diagnostics</h2>
+            <p style="font-size: 1rem; color: #63431a; margin-bottom: 10px;">Automated Concept Verification Report</p>
+            
+            <div class="parchment-report-card">
+                <div class="report-metric-row"><span>Light Filter Characteristics:</span> <span id="rep-light" style="color: var(--steam-copper);">--</span></div>
+                <div class="report-metric-row"><span>Eclipse Structural Alignments:</span> <span id="rep-eclipse" style="color: var(--steam-copper);">--</span></div>
+                <div class="report-metric-row"><span>Acoustic Frequency Sorting:</span> <span id="rep-sound" style="color: var(--steam-copper);">--</span></div>
+                <div class="report-metric-row"><span>Force Vector Interaction:</span> <span id="rep-force" style="color: var(--steam-copper);">--</span></div>
+                <div class="report-metric-row" style="margin-top: 14px; border-top: 2px dashed #b87333; padding-top: 10px; font-size: 1.15rem; font-weight: 700;">
+                    <span>Final Calculated Grade:</span>
+                    <span id="rep-final-score" style="color: #2ec4b6;">0 / 240</span>
+                </div>
+            </div>
+            <button class="steam-btn" onclick="location.reload()">Reset Workshop</button>
+        </div>
+
+    </div>
+
+    <!-- AUDIO DRIVERS MATRIX -->
+    <audio id="audio-correct" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="audio-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="audio-victory" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <script>
+        // MASTER CONCEPTUAL DICTIONARY (12 Simplified Textbook Matrix Items)
+        const curriculumBank = [
+            {
+                topic: "light",
+                q: "A student puts a solid wooden block in front of a torch. No light can pass through it at all. What kind of object is this?",
+                choices: ["Opaque", "Transparent", "Translucent"], answer: "Opaque",
+                setup: "optics", icon: "📦", shadow: true, hint: "This object blocks all light and makes a dark shadow behind it."
+            },
+            {
+                topic: "light",
+                q: "You look through a piece of frosted butter paper. Some light gets through, but you cannot see things clearly on the other side. What is this object?",
+                choices: ["Translucent", "Transparent", "Opaque"], answer: "Translucent",
+                setup: "optics", icon: "📝", shadow: "blurry", hint: "This object lets only some light pass through, so things look blurry."
+            },
+            {
+                topic: "light",
+                q: "A clean glass window lets all light pass through it perfectly so you can see outside clearly. What is this object?",
+                choices: ["Transparent", "Translucent", "Opaque"], answer: "Transparent",
+                setup: "optics", icon: "🖼️", shadow: false, hint: "Think of clean water or clear glass that you can see through perfectly."
+            },
+            {
+                topic: "light",
+                q: "When an opaque object blocks straight lines of light from a torch, what does it make on the wall behind it?",
+                choices: ["A dark shadow", "A bright light", "A reflection"], answer: "A dark shadow",
+                setup: "optics", icon: "🧍", shadow: true, hint: "When light is blocked, it leaves a dark shape on the wall."
+            },
+            {
+                topic: "eclipse",
+                q: "During a solar eclipse, the daytime suddenly turns dark. Which body comes directly in the middle to block the light from the Sun?",
+                choices: ["The Moon", "The Earth", "A Star"], answer: "The Moon",
+                setup: "space", mid: "🌑", right: "🌍", hint: "The Moon moves between the Sun and the Earth to hide the Sun."
+            },
+            {
+                topic: "eclipse",
+                q: "During a lunar eclipse, the Moon goes dark because a shadow falls on it. Which big body is in the middle blocking the Sun's light?",
+                choices: ["The Earth", "The Moon", "A Rocket"], answer: "The Earth",
+                setup: "space", mid: "🌍", right: "🌑", hint: "Our home planet, Earth, stands between the Sun and the Moon."
+            },
+            {
+                topic: "sound",
+                q: "A student plucks a tight rubber band. It moves back and forth very fast and makes a sound. What is this fast movement called?",
+                choices: ["A vibration", "A push", "A pull"], answer: "A vibration",
+                setup: "wave", noisy: false, icon: "🎸", hint: "All sounds are made when an object moves back and forth very quickly."
+            },
+            {
+                topic: "sound",
+                q: "A big drill machine makes a very loud, harsh and unpleasant sound that hurts our ears. What do we call this?",
+                choices: ["Noise", "Music", "A quiet sound"], answer: "Noise",
+                setup: "wave", noisy: true, icon: "🚜", hint: "Loud, unpleasant sounds that do not have a nice tune are called noise."
+            },
+            {
+                topic: "sound",
+                q: "A child plays a soft, beautiful tune on a flute. It feels very nice and comfortable to hear. What do we call this?",
+                choices: ["Music", "Noise", "A loud sound"], answer: "Music",
+                setup: "wave", noisy: false, icon: "🪈", hint: "Sounds that have a nice pattern and are pleasant to hear are music."
+            },
+            {
+                topic: "force",
+                q: "A boy kicks a football across the floor to move it away from him. What kind of force is a kick?",
+                choices: ["A push", "A pull", "A twist"], answer: "A push",
+                setup: "press", direction: "down", icon: "⚽", hint: "When you move an object away from you, you are giving it a push."
+            },
+            {
+                topic: "force",
+                q: "A girl opens a drawer by tugging the handle towards herself. What kind of force is she using?",
+                choices: ["A pull", "A push", "A lift"], answer: "A pull",
+                setup: "press", direction: "up", icon: "🗄️", hint: "When you move an object closer to you, you are giving it a pull."
+            },
+            {
+                topic: "force",
+                q: "A student presses down hard on a soft ball of playdough and flattens it. What did the force do to the playdough?",
+                choices: ["Changed its shape", "Changed its weight", "Made it disappear"], answer: "Changed its shape",
+                setup: "press", direction: "down", icon: "🍩", hint: "Pressing or squashing something changes how it looks on the outside."
+            }
+        ];
+
+        let playheadSequence = [];
+        let indexTracker = 0;
+        let runningScore = 0;
+        let vitalHearts = 3;
+        let attemptTrackingCounter = 0;
+        let interactionLock = false;
+
+        // Core score analytics dictionary object
+        let verificationMetrics = { light: 0, eclipse: 0, sound: 0, force: 0 };
+
+        // 5-second precise gateway initialization trigger
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('title-screen').style.display = 'flex';
+                }, 800);
+            }, 5000);
+        });
+
+        function advanceToInstructions() {
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('instruction-screen').style.display = 'flex';
+        }
+
+        function commenceWorkshopQuest() {
+            document.getElementById('instruction-screen').style.display = 'none';
+            // Shuffle both questions array and choices array elements internally
+            playheadSequence = shuffleStructure([...curriculumBank]);
+            indexTracker = 0;
+            runningScore = 0;
+            vitalHearts = 3;
+            renderHeartsUI();
+            fetchChallengeTurn();
+        }
+
+        function fetchChallengeTurn() {
+            interactionLock = false;
+            attemptTrackingCounter = 0;
+            document.getElementById('steampunk-hint-capsule').style.display = 'none';
+            
+            const currentObj = playheadSequence[indexTracker];
+            document.getElementById('progress-meter').innerText = `${indexTracker + 1} / 12`;
+            document.getElementById('question-scroll-panel').innerText = currentObj.q;
+
+            buildMechanicalSimulation(currentObj);
+            deployOptionSwitches(currentObj);
+        }
+
+        function buildMechanicalSimulation(obj) {
+            const bay = document.getElementById('interactive-simulation-bay');
+            bay.innerHTML = '';
+
+            if (obj.setup === 'optics') {
+                bay.innerHTML = `
+                    <div class="shadow-backdrop" id="optics-shadow">${obj.icon}</div>
+                    <div class="reveal-item" id="optics-target" style="left: 40px;">${obj.icon}</div>
+                    <div class="vector-torch-beam" id="torch-overlay" style="background: radial-gradient(circle 50px at 80px 110px, transparent 100%, rgba(0,0,0,0.96) 100%);"></div>
+                `;
+                bay.onmousemove = (e) => {
+                    if (interactionLock) return;
+                    const r = bay.getBoundingClientRect();
+                    const x = e.clientX - r.left;
+                    const y = e.clientY - r.top;
+                    document.getElementById('torch-overlay').style.background = `radial-gradient(circle 50px at ${x}px ${y}px, transparent 100%, rgba(0,0,0,0.96) 100%)`;
+                    
+                    const target = document.getElementById('optics-target');
+                    target.style.left = `${x - 30}px`;
+                    target.style.top = `${y - 40}px`;
+
+                    const s = document.getElementById('optics-shadow');
+                    if (x > 180) {
+                        if (obj.shadow === true) { s.style.opacity = "0.75"; s.style.filter = "brightness(0)"; }
+                        else if (obj.shadow === 'blurry') { s.style.opacity = "0.3"; s.style.filter = "brightness(0) blur(4px)"; }
+                        else { s.style.opacity = "0.85"; s.style.filter = "none"; }
+                    } else {
+                        s.style.opacity = "0.15"; s.style.filter = "brightness(0)";
+                    }
+                };
+            } 
+            else if (obj.setup === 'space') {
+                bay.onmousemove = null;
+                bay.innerHTML = `
+                    <div class="orbit-track">
+                        <div style="font-size: 3rem;">☀️</div>
+                        <div class="node-body active-slot">?</div>
+                        <div class="node-body">${obj.right}</div>
+                    </div>
+                `;
+            } 
+            else if (obj.setup === 'wave') {
+                bay.onmousemove = null;
+                bay.innerHTML = `
+                    <div class="sound-wave-container" style="width:90%;">
+                        <div class="oscilloscope-screen">
+                            <div class="sine-wave-line ${obj.noisy?'rugged':''}" id="oscillating-wire"></div>
+                        </div>
+                        <div style="font-size: 3rem; text-align:center; margin-top:10px;">${obj.icon}</div>
+                    </div>
+                `;
+                let step = 0;
+                setInterval(() => {
+                    step++;
+                    const el = document.getElementById('oscillating-wire');
+                    if (el) el.style.transform = `translateY(${(Math.sin(step * 0.4) * (obj.noisy ? 18 : 8)) - 1.5}px)`;
+                }, 50);
+            } 
+            else if (obj.setup === 'press') {
+                bay.onmousemove = null;
+                bay.innerHTML = `
+                    <div class="piston-shaft" id="mech-piston"></div>
+                    <div class="press-base" id="mech-target-clay">${obj.icon}</div>
+                `;
+            }
+        }
+
+        function deployOptionSwitches(obj) {
+            const box = document.getElementById('choices-grid-box');
+            box.innerHTML = '';
+            
+            const shuffledChoices = shuffleStructure([...obj.choices]);
+
+            shuffledChoices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'option-dial-btn';
+                btn.innerText = choice;
+                btn.onclick = () => evaluationTrigger(btn, choice, obj);
+                box.appendChild(btn);
+            });
+        }
+
+        function evaluationTrigger(selectedBtn, selectionText, currentObj) {
+            if (interactionLock) return;
+            
+            if (selectionText === currentObj.answer) {
+                interactionLock = true;
+                selectedBtn.classList.add('success-glow');
+                document.getElementById('audio-correct').play().catch(()=>{});
+
+                // Trigger successful physical component animations based on module
+                if (currentObj.setup === 'space') {
+                    const slot = document.querySelector('.active-slot');
+                    if (slot) slot.innerText = currentObj.mid;
+                }
+                if (currentObj.setup === 'press') {
+                    const piston = document.getElementById('mech-piston');
+                    const target = document.getElementById('mech-target-clay');
+                    if (currentObj.direction === 'down') {
+                        piston.style.transform = "translateY(140px)";
+                        setTimeout(() => { target.style.transform = "scaleY(0.3) scaleX(1.4)"; }, 150);
+                    } else {
+                        piston.style.transform = "translateY(-30px)";
+                        setTimeout(() => { target.style.transform = "translateY(-40px) scale(1.1)"; }, 150);
+                    }
+                }
+
+                // Append values to metrics trackers
+                runningScore += 20;
+                document.getElementById('live-score-counter').innerText = runningScore;
+                verificationMetrics[currentObj.topic] += 1;
+
+                setTimeout(advanceTrackSequence, 2000);
+            } else {
+                attemptTrackingCounter++;
+                selectedBtn.disabled = true;
+                selectedBtn.classList.add('error-glow');
+                document.getElementById('audio-wrong').play().catch(()=>{});
+
+                if (attemptTrackingCounter === 1) {
+                    document.getElementById('hint-text-box').innerText = currentObj.hint;
+                    document.getElementById('steampunk-hint-capsule').style.display = 'flex';
+                }
+
+                vitalHearts--;
+                renderHeartsUI();
+
+                if (vitalHearts <= 0) {
+                    interactionLock = true;
+                    setTimeout(compileFinalReportCard, 1500);
+                }
+            }
+        }
+
+        function advanceTrackSequence() {
+            indexTracker++;
+            if (indexTracker < playheadSequence.length) {
+                fetchChallengeTurn();
+            } else {
+                compileFinalReportCard();
+            }
+        }
+
+        function renderHeartsUI() {
+            const container = document.getElementById('mechanical-hearts');
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                container.innerHTML += i < vitalHearts ? '❤️ ' : '🖤 ';
+            }
+        }
+
+        function compileFinalReportCard() {
+            document.getElementById('diagnostic-report-screen').style.display = 'flex';
+            document.getElementById('audio-victory').play().catch(()=>{});
+
+            // Process component metrics out of 3 total per cluster
+            document.getElementById('rep-light').innerText = `${Math.round((verificationMetrics.light / 4) * 100)}% Verified`;
+            document.getElementById('rep-eclipse').innerText = `${Math.round((verificationMetrics.eclipse / 2) * 100)}% Verified`;
+            document.getElementById('rep-sound').innerText = `${Math.round((verificationMetrics.sound / 3) * 100)}% Verified`;
+            document.getElementById('rep-force').innerText = `${Math.round((verificationMetrics.force / 3) * 100)}% Verified`;
+            
+            document.getElementById('rep-final-score').innerText = `${runningScore} / 240 Points`;
+        }
+
+        // Fisher-Yates array shuffler logic
+        function shuffleStructure(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+    </script>
+</body>
+</html>
