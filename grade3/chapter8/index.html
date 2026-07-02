@@ -1,1 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Junior Measurement Lab</title>
+    <!-- Playful, rounded child-friendly font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Neon Cyber exciting color palette */
+            --neon-mint: #10b981;
+            --neon-mint-hover: #059669;
+            --electric-tangerine: #f59e0b;
+            --coral-pink: #ef476f;
+            --text-light: #ffffff;
+            --text-yellow: #fef08a;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #0b0f19;
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Responsive Safe-Zone Container with Neon Purple Ombre Gradient */
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            max-height: 850px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5, #312e81, #1e1b4b);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.7), inset 0 0 40px rgba(99, 102, 241, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-height: 851px) {
+            #game-container {
+                border-radius: 28px;
+                border: 4px solid rgba(255, 255, 255, 0.15);
+            }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        /* Screen 1: Splash Layout */
+        #splash-screen {
+            background: #ffffff;
+        }
+        #splash-screen img {
+            max-width: 65%;
+            max-height: 50%;
+            object-fit: contain;
+            animation: softPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes softPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Typography & Universal Styled Action Buttons */
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 32px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.6);
+            line-height: 1.25;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .cute-btn {
+            background: var(--neon-mint);
+            color: white;
+            border: none;
+            padding: 16px 44px;
+            font-size: 1.4rem;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #047857, 0 12px 25px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+        }
+
+        .cute-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #047857, 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Frosted Glass Panels */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            margin-bottom: 32px;
+        }
+
+        .glass-card p {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+        }
+
+        /* Screen 4: Active Gameplay Arena Layout */
+        #game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 20;
+        }
+
+        .hud-pill {
+            font-size: 0.95rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 14px;
+            color: #ffffff;
+        }
+
+        #lives-bar {
+            display: flex;
+            gap: 4px;
+            font-size: 1.3rem;
+        }
+
+        .heart {
+            transition: transform 0.2s ease;
+        }
+        .heart.empty {
+            transform: scale(0.8);
+            filter: grayscale(1);
+            opacity: 0.2;
+        }
+
+        /* Central Work Desk */
+        #work-desk {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 75px 20px 20px 20px;
+        }
+
+        .problem-bubble {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.45;
+            width: 100%;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        /* Hint Widget CSS styles */
+        #hint-container {
+            width: 100%;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hint-toggle-btn {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--electric-tangerine);
+            border: 1.5px dashed var(--electric-tangerine);
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .hint-toggle-btn:hover {
+            background: rgba(245, 158, 11, 0.3);
+        }
+
+        .hint-text-box {
+            width: 100%;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fef08a;
+            font-size: 0.95rem;
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-top: 8px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Canvas Workspace Graphic Simulators */
+        #visual-canvas-area {
+            width: 100%;
+            height: 180px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        /* CSS Simulators */
+        .sim-ruler {
+            width: 85%;
+            height: 35px;
+            background: #fde047;
+            border: 2px solid #ca8a04;
+            border-radius: 6px;
+            position: relative;
+        }
+        .sim-ruler::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 10px;
+            background: repeating-linear-gradient(90deg, #ca8a04, #ca8a04 2px, transparent 2px, transparent 12px);
+        }
+
+        .sim-cylinder {
+            width: 60px;
+            height: 130px;
+            border: 3px solid #94a3b8;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            position: relative;
+            background: rgba(255,255,255,0.1);
+        }
+        .sim-water {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: #0ea5e9;
+            height: 50%;
+            transition: height 0.5s ease;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.6);
+        }
+
+        .sim-scale-beam {
+            width: 150px;
+            height: 6px;
+            background: #94a3b8;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+        }
+        .sim-pan {
+            width: 45px;
+            height: 30px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid #94a3b8;
+            border-radius: 0 0 50% 50%;
+            margin-top: 6px;
+        }
+
+        .sim-thermometer {
+            width: 20px;
+            height: 120px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            border: 2px solid #94a3b8;
+            position: relative;
+        }
+        .sim-mercury {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: var(--coral-pink);
+            height: 60%;
+            border-radius: 6px;
+            transition: height 0.5s ease;
+            box-shadow: 0 0 8px rgba(239, 71, 111, 0.7);
+        }
+
+        /* Unified Options Buttons Grid */
+        #options-box {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .interactive-choice-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 20px;
+            border-radius: 18px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #ffffff;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .interactive-choice-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .interactive-choice-btn:active {
+            transform: translateY(2px);
+        }
+
+        .interactive-choice-btn.clicked-correct {
+            background: #065f46 !important;
+            border-color: var(--neon-mint) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .interactive-choice-btn.clicked-wrong {
+            background: #991b1b !important;
+            border-color: var(--coral-pink) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(239, 71, 111, 0.4);
+        }
+
+        /* Screen 5: Game End Window */
+        #end-screen {
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+        }
+        #end-screen p {
+            font-size: 1.25rem;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <!-- SCREEN 1: 5-Second Splash Screen Loader -->
+        <div id="splash-screen" class="screen active">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('alt-logo-text').style.display='block';">
+            <h2 id="alt-logo-text" style="color: #1e1b4b; display:none; font-size: 2.5rem; font-weight:700;">Innovine</h2>
+        </div>
+
+        <!-- SCREEN 2: Title Screen -->
+        <div id="menu-screen" class="screen">
+            <h1>The Junior<br>Measurement Lab!</h1>
+            <button class="cute-btn" onclick="goToScreen('instructions-screen')">Start Game</button>
+        </div>
+
+        <!-- SCREEN 3: Lab Training Instructions -->
+        <div id="instructions-screen" class="screen">
+            <div class="glass-card">
+                <p>🧪 <strong>Welcome Lab Assistant!</strong></p>
+                <p>1. Analyze the tracking task on each workstation bubble.</p>
+                <p>2. Tap the correct tool option, balance weight, or scale units below.</p>
+                <p>3. Stuck? Click the 💡 **Get Hint** button for assistance!</p>
+                <p>4. **Earn +20 Marks** for every correct match you secure!</p>
+                <p>5. Careful! You have exactly 3 lives to clear the lab inventory.</p>
+            </div>
+            <button class="cute-btn" onclick="startGame()">Play! 🎮</button>
+        </div>
+
+        <!-- SCREEN 4: Active Gameplay Arena -->
+        <div id="game-screen" class="screen">
+            <div id="game-header">
+                <div id="discipline-pill" class="hud-pill">Length Lab</div>
+                <div id="score-pill" class="hud-pill">⭐ Score: 0</div>
+                <div id="lives-bar">
+                    <span class="heart" id="h1">❤️</span>
+                    <span class="heart" id="h2">❤️</span>
+                    <span class="heart" id="h3">❤️</span>
+                </div>
+            </div>
+
+            <div id="work-desk">
+                <div class="problem-bubble" id="problem-text">Loading problem...</div>
+                
+                <!-- Interactive Free Hint Bar System -->
+                <div id="hint-container">
+                    <button class="hint-toggle-btn" onclick="toggleHintVisibility()">💡 Need a Hint?</button>
+                    <div id="hint-text-box" class="hint-text-box">Hint text goes here.</div>
+                </div>
+                
+                <!-- Dynamic Graphic Simulation Workspace Panel -->
+                <div id="visual-canvas-area"></div>
+
+                <div id="options-box"></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: Performance Evaluation Summary -->
+        <div id="end-screen" class="screen">
+            <h1 id="end-title">Lab Evaluation!</h1>
+            <p id="end-msg">Your performance records are calculated here.</p>
+            <button id="end-action-btn" class="cute-btn" style="background:var(--electric-tangerine); box-shadow: 0 6px 0 #b45309;" onclick="handleEndRoute()">Play Again</button>
+        </div>
+
+    </div>
+
+    <!-- AUDIO ELEMENTS FROM TARGETED REPOSITORY FOLDER -->
+    <audio id="sound-bg" src="assets/acousticmusic.mp3" loop preload="auto"></audio>
+    <audio id="sound-correct" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="sound-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="sound-victory" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <script>
+        // Full database mapping 12 specific questions (3 items per discipline level) with hints
+        const questDatabase = [
+            // LEVEL 1: LENGTH LAB
+            {
+                labType: "Length Lab",
+                visualMarkup: '<div class="sim-ruler"></div><div style="width:45px; height:6px; background:#ef4444; position:absolute; bottom:100px; border-radius:3px;"></div>',
+                problem: "Maya needs to measure the length of a small writing pencil accurately. Which standard instrument from your drawer matches this job best?",
+                choices: ["Ruler", "Measuring Cup", "Common Balance"],
+                answer: "Ruler",
+                hint: "Look for the flat, yellow tool marked with centimeters (cm) and millimeters (mm)!"
+            },
+            {
+                labType: "Length Lab",
+                visualMarkup: '<div class="sim-ruler" style="width:90%; height:18px; background:#a855f7; border-color:#7e22ce;"></div>',
+                problem: "Long ago, people used handspans, strides, and cubits to calculate length. Why did we realize these non-standard units aren't perfect?",
+                choices: ["Because body parts vary from person to person.", "Because they were too heavy to carry around.", "Because they only worked in the morning."],
+                answer: "Because body parts vary from person to person.",
+                hint: "Think about it—is your hand exactly the same size as your teacher's or your parent's hand?"
+            },
+            {
+                labType: "Length Lab",
+                visualMarkup: '<div style="font-size:3rem; filter: drop-shadow(0 0 8px rgba(255,255,255,0.2));">🚗💨</div>',
+                problem: "Very long distances, like the highway stretch travelled by a car or delivery truck from town to town, are tracked using which standard unit?",
+                choices: ["Kilometres (km)", "Millimetres (mm)", "Centimetres (cm)"],
+                answer: "Kilometres (km)",
+                hint: "For massive distances out on the open road, we use the biggest metric prefix, where 'kilo' means 1,000 meters."
+            },
+
+            // LEVEL 2: CAPACITY LAB
+            {
+                labType: "Capacity Lab",
+                visualMarkup: '<div class="sim-cylinder"><div class="sim-water" style="height:65%;"></div></div>',
+                problem: "Capacity is defined as the amount of liquid a container holds. What standard metric units do we use for measuring volumes of juice, milk, or water?",
+                choices: ["Millilitres (mL) and Litres (L)", "Grams (g) and Kilograms (kg)", "Centimetres (cm) and Metres (m)"],
+                answer: "Millilitres (mL) and Litres (L)",
+                hint: "Check the back of a small juice box or a large water bottle—what letters do you see next to the numbers?"
+            },
+            {
+                labType: "Capacity Lab",
+                visualMarkup: '<div class="sim-cylinder"><div class="sim-water" style="height:90%;"></div></div>',
+                problem: "A laboratory teacher needs to carefully measure a precise amount of liquid chemistry for a school experiment. Which container tool is built for this?",
+                choices: ["Measuring Cylinder", "Common Balance scale", "Handspan line"],
+                answer: "Measuring Cylinder",
+                hint: "It is a tall, see-through glass or plastic tube with lines marked all the way up the side."
+            },
+            {
+                labType: "Capacity Lab",
+                visualMarkup: '<div style="font-size:2.5rem;">🥛🥛🥛</div>',
+                problem: "Let's complete the standard volume conversion equation: 1 Litre is exactly equal to how many Millilitres?",
+                choices: ["1,000 millilitres", "100 millilitres", "10 millilitres"],
+                answer: "1,000 millilitres",
+                hint: "The prefix 'milli-' means one-thousandth. It takes a lot of tiny drops to fill up a whole 1-litre bottle!"
+            },
+
+            // LEVEL 3: WEIGHT LAB
+            {
+                labType: "Weight Lab",
+                visualMarkup: '<div class="sim-scale-beam"><div class="sim-pan"></div><div class="sim-pan"></div></div>',
+                problem: "Rohan walks into a grocery shop and wants to check the heaviness or lightness of a packet of dal. Which tool will the shopkeeper use to weigh it?",
+                choices: ["Common Balance or Electronic Balance", "Measuring Tape", "Glass Thermometer tube"],
+                answer: "Common Balance or Electronic Balance",
+                hint: "This tool has two pans that balance evenly, or a digital screen that displays numbers when you place items on it."
+            },
+            {
+                labType: "Weight Lab",
+                visualMarkup: '<div style="font-size:3.5rem;">🍎</div>',
+                problem: "Heavy weights are measured in kilograms (kg). Which option contains a much lighter object that should be measured using lighter grams (g)?",
+                choices: ["A packet of biscuits", "A heavy sack of rice", "A huge pile of construction bricks"],
+                answer: "A packet of biscuits",
+                hint: "Pick the item that you can easily lift with just two fingers!"
+            },
+            {
+                labType: "Weight Lab",
+                visualMarkup: '<div style="font-size:2rem; font-weight:700; color:var(--text-yellow);">⚖️ 1 kg = ?</div>',
+                problem: "If a farmer places a weight of exactly 1 Kilogram (kg) on one pan of a balance, how many Grams (g) are required on the other side to level it perfectly?",
+                choices: ["1,000 grams", "500 grams", "100 grams"],
+                answer: "1,000 grams",
+                hint: "Just like with meters and liters, the prefix 'kilo-' always means you need exactly one thousand units to match it."
+            },
+
+            // LEVEL 4: TEMPERATURE & TIME LAB
+            {
+                labType: "Temperature Lab",
+                visualMarkup: '<div class="sim-thermometer"><div class="sim-mercury" style="height:55%;"></div></div>',
+                problem: "When you feel unwell, a doctor uses a specific instrument to track the exact heat or temperature level of your body. What is it called?",
+                choices: ["Thermometer", "Metre rod", "Measuring Can"],
+                answer: "Thermometer",
+                hint: "This tool can slide under your tongue or press against your forehead to display numbers in Celsius or Fahrenheit."
+            },
+            {
+                labType: "Temperature Lab",
+                visualMarkup: '<div style="font-size:3rem;">🌡️✨</div>',
+                problem: "What is the standard value of normal, healthy human body temperature when calculated on the degree Celsius (°C) scale?",
+                choices: ["37°C", "98.6°C", "45°C"],
+                answer: "37°C",
+                hint: "Be careful! 98.6 is correct for Fahrenheit (°F), but we need the much smaller equivalent number on the Celsius scale."
+            },
+            {
+                labType: "Temperature Lab",
+                visualMarkup: '<div style="font-size:2.5rem;">☀️⏳</div>',
+                problem: "Long before digital wall clocks or wristwatches were invented, what ancient tool tracked time using shadows cast by the sun?",
+                choices: ["The Sundial", "The Balance Scale", "The Thermometer line"],
+                answer: "The Sundial",
+                hint: "This device relies completely on the sun moving across the sky to point a shadow-needle at different hours carved into stone."
+            }
+        ];
+
+        // Core App Lifecycle Global Vars
+        let activeQuestionIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let controlLock = false;
+
+        // Force exactly 5 seconds display hold on the branding frame loop
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                goToScreen('menu-screen');
+            }, 5000);
+        });
+
+        function goToScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startGame() {
+            score = 0;
+            lives = 3;
+            activeQuestionIndex = 0;
+            updateHudDisplay();
+            loadWorkstationItem();
+            
+            // Trigger the looped acoustic background music right here on game start click
+            playAudioTrack('sound-bg');
+            
+            goToScreen('game-screen');
+        }
+
+        function loadWorkstationItem() {
+            controlLock = false;
+            const currentItem = questDatabase[activeQuestionIndex];
+            
+            // Render text elements
+            document.getElementById('discipline-pill').innerText = currentItem.labType;
+            document.getElementById('problem-text').innerText = `${activeQuestionIndex + 1}/12: ${currentItem.problem}`;
+            document.getElementById('visual-canvas-area').innerHTML = currentItem.visualMarkup;
+
+            // Reset and hide the Hint container state values
+            const hintBox = document.getElementById('hint-text-box');
+            hintBox.innerText = currentItem.hint;
+            hintBox.style.display = 'none';
+
+            // Generate choice buttons grid
+            const container = document.getElementById('options-box');
+            container.innerHTML = '';
+            
+            currentItem.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'interactive-choice-btn';
+                button.innerText = choice;
+                button.onclick = () => selectChoice(choice, currentItem.answer, button);
+                container.appendChild(button);
+            });
+        }
+
+        function toggleHintVisibility() {
+            const hintBox = document.getElementById('hint-text-box');
+            if (hintBox.style.display === 'none' || hintBox.style.display === '') {
+                hintBox.style.display = 'block';
+            } else {
+                hintBox.style.display = 'none';
+            }
+        }
+
+        function selectChoice(selected, rightAnswer, btnNode) {
+            if (controlLock) return;
+            controlLock = true;
+
+            if (selected === rightAnswer) {
+                playAudioTrack('sound-correct');
+                btnNode.classList.add('clicked-correct');
+                score += 20; // Plus 20 marks allocated on success paths
+                updateHudDisplay();
+
+                setTimeout(() => {
+                    activeQuestionIndex++;
+                    if (activeQuestionIndex < questDatabase.length) {
+                        loadWorkstationItem();
+                    } else {
+                        triggerGameEnd(true);
+                    }
+                }, 1200);
+
+            } else {
+                playAudioTrack('sound-wrong');
+                btnNode.classList.add('clicked-wrong');
+                lives--;
+                updateHudDisplay();
+
+                // Highlight the correct option for visual feedback
+                const buttons = document.getElementById('options-box').children;
+                for (let btn of buttons) {
+                    if (btn.innerText === rightAnswer) {
+                        btn.classList.add('clicked-correct');
+                    }
+                }
+
+                setTimeout(() => {
+                    if (lives <= 0) {
+                        triggerGameEnd(false);
+                    } else {
+                        activeQuestionIndex++;
+                        if (activeQuestionIndex < questDatabase.length) {
+                            loadWorkstationItem();
+                        } else {
+                            triggerGameEnd(true);
+                        }
+                    }
+                }, 1600);
+            }
+        }
+
+        function updateHudDisplay() {
+            document.getElementById('score-pill').innerText = `⭐ Score: ${score}`;
+            
+            // Manage dynamic configuration for health tracking metrics
+            for (let i = 1; i <= 3; i++) {
+                const heartNode = document.getElementById(`h${i}`);
+                if (i <= lives) {
+                    heartNode.classList.remove('empty');
+                } else {
+                    heartNode.classList.add('empty');
+                }
+            }
+        }
+
+        function triggerGameEnd(isVictory) {
+            const titleNode = document.getElementById('end-title');
+            const msgNode = document.getElementById('end-msg');
+            const actionBtn = document.getElementById('end-action-btn');
+
+            // Pause the main background track on game complete evaluation screens
+            const bgMusic = document.getElementById('sound-bg');
+            if (bgMusic) bgMusic.pause();
+
+            if (isVictory && lives > 0) {
+                playAudioTrack('sound-victory');
+                titleNode.innerText = "Lab Champion! 🏆";
+                msgNode.innerHTML = `Outstanding Work Junior Scientist!<br>You completed the inventory check.<br><br><strong>Final Score: ${score} / 240 Marks!</strong>`;
+                actionBtn.innerText = "Play Again";
+            } else {
+                titleNode.innerText = "Lab Closed! 🎈";
+                msgNode.innerHTML = `Don't worry, lab research takes practice!<br>You scored: <strong>${score} marks</strong>.<br>Let's try balancing the scales again!`;
+                actionBtn.innerText = "Restart Experiment";
+            }
+            goToScreen('end-screen');
+        }
+
+        function handleEndRoute() {
+            startGame();
+        }
+
+        function playAudioTrack(elementId) {
+            const audioObj = document.getElementById(elementId);
+            if (audioObj) {
+                if (elementId === 'sound-bg') {
+                    audioObj.currentTime = 0;
+                }
+                audioObj.play().catch(() => {}); // Gracefully handles browser media block restrictions
+            }
+        }
+    </script>
+</body>
+</html>
