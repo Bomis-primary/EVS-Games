@@ -399,8 +399,8 @@
 
         <!-- SCREEN 1: Splash Screen (Innovine) -->
         <div id="splash-screen" class="screen active">
-            <!-- Asset file loaded precisely as indexed in image_6ccb02.png -->
-            <img src="EVS-Games/grade3/chapter7/assets/innovine-logo.png" alt="Innovine Logo">
+            <!-- Short relative asset path to correctly locate file -->
+            <img src="assets/innovine-logo.png" alt="Innovine Logo">
         </div>
 
         <!-- SCREEN 2: Main Menu Screen -->
@@ -413,7 +413,7 @@
         <div id="instructions-screen" class="screen">
             <div class="info-card">
                 <p>🌟 <strong>How to Play:</strong></p>
-                <p>1. Click any blank puzzle box to see a secret question banenr.</p>
+                <p>1. Click any blank puzzle box to see a secret question banner.</p>
                 <p>2. Choose the correct answer to make magic confetti fly and reveal the hidden photo!</p>
                 <p>3. Watch out! You have 3 lives. Missing two answers back-to-back unlocks a glowing hint!</p>
             </div>
@@ -461,18 +461,18 @@
         </div>
     </div>
 
-    <!-- AUDIO FILES COMPATIBLE WITH ASSETS SPECIFIED IN image_6ccb02.png -->
-    <audio id="snd-correct" src="EVS-Games/grade3/chapter7/assets/correct.mp3" preload="auto"></audio>
-    <audio id="snd-wrong" src="EVS-Games/grade3/chapter7/assets/wrong.mp3" preload="auto"></audio>
-    <audio id="snd-victory" src="EVS-Games/grade3/chapter7/assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+    <!-- AUDIO FILES UPDATED WITH CORRECT RELATIVE ASSET FOLDER SCHEME -->
+    <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="snd-victory" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <script>
-        // Data Configuration Object matching standard UK Grade 3 curriculum guidelines 
+        // Updated Data Configuration with direct relative folder linking
         const gameData = {
             levels: [
                 {
                     name: "Level 1: Air",
-                    image: "EVS-Games/grade3/chapter7/assets/air.png",
+                    image: "assets/air.png",
                     questions: [
                         {
                             q: "Rohan is trying to light a campfire on a windy day, so he completely blocks all sides of the wood with thick wooden boards. What will most likely happen to his fire?",
@@ -502,7 +502,7 @@
                 },
                 {
                     name: "Level 2: Water",
-                    image: "EVS-Games/grade3/chapter7/assets/water.png",
+                    image: "assets/water.png",
                     questions: [
                         {
                             q: "A satellite takes a clear photograph of our world from high up in space, and the picture shows that nearly the whole globe looks bright blue. This happens because...",
@@ -532,7 +532,7 @@
                 },
                 {
                     name: "Level 3: Soil",
-                    image: "EVS-Games/grade3/chapter7/assets/soil.png",
+                    image: "assets/soil.png",
                     questions: [
                         {
                             q: "Strong wind blows against a giant mountain, and heavy rain pours down on its rocks for hundreds of years. Over a very long time, these rocks will...",
@@ -603,18 +603,15 @@
             goToScreen('game-screen');
         }
 
-        // Setup Level Architecture with Randomisation
         function loadLevel(levelIdx) {
             const level = gameData.levels[levelIdx];
             document.getElementById('level-display').innerText = level.name;
             consecutiveWrongCount = 0;
             solvedPieces = [false, false, false, false];
 
-            // Shuffling and randomising assignment maps
             activeLevelQuestions = [...level.questions];
             shuffleArray(activeLevelQuestions);
 
-            // Populate background puzzle partition references
             for(let i=0; i<4; i++) {
                 const pieceNode = document.getElementById(`piece-${i}`);
                 pieceNode.classList.remove('solved');
@@ -630,7 +627,6 @@
             const questionData = activeLevelQuestions[index];
             document.getElementById('modal-q-text').innerText = questionData.q;
             
-            // Randomise multiple choice options sequence mapping
             let optionsShuffled = [...questionData.options];
             shuffleArray(optionsShuffled);
 
@@ -645,12 +641,10 @@
                 optionsContainer.appendChild(btn);
             });
 
-            // Evaluate Back-To-Back Wrong Answer Metrics for Help Glowing Output Trigger
             const hintBox = document.getElementById('modal-hint-box');
             if (consecutiveWrongCount >= 2) {
                 document.getElementById('modal-hint-text').innerText = questionData.hint;
                 hintBox.style.display = 'block';
-                // Make correct answer option button glow inside the view
                 Array.from(optionsContainer.children).forEach(button => {
                     if (button.innerText === questionData.correct) {
                         button.classList.add('glow-hint');
@@ -667,7 +661,6 @@
             const modal = document.getElementById('question-modal');
             
             if (chosen === correct) {
-                // Correct answer selected -> Fire confetti trigger
                 playSound('snd-correct');
                 consecutiveWrongCount = 0;
                 solvedPieces[selectedPieceIndex] = true;
@@ -676,12 +669,10 @@
                 modal.classList.remove('active');
                 triggerConfettiExplosion();
                 
-                // Assess if board partition quadrant grid complete
                 if (solvedPieces.every(p => p === true)) {
                     setTimeout(triggerLevelComplete, 1200);
                 }
             } else {
-                // Incorrect answer selected
                 playSound('snd-wrong');
                 consecutiveWrongCount++;
                 lives--;
@@ -744,16 +735,14 @@
             }
         }
 
-        // Robust cross-browser HTML5 Audio playback helper
         function playSound(id) {
             const aud = document.getElementById(id);
             if (aud) {
                 aud.currentTime = 0;
-                aud.play().catch(() => { /* Handle silent safari mobile restrictions safely */ });
+                aud.play().catch(() => {});
             }
         }
 
-        // Utility Arrays Shuffling Randomizer Utility (Fisher-Yates)
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -761,7 +750,6 @@
             }
         }
 
-        // High Performance lightweight particle canvas loop for rendering Confetti
         function triggerConfettiExplosion() {
             const colors = ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#ffffff'];
             for (let i = 0; i < 80; i++) {
@@ -784,7 +772,7 @@
                 const p = confettiParticles[i];
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.3; // Gravity pull force acceleration
+                p.vy += 0.3;
                 p.rotation += p.rotationSpeed;
 
                 ctx.save();
@@ -794,7 +782,6 @@
                 ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
                 ctx.restore();
 
-                // Drop off-screen array clean elements up safely
                 if (p.y > canvas.height || p.x < 0 || p.x > canvas.width) {
                     confettiParticles.splice(i, 1);
                 }
