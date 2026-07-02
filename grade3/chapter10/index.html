@@ -2,94 +2,810 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Galaxy Game Journey</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { margin: 0; background: #0b0d17; color: white; font-family: sans-serif; overflow: hidden; }
-        .screen { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; }
-        #splash-screen { display: flex; z-index: 500; background: #000; }
-        button { padding: 20px 40px; font-size: 1.5rem; cursor: pointer; border-radius: 20px; border: none; background: #ffcc00; color: #333; font-weight: bold; }
-        #game-board { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; }
-        #quiz-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 300; }
+        :root {
+            --space-bg: #050510;
+            --panel-bg: rgba(15, 15, 35, 0.9);
+            --accent-yellow: #ffd000;
+            --neon-blue: #00bfff;
+            --candy-pink: #ff4a85;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--space-bg);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Twinkling Space Starfield Background */
+        .starfield-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, #0c0c25 0%, #050512 100%);
+            z-index: 1;
+            overflow: hidden;
+        }
+        .starfield-bg::after {
+            content: " ";
+            position: absolute;
+            width: 3px; height: 3px;
+            background: transparent;
+            box-shadow: 50px 100px #fff, 200px 300px #fff, 150px 500px #fff, 400px 100px #fff, 
+                        600px 250px #fff, 750px 450px #fff, 900px 150px #fff, 100px 700px #fff,
+                        500px 650px #fff, 850px 750px #fff, 300px 800px #fff, 700px 50px #fff;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1024px;
+            max-height: 768px;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+        }
+
+        /* SCREENS LAYER ARCHITECTURE */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 20;
+        }
+
+        /* 1. Splash Screen */
+        #splash-screen {
+            display: flex;
+            background: #ffffff;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+        #splash-screen img {
+            max-width: 300px;
+            width: 70%;
+            height: auto;
+            animation: pulseLogo 2s infinite ease-in-out;
+        }
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 2. Title & Instruction Screens */
+        .cosmic-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(180deg, #ffffff 0%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 15px rgba(0, 191, 255, 0.5);
+            margin-bottom: 20px;
+        }
+        .cosmic-btn {
+            background: linear-gradient(180deg, #ffe600 0%, #ff9900 100%);
+            border: 3px solid #ffffff;
+            border-radius: 50px;
+            color: #201000;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            padding: 12px 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 204, 0, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin-top: 20px;
+        }
+        .cosmic-btn:active { transform: scale(0.95); }
+
+        .instruction-card {
+            background: var(--panel-bg);
+            border: 2px solid #3a3a70;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 600px;
+            font-size: 1.3rem;
+            line-height: 1.6;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* 3. Main Live Gameplay Screen */
+        #hud-header {
+            width: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            z-index: 40;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(180deg, rgba(5,5,15,0.8) 0%, rgba(5,5,15,0) 100%);
+        }
+        .hearts-box { color: var(--candy-pink); font-size: 1.6rem; letter-spacing: 4px; }
+        .score-box { color: var(--accent-yellow); }
+
+        /* Solar System Arena Grid Layout */
+        #arena-map {
+            width: 100%;
+            height: 70%;
+            position: relative;
+            margin-top: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 20px;
+        }
+
+        /* The Sun Structure Anchor on Left */
+        .sun-anchor {
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, #fff700 20%, #ff7700 70%, #ff3700 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 50px #ff7700, inset 0 0 20px #ffffff;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 0 2px 4px #000;
+            flex-shrink: 0;
+            animation: sunGlow 4s infinite alternate ease-in-out;
+        }
+        @keyframes sunGlow {
+            0% { box-shadow: 0 0 40px #ff7700; }
+            100% { box-shadow: 0 0 65px #ff3700; }
+        }
+
+        /* Sequence Orbit Target Drop Zones Layout */
+        .orbit-slots-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            flex-grow: 1;
+            height: 100%;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .target-slot {
+            width: 90px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .slot-circle {
+            width: 70px;
+            height: 70px;
+            border: 2px dashed rgba(255,255,255,0.25);
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+            transition: all 0.3s;
+        }
+        .slot-circle.highlight-hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 191, 255, 0.15);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+        .slot-label {
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #050512;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Draggable Storage Tray Components */
+        #planets-tray {
+            width: 90%;
+            height: 20%;
+            background: rgba(20, 20, 45, 0.6);
+            border: 2px solid #252550;
+            border-radius: 20px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 10px;
+            backdrop-filter: blur(5px);
+            z-index: 30;
+        }
+
+        /* PLANET RENDERING STYLING (Accurate colors, ratios, and graphics) */
+        .planet-element {
+            border-radius: 50%;
+            position: relative;
+            display: inline-block;
+            cursor: grab;
+            touch-action: none;
+            z-index: 50;
+            box-shadow: inset -8px -8px 15px rgba(0,0,0,0.6);
+            transition: transform 0.1s;
+        }
+        .planet-element:active { cursor: grabbing; }
+
+        /* Specific Planets Dimensions & Visual Attributes matching image_977b5c.png */
+        .p-mercury { width: 26px; height: 26px; background: radial-gradient(circle at 30% 30%, #a1a1a1, #595959); }
+        .p-venus { width: 38px; height: 38px; background: radial-gradient(circle at 30% 30%, #eddca7, #967e36); }
+        .p-earth { width: 42px; height: 42px; background: radial-gradient(circle at 30% 30%, #4b9cd3, #165227); }
+        .p-mars { width: 32px; height: 32px; background: radial-gradient(circle at 30% 30%, #e05943, #7c1a0c); }
+        .p-jupiter { width: 70px; height: 70px; background: repeating-linear-gradient(45deg, #cc9966, #cc9966 6px, #996633 6px, #996633 12px); }
+        .p-saturn { width: 56px; height: 56px; background: radial-gradient(circle at 30% 30%, #e2bf7d, #8f7034); margin: 0 10px; }
+        /* Saturn Tilted Ring Graphic System */
+        .p-saturn::after {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            width: 96px; height: 16px;
+            border: 6px solid rgba(210,180,140,0.7); border-radius: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+        .p-uranus { width: 46px; height: 46px; background: radial-gradient(circle at 30% 30%, #b3f0ff, #338599); }
+        /* Uranus Thin Ring System */
+        .p-uranus::after {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            width: 64px; height: 6px;
+            border: 2px solid rgba(255,255,255,0.4); border-radius: 50%;
+            transform: translate(-50%, -50%) rotate(75deg);
+        }
+        .p-neptune { width: 44px; height: 44px; background: radial-gradient(circle at 30% 30%, #274687, #0f1c3f); }
+
+        /* 4. OVERLAY INTERACTIVE QUIZ WINDOW */
+        #quiz-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 5, 15, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .quiz-card {
+            background: radial-gradient(circle at top left, #18183a 0%, #0d0d22 100%);
+            border: 3px solid var(--neon-blue);
+            border-radius: 32px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 191, 255, 0.3);
+            text-align: center;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        #quiz-q-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .options-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid #333366;
+            border-radius: 16px;
+            padding: 14px;
+            color: #ffffff;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .option-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--neon-blue); }
+        
+        /* Feedback State Animations */
+        .option-btn.correct-glow { background: #00cc66 !important; border-color: #ffffff !important; animation: popCorrect 0.3s ease; }
+        .option-btn.wrong-glow { background: #ff3333 !important; border-color: #ffffff !important; opacity: 0.7; }
+        @keyframes popCorrect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #hint-box {
+            background: rgba(255, 204, 0, 0.1);
+            border: 2px dashed #ffcc00;
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 15px;
+            color: #ffe680;
+            font-size: 1.1rem;
+            display: none;
+        }
+
+        /* 5. DIAGNOSTIC RESULTS SHEET */
+        #end-screen {
+            background: linear-gradient(135deg, #0f0f2d 0%, #050515 100%);
+            z-index: 300;
+        }
+        .score-display-big {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--accent-yellow);
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(255,208,0,0.4);
+        }
+
+        /* Layout Fallbacks for Small Displays */
+        @media (max-width: 768px) {
+            .cosmic-title { font-size: 2.3rem; }
+            .sun-anchor { width: 90px; height: 90px; font-size: 0.9rem; }
+            .target-slot { width: 65px; }
+            .slot-circle { width: 50px; height: 50px; }
+            .slot-label { font-size: 0.65rem; padding: 2px 6px; }
+            .planet-element { transform: scale(0.75); }
+            #quiz-q-text { font-size: 1.15rem; }
+            .option-btn { font-size: 1rem; padding: 10px; }
+        }
     </style>
 </head>
 <body>
 
-<div id="splash-screen" class="screen" style="display:flex;"><img src="assets/innovine-logo.png" alt="Logo"></div>
+    <div class="starfield-bg"></div>
 
-<div id="title-screen" class="screen" style="display:flex;">
-    <h1>Galaxy Game Journey</h1>
-    <button onclick="showInstructions()">PLAY</button>
-</div>
+    <div id="game-container">
 
-<div id="instruction-screen" class="screen">
-    <h2>How to Play</h2>
-    <p>Arrange the planets and answer questions to win!</p>
-    <button onclick="startGame()">START MISSION</button>
-</div>
+        <!-- SCREEN 1: SPLASH GATE -->
+        <div id="splash-screen" class="screen">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo">
+        </div>
 
-<div id="game-play" class="screen">
-    <div id="game-board"></div>
-</div>
+        <!-- SCREEN 2: GAME TITLE LANDING -->
+        <div id="title-screen" class="screen">
+            <h1 class="cosmic-title">Galaxy Game Journey</h1>
+            <div style="font-size: 6rem; margin-bottom: 20px; animation: float 3s infinite ease-in-out;">🚀</div>
+            <button class="cosmic-btn" onclick="showInstructionsScreen()">PLAY</button>
+        </div>
 
-<div id="quiz-overlay">
-    <div id="quiz-content"></div>
-</div>
+        <!-- SCREEN 3: INSTRUCTIONS BRIEFING -->
+        <div id="instruction-screen" class="screen">
+            <div class="instruction-card">
+                <h2 style="color: var(--accent-yellow); margin-bottom: 15px; font-size: 2rem;">Space Commander Mission!</h2>
+                <p style="margin-bottom: 12px;">1. Drag the scrambled planets from the bottom tray into their correct orbital order relative to the Sun!</p>
+                <p style="margin-bottom: 12px;">2. Every successfully placed planet unlocks an immediate batch of 2 cosmic questions.</p>
+                <p>3. You have 3 lives total. Incorrect answers lose a life, but hint support will open after your 1st wrong attempt!</p>
+            </div>
+            <button class="cosmic-btn" onclick="bootstrapGameEngine()">START</button>
+        </div>
 
-<audio id="bg-music" src="assets/cheerfulmusic.mp3" loop></audio>
-<audio id="sfx-correct" src="assets/correct.mp3"></audio>
-<audio id="sfx-wrong" src="assets/wrong.mp3"></audio>
-<audio id="sfx-clap" src="assets/freesound_community-claps-44774.mp3"></audio>
+        <!-- SCREEN 4: ACTIVE CORE GAMEPLAY ARENA -->
+        <div id="main-gameplay-screen" class="screen" style="align-items: stretch; justify-content: flex-start; text-align: left;">
+            <div id="hud-header">
+                <div>Score: <span id="hud-score-val" class="score-box">0</span></div>
+                <div id="hud-hearts-container" class="hearts-box">❤️ ❤️ ❤️</div>
+            </div>
 
-<script>
-    const questions = [
-        {q: "Which is the closest star to Earth?", a: "The Sun", o: ["The Sun", "Sirius", "Pole Star", "Proxima"]},
-        {q: "Which planet is known as the ringed planet?", a: "Saturn", o: ["Saturn", "Jupiter", "Uranus", "Neptune"]},
-        {q: "What is the term for a massive collection of gas, dust, and stars?", a: "A galaxy", o: ["A galaxy", "A planet", "A constellation", "A meteoroid"]},
-        {q: "Who was the first Indian astronomer to state that the Earth is round?", a: "Aryabhatta", o: ["Aryabhatta", "Bhaskara", "Varahamihira", "Sputnik"]},
-        {q: "Which celestial body is Earth's only natural satellite?", a: "The Moon", o: ["The Moon", "The Sun", "Mars", "Venus"]},
-        {q: "What do we call the path along which each planet revolves?", a: "Orbit", o: ["Orbit", "Rotation", "Axis", "Path"]},
-        {q: "Which planet is the largest in our solar system?", a: "Jupiter", o: ["Jupiter", "Saturn", "Neptune", "Earth"]},
-        {q: "What are shooting stars actually?", a: "Meteoroids", o: ["Meteoroids", "Stars", "Planets", "Satellites"]},
-        {q: "When the Moon is not visible, what is this phase called?", a: "New Moon", o: ["New Moon", "Full Moon", "Crescent", "Quarter"]},
-        {q: "What is a primary use of artificial satellites?", a: "Weather forecasting", o: ["Weather forecasting", "Growing crops", "Digging", "Music"]},
-        {q: "Why do stars appear to twinkle?", a: "Earth's atmosphere", o: ["Earth's atmosphere", "They are moving", "Heat", "Distance"]},
-        {q: "What is the name of our home galaxy?", a: "The Milky Way", o: ["The Milky Way", "Andromeda", "Saptarishi", "Solar"]},
-        {q: "Which planet is known as the ice giant?", a: "Uranus", o: ["Uranus", "Neptune", "Saturn", "Mars"]},
-        {q: "What is the temperature at the center of the Sun?", a: "5,500°C", o: ["5,500°C", "150M km", "1,500 years", "384k km"]},
-        {q: "What is the Full Moon day called in India?", a: "Purnima", o: ["Purnima", "Amavasya", "Eclipse", "Crescent"]},
-        {q: "Where is the main asteroid belt found?", a: "Mars and Jupiter", o: ["Mars and Jupiter", "Earth and Mars", "Venus and Earth", "Jupiter and Saturn"]}
-    ];
+            <div id="arena-map">
+                <!-- Anchor Sun Graphic Element -->
+                <div class="sun-anchor">SUN</div>
+                
+                <!-- Target Slots Drop Grid Matrix Loop -->
+                <div class="orbit-slots-container" id="slots-wrapper"></div>
+            </div>
 
-    let score = 0;
-    let answered = 0;
+            <!-- Draggable Source Planets Storage Dock Tray -->
+            <div id="planets-tray"></div>
+        </div>
 
-    setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; }, 5000);
+        <!-- SCREEN 4 SUB-LAYER: QUIZ SYSTEM LIGHTBOX POPUP -->
+        <div id="quiz-overlay">
+            <div class="quiz-card">
+                <div id="quiz-progress-badge" style="color: var(--neon-blue); font-weight: 700; margin-bottom: 8px;">COSMIC CHALLENGE</div>
+                <div id="quiz-q-text">Question Template Content placeholder Text context?</div>
+                <div class="options-stack" id="quiz-options-box"></div>
+                <div id="hint-box">💡 <strong>Mission Tip:</strong> <span id="hint-msg-string"></span></div>
+            </div>
+        </div>
 
-    function showInstructions() {
-        document.getElementById('title-screen').style.display = 'none';
-        document.getElementById('instruction-screen').style.display = 'flex';
-    }
+        <!-- SCREEN 5: FINAL EVALUATION SUMMARY SCORECARD -->
+        <div id="end-screen" class="screen">
+            <h1 id="end-status-header" class="cosmic-title">Mission Accomplished!</h1>
+            <div id="end-emoji" style="font-size: 5rem;">🏆</div>
+            <div class="score-display-big" id="end-score-val">0</div>
+            <p style="font-size: 1.3rem; color: #aaa; margin-bottom: 30px;">Fantastic job exploring the solar system!</p>
+            <button class="cosmic-btn" onclick="location.reload()">PLAY AGAIN</button>
+        </div>
 
-    function startGame() {
-        document.getElementById('instruction-screen').style.display = 'none';
-        document.getElementById('game-play').style.display = 'flex';
-        document.getElementById('bg-music').play().catch(()=>{});
-    }
+    </div>
 
-    function handleAnswer(isCorrect) {
-        if(isCorrect) {
-            score += 20;
-            document.getElementById('sfx-correct').play();
-        } else {
-            document.getElementById('sfx-wrong').play();
+    <!-- AUDIO DRIVER HARDWARE SYSTEM -->
+    <audio id="snd-bg" src="assets/cheerfulmusic.mp3" loop preload="auto"></audio>
+    <audio id="snd-right" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="snd-clap" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <script>
+        // Full Complete 16 Question Dataset Framework
+        const cosmicQuestionBank = [
+            { q: "Which of these is considered the closest star to the Earth?", o: ["The Sun", "Sirius", "The Pole Star", "Proxima Centauri"], a: "The Sun", h: "It lights up our daytime and provides heat to all planets." },
+            { q: "Which planet in our solar system is known as the 'ringed planet'?", o: ["Saturn", "Jupiter", "Uranus", "Neptune"], a: "Saturn", h: "It features spectacular, wide icy rings spinning around it." },
+            { q: "What is the term for a massive collection of gas, dust, and billions of stars?", o: ["A galaxy", "A planet", "A constellation", "A meteoroid"], a: "A galaxy", h: "Our home planet belongs to one called the Milky Way." },
+            { q: "Who was the first Indian astronomer to state that the Earth is round and rotates on its own axis?", o: ["Aryabhatta", "Bhaskara", "Varahamihira", "Sputnik"], a: "Aryabhatta", h: "This famous ancient Indian scientist has a satellite named after him." },
+            { q: "Which celestial body is Earth's only natural satellite?", o: ["The Moon", "The Sun", "Mars", "Venus"], a: "The Moon", h: "It has no air or light of its own and loops around Earth every 27 days." },
+            { q: "What do we call the path along which each planet revolves around the Sun?", o: ["Orbit", "Rotation", "Axis", "Path"], a: "Orbit", h: "It is an oval-shaped route that planets travel constantly." },
+            { q: "Which planet is known as the 'largest planet' in our solar system?", o: ["Jupiter", "Saturn", "Neptune", "Earth"], a: "Jupiter", h: "This gas giant is so huge that over 1,300 Earths could fit inside it." },
+            { q: "What are 'shooting stars' actually?", o: ["Meteoroids burning in the atmosphere", "Falling stars", "Broken planets", "Artificial satellites"], a: "Meteoroids burning in the atmosphere", h: "They are small rocks entering Earth's air so fast they get hot and burn up." },
+            { q: "When the Moon is not visible from Earth at all, what is this phase called?", o: ["New Moon", "Full Moon", "Crescent Moon", "Quarter Moon"], a: "New Moon", h: "This dark phase occurs when the Moon sits right between the Earth and Sun." },
+            { q: "Which of the following is a primary use of artificial satellites?", o: ["Weather forecasting", "Growing crops", "Digging mines", "Making music"], a: "Weather forecasting", h: "They monitor clouds and storms from up high in outer space." },
+            { q: "Stars appear to twinkle in the night sky primarily because of what?", o: ["The atmosphere around the Earth", "They are moving", "They produce their own light", "They are very far away"], a: "The atmosphere around the Earth", h: "Light travels through shifting layers of gases surrounding our world." },
+            { q: "What is the name of the galaxy that is the home of our planet Earth?", o: ["The Milky Way", "The Andromeda", "The Saptarishi", "The Solar Galaxy"], a: "The Milky Way", h: "In India, this beautiful cosmic highway is known as Akash Ganga." },
+            { q: "Which planet is known as the 'ice giant'?", o: ["Uranus", "Neptune", "Saturn", "Mars"], a: "Uranus", h: "It is a freezing, greenish-blue outer gas world with a tilted axis." },
+            { q: "What is the approximate temperature at the center of the Sun?", o: ["5,500°C", "150 million km", "1,500 years", "3,84,400 km"], a: "5,500°C", h: "It matches the boiling heat value found across the Sun's surface layer." },
+            { q: "Which day is referred to as 'Purnima' in India?", o: ["Full Moon day", "New Moon day", "The day of the eclipse", "The day of the crescent"], a: "Full Moon day", h: "It is when the entire round, glowing face of the Moon faces Earth." },
+            { q: "Asteroids are mostly found between the orbits of which two planets?", o: ["Mars and Jupiter", "Earth and Mars", "Venus and Earth", "Jupiter and Saturn"], a: "Mars and Jupiter", h: "This rocky debris belt divides the inner worlds from the giant gas planets." }
+        ];
+
+        // Definitive Ordered Data Structure mapping image_977b5c.png
+        const planetsData = [
+            { id: "mercury", name: "Mercury", class: "p-mercury" },
+            { id: "venus", name: "Venus", class: "p-venus" },
+            { id: "earth", name: "Earth", class: "p-earth" },
+            { id: "mars", name: "Mars", class: "p-mars" },
+            { id: "jupiter", name: "Jupiter", class: "p-jupiter" },
+            { id: "saturn", name: "Saturn", class: "p-saturn" },
+            { id: "uranus", name: "Uranus", class: "p-uranus" },
+            { id: "neptune", name: "Neptune", class: "p-neptune" }
+        ];
+
+        let gameScore = 0;
+        let gameLives = 3;
+        let activeQuizIndex = 0;
+        let wrongAttemptCount = 0;
+        let currentBatchQuestionsAnswered = 0;
+
+        // Pointer Drag Engine State Matrix Variable Holders
+        let activeDraggedElement = null;
+        let initialX = 0, initialY = 0;
+        let offsetX = 0, offsetY = 0;
+
+        // 1. Splash Screen Automatic Gateway Timer (Exactly 5s Duration)
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            document.getElementById('title-screen').style.display = 'flex';
+            setTimeout(() => splash.style.display = 'none', 500);
+        }, 5000);
+
+        function showInstructionsScreen() {
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('instruction-screen').style.display = 'flex';
         }
-        answered++;
-        if(answered >= 16) {
-            document.getElementById('quiz-overlay').innerHTML = `<h2>Mission Complete!</h2><p>Your Final Score: ${score}</p><button onclick="location.reload()">PLAY AGAIN</button>`;
-            document.getElementById('sfx-clap').play();
+
+        // 2. Main Gameplay Initializer
+        function bootstrapGameEngine() {
+            document.getElementById('instruction-screen').style.display = 'none';
+            document.getElementById('main-gameplay-screen').style.display = 'flex';
+            
+            // Audio Safety Stream Trigger Engagement
+            document.getElementById('snd-bg').play().catch(() => {});
+
+            // Scramble dataset orders before render instantiation
+            shuffleArray(cosmicQuestionBank);
+
+            buildBoardSlots();
+            populatePlanetTray();
         }
-    }
-</script>
+
+        function buildBoardSlots() {
+            const wrapper = document.getElementById('slots-wrapper');
+            wrapper.innerHTML = '';
+            planetsData.forEach((planet) => {
+                const slot = document.createElement('div');
+                slot.className = 'target-slot';
+                slot.dataset.id = planet.id;
+                slot.innerHTML = `
+                    <div class="slot-circle" id="slot-circle-${planet.id}"></div>
+                    <div class="slot-label">${planet.name}</div>
+                `;
+                wrapper.appendChild(slot);
+            });
+        }
+
+        function populatePlanetTray() {
+            const tray = document.getElementById('planets-tray');
+            tray.innerHTML = '';
+            
+            // Clone and scramble source planetary order before tray display injection
+            let scrambledPlanets = [...planetsData];
+            shuffleArray(scrambledPlanets);
+
+            scrambledPlanets.forEach((p) => {
+                const el = document.createElement('div');
+                el.className = `planet-element ${p.class}`;
+                el.id = `drag-${p.id}`;
+                el.dataset.id = p.id;
+                
+                // Mount universal pointer engine hook listeners
+                el.addEventListener('pointerdown', onPointerDown);
+                tray.appendChild(el);
+            });
+        }
+
+        // 3. COMPLETE CUSTOM POINTER DRAG ENGINE (Cross-Device Safe)
+        function onPointerDown(e) {
+            e.preventDefault();
+            activeDraggedElement = e.currentTarget;
+            activeDraggedElement.style.transition = 'none';
+            activeDraggedElement.style.zIndex = '1000';
+
+            const rect = activeDraggedElement.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            // Move target element directly into root body wrapper to break layout boundaries cleanly
+            activeDraggedElement.style.position = 'fixed';
+            activeDraggedElement.style.left = `${e.clientX - offsetX}px`;
+            activeDraggedElement.style.top = `${e.clientY - offsetY}px`;
+
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+        }
+
+        function onPointerMove(e) {
+            if (!activeDraggedElement) return;
+            activeDraggedElement.style.left = `${e.clientX - offsetX}px`;
+            activeDraggedElement.style.top = `${e.clientY - offsetY}px`;
+
+            // Dynamic Hover Collision Slot Highlighting Loop Check
+            const targetSlotId = checkCollisionTarget(e.clientX, e.clientY);
+            document.querySelectorAll('.slot-circle').forEach(sc => sc.classList.remove('highlight-hover'));
+            if (targetSlotId) {
+                document.getElementById(`slot-circle-${targetSlotId}`).classList.add('highlight-hover');
+            }
+        }
+
+        function onPointerUp(e) {
+            if (!activeDraggedElement) return;
+            document.remove('pointermove', onPointerMove);
+            document.remove('pointerup', onPointerUp);
+
+            const matchedSlotId = checkCollisionTarget(e.clientX, e.clientY);
+            const expectedPlanetId = activeDraggedElement.dataset.id;
+
+            document.querySelectorAll('.slot-circle').forEach(sc => sc.classList.remove('highlight-hover'));
+
+            // Core Logic Validation Rule
+            if (matchedSlotId && matchedSlotId === expectedPlanetId) {
+                // SUCCESS SNAPLOCK CONTEXT
+                document.getElementById('snd-right').play().catch(() => {});
+                const circleSlot = document.getElementById(`slot-circle-${matchedSlotId}`);
+                circleSlot.style.border = 'none';
+                circleSlot.style.background = 'transparent';
+                
+                // Reparent dragged element flush into target socket interface framework
+                circleSlot.appendChild(activeDraggedElement);
+                activeDraggedElement.style.position = 'relative';
+                activeDraggedElement.style.left = '0px';
+                activeDraggedElement.style.top = '0px';
+                activeDraggedElement.style.zIndex = '10';
+                activeDraggedElement.removeEventListener('pointerdown', onPointerDown);
+                activeDraggedElement.style.cursor = 'default';
+
+                activeDraggedElement = null;
+
+                // Fire Batch Quiz Gateway Engine instantly (+2 Questions per correct arrangement)
+                setTimeout(() => {
+                    currentBatchQuestionsAnswered = 0;
+                    launchQuizBatchWindow();
+                }, 400);
+
+            } else {
+                // FAIL RETRACT CONTEXT (Spring Back To Tray Base Container Layout)
+                document.getElementById('snd-wrong').play().catch(() => {});
+                activeDraggedElement.style.transition = 'all 0.3s ease';
+                activeDraggedElement.style.position = 'relative';
+                activeDraggedElement.style.left = '0px';
+                activeDraggedElement.style.top = '0px';
+                activeDraggedElement.style.zIndex = '50';
+                
+                const tray = document.getElementById('planets-tray');
+                tray.appendChild(activeDraggedElement);
+                activeDraggedElement = null;
+            }
+        }
+
+        function checkCollisionTarget(clientX, clientY) {
+            let foundId = null;
+            planetsData.forEach((p) => {
+                const targetBox = document.getElementById(`slot-circle-${p.id}`).getBoundingClientRect();
+                if (clientX >= targetBox.left && clientX <= targetBox.right &&
+                    clientY >= targetBox.top && clientY <= targetBox.bottom) {
+                    foundId = p.id;
+                }
+            });
+            return foundId;
+        }
+
+        // 4. BATCH INTERACTIVE QUIZ DRIVER SYSTEM
+        function launchQuizBatchWindow() {
+            if (activeQuizIndex >= cosmicQuestionBank.length || gameLives <= 0) {
+                terminateSession();
+                return;
+            }
+
+            wrongAttemptCount = 0;
+            document.getElementById('hint-box').style.display = 'none';
+            
+            const currentQA = cosmicQuestionBank[activeQuizIndex];
+            document.getElementById('quiz-progress-badge').innerText = `COSMIC QUIZ: QUESTION ${activeQuizIndex + 1} / 16`;
+            document.getElementById('quiz-q-text').innerText = currentQA.q;
+
+            const optionsContainer = document.getElementById('quiz-options-box');
+            optionsContainer.innerHTML = '';
+
+            // Shuffle choice presentation variants completely
+            let scrambledChoices = [...currentQA.o];
+            shuffleArray(scrambledChoices);
+
+            scrambledChoices.forEach((choice) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = choice;
+                btn.onclick = () => validateQuizSelection(btn, choice, currentQA);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('quiz-overlay').style.display = 'flex';
+        }
+
+        function validateQuizSelection(btnElement, chosenText, qaData) {
+            if (chosenText === qaData.a) {
+                // CORRECT ANSWERS PROCESSING LOGIC (+20 Points Rule)
+                btnElement.classList.add('correct-glow');
+                document.getElementById('snd-right').play().catch(() => {});
+                gameScore += 20;
+                document.getElementById('hud-score-val').innerText = gameScore;
+                
+                activeQuizIndex++;
+                currentBatchQuestionsAnswered++;
+
+                // Lock interface down during victory confirmation frame
+                disableAllQuizOptionButtons();
+
+                setTimeout(() => {
+                    if (activeQuizIndex >= 16) {
+                        document.getElementById('quiz-overlay').style.display = 'none';
+                        terminateSession();
+                    } else if (currentBatchQuestionsAnswered < 2) {
+                        launchQuizBatchWindow(); // Loop to execute 2nd consecutive batch question
+                    } else {
+                        // Batch finished safely, close card window layer entirely
+                        document.getElementById('quiz-overlay').style.display = 'none';
+                        checkWinCondition();
+                    }
+                }, 1200);
+
+            } else {
+                // INCORRECT ANSWERS PROCESSING LOGIC (-1 Life Rule)
+                wrongAttemptCount++;
+                btnElement.disabled = true;
+                btnElement.classList.add('wrong-glow');
+                document.getElementById('snd-wrong').play().catch(() => {});
+
+                // Hint Trigger Rule - Display on 1st error instance
+                if (wrongAttemptCount === 1) {
+                    document.getElementById('hint-msg-string').innerText = qaData.h;
+                    document.getElementById('hint-box').style.display = 'block';
+                }
+
+                gameLives--;
+                refreshHeartsHUD();
+
+                if (gameLives <= 0) {
+                    disableAllQuizOptionButtons();
+                    setTimeout(() => {
+                        document.getElementById('quiz-overlay').style.display = 'none';
+                        terminateSession();
+                    }, 1200);
+                }
+            }
+        }
+
+        function disableAllQuizOptionButtons() {
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+        }
+
+        function refreshHeartsHUD() {
+            const container = document.getElementById('hud-hearts-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                container.innerHTML += i < gameLives ? '❤️ ' : '🖤 ';
+            }
+        }
+
+        function checkWinCondition() {
+            // If all planets are bound or quiz metrics fully populated
+            if (document.querySelectorAll('#planets-tray .planet-element').length === 0) {
+                terminateSession();
+            }
+        }
+
+        // 5. SESSION COMPLETION SCREEN SUMMARY REPORT CARD
+        function terminateSession() {
+            document.getElementById('main-gameplay-screen').style.display = 'none';
+            document.getElementById('quiz-overlay').style.display = 'none';
+            
+            const endScreen = document.getElementById('end-screen');
+            const endTitle = document.getElementById('end-status-header');
+            const endEmoji = document.getElementById('end-emoji');
+            
+            endScreen.style.display = 'flex';
+            document.getElementById('end-score-val').innerText = `${gameScore} Points`;
+
+            if (gameLives <= 0) {
+                endTitle.innerText = "Game Over!";
+                endTitle.style.background = "linear-gradient(180deg, #ff9999 0%, #ff3333 100%)";
+                endTitle.style.webkitBackgroundClip = "text";
+                endEmoji.innerText = "💥";
+            } else {
+                document.getElementById('snd-clap').play().catch(() => {});
+            }
+        }
+
+        // Fisher-Yates Array Shuffle Utility
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+    </script>
 </body>
 </html>
