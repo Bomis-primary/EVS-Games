@@ -73,12 +73,12 @@
             height: auto;
         }
 
-        /* HOME MENU HUB */
-        #menu-screen, #instruction-screen {
+        /* TITLE SCREEN */
+        #title-screen, #instruction-screen {
             position: absolute;
             inset: 0;
             z-index: 90;
-            display: none; /* Changed to display: none initially */
+            display: none; 
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -301,8 +301,8 @@
             <img src="assets/innovine-logo.png" alt="Innovine Logo">
         </div>
 
-        <!-- INTERFACE STAGE 2: HOME PORTAL MENU -->
-        <div id="menu-screen">
+        <!-- INTERFACE STAGE 2: TITLE SCREEN -->
+        <div id="title-screen">
             <h1 class="game-title-banner">Candy EVS<br>Crush Quest</h1>
             <div style="font-size: 5.5rem; margin-bottom: 30px;">🍬</div>
             <button class="sweet-btn" onclick="goToInstructions()">NEXT</button>
@@ -386,18 +386,25 @@
         let interactiveLock = false;
         let quizWrongAttemptCounter = 0;
 
-        window.addEventListener('load', () => {
+        // FIXED LOGIC: Triggers immediately after page is processed. No waiting for audio/images.
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            const titleScreen = document.getElementById('title-screen');
+            
+            // Set the title screen to visible so it is waiting underneath
+            titleScreen.style.display = 'flex'; 
+            
+            // Trigger the fade animation
+            splash.style.opacity = '0';
+            
+            // Clean up the splash screen after fade completes
             setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                }, 400); 
-            }, 1000); 
-        });
+                splash.style.display = 'none';
+            }, 400); 
+        }, 1200); // Wait 1.2 seconds to show the Innovine logo
 
         function goToInstructions() {
-            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('title-screen').style.display = 'none';
             document.getElementById('instruction-screen').style.display = 'flex';
         }
 
