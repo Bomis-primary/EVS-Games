@@ -165,12 +165,17 @@
             backdrop-filter: blur(5px);
         }
 
+        .hud-group {
+            display: flex;
+            gap: 10px;
+        }
+
         .hud-item {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: #ffffff;
             background: rgba(0, 0, 0, 0.2);
-            padding: 5px 15px;
+            padding: 6px 16px;
             border-radius: 15px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
@@ -417,7 +422,8 @@
                 <p>🌟 <strong>How to Play:</strong></p>
                 <p>1. Click any blank puzzle box to see a secret question banner.</p>
                 <p>2. Choose the correct answer to make magic confetti fly and reveal the hidden photo!</p>
-                <p>3. Watch out! You have 3 lives. Missing two answers back-to-back unlocks a glowing hint!</p>
+                <p>3. **Earn +10 Marks** for every correct science question solved!</p>
+                <p>4. Watch out! You have 3 lives. Missing two answers back-to-back unlocks a glowing hint!</p>
             </div>
             <button class="cute-btn" onclick="startGame()">Play! 🎮</button>
         </div>
@@ -425,7 +431,10 @@
         <!-- SCREEN 4: Gameplay Screen -->
         <div id="game-screen" class="screen">
             <div id="game-header">
-                <div id="level-display" class="hud-item">Level 1: Air</div>
+                <div class="hud-group">
+                    <div id="level-display" class="hud-item">Level 1: Air</div>
+                    <div id="score-display" class="hud-item">⭐ Score: 0</div>
+                </div>
                 <div id="lives-display">
                     <span class="heart" id="heart-1">❤️</span>
                     <span class="heart" id="heart-2">❤️</span>
@@ -567,6 +576,7 @@
 
         // Game State Variables
         let currentLevelIndex = 0;
+        let score = 0;
         let lives = 3;
         let consecutiveWrongCount = 0;
         let selectedPieceIndex = null;
@@ -599,8 +609,10 @@
 
         function startGame() {
             currentLevelIndex = 0;
+            score = 0;
             lives = 3;
             updateLivesUI();
+            updateScoreUI();
             loadLevel(currentLevelIndex);
             goToScreen('game-screen');
         }
@@ -665,6 +677,11 @@
             if (chosen === correct) {
                 playSound('snd-correct');
                 consecutiveWrongCount = 0;
+                
+                // Add +10 marks for a correct answer setup
+                score += 10;
+                updateScoreUI();
+
                 solvedPieces[selectedPieceIndex] = true;
                 document.getElementById(`piece-${selectedPieceIndex}`).classList.add('solved');
                 
@@ -698,18 +715,23 @@
             }
         }
 
+        function updateScoreUI() {
+            document.getElementById('score-display').innerText = `⭐ Score: ${score}`;
+        }
+
         function triggerLevelComplete() {
             playSound('snd-victory');
             const endTitle = document.getElementById('end-title');
             const endMessage = document.getElementById('end-message');
             const endBtn = document.getElementById('end-btn');
 
-            endTitle.innerText = "Fantastic Job! 🎉";
-            endMessage.innerText = `You revealed the beautiful picture for ${gameData.levels[currentLevelIndex].name}!`;
-            
             if (currentLevelIndex < gameData.levels.length - 1) {
+                endTitle.innerText = "Fantastic Job! 🎉";
+                endMessage.innerText = `You revealed the picture for ${gameData.levels[currentLevelIndex].name}!\nYour current total score is: ${score} marks!`;
                 endBtn.innerText = "Next Level";
             } else {
+                endTitle.innerText = "Ultimate Champion! 🏆";
+                endMessage.innerText = `Outstanding! You solved all puzzle maps!\nFinal Science Score: ${score} / 120 marks!`;
                 endBtn.innerText = "Play Again";
             }
             goToScreen('end-screen');
@@ -721,7 +743,7 @@
             const endBtn = document.getElementById('end-btn');
 
             endTitle.innerText = "Game Over! 🎈";
-            endMessage.innerText = "Don't worry, nature takes time! Let's try again to solve the puzzles.";
+            endMessage.innerText = `Don't worry, nature takes time! Let's try again.\nYou finished with ${score} marks.`;
             endBtn.innerText = "Restart Game";
             goToScreen('end-screen');
         }
