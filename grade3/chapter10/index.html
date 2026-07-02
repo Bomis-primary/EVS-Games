@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Game Journey</title>
+    <style>
+        body { margin: 0; background: #0b0d17; color: white; font-family: sans-serif; overflow: hidden; }
+        .screen { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        #splash-screen { display: flex; z-index: 500; background: #000; }
+        button { padding: 20px 40px; font-size: 1.5rem; cursor: pointer; border-radius: 20px; border: none; background: #ffcc00; color: #333; font-weight: bold; }
+        #game-board { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; }
+        #quiz-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 300; }
+    </style>
+</head>
+<body>
 
+<div id="splash-screen" class="screen" style="display:flex;"><img src="assets/innovine-logo.png" alt="Logo"></div>
+
+<div id="title-screen" class="screen" style="display:flex;">
+    <h1>Galaxy Game Journey</h1>
+    <button onclick="showInstructions()">PLAY</button>
+</div>
+
+<div id="instruction-screen" class="screen">
+    <h2>How to Play</h2>
+    <p>Arrange the planets and answer questions to win!</p>
+    <button onclick="startGame()">START MISSION</button>
+</div>
+
+<div id="game-play" class="screen">
+    <div id="game-board"></div>
+</div>
+
+<div id="quiz-overlay">
+    <div id="quiz-content"></div>
+</div>
+
+<audio id="bg-music" src="assets/cheerfulmusic.mp3" loop></audio>
+<audio id="sfx-correct" src="assets/correct.mp3"></audio>
+<audio id="sfx-wrong" src="assets/wrong.mp3"></audio>
+<audio id="sfx-clap" src="assets/freesound_community-claps-44774.mp3"></audio>
+
+<script>
+    const questions = [
+        {q: "Which is the closest star to Earth?", a: "The Sun", o: ["The Sun", "Sirius", "Pole Star", "Proxima"]},
+        {q: "Which planet is known as the ringed planet?", a: "Saturn", o: ["Saturn", "Jupiter", "Uranus", "Neptune"]},
+        {q: "What is the term for a massive collection of gas, dust, and stars?", a: "A galaxy", o: ["A galaxy", "A planet", "A constellation", "A meteoroid"]},
+        {q: "Who was the first Indian astronomer to state that the Earth is round?", a: "Aryabhatta", o: ["Aryabhatta", "Bhaskara", "Varahamihira", "Sputnik"]},
+        {q: "Which celestial body is Earth's only natural satellite?", a: "The Moon", o: ["The Moon", "The Sun", "Mars", "Venus"]},
+        {q: "What do we call the path along which each planet revolves?", a: "Orbit", o: ["Orbit", "Rotation", "Axis", "Path"]},
+        {q: "Which planet is the largest in our solar system?", a: "Jupiter", o: ["Jupiter", "Saturn", "Neptune", "Earth"]},
+        {q: "What are shooting stars actually?", a: "Meteoroids", o: ["Meteoroids", "Stars", "Planets", "Satellites"]},
+        {q: "When the Moon is not visible, what is this phase called?", a: "New Moon", o: ["New Moon", "Full Moon", "Crescent", "Quarter"]},
+        {q: "What is a primary use of artificial satellites?", a: "Weather forecasting", o: ["Weather forecasting", "Growing crops", "Digging", "Music"]},
+        {q: "Why do stars appear to twinkle?", a: "Earth's atmosphere", o: ["Earth's atmosphere", "They are moving", "Heat", "Distance"]},
+        {q: "What is the name of our home galaxy?", a: "The Milky Way", o: ["The Milky Way", "Andromeda", "Saptarishi", "Solar"]},
+        {q: "Which planet is known as the ice giant?", a: "Uranus", o: ["Uranus", "Neptune", "Saturn", "Mars"]},
+        {q: "What is the temperature at the center of the Sun?", a: "5,500°C", o: ["5,500°C", "150M km", "1,500 years", "384k km"]},
+        {q: "What is the Full Moon day called in India?", a: "Purnima", o: ["Purnima", "Amavasya", "Eclipse", "Crescent"]},
+        {q: "Where is the main asteroid belt found?", a: "Mars and Jupiter", o: ["Mars and Jupiter", "Earth and Mars", "Venus and Earth", "Jupiter and Saturn"]}
+    ];
+
+    let score = 0;
+    let answered = 0;
+
+    setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; }, 5000);
+
+    function showInstructions() {
+        document.getElementById('title-screen').style.display = 'none';
+        document.getElementById('instruction-screen').style.display = 'flex';
+    }
+
+    function startGame() {
+        document.getElementById('instruction-screen').style.display = 'none';
+        document.getElementById('game-play').style.display = 'flex';
+        document.getElementById('bg-music').play().catch(()=>{});
+    }
+
+    function handleAnswer(isCorrect) {
+        if(isCorrect) {
+            score += 20;
+            document.getElementById('sfx-correct').play();
+        } else {
+            document.getElementById('sfx-wrong').play();
+        }
+        answered++;
+        if(answered >= 16) {
+            document.getElementById('quiz-overlay').innerHTML = `<h2>Mission Complete!</h2><p>Your Final Score: ${score}</p><button onclick="location.reload()">PLAY AGAIN</button>`;
+            document.getElementById('sfx-clap').play();
+        }
+    }
+</script>
+</body>
+</html>
