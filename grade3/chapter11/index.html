@@ -1,1 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Orbit Defender - Arcade Science</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body {
+            background-color: #060614;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
+        /* Responsive Game Wrapper Container */
+        #game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 1024px;
+            max-height: 768px;
+            position: relative;
+            background: radial-gradient(circle at center, #0b112c 0%, #03040c 100%);
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
+        }
+
+        /* Screen States Layering */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+        .active-screen { display: flex; }
+
+        /* Screen 1: Splash Screen */
+        #splash-screen { background-color: #000000; }
+        #splash-logo { max-width: 250px; width: 60%; height: auto; animation: pulse 2s infinite ease-in-out; }
+
+        /* Screen 2 & 3 UI Styling */
+        .game-title { font-size: 2.8rem; color: #00ffcc; text-shadow: 0 0 15px rgba(0, 255, 204, 0.6); margin-bottom: 20px; font-weight: 800; }
+        .btn {
+            background: linear-gradient(135deg, #00ffcc 0%, #00a3ff 100%);
+            border: none; padding: 15px 40px; font-size: 1.5rem; color: #03040c;
+            font-weight: bold; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4); transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        .instructions-card {
+            background: rgba(255, 255, 255, 0.05); border: 2px solid #00a3ff;
+            border-radius: 16px; padding: 25px; max-width: 500px; width: 90%;
+            margin-bottom: 30px; font-size: 1.1rem; line-height: 1.6;
+        }
+        .instructions-card ul { text-align: left; margin-left: 20px; margin-top: 10px; }
+        .instructions-card li { margin-bottom: 10px; color: #e2e8f0; }
+
+        /* Screen 4: Active Core Gameplay Layout */
+        #hud {
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; background: rgba(3, 4, 12, 0.75); z-index: 5;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        #mission-text {
+            position: absolute; top: 65px; left: 5%; width: 90%;
+            background: rgba(0, 163, 255, 0.15); border: 1px solid #00a3ff;
+            padding: 10px; border-radius: 8px; text-align: center;
+            font-size: 1rem; color: #00ffcc; z-index: 5; font-weight: 600;
+        }
+
+        /* Pure CSS Game Canvas Space Simulation Layer */
+        #playfield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        
+        /* Interactive Game Element DOM Objects */
+        .target-box {
+            position: absolute; background: rgba(15, 23, 42, 0.9);
+            border: 2px solid #334155; border-radius: 8px; padding: 10px;
+            color: #f1f5f9; font-weight: bold; font-size: 0.9rem; text-align: center;
+            pointer-events: auto; cursor: pointer; transition: border 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        /* Hint System Golden Pulse Animation */
+        .hint-glow {
+            border-color: #ffd700 !important;
+            box-shadow: 0 0 20px #ffd700 !important;
+            animation: glowPulse 1s infinite alternate;
+        }
+
+        #player-ship {
+            position: absolute; bottom: 30px; width: 60px; height: 50px;
+            background: #38bdf8; border-radius: 50% 50% 10% 10%;
+            pointer-events: auto; cursor: grep; z-index: 4;
+            box-shadow: 0 0 15px #38bdf8;
+        }
+        #player-ship::before, #player-ship::after {
+            content: ''; position: absolute; top: 20px; width: 15px; height: 15px; background: #60a5fa;
+        }
+        #player-ship::before { left: -12px; border-radius: 4px 0 0 4px; }
+        #player-ship::after { right: -12px; border-radius: 0 4px 4px 0; }
+
+        .laser {
+            position: absolute; width: 4px; height: 15px; background: #f43f5e;
+            border-radius: 2px; box-shadow: 0 0 8px #f43f5e;
+        }
+
+        /* Animations */
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        @keyframes glowPulse { 0% { transform: scale(1); } 100% { transform: scale(1.04); } }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <!-- SCREEN 1: SPLASH SCREEN (INNOVINE LOGO) -->
+        <div id="splash-screen" class="screen active-screen">
+            <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('splash-fallback').style.display='block';">
+            <h2 id="splash-fallback" style="display:none; color:#00ffcc; font-size:2rem;">INNOVINE LEARNING</h2>
+        </div>
+
+        <!-- SCREEN 2: GAME TITLE SCREEN -->
+        <div id="title-screen" class="screen">
+            <h1 class="game-title">ORBIT DEFENDER</h1>
+            <p style="margin-bottom: 30px; color: #94a3b8;">Arcade Space Science Explorer</p>
+            <button class="btn" onclick="showScreen('instruction-screen')">PLAY GAME</button>
+        </div>
+
+        <!-- SCREEN 3: GRADE 3 INSTRUCTIONS -->
+        <div id="instruction-screen" class="screen">
+            <h2 class="game-title" style="font-size: 2rem;">How to Play 🚀</h2>
+            <div class="instructions-card">
+                <ul>
+                    <li>🛸 <b>Move Your Ship:</b> Move left and right with <b>A/D keys</b>, <b>Arrow keys</b>, or by <b>dragging your ship</b> on screen!</li>
+                    <li>🎯 <b>Aim and Blast:</b> Hit the <b>Spacebar</b> or <b>tap a block</b> to fire a laser at the right answer!</li>
+                    <li>❤️ <b>Stay Safe:</b> You have 3 lives. Don't blast the wrong space blocks!</li>
+                </ul>
+            </div>
+            <button class="btn" onclick="startGame()">START MISSION</button>
+        </div>
+
+        <!-- SCREEN 4: GAMEPLAY PANEL -->
+        <div id="game-screen" class="screen" style="padding:0;">
+            <div id="hud">
+                <div id="score-display" style="color: #00ffcc; font-weight: bold;">SCORE: 00</div>
+                <div id="lives-display" style="color: #ef4444;">❤️❤️❤️</div>
+            </div>
+            <div id="mission-text">Loading Space Coordinates...</div>
+            <div id="playfield"></div>
+            <div id="player-ship"></div>
+        </div>
+
+        <!-- SCREEN 5: GAME OVER & SUMMARY SCREEN -->
+        <div id="end-screen" class="screen">
+            <h1 id="end-title" class="game-title">MISSION OVER</h1>
+            <h2 id="end-score" style="font-size: 2rem; margin-bottom: 20px;">Final Score: 0</h2>
+            <div id="feedback-text" class="instructions-card" style="border-color: #00ffcc; color: #fff;"></div>
+            <button class="btn" onclick="resetGame()">PLAY AGAIN</button>
+        </div>
+
+    </div>
+
+<script>
+    // System Asset Audios mapping to Screenshot 2026-07-03 182547.png
+    const audioCorrect = new Audio('assets/correct.mp3');
+    const audioWrong = new Audio('assets/wrong.mp3');
+    const audioWin = new Audio('assets/freesound_community-claps-44774.mp3');
+
+    // 12 Chapter Core Questions
+    const missions = [
+        { text: "Shoot down the item that causes DAY and NIGHT on Earth!", correct: "Rotation", answers: ["Rotation", "Revolution", "Orbiting", "Gravity"] },
+        { text: "Blast the correct percentage of LAND surface on Earth!", correct: "29% Land", answers: ["29% Land", "71% Land", "50% Land", "90% Land"] },
+        { text: "Target the LOWLAND landform situated between mountains!", correct: "Valley", answers: ["Valley", "Plateau", "Plain", "Desert"] },
+        { text: "Find and shoot the SMALLEST continent on Earth!", correct: "Australia", answers: ["Australia", "Asia", "Africa", "Europe"] },
+        { text: "Shoot Earth's ideal distance from the Sun!", correct: "150 million km", answers: ["150 million km", "50 million km", "300 million km", "100 million km"] },
+        { text: "What is the layer of air surrounding the Earth called?", correct: "Atmosphere", answers: ["Atmosphere", "Ozone Layer", "Lithosphere", "Hydrosphere"] },
+        { text: "Shoot the movement that takes 365 and 1/4 days and changes seasons!", correct: "Revolution", answers: ["Revolution", "Rotation", "Spinning", "Axis Tilt"] },
+        { text: "Target the LARGEST continent on Earth!", correct: "Asia", answers: ["Asia", "Africa", "North America", "Antarctica"] },
+        { text: "What do we call a flat drawing that shows land and water areas?", correct: "A Map", answers: ["A Map", "A Globe", "An Atlas", "A Sketch"] },
+        { text: "Blast the tool used by sailors that always points North!", correct: "Compass", answers: ["Compass", "Satellite", "Atlas", "Scale"] },
+        { text: "Target the famous desert located right here in India!", correct: "Thar Desert", answers: ["Thar Desert", "Sahara Desert", "Gobi Desert", "Atacama Desert"] },
+        { text: "Find the islands belonging to India located in the South-East sea!", correct: "Andaman & Nicobar", answers: ["Andaman & Nicobar", "Lakshadweep", "Maldives", "Sri Lanka"] }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let lives = 3;
+    let wrongAttemptsThisQuestion = 0;
+    let gameActive = false;
+    let targetObjects = [];
+    let laserObjects = [];
+    
+    const container = document.getElementById('game-container');
+    const playfield = document.getElementById('playfield');
+    const ship = document.getElementById('player-ship');
+
+    // Ship Physics variables
+    let shipX = 0; 
+    const shipSpeed = 8;
+    const keys = { left: false, right: false };
+
+    // Auto Run Splash Screen Flow on Load
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            showScreen('title-screen');
+        }, 5000); // 5 Seconds Splash Gating
+        setupInputControls();
+    });
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.getElementById(screenId).classList.add('active-screen');
+    }
+
+    function startGame() {
+        score = 0;
+        lives = 3;
+        currentIdx = 0;
+        wrongAttemptsThisQuestion = 0;
+        updateHUD();
+        showScreen('game-screen');
+        shipX = (container.clientWidth / 2) - (ship.clientWidth / 2);
+        ship.style.left = shipX + 'px';
+        gameActive = true;
+        loadMission();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function loadMission() {
+        // Clear old space elements
+        document.querySelectorAll('.target-box').forEach(el => el.remove());
+        document.querySelectorAll('.laser').forEach(el => el.remove());
+        targetObjects = [];
+        laserObjects = [];
+        wrongAttemptsThisQuestion = 0;
+
+        if (currentIdx >= missions.length) {
+            endGame(true);
+            return;
+        }
+
+        const mission = missions[currentIdx];
+        document.getElementById('mission-text').innerText = `MISSION ${currentIdx + 1}: ${mission.text}`;
+
+        // Generate shuffled answers
+        let shuffled = [...mission.answers].sort(() => Math.random() - 0.5);
+        const colWidth = container.clientWidth / shuffled.length;
+
+        shuffled.forEach((text, i) => {
+            const box = document.createElement('div');
+            box.className = 'target-box';
+            box.innerText = text;
+            box.style.top = '130px';
+            
+            // Layout placement adaptive column spacing
+            const leftPos = (i * colWidth) + (colWidth / 2) - 55;
+            box.style.left = leftPos + 'px';
+            box.style.width = '110px';
+
+            container.appendChild(box);
+
+            targetObjects.push({
+                element: box,
+                text: text,
+                isCorrect: text === mission.correct,
+                x: leftPos,
+                y: 130,
+                width: 110,
+                height: box.clientHeight || 45,
+                speed: 0.4 + (Math.random() * 0.3)
+            });
+
+            // Tap target directly mechanics for mobile convenience
+            box.addEventListener('pointerdown', () => {
+                if (!gameActive) return;
+                // Move ship smoothly under target option and auto-fire
+                shipX = leftPos + 25;
+                ship.style.left = shipX + 'px';
+                fireLaser();
+            });
+        });
+    }
+
+    function fireLaser() {
+        const laser = document.createElement('div');
+        laser.className = 'laser';
+        const lx = shipX + (ship.clientWidth / 2) - 2;
+        const ly = container.clientHeight - 80;
+        laser.style.left = lx + 'px';
+        laser.style.top = ly + 'px';
+        container.appendChild(laser);
+
+        laserObjects.push({ element: laser, x: lx, y: ly, width: 4, height: 15 });
+    }
+
+    function handleCollision(target, tIdx) {
+        if (target.isCorrect) {
+            try { audioCorrect.play(); } catch(e){}
+            score += 20; // Exact scoring request +20 points
+            currentIdx++;
+            updateHUD();
+            loadMission();
+        } else {
+            try { audioWrong.play(); } catch(e){}
+            lives--;
+            wrongAttemptsThisQuestion++;
+            updateHUD();
+            
+            // Delete hit incorrect block
+            target.element.remove();
+            targetObjects.splice(tIdx, 1);
+
+            if (lives <= 0) {
+                endGame(false);
+                return;
+            }
+
+            // Trigger Hint System on 1 incorrect attempt
+            if (wrongAttemptsThisQuestion >= 1) {
+                targetObjects.forEach(t => {
+                    if (t.isCorrect) t.element.classList.add('hint-glow');
+                });
+            }
+        }
+    }
+
+    function gameLoop() {
+        if (!gameActive) return;
+
+        // Desktop keyboard handling 
+        if (keys.left && shipX > 0) { shipX -= shipSpeed; ship.style.left = shipX + 'px'; }
+        if (keys.right && shipX < (container.clientWidth - ship.clientWidth)) { shipX += shipSpeed; ship.style.left = shipX + 'px'; }
+
+        // Process Lasers
+        for (let l = laserObjects.length - 1; l >= 0; l--) {
+            let laser = laserObjects[l];
+            laser.y -= 10;
+            laser.element.style.top = laser.y + 'px';
+
+            if (laser.y < 0) {
+                laser.element.remove();
+                laserObjects.splice(l, 1);
+                continue;
+            }
+
+            // Check contact with meteors
+            for (let t = targetObjects.length - 1; t >= 0; t--) {
+                let target = targetObjects[t];
+                if (laser.x < target.x + target.width &&
+                    laser.x + laser.width > target.x &&
+                    laser.y < target.y + target.height &&
+                    laser.y + laser.height > target.y) {
+                    
+                    laser.element.remove();
+                    laserObjects.splice(l, 1);
+                    handleCollision(target, t);
+                    break;
+                }
+            }
+        }
+
+        // Float Targets downwards
+        targetObjects.forEach((target) => {
+            target.y += target.speed;
+            target.element.style.top = target.y + 'px';
+
+            // Boundary wrap ground reset check
+            if (target.y > container.clientHeight - 100) {
+                loadMission();
+            }
+        });
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updateHUD() {
+        document.getElementById('score-display').innerText = `SCORE: ${score}`;
+        document.getElementById('lives-display').innerText = '❤️'.repeat(Math.max(0, lives));
+    }
+
+    function endGame(isWin) {
+        gameActive = false;
+        showScreen('end-screen');
+        
+        document.getElementById('end-title').innerText = isWin ? "EARTH UNLOCKED! 🌟" : "MISSION CONCLUDED";
+        document.getElementById('end-score').innerText = `Total Score: ${score} Points`;
+        
+        let feedback = "";
+        if (isWin && score >= 240) {
+            try { audioWin.play(); } catch(e){}
+            feedback = "🏆 Flawless Space Captain! You perfectly know everything about Earth's movements, landmarks, and Indian geography!";
+        } else if (score >= 140) {
+            feedback = "✨ Great Job Explorer! You have a wonderful grasp of Grade 3 Social Science. Play again to shoot for a perfect score!";
+        } else {
+            feedback = "👍 Keep Practicing Space cadet! Review the chapter on maps, oceans, and landforms, then hop back in to break your record!";
+        }
+        document.getElementById('feedback-text').innerText = feedback;
+    }
+
+    function resetGame() { showScreen('title-screen'); }
+
+    function setupInputControls() {
+        // Desktop Key Listeners
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = true;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = true;
+            if (e.code === 'Space' && gameActive) { fireLaser(); e.preventDefault(); }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
+        });
+
+        // Touch drag ship support for tablets and mobile devices
+        ship.addEventListener('pointerdown', (e) => {
+            ship.setPointerCapture(e.pointerId);
+            const onPointerMove = (ev) => {
+                const rect = container.getBoundingClientRect();
+                let clientX = ev.clientX - rect.left;
+                shipX = clientX - (ship.clientWidth / 2);
+                shipX = Math.max(0, Math.min(shipX, container.clientWidth - ship.clientWidth));
+                ship.style.left = shipX + 'px';
+            };
+            ship.addEventListener('pointermove', onPointerMove);
+            ship.addEventListener('pointerup', () => {
+                ship.removeEventListener('pointermove', onPointerMove);
+                if(gameActive) fireLaser(); // Tap release triggers auto shot
+            }, { once: true });
+        });
+    }
+</script>
+</body>
+</html>
