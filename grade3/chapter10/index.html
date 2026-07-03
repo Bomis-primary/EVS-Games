@@ -38,7 +38,7 @@
         .orbits-layer { position: absolute; top: 0; left: 0; width: 100%; height: 60%; pointer-events: none; z-index: 1; overflow: hidden; }
         .orbit-line { position: absolute; top: 35%; left: -10%; border: 1.5px dashed rgba(255, 255, 255, 0.08); border-radius: 50%; transform: translateY(-50%); }
 
-        /* Slots Row (Top) - Empty Spaces without individual names */
+        /* Slots Row (Top) */
         .slots-container { display: flex; justify-content: center; align-items: flex-start; position: relative; margin-top: 12vh; width: 100%; padding: 0 40px; gap: 20px; z-index: 2; }
         .slot-wrapper { display: flex; flex-direction: column; align-items: center; width: 100px; min-height: 140px; }
         .slot { width: 85px; height: 85px; border: 2px dashed rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; background: rgba(5,5,15,0.6); transition: all 0.3s ease; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
@@ -54,14 +54,12 @@
         /* Deck Row (Bottom) */
         .deck-container { display: flex; justify-content: center; align-items: center; width: 100%; background: linear-gradient(transparent, rgba(15,15,35,0.85)); padding: 35px; gap: 25px; backdrop-filter: blur(8px); border-top: 2px solid rgba(255,255,255,0.08); margin-bottom: 2vh; position: relative; z-index: 3; min-height: 160px; }
         
-        /* Planet Containers that hold Planet + Name Tag together */
+        /* Planet Containers */
         .planet-container { display: flex; flex-direction: column; align-items: center; cursor: grab; transition: transform 0.2s; z-index: 6; }
         .planet-container:active { cursor: grabbing; transform: scale(1.1); }
         
-        /* Planet Texture Spheres - FORCED ignore inner elements on drag */
+        /* Planet Texture Spheres */
         .planet { width: 75px; height: 75px; border-radius: 50%; position: relative; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.4); pointer-events: none; }
-        
-        /* CRITICAL BUG FIX: pointer-events: none stops children from intercepting drag selections */
         .movable-label { margin-top: 10px; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ffcc00; text-align: center; background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 8px; border: 1px solid rgba(255,254,200,0.2); pointer-events: none; }
         
         .p-mercury { background: radial-gradient(circle at 30% 30%, #cfcfcf, #4a4a4a); }
@@ -79,8 +77,6 @@
         .quiz-card { background: #151530; border: 3px solid #ffcc00; padding: 35px; border-radius: 25px; max-width: 580px; width: 90%; box-shadow: 0 15px 40px rgba(0,0,0,0.6); text-align: left; position: relative; }
         .quiz-progress { font-size: 1.1rem; color: #ffcc00; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
         .quiz-question { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; line-height: 1.4; color: #ffffff; }
-        
-        /* Quiz Clue Box */
         .quiz-clue { background: rgba(255,204,0,0.1); border-left: 4px solid #ffcc00; padding: 10px 15px; border-radius: 4px; margin-bottom: 15px; font-size: 1.1rem; color: #ffe680; display: none; }
         
         .options-list { display: flex; flex-direction: column; gap: 12px; }
@@ -95,7 +91,7 @@
 </head>
 <body>
 
-    <!-- Audio Elements pointing directly to your assets folder -->
+    <!-- Audio Elements -->
     <audio id="bg-music" src="assets/cheerfulmusic.mp3" loop></audio>
     <audio id="snd-correct" src="assets/correct.mp3"></audio>
     <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
@@ -110,10 +106,9 @@
         <div id="hearts-display">❤️❤️❤️</div>
     </div>
 
-    <!-- NEW: Innovine Logo Splash Screen (Shows for 5 seconds on load) -->
+    <!-- UPDATED: Innovine Logo Splash Screen (Kept only the logo image) -->
     <div id="splash-screen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" style="max-width: 300px; margin-bottom: 20px; animation: pulseHint 1.5s infinite;">
-        <h2 style="color: #ffcc00; letter-spacing: 2px; font-size: 2.2rem; font-weight: 800;">INNOVINE</h2>
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" style="max-width: 300px; animation: pulseHint 1.5s infinite;">
     </div>
 
     <!-- 1. Start Screen (Hidden initially while splash screen loads) -->
@@ -223,7 +218,7 @@
         let wrongAttemptsMap = {};
         let quizAttempts = 0;
 
-        // NEW: 5-Second Splash Screen Logic
+        // 5-Second Splash Screen Logic
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -232,17 +227,16 @@
                     splash.classList.add('hidden');
                     startScreen.classList.remove('hidden');
                 }
-            }, 5000); // 5000ms = 5 seconds
+            }, 5000);
         });
 
-        // Background Music Starter
         function playMusic() {
             const music = document.getElementById('bg-music');
             music.volume = 0.2;
             music.play().catch(e => console.log("Audio waiting for user gesture"));
         }
 
-        // Generate Decorative Background Stars
+        // Generate Background Stars
         const bgContainer = document.getElementById('stars-container');
         for (let i = 0; i < 60; i++) {
             let star = document.createElement('div');
@@ -392,9 +386,7 @@
                 text.innerText = currentQuiz.q;
                 optionsBox.innerHTML = '';
 
-                // Create a copy of the options array with indices mapped
                 let optionsMapped = currentQuiz.a.map((opt, index) => ({ text: opt, originalIndex: index }));
-                // Randomize the choices layout for the layout requirement
                 optionsMapped.sort(() => Math.random() - 0.5);
 
                 optionsMapped.forEach((mappedObj) => {
