@@ -40,7 +40,7 @@
 
         /* Slots Row (Top) - Empty Spaces without individual names */
         .slots-container { display: flex; justify-content: center; align-items: flex-start; position: relative; margin-top: 12vh; width: 100%; padding: 0 40px; gap: 20px; z-index: 2; }
-        .slot-wrapper { display: flex; flex-direction: column; align-items: center; width: 100px; }
+        .slot-wrapper { display: flex; flex-direction: column; align-items: center; width: 100px; min-height: 140px; }
         .slot { width: 85px; height: 85px; border: 2px dashed rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; background: rgba(5,5,15,0.6); transition: all 0.3s ease; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         
         /* Hint System Activation styles */
@@ -49,7 +49,7 @@
         .slot.correct-drop { border-style: solid; border-color: #28a745; background: rgba(40,167,69,0.15); box-shadow: 0 0 15px rgba(40,167,69,0.4); }
         
         /* Sun Stationary Anchor */
-        .sun-static { width: 120px; height: 120px; background: radial-gradient(circle, #ffea00 20%, #ff6a00 100%); border-radius: 50%; box-shadow: 0 0 50px #ff6a00; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #300; font-size: 1.3rem; letter-spacing: 1px; animation: solarFlare 4s infinite alternate; }
+        .sun-static { width: 120px; height: 120px; background: radial-gradient(circle, #ffea00 20%, #ff6a00 100%); border-radius: 50%; box-shadow: 0 0 50px #ff6a00; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #300; font-size: 1.3rem; letter-spacing: 1px; }
 
         /* Deck Row (Bottom) */
         .deck-container { display: flex; justify-content: center; align-items: center; width: 100%; background: linear-gradient(transparent, rgba(15,15,35,0.85)); padding: 35px; gap: 25px; backdrop-filter: blur(8px); border-top: 2px solid rgba(255,255,255,0.08); margin-bottom: 2vh; position: relative; z-index: 3; min-height: 160px; }
@@ -58,10 +58,10 @@
         .planet-container { display: flex; flex-direction: column; align-items: center; cursor: grab; transition: transform 0.2s; z-index: 6; }
         .planet-container:active { cursor: grabbing; transform: scale(1.1); }
         
-        /* Planet Texture Spheres */
-        .planet { width: 75px; height: 75px; border-radius: 50%; position: relative; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.4); }
+        /* Planet Texture Spheres - FORCED ignore inner elements on drag */
+        .planet { width: 75px; height: 75px; border-radius: 50%; position: relative; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.4); pointer-events: none; }
         
-        /* Persistent Labels attached beneath the actual movable planets */
+        /* CRITICAL BUG FIX: pointer-events: none stops children from intercepting drag selections */
         .movable-label { margin-top: 10px; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ffcc00; text-align: center; background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 8px; border: 1px solid rgba(255,254,200,0.2); pointer-events: none; }
         
         .p-mercury { background: radial-gradient(circle at 30% 30%, #cfcfcf, #4a4a4a); }
@@ -95,7 +95,7 @@
 </head>
 <body>
 
-    <!-- Audio Elements pointing directly to your assets folder -->
+    <!-- Audio Elements pointing directly to your assets folder from Screenshot 2026-07-03 002959.png -->
     <audio id="bg-music" src="assets/cheerfulmusic.mp3" loop></audio>
     <audio id="snd-correct" src="assets/correct.mp3"></audio>
     <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
@@ -266,18 +266,15 @@
             keys.sort(() => Math.random() - 0.5);
 
             keys.forEach(key => {
-                // Wrapper container for planet and label combined
                 const container = document.createElement('div');
                 container.className = 'planet-container';
                 container.id = `draggable-${key}`;
                 container.setAttribute('draggable', 'true');
                 container.setAttribute('data-planet', key);
 
-                // Planet circle sphere element
                 const pDiv = document.createElement('div');
                 pDiv.className = `planet ${planetData[key].class}`;
                 
-                // Label tag locked right below the planet
                 const labelDiv = document.createElement('div');
                 labelDiv.className = 'movable-label';
                 labelDiv.innerText = planetData[key].name;
@@ -295,7 +292,8 @@
 
             containers.forEach(c => {
                 c.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', e.target.id);
+                    // Guarantees we get container node context even if labels are targeted
+                    e.dataTransfer.setData('text/plain', e.currentTarget.id);
                 });
             });
 
@@ -319,8 +317,6 @@
                         slot.classList.add('correct-drop');
                         slot.appendChild(draggedContainer);
                         draggedContainer.setAttribute('draggable', 'false');
-                        
-                        // Clean style modifications once locked inside the layout orbit row
                         draggedContainer.style.transform = 'none';
                         
                         totalPlaced++;
@@ -332,7 +328,6 @@
                         wrongAttemptsMap[planetKey]++;
                         processDamage();
                         
-                        // Hint triggers after 2 incorrect attempts
                         if (wrongAttemptsMap[planetKey] >= 2) {
                             activateHintFor(planetKey);
                         }
