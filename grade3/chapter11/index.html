@@ -163,11 +163,11 @@
         <!-- SCREEN 2: GAME TITLE SCREEN -->
         <div id="title-screen" class="screen">
             <h1 class="game-title">ORBIT DEFENDER</h1>
-            <p style="margin-bottom: 40px; color: #94a3b8; letter-spacing: 1px;">Grade 3 Science Space Mission</p>
+            <p style="margin-bottom: 40px; color: #94a3b8; letter-spacing: 1px;">EVS Space Mission</p>
             <button class="btn" onclick="showScreen('instruction-screen')">PLAY GAME</button>
         </div>
 
-        <!-- SCREEN 3: GRADE 3 INSTRUCTIONS -->
+        <!-- SCREEN 3: INSTRUCTIONS -->
         <div id="instruction-screen" class="screen">
             <h2 class="game-title" style="font-size: 2rem;">How to Play 🚀</h2>
             <div class="instructions-card">
@@ -212,7 +212,6 @@
     </div>
 
 <script>
-    // Fail-safe Safe Audio Engine Triggers
     function playSound(type) {
         let audioPath = '';
         if (type === 'correct') audioPath = 'assets/correct.mp3';
@@ -222,11 +221,10 @@
         if (audioPath) {
             const snd = new Audio(audioPath);
             snd.volume = 0.6;
-            snd.play().catch(() => { /* Audio gracefully muted if browser blocks it */ });
+            snd.play().catch(() => { });
         }
     }
 
-    // Comprehensive 12 Content-Validated Grade 3 Questions
     const missions = [
         { text: "Shoot down the item that causes DAY and NIGHT on Earth!", correct: "Rotation", answers: ["Rotation", "Revolution", "Orbiting", "Gravity"] },
         { text: "Blast the correct percentage of LAND surface on Earth!", correct: "29% Land", answers: ["29% Land", "71% Land", "50% Land", "90% Land"] },
@@ -254,7 +252,6 @@
     const ship = document.getElementById('player-ship');
     let shipX = 0;
 
-    // Fixed Splash Screen Timer - Always fires to title screen after 5s
     setTimeout(() => {
         showScreen('title-screen');
     }, 5000);
@@ -272,7 +269,6 @@
         updateHUD();
         showScreen('game-screen');
         
-        // Center player ship position cleanly inside container width
         shipX = (playfield.clientWidth / 2) - (ship.clientWidth / 2);
         ship.style.left = shipX + 'px';
         
@@ -294,14 +290,13 @@
         }
 
         const mission = missions[currentIdx];
-        document.getElementById('mission-text').innerText = `MISSION ${currentIdx + 1}: ${mission.text}`;
+        document.getElementById('mission-text').innerText = `MISSION ${currentIdx + 1} of 12: ${mission.text}`;
 
         let shuffled = [...mission.answers].sort(() => Math.random() - 0.5);
         
-        // Dynamically compute grid offsets for exactly 4 boxes inside screen limits
         const fieldWidth = playfield.clientWidth;
         const boxWidth = 100;
-        const totalBoxWidth = boxWidth * 2; // 2 boxes per row
+        const totalBoxWidth = boxWidth * 2;
         const horizontalGap = (fieldWidth - totalBoxWidth) / 3;
 
         shuffled.forEach((text, i) => {
@@ -309,7 +304,6 @@
             box.className = 'target-box';
             box.innerText = text;
             
-            // Grid-based layout positioning (2x2 matrix grid prevents overflowing boundaries)
             const row = Math.floor(i / 2);
             const col = i % 2;
             
@@ -324,11 +318,13 @@
                 element: box,
                 text: text,
                 isCorrect: text === mission.correct,
+                startX: leftPos,
+                startY: topPos,
                 x: leftPos,
                 y: topPos,
                 width: boxWidth,
                 height: 42,
-                speed: 0.25 + (Math.random() * 0.2) // Controlled kid-friendly drop speeds
+                speed: 0.3 + (Math.random() * 0.2)
             });
         });
     }
@@ -349,7 +345,7 @@
     function handleCollision(target, tIdx) {
         if (target.isCorrect) {
             playSound('correct');
-            score += 20; // Exact requested scoring logic (+20 points)
+            score += 20;
             currentIdx++;
             updateHUD();
             loadMission();
@@ -367,7 +363,6 @@
                 return;
             }
 
-            // Glow Hint System activated instantly on 1 error
             if (wrongAttemptsThisQuestion >= 1) {
                 targetObjects.forEach(t => {
                     if (t.isCorrect) t.element.classList.add('hint-glow');
@@ -376,11 +371,9 @@
         }
     }
 
-    // Engine Core Processing Loop
     function gameLoop() {
         if (!gameActive) return;
 
-        // Process active continuous arrow button hold mechanics
         if (holdingLeft && shipX > 5) {
             shipX -= 5;
             ship.style.left = shipX + 'px';
@@ -390,7 +383,7 @@
             ship.style.left = shipX + 'px';
         }
 
-        // Move and process active projectile vectors
+        // Projectiles Loop
         for (let l = laserObjects.length - 1; l >= 0; l--) {
             let laser = laserObjects[l];
             laser.y -= 9;
@@ -417,15 +410,15 @@
             }
         }
 
-        // Animate incoming targeting elements downwards
+        // Falling Targets Loop (FIXED: Loop loops smoothly back to start y without skipping missions)
         for (let t = targetObjects.length - 1; t >= 0; t--) {
             let target = targetObjects[t];
             target.y += target.speed;
             target.element.style.top = target.y + 'px';
 
-            if (target.y > playfield.clientHeight - 75) {
-                loadMission();
-                break;
+            if (target.y > playfield.clientHeight - 65) {
+                target.y = target.startY; 
+                target.element.style.top = target.y + 'px';
             }
         }
 
@@ -445,16 +438,15 @@
         if (isWin) {
             playSound('win');
             document.getElementById('end-title').innerText = "MISSION COMPLETED! 🌟";
-            document.getElementById('feedback-text').innerText = "🏆 Incredible job, Space Captain! You got a perfect score and know everything about the Earth!";
+            document.getElementById('feedback-text').innerText = "🏆 Incredible job, Space Captain! You successfully answered all questions and saved the planet!";
         } else {
             document.getElementById('end-title').innerText = "GAME OVER";
-            document.getElementById('feedback-text').innerText = "👍 Nice try! Let's complete another orbit around the sun and practice our Earth science facts!";
+            document.getElementById('feedback-text').innerText = "👍 Nice try! Let's complete another orbit around the sun and practice our science facts!";
         }
     }
 
     function resetGame() { showScreen('title-screen'); }
 
-    // Desktop Key and Dedicated Mobile Arcade Button Input Hooks
     let holdingLeft = false;
     let holdingRight = false;
 
@@ -462,13 +454,11 @@
     const rightBtn = document.getElementById('right-arrow');
     const fireBtn = document.getElementById('fire-button');
 
-    // Arrow Button Interactive Events
     leftBtn.addEventListener('pointerdown', (e) => { holdingLeft = true; e.preventDefault(); });
     window.addEventListener('pointerup', () => { holdingLeft = false; holdingRight = false; });
     rightBtn.addEventListener('pointerdown', (e) => { holdingRight = true; e.preventDefault(); });
     fireBtn.addEventListener('pointerdown', (e) => { if (gameActive) fireLaser(); e.preventDefault(); });
 
-    // Desktop Keyboard Fallback support
     window.addEventListener('keydown', (e) => {
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') holdingLeft = true;
         if (e.code === 'ArrowRight' || e.code === 'KeyD') holdingRight = true;
