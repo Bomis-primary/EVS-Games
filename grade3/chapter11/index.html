@@ -44,10 +44,9 @@
         }
         .active-screen { display: flex; }
 
-        /* The standalone splash screen */
         #splash-screen { 
             background-color: #000000; 
-            z-index: 100; /* Stays on top during loading */
+            z-index: 100;
         }
         .logo-img { 
             width: 240px; 
@@ -125,6 +124,14 @@
             border-radius: 2px; box-shadow: 0 0 8px #f43f5e;
         }
 
+        /* High-performance confetti rendering layer overlay */
+        #confetti-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
         #controls-deck {
             height: 140px; width: 100%; background: #090d22;
             display: flex; align-items: center; justify-content: space-around;
@@ -157,12 +164,11 @@
 
     <div id="game-container">
         
-        <!-- Contained Splash Screen -->
+        <!-- Splash Screen Only -->
         <div id="splash-screen" class="screen active-screen">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
         </div>
 
-        <!-- Main Title Screen (Kept safe behind splash) -->
         <div id="title-screen" class="screen">
             <h1 class="game-title">ORBIT DEFENDER</h1>
             <p style="margin-bottom: 40px; color: #94a3b8; letter-spacing: 1px;">EVS Space Mission</p>
@@ -182,6 +188,9 @@
         </div>
 
         <div id="game-screen" class="screen" style="padding:0; background:transparent;">
+            <!-- Confetti Layer Attached to Active Field -->
+            <canvas id="confetti-canvas"></canvas>
+
             <div id="hud">
                 <div id="score-display" style="color: #00ffcc; font-weight: bold; font-family: monospace; font-size:1.1rem;">SCORE: 00</div>
                 <div id="lives-display" style="font-size: 1.2rem;">❤️❤️❤️</div>
@@ -249,7 +258,63 @@
     const ship = document.getElementById('player-ship');
     let shipX = 0;
 
-    // Splash auto-hides completely after 2.5 seconds
+    // Confetti Engine Components
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let confettiParticles = [];
+    const confettiColors = ['#00ffcc', '#00a3ff', '#ff007f', '#ffd700', '#ff5722', '#7fff00'];
+
+    function resizeConfettiCanvas() {
+        const container = document.getElementById('game-container');
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+    }
+
+    function spawnConfettiExplosion() {
+        const particleCount = 70;
+        for (let i = 0; i < particleCount; i++) {
+            confettiParticles.push({
+                x: canvas.width / 2,
+                y: canvas.height / 3, // Explosion centered around answer impact zone
+                size: Math.random() * 6 + 4,
+                color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+                velocityX: (Math.random() - 0.5) * 10,
+                velocityY: (Math.random() - 0.7) * 12,
+                rotation: Math.random() * 360,
+                rotationSpeed: (Math.random() - 0.5) * 10,
+                opacity: 1
+            });
+        }
+    }
+
+    function updateAndRenderConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for (let i = confettiParticles.length - 1; i >= 0; i--) {
+            let p = confettiParticles[i];
+            
+            p.x += p.velocityX;
+            p.y += p.velocityY;
+            p.velocityY += 0.25; // Simulated gravity acceleration
+            p.velocityX *= 0.98; // Air resistance dampening
+            p.rotation += p.rotationSpeed;
+            p.opacity -= 0.015;  // Smooth visual fade-out
+
+            if (p.opacity <= 0 || p.y > canvas.height) {
+                confettiParticles.splice(i, 1);
+                continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = p.opacity;
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation * Math.PI / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+        }
+    }
+
     setTimeout(() => {
         showScreen('title-screen');
     }, 2500);
@@ -257,13 +322,23 @@
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById(screenId).classList.add('active-screen');
+        if(screenId === 'game-screen') {
+            resizeConfettiCanvas();
+        }
     }
+
+    window.addEventListener('resize', () => {
+        if (document.getElementById('game-screen').classList.contains('active-screen')) {
+            resizeConfettiCanvas();
+        }
+    });
 
     function startGame() {
         score = 0;
         lives = 3;
         currentIdx = 0;
         wrongAttemptsThisQuestion = 0;
+        confettiParticles = [];
         updateHUD();
         showScreen('game-screen');
         
@@ -341,6 +416,7 @@
     function handleCollision(target, tIdx) {
         if (target.isCorrect) {
             playSound('correct');
+            spawnConfettiExplosion(); // Trigger the confetti effect instantly
             score += 20;
             currentIdx++;
             updateHUD();
@@ -369,6 +445,9 @@
 
     function gameLoop() {
         if (!gameActive) return;
+
+        // Drive Confetti Rendering Calculations Independent of Active Play Engine Stops
+        updateAndRenderConfetti();
 
         if (holdingLeft && shipX > 5) {
             shipX -= 7;
