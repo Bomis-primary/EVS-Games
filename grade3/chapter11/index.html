@@ -41,25 +41,24 @@
             padding: 24px;
             text-align: center;
             z-index: 10;
-            background: #03040c;
         }
         .active-screen { display: flex; }
 
-        /* Centered, clean branding splash screen */
+        /* The standalone splash screen */
         #splash-screen { 
             background-color: #000000; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            z-index: 100; /* Stays on top during loading */
         }
         .logo-img { 
             width: 240px; 
             height: auto; 
-            margin-bottom: 0; 
             animation: pulse 2.5s infinite ease-in-out; 
         }
         
+        #title-screen { background: #03040c; }
+        #instruction-screen { background: #03040c; }
+        #end-screen { background: #03040c; }
+
         .game-title { font-size: 2.5rem; color: #00ffcc; text-shadow: 0 0 15px rgba(0, 255, 204, 0.5); margin-bottom: 16px; font-weight: 800; }
         
         .btn {
@@ -75,7 +74,6 @@
             border-radius: 16px; padding: 20px; width: 100%;
             margin-bottom: 24px; font-size: 1rem; line-height: 1.5;
         }
-        .instructions-card ul { text-align: left; margin-left: 16px; }
         .instructions-card li { margin-bottom: 12px; color: #e2e8f0; }
 
         #game-screen { display: none; flex-direction: column; height: 100%; position: relative; background: transparent; }
@@ -159,11 +157,12 @@
 
     <div id="game-container">
         
-        <!-- Redesigned Splash Screen centered and larger as per image_9f8307.png request -->
+        <!-- Contained Splash Screen -->
         <div id="splash-screen" class="screen active-screen">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
         </div>
 
+        <!-- Main Title Screen (Kept safe behind splash) -->
         <div id="title-screen" class="screen">
             <h1 class="game-title">ORBIT DEFENDER</h1>
             <p style="margin-bottom: 40px; color: #94a3b8; letter-spacing: 1px;">EVS Space Mission</p>
@@ -223,7 +222,6 @@
         }
     }
 
-    // Engaging, narrative questions tailored for Grade 3 students
     const missions = [
         { text: "Earth is spinning like a top! What do we call this movement that brings us day and night?", correct: "Rotation", answers: ["Rotation", "Revolution", "Orbiting", "Gravity"] },
         { text: "If we split the whole Earth into pieces, how much of it is covered by dry land?", correct: "29% Land", answers: ["29% Land", "71% Land", "50% Land", "90% Land"] },
@@ -251,6 +249,7 @@
     const ship = document.getElementById('player-ship');
     let shipX = 0;
 
+    // Splash auto-hides completely after 2.5 seconds
     setTimeout(() => {
         showScreen('title-screen');
     }, 2500);
@@ -322,7 +321,6 @@
                 y: topPos,
                 width: boxWidth,
                 height: 38,
-                // Drastically reduced speed (from 0.45 down to 0.22) so young students have plenty of time to digest
                 speed: 0.22 + (Math.random() * 0.12)
             });
         });
