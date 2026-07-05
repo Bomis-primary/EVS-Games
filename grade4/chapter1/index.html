@@ -1,1 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nutrient Ninja: Food & Digestion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
 
+        body {
+            background-color: #140d07;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow: hidden;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            height: -webkit-fill-available;
+            max-height: 850px;
+            background: #2b1d11; 
+            border: 6px solid #5c3a21;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+            z-index: 20;
+            transition: opacity 0.3s ease;
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+        }
+
+        #splash-screen {
+            background: #ffffff;
+        }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-img {
+            max-width: 240px;
+            width: 80%;
+            height: auto;
+            animation: pulse 1.8s infinite ease-in-out;
+        }
+
+        #menu-screen, #instruction-screen {
+            background: linear-gradient(rgba(43, 29, 17, 0.85), rgba(20, 13, 7, 0.95)), 
+                        radial-gradient(circle, #5c3a21 20%, #140d07 100%);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #ffb703;
+            text-shadow: 3px 3px 0px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .ninja-avatar {
+            font-size: 5.5rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.5));
+            animation: float 3s infinite ease-in-out;
+        }
+
+        .btn-play {
+            background: #e63946;
+            color: #fff;
+            border: 3px solid #fff;
+            padding: 14px 44px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #9b1c26, 0 10px 20px rgba(0,0,0,0.4);
+            transition: all 0.1s ease;
+            transform: translateY(0);
+        }
+        .btn-play:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #9b1c26, 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 3px dashed #ffb703;
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 1.05rem;
+            color: #f8f9fa;
+            line-height: 1.5;
+            margin-bottom: 35px;
+            text-align: left;
+            max-height: 50%;
+            overflow-y: auto;
+        }
+
+        #hud-top {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .hud-item {
+            background: rgba(20, 13, 7, 0.85);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: 2px solid #ffb703;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #lives-box {
+            color: #ff4d6d;
+            letter-spacing: 2px;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle, #3d2b1f 0%, #140d07 100%);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #quiz-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(12, 8, 5, 0.85);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            z-index: 30;
+        }
+
+        .quiz-box {
+            background: #fffdf9;
+            border: 6px solid #ffb703;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 420px;
+            padding: 24px 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            text-align: center;
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .quiz-title {
+            font-size: 0.95rem;
+            color: #e63946;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .quiz-text {
+            font-size: 1.25rem;
+            color: #1d3557;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 22px;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 3px solid #e2e8f0;
+            padding: 14px 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2b1d11;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: left;
+            box-shadow: 0 4px 0e2e8f0;
+        }
+        .option-btn:active {
+            background: #f1f5f9;
+            transform: translateY(2px);
+        }
+
+        #end-screen {
+            background: radial-gradient(circle, #2b1d11 20%, #0c0805 100%);
+            color: white;
+        }
+        #end-screen h2 {
+            font-size: 3rem;
+            color: #ffb703;
+            text-shadow: 3px 3px 0px #000;
+            margin-bottom: 10px;
+        }
+        .final-score-box {
+            font-size: 2.2rem;
+            margin: 25px 0;
+            background: rgba(255,255,255,0.06);
+            padding: 15px 40px;
+            border-radius: 24px;
+            border: 3px dashed #ffb703;
+            font-weight: 700;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+
+        <div id="splash-screen" class="game-screen">
+            <div class="logo-container">
+                <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
+            </div>
+        </div>
+
+        <div id="menu-screen" class="game-screen hidden">
+            <div class="ninja-avatar">🥷⚔️</div>
+            <h1>NUTRIENT NINJA!</h1>
+            <button class="btn-play" onclick="goToInstructions()">START GAME</button>
+        </div>
+
+        <div id="instruction-screen" class="game-screen hidden">
+            <h1>HOW TO PLAY</h1>
+            <div class="info-card">
+                🍎 <b>Swipe & Slice</b> healthy nutritious food items launched onto the screen!<br><br>
+                💥 <b>Avoid Junk Food bombs</b> like Burgers & Sodas. Slicing them instantly costs 1 Life!<br><br>
+                🧠 <b>Slice 3 healthy items</b> to activate the Educational Quiz Challenges! Complete <b>5 core textbook questions per level</b> to advance. Correct answers award <b>20 Marks</b> each!
+            </div>
+            <button class="btn-play" onclick="startActualGame()">PLAY NOW</button>
+        </div>
+
+        <div id="hud-top" class="hidden">
+            <div class="hud-item">SCORE: <span id="score-display">0</span></div>
+            <div class="hud-item" id="lives-box">LIVES: <span id="lives-display">❤️❤️❤️</span></div>
+            <div class="hud-item">LVL: <span id="level-display">1/3</span></div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="ninjaCanvas"></canvas>
+        </div>
+
+        <div id="quiz-overlay" class="hidden">
+            <div class="quiz-box">
+                <div class="quiz-title" id="quiz-badge">Challenge Question 1 of 5</div>
+                <div class="quiz-text" id="quiz-question-field">Loading dynamic challenge pool...</div>
+                <div class="options-grid" id="quiz-options-box"></div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="game-screen hidden">
+            <h2 id="end-title">COMPLETED!</h2>
+            <p id="end-subtitle">You are officially a Master Nutrition Science Ninja!</p>
+            <div class="final-score-box">
+                Marks: <span id="final-score-display">0</span> / 300
+            </div>
+            <button class="btn-play" onclick="restartEntireGame()">PLAY AGAIN</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- AUDIO ENGINE ASSETS INTEGRATION ---
+        const sndCorrect = new Audio('assets/correct.mp3');
+        const sndWrong = new Audio('assets/wrong.mp3');
+        const sndClaps = new Audio('assets/freesound_community-claps-44774.mp3');
+
+        // Dynamic 3-Level Database Architecture matching standard curricula layout
+        const databasePool = {
+            1: [
+                { q: "What type of nutrients provide our body with instant energy?", a: "Carbohydrates", options: ["Carbohydrates", "Proteins", "Vitamins"] },
+                { q: "Growing children require large amounts of which body-building nutrient to build muscles and make new cells?", a: "Proteins", options: ["Fats", "Proteins", "Carbohydrates"] },
+                { q: "Which food group provides more heat and energy than carbohydrates?", a: "Fats", options: ["Fats", "Vitamins", "Roughage"] },
+                { q: "Why are vitamins and minerals known as 'protective foods'?", a: "They help us fight against diseases", options: ["They give instant energy", "They help us fight against diseases", "They build strong bones only"] },
+                { q: "Lack of Vitamin A in a person's diet can lead to which deficiency disease?", a: "Night blindness", options: ["Scurvy", "Beriberi", "Night blindness"] }
+            ],
+            2: [
+                { q: "The process of breaking down food into simpler, soluble substances is called:", a: "Digestion", options: ["Preservation", "Digestion", "Churning"] },
+                { q: "Which fluid in our mouth turns insoluble starch into sweet, soluble sugar while we chew?", a: "Saliva", options: ["Bile juice", "Acid", "Saliva"] },
+                { q: "What is the long muscular pipe connecting the mouth directly to your stomach?", a: "Oesophagus", options: ["Oesophagus", "Small Intestine", "Anus"] },
+                { q: "Inside which J-shaped muscular bag is food churned and mixed with strong digestive juices?", a: "Stomach", options: ["Liver", "Stomach", "Large Intestine"] },
+                { q: "Where is the digestion of food completed and its nutrients absorbed by the body?", a: "Small Intestine", options: ["Mouth", "Small Intestine", "Large Intestine"] }
+            ],
+            3: [
+                { q: "What causes bread left out for too long to spoil and grow a brownish-green cotton-like formation?", a: "Germs growing in warm, moist air", options: ["Loss of water", "Germs growing in warm, moist air", "Excess salt"] },
+                { q: "The process by which we keep food fresh, safe, and free from germ spoilage for a long time is called:", a: "Food preservation", options: ["Digestion", "Food preservation", "Churning"] },
+                { q: "Which kitchen preservation method kills present germs instantly in fluids like milk?", a: "Boiling method", options: ["Freezing method", "Boiling method", "Drying method"] },
+                { q: "Why does keeping fresh vegetables or meat inside a refrigerator prevent them from spoiling quickly?", a: "Low temperatures do not allow germs to grow fast", options: ["Low temperatures do not allow germs to grow fast", "It removes all water content", "It adds healthy salt coatings"] },
+                { q: "Which method removes moisture content to preserve foods like red chillies, ginger, and turmeric?", a: "Drying method", options: ["Canning process", "Freezing method", "Drying method"] }
+            ]
+        };
+
+        const healthyItems = ["🍏", "🥚", "🥛", "🍌", "🥦", " Pineapple ", "🥔", "🍞", "🥕", "🍗"];
+        const junkItems = ["🍔", "🍟", "🥤", "🍩", "🍕"];
+
+        let score = 0;
+        let lives = 3;
+        let currentLevel = 1;
+        let slicedCountThisLevel = 0;
+        let quizSessionIndex = 0;
+        let levelQuizQuestions = [];
+        let isGameRunning = false;
+
+        const canvas = document.getElementById('ninjaCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+
+        let spawnTimer = 0;
+        let spawnInterval = 60; 
+        let itemsArray = [];
+        let particlesArray = [];
+        let swipeTrail = [];
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                document.getElementById('menu-screen').classList.remove('hidden');
+            }, 3000);
+            resizeCanvas();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 200));
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+
+        function goToInstructions() {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('instruction-screen').classList.remove('hidden');
+        }
+
+        function startActualGame() {
+            document.getElementById('instruction-screen').classList.add('hidden');
+            document.getElementById('hud-top').classList.remove('hidden');
+            
+            score = 0;
+            lives = 3;
+            currentLevel = 1;
+            slicedCountThisLevel = 0;
+            itemsArray = [];
+            particlesArray = [];
+            swipeTrail = [];
+
+            updateHUD();
+            isGameRunning = true;
+            animateNinjaSandbox();
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').textContent = score;
+            document.getElementById('level-display').textContent = `${currentLevel}/3`;
+            let hearts = "";
+            for(let i=0; i<3; i++) {
+                hearts += (i < lives) ? "❤️" : "🖤";
+            }
+            document.getElementById('lives-display').textContent = hearts;
+        }
+
+        class FlyingItem {
+            constructor() {
+                this.x = Math.random() * (canvas.width - 80) + 40;
+                this.y = canvas.height + 40;
+                this.isJunk = Math.random() < 0.25; 
+                this.label = this.isJunk ? junkItems[Math.floor(Math.random() * junkItems.length)] : healthyItems[Math.floor(Math.random() * healthyItems.length)];
+                
+                this.radius = 28;
+                // Scale physical upward dynamic speed relative to the calculated window height bounds
+                this.vx = (canvas.width / 2 - this.x) * 0.012 + (Math.random() * 2 - 1);
+                this.vy = -(Math.random() * 4 + (canvas.height * 0.016) + 10); 
+                this.gravity = 0.24;
+                this.isSliced = false;
+                this.sliceAngle = 0;
+                this.leftX = 0;
+                this.rightX = 0;
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw() {
+                ctx.save();
+                if (!this.isSliced) {
+                    ctx.translate(this.x, this.y);
+                    ctx.font = "42px Arial";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(this.label, 0, 0);
+                } else {
+                    ctx.save();
+                    ctx.translate(this.x - 16 + this.leftX, this.y);
+                    ctx.rotate(-this.sliceAngle);
+                    ctx.font = "40px Arial";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(this.label, 0, 0);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.translate(this.x + 16 + this.rightX, this.y);
+                    ctx.rotate(this.sliceAngle);
+                    ctx.font = "40px Arial";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(this.label, 0, 0);
+                    ctx.restore();
+
+                    this.leftX -= 2.5;
+                    this.rightX += 2.5;
+                    this.sliceAngle += 0.05;
+                }
+                ctx.restore();
+            }
+        }
+
+        class SplashParticle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 3 + 3;
+                this.vx = Math.random() * 6 - 3;
+                this.vy = Math.random() * 6 - 3;
+                this.color = color;
+                this.alpha = 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 0.04;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createJuiceSplatter(x, y, isJunk) {
+            const color = isJunk ? "#555" : "#ffb703";
+            for(let i=0; i<10; i++) {
+                particlesArray.push(new SplashParticle(x, y, color));
+            }
+        }
+
+        function animateNinjaSandbox() {
+            if (!isGameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            spawnTimer++;
+            if (spawnTimer >= spawnInterval) {
+                itemsArray.push(new FlyingItem());
+                spawnTimer = 0;
+            }
+
+            for (let i = itemsArray.length - 1; i >= 0; i--) {
+                let item = itemsArray[i];
+                item.update();
+                item.draw();
+
+                if (item.y > canvas.height + 60) {
+                    itemsArray.splice(i, 1);
+                }
+            }
+
+            for (let i = particlesArray.length - 1; i >= 0; i--) {
+                let p = particlesArray[i];
+                p.update();
+                if (p.alpha <= 0) {
+                    particlesArray.splice(i, 1);
+                } else {
+                    p.draw();
+                }
+            }
+
+            // Draw fluid colorful touch swipe trails
+            if (swipeTrail.length > 1) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = "#ffb703";
+                ctx.lineWidth = 5;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                ctx.moveTo(swipeTrail[0].x, swipeTrail[0].y);
+                for(let i=1; i<swipeTrail.length; i++) {
+                    ctx.lineTo(swipeTrail[i].x, swipeTrail[i].y);
+                }
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            animationFrameId = requestAnimationFrame(animateNinjaSandbox);
+        }
+
+        function checkIntersectionAndSlice(p2) {
+            itemsArray.forEach(item => {
+                if (item.isSliced) return;
+
+                let dist = Math.hypot(item.x - p2.x, item.y - p2.y);
+                if (dist < item.radius + 12) {
+                    item.isSliced = true;
+                    createJuiceSplatter(item.x, item.y, item.isJunk);
+
+                    if (item.isJunk) {
+                        try { sndWrong.currentTime = 0; sndWrong.play(); } catch(e){}
+                        lives--;
+                        updateHUD();
+                        if (lives <= 0) {
+                            endEntireGame(false);
+                        }
+                    } else {
+                        try { sndCorrect.currentTime = 0; sndCorrect.play(); } catch(e){}
+                        slicedCountThisLevel++;
+
+                        if (slicedCountThisLevel >= 3) {
+                            triggerQuizChallengeSequence();
+                        }
+                    }
+                }
+            });
+        }
+
+        function handlePointerMove(clientX, clientY) {
+            if (!isGameRunning) return;
+            const rect = canvas.getBoundingClientRect();
+            const currentPoint = {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+
+            swipeTrail.push(currentPoint);
+            if (swipeTrail.length > 6) swipeTrail.shift();
+
+            checkIntersectionAndSlice(currentPoint);
+        }
+
+        function clearSwipeTrail() {
+            swipeTrail = [];
+        }
+
+        // Setup unified mouse input event hooks
+        canvas.addEventListener('mousemove', (e) => { if (e.buttons === 1) handlePointerMove(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', clearSwipeTrail);
+
+        // Setup low latency hardware responsive mobile touch inputs
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+        window.addEventListener('touchend', clearSwipeTrail);
+
+        function triggerQuizChallengeSequence() {
+            isGameRunning = false; 
+            cancelAnimationFrame(animationFrameId);
+            clearSwipeTrail();
+
+            levelQuizQuestions = databasePool[currentLevel];
+            quizSessionIndex = 0;
+
+            launchQuizModal();
+        }
+
+        function launchQuizModal() {
+            const currentData = levelQuizQuestions[quizSessionIndex];
+            
+            document.getElementById('quiz-badge').textContent = `Level ${currentLevel} Challenge: Question ${quizSessionIndex + 1} of 5`;
+            document.getElementById('quiz-question-field').textContent = currentData.q;
+            
+            const box = document.getElementById('quiz-options-box');
+            box.innerHTML = '';
+
+            let optionsShuffled = [...currentData.options].sort(() => 0.5 - Math.random());
+
+            optionsShuffled.forEach(opt => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = opt;
+                button.onclick = () => submitQuizChoice(opt, currentData.a, button);
+                box.appendChild(button);
+            });
+
+            document.getElementById('quiz-overlay').classList.remove('hidden');
+        }
+
+        function submitQuizChoice(selected, correct, buttonNode) {
+            if (selected === correct) {
+                buttonNode.style.background = "#a7c957";
+                buttonNode.style.borderColor = "#6a994e";
+                buttonNode.style.color = "#fff";
+                
+                try { sndCorrect.currentTime = 0; sndCorrect.play(); } catch(e){}
+
+                score += 20; 
+                updateHUD();
+                quizSessionIndex++;
+
+                setTimeout(() => {
+                    if (quizSessionIndex < 5) {
+                        launchQuizModal();
+                    } else {
+                        document.getElementById('quiz-overlay').classList.add('hidden');
+                        if (currentLevel >= 3) {
+                            endEntireGame(true);
+                        } else {
+                            currentLevel++;
+                            slicedCountThisLevel = 0;
+                            itemsArray = [];
+                            updateHUD();
+                            
+                            isGameRunning = true;
+                            animateNinjaSandbox();
+                        }
+                    }
+                }, 400);
+            } else {
+                buttonNode.style.background = "#f28482";
+                buttonNode.style.borderColor = "#e63946";
+                buttonNode.style.color = "#fff";
+                
+                try { sndWrong.currentTime = 0; sndWrong.play(); } catch(e){}
+
+                const boxElement = document.querySelector('.quiz-box');
+                boxElement.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    boxElement.style.transform = 'scale(1)';
+                    buttonNode.style.background = "#ffffff";
+                    buttonNode.style.borderColor = "#e2e8f0";
+                    buttonNode.style.color = "#2b1d11";
+                }, 200);
+            }
+        }
+
+        function endEntireGame(isVictory) {
+            isGameRunning = false;
+            cancelAnimationFrame(animationFrameId);
+            document.getElementById('quiz-overlay').classList.add('hidden');
+            document.getElementById('hud-top').classList.add('hidden');
+            
+            const endScreen = document.getElementById('end-screen');
+            const title = document.getElementById('end-title');
+            const sub = document.getElementById('end-subtitle');
+
+            if (isVictory) {
+                try { sndClaps.currentTime = 0; sndClaps.play(); } catch(e){}
+                title.textContent = "VICTORY!";
+                sub.textContent = "Outstanding job! You answered all level question blocks perfectly!";
+            } else {
+                title.textContent = "GAME OVER";
+                sub.textContent = "You sliced too many junk food items! Study the nutrient groups and try again.";
+            }
+
+            document.getElementById('final-score-display').textContent = score;
+            endScreen.classList.remove('hidden');
+        }
+
+        function restartEntireGame() {
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
