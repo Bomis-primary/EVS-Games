@@ -381,11 +381,15 @@
         };
 
         let quizSessionActive = false;
-        let currentQuestionCount = 0;
+        let currentQuestionCount = 0; // Tracks position within the 3-question set (1 to 3)
         let currentQuestionData = null;
         let currentShuffledOptions = [];
         let currentCorrectIndex = -1;
         let dynamicRoundPool = [];
+
+        // NEW TRACKING VARIABLES
+        let blocksPlacedInRound = 0; // Tracks blocks safely stacked since the last quiz break (0 to 2)
+        let quizRoundsTriggered = 0; // Tracks total quiz sets launched during the match (0 to 4)
 
         window.addEventListener('load', () => {
             adjustCanvasSize();
@@ -421,6 +425,12 @@
             lives = 3;
             cameraY = 0;
             blocks = [];
+            blocksPlacedInRound = 0; // Reset block counter
+            quizRoundsTriggered = 0;  // Reset quiz round sets counter
+            
+            // Generate a fresh, completely shuffled question pool for this match
+            dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
+            
             document.getElementById('score-val').textContent = score;
             updateHeartsUI();
             spawnNewBlock();
@@ -487,6 +497,7 @@
                             activeBlock.x += (blockCenter - targetCenter) * 0.05;
 
                             blocks.push(activeBlock);
+                            blocksPlacedInRound++; // Track this safe placement
 
                             if (canvas.height - activeBlock.y > 350) {
                                 let offset = 75;
@@ -497,8 +508,9 @@
 
                             activeBlock = null;
                             
-                            // FIXED: Check if the player stacked 2 blocks. If yes, trigger the quiz.
-                            if (blocks.length === 2) {
+                            // Check if exactly 2 fresh blocks have been dropped
+                            if (blocksPlacedInRound === 2) {
+                                blocksPlacedInRound = 0; // Clear the counter for the next round
                                 launchPlacementQuiz();
                             } else {
                                 spawnNewBlock();
@@ -585,22 +597,21 @@
 
         function launchPlacementQuiz() {
             quizSessionActive = true;
-            currentQuestionCount = 1;
+            currentQuestionCount = 1; // Start at question #1 inside this set
+            quizRoundsTriggered++;     // Advance total quiz sets executed
             
-            // Refill bank if running low on questions
-            if (quizBank.length < 3) {
-                dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
-            } else {
-                dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
-            }
-
             document.getElementById('quiz-overlay').classList.remove('hidden');
             loadQuizQuestion();
         }
 
         function loadQuizQuestion() {
             document.getElementById('hint-box').classList.add('hidden');
-            document.getElementById('quiz-progress').textContent = `Question ${currentQuestionCount} of 3`;
+            document.getElementById('quiz-progress').textContent = `Question ${currentQuestionCount} of 3 (Round ${quizRoundsTriggered}/4)`;
+
+            // If the pool runs dry unexpectedly, fall back and regenerate it safely
+            if (dynamicRoundPool.length === 0) {
+                dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
+            }
 
             currentQuestionData = dynamicRoundPool.pop();
             document.getElementById('quiz-question').textContent = currentQuestionData.q;
@@ -626,12 +637,20 @@
                 score += 20;
                 document.getElementById('score-val').textContent = score;
 
-                currentQuestionCount++;
+                currentQuestionCount++; // Move to the next card in this set
+                
                 if (currentQuestionCount > 3) {
-                    sndClap.play().catch(()=>{});
-                    closeQuizModal();
+                    // Check if all 4 quiz sets have been successfully cleared (12 total questions completed)
+                    if (quizRoundsTriggered >= 4) {
+                        sndClap.play().catch(()=>{});
+                        closeQuizModal();
+                        triggerGameOver(); // Finishes game upon full question deck completion
+                    } else {
+                        sndClap.play().catch(()=>{});
+                        closeQuizModal(); // Closes quiz overlay to let them return to dropping blocks
+                    }
                 } else {
-                    loadQuizQuestion();
+                    loadQuizQuestion(); // Keep modal open and display question 2 or 3
                 }
             } else {
                 deductLife();
@@ -654,11 +673,9 @@
             quizSessionActive = false;
             document.getElementById('quiz-overlay').classList.add('hidden');
             
-            // FIXED: Reset the tower block array to 0!
-            // This forces the user to stack 2 fresh blocks to trigger the next set of questions, breaking the infinite loop.
-            blocks = []; 
-            
-            if (gameRunning) {
+            // FIX CONFIRMED: We no longer clear out blocks = [] here!
+            // The architectural history is preserved so building heights stay synchronized.
+            if (gameRunning && lives > 0) {
                 spawnNewBlock();
             }
         }
@@ -683,14 +700,14 @@
             document.getElementById('final-score-text').textContent = `Final Score: ${score}`;
             
             const feedbackEl = document.getElementById('final-feedback-text');
-            if (score >= 60) {
-                feedbackEl.textContent = "🏅 Spectacular! You are a master structural architect and an expert geographer!";
-            } else if (score >= 40) {
-                feedbackEl.textContent = "🌟 Great job! Your stacking timing is precise and your city knowledge is strong!";
-            } else if (score >= 20) {
-                feedbackEl.textContent = "👍 Good effort! With a little more practice, your skyscraper will touch the stars!";
+            if (score >= 200) {
+                feedbackEl.textContent = "🏅 Perfect Score! You cleared all 12 structural city-builder questions flawlessly!";
+            } else if (score >= 120) {
+                feedbackEl.textContent = "🌟 Spectacular! You built a towering skyscraper and mastered your regional geography!";
+            } else if (score >= 60) {
+                feedbackEl.textContent = "👍 Great effort! Your stacking is stable and your city answers are getting better!";
             } else {
-                feedbackEl.textContent = "🏢 Foundations are built step-by-step! Try again to drop your blocks straighter and ace the quiz!";
+                feedbackEl.textContent = "🏢 Foundations take practice! Try again to lock down your block alignment and ace every trivia deck!";
             }
 
             document.getElementById('screen-gameover').classList.remove('hidden');
