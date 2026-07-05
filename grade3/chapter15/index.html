@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght=500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -245,10 +245,10 @@
             <h2>How to Play!</h2>
             <div class="instruction-card">
                 <ul>
-                    <li><strong>Desktops:</strong> Press the <strong>SPACEBAR</strong> or click your mouse to drop!</li>
-                    <li><strong>Mobile:</strong> Simply <strong>tap anywhere</strong> on the screen to drop!</li>
-                    <li>Stack <strong>2 blocks safely</strong> on top of the base to trigger the Quiz!</li>
-                    <li>Earn +20 points per correct answer. You have 3 lives!</li>
+                    <li><strong>Drop Blocks:</strong> Tap the screen or press <strong>SPACEBAR</strong> to drop a building block.</li>
+                    <li><strong>No-Stress Stacking:</strong> Missing a stack won't cost lives! Keep trying until you lock it down.</li>
+                    <li><strong>Trigger Quiz:</strong> Stack <strong>2 blocks safely</strong> to start the dynamic geography quiz!</li>
+                    <li><strong>Watch Your Lives:</strong> You have 3 lives total. Getting a quiz question wrong costs 1 life! ❤️</li>
                 </ul>
             </div>
             <button class="fun-btn" onclick="startActualGame()">LET'S GO! 🚀</button>
@@ -289,7 +289,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Simplified, kid-friendly 12-Question Textbook-Aligned Bank
+        // Cleaned up, direct textbook question bank
         const quizBank = [
             {
                 q: "Which city should you visit to see the famous historic Red Fort?",
@@ -325,7 +325,7 @@
                 q: "Where is the famous Charminar monument located?",
                 options: ["Mumbai", "Hyderabad", "Kochi", "Delhi"],
                 correctAnswer: "Hyderabad",
-                hint: "This city is celebrated for its glittering bangles and world-famous Biryani."
+                hint: "This city is celebrated for its glittering banners and world-famous Biryani."
             },
             {
                 q: "In which city can you see the breathtaking white marble Taj Mahal?",
@@ -386,7 +386,6 @@
         let currentQuestionData = null;
         let currentShuffledOptions = [];
         let currentCorrectIndex = -1;
-        let incorrectAttempts = 0;
         let dynamicRoundPool = [];
 
         window.addEventListener('load', () => {
@@ -424,7 +423,7 @@
             cameraY = 0;
             blocks = [];
             document.getElementById('score-val').textContent = score;
-            document.getElementById('lives-val').textContent = "❤️❤️❤️";
+            updateHeartsUI();
             spawnNewBlock();
             requestAnimationFrame(updateGameLoop);
         }
@@ -505,8 +504,10 @@
                                 spawnNewBlock();
                             }
                         } else {
-                            deductLife();
-                            if (lives > 0) spawnNewBlock();
+                            // MISSED BLOCK MECHANIC REMOVED FROM LIVES SYSTEM
+                            // Plays subtle alert sound and resets the crane block immediately with no penalty
+                            sndWrong.play().catch(()=>{});
+                            spawnNewBlock();
                         }
                     }
                 }
@@ -587,24 +588,19 @@
         function launchPlacementQuiz() {
             quizSessionActive = true;
             currentQuestionCount = 1;
-            // Scramble the entire global question pool for this round
             dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
             document.getElementById('quiz-overlay').classList.remove('hidden');
             loadQuizQuestion();
         }
 
         function loadQuizQuestion() {
-            incorrectAttempts = 0;
             document.getElementById('hint-box').classList.add('hidden');
             document.getElementById('quiz-progress').textContent = `Question ${currentQuestionCount} of 3`;
 
-            // Pull a completely randomized question
             currentQuestionData = dynamicRoundPool.pop();
             document.getElementById('quiz-question').textContent = currentQuestionData.q;
 
-            // Scramble the multiple choice options on the fly
             currentShuffledOptions = [...currentQuestionData.options].sort(() => 0.5 - Math.random());
-            // Pinpoint the new index of the true correct text string
             currentCorrectIndex = currentShuffledOptions.indexOf(currentQuestionData.correctAnswer);
 
             const optionsBox = document.getElementById('options-box');
@@ -633,13 +629,16 @@
                     loadQuizQuestion();
                 }
             } else {
-                sndWrong.play().catch(()=>{});
-                incorrectAttempts++;
-                element.style.background = '#dcdde1';
-                element.style.color = '#718093';
+                // LIVES SYSTEM APPLIED TO WRONG ANSWERS
+                deductLife();
+                element.style.background = '#ff4757';
+                element.style.color = '#ffffff';
                 element.disabled = true;
 
-                if (incorrectAttempts >= 1) {
+                if (lives <= 0) {
+                    closeQuizModal();
+                    triggerGameOver();
+                } else {
                     const hintBox = document.getElementById('hint-box');
                     hintBox.textContent = `💡 Hint: ${currentQuestionData.hint}`;
                     hintBox.classList.remove('hidden');
@@ -658,15 +657,15 @@
         function deductLife() {
             lives--;
             sndWrong.play().catch(()=>{});
+            updateHeartsUI();
+        }
+
+        function updateHeartsUI() {
             let hearts = "";
             for(let i=0; i<3; i++) {
                 hearts += (i < lives) ? "❤️" : "🖤";
             }
             document.getElementById('lives-val').textContent = hearts;
-
-            if (lives <= 0) {
-                triggerGameOver();
-            }
         }
 
         function triggerGameOver() {
