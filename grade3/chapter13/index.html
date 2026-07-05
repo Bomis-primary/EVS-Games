@@ -1,1 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Transport Express - Grade 3 EVS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #E8F5E9;
+            font-family: 'Comic Sans MS', 'Fredoka One', sans-serif;
+            color: #333;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 500px;
+            margin: 0 auto;
+            background: #B3E5FC; /* Sky pastel */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+        .active-screen { display: flex; }
 
+        /* Screen 1: Splash Screen */
+        #splash-screen {
+            background-color: #ffffff;
+            z-index: 100;
+        }
+        #splash-screen img {
+            max-width: 60%;
+            max-height: 60%;
+            object-fit: contain;
+        }
+
+        /* Screen 2: Menu Screen */
+        #menu-screen { 
+            background: linear-gradient(135deg, #FFF9C4 0%, #FFECB3 100%); 
+        }
+        
+        /* Screen 3: Instruction Screen */
+        #instruction-screen { 
+            background: linear-gradient(135deg, #E1BEE7 0%, #F8BBD0 100%); 
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #283593;
+            text-shadow: 2px 2px 0px #FFF;
+            margin-bottom: 30px;
+        }
+        .instruction-box {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #4A148C;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px 30px;
+            border-radius: 20px;
+            border: 3px dashed #BA68C8;
+            max-width: 80%;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 50px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: #FF8F00;
+            border: 4px solid #fff;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #CF7100;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #CF7100;
+        }
+
+        /* Game Screen Layout */
+        #game-screen {
+            padding: 0;
+            justify-content: flex-start;
+        }
+        #ui-bar {
+            width: 100%;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 15;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+        }
+        .ui-item {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #37474F;
+        }
+        .lives-display {
+            color: #E91E63;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+        }
+
+        #station-board {
+            width: 90%;
+            background: #FFFFFF;
+            border: 4px solid #4FC3F7;
+            border-radius: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            z-index: 15;
+        }
+        #question-text {
+            font-size: 1.25rem;
+            color: #01579B;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        #hint-text {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.05rem;
+            color: #2E7D32;
+            background: #E8F5E9;
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 2px dashed #81C784;
+            animation: popIn 0.3s ease;
+        }
+
+        #canvas-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 320px;
+            z-index: 11;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* End Game / Score Screen */
+        #end-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 200;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .score-card {
+            background: #E8F5E9;
+            border: 5px solid #81C784;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .score-card h2 {
+            font-size: 2.5rem;
+            color: #2E7D32;
+            margin-bottom: 10px;
+        }
+        .score-card p {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #37474F;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- Screen 1: Splash Screen -->
+    <div id="splash-screen" class="screen active-screen">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%234FC3F7\'/><text x=\'50%\' y=\'55%\' font-size=\'24\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\'>INNOVINE</text></svg>'">
+    </div>
+
+    <!-- Screen 2: Title Menu Screen -->
+    <div id="menu-screen" class="screen">
+        <h1>🚂 Transport Express!</h1>
+        <button class="btn" id="start-btn">START</button>
+    </div>
+
+    <!-- Screen 3: Grade 3 Simplified Instructions Screen -->
+    <div id="instruction-screen" class="screen">
+        <h1>How To Play</h1>
+        <div class="instruction-box">
+            Read the riddle on the Station Board at the top! 📜<br><br>
+            A friendly train will pass by carrying answer options.<br><br>
+            <b>Tap the correct train car</b> to answer and win points! 🌟
+        </div>
+        <button class="btn" id="play-btn">PLAY</button>
+    </div>
+
+    <!-- Screen 4: Active Game Frame -->
+    <div id="game-screen" class="screen">
+        <div id="ui-bar">
+            <div class="ui-item" id="score-display">Score: 0</div>
+            <div class="ui-item" id="progress-display">Question: 1/12</div>
+            <div class="ui-item lives-display" id="lives-display">❤️❤️❤️</div>
+        </div>
+
+        <div id="station-board">
+            <div id="question-text">Loading question riddle...</div>
+            <div id="hint-text">💡 Idea: Hint message goes here!</div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- End Score & Celebration Screen -->
+        <div id="end-overlay">
+            <div class="score-card">
+                <h2 id="end-title">Wonderful Job! 🎉</h2>
+                <p id="end-score-text">Your Score: 0/12</p>
+                <button class="btn" id="restart-btn">PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Asset files specified from the image_45dfa9.png repository tree
+    const sndCorrect = new Audio('assets/correct.mp3');
+    const sndWrong = new Audio('assets/wrong.mp3');
+    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
+
+    function playSound(audioObj) {
+        audioObj.currentTime = 0;
+        audioObj.play().catch(() => {});
+    }
+
+    const questionBank = [
+        { q: "Vehicles like cars, bicycles, and tractors move only on roads or soil. Which category do they belong to?", a: "Land Transport", options: ["Land Transport", "Water Transport", "Air Transport", "Space Transport"], hint: "Think about where these wheels roll! They stay firmly on the ground." },
+        { q: "I am a vehicle, but I am not very wide. I have an engine and two wheels, and you must sit astride me. Who am I?", a: "Motorbike", options: ["Motorbike", "Auto Rickshaw", "Tractor", "Bus"], hint: "Look for a fast vehicle that has exactly two wheels just like a bicycle!" },
+        { q: "Ships, boats, ferries, and steamers are some of the different means used to travel across which medium?", a: "Water Transport", options: ["Water Transport", "Land Transport", "Air Transport", "Rail Transport"], hint: "These vehicles are built to float safely across deep rivers and wide oceans!" },
+        { q: "What is the swiftest (fastest) and most expensive mode of transport that takes you high up through the clouds?", a: "Air Transport", options: ["Air Transport", "Land Transport", "Water Transport", "Rail Transport"], hint: "This mode of transport requires a special place called an airport to take off!" },
+        { q: "I am a special kind of transport used in emergencies to fly, hover in one spot, and help rescue people at sea. Who am I?", a: "Helicopter", options: ["Helicopter", "Aeroplane", "Submarine", "Cruise Ship"], hint: "Unlike an aeroplane, this aircraft has giant spinning blades directly on top!" },
+        { q: "In villages and towns, we see some vehicles without engines pulled by humans, such as fruit carts or what 3-wheeled vehicle?", a: "Cycle Rickshaw", options: ["Cycle Rickshaw", "Auto Rickshaw", "Metro Train", "Motorbike"], hint: "It requires human leg power to pedal three wheels over short distances." },
+        { q: "Which type of train is used specifically to carry heavy raw products like minerals, coal, and metals in big wagons?", a: "Goods Train", options: ["Goods Train", "Passenger Train", "Monorail", "Metro Rail"], hint: "This train does not carry human passengers; it transports heavy materials!" },
+        { q: "Which city is famous for launching the very first modern monorail project in India to ease traffic congestion?", a: "Mumbai", options: ["Mumbai", "Delhi", "Kolkata", "Jaipur"], hint: "This huge city runs along the western coast of India and has popular local trains." },
+        { q: "What do we call the massive, sturdy ships that are used to transport bulky and heavy cargo across seas and oceans?", a: "Cargo Ships", options: ["Cargo Ships", "Cruise Ships", "Yachts", "Hovercrafts"], hint: "These large vessels are loaded at sea ports with the help of giant cranes!" },
+        { q: "Which unique water vehicle is special because it can actually float and slide both over water surfaces and on thin cushions of air over land?", a: "Hovercraft", options: ["Hovercraft", "Submarine", "Tanker", "Ferry"], hint: "It uses a powerful fan system underneath its body to skim gracefully just above flat spaces." },
+        { q: "In dry desert regions where wheels easily sink into sand, which animal is known as the 'ship of the desert'?", a: "Camel", options: ["Camel", "Yak", "Pony", "Elephant"], hint: "This animal has padded feet and can go without drinking water for many days!" },
+        { q: "Think back to history! In the year 1853, the very first railway line in India was built to connect which two locations?", a: "Mumbai to Thane", options: ["Mumbai to Thane", "Kolkata to Delhi", "Jaipur to Mumbai", "Thane to Pune"], hint: "The track connected the main seaside city of Maharashtra to its nearby neighboring city." }
+    ];
+
+    let randomizedQuestions = [];
+    let currentQuestionIdx = 0;
+    let score = 0;
+    let lives = 3;
+    let wrongAttemptsOnCurrentQuestion = 0;
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let animationId;
+
+    // Train System States
+    let trainX = -600;
+    const trainY = 130;
+    const trainSpeed = 1.8; // Calibrated easy pace for students
+    let trainCars = [];
+    let trainState = 'entering'; // entering, waiting, exiting, gone
+    let targetWaitX = 0;
+    let glowOpacity = 0;
+    let glowDirection = 1;
+
+    // Interactive Systems
+    let particles = [];
+    let showConfetti = false;
+
+    // Page Navigation Handling
+    window.addEventListener('load', () => {
+        setTimeout(() => { showScreen('menu-screen'); }, 5000); // 5-second Splash screen
+    });
+
+    document.getElementById('start-btn').addEventListener('click', () => { showScreen('instruction-screen'); });
+    document.getElementById('play-btn').addEventListener('click', () => { showScreen('game-screen'); initGame(); });
+    document.getElementById('restart-btn').addEventListener('click', () => { initGame(); });
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.getElementById(id).classList.add('active-screen');
+    }
+
+    // Shuffle Utility
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function initGame() {
+        document.getElementById('end-overlay').style.display = 'none';
+        randomizedQuestions = JSON.parse(JSON.stringify(questionBank));
+        shuffle(randomizedQuestions);
+        randomizedQuestions.forEach(q => shuffle(q.options));
+
+        currentQuestionIdx = 0;
+        score = 0;
+        lives = 3;
+        showConfetti = false;
+        particles = [];
+        
+        updateUI();
+        loadQuestion();
+        
+        // Match canvas bounds
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        targetWaitX = (canvas.width - 560) / 2;
+
+        if (animationId) cancelAnimationFrame(animationId);
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function updateUI() {
+        document.getElementById('score-display').innerText = `Score: ${score * 10}`;
+        document.getElementById('progress-display').innerText = `Question: ${currentQuestionIdx + 1}/${randomizedQuestions.length}`;
+        document.getElementById('lives-display').innerText = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+    }
+
+    function loadQuestion() {
+        wrongAttemptsOnCurrentQuestion = 0;
+        document.getElementById('hint-text').style.display = 'none';
+        
+        let currentQ = randomizedQuestions[currentQuestionIdx];
+        document.getElementById('question-text').innerText = currentQ.q;
+
+        // Build Train Objects based on question options
+        trainX = -650;
+        trainState = 'entering';
+        trainCars = [];
+
+        // Generate Car coordinates relative to train head
+        currentQ.options.forEach((opt, index) => {
+            trainCars.push({
+                label: opt,
+                isCorrect: (opt === currentQ.a),
+                localX: 140 + (index * 135), // Spacing out the trailer cars
+                width: 120,
+                height: 70,
+                color: ['#FFCDD2', '#C8E6C9', '#BBDEFB', '#FFE0B2'][index] // Pastel shades
+            });
+        });
+    }
+
+    // Engine Core Animation Loop
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        drawEnvironment();
+        updateAndDrawTrain();
+        if (showConfetti) handleConfetti();
+
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function drawEnvironment() {
+        // Soft Pastel Meadows
+        ctx.fillStyle = '#C8E6C9';
+        ctx.fillRect(0, 200, canvas.width, canvas.height - 200);
+
+        // Track Rails
+        ctx.fillStyle = '#78909C';
+        ctx.fillRect(0, trainY + 70, canvas.width, 8);
+        
+        // Track Wooden Ties
+        ctx.fillStyle = '#8D6E63';
+        for (let i = 0; i < canvas.width; i += 30) {
+            ctx.fillRect(i, trainY + 78, 12, 6);
+        }
+    }
+
+    function updateAndDrawTrain() {
+        // Pulsing animation handle for glow system
+        glowOpacity += 0.04 * glowDirection;
+        if (glowOpacity > 1 || glowOpacity < 0) glowDirection *= -1;
+
+        // Movement States Manager
+        if (trainState === 'entering') {
+            trainX += trainSpeed;
+            if (trainX >= targetWaitX) {
+                trainX = targetWaitX;
+                trainState = 'waiting';
+            }
+        } else if (trainState === 'exiting') {
+            trainX += trainSpeed * 2.5; // Clears away faster once answered
+            if (trainX > canvas.width + 100) {
+                trainState = 'gone';
+                proceedNext();
+            }
+        }
+
+        // Draw individual trailer cars
+        trainCars.forEach(car => {
+            let cx = trainX + car.localX;
+            let cy = trainY;
+
+            // Trigger gold glow on correct choice if student misses once
+            if (wrongAttemptsOnCurrentQuestion > 0 && car.isCorrect) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = `rgba(255, 193, 7, ${0.4 + glowOpacity * 0.6})`;
+                ctx.strokeStyle = '#FFC107';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(cx - 2, cy - 2, car.width + 4, car.height + 4);
+                ctx.shadowBlur = 0; // reset
+            }
+
+            // Draw Pastel Car Body
+            ctx.fillStyle = car.color;
+            ctx.fillRect(cx, cy, car.width, car.height);
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(cx, cy, car.width, car.height);
+
+            // Coupling chain
+            ctx.fillStyle = '#546E7A';
+            ctx.fillRect(cx - 15, cy + 50, 15, 6);
+
+            // Car Wheels
+            ctx.fillStyle = '#37474F';
+            ctx.beginPath(); ctx.arc(cx + 25, cy + 70, 12, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx + car.width - 25, cy + 70, 12, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#CFD8DC';
+            ctx.beginPath(); ctx.arc(cx + 25, cy + 70, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx + car.width - 25, cy + 70, 5, 0, Math.PI * 2); ctx.fill();
+
+            // Text Label inside car
+            ctx.fillStyle = '#37474F';
+            ctx.font = 'bold 14px "Comic Sans MS"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            wrapText(ctx, car.label, cx + car.width / 2, cy + car.height / 2, car.width - 10, 16);
+        });
+
+        // Draw Engine Locomotive Head
+        let ex = trainX;
+        let ey = trainY - 15;
+        ctx.fillStyle = '#4FC3F7'; // Bright Child friendly Blue
+        ctx.fillRect(ex, ey + 15, 125, 70);
+        ctx.fillRect(ex + 80, ey, 45, 30); // Cabin space
+        // Cabin Window
+        ctx.fillStyle = '#E0F7FA';
+        ctx.fillRect(ex + 90, ey + 5, 25, 20);
+        // Smokestack
+        ctx.fillStyle = '#37474F';
+        ctx.fillRect(ex + 25, ey - 5, 15, 25);
+        // Engine wheels
+        ctx.fillStyle = '#263238';
+        ctx.beginPath(); ctx.arc(ex + 30, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex + 70, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex + 105, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        let words = text.split(' ');
+        let line = '';
+        let lines = [];
+
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            let metrics = context.measureText(testLine);
+            if (metrics.width > maxWidth && n > 0) {
+                lines.push(line);
+                line = words[n] + ' ';
+            } else {
+                line = testLine;
+            }
+        }
+        lines.push(line);
+
+        let startY = y - ((lines.length - 1) * lineHeight) / 2;
+        for (let k = 0; k < lines.length; k++) {
+            context.fillText(lines[k], x, startY + (k * lineHeight));
+        }
+    }
+
+    // Tap Input Vector Hit-Detection
+    canvas.addEventListener('click', (e) => {
+        if (trainState !== 'waiting') return;
+
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        trainCars.forEach(car => {
+            let cx = trainX + car.localX;
+            let cy = trainY;
+
+            // Check boundaries
+            if (clickX >= cx && clickX <= cx + car.width && clickY >= cy && clickY <= cy + car.height) {
+                evaluateChoice(car);
+            }
+        });
+    });
+
+    function evaluateChoice(car) {
+        if (car.isCorrect) {
+            score++;
+            playSound(sndCorrect);
+            triggerConfettiCelebration();
+            trainState = 'exiting';
+        } else {
+            lives--;
+            wrongAttemptsOnCurrentQuestion++;
+            updateUI();
+            playSound(sndWrong);
+
+            if (lives <= 0) {
+                endGame(false);
+            } else {
+                // Activate Interactive Assistance Scaffold Layer
+                let hintElement = document.getElementById('hint-text');
+                hintElement.innerText = "💡 Idea: " + randomizedQuestions[currentQuestionIdx].hint;
+                hintElement.style.display = 'block';
+            }
+        }
+    }
+
+    function triggerConfettiCelebration() {
+        particles = [];
+        for (let i = 0; i < 60; i++) {
+            particles.push({
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.7) * 10,
+                size: Math.random() * 6 + 4,
+                color: ['#FF8A80', '#FFD54F', '#81C784', '#4FC3F7', '#BA68C8'][Math.floor(Math.random() * 5)]
+            });
+        }
+        showConfetti = true;
+        setTimeout(() => { showConfetti = false; }, 1500);
+    }
+
+    function handleConfetti() {
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.2; // gravity factor
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+    }
+
+    function proceedNext() {
+        currentQuestionIdx++;
+        if (currentQuestionIdx < randomizedQuestions.length && lives > 0) {
+            updateUI();
+            loadQuestion();
+        } else {
+            endGame(true);
+        }
+    }
+
+    function endGame(completedAll) {
+        if (animationId) cancelAnimationFrame(animationId);
+        
+        let titleNode = document.getElementById('end-title');
+        let scoreNode = document.getElementById('end-score-text');
+        
+        if (completedAll && score >= 8) {
+            titleNode.innerText = "Fantastic Work! 🏆";
+        } else {
+            titleNode.innerText = "Good Try! 👍";
+        }
+
+        // Display Score format required: e.g. 20/60 (Each question worth 10 points)
+        scoreNode.innerText = `Your Score: ${score * 10} / ${randomizedQuestions.length * 10}`;
+        
+        document.getElementById('end-overlay').style.display = 'flex';
+        
+        // Final screen community celebration claps trigger
+        playSound(sndClap);
+    }
+</script>
+</body>
+</html>
