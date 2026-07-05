@@ -239,7 +239,7 @@
 <body>
 
 <div id="game-container">
-    <!-- Screen 1: Innovine Splash Logo Screen (Fixed relative asset path) -->
+    <!-- Screen 1: Innovine Splash Logo Screen -->
     <div id="splash-screen" class="screen active-screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%23ff9f43\'/><text x=\'50%\' y=\'55%\' font-size=\'24\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\'>INNOVINE</text></svg>'">
     </div>
@@ -295,7 +295,7 @@
 </div>
 
 <script>
-    // Fixed direct relative audio paths targeting the assets folder
+    // Audio elements mapped directly to repository structure
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
@@ -326,6 +326,7 @@
     let quizBatchCount = 0;
     let questionsAnsweredTotal = 0;
 
+    // Shuffle Utility
     function shuffleArray(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -341,6 +342,7 @@
         currentQuestionIndex = 0;
     }
 
+    // Canvas Board State Setup
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
@@ -349,16 +351,18 @@
     let grid = [];
     let cellSize = 0;
     
-    const COLORS = ['#ee5253', '#341f97', '#10ac84', '#feca57', '#574b90'];
+    const COLORS = ['#ee5253', '#341f97', '#10ac84', '#feca57', '#574b90']; // Red, Blue, Green, Yellow, Purple
     
     let currentPiece = null; 
     let gameScore = 0;
     let isGameOver = false;
     let isPausedForQuiz = false;
-    let dropInterval = 1000;
+    let dropInterval = 1200; // Eased drop speed from 1000ms to 1200ms
     let lastTime = 0;
 
+    // Initialize Screens Sequence flow
     window.addEventListener('load', () => {
+        // Step 1: Splash timeout screen active for 5 seconds
         setTimeout(() => {
             showScreen('menu-screen');
         }, 5000);
@@ -401,6 +405,7 @@
     }
 
     function spawnPiece() {
+        // Vertical column stack consisting of 3 random colors
         currentPiece = {
             x: 2,
             y: -2, 
@@ -411,13 +416,16 @@
             ]
         };
         
+        // Game over conditional constraint checking space availability
         if (grid[0][2] !== null || grid[1][2] !== null) {
             isGameOver = true;
-            alert("Game Over! Let's try again to help our tribe!");
+            // Replaced alert with a cleaner state reset
+            console.log("Game Over triggered");
             initGame();
         }
     }
 
+    // Main Canvas Render and Tick loop configuration
     function gameLoop(timestamp) {
         if (isGameOver || isPausedForQuiz) return;
 
@@ -434,9 +442,11 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        // Calculate offset values centering the grid matrix boundary context
         let offsetX = (canvas.width - (COLS * cellSize)) / 2;
         let offsetY = (canvas.height - (ROWS * cellSize)) / 2;
 
+        // Draw stable board block grid items
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
                 ctx.strokeStyle = '#3d2711';
@@ -447,6 +457,7 @@
             }
         }
 
+        // Draw active dropping columns fragment elements
         if (currentPiece) {
             for (let i = 0; i < 3; i++) {
                 let py = currentPiece.y + i;
@@ -467,6 +478,7 @@
         ctx.fillStyle = color;
         ctx.fill();
         
+        // High fidelity glossy shine layer
         ctx.beginPath();
         ctx.arc(cx - radius/3, cy - radius/3, radius/4, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255,255,255,0.6)';
@@ -479,6 +491,7 @@
         ctx.stroke();
     }
 
+    // Mechanics: Core Horizontal, Vertical and Side inputs handling mapping rules
     function moveLeft() {
         if (currentPiece && currentPiece.x > 0 && !checkCollision(currentPiece.x - 1, currentPiece.y)) {
             currentPiece.x--;
@@ -493,6 +506,7 @@
 
     function swapColors() {
         if (!currentPiece) return;
+        // Shift colors downward across the stack container
         let temp = currentPiece.colors[2];
         currentPiece.colors[2] = currentPiece.colors[1];
         currentPiece.colors[1] = currentPiece.colors[0];
@@ -532,6 +546,7 @@
         let matched = false;
         let toRemove = Array(ROWS).fill().map(() => Array(COLS).fill(false));
 
+        // Check horizontal sets
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS - 2; c++) {
                 if (grid[r][c] && grid[r][c] === grid[r][c+1] && grid[r][c] === grid[r][c+2]) {
@@ -541,6 +556,7 @@
             }
         }
 
+        // Check vertical sets
         for (let c = 0; c < COLS; c++) {
             for (let r = 0; r < ROWS - 2; r++) {
                 if (grid[r][c] && grid[r][c] === grid[r+1][c] && grid[r][c] === grid[r+2][c]) {
@@ -551,6 +567,7 @@
         }
 
         if (matched) {
+            // Apply score points
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     if (toRemove[r][c]) {
@@ -561,6 +578,8 @@
             }
             document.getElementById('score-display').innerText = "Score: " + gameScore;
             applyGravity();
+            
+            // Activate the integrated quiz phase setup
             triggerQuizBatch();
         } else {
             spawnPiece();
@@ -581,6 +600,7 @@
         }
     }
 
+    // Intermediary Quiz Overlay triggering rules logic
     function triggerQuizBatch() {
         if (questionsAnsweredTotal >= 12) {
             spawnPiece();
@@ -593,6 +613,7 @@
 
     function showQuizQuestion() {
         if (quizBatchCount >= 3 || currentQuestionIndex >= gameQuestions.length) {
+            // Completed the target batch setup; return control loop seamlessly back to grid matching action
             isPausedForQuiz = false;
             document.getElementById('quiz-overlay').style.display = 'none';
             spawnPiece();
@@ -620,6 +641,7 @@
     }
 
     function handleAnswerSelection(selected, correct, buttonElement) {
+        // Disable further click interactions on all sibling button components temporarily during verification sequence
         const buttons = document.querySelectorAll('.option-btn');
         buttons.forEach(b => b.disabled = true);
 
@@ -645,9 +667,9 @@
             buttonElement.style.background = '#ee5253';
             buttonElement.style.color = '#fff';
             playSound(sndWrong);
-            alert("Oops! Let's think like an early human and try that question again!");
+            // Re-shuffle the current choices dynamically to offer a fresh perspective layout
             shuffleArray(gameQuestions[currentQuestionIndex].options);
-            showQuizQuestion();
+            setTimeout(() => showQuizQuestion(), 1000);
         }
     }
 
@@ -655,6 +677,7 @@
         document.getElementById('progress-display').innerText = `History: ${questionsAnsweredTotal}/12`;
     }
 
+    // Map Keyboard keycodes dynamically to support cross-device setups
     window.addEventListener('keydown', (e) => {
         if (isPausedForQuiz || isGameOver) return;
         if (e.key === 'ArrowLeft') moveLeft();
@@ -664,6 +687,7 @@
         draw();
     });
 
+    // Wire up tactile responsive click events down to visual button handles on mobile devices
     document.getElementById('left-btn').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); draw(); });
     document.getElementById('right-btn').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); draw(); });
     document.getElementById('swap-btn').addEventListener('touchstart', (e) => { e.preventDefault(); swapColors(); draw(); });
