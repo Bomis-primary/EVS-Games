@@ -1,1 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cut the Gov-Rope! Civic Arcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
 
+        body {
+            background-color: #1c110c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Responsive Mobile Container mimicking Cardboard Aspect Ratio */
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            max-height: 850px;
+            background: #d7b183; /* Cardboard color base */
+            border: 8px solid #a0784e;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+
+        /* Screens styling */
+        .game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+            z-index: 20;
+            background: #d7b183;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Screen 1: Splash */
+        #splash-screen {
+            background: #ffffff;
+        }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        .logo-img {
+            max-width: 220px;
+            height: auto;
+            margin-bottom: 12px;
+        }
+        .logo-sub {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+
+        /* Screen 2 & 3: Menu & Instructions */
+        #menu-screen, #instruction-screen {
+            background: radial-gradient(circle, #e2be92 40%, #c49d6f 100%);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #5c3a21;
+            text-shadow: 3px 3px 0px #fff;
+            line-height: 1.1;
+            margin-bottom: 30px;
+        }
+
+        .funny-monster-avatar {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        .btn-play {
+            background: #ff5722;
+            color: #fff;
+            border: 4px solid #fff;
+            padding: 14px 40px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #bf360c;
+            transform: translateY(0);
+            transition: transform 0.1s;
+        }
+        .btn-play:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #bf360c;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 3px dashed #5c3a21;
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #4a2e1b;
+            line-height: 1.4;
+            margin-bottom: 40px;
+        }
+
+        /* Game HUD Top elements */
+        #hud-top {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .hud-item {
+            background: rgba(92, 58, 33, 0.85);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 2px solid #fff;
+        }
+
+        /* Physics Canvas Area */
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(to bottom, #d7b183, #c29c6e);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Overlay Quiz Popup Modal */
+        #quiz-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 30;
+        }
+
+        .quiz-box {
+            background: #fffdf6;
+            border: 6px solid #5c3a21;
+            border-radius: 24px;
+            width: 100%;
+            padding: 24px 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .quiz-title {
+            font-size: 0.9rem;
+            color: #ff5722;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .quiz-text {
+            font-size: 1.25rem;
+            color: #2c3e50;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: #fdf2e9;
+            border: 3px solid #e0a96d;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #5c3a21;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-btn:active {
+            background: #e0a96d;
+            color: white;
+        }
+
+        /* Hint Box */
+        .hint-box {
+            margin-top: 12px;
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: #856404;
+            font-weight: 600;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Score & End Screen */
+        #end-screen {
+            background: radial-gradient(circle, #34495e 40%, #2c3e50 100%);
+            color: white;
+        }
+        #end-screen h2 {
+            font-size: 3rem;
+            color: #f1c40f;
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 10px;
+        }
+        .final-score-box {
+            font-size: 1.8rem;
+            margin: 20px 0 40px 0;
+            background: rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: 2px dashed #f1c40f;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scaleX(1); }
+            50% { transform: translateY(-12px) scaleX(0.95); }
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+
+        <div id="splash-screen" class="game-screen">
+            <div class="logo-container">
+                <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
+                <div class="logo-sub">Educational Media Labs</div>
+            </div>
+        </div>
+
+        <div id="menu-screen" class="game-screen hidden">
+            <div class="funny-monster-avatar">😋</div>
+            <h1>CUT THE<br>GOV-ROPE!</h1>
+            <button class="btn-play" onclick="goToInstructions()">START</button>
+        </div>
+
+        <div id="instruction-screen" class="game-screen hidden">
+            <h1>HOW TO PLAY</h1>
+            <div class="info-card">
+                👉 Swipe across the hanging ropes with your finger or mouse to cut them!<br><br>
+                🍬 Drop the knowledge candy directly into the hungry monster's mouth!<br><br>
+                🧠 Answer the quick civic scenarios correctly to get points!
+            </div>
+            <button class="btn-play" onclick="startActualGame()">PLAY!</button>
+        </div>
+
+        <div id="hud-top">
+            <div class="hud-item">SCORE: <span id="score-display">0</span></div>
+            <div class="hud-item">LEVEL: <span id="level-display">1/5</span></div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="physicsCanvas"></canvas>
+        </div>
+
+        <div id="quiz-overlay" class="hidden">
+            <div class="quiz-box">
+                <div class="quiz-title" id="quiz-badge">Question 1 of 2</div>
+                <div class="quiz-text" id="quiz-question-field">Loading question details...</div>
+                <div class="options-grid" id="quiz-options-box">
+                    </div>
+                <div id="hint-display" class="hint-box hidden"></div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="game-screen hidden">
+            <h2>GAME OVER!</h2>
+            <p>You fed the Gov-Monster completely!</p>
+            <div class="final-score-box">
+                Score: <span id="final-score-display">0</span> / 200
+            </div>
+            <button class="btn-play" onclick="restartEntireGame()">PLAY AGAIN</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- AUDIO ENGINE ASSETS LINKING ---
+        const sndCorrect = new Audio('assets/correct.mp3');
+        const sndWrong = new Audio('assets/wrong.mp3');
+        const sndClaps = new Audio('assets/freesound_community-claps-44774.mp3');
+
+        // Question Master Pool mapped into randomized evaluation slices
+        const masterQuestionPool = [
+            { q: "Oh no! A broken pipe is flooding our street with water! Who fixes this?", a: "Local Self-Gov", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Think of the hard workers right inside your own neighborhood town!" },
+            { q: "We need to make new ten-rupee shiny coins for the whole country. Who prints them?", a: "Central Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "This big task belongs to the main team sitting in New Delhi!" },
+            { q: "Our village wants a beautiful new park with a red slide. Who builds it?", a: "Local Self-Gov", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Your neighborhood Gram Panchayat or Council looks after playgrounds!" },
+            { q: "A state bus needs a new route to carry people between our cities. Who decides?", a: "State Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "This team looks after our whole region, led by the Chief Minister!" },
+            { q: "Look! The school street is full of messy rubbish! Who will sweep it clean?", a: "Local Self-Gov", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Local sweepers and trash trucks are sent by your nearby town office!" },
+            { q: "An enemy army wants to attack our peaceful borders! Who sends soldiers to protect us?", a: "Central Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Protecting the whole nation is a massive job for the main Central team!" },
+            { q: "We want to lay down brand new cross-country train tracks for fast steam engines!", a: "Central Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "National railways connect all states together, so the top level rules it!" },
+            { q: "The police officers in our city need new uniforms to catch bad guys. Who pays them?", a: "State Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "The police force is run by your state's regional leaders!" },
+            { q: "Our teacher says our whole state is getting a new school holiday! Who made this rule?", a: "State Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Your state capital city team makes decisions for all regional schools!" },
+            { q: "We need a giant new airport in New Delhi so planes can fly across the world!", a: "Central Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Huge international travel systems belong to the highest national power!" }
+        ];
+
+        let activeGameQuestions = [];
+        let currentQuestionIndex = 0;
+        let subQuestionCounter = 0; 
+        let score = 0;
+        let currentLevel = 1;
+        let firstAttemptWrong = false;
+        let isGameRunning = false;
+
+        // Physics variables mimicking Cut the Rope dynamics canvas layouts
+        const canvas = document.getElementById('physicsCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        
+        let bubble = { x: 240, y: 220, radius: 24, vx: 0, vy: 0, isFree: false };
+        let ropes = [];
+        let monster = { x: 240, y: 680, width: 70, height: 70, mouthOpen: false };
+        let swipePath = [];
+        let isSwiping = false;
+
+        // --- SCREEN ROUTING SEQUENCES ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                document.getElementById('menu-screen').classList.remove('hidden');
+            }, 5000); // Strict 5-second Splash screen constraint
+            resizeCanvas();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            monster.x = canvas.width / 2;
+            monster.y = canvas.height - 100;
+            if(!bubble.isFree) {
+                bubble.x = canvas.width / 2;
+                bubble.y = 220;
+            }
+        }
+
+        function goToInstructions() {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('instruction-screen').classList.remove('hidden');
+        }
+
+        function startActualGame() {
+            document.getElementById('instruction-screen').classList.add('hidden');
+            score = 0;
+            currentLevel = 1;
+            currentQuestionIndex = 0;
+            document.getElementById('score-display').textContent = score;
+            document.getElementById('level-display').textContent = `${currentLevel}/5`;
+            
+            activeGameQuestions = [...masterQuestionPool].sort(() => 0.5 - Math.random());
+            
+            isGameRunning = true;
+            setupLevelPhysics();
+            animatePhysics();
+        }
+
+        // --- CAPTURE & SETUP PHYSICS FOR ROPE SLICES ---
+        function setupLevelPhysics() {
+            bubble.x = canvas.width / 2;
+            bubble.y = 200 + (Math.random() * 40 - 20);
+            bubble.vx = 0;
+            bubble.vy = 0;
+            bubble.isFree = false;
+            monster.mouthOpen = false;
+
+            ropes = [
+                { anchorX: canvas.width / 2 - 80, anchorY: 80, length: 150, active: true },
+                { anchorX: canvas.width / 2 + 80, anchorY: 80, length: 150, active: true }
+            ];
+            
+            if(currentLevel > 2) {
+                ropes.push({ anchorX: canvas.width / 2 + (Math.random() * 120 - 60), anchorY: 50, length: 180, active: true });
+            }
+        }
+
+        // --- RENDER CORE LOOP CANVAS ---
+        function animatePhysics() {
+            if (!isGameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Cardboard Interior Stitchings lines
+            ctx.strokeStyle = "rgba(92, 58, 33, 0.15)";
+            ctx.lineWidth = 4;
+            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+
+            // Update & Draw Ropes constraints
+            let attachedCount = 0;
+            let targetX = 0, targetY = 0;
+
+            ropes.forEach(rope => {
+                if (!rope.active) return;
+                attachedCount++;
+                
+                ctx.beginPath();
+                ctx.strokeStyle = "#4a2e1b";
+                ctx.lineWidth = 3;
+                ctx.moveTo(rope.anchorX, rope.anchorY);
+                ctx.lineTo(bubble.x, bubble.y);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.fillStyle = "#34495e";
+                ctx.arc(rope.anchorX, rope.anchorY, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                targetX += rope.anchorX;
+                targetY += rope.anchorY + rope.length * 0.9;
+            });
+
+            // Handle Bubble movement dynamics
+            if (!bubble.isFree) {
+                if (attachedCount > 0) {
+                    let idealX = targetX / attachedCount;
+                    let idealY = (targetY / attachedCount);
+                    bubble.x += (idealX - bubble.x) * 0.1;
+                    bubble.y += (idealY - bubble.y) * 0.1;
+                } else {
+                    bubble.isFree = true;
+                }
+            } else {
+                bubble.vy += 0.5; 
+                bubble.x += bubble.vx;
+                bubble.y += bubble.vy;
+            }
+
+            // Animate Monster waiting at bottom base
+            let distanceToMonster = Math.hypot(bubble.x - monster.x, bubble.y - monster.y);
+            if (distanceToMonster < 160) {
+                monster.mouthOpen = true; 
+            }
+
+            // Draw Monster Body
+            ctx.fillStyle = "#6ab04c";
+            ctx.beginPath();
+            ctx.arc(monster.x, monster.y + 15, 45, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Eyes
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(monster.x - 18, monster.y - 10, 15, 0, Math.PI * 2);
+            ctx.arc(monster.x + 18, monster.y - 10, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(monster.x - 16, monster.y - 10, 6, 0, Math.PI * 2);
+            ctx.arc(monster.x + 20, monster.y - 10, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Animated Mouth
+            ctx.fillStyle = monster.mouthOpen ? "#130f40" : "#222";
+            ctx.beginPath();
+            if (monster.mouthOpen) {
+                ctx.arc(monster.x, monster.y + 20, 24, 0, Math.PI, false);
+            } else {
+                ctx.arc(monster.x, monster.y + 22, 12, 0, Math.PI, true);
+            }
+            ctx.fill();
+
+            // Draw Candy Box
+            ctx.beginPath();
+            ctx.fillStyle = "rgba(255, 87, 34, 0.85)";
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 3;
+            ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText("🌟", bubble.x - 11, bubble.y + 7);
+
+            // Draw swipe cut line
+            if (swipePath.length > 1) {
+                ctx.beginPath();
+                ctx.strokeStyle = "#e74c3c";
+                ctx.lineWidth = 4;
+                ctx.moveTo(swipePath[0].x, swipePath[0].y);
+                for(let i=1; i<swipePath.length; i++) {
+                    ctx.lineTo(swipePath[i].x, swipePath[i].y);
+                }
+                ctx.stroke();
+            }
+
+            // COLLISION VERIFICATION LOOP
+            if (bubble.y > canvas.height + 50) {
+                setupLevelPhysics();
+            } else if (distanceToMonster < 40) {
+                isGameRunning = false; 
+                cancelAnimationFrame(animationFrameId); 
+
+                // Play community claps when puzzle level drops candy successfully
+                sndClaps.currentTime = 0;
+                sndClaps.play().catch(err => console.log("Audio play blocked by browser rules"));
+
+                triggerQuizSequence();
+                return;
+            }
+
+            animationFrameId = requestAnimationFrame(animatePhysics);
+        }
+
+        // --- SWIPE / TOUCH INTERACTION INTERCEPTORS ---
+        function startSwipe(clientX, clientY) {
+            isSwiping = true;
+            swipePath = [];
+            addSwipePoint(clientX, clientY);
+        }
+
+        function addSwipePoint(clientX, clientY) {
+            if (!isSwiping) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            swipePath.push({x, y});
+            if(swipePath.length > 5) swipePath.shift();
+
+            if (swipePath.length >= 2) {
+                let p1 = swipePath[swipePath.length - 2];
+                let p2 = swipePath[swipePath.length - 1];
+
+                ropes.forEach(rope => {
+                    if (!rope.active) return;
+                    if (checkLineIntersection(p1.x, p1.y, p2.x, p2.y, rope.anchorX, rope.anchorY, bubble.x, bubble.y)) {
+                        rope.active = false;
+                    }
+                });
+            }
+        }
+
+        function endSwipe() {
+            isSwiping = false;
+            swipePath = [];
+        }
+
+        function checkLineIntersection(a1x, a1y, a2x, a2y, b1x, b1y, b2x, b2y) {
+            let det = (a2x - a1x) * (b2y - b1y) - (b2x - b1x) * (a2y - a1y);
+            if (det === 0) return false;
+            let lambda = ((b2y - b1y) * (b2x - a1x) + (b1x - b2x) * (b2y - a1y)) / det;
+            let gamma = ((a1y - a2y) * (b2x - a1x) + (a2x - a1x) * (b2y - a1y)) / det;
+            return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+        }
+
+        canvas.addEventListener('mousedown', (e) => startSwipe(e.clientX, e.clientY));
+        canvas.addEventListener('mousemove', (e) => { if(e.buttons === 1) addSwipePoint(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', endSwipe);
+
+        canvas.addEventListener('touchstart', (e) => { if(e.touches.length > 0) startSwipe(e.touches[0].clientX, e.touches[0].clientY); });
+        canvas.addEventListener('touchmove', (e) => { if(e.touches.length > 0) addSwipePoint(e.touches[0].clientX, e.touches[0].clientY); });
+        window.addEventListener('touchend', endSwipe);
+
+        // --- QUIZ ROUTING DISPLAY ENGINE ---
+        function triggerQuizSequence() {
+            subQuestionCounter = 0;
+            displaySubQuestion();
+        }
+
+        function displaySubQuestion() {
+            firstAttemptWrong = false;
+            document.getElementById('hint-display').classList.add('hidden');
+            
+            const currentData = activeGameQuestions[currentQuestionIndex];
+            document.getElementById('quiz-badge').textContent = `Question ${subQuestionCounter + 1} of 2`;
+            document.getElementById('quiz-question-field').textContent = currentData.q;
+            
+            const optionsBox = document.getElementById('quiz-options-box');
+            optionsBox.innerHTML = '';
+
+            let randomizedOptions = [...currentData.options].sort(() => 0.5 - Math.random());
+
+            randomizedOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => verifyUserChoice(opt, currentData.a);
+                optionsBox.appendChild(btn);
+            });
+
+            document.getElementById('quiz-overlay').classList.remove('hidden');
+        }
+
+        function verifyUserChoice(selected, correct) {
+            if (selected === correct) {
+                // Play matching correct answer sound file asset
+                sndCorrect.currentTime = 0;
+                sndCorrect.play().catch(e => console.log("Audio blocked"));
+
+                score += 20;
+                document.getElementById('score-display').textContent = score;
+                
+                subQuestionCounter++;
+                currentQuestionIndex++;
+
+                if (subQuestionCounter < 2 && currentQuestionIndex < activeGameQuestions.length) {
+                    displaySubQuestion();
+                } else {
+                    document.getElementById('quiz-overlay').classList.add('hidden');
+                    if (currentQuestionIndex >= 10) {
+                        endEntireGame();
+                    } else {
+                        currentLevel++;
+                        document.getElementById('level-display').textContent = `${currentLevel}/5`;
+                        isGameRunning = true; 
+                        setupLevelPhysics();
+                        animatePhysics();
+                    }
+                }
+            } else {
+                // Play matching wrong answer sound file asset
+                sndWrong.currentTime = 0;
+                sndWrong.play().catch(e => console.log("Audio blocked"));
+
+                if (!firstAttemptWrong) {
+                    firstAttemptWrong = true;
+                    const hintDiv = document.getElementById('hint-display');
+                    hintDiv.textContent = `💡 Hint: ${activeGameQuestions[currentQuestionIndex].hint}`;
+                    hintDiv.classList.remove('hidden');
+                }
+                const box = document.querySelector('.quiz-box');
+                box.style.transform = 'translateX(10px)';
+                setTimeout(() => box.style.transform = 'translateX(-10px)', 80);
+                setTimeout(() => box.style.transform = 'translateX(0)', 160);
+            }
+        }
+
+        function endEntireGame() {
+            isGameRunning = false;
+            cancelAnimationFrame(animationFrameId);
+            document.getElementById('quiz-overlay').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score-display').textContent = score;
+        }
+
+        function restartEntireGame() {
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
