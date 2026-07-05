@@ -166,7 +166,8 @@
             transform: translateY(2px);
             box-shadow: 0 2px 0 #2c254e;
         }
-        /* Quiz Panel Overlay */
+
+        /* Quiz Panel Overlay with Header Bar for Statuses */
         #quiz-overlay {
             display: none;
             position: absolute;
@@ -180,6 +181,47 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+        }
+        #quiz-header-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        #quiz-progress {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+            background: #ee5253;
+            padding: 5px 15px;
+            border-radius: 15px;
+            border: 2px solid #fff;
+        }
+        #quiz-lives {
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+        }
+        #hint-btn {
+            background: #54a0ff;
+            color: white;
+            border: 2px solid white;
+            padding: 5px 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #2e71c2;
+        }
+        #hint-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #2e71c2;
+        }
+        #hint-btn:disabled {
+            background: #a4b0be;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.6;
         }
         #quiz-box {
             width: 100%;
@@ -211,22 +253,17 @@
             border-radius: 12px;
             cursor: pointer;
             text-align: left;
-            transition: background 0.2s, color 0.2s, border-color 0.2s;
+            transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
         }
-        .option-btn:active {
+        .option-btn:active:not(:disabled) {
             background: #ffeaa7;
         }
-        #quiz-progress {
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #fff;
-            background: #ee5253;
-            padding: 4px 15px;
-            border-radius: 15px;
+        .option-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
         
-        /* Custom In-Game Message Banners (No more alert pop-ups) */
+        /* Custom End Banner Overlays */
         #end-overlay {
             display: none;
             position: absolute;
@@ -309,16 +346,20 @@
             <canvas id="gameCanvas"></canvas>
         </div>
 
-        <!-- Touch Controls Layout for Tablets and Mobile devices -->
+        <!-- Touch Controls Layout -->
         <div id="controls-bar">
             <button class="control-btn" id="left-btn">◀</button>
             <button class="control-btn" id="swap-btn">🔄</button>
             <button class="control-btn" id="right-btn">▶</button>
         </div>
 
-        <!-- Quiz Panel overlay framework -->
+        <!-- Quiz Panel overlay framework (Now with HUD details) -->
         <div id="quiz-overlay">
-            <div id="quiz-progress">Secret Story 1/12</div>
+            <div id="quiz-header-bar">
+                <div id="quiz-progress">Secret Story 1/12</div>
+                <div id="quiz-lives">❤️❤️❤️</div>
+                <button id="hint-btn">💡 Hint</button>
+            </div>
             <div id="quiz-box">
                 <div id="question-text">Question text goes here?</div>
                 <div id="options-container">
@@ -348,7 +389,7 @@
 
     function playSound(sound) {
         sound.currentTime = 0;
-        sound.play().catch(e => console.log("Audio waiting for interaction context"));
+        sound.play().catch(e => console.log("Audio waiting for user context"));
     }
 
     const baseQuestions = [
@@ -369,6 +410,8 @@
     let gameQuestions = [];
     let currentQuestionIndex = 0;
     let questionsAnsweredTotal = 0;
+    let quizLives = 3;
+    let hintUsedForCurrent = false;
 
     function shuffleArray(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
@@ -426,6 +469,9 @@
         initGame();
     });
 
+    // Wire up hint helper
+    document.getElementById('hint-btn').addEventListener('click', useHint);
+
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById(screenId).classList.add('active-screen');
@@ -442,6 +488,7 @@
     function initGame() {
         grid = Array(ROWS).fill().map(() => Array(COLS).fill(null));
         gameScore = 0;
+        quizLives = 3;
         isGameOver = false;
         isPausedForQuiz = false;
         showConfetti = false;
@@ -674,7 +721,17 @@
             return;
         }
         isPausedForQuiz = true;
+        hintUsedForCurrent = false;
+        document.getElementById('hint-btn').disabled = false;
         showQuizQuestion();
+    }
+
+    function updateLivesUI() {
+        let hearts = "";
+        for(let i=0; i<3; i++) {
+            hearts += (i < quizLives) ? "❤️" : "🖤";
+        }
+        document.getElementById('quiz-lives').innerText = hearts;
     }
 
     function showQuizQuestion() {
@@ -682,6 +739,8 @@
             resumeGameplay();
             return;
         }
+
+        updateLivesUI();
 
         const quizBox = document.getElementById('quiz-box');
         quizBox.style.backgroundColor = '#ffeaa7';
@@ -700,14 +759,40 @@
             let btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerText = opt;
+            btn.setAttribute('data-value', opt);
             btn.onclick = () => handleAnswerSelection(opt, currentQ.a, btn);
             container.appendChild(btn);
         });
+
+        if (hintUsedForCurrent) {
+            document.getElementById('hint-btn').disabled = true;
+        }
+    }
+
+    function useHint() {
+        if (hintUsedForCurrent || isGameOver) return;
+        
+        let currentQ = gameQuestions[currentQuestionIndex];
+        let buttons = document.querySelectorAll('.option-btn');
+        let incorrectCount = 0;
+
+        // Eliminate up to 2 incorrect choices safely
+        buttons.forEach(btn => {
+            let val = btn.getAttribute('data-value');
+            if (val !== currentQ.a && incorrectCount < 2 && !btn.disabled) {
+                btn.disabled = true;
+                incorrectCount++;
+            }
+        });
+
+        hintUsedForCurrent = true;
+        document.getElementById('hint-btn').disabled = true;
     }
 
     function handleAnswerSelection(selected, correct, buttonElement) {
         const buttons = document.querySelectorAll('.option-btn');
         buttons.forEach(b => b.disabled = true);
+        document.getElementById('hint-btn').disabled = true;
 
         const quizBox = document.getElementById('quiz-box');
 
@@ -734,20 +819,32 @@
                 }
             }, 1500);
         } else {
+            quizLives--;
+            updateLivesUI();
+
             quizBox.style.backgroundColor = '#ee5253';
             quizBox.style.color = '#fff';
             buttonElement.style.background = '#fff';
             buttonElement.style.color = '#ee5253';
             buttonElement.style.borderColor = '#fff';
 
-            document.getElementById('question-text').innerText = "Let's think like an early human and try again! 🤔";
-            
             playSound(sndWrong);
-            shuffleArray(gameQuestions[currentQuestionIndex].options);
 
-            setTimeout(() => {
-                showQuizQuestion();
-            }, 2000);
+            if (quizLives <= 0) {
+                document.getElementById('question-text').innerText = "Out of lives for this story puzzle! 🦕";
+                setTimeout(() => {
+                    document.getElementById('quiz-overlay').style.display = 'none';
+                    triggerEndGame(false);
+                }, 2000);
+            } else {
+                document.getElementById('question-text').innerText = "Let's think like an early human and try again! 🤔";
+                shuffleArray(gameQuestions[currentQuestionIndex].options);
+                setTimeout(() => {
+                    // Re-enable hint flag if they haven't used it yet for this card turn loop
+                    if (!hintUsedForCurrent) document.getElementById('hint-btn').disabled = false;
+                    showQuizQuestion();
+                }, 2000);
+            }
         }
     }
 
@@ -767,7 +864,7 @@
             createConfetti(); 
         } else {
             endTitle.innerText = "🌋 Game Over!";
-            endMessage.innerText = `The grid filled up! Let's try again to help our tribe!\nFinal Score: ${gameScore}`;
+            endMessage.innerText = `Let's try again to help our tribe master the elements!\nFinal Score: ${gameScore}`;
             endBox.style.border = "5px solid #ee5253";
         }
 
