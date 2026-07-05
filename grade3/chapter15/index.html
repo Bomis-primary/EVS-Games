@@ -1,1 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Metro Tower Bloxx Quiz</title>
+    
+    <!-- Child-friendly typography & styling optimized for responsiveness -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 
+    <style>
+        :root {
+            --primary-font: 'Quicksand', sans-serif;
+            --heading-font: 'Fredoka One', cursive;
+            --color-sky-top: #a1c4fd;
+            --color-sky-bottom: #c2e9fb;
+            --color-ui-bg: rgba(255, 255, 255, 0.95);
+            --color-btn: #4cd137;
+            --color-btn-hover: #44bd32;
+            --color-wrong: #e84118;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #2f3640;
+            font-family: var(--primary-font);
+        }
+
+        /* Container keeping game responsive and centered across mobile/desktop */
+        #game-viewport {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 480px;
+            max-height: 850px;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, var(--color-sky-top), var(--color-sky-bottom));
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Canvas configuration */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Screen Configurations */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(to bottom, #6a11cb 0%, #2575fc 100%);
+            color: #ffffff;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+
+        /* Screen 1: Splash Screen */
+        #screen-splash {
+            background: #ffffff;
+        }
+        #screen-splash img {
+            max-width: 70%;
+            max-height: 50%;
+            object-fit: contain;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Screen 2: Title Screen */
+        #screen-title h1 {
+            font-family: var(--heading-font);
+            font-size: 2.8rem;
+            color: #fbc531;
+            text-shadow: 0 6px 0 #c23616, 0 12px 20px rgba(0,0,0,0.4);
+            margin-bottom: 50px;
+            line-height: 1.2;
+        }
+
+        /* Screen 3: Instructions */
+        #screen-instructions h2 {
+            font-family: var(--heading-font);
+            font-size: 2.2rem;
+            color: #fbc531;
+            margin-bottom: 20px;
+        }
+        .instruction-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: left;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .instruction-card li {
+            margin-bottom: 12px;
+            list-style-type: '🌟 ';
+            margin-left: 20px;
+        }
+
+        /* Big Fun Interactive Buttons */
+        .fun-btn {
+            font-family: var(--heading-font);
+            font-size: 1.5rem;
+            padding: 15px 45px;
+            color: white;
+            background: linear-gradient(to bottom, #4cd137, #44bd32);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #27ae60, 0 10px 20px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+        }
+        .fun-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #27ae60, 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Game HUD Overlays */
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .hud-item {
+            background: var(--color-ui-bg);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: var(--heading-font);
+            font-size: 1.1rem;
+            color: #2f3640;
+            border: 3px solid #fbc531;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Quiz Popup Layer */
+        #quiz-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(47, 54, 64, 0.85);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.3s ease;
+        }
+        .quiz-container {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 25px;
+            border: 5px solid #fbc531;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transform: scale(1);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #quiz-progress {
+            font-family: var(--heading-font);
+            color: #718093;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        #quiz-question {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2f3640;
+            line-height: 1.4;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-btn {
+            font-family: var(--primary-font);
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 12px 20px;
+            background: #f5f6fa;
+            border: 2px solid #dcdde1;
+            border-radius: 12px;
+            color: #2f3640;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover { background: #e1b12c; color: white; border-color: #e1b12c; }
+        
+        #hint-box {
+            background: #fff2cc;
+            border: 2px dashed #f1c40f;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #b78a00;
+            font-weight: 700;
+            text-align: center;
+            animation: shake 0.5s ease;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-viewport">
+        
+        <!-- SCREEN 1: Splash Screen (Innovine Logo) -->
+        <div id="screen-splash" class="screen">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo">
+        </div>
+
+        <!-- SCREEN 2: Title Screen -->
+        <div id="screen-title" class="screen hidden">
+            <h1>METRO<br>TOWER BLOXX</h1>
+            <button class="fun-btn" onclick="goToInstructions()">START GAME</button>
+        </div>
+
+        <!-- SCREEN 3: Instructions Screen -->
+        <div id="screen-instructions" class="screen hidden">
+            <h2>How to Play!</h2>
+            <div class="instruction-card">
+                <ul>
+                    <li>Tap or Press SPACEBAR to drop the swinging building block!</li>
+                    <li>Try to balance the block safely on the stack.</li>
+                    <li>Placing a block triggers 3 quiz challenges!</li>
+                    <li>Answer questions correctly to earn massive points (+20).</li>
+                    <li>Watch out! You only have 3 lives to spare.</li>
+                </ul>
+            </div>
+            <button class="fun-btn" onclick="startActualGame()">LET'S GO! 🚀</button>
+        </div>
+
+        <!-- SCREEN 4: Game Elements & Canvas Viewport -->
+        <div id="hud">
+            <div class="hud-item">SCORE: <span id="score-val">0</span></div>
+            <div class="hud-item">LIVES: <span id="lives-val">❤️❤️❤️</span></div>
+        </div>
+
+        <!-- Dynamic Modal Layer for the 3-Question Placement Quiz Loop -->
+        <div id="quiz-overlay" class="hidden">
+            <div class="quiz-container">
+                <div id="quiz-progress">Question 1 of 3</div>
+                <div id="quiz-question">Loading Question?</div>
+                <div class="options-grid" id="options-box">
+                    <!-- Buttons are dynamically inserted here -->
+                </div>
+                <div id="hint-box" class="hidden">💡 Hint content goes here.</div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="screen-gameover" class="screen hidden">
+            <h1 style="color: #ff4757;">GAME OVER</h1>
+            <p style="font-size: 1.4rem; margin-bottom: 30px;" id="final-score-text">Final Score: 0</p>
+            <button class="fun-btn" onclick="restartWholeGame()">PLAY AGAIN</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+        // Set Audio references exactly following the specified paths from image_546b0a.png
+        const sndCorrect = new Audio('assets/correct.mp3');
+        const sndWrong = new Audio('assets/wrong.mp3');
+        const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Situational Grade-3 Questions mapping India's Cities
+        const quizBank = [
+            {
+                q: "Rahul wants to visit the massive, historic Red Fort. Which major city should his family catch a flight to?",
+                options: ["Mumbai", "Chennai", "Delhi", "Kolkata"],
+                correct: 2,
+                hint: "This beautiful city was completely planned out with wide avenues and trees by Sir Edwin Lutyens."
+            },
+            {
+                q: "Aarav is standing near the Arabian Sea watching a beautiful sunset right beside the iconic Gateway of India. Where is he?",
+                options: ["Kolkata", "Mumbai", "Delhi", "Chennai"],
+                correct: 1,
+                hint: "This energetic city is widely famous for its packed network of Local Trains and delicious Vada Pav!"
+            },
+            {
+                q: "Meera is riding a real heritage wooden Tram car running right on tracks fixed into the street. Which city is she exploring?",
+                options: ["Kolkata", "Delhi", "Chennai", "Mumbai"],
+                correct: 0,
+                hint: "People here speak Bengali, view the majestic Victoria Memorial, and absolute love eating Rasgullas."
+            },
+            {
+                q: "Ananya needs to pack cool, light cotton clothes because of a humid breeze coming off Marina Beach. What city is she visiting?",
+                options: ["Delhi", "Mumbai", "Kolkata", "Chennai"],
+                correct: 3,
+                hint: "This southern coastal city contains the historic Fort St. George and beautiful Kapaleeshwarar Temple."
+            },
+            {
+                q: "Your cousin wants to see the prime minister's office at Central Secretariat and ride the super clean modern metro lines. Where should they go?",
+                options: ["Mumbai", "Delhi", "Chennai", "Kolkata"],
+                correct: 1,
+                hint: "It acts as the proud capital city of India."
+            }
+        ];
+
+        // Core Physics State variables configured to emulate Tower Bloxx
+        let gameRunning = false;
+        let score = 0;
+        let lives = 3;
+        let cameraY = 0;
+        let blocks = [];
+        let activeBlock = null;
+        let foundation = { x: 0, y: 0, w: 140, h: 45 };
+        
+        let crane = {
+            x: 0, y: 50,
+            length: 160,
+            angle: 0,
+            speed: 0.045,
+            direction: 1
+        };
+
+        // Quiz Control State Loop properties
+        let quizSessionActive = false;
+        let currentQuestionCount = 0; // runs up to 3 questions per block drop
+        let currentQuestionData = null;
+        let incorrectAttempts = 0;
+
+        // Sequence Step 1: Automatic Splash Screen running exactly for 5 seconds
+        window.addEventListener('load', () => {
+            adjustCanvasSize();
+            setTimeout(() => {
+                document.getElementById('screen-splash').classList.add('hidden');
+                document.getElementById('screen-title').classList.remove('hidden');
+            }, 5000);
+        });
+
+        window.addEventListener('resize', adjustCanvasSize);
+
+        function adjustCanvasSize() {
+            const container = document.getElementById('game-viewport');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Re-anchor the base ground platform based on dynamic height constraints
+            foundation.w = canvas.width * 0.35;
+            foundation.x = (canvas.width - foundation.w) / 2;
+            foundation.y = canvas.height - 80;
+            crane.x = canvas.width / 2;
+        }
+
+        function goToInstructions() {
+            document.getElementById('screen-title').classList.add('hidden');
+            document.getElementById('screen-instructions').classList.remove('hidden');
+        }
+
+        function startActualGame() {
+            document.getElementById('screen-instructions').classList.add('hidden');
+            gameRunning = true;
+            score = 0;
+            lives = 3;
+            cameraY = 0;
+            blocks = [];
+            document.getElementById('score-val').textContent = score;
+            document.getElementById('lives-val').textContent = "❤️❤️❤️";
+            spawnNewBlock();
+            requestAnimationFrame(updateGameLoop);
+        }
+
+        function spawnNewBlock() {
+            const blockWidth = canvas.width * 0.3;
+            activeBlock = {
+                w: blockWidth,
+                h: 40,
+                x: 0, y: 0,
+                vx: 0, vy: 0,
+                isDropped: false,
+                color: getRandomColor()
+            };
+        }
+
+        function getRandomColor() {
+            const colors = ['#ff6b6b', '#4bcff6', '#ff9f43', '#10ac84', '#9c88ff'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Drop Action Bindings (Spacebar + Mouse/Touch support)
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space') handleInputTrigger(); });
+        canvas.addEventListener('mousedown', handleInputTrigger);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInputTrigger(); }, {passive:false});
+
+        function handleInputTrigger() {
+            if (!gameRunning || quizSessionActive || !activeBlock || activeBlock.isDropped) return;
+            activeBlock.isDropped = true;
+        }
+
+        // Main Physics Loop mimicking Tower Bloxx swing & tracking physics
+        function updateGameLoop() {
+            if (!gameRunning) return;
+
+            if (!quizSessionActive) {
+                // Crane Pendulum Swing Animation
+                crane.angle += crane.speed * crane.direction;
+                if (Math.abs(crane.angle) > 0.75) {
+                    crane.direction *= -1; // Change swing direction
+                }
+
+                if (!activeBlock.isDropped) {
+                    // Lock block center to tip coordinates of the crane wire rope
+                    activeBlock.x = crane.x + Math.sin(crane.angle) * crane.length - activeBlock.w / 2;
+                    activeBlock.y = crane.y + Math.cos(crane.angle) * crane.length;
+                } else {
+                    // Drop down via simulated gravitational acceleration
+                    activeBlock.vy += 0.5;
+                    activeBlock.y += activeBlock.vy;
+
+                    // Evaluate physical landing collision threshold
+                    let targetY = foundation.y + cameraY;
+                    let targetLeft = foundation.x;
+                    let targetRight = foundation.x + foundation.w;
+
+                    if (blocks.length > 0) {
+                        let topBlock = blocks[blocks.length - 1];
+                        targetY = topBlock.y;
+                        targetLeft = topBlock.x;
+                        targetRight = topBlock.x + topBlock.w;
+                    }
+
+                    if (activeBlock.y + activeBlock.h >= targetY) {
+                        let blockCenter = activeBlock.x + activeBlock.w / 2;
+                        
+                        // Valid Landing check
+                        if (blockCenter >= targetLeft && blockCenter <= targetRight) {
+                            activeBlock.y = targetY - activeBlock.h;
+                            activeBlock.vy = 0;
+                            
+                            // Apply physical friction structural offset multiplier
+                            let targetCenter = (targetLeft + targetRight) / 2;
+                            activeBlock.x += (blockCenter - targetCenter) * 0.1;
+
+                            blocks.push(activeBlock);
+
+                            // Smooth step adjustment to lock view tracking on higher towers
+                            if (canvas.height - activeBlock.y > 300) {
+                                let offset = 45;
+                                cameraY += offset;
+                                foundation.y += offset;
+                                blocks.forEach(b => b.y += offset);
+                            }
+
+                            activeBlock = null;
+                            // Trigger full 3-Question Modal interaction loop
+                            launchPlacementQuiz();
+                        } else {
+                            // Missing alignment completely triggers life damage sequence
+                            deductLife();
+                            if (lives > 0) {
+                                spawnNewBlock();
+                            }
+                        }
+                    }
+                }
+            }
+
+            renderGraphics();
+            requestAnimationFrame(updateGameLoop);
+        }
+
+        function renderGraphics() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw procedural background building silhouettes to visually add context
+            ctx.fillStyle = "rgba(255,255,255,0.15)";
+            ctx.fillRect(30, canvas.height - 180, 60, 180);
+            ctx.fillRect(canvas.width - 90, canvas.height - 240, 70, 240);
+
+            // Draw Main Base Anchor Platform Ground
+            ctx.fillStyle = '#718093';
+            ctx.fillRect(foundation.x, foundation.y, foundation.w, foundation.h);
+            ctx.fillStyle = '#2f3542';
+            ctx.fillRect(foundation.x, foundation.y, foundation.w, 6);
+
+            // Render Stacked Tower Blocks safely landed
+            blocks.forEach((b) => {
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                
+                // Add stylized architectural cartoon windows
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                let winSpacing = b.w / 4;
+                for (let i = 1; i <= 3; i++) {
+                    ctx.fillRect(b.x + (i * winSpacing) - 5, b.y + 10, 10, 10);
+                    ctx.fillRect(b.x + (i * winSpacing) - 5, b.y + 24, 10, 10);
+                }
+            });
+
+            // Render Mechanical Hanging Crane Cable Assembly
+            ctx.strokeStyle = '#2f3542';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(crane.x, crane.y);
+            let endWireX = crane.x + Math.sin(crane.angle) * crane.length;
+            let endWireY = crane.y + Math.cos(crane.angle) * crane.length;
+            ctx.lineTo(endWireX, endWireY);
+            ctx.stroke();
+
+            // Render Incoming Dropping Block
+            if (activeBlock) {
+                ctx.fillStyle = activeBlock.color;
+                ctx.fillRect(activeBlock.x, activeBlock.y, activeBlock.w, activeBlock.h);
+                
+                // Glowing bright windows for active items
+                ctx.fillStyle = '#fbc531';
+                let winSpacing = activeBlock.w / 4;
+                for (let i = 1; i <= 3; i++) {
+                    ctx.fillRect(activeBlock.x + (i * winSpacing) - 5, activeBlock.y + 10, 10, 10);
+                    ctx.fillRect(activeBlock.x + (i * winSpacing) - 5, activeBlock.y + 24, 10, 10);
+                }
+            }
+        }
+
+        // Quiz State Handler: Fires exactly 3 questions sequentially upon block placement
+        function launchPlacementQuiz() {
+            quizSessionActive = true;
+            currentQuestionCount = 1;
+            loadQuizQuestion();
+            document.getElementById('quiz-overlay').classList.remove('hidden');
+        }
+
+        function loadQuizQuestion() {
+            incorrectAttempts = 0;
+            document.getElementById('hint-box').classList.add('hidden');
+            document.getElementById('quiz-progress').textContent = `Question ${currentQuestionCount} of 3`;
+
+            // Pull a random question item from the conceptual situational dataset
+            currentQuestionData = quizBank[Math.floor(Math.random() * quizBank.length)];
+            document.getElementById('quiz-question').textContent = currentQuestionData.q;
+
+            const optionsBox = document.getElementById('options-box');
+            optionsBox.innerHTML = '';
+
+            currentQuestionData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = `${idx + 1}. ${opt}`;
+                btn.onclick = () => checkOptionAnswer(idx, btn);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function checkOptionAnswer(chosenIndex, element) {
+            if (chosenIndex === currentQuestionData.correct) {
+                // Correct Answer Path
+                sndCorrect.play().catch(()=>{});
+                score += 20; // Plus 20 assigned per correct answer
+                document.getElementById('score-val').textContent = score;
+
+                currentQuestionCount++;
+                if (currentQuestionCount > 3) {
+                    // Finished all 3 challenges successfully
+                    sndClap.play().catch(()=>{});
+                    closeQuizModal();
+                } else {
+                    // Next question step inside stack loop
+                    loadQuizQuestion();
+                }
+            } else {
+                // Incorrect Answer Path
+                sndWrong.play().catch(()=>{});
+                incorrectAttempts++;
+                element.style.background = '#dcdde1';
+                element.style.color = '#718093';
+                element.disabled = true;
+
+                // Deploys hints instantly after the 1st incorrect option attempt
+                if (incorrectAttempts >= 1) {
+                    const hintBox = document.getElementById('hint-box');
+                    hintBox.textContent = `💡 Hint: ${currentQuestionData.hint}`;
+                    hintBox.classList.remove('hidden');
+                }
+            }
+        }
+
+        function closeQuizModal() {
+            quizSessionActive = false;
+            document.getElementById('quiz-overlay').classList.add('hidden');
+            if (gameRunning) {
+                spawnNewBlock();
+            }
+        }
+
+        function deductLife() {
+            lives--;
+            sndWrong.play().catch(()=>{});
+            let hearts = "";
+            for(let i=0; i<3; i++) {
+                hearts += (i < lives) ? "❤️" : "🖤";
+            }
+            document.getElementById('lives-val').textContent = hearts;
+
+            if (lives <= 0) {
+                gameRunning = false;
+                document.getElementById('final-score-text').textContent = `Final Score: ${score}`;
+                document.getElementById('screen-gameover').classList.remove('hidden');
+            }
+        }
+
+        function restartWholeGame() {
+            document.getElementById('screen-gameover').classList.add('hidden');
+            adjustCanvasSize();
+            startActualGame();
+        }
+    </script>
+</body>
+</html>
