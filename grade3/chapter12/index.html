@@ -167,7 +167,7 @@
             box-shadow: 0 2px 0 #2c254e;
         }
 
-        /* Quiz Panel Overlay with Header Bar for Statuses */
+        /* Quiz Panel Overlay Layout */
         #quiz-overlay {
             display: none;
             position: absolute;
@@ -202,27 +202,6 @@
             font-size: 1.4rem;
             letter-spacing: 3px;
         }
-        #hint-btn {
-            background: #54a0ff;
-            color: white;
-            border: 2px solid white;
-            padding: 5px 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 15px;
-            cursor: pointer;
-            box-shadow: 0 3px 0 #2e71c2;
-        }
-        #hint-btn:active:not(:disabled) {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #2e71c2;
-        }
-        #hint-btn:disabled {
-            background: #a4b0be;
-            box-shadow: none;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
         #quiz-box {
             width: 100%;
             background: #ffeaa7;
@@ -236,10 +215,23 @@
         }
         #question-text {
             font-size: 1.3rem;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             font-weight: bold;
             line-height: 1.4;
             text-align: center;
+        }
+        #quiz-hint-text {
+            display: none;
+            font-size: 1.05rem;
+            color: #fff;
+            background: #574b90;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-style: italic;
+            border: 2px dashed #ffeaa7;
+            animation: popIn 0.3s ease;
         }
         .option-btn {
             width: 100%;
@@ -253,17 +245,25 @@
             border-radius: 12px;
             cursor: pointer;
             text-align: left;
-            transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+            transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
         .option-btn:active:not(:disabled) {
             background: #ffeaa7;
         }
         .option-btn:disabled {
-            opacity: 0.3;
+            opacity: 0.4;
             cursor: not-allowed;
         }
         
-        /* Custom End Banner Overlays */
+        /* Auto Hint Glow Effect Style */
+        .option-btn.correct-glow {
+            border-color: #feca57 !important;
+            box-shadow: 0 0 15px #feca57, inset 0 0 10px #feca57 !important;
+            background: #fffdf0 !important;
+            animation: gentlePulse 1.5s infinite ease-in-out;
+        }
+
+        /* End Game Overlays */
         #end-overlay {
             display: none;
             position: absolute;
@@ -309,6 +309,11 @@
             from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
+        @keyframes gentlePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -353,15 +358,15 @@
             <button class="control-btn" id="right-btn">▶</button>
         </div>
 
-        <!-- Quiz Panel overlay framework (Now with HUD details) -->
+        <!-- Quiz Panel overlay framework -->
         <div id="quiz-overlay">
             <div id="quiz-header-bar">
                 <div id="quiz-progress">Secret Story 1/12</div>
                 <div id="quiz-lives">❤️❤️❤️</div>
-                <button id="hint-btn">💡 Hint</button>
             </div>
             <div id="quiz-box">
                 <div id="question-text">Question text goes here?</div>
+                <div id="quiz-hint-text">Hint box text placeholder</div>
                 <div id="options-container">
                     <button class="option-btn">Option 1</button>
                     <button class="option-btn">Option 2</button>
@@ -393,25 +398,25 @@
     }
 
     const baseQuestions = [
-        { q: "BRRR! It is raining hard and a big wild cat is chasing you! Where do you hide to stay safe?", a: "Inside a dark cave or up in a tall tree!", options: ["Inside a dark cave or up in a tall tree!", "Inside a modern brick house.", "Under a beach umbrella.", "Inside a camping tent."] },
-        { q: "Oh no! Clothes are not invented yet! What can you wear today to stay warm?", a: "Big leaves, tree bark, and furry animal skins!", options: ["Big leaves, tree bark, and furry animal skins!", "A bright yellow raincoat and boots.", "A superhero costume.", "Soft cotton pajamas."] },
-        { q: "Time to eat! You found wild berries and a fish. There are no stoves or microwaves. How do you eat them?", a: "You eat them raw!", options: ["You eat them raw!", "You bake them into a pizza.", "You fry them in a pan with butter.", "You microwave them."] },
-        { q: "You want to dig up roots to eat, but your hands are not strong enough. What do you look for on the ground to help you?", a: "Sharp stones, animal bones, and horns!", options: ["Sharp stones, animal bones, and horns!", "Metal nails and a screwdriver.", "Colorful plastic toys.", "Pieces of broken glass."] },
-        { q: "SPARK! You rub two special stones together very fast. What amazing thing jumps out?", a: "Bright sparks that start a fire!", options: ["Bright sparks that start a fire!", "A magic genie.", "Bubbly cold water.", "Rainbow smoke."] },
+        { q: "BRRR! It is raining hard and a big wild cat is chasing you! Where do you hide to stay safe?", a: "Inside a dark cave or up in a tall tree!", hint: "Early humans looked for shelter high up or covered in rock where large animals couldn't easily strike!", options: ["Inside a dark cave or up in a tall tree!", "Inside a modern brick house.", "Under a beach umbrella.", "Inside a camping tent."] },
+        { q: "Oh no! Clothes are not invented yet! What can you wear today to stay warm?", a: "Big leaves, tree bark, and furry animal skins!", hint: "Think about what materials you can find directly on forest floors or from animals in nature!", options: ["Big leaves, tree bark, and furry animal skins!", "A bright yellow raincoat and boots.", "A superhero costume.", "Soft cotton pajamas."] },
+        { q: "Time to eat! You found wild berries and a fish. There are no stoves or microwaves. How do you eat them?", a: "You eat them raw!", hint: "Before humans learned to master fire, food could not be boiled, baked, or cooked at all!", options: ["You eat them raw!", "You bake them into a pizza.", "You fry them in a pan with butter.", "You microwave them."] },
+        { q: "You want to dig up roots to eat, but your hands are not strong enough. What do you look for on the ground to help you?", a: "Sharp stones, animal bones, and horns!", hint: "Nature provides solid, pointy objects lying around long before metal factories existed!", options: ["Sharp stones, animal bones, and horns!", "Metal nails and a screwdriver.", "Colorful plastic toys.", "Pieces of broken glass."] },
+        { q: "SPARK! You rub two special stones together very fast. What amazing thing jumps out?", a: "Bright sparks that start a fire!", hint: "Striking hard rocks like flint creating friction releases a sudden flash of light and high heat!", options: ["Bright sparks that start a fire!", "A magic genie.", "Bubbly cold water.", "Rainbow smoke."] },
         { q: "A scary wild animal is walking toward your cave! What can you light up to scare it away?", a: "A bright, hot fire!", options: ["A bright, hot fire!", "A big flashlight.", "A neon sign.", "Twinkling fairy lights."] },
-        { q: "You dropped some seeds in the dirt last week. Now, tiny green plants are growing there! What does this teach you?", a: "Seeds grow into new plants for food!", options: ["Seeds grow into new plants for food!", "Seeds turn into gold coins.", "Plants fall down from the sky.", "Ants hide secret treasures there."] },
-        { q: "You tie a sharp stone to a strong wooden stick. What useful tool did you just make?", a: "A strong stone axe!", options: ["A strong stone axe!", "An electric chainsaw.", "Kitchen scissors.", "A magic wand."] },
-        { q: "A furry animal walks up to you and wags its tail. It wants to guard your cave. What is your new pet?", a: "A friendly dog!", options: ["A friendly dog!", "A roaring tiger.", "A giant elephant.", "A wild mountain lion."] },
-        { q: "Your tribe needs to cross a big, deep river but you cannot swim. How do you get across?", a: "Tie logs together to make a floating raft!", options: ["Tie logs together to make a floating raft!", "Call a fast motorboat.", "Get on a giant cruise ship.", "Ride in a submarine."] },
-        { q: "You see a round tree log rolling down a hill very fast. What great idea does this give you?", a: "To invent the rolling wheel!", options: ["To invent the rolling wheel!", "To make a square brick.", "To build a triangle roof.", "To make an iron bar."] },
-        { q: "You spin a wooden wheel with wet mud on top to shape a bowl for water. What are you using?", a: "A potter's wheel to make clay pots!", options: ["A potter's wheel to make clay pots!", "A car steering wheel.", "A spinning wheel for making clothes.", "A giant Ferris wheel."] }
+        { q: "You dropped some seeds in the dirt last week. Now, tiny green plants are growing there! What does this teach you?", a: "Seeds grow into new plants for food!", hint: "When seeds stay moist in natural soil, they sprout and transform over time!", options: ["Seeds grow into new plants for food!", "Seeds turn into gold coins.", "Plants fall down from the sky.", "Ants hide secret treasures there."] },
+        { q: "You tie a sharp stone to a strong wooden stick. What useful tool did you just make?", a: "A strong stone axe!", hint: "Combining wood handles with a wedge shape creates an efficient chopping item!", options: ["A strong stone axe!", "An electric chainsaw.", "Kitchen scissors.", "A magic wand."] },
+        { q: "A furry animal walks up to you and wags its tail. It wants to guard your cave. What is your new pet?", a: "A friendly dog!", hint: "This animal is known as humanity's ancient loyal companion, closely linked to wild wolves!", options: ["A friendly dog!", "A roaring tiger.", "A giant elephant.", "A wild mountain lion."] },
+        { q: "Your tribe needs to cross a big, deep river but you cannot swim. How do you get across?", a: "Tie logs together to make a floating raft!", hint: "Wood naturally floats on water surfaces when tied safely side-by-side!", options: ["Tie logs together to make a floating raft!", "Call a fast motorboat.", "Get on a giant cruise ship.", "Ride in a submarine."] },
+        { q: "You see a round tree log rolling down a hill very fast. What great idea does this give you?", a: "To invent the rolling wheel!", hint: "Circular curved objects roll smoothly without dragging weight flatly on earth terrain!", options: ["To invent the rolling wheel!", "To make a square brick.", "To build a triangle roof.", "To make an iron bar."] },
+        { q: "You spin a wooden wheel with wet mud on top to shape a bowl for water. What are you using?", a: "A potter's wheel to make clay pots!", hint: "Shaping wet soil mud on a rotating disc makes storage kitchenware container pots!", options: ["A potter's wheel to make clay pots!", "A car steering wheel.", "A spinning wheel for making clothes.", "A giant Ferris wheel."] }
     ];
 
     let gameQuestions = [];
     let currentQuestionIndex = 0;
     let questionsAnsweredTotal = 0;
     let quizLives = 3;
-    let hintUsedForCurrent = false;
+    let questionsRemainingInCurrentBatch = 0;
 
     function shuffleArray(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
@@ -468,9 +473,6 @@
         document.getElementById('end-overlay').style.display = 'none';
         initGame();
     });
-
-    // Wire up hint helper
-    document.getElementById('hint-btn').addEventListener('click', useHint);
 
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
@@ -695,7 +697,11 @@
             }
             document.getElementById('score-display').innerText = "Score: " + gameScore;
             applyGravity();
-            triggerQuizBatch();
+            
+            // Trigger 3 questions sequentially from a single match event
+            isPausedForQuiz = true;
+            questionsRemainingInCurrentBatch = 3;
+            showNextQuizQuestionInBatch();
         } else {
             spawnPiece();
         }
@@ -715,14 +721,11 @@
         }
     }
 
-    function triggerQuizBatch() {
-        if (questionsAnsweredTotal >= 12) {
-            spawnPiece();
+    function showNextQuizQuestionInBatch() {
+        if (questionsAnsweredTotal >= 12 || questionsRemainingInCurrentBatch <= 0) {
+            resumeGameplay();
             return;
         }
-        isPausedForQuiz = true;
-        hintUsedForCurrent = false;
-        document.getElementById('hint-btn').disabled = false;
         showQuizQuestion();
     }
 
@@ -746,6 +749,9 @@
         quizBox.style.backgroundColor = '#ffeaa7';
         quizBox.style.color = '#2c1a04';
 
+        // Hide hint box clean at start of card
+        document.getElementById('quiz-hint-text').style.display = 'none';
+
         document.getElementById('quiz-overlay').style.display = 'flex';
         document.getElementById('quiz-progress').innerText = `Secret Story: ${questionsAnsweredTotal + 1} / 12`;
 
@@ -763,51 +769,29 @@
             btn.onclick = () => handleAnswerSelection(opt, currentQ.a, btn);
             container.appendChild(btn);
         });
-
-        if (hintUsedForCurrent) {
-            document.getElementById('hint-btn').disabled = true;
-        }
-    }
-
-    function useHint() {
-        if (hintUsedForCurrent || isGameOver) return;
-        
-        let currentQ = gameQuestions[currentQuestionIndex];
-        let buttons = document.querySelectorAll('.option-btn');
-        let incorrectCount = 0;
-
-        // Eliminate up to 2 incorrect choices safely
-        buttons.forEach(btn => {
-            let val = btn.getAttribute('data-value');
-            if (val !== currentQ.a && incorrectCount < 2 && !btn.disabled) {
-                btn.disabled = true;
-                incorrectCount++;
-            }
-        });
-
-        hintUsedForCurrent = true;
-        document.getElementById('hint-btn').disabled = true;
     }
 
     function handleAnswerSelection(selected, correct, buttonElement) {
         const buttons = document.querySelectorAll('.option-btn');
-        buttons.forEach(b => b.disabled = true);
-        document.getElementById('hint-btn').disabled = true;
-
+        let currentQ = gameQuestions[currentQuestionIndex];
         const quizBox = document.getElementById('quiz-box');
 
         if (selected === correct) {
+            buttons.forEach(b => b.disabled = true);
             quizBox.style.backgroundColor = '#10ac84';
             quizBox.style.color = '#fff';
             buttonElement.style.background = '#fff';
             buttonElement.style.color = '#10ac84';
             buttonElement.style.borderColor = '#fff';
+            buttonElement.classList.remove('correct-glow');
             
             document.getElementById('question-text').innerText = "🌟 Excellent! That's correct!";
+            document.getElementById('quiz-hint-text').style.display = 'none';
             
             playSound(sndCorrect);
             questionsAnsweredTotal++;
             currentQuestionIndex++;
+            questionsRemainingInCurrentBatch--;
             updateProgressUI();
 
             setTimeout(() => {
@@ -815,35 +799,44 @@
                     document.getElementById('quiz-overlay').style.display = 'none';
                     triggerEndGame(true);
                 } else {
-                    resumeGameplay();
+                    showNextQuizQuestionInBatch();
                 }
             }, 1500);
         } else {
             quizLives--;
             updateLivesUI();
 
-            quizBox.style.backgroundColor = '#ee5253';
-            quizBox.style.color = '#fff';
-            buttonElement.style.background = '#fff';
-            buttonElement.style.color = '#ee5253';
-            buttonElement.style.borderColor = '#fff';
-
             playSound(sndWrong);
 
             if (quizLives <= 0) {
+                buttons.forEach(b => b.disabled = true);
+                quizBox.style.backgroundColor = '#ee5253';
+                quizBox.style.color = '#fff';
                 document.getElementById('question-text').innerText = "Out of lives for this story puzzle! 🦕";
                 setTimeout(() => {
                     document.getElementById('quiz-overlay').style.display = 'none';
                     triggerEndGame(false);
                 }, 2000);
             } else {
+                // 1st Incorrect Action: Show interactive idea and add correct-glow classes
                 document.getElementById('question-text').innerText = "Let's think like an early human and try again! 🤔";
-                shuffleArray(gameQuestions[currentQuestionIndex].options);
-                setTimeout(() => {
-                    // Re-enable hint flag if they haven't used it yet for this card turn loop
-                    if (!hintUsedForCurrent) document.getElementById('hint-btn').disabled = false;
-                    showQuizQuestion();
-                }, 2000);
+                
+                // Set up and present educational idea text box
+                let customHint = currentQ.hint || "Look closely at nature's simple raw items found all around our early human tribes!";
+                const hintContainer = document.getElementById('quiz-hint-text');
+                hintContainer.innerText = "💡 Idea: " + customHint;
+                hintContainer.style.display = 'block';
+
+                // Add glowing styling to the correct option button element while keeping active options unlocked
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('data-value') === correct) {
+                        btn.classList.add('correct-glow');
+                    }
+                    // Disable only the specific wrong button they just selected so they can make another pick immediately
+                    if (btn === buttonElement) {
+                        btn.disabled = true;
+                    }
+                });
             }
         }
     }
