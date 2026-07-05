@@ -55,6 +55,13 @@
             z-index: 1;
         }
 
+        /* FIXED: Added a universal hidden utility rule so elements aren't visible at game start */
+        .hidden {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         .screen {
             position: absolute;
             inset: 0;
@@ -68,12 +75,6 @@
             background: linear-gradient(to bottom, #1a252f, #2c3e50);
             color: #ffffff;
             transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.95);
         }
 
         #screen-splash { background: #ffffff; }
@@ -289,7 +290,6 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Cleaned up, direct textbook question bank
         const quizBank = [
             {
                 q: "Which city should you visit to see the famous historic Red Fort?",
@@ -377,7 +377,7 @@
             x: 0, y: -20,
             length: 190,
             angle: 0,
-            speed: 0.02,
+            speed: 0.01, // FIXED: Reduced pacing speed by 50% for child-friendly controls
             direction: 1
         };
 
@@ -504,8 +504,6 @@
                                 spawnNewBlock();
                             }
                         } else {
-                            // MISSED BLOCK MECHANIC REMOVED FROM LIVES SYSTEM
-                            // Plays subtle alert sound and resets the crane block immediately with no penalty
                             sndWrong.play().catch(()=>{});
                             spawnNewBlock();
                         }
@@ -629,7 +627,6 @@
                     loadQuizQuestion();
                 }
             } else {
-                // LIVES SYSTEM APPLIED TO WRONG ANSWERS
                 deductLife();
                 element.style.background = '#ff4757';
                 element.style.color = '#ffffff';
