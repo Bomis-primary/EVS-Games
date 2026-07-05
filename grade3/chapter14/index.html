@@ -1,1 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Media Mission: Sort the Signals!</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Ubuntu', sans-serif;
+        }
 
+        body {
+            background-color: #FFE5EC;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        /* Game Container with fixed aspect ratio look but responsive scaling */
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 92vh;
+            max-height: 750px;
+            background: linear-gradient(180deg, #FFE5EC 0%, #FFF0F5 100%);
+            border: 6px solid #FF85A1;
+            border-radius: 30px;
+            box-shadow: 0 12px 24px rgba(255, 133, 161, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Dynamic Decorative Pastel Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.75);
+            border-radius: 50px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.75);
+            border-radius: 50%;
+        }
+        .cloud-1 { width: 100px; height: 40px; top: 12%; left: -20px; animation: floatCloud 25s linear infinite; }
+        .cloud-1::before { width: 50px; height: 50px; top: -20px; left: 15px; }
+        .cloud-1::after { width: 40px; height: 40px; top: -15px; left: 45px; }
+
+        .cloud-2 { width: 120px; height: 45px; top: 35%; right: -30px; animation: floatCloudReverse 30s linear infinite; }
+        .cloud-2::before { width: 60px; height: 60px; top: -25px; left: 20px; }
+        .cloud-2::after { width: 45px; height: 45px; top: -15px; left: 55px; }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(600px); }
+        }
+        @keyframes floatCloudReverse {
+            0% { transform: translateX(100px); }
+            100% { transform: translateX(-600px); }
+        }
+
+        /* Screen States Architecture */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .active-screen {
+            display: flex;
+        }
+
+        /* 1. Splash Screen */
+        #splash-screen {
+            background-color: #FFFFFF;
+        }
+        .logo-wrapper {
+            max-width: 220px;
+            animation: pulseLogo 2s ease-in-out infinite;
+        }
+        .logo-wrapper img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+        .loader-bar {
+            width: 60%;
+            height: 10px;
+            background-color: #F0F0F0;
+            border-radius: 10px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+        .loader-progress {
+            width: 0%;
+            height: 10px;
+            background-color: #FF85A1;
+            border-radius: 10px;
+            animation: loadProgress 5s linear forwards;
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* Child Friendly Buttons */
+        .btn-kids {
+            background: linear-gradient(180deg, #FFB703 0%, #FB8500 100%);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #D06D00, 0 8px 15px rgba(0,0,0,0.15);
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-kids:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #D06D00, 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 2. Title Screen */
+        #title-screen h1 {
+            font-size: 32px;
+            color: #F15BB5;
+            text-shadow: 2px 2px 0px #FFF, 4px 4px 0px #FF85A1;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+        .title-hero {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: hoverHero 3s ease-in-out infinite;
+        }
+        @keyframes hoverHero {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* 3. Instruction Screen */
+        .card-board {
+            background: rgba(255, 255, 255, 0.9);
+            border: 4px dashed #FF85A1;
+            border-radius: 24px;
+            padding: 20px;
+            width: 100%;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+        }
+        .card-board h2 {
+            color: #FB8500;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .card-board ul {
+            text-align: left;
+            list-style-type: none;
+            font-size: 17px;
+            color: #4A4A4A;
+            line-height: 1.6;
+        }
+        .card-board li {
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 28px;
+        }
+        .card-board li::before {
+            content: '⭐';
+            position: absolute;
+            left: 0;
+            top: 2px;
+        }
+
+        /* 4. Main Arena Layout */
+        #arena-screen {
+            justify-content: space-between;
+            padding: 15px;
+        }
+
+        /* Top HUD Row */
+        .hud-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 11;
+        }
+        .score-box {
+            background: #FFFFFF;
+            border: 3px solid #FF85A1;
+            padding: 6px 16px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #F15BB5;
+            box-shadow: 0 4px 0 #FF85A1;
+        }
+        .lives-box {
+            display: flex;
+            gap: 5px;
+        }
+        .heart {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+        .heart.lost {
+            transform: scale(0);
+        }
+
+        /* Central Discovery Pod Panel */
+        .discovery-zone {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 5;
+        }
+        .discovery-pod {
+            width: 190px;
+            height: 190px;
+            background: #FFFFFF;
+            border: 4px solid #FFB703;
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(251, 133, 0, 0.15);
+            cursor: grab;
+            position: relative;
+            touch-action: none;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .discovery-pod:active {
+            cursor: grabbing;
+        }
+        .discovery-pod.selected {
+            border-color: #F15BB5;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(241, 91, 181, 0.4);
+        }
+        .item-icon {
+            font-size: 55px;
+            margin-bottom: 8px;
+        }
+        .item-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+            padding: 0 10px;
+        }
+
+        /* Bottom Carousel Pod Grid Layout */
+        .pods-carousel-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+            z-index: 11;
+        }
+        .target-pod {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 12px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .target-pod:active {
+            transform: translateY(3px);
+        }
+        #pod-postal { border: 4px solid #FFB703; background: #FFF9E6; }
+        #pod-telecom { border: 4px solid #FF85A1; background: #FFEAF0; }
+        #pod-mass { border: 4px solid #F15BB5; background: #FDF0F8; }
+
+        .pod-icon { font-size: 32px; margin-bottom: 6px; }
+        .pod-label { font-size: 13px; font-weight: bold; color: #4A4A4A; }
+
+        /* Dynamic Contextual Hint Banner */
+        .hint-banner {
+            width: 100%;
+            background: #FFF;
+            border: 3px solid #FFB703;
+            border-radius: 16px;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #FB8500;
+            font-weight: bold;
+            margin-top: 5px;
+            display: none;
+            animation: popHint 0.3s ease-out forwards;
+            z-index: 11;
+        }
+        @keyframes popHint {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 5. Recap Screen */
+        .recap-hero { font-size: 70px; margin-bottom: 10px; }
+        .score-display {
+            font-size: 36px;
+            color: #F15BB5;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        /* Programmatic Animation Clues */
+        .shake {
+            animation: shakeAnim 0.4s ease-in-out;
+        }
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        /* Celebration Fireworks Engine Particle Styling */
+        .firework-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99;
+            animation: blast 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes blast {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--mx), var(--my)) scale(0.3); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Background Clouds elements -->
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+
+        <!-- 1. Splash Screen -->
+        <div id="splash-screen" class="screen active-screen">
+            <div class="logo-wrapper">
+                <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='https://placehold.co/200x100?text=Innovine'">
+            </div>
+            <div class="loader-bar">
+                <div class="loader-progress"></div>
+            </div>
+        </div>
+
+        <!-- 2. Title Screen -->
+        <div id="title-screen" class="screen">
+            <div class="title-hero">📡</div>
+            <h1>Media Mission:<br>Sort the Signals!</h1>
+            <button class="btn-kids" onclick="transitionTo('instruction-screen')">Launch Mission</button>
+        </div>
+
+        <!-- 3. Instruction Screen -->
+        <div id="instruction-screen" class="screen">
+            <div class="card-board">
+                <h2>How to Play!</h2>
+                <ul>
+                    <li>Look closely at the vehicle, bird, or machine inside the center box!</li>
+                    <li>Drag it or tap it, then choose the correct system container below!</li>
+                    <li>Every correct match earns you <b>+20 points</b>!</li>
+                    <li>You have <b>3 hearts</b>. Be safe and accurate!</li>
+                </ul>
+            </div>
+            <button class="btn-kids" onclick="startGame()">Ready, Go!</button>
+        </div>
+
+        <!-- 4. Main Arena Screen -->
+        <div id="arena-screen" class="screen">
+            <div class="hud-row">
+                <div class="score-box">Score: <span id="score-val">0</span></div>
+                <div class="lives-box" id="lives-container">
+                    <span class="heart" id="heart-1">❤️</span>
+                    <span class="heart" id="heart-2">❤️</span>
+                    <span class="heart" id="heart-3">❤️</span>
+                </div>
+            </div>
+
+            <div class="discovery-zone">
+                <div id="current-item-pod" class="discovery-pod">
+                    <div class="item-icon" id="target-icon">✉️</div>
+                    <div class="item-text" id="target-label">Letter</div>
+                </div>
+            </div>
+
+            <div class="hint-banner" id="hint-panel">💡 Hint will appear here!</div>
+
+            <div class="pods-carousel-grid">
+                <div class="target-pod" id="pod-postal" data-category="postal">
+                    <div class="pod-icon">📮</div>
+                    <div class="pod-label">Postal</div>
+                </div>
+                <div class="target-pod" id="pod-telecom" data-category="telecom">
+                    <div class="pod-icon">📱</div>
+                    <div class="pod-label">Telecom</div>
+                </div>
+                <div class="target-pod" id="pod-mass" data-category="mass">
+                    <div class="pod-icon">📺</div>
+                    <div class="pod-label">Mass Media</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Final Success / Game Over Screen -->
+        <div id="recap-screen" class="screen">
+            <div class="recap-hero" id="recap-emoji">🎉</div>
+            <h2 id="recap-title">Mission Complete!</h2>
+            <div class="score-display" id="final-score-txt">0 / 200</div>
+            <button class="btn-kids" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Audio elements definition -->
+    <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+    <script>
+        // Item Dataset directly mapped to Chapter 14 textbook context
+        const communicationItems = [
+            { name: "Letter", icon: "✉️", cat: "postal", hint: "Dropped inside a red mailbox for the postal carrier." },
+            { name: "Pigeon", icon: "🐦", cat: "postal", hint: "A trained bird used in ancient times to bring written scrolls." },
+            { name: "Aerogramme", icon: "✈️", cat: "postal", hint: "Special air-mail paper sent outside of India." },
+            { name: "Postcard", icon: "📇", cat: "postal", hint: "An open, stiff paper card sent through the post office." },
+            { name: "Smartphone", icon: "📱", cat: "telecom", hint: "A wireless phone in your pocket used to text, call, and browse." },
+            { name: "Fax Machine", icon: "📠", cat: "telecom", hint: "Sends an exact printed copy of document pages over a wire." },
+            { name: "Telephone", icon: "☎️", cat: "telecom", hint: "Used to make classic personal STD and ISD voice calls." },
+            { name: "Television", icon: "📺", cat: "mass", hint: "Broadcasts live shows and news to millions of families at once." },
+            { name: "Radio", icon: "📻", cat: "mass", hint: "Very popular in villages to broadcast news via sound only." },
+            { name: "Newspaper", icon: "📰", cat: "mass", hint: "Printed daily papers read by thousands of citizens in your city." }
+        ];
+
+        // Game state variables
+        let score = 0;
+        let lives = 3;
+        let pool = [];
+        let currentItem = null;
+        let isSelected = false;
+        let firstMistakeDone = false;
+
+        // Auto-advance splash loop screen at exactly 5 seconds
+        setTimeout(() => {
+            transitionTo('title-screen');
+        }, 5000);
+
+        // State Machine Router Navigation
+        function transitionTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.getElementById(screenId).classList.add('active-screen');
+        }
+
+        // Sound Player Wrapper with safety checks for browsers requiring user gestures
+        function playSound(audioId) {
+            const sound = document.getElementById(audioId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Audio playback blocked until user interaction."));
+            }
+        }
+
+        // Initialization Logic
+        function startGame() {
+            score = 0;
+            lives = 3;
+            firstMistakeDone = false;
+            document.getElementById('score-val').textContent = score;
+            document.getElementById('hint-panel').style.display = 'none';
+            
+            // Reset Heart Markers visual states
+            for(let i=1; i<=3; i++) {
+                document.getElementById(`heart-${i}`).classList.remove('lost');
+            }
+
+            // Copy and completely random-shuffle the items array pool
+            pool = [...communicationItems].sort(() => Math.random() - 0.5);
+            
+            transitionTo('arena-screen');
+            loadNextItem();
+        }
+
+        // Load item state card into central console console zone
+        function loadNextItem() {
+            if (pool.length === 0 || lives <= 0) {
+                endGame();
+                return;
+            }
+
+            currentItem = pool.pop();
+            document.getElementById('target-label').textContent = currentItem.name;
+            document.getElementById('target-icon').textContent = currentItem.icon;
+            
+            // Reset active states
+            isSelected = false;
+            const itemPod = document.getElementById('current-item-pod');
+            itemPod.classList.remove('selected');
+            itemPod.style.transform = "translate(0px, 0px) scale(1)";
+        }
+
+        // --- Core Interactions Setup (Tap-to-Route & Desktop/Mobile Drag-and-Drop) ---
+        const itemPod = document.getElementById('current-item-pod');
+        let startX = 0, startY = 0;
+        let isDragging = false;
+
+        // Tap Selection Routing Toggle
+        itemPod.addEventListener('click', (e) => {
+            if(isDragging) return;
+            isSelected = !isSelected;
+            itemPod.classList.toggle('selected', isSelected);
+        });
+
+        // Target Pod Bins Tap Process
+        document.querySelectorAll('.target-pod').forEach(pod => {
+            pod.addEventListener('click', () => {
+                const targetedCat = pod.getAttribute('data-category');
+                
+                // Route if item card is explicitly selected/highlighted
+                if (isSelected && currentItem) {
+                    processChoice(targetedCat, pod);
+                } 
+                // Fallback direct shortcut tap mechanism to maximize performance on mobile devices
+                else if (currentItem) {
+                    processChoice(targetedCat, pod);
+                }
+            });
+        });
+
+        // Pointer Event Drag Listeners (Unified Desktop/Mobile System)
+        itemPod.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            itemPod.setPointerCapture(e.pointerId);
+        });
+
+        itemPod.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            itemPod.style.transform = `translate(${dx}px, ${dy}px) scale(1.02)`;
+        });
+
+        itemPod.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            itemPod.releasePointerCapture(e.pointerId);
+
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+
+            // Check hit validation box via overlapping positions if dropped low enough
+            if (dy > 80) {
+                // Find horizontal category zone based on grid drop coordinates
+                const containerWidth = document.getElementById('game-container').offsetWidth;
+                const dropRatio = (startX + dx) / window.innerWidth;
+                
+                let selectedCategory = "";
+                let targetEl = null;
+
+                if (dropRatio < 0.4) {
+                    selectedCategory = "postal";
+                    targetEl = document.getElementById('pod-postal');
+                } else if (dropRatio >= 0.4 && dropRatio <= 0.65) {
+                    selectedCategory = "telecom";
+                    targetEl = document.getElementById('pod-telecom');
+                } else {
+                    selectedCategory = "mass";
+                    targetEl = document.getElementById('pod-mass');
+                }
+
+                processChoice(selectedCategory, targetEl);
+            } else {
+                // Snap card asset smoothly back to origin
+                itemPod.style.transform = "translate(0px, 0px) scale(1)";
+                itemPod.classList.remove('selected');
+                isSelected = false;
+            }
+        });
+
+        // Verification & Evaluation Processing Logic
+        function processChoice(categoryName, elementRef) {
+            if (!currentItem) return;
+
+            if (currentItem.cat === categoryName) {
+                // Correct Match Sequence Triggered
+                score += 20;
+                document.getElementById('score-val').textContent = score;
+                playSound('snd-correct');
+                
+                // Throw clean programmatic CSS firework burst precisely over selected bin location
+                if(elementRef) {
+                    createFireworks(elementRef);
+                }
+
+                // Auto-clear active hints panel
+                document.getElementById('hint-panel').style.display = 'none';
+                loadNextItem();
+            } else {
+                // Incorrect Routing Sequence Triggered
+                lives--;
+                playSound('snd-wrong');
+                
+                // Visual heart reduction marker loss
+                const currentHeart = document.getElementById(`heart-${lives + 1}`);
+                if(currentHeart) currentHeart.classList.add('lost');
+
+                // Apply error shake vibration styling look
+                itemPod.classList.add('shake');
+                setTimeout(() => itemPod.classList.remove('shake'), 400);
+
+                // Hint box activates only after running into the first single mismatch
+                firstMistakeDone = true;
+                const hintPanel = document.getElementById('hint-panel');
+                hintPanel.textContent = `💡 Hint: ${currentItem.hint}`;
+                hintPanel.style.display = 'block';
+
+                if (lives <= 0) {
+                    endGame();
+                } else {
+                    // Reset card center state loop without replacing current item card yet
+                    itemPod.style.transform = "translate(0px, 0px) scale(1)";
+                    itemPod.classList.remove('selected');
+                    isSelected = false;
+                }
+            }
+        }
+
+        // Custom CSS Programmatic Particle Fireworks Generator Engine
+        function createFireworks(targetElement) {
+            const rect = targetElement.getBoundingClientRect();
+            const containerRect = document.getElementById('game-container').getBoundingClientRect();
+            
+            // Core coordinate calculation relative to parent viewbox boundary
+            const originX = (rect.left + rect.width / 2) - containerRect.left;
+            const originY = (rect.top + rect.height / 2) - containerRect.top;
+
+            const colors = ['#FF85A1', '#FFB703', '#F15BB5', '#00BBF9', '#38B000'];
+
+            for (let i = 0; i < 16; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('firework-particle');
+                
+                // Map randomized burst trajectories inside custom CSS properties
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 40 + Math.random() * 60;
+                const mx = Math.cos(angle) * distance;
+                const my = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--mx', `${mx}px`);
+                particle.style.setProperty('--my', `${my}px`);
+                particle.style.left = `${originX}px`;
+                particle.style.top = `${originY}px`;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+                document.getElementById('game-container').appendChild(particle);
+                
+                // Instantly scrub element from viewport DOM layout after lifecycle completion
+                setTimeout(() => particle.remove(), 600);
+            }
+        }
+
+        // Termination Screen Flow Engine
+        function endGame() {
+            const maxCalculatedScore = communicationItems.length * 20;
+            document.getElementById('final-score-txt').textContent = `${score} / ${maxCalculatedScore}`;
+            
+            const emojiEl = document.getElementById('recap-emoji');
+            const titleEl = document.getElementById('recap-title');
+
+            if (score >= maxCalculatedScore * 0.7) {
+                emojiEl.textContent = "🏆";
+                titleEl.textContent = "Outstanding Job!";
+                playSound('snd-claps');
+            } else if (lives <= 0) {
+                emojiEl.textContent = "🎈";
+                titleEl.textContent = "Good Try! Keep Learning!";
+            } else {
+                emojiEl.textContent = "🎉";
+                titleEl.textContent = "Great Mission Run!";
+                playSound('snd-claps');
+            }
+
+            transitionTo('recap-screen');
+        }
+
+        function restartGame() {
+            transitionTo('title-screen');
+        }
+    </script>
+</body>
+</html>
