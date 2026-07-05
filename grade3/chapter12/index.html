@@ -49,7 +49,7 @@
         }
         .active-screen { display: flex; }
 
-        /* Screen 1: Splash */
+        /* Splash Screen */
         #splash-screen {
             background-color: #ffffff;
             z-index: 100;
@@ -60,7 +60,7 @@
             object-fit: contain;
             animation: pulse 2s infinite ease-in-out;
         }
-        /* Screen 2 & 3: Menu & Instructions */
+        /* Menu & Instructions */
         #menu-screen { background: linear-gradient(135deg, #ff9f43 0%, #ee5253 100%); }
         #instruction-screen { background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); }
         
@@ -96,7 +96,7 @@
             transform: translateY(4px);
             box-shadow: 0 2px 0px #d35400;
         }
-        /* Screen 4: Main gameplay core */
+        /* Game Screen */
         #game-screen {
             display: none;
             position: relative;
@@ -140,7 +140,7 @@
             width: 100%;
             height: 100%;
         }
-        /* Touch controls for mobile layouts */
+        /* Mobile controls layout */
         #controls-bar {
             width: 100%;
             display: flex;
@@ -166,7 +166,7 @@
             transform: translateY(2px);
             box-shadow: 0 2px 0 #2c254e;
         }
-        /* Quiz overlay block */
+        /* Quiz Panel Overlay */
         #quiz-overlay {
             display: none;
             position: absolute;
@@ -190,6 +190,7 @@
             color: #2c1a04;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         #question-text {
             font-size: 1.3rem;
@@ -210,7 +211,7 @@
             border-radius: 12px;
             cursor: pointer;
             text-align: left;
-            transition: background 0.2s;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
         .option-btn:active {
             background: #ffeaa7;
@@ -224,7 +225,44 @@
             padding: 4px 15px;
             border-radius: 15px;
         }
-        /* Animations */
+        
+        /* Custom In-Game Message Banners (No more alert pop-ups) */
+        #end-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 60;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+        .end-banner {
+            width: 100%;
+            background: #fff;
+            border-radius: 25px;
+            padding: 30px 20px;
+            color: #2c1a04;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .end-banner h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0px #ffeaa7;
+        }
+        .end-banner p {
+            font-size: 1.3rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -291,11 +329,19 @@
                 </div>
             </div>
         </div>
+
+        <!-- Game Over & Victory Custom Banner Overlay System -->
+        <div id="end-overlay">
+            <div class="end-banner" id="end-banner-box">
+                <h2 id="end-title">🎉 Fantastic Work!</h2>
+                <p id="end-message">You uncovered all 12 Stone Age Secrets!</p>
+                <button class="btn" id="restart-btn">PLAY AGAIN</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Audio elements mapped directly to repository structure
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
@@ -305,7 +351,6 @@
         sound.play().catch(e => console.log("Audio waiting for interaction context"));
     }
 
-    // 12 Simplified Kid-Friendly Questions Bank
     const baseQuestions = [
         { q: "BRRR! It is raining hard and a big wild cat is chasing you! Where do you hide to stay safe?", a: "Inside a dark cave or up in a tall tree!", options: ["Inside a dark cave or up in a tall tree!", "Inside a modern brick house.", "Under a beach umbrella.", "Inside a camping tent."] },
         { q: "Oh no! Clothes are not invented yet! What can you wear today to stay warm?", a: "Big leaves, tree bark, and furry animal skins!", options: ["Big leaves, tree bark, and furry animal skins!", "A bright yellow raincoat and boots.", "A superhero costume.", "Soft cotton pajamas."] },
@@ -323,10 +368,8 @@
 
     let gameQuestions = [];
     let currentQuestionIndex = 0;
-    let quizBatchCount = 0;
     let questionsAnsweredTotal = 0;
 
-    // Shuffle Utility
     function shuffleArray(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -342,7 +385,6 @@
         currentQuestionIndex = 0;
     }
 
-    // Canvas Board State Setup
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
@@ -351,18 +393,19 @@
     let grid = [];
     let cellSize = 0;
     
-    const COLORS = ['#ee5253', '#341f97', '#10ac84', '#feca57', '#574b90']; // Red, Blue, Green, Yellow, Purple
+    const COLORS = ['#ee5253', '#341f97', '#10ac84', '#feca57']; 
     
     let currentPiece = null; 
     let gameScore = 0;
     let isGameOver = false;
     let isPausedForQuiz = false;
-    let dropInterval = 1200; // Eased drop speed from 1000ms to 1200ms
+    let showConfetti = false;
+    let confettiParticles = [];
+    
+    let dropInterval = 1600; 
     let lastTime = 0;
 
-    // Initialize Screens Sequence flow
     window.addEventListener('load', () => {
-        // Step 1: Splash timeout screen active for 5 seconds
         setTimeout(() => {
             showScreen('menu-screen');
         }, 5000);
@@ -375,6 +418,11 @@
     document.getElementById('play-btn').addEventListener('click', () => {
         showScreen('game-screen');
         resizeCanvas();
+        initGame();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        document.getElementById('end-overlay').style.display = 'none';
         initGame();
     });
 
@@ -396,6 +444,8 @@
         gameScore = 0;
         isGameOver = false;
         isPausedForQuiz = false;
+        showConfetti = false;
+        confettiParticles = [];
         document.getElementById('score-display').innerText = "Score: " + gameScore;
         initQuestions();
         updateProgressUI();
@@ -405,7 +455,6 @@
     }
 
     function spawnPiece() {
-        // Vertical column stack consisting of 3 random colors
         currentPiece = {
             x: 2,
             y: -2, 
@@ -416,37 +465,37 @@
             ]
         };
         
-        // Game over conditional constraint checking space availability
         if (grid[0][2] !== null || grid[1][2] !== null) {
-            isGameOver = true;
-            // Replaced alert with a cleaner state reset
-            console.log("Game Over triggered");
-            initGame();
+            triggerEndGame(false);
         }
     }
 
-    // Main Canvas Render and Tick loop configuration
     function gameLoop(timestamp) {
-        if (isGameOver || isPausedForQuiz) return;
+        if (isGameOver && !showConfetti) return;
 
-        let delta = timestamp - lastTime;
-        if (delta > dropInterval) {
-            moveDown();
-            lastTime = timestamp;
+        if (!isGameOver && !isPausedForQuiz) {
+            let delta = timestamp - lastTime;
+            if (delta > dropInterval) {
+                moveDown();
+                lastTime = timestamp;
+            }
         }
 
         draw();
+        
+        if (showConfetti) {
+            updateAndDrawConfetti();
+        }
+
         requestAnimationFrame(gameLoop);
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Calculate offset values centering the grid matrix boundary context
         let offsetX = (canvas.width - (COLS * cellSize)) / 2;
         let offsetY = (canvas.height - (ROWS * cellSize)) / 2;
 
-        // Draw stable board block grid items
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
                 ctx.strokeStyle = '#3d2711';
@@ -457,8 +506,7 @@
             }
         }
 
-        // Draw active dropping columns fragment elements
-        if (currentPiece) {
+        if (currentPiece && !isPausedForQuiz && !isGameOver) {
             for (let i = 0; i < 3; i++) {
                 let py = currentPiece.y + i;
                 if (py >= 0 && py < ROWS) {
@@ -478,7 +526,6 @@
         ctx.fillStyle = color;
         ctx.fill();
         
-        // High fidelity glossy shine layer
         ctx.beginPath();
         ctx.arc(cx - radius/3, cy - radius/3, radius/4, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255,255,255,0.6)';
@@ -491,7 +538,34 @@
         ctx.stroke();
     }
 
-    // Mechanics: Core Horizontal, Vertical and Side inputs handling mapping rules
+    function createConfetti() {
+        confettiParticles = [];
+        for (let i = 0; i < 100; i++) {
+            confettiParticles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * -canvas.height,
+                size: Math.random() * 6 + 4,
+                color: ['#ff9f43', '#ee5253', '#1dd1a1', '#feca57', '#54a0ff', '#9b59b6'][Math.floor(Math.random() * 6)],
+                speedY: Math.random() * 3 + 2,
+                speedX: Math.random() * 2 - 1
+            });
+        }
+        showConfetti = true;
+    }
+
+    function updateAndDrawConfetti() {
+        confettiParticles.forEach(p => {
+            p.y += p.speedY;
+            p.x += p.speedX;
+            if (p.y > canvas.height) {
+                p.y = -10;
+                p.x = Math.random() * canvas.width;
+            }
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+    }
+
     function moveLeft() {
         if (currentPiece && currentPiece.x > 0 && !checkCollision(currentPiece.x - 1, currentPiece.y)) {
             currentPiece.x--;
@@ -506,7 +580,6 @@
 
     function swapColors() {
         if (!currentPiece) return;
-        // Shift colors downward across the stack container
         let temp = currentPiece.colors[2];
         currentPiece.colors[2] = currentPiece.colors[1];
         currentPiece.colors[1] = currentPiece.colors[0];
@@ -546,7 +619,6 @@
         let matched = false;
         let toRemove = Array(ROWS).fill().map(() => Array(COLS).fill(false));
 
-        // Check horizontal sets
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS - 2; c++) {
                 if (grid[r][c] && grid[r][c] === grid[r][c+1] && grid[r][c] === grid[r][c+2]) {
@@ -556,7 +628,6 @@
             }
         }
 
-        // Check vertical sets
         for (let c = 0; c < COLS; c++) {
             for (let r = 0; r < ROWS - 2; r++) {
                 if (grid[r][c] && grid[r][c] === grid[r+1][c] && grid[r][c] === grid[r+2][c]) {
@@ -567,7 +638,6 @@
         }
 
         if (matched) {
-            // Apply score points
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     if (toRemove[r][c]) {
@@ -578,8 +648,6 @@
             }
             document.getElementById('score-display').innerText = "Score: " + gameScore;
             applyGravity();
-            
-            // Activate the integrated quiz phase setup
             triggerQuizBatch();
         } else {
             spawnPiece();
@@ -600,27 +668,24 @@
         }
     }
 
-    // Intermediary Quiz Overlay triggering rules logic
     function triggerQuizBatch() {
         if (questionsAnsweredTotal >= 12) {
             spawnPiece();
             return;
         }
         isPausedForQuiz = true;
-        quizBatchCount = 0; 
         showQuizQuestion();
     }
 
     function showQuizQuestion() {
-        if (quizBatchCount >= 3 || currentQuestionIndex >= gameQuestions.length) {
-            // Completed the target batch setup; return control loop seamlessly back to grid matching action
-            isPausedForQuiz = false;
-            document.getElementById('quiz-overlay').style.display = 'none';
-            spawnPiece();
-            lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
+        if (currentQuestionIndex >= gameQuestions.length) {
+            resumeGameplay();
             return;
         }
+
+        const quizBox = document.getElementById('quiz-box');
+        quizBox.style.backgroundColor = '#ffeaa7';
+        quizBox.style.color = '#2c1a04';
 
         document.getElementById('quiz-overlay').style.display = 'flex';
         document.getElementById('quiz-progress').innerText = `Secret Story: ${questionsAnsweredTotal + 1} / 12`;
@@ -641,43 +706,86 @@
     }
 
     function handleAnswerSelection(selected, correct, buttonElement) {
-        // Disable further click interactions on all sibling button components temporarily during verification sequence
         const buttons = document.querySelectorAll('.option-btn');
         buttons.forEach(b => b.disabled = true);
 
+        const quizBox = document.getElementById('quiz-box');
+
         if (selected === correct) {
-            buttonElement.style.background = '#10ac84';
-            buttonElement.style.color = '#fff';
+            quizBox.style.backgroundColor = '#10ac84';
+            quizBox.style.color = '#fff';
+            buttonElement.style.background = '#fff';
+            buttonElement.style.color = '#10ac84';
+            buttonElement.style.borderColor = '#fff';
+            
+            document.getElementById('question-text').innerText = "🌟 Excellent! That's correct!";
+            
             playSound(sndCorrect);
             questionsAnsweredTotal++;
-            quizBatchCount++;
             currentQuestionIndex++;
             updateProgressUI();
 
             setTimeout(() => {
                 if (questionsAnsweredTotal >= 12) {
-                    playSound(sndClap);
-                    alert(`Fantastic Work! You uncovered all 12 Stone Age Secrets! Final Score: ${gameScore}`);
-                    initGame();
+                    document.getElementById('quiz-overlay').style.display = 'none';
+                    triggerEndGame(true);
                 } else {
-                    showQuizQuestion();
+                    resumeGameplay();
                 }
-            }, 1200);
+            }, 1500);
         } else {
-            buttonElement.style.background = '#ee5253';
-            buttonElement.style.color = '#fff';
+            quizBox.style.backgroundColor = '#ee5253';
+            quizBox.style.color = '#fff';
+            buttonElement.style.background = '#fff';
+            buttonElement.style.color = '#ee5253';
+            buttonElement.style.borderColor = '#fff';
+
+            document.getElementById('question-text').innerText = "Let's think like an early human and try again! 🤔";
+            
             playSound(sndWrong);
-            // Re-shuffle the current choices dynamically to offer a fresh perspective layout
             shuffleArray(gameQuestions[currentQuestionIndex].options);
-            setTimeout(() => showQuizQuestion(), 1000);
+
+            setTimeout(() => {
+                showQuizQuestion();
+            }, 2000);
         }
+    }
+
+    function triggerEndGame(isVictory) {
+        isGameOver = true;
+        
+        const endOverlay = document.getElementById('end-overlay');
+        const endTitle = document.getElementById('end-title');
+        const endMessage = document.getElementById('end-message');
+        const endBox = document.getElementById('end-banner-box');
+
+        if (isVictory) {
+            endTitle.innerText = "🎉 Fantastic Work!";
+            endMessage.innerText = `You uncovered all 12 Stone Age Secrets!\nFinal Score: ${gameScore}`;
+            endBox.style.border = "5px solid #1dd1a1";
+            playSound(sndClap);
+            createConfetti(); 
+        } else {
+            endTitle.innerText = "🌋 Game Over!";
+            endMessage.innerText = `The grid filled up! Let's try again to help our tribe!\nFinal Score: ${gameScore}`;
+            endBox.style.border = "5px solid #ee5253";
+        }
+
+        endOverlay.style.display = "flex";
+    }
+
+    function resumeGameplay() {
+        isPausedForQuiz = false;
+        document.getElementById('quiz-overlay').style.display = 'none';
+        spawnPiece();
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
     }
 
     function updateProgressUI() {
         document.getElementById('progress-display').innerText = `History: ${questionsAnsweredTotal}/12`;
     }
 
-    // Map Keyboard keycodes dynamically to support cross-device setups
     window.addEventListener('keydown', (e) => {
         if (isPausedForQuiz || isGameOver) return;
         if (e.key === 'ArrowLeft') moveLeft();
@@ -687,7 +795,6 @@
         draw();
     });
 
-    // Wire up tactile responsive click events down to visual button handles on mobile devices
     document.getElementById('left-btn').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); draw(); });
     document.getElementById('right-btn').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); draw(); });
     document.getElementById('swap-btn').addEventListener('touchstart', (e) => { e.preventDefault(); swapColors(); draw(); });
