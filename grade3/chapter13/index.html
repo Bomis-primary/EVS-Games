@@ -269,14 +269,24 @@
 </div>
 
 <script>
-    // Asset files specified from the image_45dfa9.png repository tree
-    const sndCorrect = new Audio('assets/correct.mp3');
-    const sndWrong = new Audio('assets/wrong.mp3');
-    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
+    // Audio engine initialized safely inside strings to protect initialization routine
+    let sndCorrect, sndWrong, sndClap;
+
+    function initAudio() {
+        try {
+            sndCorrect = new Audio('assets/correct.mp3');
+            sndWrong = new Audio('assets/wrong.mp3');
+            sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
+        } catch(e) {
+            console.log("Audio loading bypassed safely:", e);
+        }
+    }
 
     function playSound(audioObj) {
-        audioObj.currentTime = 0;
-        audioObj.play().catch(() => {});
+        if (audioObj) {
+            audioObj.currentTime = 0;
+            audioObj.play().catch(() => {});
+        }
     }
 
     const questionBank = [
@@ -304,23 +314,27 @@
     const ctx = canvas.getContext('2d');
     let animationId;
 
-    // Train System States
     let trainX = -600;
     const trainY = 130;
-    const trainSpeed = 1.8; // Calibrated easy pace for students
+    const trainSpeed = 1.8;
     let trainCars = [];
-    let trainState = 'entering'; // entering, waiting, exiting, gone
+    let trainState = 'entering';
     let targetWaitX = 0;
     let glowOpacity = 0;
     let glowDirection = 1;
 
-    // Interactive Systems
     let particles = [];
     let showConfetti = false;
 
-    // Page Navigation Handling
-    window.addEventListener('load', () => {
-        setTimeout(() => { showScreen('menu-screen'); }, 5000); // 5-second Splash screen
+    // Direct interface initialization sequence
+    window.addEventListener('DOMContentLoaded', () => {
+        initAudio();
+        showScreen('splash-screen');
+        
+        // Auto progress from layout splash screen after 3 seconds safely
+        setTimeout(() => { 
+            showScreen('menu-screen'); 
+        }, 3000);
     });
 
     document.getElementById('start-btn').addEventListener('click', () => { showScreen('instruction-screen'); });
@@ -329,10 +343,10 @@
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById(id).classList.add('active-screen');
+        let target = document.getElementById(id);
+        if(target) target.classList.add('active-screen');
     }
 
-    // Shuffle Utility
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -356,9 +370,8 @@
         updateUI();
         loadQuestion();
         
-        // Match canvas bounds
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
+        canvas.width = canvas.parentElement.clientWidth || 800;
+        canvas.height = canvas.parentElement.clientHeight || 320;
         targetWaitX = (canvas.width - 560) / 2;
 
         if (animationId) cancelAnimationFrame(animationId);
@@ -378,45 +391,35 @@
         let currentQ = randomizedQuestions[currentQuestionIdx];
         document.getElementById('question-text').innerText = currentQ.q;
 
-        // Build Train Objects based on question options
         trainX = -650;
         trainState = 'entering';
         trainCars = [];
 
-        // Generate Car coordinates relative to train head
         currentQ.options.forEach((opt, index) => {
             trainCars.push({
                 label: opt,
                 isCorrect: (opt === currentQ.a),
-                localX: 140 + (index * 135), // Spacing out the trailer cars
+                localX: 140 + (index * 135),
                 width: 120,
                 height: 70,
-                color: ['#FFCDD2', '#C8E6C9', '#BBDEFB', '#FFE0B2'][index] // Pastel shades
+                color: ['#FFCDD2', '#C8E6C9', '#BBDEFB', '#FFE0B2'][index]
             });
         });
     }
 
-    // Engine Core Animation Loop
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
         drawEnvironment();
         updateAndDrawTrain();
         if (showConfetti) handleConfetti();
-
         animationId = requestAnimationFrame(gameLoop);
     }
 
     function drawEnvironment() {
-        // Soft Pastel Meadows
         ctx.fillStyle = '#C8E6C9';
         ctx.fillRect(0, 200, canvas.width, canvas.height - 200);
-
-        // Track Rails
         ctx.fillStyle = '#78909C';
         ctx.fillRect(0, trainY + 70, canvas.width, 8);
-        
-        // Track Wooden Ties
         ctx.fillStyle = '#8D6E63';
         for (let i = 0; i < canvas.width; i += 30) {
             ctx.fillRect(i, trainY + 78, 12, 6);
@@ -424,11 +427,9 @@
     }
 
     function updateAndDrawTrain() {
-        // Pulsing animation handle for glow system
         glowOpacity += 0.04 * glowDirection;
         if (glowOpacity > 1 || glowOpacity < 0) glowDirection *= -1;
 
-        // Movement States Manager
         if (trainState === 'entering') {
             trainX += trainSpeed;
             if (trainX >= targetWaitX) {
@@ -436,40 +437,35 @@
                 trainState = 'waiting';
             }
         } else if (trainState === 'exiting') {
-            trainX += trainSpeed * 2.5; // Clears away faster once answered
+            trainX += trainSpeed * 2.5;
             if (trainX > canvas.width + 100) {
                 trainState = 'gone';
                 proceedNext();
             }
         }
 
-        // Draw individual trailer cars
         trainCars.forEach(car => {
             let cx = trainX + car.localX;
             let cy = trainY;
 
-            // Trigger gold glow on correct choice if student misses once
             if (wrongAttemptsOnCurrentQuestion > 0 && car.isCorrect) {
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = `rgba(255, 193, 7, ${0.4 + glowOpacity * 0.6})`;
                 ctx.strokeStyle = '#FFC107';
                 ctx.lineWidth = 4;
                 ctx.strokeRect(cx - 2, cy - 2, car.width + 4, car.height + 4);
-                ctx.shadowBlur = 0; // reset
+                ctx.shadowBlur = 0;
             }
 
-            // Draw Pastel Car Body
             ctx.fillStyle = car.color;
             ctx.fillRect(cx, cy, car.width, car.height);
             ctx.strokeStyle = '#FFFFFF';
             ctx.lineWidth = 3;
             ctx.strokeRect(cx, cy, car.width, car.height);
 
-            // Coupling chain
             ctx.fillStyle = '#546E7A';
             ctx.fillRect(cx - 15, cy + 50, 15, 6);
 
-            // Car Wheels
             ctx.fillStyle = '#37474F';
             ctx.beginPath(); ctx.arc(cx + 25, cy + 70, 12, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(cx + car.width - 25, cy + 70, 12, 0, Math.PI * 2); ctx.fill();
@@ -477,7 +473,6 @@
             ctx.beginPath(); ctx.arc(cx + 25, cy + 70, 5, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(cx + car.width - 25, cy + 70, 5, 0, Math.PI * 2); ctx.fill();
 
-            // Text Label inside car
             ctx.fillStyle = '#37474F';
             ctx.font = 'bold 14px "Comic Sans MS"';
             ctx.textAlign = 'center';
@@ -485,19 +480,15 @@
             wrapText(ctx, car.label, cx + car.width / 2, cy + car.height / 2, car.width - 10, 16);
         });
 
-        // Draw Engine Locomotive Head
         let ex = trainX;
         let ey = trainY - 15;
-        ctx.fillStyle = '#4FC3F7'; // Bright Child friendly Blue
+        ctx.fillStyle = '#4FC3F7';
         ctx.fillRect(ex, ey + 15, 125, 70);
-        ctx.fillRect(ex + 80, ey, 45, 30); // Cabin space
-        // Cabin Window
+        ctx.fillRect(ex + 80, ey, 45, 30);
         ctx.fillStyle = '#E0F7FA';
         ctx.fillRect(ex + 90, ey + 5, 25, 20);
-        // Smokestack
         ctx.fillStyle = '#37474F';
         ctx.fillRect(ex + 25, ey - 5, 15, 25);
-        // Engine wheels
         ctx.fillStyle = '#263238';
         ctx.beginPath(); ctx.arc(ex + 30, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath(); ctx.arc(ex + 70, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
@@ -527,7 +518,6 @@
         }
     }
 
-    // Tap Input Vector Hit-Detection
     canvas.addEventListener('click', (e) => {
         if (trainState !== 'waiting') return;
 
@@ -539,7 +529,6 @@
             let cx = trainX + car.localX;
             let cy = trainY;
 
-            // Check boundaries
             if (clickX >= cx && clickX <= cx + car.width && clickY >= cy && clickY <= cy + car.height) {
                 evaluateChoice(car);
             }
@@ -561,7 +550,6 @@
             if (lives <= 0) {
                 endGame(false);
             } else {
-                // Activate Interactive Assistance Scaffold Layer
                 let hintElement = document.getElementById('hint-text');
                 hintElement.innerText = "💡 Idea: " + randomizedQuestions[currentQuestionIdx].hint;
                 hintElement.style.display = 'block';
@@ -589,7 +577,7 @@
         particles.forEach(p => {
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.2; // gravity factor
+            p.vy += 0.2;
             ctx.fillStyle = p.color;
             ctx.fillRect(p.x, p.y, p.size, p.size);
         });
@@ -617,12 +605,8 @@
             titleNode.innerText = "Good Try! 👍";
         }
 
-        // Display Score format required: e.g. 20/60 (Each question worth 10 points)
         scoreNode.innerText = `Your Score: ${score * 10} / ${randomizedQuestions.length * 10}`;
-        
         document.getElementById('end-overlay').style.display = 'flex';
-        
-        // Final screen community celebration claps trigger
         playSound(sndClap);
     }
 </script>
