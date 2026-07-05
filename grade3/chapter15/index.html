@@ -155,15 +155,13 @@
         #quiz-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(20, 28, 36, 0.9);
-            z-index: 20;
+            background: rgba(20, 28, 36, 0.95);
+            z-index: 100;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-        
-        .hidden { display: none !important; }
 
         .quiz-container {
             width: 100%;
@@ -184,7 +182,7 @@
             text-align: center;
         }
         #quiz-question {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: #2f3640;
             line-height: 1.4;
@@ -203,6 +201,7 @@
             color: #2f3640;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-align: left;
         }
         .option-btn:hover { background: #e1b12c; color: white; border-color: #e1b12c; }
         
@@ -217,7 +216,6 @@
             text-align: center;
         }
 
-        /* Styling updates for the Final Score & Feedback Screen */
         .feedback-message {
             font-size: 1.2rem;
             line-height: 1.5;
@@ -247,8 +245,8 @@
             <h2>How to Play!</h2>
             <div class="instruction-card">
                 <ul>
-                    <li><strong>Desktops & Laptops:</strong> Press the <strong>SPACEBAR</strong> (or click your mouse) to drop!</li>
-                    <li><strong>Mobile Devices:</strong> Simply <strong>tap anywhere</strong> on the touch screen to drop!</li>
+                    <li><strong>Desktops:</strong> Press the <strong>SPACEBAR</strong> or click your mouse to drop!</li>
+                    <li><strong>Mobile:</strong> Simply <strong>tap anywhere</strong> on the screen to drop!</li>
                     <li>Stack <strong>2 blocks safely</strong> on top of the base to trigger the Quiz!</li>
                     <li>Earn +20 points per correct answer. You have 3 lives!</li>
                 </ul>
@@ -262,7 +260,7 @@
             <div class="hud-item">LIVES: <span id="lives-val">❤️❤️❤️</span></div>
         </div>
 
-        <!-- SCREEN 4: Game Over Overlay with Score & Feedback UI -->
+        <!-- SCREEN 4: Game Over Overlay -->
         <div id="screen-gameover" class="screen hidden">
             <h1 style="color: #ff4757; font-family: var(--heading-font); font-size: 2.8rem; margin-bottom: 10px;">GAME OVER</h1>
             <p style="font-size: 1.8rem; font-weight: 700; color: #ffffff;" id="final-score-text">Final Score: 0</p>
@@ -291,30 +289,79 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Simplified, kid-friendly 12-Question Textbook-Aligned Bank
         const quizBank = [
             {
-                q: "Rahul wants to visit the massive, historic Red Fort. Which major city should his family catch a flight to?",
+                q: "Which city should you visit to see the famous historic Red Fort?",
                 options: ["Mumbai", "Chennai", "Delhi", "Kolkata"],
-                correct: 2,
-                hint: "This beautiful city was completely planned out with wide avenues by Sir Edwin Lutyens."
+                correctAnswer: "Delhi",
+                hint: "This capital city features historic gates and beautiful wide roads."
             },
             {
-                q: "Aarav is standing near the Arabian Sea watching a beautiful sunset right beside the iconic Gateway of India. Where is he?",
+                q: "In which coastal city can you find the iconic Gateway of India?",
                 options: ["Kolkata", "Mumbai", "Delhi", "Chennai"],
-                correct: 1,
-                hint: "This energetic city is widely famous for its packed network of Local Trains and delicious Vada Pav!"
+                correctAnswer: "Mumbai",
+                hint: "This energetic city is widely famous for local trains and delicious Vada Pav!"
             },
             {
-                q: "Meera is riding a real heritage wooden Tram car running right on tracks fixed into the street. Which city is she exploring?",
+                q: "Which city is famous for its vintage wooden tram cars running right on the streets?",
                 options: ["Kolkata", "Delhi", "Chennai", "Mumbai"],
-                correct: 0,
-                hint: "People here speak Bengali, view the majestic Victoria Memorial, and absolute love eating Rasgullas."
+                correctAnswer: "Kolkata",
+                hint: "People here speak Bengali and absolutely love sweet Rosogollas."
             },
             {
-                q: "Ananya needs to pack cool, light cotton clothes because of a humid breeze coming off Marina Beach. What city is she visiting?",
+                q: "Which city is famous for Marina Beach, where you need cool cotton clothes due to high humidity?",
                 options: ["Delhi", "Mumbai", "Kolkata", "Chennai"],
-                correct: 3,
-                hint: "This southern coastal city contains the historic Fort St. George and beautiful Kapaleeshwarar Temple."
+                correctAnswer: "Chennai",
+                hint: "This southern coastal city contains the historic Fort St. George."
+            },
+            {
+                q: "Which beautiful city is home to the pink sandstone palace called Hawa Mahal?",
+                options: ["Jaipur", "Hyderabad", "Bengaluru", "Agra"],
+                correctAnswer: "Jaipur",
+                hint: "This historic place is proudly known as the 'Pink City' and is the capital of Rajasthan."
+            },
+            {
+                q: "Where is the famous Charminar monument located?",
+                options: ["Mumbai", "Hyderabad", "Kochi", "Delhi"],
+                correctAnswer: "Hyderabad",
+                hint: "This city is celebrated for its glittering bangles and world-famous Biryani."
+            },
+            {
+                q: "In which city can you see the breathtaking white marble Taj Mahal?",
+                options: ["Lucknow", "Patna", "Agra", "Jaipur"],
+                correctAnswer: "Agra",
+                hint: "This city in Uttar Pradesh sits right along the famous Yamuna River."
+            },
+            {
+                q: "Which city features a unique Rock Garden made out of broken bangles and recycled waste?",
+                options: ["Chandigarh", "Amritsar", "Delhi", "Shimla"],
+                correctAnswer: "Chandigarh",
+                hint: "This clean, organized city serves as the shared capital for Punjab and Haryana."
+            },
+            {
+                q: "To visit the hand-carved Elephanta Caves by boat, which city do you start from?",
+                options: ["Kochi", "Chennai", "Kolkata", "Mumbai"],
+                correctAnswer: "Mumbai",
+                hint: "This big financial hub city was originally made by joining seven separate islands."
+            },
+            {
+                q: "Which capital city features the grand, white marble Victoria Memorial?",
+                options: ["New Delhi", "Kolkata", "Chennai", "Guwahati"],
+                correctAnswer: "Kolkata",
+                hint: "This cultural capital sits beautifully right beside the Hooghly River."
+            },
+            {
+                q: "Which coastal place is famous for its French Quarter and bright yellow colonial buildings?",
+                options: ["Goa", "Mumbai", "Puducherry", "Kochi"],
+                correctAnswer: "Puducherry",
+                hint: "This beautiful coastal Union Territory features the peaceful Rock Beach."
+            },
+            {
+                q: "Where can you find the Vivekananda Rock Memorial, built where three massive oceans meet?",
+                options: ["Kanyakumari", "Chennai", "Kochi", "Puri"],
+                correctAnswer: "Kanyakumari",
+                hint: "This special landmark sits at the very southernmost tip of the Indian mainland!"
             }
         ];
 
@@ -330,14 +377,17 @@
             x: 0, y: -20,
             length: 190,
             angle: 0,
-            speed: 0.05,
+            speed: 0.02,
             direction: 1
         };
 
         let quizSessionActive = false;
         let currentQuestionCount = 0;
         let currentQuestionData = null;
+        let currentShuffledOptions = [];
+        let currentCorrectIndex = -1;
         let incorrectAttempts = 0;
+        let dynamicRoundPool = [];
 
         window.addEventListener('load', () => {
             adjustCanvasSize();
@@ -462,7 +512,10 @@
                 }
             }
 
-            renderGraphics();
+            if (!quizSessionActive) {
+                renderGraphics();
+            }
+            
             requestAnimationFrame(updateGameLoop);
         }
 
@@ -534,8 +587,10 @@
         function launchPlacementQuiz() {
             quizSessionActive = true;
             currentQuestionCount = 1;
-            loadQuizQuestion();
+            // Scramble the entire global question pool for this round
+            dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
             document.getElementById('quiz-overlay').classList.remove('hidden');
+            loadQuizQuestion();
         }
 
         function loadQuizQuestion() {
@@ -543,13 +598,19 @@
             document.getElementById('hint-box').classList.add('hidden');
             document.getElementById('quiz-progress').textContent = `Question ${currentQuestionCount} of 3`;
 
-            currentQuestionData = quizBank[Math.floor(Math.random() * quizBank.length)];
+            // Pull a completely randomized question
+            currentQuestionData = dynamicRoundPool.pop();
             document.getElementById('quiz-question').textContent = currentQuestionData.q;
+
+            // Scramble the multiple choice options on the fly
+            currentShuffledOptions = [...currentQuestionData.options].sort(() => 0.5 - Math.random());
+            // Pinpoint the new index of the true correct text string
+            currentCorrectIndex = currentShuffledOptions.indexOf(currentQuestionData.correctAnswer);
 
             const optionsBox = document.getElementById('options-box');
             optionsBox.innerHTML = '';
 
-            currentQuestionData.options.forEach((opt, idx) => {
+            currentShuffledOptions.forEach((opt, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.textContent = `${idx + 1}. ${opt}`;
@@ -559,7 +620,7 @@
         }
 
         function checkOptionAnswer(chosenIndex, element) {
-            if (chosenIndex === currentQuestionData.correct) {
+            if (chosenIndex === currentCorrectIndex) {
                 sndCorrect.play().catch(()=>{});
                 score += 20;
                 document.getElementById('score-val').textContent = score;
@@ -608,11 +669,9 @@
             }
         }
 
-        // Logic processing final scores and delivering customized feedback
         function triggerGameOver() {
             gameRunning = false;
             document.getElementById('hud').classList.remove('visible');
-            
             document.getElementById('final-score-text').textContent = `Final Score: ${score}`;
             
             const feedbackEl = document.getElementById('final-feedback-text');
