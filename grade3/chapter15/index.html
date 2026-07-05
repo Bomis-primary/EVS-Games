@@ -55,7 +55,6 @@
             z-index: 1;
         }
 
-        /* FIXED: Added a universal hidden utility rule so elements aren't visible at game start */
         .hidden {
             display: none !important;
             opacity: 0 !important;
@@ -377,7 +376,7 @@
             x: 0, y: -20,
             length: 190,
             angle: 0,
-            speed: 0.01, // FIXED: Reduced pacing speed by 50% for child-friendly controls
+            speed: 0.01, 
             direction: 1
         };
 
@@ -498,6 +497,7 @@
 
                             activeBlock = null;
                             
+                            // FIXED: Check if the player stacked 2 blocks. If yes, trigger the quiz.
                             if (blocks.length === 2) {
                                 launchPlacementQuiz();
                             } else {
@@ -586,7 +586,14 @@
         function launchPlacementQuiz() {
             quizSessionActive = true;
             currentQuestionCount = 1;
-            dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
+            
+            // Refill bank if running low on questions
+            if (quizBank.length < 3) {
+                dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
+            } else {
+                dynamicRoundPool = [...quizBank].sort(() => 0.5 - Math.random());
+            }
+
             document.getElementById('quiz-overlay').classList.remove('hidden');
             loadQuizQuestion();
         }
@@ -646,6 +653,11 @@
         function closeQuizModal() {
             quizSessionActive = false;
             document.getElementById('quiz-overlay').classList.add('hidden');
+            
+            // FIXED: Reset the tower block array to 0!
+            // This forces the user to stack 2 fresh blocks to trigger the next set of questions, breaking the infinite loop.
+            blocks = []; 
+            
             if (gameRunning) {
                 spawnNewBlock();
             }
