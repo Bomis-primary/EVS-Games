@@ -1,1 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chapter 5: Animal Adaptation Safari</title>
+    <style>
+        :root {
+            --bg-canvas: #F4F9F5;
+            --safari-green: #2E7D32;
+            --accent-gold: #FFA000;
+            --target-pink: #FF4081;
+            --white: #FFFFFF;
+            --earth-brown: #5D4037;
+            --text-dark: #1B5E20;
+            --font-kids: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: var(--font-kids);
+            background-color: var(--bg-canvas);
+            color: var(--earth-brown);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-wrapper {
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            max-height: 820px;
+            background-color: var(--white);
+            position: relative;
+            box-shadow: 0 16px 48px rgba(46, 125, 50, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 601px) {
+            #game-wrapper {
+                border-radius: 28px;
+                height: 95vh;
+                border: 6px solid var(--safari-green);
+            }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            background-color: var(--white);
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- SCREEN 1: BRAND LOGO SPLASH --- */
+        #screen-logo {
+            background-color: #FFFFFF;
+        }
+        .brand-logo-img {
+            width: 220px;
+            height: auto;
+            max-height: 220px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            animation: pulseFade 1.5s infinite ease-in-out;
+        }
+
+        /* --- MENU & NAVIGATION --- */
+        #screen-intro, #screen-instructions {
+            background: linear-gradient(180deg, #FFFFFF, #E8F5E9);
+        }
+
+        .decorative-badge {
+            font-size: 4.5rem;
+            margin-bottom: 10px;
+            animation: float 3s infinite ease-in-out;
+        }
+
+        .main-title {
+            color: var(--safari-green);
+            font-size: 2.1rem;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        .instruction-box {
+            background-color: rgba(255,255,255,0.9);
+            border: 2px dashed var(--safari-green);
+            border-radius: 20px;
+            padding: 22px;
+            text-align: left;
+            width: 100%;
+            max-width: 360px;
+            margin-top: 15px;
+        }
+
+        .instruction-box ul {
+            padding-left: 20px;
+            color: var(--earth-brown);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .btn-action {
+            background-color: var(--safari-green);
+            color: var(--white);
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.25rem;
+            font-family: var(--font-kids);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #1B5E20;
+            transition: all 0.1s ease;
+            margin-top: 25px;
+        }
+
+        .btn-action:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #1B5E20;
+        }
+
+        /* --- HUD CONTROLS --- */
+        .hud-row {
+            width: 100%;
+            background-color: var(--safari-green);
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .hud-item {
+            background-color: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+
+        /* --- SNAKE MAP ARENA --- */
+        .canvas-frame-container {
+            flex: 1;
+            position: relative;
+            background-color: #F9FDF9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        #safari-game-canvas {
+            background-color: #E8F5E9;
+            border: 3px solid rgba(46, 125, 50, 0.2);
+            border-radius: 16px;
+        }
+
+        /* --- JOYPAD SYSTEM --- */
+        .joypad-panel {
+            background-color: #E8F5E9;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 2px solid rgba(46, 125, 50, 0.1);
+        }
+
+        .d-pad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            width: 170px;
+            height: 170px;
+        }
+
+        .joy-btn {
+            background-color: var(--white);
+            border: 2px solid #A5D6A7;
+            border-bottom: 5px solid #81C784;
+            border-radius: 16px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .joy-btn:active {
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+        }
+
+        /* --- ADAPTIVE QUIZ MODAL --- */
+        .quiz-modal-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--white);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .quiz-top-badge {
+            background-color: #E8F5E9;
+            color: var(--safari-green);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-bubble-box {
+            background-color: #FAFAFA;
+            border: 2px dashed var(--safari-green);
+            border-radius: 20px;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1.45;
+            margin-bottom: 20px;
+            text-align: left;
+            color: var(--earth-brown);
+        }
+
+        .options-vertical-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .option-card-row {
+            background-color: var(--white);
+            border: 2px solid #DCEDC8;
+            border-bottom: 5px solid #C5E1A5;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-family: var(--font-kids);
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            color: #33691E;
+        }
+
+        .option-card-row.correct-choice {
+            background-color: #E8F5E9 !important;
+            border-color: #2E7D32 !important;
+            color: #1B5E20 !important;
+        }
+
+        .option-card-row.wrong-choice {
+            background-color: #FFEBEE !important;
+            border-color: #D32F2F !important;
+            color: #C62828 !important;
+        }
+
+        .hint-banner-alert {
+            margin-top: auto;
+            background-color: #FFF8E1;
+            border-left: 5px solid var(--accent-gold);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes pulseFade {
+            0%, 100% { opacity: 0.85; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+
+        <div id="screen-logo" class="screen">
+            <img src="assets/innovine-logo.png" class="brand-logo-img" alt="Innovine Logo">
+        </div>
+
+        <div id="screen-intro" class="screen hidden">
+            <div class="decorative-badge">🦁</div>
+            <h1 class="main-title">Animal Adaptation<br>Safari Arcade</h1>
+            <p style="color: #5D4037; font-size: 1.05rem; padding: 0 12px;">Discover how amazing wildlife survives on Earth!</p>
+            <button class="btn-action" onclick="showInstructionsScreen()">Start Game ➔</button>
+        </div>
+
+        <div id="screen-instructions" class="screen hidden">
+            <div class="decorative-badge">📝</div>
+            <h1 class="main-title" style="font-size: 1.8rem;">How to Play</h1>
+            
+            <div class="instruction-box">
+                <ul>
+                    <li>Use <b>🔼 🔽 ◀️ ▶️</b> control pads to move the friendly trail.</li>
+                    <li>Chomp down on <b>2 pink stars</b> to pop open adaptation quiz screens.</li>
+                    <li>Answer each question correctly to secure <b>+20 points</b>.</li>
+                    <li>Watch your steps! You share <b>3 lives</b> across all quiz interactions.</li>
+                </ul>
+            </div>
+
+            <button class="btn-action" onclick="launchArcadeGameLoop()">Play Now 🚀</button>
+        </div>
+
+        <div id="screen-gameplay" class="screen hidden" style="padding:0;">
+            <div class="hud-row">
+                <div class="hud-item" id="hud-score">Score: 0</div>
+                <div class="hud-item" id="hud-berries">Stars: 0/2</div>
+            </div>
+
+            <div class="canvas-frame-container">
+                <canvas id="safari-game-canvas"></canvas>
+            </div>
+
+            <div class="joypad-panel">
+                <div class="d-pad-grid">
+                    <div></div>
+                    <button class="joy-btn" onclick="injectDirectionVector('UP')">🔼</button>
+                    <div></div>
+                    <button class="joy-btn" onclick="injectDirectionVector('LEFT')">◀️</button>
+                    <div style="background-color: var(--accent-gold); border-radius: 50%; width:16px; height:16px; justify-self:center; align-self:center;"></div>
+                    <button class="joy-btn" onclick="injectDirectionVector('RIGHT')">▶️</button>
+                    <div></div>
+                    <button class="joy-btn" onclick="injectDirectionVector('DOWN')">🔽</button>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-quiz" class="quiz-modal-container hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; width:100%;">
+                <div class="quiz-top-badge" id="quiz-header-badge">Question 1 / 3</div>
+                <div style="font-weight: bold; font-size:0.9rem;" id="quiz-lives-badge">❤️ Lives: 3/3</div>
+            </div>
+            <div class="question-bubble-box" id="quiz-question-lbl">Loading safari data...</div>
+            <div class="options-vertical-stack" id="quiz-options-box"></div>
+            <div class="hint-banner-alert hidden" id="quiz-hint-lbl"></div>
+        </div>
+
+        <div id="screen-gameover" class="screen hidden">
+            <div style="font-size: 4.5rem; margin-bottom: 15px;" id="summary-emoticon">🏆</div>
+            <h1 class="main-title">Safari Results</h1>
+            
+            <div style="background-color: #E8F5E9; padding: 15px 45px; border-radius: 24px; margin-bottom: 20px; width: 80%;">
+                <span style="font-size: 0.9rem; color: var(--safari-green); text-transform: uppercase; font-weight: bold;">Final Score</span>
+                <div style="font-size: 3.2rem; font-weight: bold; color: var(--safari-green);" id="summary-score-lbl">0</div>
+            </div>
+
+            <div style="background-color: #FAFAFA; border: 2px dashed #C5E1A5; padding: 16px; border-radius: 16px; margin-bottom: 25px; width: 100%; font-size: 1rem; color: var(--earth-brown); line-height: 1.4;" id="summary-subtext">
+                Feedback box container content loaded dynamically.
+            </div>
+
+            <button class="btn-action" onclick="resetWholeGameContext()">Play Again 🔄</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- AUDIO FILE DEFINITIONS (MAPPED FROM YOUR SCREENSHOT) ---
+        const sfxCorrect = new Audio('assets/correct.mp3');
+        const sfxWrong = new Audio('assets/wrong.mp3');
+        const sfxStar = new Audio('assets/freesound_community-claps-44774.mp3');
+
+        sfxCorrect.preload = 'auto';
+        sfxWrong.preload = 'auto';
+        sfxStar.preload = 'auto';
+
+        // --- CORE QUESTION DATASET ---
+        const MASTER_QUESTIONS_ARRAY = [
+            { q: "What is the changing of an animal's features to fit its home environment called?", opts: ["Adaptation", "Extinction", "Migration"], correctStr: "Adaptation", hint: "It means adjusting to stay alive comfortably!" },
+            { q: "Into how many main habitat groups can we divide animals on Earth?", opts: ["Five groups", "Three groups", "Eight groups"], correctStr: "Five groups", hint: "Think of Terrestrial, Aquatic, Amphibians, Arboreal, and Aerial!" },
+            { q: "What is stored inside a desert camel's big hump?", opts: ["Fat used as food", "Cold drinking water", "Dry desert sand"], correctStr: "Fat used as food", hint: "It provides energy when there is no fresh food around!" },
+            { q: "What type of feet help a camel walk smoothly on hot desert sand?", opts: ["Padded feet", "Sharp long claws", "Heavy hoof shoes"], correctStr: "Padded feet", hint: "They are wide and cushiony so the camel doesn't sink!" },
+            { q: "What does a polar bear have under its skin to keep it warm in the freezing ice?", opts: ["A thick layer of fat", "Soft light feathers", "Waterproof scales"], correctStr: "A thick layer of fat", hint: "This warm insulation layer is also called blubber!" },
+            { q: "How do adult frogs breathe when they are swimming deep inside water?", opts: ["Through their moist skin", "Through their lungs", "Through special gills"], correctStr: "Through their moist skin", hint: "They use lungs on land, but use skin when under water!" },
+            { q: "What do we call tree-dwelling creatures like monkeys that spend most of their time on branches?", opts: ["Arboreal animals", "Aerial animals", "Aquatic animals"], correctStr: "Arboreal animals", hint: "This special word starts with 'Ar' and means tree-dwellers!" },
+            { q: "Why are birds so light and excellent at flying in the air?", opts: ["They have hollow bones", "They have solid iron bones", "They do not have any bones"], correctStr: "They have hollow bones", hint: "Their bones are completely empty and filled with light air!" },
+            { q: "What do we call tiny insects like ticks or lice that live on other animals to suck blood?", opts: ["Parasites", "Scavengers", "Herbivores"], correctStr: "Parasites", hint: "They live directly on a host's body to steal food!" },
+            { q: "What is it called when a chameleon changes its skin color to match a green branch?", opts: ["Camouflage", "Hibernation", "Migration"], correctStr: "Camouflage", hint: "It is a trick used to hide from dangerous enemies!" },
+            { q: "What sharp features protect a porcupine's body from being eaten by predators?", opts: ["Sharp spines", "A hard stone shell", "Poisonous liquid bags"], correctStr: "Sharp spines", hint: "These are long needle-like quills that poke enemies away!" },
+            { q: "What is the long, deep sleep that some animals take during the freezing winter called?", opts: ["Hibernation", "Aestivation", "Mimicry"], correctStr: "Hibernation", hint: "Think of a bear sleeping inside a dark cave until spring!" }
+        ];
+
+        let gameScore = 0;
+        let livesLeft = 3;
+        let runtimeQuestionsPool = [];
+        let indexQuizBatchTracker = 0;
+        let batchCounterCount = 0; 
+        let questionAttemptsTracker = 0;
+        let activeShuffledOptions = [];
+        let correctOptionIndexInActive = 0;
+
+        const canvas = document.getElementById("safari-game-canvas");
+        const ctx = canvas.getContext("2d");
+        const boxSize = 20; 
+        let gridWidth, gridHeight;
+
+        let snakeArr = [];
+        let currentDirection = "RIGHT";
+        let nextDirection = "RIGHT";
+        let targetStarObj = { x: 0, y: 0 };
+        let consumedStarsCounter = 0;
+        let engineClockTimerId = null;
+
+        // AUTOMATIC TIMER TRANSITION FROM LOGO TO TITLE SCREEN (EXACTLY 5 SECONDS)
+        window.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                document.getElementById('screen-logo').classList.add('hidden');
+                document.getElementById('screen-intro').classList.remove('hidden');
+            }, 5000);
+        });
+
+        function showInstructionsScreen() {
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-instructions').classList.remove('hidden');
+        }
+
+        function setCanvasViewportDimensions() {
+            canvas.width = 300;
+            canvas.height = 300;
+            gridWidth = canvas.width / boxSize;
+            gridHeight = canvas.height / boxSize;
+        }
+
+        function launchArcadeGameLoop() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-gameplay').classList.remove('hidden');
+            
+            setCanvasViewportDimensions();
+            shuffleGlobalQuestionsPool();
+            resetSnakePositionContext();
+            spawnRandomStarEntity();
+            
+            consumedStarsCounter = 0;
+            document.getElementById('hud-berries').innerText = `Stars: 0/2`;
+            
+            startSnakeClockTimer();
+        }
+
+        function shuffleGlobalQuestionsPool() {
+            runtimeQuestionsPool = [...MASTER_QUESTIONS_ARRAY].sort(() => Math.random() - 0.5);
+            indexQuizBatchTracker = 0;
+        }
+
+        function resetSnakePositionContext() {
+            snakeArr = [
+                { x: 5, y: 7 },
+                { x: 4, y: 7 },
+                { x: 3, y: 7 }
+            ];
+            currentDirection = "RIGHT";
+            nextDirection = "RIGHT";
+        }
+
+        function spawnRandomStarEntity() {
+            let localizedValidSpawn = false;
+            while (!localizedValidSpawn) {
+                targetStarObj.x = Math.floor(Math.random() * gridWidth);
+                targetStarObj.y = Math.floor(Math.random() * gridHeight);
+                localizedValidSpawn = !snakeArr.some(seg => seg.x === targetStarObj.x && seg.y === targetStarObj.y);
+            }
+        }
+
+        function injectDirectionVector(dir) {
+            if (dir === "UP" && currentDirection !== "DOWN") nextDirection = "UP";
+            if (dir === "DOWN" && currentDirection !== "UP") nextDirection = "DOWN";
+            if (dir === "LEFT" && currentDirection !== "RIGHT") nextDirection = "LEFT";
+            if (dir === "RIGHT" && currentDirection !== "LEFT") nextDirection = "RIGHT";
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowUp" || e.key === "w") injectDirectionVector("UP");
+            if (e.key === "ArrowDown" || e.key === "s") injectDirectionVector("DOWN");
+            if (e.key === "ArrowLeft" || e.key === "a") injectDirectionVector("LEFT");
+            if (e.key === "ArrowRight" || e.key === "d") injectDirectionVector("RIGHT");
+        });
+
+        function startSnakeClockTimer() {
+            if (engineClockTimerId) clearInterval(engineClockTimerId);
+            engineClockTimerId = setInterval(processSnakeGameFrame, 160);
+        }
+
+        function processSnakeGameFrame() {
+            currentDirection = nextDirection;
+            let headX = snakeArr[0].x;
+            let headY = snakeArr[0].y;
+
+            if (currentDirection === "UP") headY--;
+            if (currentDirection === "DOWN") headY++;
+            if (currentDirection === "LEFT") headX--;
+            if (currentDirection === "RIGHT") headX++;
+
+            if (headX >= gridWidth) headX = 0;
+            if (headX < 0) headX = gridWidth - 1;
+            if (headY >= gridHeight) headY = 0;
+            if (headY < 0) headY = gridHeight - 1;
+
+            if (snakeArr.some((seg, i) => i > 0 && seg.x === headX && seg.y === headY)) {
+                resetSnakePositionContext();
+                return;
+            }
+
+            const freshHead = { x: headX, y: headY };
+            snakeArr.unshift(freshHead);
+
+            if (headX === targetStarObj.x && headY === targetStarObj.y) {
+                consumedStarsCounter++;
+                document.getElementById('hud-berries').innerText = `Stars: ${consumedStarsCounter}/2`;
+                
+                sfxStar.currentTime = 0;
+                sfxStar.play().catch(() => {});
+
+                if (consumedStarsCounter >= 2) {
+                    clearInterval(engineClockTimerId);
+                    setTimeout(triggerQuizModalSequence, 400);
+                } else {
+                    spawnRandomStarEntity();
+                }
+            } else {
+                snakeArr.pop();
+            }
+
+            renderCanvasGraphics();
+        }
+
+        function renderCanvasGraphics() {
+            ctx.fillStyle = "#E8F5E9";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // DRAW TARGET STAR
+            ctx.fillStyle = "#FF4081";
+            ctx.beginPath();
+            let radiusOffset = boxSize / 2;
+            ctx.arc(targetStarObj.x * boxSize + radiusOffset, targetStarObj.y * boxSize + radiusOffset, radiusOffset - 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // DRAW SAFARI TRAIL
+            snakeArr.forEach((seg, i) => {
+                ctx.fillStyle = i === 0 ? "#1B5E20" : "#4CAF50";
+                ctx.beginPath();
+                ctx.roundRect(seg.x * boxSize + 1, seg.y * boxSize + 1, boxSize - 2, boxSize - 2, i === 0 ? 8 : 4);
+                ctx.fill();
+
+                if (i === 0) {
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(seg.x * boxSize + 4, seg.y * boxSize + 5, 3, 3);
+                    ctx.fillRect(seg.x * boxSize + 12, seg.y * boxSize + 5, 3, 3);
+                }
+            });
+        }
+
+        function triggerQuizModalSequence() {
+            batchCounterCount = 0;
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            renderActiveQuizQuestion();
+        }
+
+        function renderActiveQuizQuestion() {
+            questionAttemptsTracker = 0;
+            document.getElementById('quiz-hint-lbl').classList.add('hidden');
+            document.getElementById('quiz-lives-badge').innerText = `❤️ Lives: ${livesLeft}/3`;
+
+            const activeQuestionData = runtimeQuestionsPool[indexQuizBatchTracker];
+            document.getElementById('quiz-header-badge').innerText = `Question ${batchCounterCount + 1} / 3`;
+            document.getElementById('quiz-question-lbl').innerText = activeQuestionData.q;
+
+            // RANDOMISE OPTIONS EACH TIME
+            activeShuffledOptions = [...activeQuestionData.opts].sort(() => Math.random() - 0.5);
+            correctOptionIndexInActive = activeShuffledOptions.indexOf(activeQuestionData.correctStr);
+
+            const box = document.getElementById('quiz-options-box');
+            box.innerHTML = '';
+
+            activeShuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-card-row';
+                btn.innerText = opt;
+                btn.onclick = () => evaluateOptionSubmission(index, btn);
+                box.appendChild(btn);
+            });
+        }
+
+        function evaluateOptionSubmission(selectedIdx, btnNode) {
+            const currentItem = runtimeQuestionsPool[indexQuizBatchTracker];
+            const allOptionNodes = document.querySelectorAll('.option-card-row');
+
+            allOptionNodes.forEach(b => b.style.pointerEvents = 'none');
+
+            if (selectedIdx === correctOptionIndexInActive) {
+                sfxCorrect.currentTime = 0;
+                sfxCorrect.play().catch(() => {});
+
+                btnNode.classList.add('correct-choice');
+                gameScore += 20;
+                document.getElementById('hud-score').innerText = `Score: ${gameScore}`;
+
+                setTimeout(advanceQuizLoopState, 1200);
+            } else {
+                sfxWrong.currentTime = 0;
+                sfxWrong.play().catch(() => {});
+
+                btnNode.classList.add('wrong-choice');
+                questionAttemptsTracker++;
+
+                if (questionAttemptsTracker === 1) {
+                    const alertBlock = document.getElementById('quiz-hint-lbl');
+                    alertBlock.classList.remove('hidden');
+                    alertBlock.innerHTML = `<strong>💡 Safari Hint:</strong> ${currentItem.hint}`;
+                    
+                    allOptionNodes.forEach(b => {
+                        if (!b.classList.contains('wrong-choice')) b.style.pointerEvents = 'auto';
+                    });
+                } else {
+                    livesLeft--;
+                    document.getElementById('quiz-lives-badge').innerText = `❤️ Lives: ${livesLeft}/3`;
+                    allOptionNodes[correctOptionIndexInActive].classList.add('correct-choice');
+
+                    if (livesLeft <= 0) {
+                        setTimeout(() => concludeArcadeSession(false), 1500);
+                    } else {
+                        setTimeout(advanceQuizLoopState, 2000);
+                    }
+                }
+            }
+        }
+
+        function advanceQuizLoopState() {
+            batchCounterCount++;
+            indexQuizBatchTracker++;
+
+            if (indexQuizBatchTracker >= 12) {
+                concludeArcadeSession(true);
+            } else if (batchCounterCount >= 3) {
+                document.getElementById('screen-quiz').classList.add('hidden');
+                consumedStarsCounter = 0;
+                document.getElementById('hud-berries').innerText = `Stars: 0/2`;
+                resetSnakePositionContext();
+                spawnRandomStarEntity();
+                startSnakeClockTimer();
+            } else {
+                renderActiveQuizQuestion();
+            }
+        }
+
+        function concludeArcadeSession(victoryFlag) {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-gameplay').classList.add('hidden');
+            document.getElementById('screen-gameover').classList.remove('hidden');
+
+            document.getElementById('summary-score-lbl').innerText = gameScore;
+
+            let feedbackText = "";
+            let emoticon = "🏆";
+
+            if (victoryFlag && gameScore >= 200) {
+                emoticon = "🦁";
+                feedbackText = "⭐ <strong>Super Safari King!</strong> You answered everything perfectly and fully understand how animals adapt to live safely on Earth!";
+            } else if (gameScore >= 120) {
+                emoticon = "🦊";
+                feedbackText = "👍 <strong>Great Job Explorer!</strong> You have a solid grasp of animal camouflage, habitats, and special traits. Try again to get a perfect score!";
+            } else {
+                emoticon = "🐢";
+                feedbackText = "🍃 <strong>Keep Learning!</strong> Some adaptations can be tricky. Look at your text fields again and try another run to hit the top score!";
+            }
+
+            document.getElementById('summary-emoticon').innerText = emoticon;
+            document.getElementById('summary-subtext').innerHTML = feedbackText;
+        }
+
+        function resetWholeGameContext() {
+            gameScore = 0;
+            livesLeft = 3;
+            document.getElementById('hud-score').innerText = `Score: 0`;
+            document.getElementById('screen-gameover').classList.add('hidden');
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-intro').classList.remove('hidden'); 
+        }
+
+        document.addEventListener('click', () => {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            if (context.state === 'suspended') context.resume();
+        }, { once: true });
+    </script>
+</body>
+</html>
