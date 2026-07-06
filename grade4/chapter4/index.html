@@ -448,12 +448,11 @@
     </div>
 
     <script>
-        // --- NATIVE LIGHTWEIGHT HTML5 AUDIO OBJECTS INITIALIZATION ---
+        // --- AUDIO ENGINE FILE CONFIGURATION ---
         const audioTimelineSuccess = new Audio('assets/freesound_community-claps-44774.mp3');
         const audioQuizCorrect = new Audio('assets/correct.mp3');
         const audioQuizWrong = new Audio('assets/wrong.mp3');
 
-        // Preload files so audio plays instantly on interaction
         audioTimelineSuccess.preload = 'auto';
         audioQuizCorrect.preload = 'auto';
         audioQuizWrong.preload = 'auto';
@@ -655,7 +654,6 @@
             const grid = document.getElementById('scrambled-cards-grid');
             grid.innerHTML = '';
 
-            // Clone and scramble data array using standard random sequence
             let shuffled = [...STAGES_MANIFEST].sort(() => Math.random() - 0.5);
 
             shuffled.forEach(cardData => {
@@ -670,7 +668,7 @@
 
         function evaluateTimelineTap(stageId) {
             if (stageId === activeTargetTimelineIndex) {
-                // --- CORRECT TIMELINE MATCH: PLAY COMMUNITY CLAPS SOUND ---
+                // Play community clapping sound asset
                 audioTimelineSuccess.currentTime = 0;
                 audioTimelineSuccess.play().catch(e => console.log("Audio prevented:", e));
 
@@ -683,15 +681,13 @@
                 
                 document.getElementById(`scramble-card-entity-${stageId}`).classList.add('used-up');
 
-                // Burst particles celebration
                 triggerWinConfetti();
 
-                // Snappy 800ms delay to let the sound start before modal changes screen
                 setTimeout(() => {
                     initiateStageMiniQuiz();
                 }, 800); 
             } else {
-                // --- WRONG TIMELINE MATCH: PLAY GENTLE ERROR SOUND ---
+                // Play mistake chime asset
                 audioQuizWrong.currentTime = 0;
                 audioQuizWrong.play().catch(e => console.log("Audio prevented:", e));
 
@@ -738,7 +734,7 @@
             choicesButtons.forEach(b => b.style.pointerEvents = 'none');
 
             if (index === dataset.ans) {
-                // --- CORRECT OPTION: PLAY CORRECT JINGLE ---
+                // Play generic correctness melody
                 audioQuizCorrect.currentTime = 0;
                 audioQuizCorrect.play().catch(e => console.log("Audio prevented:", e));
 
@@ -769,7 +765,7 @@
                     }
                 }, 1200);
             } else {
-                // --- WRONG OPTION: PLAY WRONG CHIME ---
+                // Play mistake chime asset
                 audioQuizWrong.currentTime = 0;
                 audioQuizWrong.play().catch(e => console.log("Audio prevented:", e));
 
@@ -807,6 +803,12 @@
                 }
             }
         }
+
+        document.addEventListener('click', () => {
+            // Invisible wake up context trigger sequence for iOS Safari audio layer unlock
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') ctx.resume();
+        }, { once: true });
 
         function wrapUpGameSession() {
             renderScreen('screen-summary');
