@@ -1,1 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civic Chain Reaction</title>
+    <style>
+        :root {
+            --pastel-teal: #a7ffeb;
+            --pastel-mint: #e8f5e9;
+            --pastel-blue: #e3f2fd;
+            --soft-green: #66bb6a;
+            --soft-blue: #42a5f5;
+            --dark-slate: #37474f;
+            --soft-coral: #ef5350;
+            --soft-amber: #ffca28;
+            --cute-purple: #ab47bc;
+            --card-bg: rgba(255, 255, 255, 0.93);
+            --font-stack: 'Comic Sans MS', 'Finger Paint', 'Segoe UI', cursive, sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-stack);
+            background: linear-gradient(135deg, #b2dfdb 0%, #c8e6c9 50%, #e3f2fd 100%);
+            color: var(--dark-slate);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 460px;
+            min-height: 540px;
+            background: var(--card-bg);
+            border-radius: 35px;
+            box-shadow: 0 20px 40px rgba(112, 144, 136, 0.25);
+            padding: 24px;
+            text-align: center;
+            border: 6px solid #ffffff;
+            animation: softPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+            position: relative;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes softPop {
+            0% { opacity: 0; transform: scale(0.94) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* --- SCREEN 1: SPLASH LOADER --- */
+        #screen-splash {
+            background: #ffffff !important;
+            justify-content: center !important;
+            align-items: center !important;
+            border-color: var(--pastel-teal);
+        }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-icon {
+            font-size: 4.5rem;
+            animation: floatCute 2.5s infinite ease-in-out;
+        }
+        @keyframes floatCute {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(4deg); }
+        }
+        .loader-bar-bg {
+            width: 160px;
+            height: 10px;
+            background: #eceff1;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .loader-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4db6ac, #81c784);
+            border-radius: 20px;
+            animation: completeFill 5s linear forwards;
+        }
+        @keyframes completeFill {
+            100% { width: 100%; }
+        }
+
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        h1 {
+            font-size: 2.1rem;
+            color: #264653;
+            margin: 10px 0;
+            line-height: 1.2;
+            text-shadow: 1px 2px 0px #ffffff;
+        }
+        p {
+            font-size: 1.05rem;
+            line-height: 1.4;
+            color: #4a5759;
+            margin: 8px 0;
+        }
+
+        .btn-cute {
+            background: linear-gradient(135deg, #4db6ac 0%, #26a69a 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            font-family: var(--font-stack);
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(38, 166, 154, 0.3);
+            transition: all 0.2s ease;
+            border-bottom: 5px solid #00796b;
+            width: 85%;
+            margin: 15px auto;
+        }
+        .btn-cute:active {
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+            box-shadow: 0 4px 8px rgba(38, 166, 154, 0.2);
+        }
+
+        /* --- HOW TO PLAY VIEW --- */
+        .rules-card {
+            background: #f4faf8;
+            border: 3px dashed #80cbc4;
+            border-radius: 24px;
+            padding: 18px;
+            text-align: left;
+            width: 100%;
+            margin: auto 0;
+        }
+        .rules-card ul { margin: 0; padding-left: 20px; }
+        .rules-card li {
+            font-size: 1.02rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #37474f;
+        }
+
+        /* --- HUD VIEW --- */
+        .hud-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background: #f0f7f4;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 2px solid #e0f2f1;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .score-lbl { color: var(--soft-green); }
+        .lives-lbl { color: var(--soft-coral); letter-spacing: 1px; }
+
+        /* --- INTERACTIVE CARD MATRIX --- */
+        .grid-matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            width: 100%;
+            margin: 12px 0;
+            flex-grow: 1;
+        }
+        .grid-card {
+            background: #ffffff;
+            border: 3px solid #cfd8dc;
+            border-radius: 20px;
+            padding: 10px 6px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            color: var(--dark-slate);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-height: 80px;
+            line-height: 1.3;
+        }
+        .grid-card.selected {
+            border-color: var(--soft-blue);
+            background-color: #f1f8ff;
+            transform: scale(0.96);
+        }
+        .grid-card.correct-linked {
+            background-color: #e8f5e9 !important;
+            border-color: var(--soft-green) !important;
+            color: #2e7d32 !important;
+            pointer-events: none;
+        }
+
+        /* --- BONUS MULTIPLE CHOICE MODAL --- */
+        .bonus-modal {
+            display: none;
+            position: absolute;
+            top: 65px; left: 16px; right: 16px; bottom: 16px;
+            background: #ffffff;
+            border-radius: 28px;
+            border: 4px solid var(--cute-purple);
+            padding: 16px;
+            z-index: 10;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+            animation: modalUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+        }
+        @keyframes modalUp {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .bonus-badge {
+            background: var(--cute-purple);
+            color: white;
+            padding: 5px 15px;
+            font-size: 0.82rem;
+            font-weight: bold;
+            border-radius: 20px;
+            align-self: center;
+        }
+        .bonus-q-text {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--dark-slate);
+            line-height: 1.35;
+            margin: 8px 0;
+        }
+        .options-box {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 8px;
+        }
+        .btn-opt {
+            background: #f7f9fa;
+            border: 2px solid #e2e8f0;
+            padding: 11px 14px;
+            border-radius: 16px;
+            font-size: 0.92rem;
+            font-weight: bold;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.1s ease;
+        }
+        .btn-opt.correct-ans { background-color: #e8f5e9 !important; border-color: var(--soft-green) !important; color: #2e7d32 !important; }
+        .btn-opt.wrong-ans { background-color: #ffebee !important; border-color: var(--soft-coral) !important; color: #c62828 !important; }
+
+        .hint-alert-box {
+            width: 100%;
+            background: #fffde7;
+            border: 2px solid var(--soft-amber);
+            border-radius: 16px;
+            padding: 10px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            color: #f57f17;
+            margin-top: auto;
+            text-align: left;
+            display: none;
+            animation: softPop 0.25s ease;
+        }
+
+        /* --- CONFETTI POPPERS --- */
+        #confetti-box {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 1; overflow: hidden;
+        }
+        .confetti {
+            position: absolute; width: 8px; height: 8px; opacity: 0.85; border-radius: 50%;
+            animation: fallDown linear forwards;
+        }
+        @keyframes fallDown {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(102vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="confetti-box"></div>
+
+<audio id="audio-right" src="assets/correct.mp3" preload="auto"></audio>
+<audio id="audio-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+<audio id="audio-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+
+<div id="screen-splash" class="screen active">
+    <div class="logo-container">
+        <div class="logo-icon">🌱</div>
+        <h2 style="color: #004d40; margin: 5px 0 0 0; font-size: 1.6rem; letter-spacing: 1px;">INNOVINE</h2>
+        <div class="loader-bar-bg"><div class="loader-bar-fill"></div></div>
+    </div>
+</div>
+
+<div id="screen-welcome" class="screen">
+    <div style="margin-top: 20px;">
+        <span style="font-size: 3.5rem;">🔗</span>
+        <h1>Civic Chain<br>Reaction</h1>
+        <p style="font-weight: bold; color: #78909c;">Link community values and answer bonus constitutional questions!</p>
+    </div>
+    <button class="btn-cute" id="btn-to-rules">LET'S START ✨</button>
+</div>
+
+<div id="screen-rules" class="screen">
+    <h1>How To Play ✨</h1>
+    <div class="rules-card">
+        <ul>
+            <li>🧩 Match a <b>Real Scenario Card</b> to its matching <b>Constitutional Rule Card</b>.</li>
+            <li>🎉 Each core match scores <b>+20 points</b>!</li>
+            <li>⚡ Making a match triggers <b>2 quick bonus questions</b> worth <b>+30 points each</b>!</li>
+            <li>❤️ You have <b>4 Lives</b>. Mistakes unlock instant helpful hints!</li>
+        </ul>
+    </div>
+    <button class="btn-cute" id="btn-play-now">PLAY GAME 🚀</button>
+</div>
+
+<div id="screen-play" class="screen">
+    <div class="hud-panel">
+        <span class="score-lbl">Score: <span id="lbl-score">0</span></span>
+        <span id="lbl-tracker">Circuit 1/4</span>
+        <span class="lives-lbl" id="lbl-lives">❤️❤️❤️❤️</span>
+    </div>
+
+    <div style="font-size: 0.95rem; font-weight: bold; color: #78909c; margin: 8px 0 2px 0;">👇 Connect two cards that belong together:</div>
+
+    <div class="grid-matrix" id="live-matrix-box">
+        </div>
+
+    <div class="bonus-modal" id="popup-bonus-modal">
+        <div class="bonus-badge" id="lbl-bonus-badge">💥 BONUS CHAIN QUESTION (+30 PTS)</div>
+        <div class="bonus-q-text" id="lbl-bonus-prompt">Loading matching combo question data line...</div>
+        <div class="options-box" id="box-bonus-options">
+            </div>
+        <div class="hint-alert-box" id="box-feedback-hint">💡 Explanation hint popup node...</div>
+    </div>
+</div>
+
+<div id="screen-results" class="screen">
+    <div style="margin-top: 25px;">
+        <span style="font-size: 3.8rem;">🏆</span>
+        <h1>Circuit Complete</h1>
+        <div style="background: #e8f5e9; padding: 15px 30px; border-radius: 20px; font-size: 2rem; font-weight: bold; color: #2e7d32; display: inline-block; margin: 15px 0; border: 3px solid #ffffff; box-shadow: 0 6px 12px rgba(0,0,0,0.05);">
+            <span id="lbl-final-score">0</span> pts
+        </div>
+        <p id="lbl-final-feedback" style="font-weight: bold; color: #546e7a; padding: 0 15px;"></p>
+    </div>
+    <button class="btn-cute" id="btn-replay">PLAY AGAIN 🔄</button>
+</div>
+
+<script>
+    // Chapter 10 Thematic Structure Mapping
+    const chapterDataPool = [
+        {
+            id: "edu",
+            pairs: ["🧒 A 10-year-old girl packs her bag and goes to her local school.", "📜 Right to Education"],
+            bonus: [
+                {
+                    q: "Up to what age does our Constitution guarantee free and compulsory education for all children?",
+                    o: ["14 years", "18 years", "12 years", "16 years"],
+                    a: "14 years",
+                    info: "The Right to Education ensures all children aged 6 to 14 get free schooling."
+                },
+                {
+                    q: "Providing education opportunities to a child is considered a parent's:",
+                    o: ["Fundamental Right", "Fundamental Duty", "Personal Choice", "Directive Guideline"],
+                    a: "Fundamental Duty",
+                    info: "It is a Fundamental Duty for parents/guardians to provide education opportunities to children."
+                }
+            ]
+        },
+        {
+            id: "vote",
+            pairs: ["🗳️ An adult citizen stands patiently in line at a polling booth.", "📜 Right to Vote / Choose Government"],
+            bonus: [
+                {
+                    q: "What is the minimum age required for an Indian citizen to legally cast their vote?",
+                    o: ["16 years", "21 years", "18 years", "25 years"],
+                    a: "18 years",
+                    info: "Every Indian citizen aged 18 or above has the fundamental Right to Vote."
+                },
+                {
+                    q: "Democracy means a system of government where the power lies with the:",
+                    o: ["King", "People", "Military Leaders", "Wealthy Traders"],
+                    a: "People",
+                    info: "In a democracy, citizens elect their own leaders by voting."
+                }
+            ]
+        },
+        {
+            id: "heritage",
+            pairs: ["🏰 Kids visit an ancient stone fort and prevent scribbling on walls.", "🛠️ Duty to Protect Heritage & Public Property"],
+            bonus: [
+                {
+                    q: "Which of the following is considered public property that we have a duty to protect?",
+                    o: ["Our own private bicycle", "Government schools & public parks", "A neighbor's television", "A personal mobile phone"],
+                    a: "Government schools & public parks",
+                    info: "Public property belongs to everyone in the nation and is maintained by public funds."
+                },
+                {
+                    q: "What should a responsible citizen do if they see someone damaging historical monuments?",
+                    o: ["Ignore it completely", "Help them damage it", "Stop them politely or tell authorities", "Take a picture and run away"],
+                    a: "Stop them politely or tell authorities",
+                    info: "It is our shared citizen obligation to respect and safeguard our national monuments."
+                }
+            ]
+        },
+        {
+            id: "environment",
+            pairs: ["🗑️ Rohan finishes his snack and throws the wrapper inside a dustbin.", "🛠️ Duty to Protect Natural Environment"],
+            bonus: [
+                {
+                    q: "Which elements are listed as parts of our environment we must defend?",
+                    o: ["Concrete roads and bridges", "Forests, lakes, rivers, & wildlife", "Factories and mills", "Vehicles and airplanes"],
+                    a: "Forests, lakes, rivers, & wildlife",
+                    info: "Our fundamental duties ask us to protect and preserve natural resources like lakes and wildlife."
+                },
+                {
+                    q: "Caring for our environment is listed in our Constitution as an essential:",
+                    o: ["Fundamental Right", "Fundamental Duty", "Optional Activity", "Directive Recommendation"],
+                    a: "Fundamental Duty",
+                    info: "Protecting nature is an active, ongoing Fundamental Duty of every Indian citizen."
+                }
+            ]
+        }
+    ];
+
+    let gameRounds = [];
+    let activeRoundIdx = 0;
+    let score = 0;
+    let lives = 4;
+    let selectedActiveCard = null;
+
+    let activeBonusQuestions = [];
+    let activeBonusIdx = 0;
+    let lockBonusClicks = false;
+
+    function shuffle(arr) {
+        let cloned = [...arr];
+        for (let i = cloned.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+        }
+        return cloned;
+    }
+
+    function changeScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // 5-Second Custom Loader Trigger
+    setTimeout(() => { changeScreen('screen-welcome'); }, 5000);
+
+    const addClick = (id, cb) => {
+        document.getElementById(id).addEventListener('pointerup', (e) => { e.preventDefault(); cb(); });
+    };
+
+    addClick('btn-to-rules', () => changeScreen('screen-rules'));
+    addClick('btn-play-now', () => { changeScreen('screen-play'); startNewGame(); });
+    addClick('btn-replay', () => { changeScreen('screen-play'); startNewGame(); });
+
+    function startNewGame() {
+        score = 0;
+        lives = 4;
+        activeRoundIdx = 0;
+        document.getElementById('popup-bonus-modal').style.display = 'none';
+        document.getElementById('confetti-box').innerHTML = '';
+        gameRounds = shuffle(chapterDataPool);
+        buildActiveGrid();
+    }
+
+    function buildActiveGrid() {
+        selectedActiveCard = null;
+        updateHUD();
+
+        let currentRoundCircuit = gameRounds[activeRoundIdx];
+        let visibleCardsPool = [
+            { text: currentRoundCircuit.pairs[0], parentId: currentRoundCircuit.id },
+            { text: currentRoundCircuit.pairs[1], parentId: currentRoundCircuit.id }
+        ];
+
+        // Fill empty workspace grid spaces with items from other circuits
+        gameRounds.forEach(item => {
+            if (item.id !== currentRoundCircuit.id && visibleCardsPool.length < 6) {
+                visibleCardsPool.push({ text: item.pairs[0], parentId: item.id });
+                visibleCardsPool.push({ text: item.pairs[1], parentId: item.id });
+            }
+        });
+
+        visibleCardsPool = shuffle(visibleCardsPool);
+        const gridBox = document.getElementById('live-matrix-box');
+        gridBox.innerHTML = "";
+
+        visibleCardsPool.forEach(info => {
+            const card = document.createElement('div');
+            card.className = "grid-card";
+            card.innerText = info.text;
+
+            card.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                processCardTap(card, info);
+            });
+            gridBox.appendChild(card);
+        });
+    }
+
+    function updateHUD() {
+        document.getElementById('lbl-score').innerText = score;
+        document.getElementById('lbl-tracker').innerText = `Circuit ${activeRoundIdx + 1}/4`;
+        let hearts = "";
+        for (let i = 0; i < 4; i++) { hearts += (i < lives) ? "❤️" : "🖤"; }
+        document.getElementById('lbl-lives').innerText = hearts;
+    }
+
+    function processCardTap(cardElement, cardInfo) {
+        if (cardElement.classList.contains('correct-linked') || cardElement.classList.contains('selected')) return;
+
+        if (!selectedActiveCard) {
+            selectedActiveCard = { el: cardElement, data: cardInfo };
+            cardElement.classList.add('selected');
+        } else {
+            if (selectedActiveCard.data.text === cardInfo.text) {
+                selectedActiveCard.el.classList.remove('selected');
+                selectedActiveCard = null;
+                return;
+            }
+
+            let prevCard = selectedActiveCard;
+            selectedActiveCard = null;
+
+            let targetCircuit = gameRounds[activeRoundIdx];
+            if (prevCard.data.parentId === cardInfo.parentId && cardInfo.parentId === targetCircuit.id) {
+                prevCard.el.className = "grid-card correct-linked";
+                cardElement.className = "grid-card correct-linked";
+
+                document.getElementById('audio-right').play().catch(()=>{});
+                score += 20;
+                document.getElementById('lbl-score').innerText = score;
+
+                setTimeout(() => { openBonusFlow(targetCircuit.bonus); }, 700);
+            } else {
+                prevCard.el.classList.remove('selected');
+                document.getElementById('audio-wrong').play().catch(()=>{});
+                lives--;
+                updateHUD();
+
+                if (lives <= 0) setTimeout(() => endTheGame(false), 800);
+            }
+        }
+    }
+
+    function openBonusFlow(bonusSet) {
+        activeBonusQuestions = bonusSet;
+        activeBonusIdx = 0;
+        loadBonusQuestion();
+    }
+
+    function loadBonusQuestion() {
+        lockBonusClicks = false;
+        document.getElementById('box-feedback-hint').style.display = 'none';
+
+        let bData = activeBonusQuestions[activeBonusIdx];
+        document.getElementById('lbl-bonus-badge').innerText = `💥 BONUS CHAIN QUESTION ${activeBonusIdx + 1}/2 (+30 PTS)`;
+        document.getElementById('lbl-bonus-prompt').innerText = bData.q;
+
+        const optionsContainer = document.getElementById('box-bonus-options');
+        optionsContainer.innerHTML = "";
+
+        bData.o.forEach(optionText => {
+            const btn = document.createElement('button');
+            btn.className = "btn-opt";
+            btn.innerText = optionText;
+            btn.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                checkBonusChoice(btn, optionText, bData.a, bData.info);
+            });
+            optionsContainer.appendChild(btn);
+        });
+
+        document.getElementById('popup-bonus-modal').style.display = 'flex';
+    }
+
+    function checkBonusChoice(clickedBtn, userChoice, correctChoice, explanation) {
+        if (lockBonusClicks) return;
+        lockBonusClicks = true;
+
+        const hintBox = document.getElementById('box-feedback-hint');
+        hintBox.innerText = "💡 " + explanation;
+        hintBox.style.display = "block";
+
+        if (userChoice === correctChoice) {
+            clickedBtn.classList.add('correct-ans');
+            document.getElementById('audio-right').play().catch(()=>{});
+            score += 30;
+            document.getElementById('lbl-score').innerText = score;
+        } else {
+            clickedBtn.classList.add('wrong-ans');
+            document.getElementById('audio-wrong').play().catch(()=>{});
+            lives--;
+            updateHUD();
+
+            document.querySelectorAll('.btn-opt').forEach(b => {
+                if (b.innerText === correctChoice) b.classList.add('correct-ans');
+            });
+        }
+
+        setTimeout(() => {
+            if (lives <= 0) {
+                document.getElementById('popup-bonus-modal').style.display = 'none';
+                endTheGame(false);
+                return;
+            }
+
+            activeBonusIdx++;
+            if (activeBonusIdx < 2) {
+                loadBonusQuestion();
+            } else {
+                document.getElementById('popup-bonus-modal').style.display = 'none';
+                nextRound();
+            }
+        }, 3000);
+    }
+
+    function nextRound() {
+        activeRoundIdx++;
+        if (activeRoundIdx >= 4) {
+            endTheGame(true);
+        } else {
+            buildActiveGrid();
+        }
+    }
+
+    function createConfettiPoof() {
+        const frame = document.getElementById('confetti-box');
+        frame.innerHTML = '';
+        const tones = ['#81c784', '#4db6ac', '#64b5f6', '#ba68c8', '#ffd54f'];
+        for (let i = 0; i < 90; i++) {
+            const droplet = document.createElement('div');
+            droplet.className = 'confetti';
+            droplet.style.left = Math.random() * 100 + 'vw';
+            droplet.style.backgroundColor = tones[Math.floor(Math.random() * tones.length)];
+            droplet.style.animationDuration = (Math.random() * 2 + 1.8) + 's';
+            droplet.style.animationDelay = (Math.random() * 1) + 's';
+            frame.appendChild(droplet);
+        }
+    }
+
+    function endTheGame(isWin) {
+        changeScreen('screen-results');
+        document.getElementById('lbl-final-score').innerText = score;
+        document.getElementById('audio-claps').play().catch(()=>{});
+
+        const textOutput = document.getElementById('lbl-final-feedback');
+        if (isWin && score >= 260) {
+            textOutput.innerText = "Wow! You are an amazing citizen! You matched all the scenarios perfectly and aced every single bonus question!";
+            createConfettiPoof();
+        } else if (isWin) {
+            textOutput.innerText = "Nice job! You successfully linked the civics circuit. Try playing again to get a flawless bonus high score!";
+            createConfettiPoof();
+        } else {
+            textOutput.innerText = "Don't give up! Review the differences between Fundamental Rights and Duties from Chapter 10 and try again.";
+        }
+    }
+</script>
+</body>
+</html>
