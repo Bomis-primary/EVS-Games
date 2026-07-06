@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Safety Match & Quiz Quest</title>
     <style>
         :root {
             --purple-main: #8e44ad;
             --purple-dark: #6c3483;
+            --purple-light: #f5eeeb;
             --mint-green: #2ecc71;
             --coral-pink: #ff6b6b;
             --sky-blue: #00a8cc;
@@ -18,6 +19,8 @@
 
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         body {
@@ -31,17 +34,18 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            padding: 10px;
         }
 
         .screen {
             display: none;
             width: 100%;
             max-width: 550px;
-            min-height: 600px;
+            min-height: 620px;
             background: white;
             border-radius: 24px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-            padding: 30px;
+            padding: 25px;
             text-align: center;
             animation: fadeIn 0.4s ease-out forwards;
             position: relative;
@@ -61,26 +65,22 @@
         }
 
         /* --- SCREEN 1: SPLASH --- */
-        #splash-screen {
-            background: white;
-        }
         .logo-container img {
-            max-width: 250px;
+            max-width: 240px;
             height: auto;
             animation: pulse 2s infinite ease-in-out;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.04); }
             100% { transform: scale(1); }
         }
 
         /* --- SCREEN 2 & 3: TITLE & INSTRUCTIONS --- */
         h1.game-title {
-            font-size: 2.5rem;
+            font-size: 2.4rem;
             color: var(--purple-main);
             margin-bottom: 10px;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
         }
         .subtitle {
             font-size: 1.2rem;
@@ -110,19 +110,15 @@
             color: white;
             border: none;
             padding: 16px 45px;
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 6px 15px rgba(142, 68, 173, 0.3);
             transition: all 0.2s ease;
         }
-        .btn-friendly:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(142, 68, 173, 0.4);
-        }
         .btn-friendly:active {
-            transform: translateY(-1px);
+            transform: scale(0.97);
         }
 
         /* --- SCREEN 4: MAIN GAME --- */
@@ -131,10 +127,10 @@
             margin-bottom: 15px;
         }
         .level-indicator {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--purple-main);
-            margin: 0 0 10px 0;
+            margin-bottom: 8px;
         }
         .status-bar {
             display: flex;
@@ -145,23 +141,23 @@
             border-radius: 50px;
             font-weight: bold;
             color: var(--purple-main);
-            font-size: 1rem;
         }
 
-        /* Grid layout exactly following 4x4 layout rules */
+        /* 4x4 Grid Board Layout matching images exactly */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            gap: 10px;
             width: 100%;
             margin: 15px 0;
         }
 
+        /* Touch Flexible Card Architecture */
         .card {
             aspect-ratio: 1;
             background-color: var(--sky-blue);
             color: white;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: bold;
             display: flex;
             justify-content: center;
@@ -169,76 +165,75 @@
             border-radius: 14px;
             cursor: pointer;
             user-select: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+            position: relative;
+            transform: scale(1);
+            transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s ease;
         }
-        .card:hover {
-            transform: scale(1.03);
+        
+        /* Interactive touch responses without getting stuck */
+        .card:active {
+            transform: scale(0.92);
         }
+
         .card.flipped {
             background-color: var(--amber-yellow);
             color: #d35400;
-            transform: rotateY(180deg);
         }
+        
         .card.matched {
             background-color: var(--amber-yellow);
             color: #d35400;
             cursor: default;
-            animation: matchPop 0.3s ease-out;
+            animation: matchPop 0.35s ease-out forwards;
         }
+        
         @keyframes matchPop {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
 
-        /* --- QUIZ MODAL LAYER --- */
+        /* --- QUIZ OVERLAY LAYER --- */
         #quiz-overlay {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 24px;
-            padding: 30px;
+            padding: 25px;
             flex-direction: column;
             justify-content: center;
-            align-items: left;
             text-align: left;
             z-index: 10;
-            animation: fadeIn 0.3s ease;
         }
         .quiz-title {
             color: #d35400;
             margin: 0 0 10px 0;
             font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         #q-text {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 600;
             line-height: 1.5;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .opt-btn {
             display: block;
             width: 100%;
-            padding: 14px 20px;
+            padding: 14px 18px;
             margin: 8px 0;
             background: white;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             cursor: pointer;
-            font-size: 1.05rem;
+            font-size: 1rem;
             text-align: left;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: background-color 0.2s;
         }
-        .opt-btn:hover {
-            border-color: var(--purple-main);
-            background: var(--purple-light);
-            background-color: #fcf8ff;
+        .opt-btn:active {
+            background-color: #f7fafc;
         }
         .opt-btn.correct-choice {
             background-color: #d4edda !important;
@@ -252,7 +247,7 @@
         }
         #msg-box {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             margin-top: 15px;
             text-align: center;
             min-height: 24px;
@@ -274,20 +269,20 @@
 <div id="title-screen" class="screen">
     <h1 class="game-title">🛡️ Safety First!</h1>
     <p class="subtitle">Match & Quiz Challenge</p>
-    <button class="btn-friendly" onclick="showScreen('instruction-screen')">START</button>
+    <button class="btn-friendly" id="btn-start">START</button>
 </div>
 
 <div id="instruction-screen" class="screen">
-    <h1 class="game-title" style="font-size: 2rem;">How to Play 📜</h1>
+    <h1 class="game-title" style="font-size: 1.9rem;">How to Play 📜</h1>
     <div class="instruction-box">
         <ul>
-            <li>Flip cards to find matching safety pairs.</li>
-            <li>Match a <b>Hazard icon</b> with its <b>Correct Safe Action icon</b>!</li>
-            <li>Finding a pair unlocks a safety question.</li>
-            <li>Earn <b>+20 points</b> for each correct answer!</li>
+            <li>Tap cards to discover safe matching pairs.</li>
+            <li>Link a <b>Danger/Hazard tile</b> to its <b>Safe Solution tile</b>!</li>
+            <li>Finding a pair opens up an interactive challenge.</li>
+            <li>Secure <b>+20 points</b> for accurate answers!</li>
         </ul>
     </div>
-    <button class="btn-friendly" onclick="startGame()">PLAY</button>
+    <button class="btn-friendly" id="btn-play">PLAY</button>
 </div>
 
 <div id="game-screen" class="screen">
@@ -302,7 +297,7 @@
     <div class="grid" id="card-grid"></div>
 
     <div id="quiz-overlay">
-        <h3 class="quiz-title">⚠️ Safety Question!</h3>
+        <h3 class="quiz-title">⚠️ Safety Quiz!</h3>
         <p id="q-text"></p>
         <div id="q-options"></div>
         <div id="msg-box"></div>
@@ -310,17 +305,16 @@
 </div>
 
 <script>
-    // System Data Engine aligned with the chapter requirements
     const gameData = [
         {
             levelName: "Level 1: Safety at Home 🏠",
             pairs: [
                 { id: 1, matchId: 1, type: "A", icon: "🧼" }, // Wet Floor
-                { id: 2, matchId: 1, type: "B", icon: "🧹" }, // Dry Area
-                { id: 3, matchId: 2, type: "A", icon: "🧸" }, // Stray Toys
-                { id: 4, matchId: 2, type: "B", icon: "📦" }, // Toy Box
+                { id: 2, matchId: 1, type: "B", icon: "🧹" }, // Dry Action
+                { id: 3, matchId: 2, type: "A", icon: "🧸" }, // Leftover Toys
+                { id: 4, matchId: 2, type: "B", icon: "📦" }, // Clean Box
                 { id: 5, matchId: 3, type: "A", icon: "⚡" }, // Wet Hands
-                { id: 6, matchId: 3, type: "B", icon: "🔌" }  // Safe Switch
+                { id: 6, matchId: 3, type: "B", icon: "🔌" }  // Power Isolation
             ],
             questions: [
                 { q: "You see soap and water spilled on the bathroom floor. What should you do?", o: ["Walk over it quickly.", "Clean the floor and keep it dry so no one slips.", "Leave it for someone else."], a: 1 },
@@ -372,21 +366,22 @@
     let activeQuestionIdx = 0;
     let levelCards = [];
 
-    // Screen Management System
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
     }
 
-    // Auto routing splash screen redirection
+    // Auto router splash display for 5000ms
     setTimeout(() => {
         showScreen('title-screen');
     }, 5000);
 
-    function startGame() {
+    // Touch-flexible navigation triggers
+    document.getElementById('btn-start').addEventListener('pointerup', () => showScreen('instruction-screen'));
+    document.getElementById('btn-play').addEventListener('pointerup', () => {
         showScreen('game-screen');
         setupLevel();
-    }
+    });
 
     function setupLevel() {
         matchesFound = 0;
@@ -396,13 +391,11 @@
         document.getElementById("match-count").innerText = matchesFound;
         document.getElementById("level-title").innerText = gameData[currentLevel].levelName;
         
-        // Form 16 cards (6 scenario tiles + 10 structural layout placeholder tiles)
         let dataset = [...gameData[currentLevel].pairs];
         while(dataset.length < 16) {
             dataset.push({ id: -1, matchId: -2, type: "X", icon: "❓" });
         }
         
-        // Randomization processing array
         dataset.sort(() => Math.random() - 0.5);
         levelCards = dataset;
         renderGrid();
@@ -415,12 +408,17 @@
             const cardEl = document.createElement("div");
             cardEl.className = "card";
             cardEl.innerText = "?";
-            cardEl.onclick = () => handleCardClick(idx, cardEl);
+            
+            // Pointerup offers flexible responsive selection for physical screens and emulation tracking alike
+            cardEl.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                handleCardInteraction(idx, cardEl);
+            });
             gridEl.appendChild(cardEl);
         });
     }
 
-    function handleCardClick(idx, cardEl) {
+    function handleCardInteraction(idx, cardEl) {
         let card = levelCards[idx];
         if (card.id === -1 || cardEl.classList.contains("matched") || cardEl.classList.contains("flipped") || selectedCards.length >= 2) return;
 
@@ -429,11 +427,11 @@
         selectedCards.push({ data: card, element: cardEl });
 
         if (selectedCards.length === 2) {
-            checkMatch();
+            processMatchCheck();
         }
     }
 
-    function checkMatch() {
+    function processMatchCheck() {
         let [c1, c2] = selectedCards;
         if (c1.data.matchId === c2.data.matchId && c1.data.type !== c2.data.type) {
             c1.element.className = "card matched";
@@ -443,8 +441,8 @@
             selectedCards = [];
             
             setTimeout(() => {
-                showQuestion();
-            }, 600);
+                displayOverlayQuestion();
+            }, 500);
         } else {
             setTimeout(() => {
                 c1.element.innerText = "?";
@@ -452,11 +450,11 @@
                 c1.element.classList.remove("flipped");
                 c2.element.classList.remove("flipped");
                 selectedCards = [];
-            }, 1000);
+            }, 800);
         }
     }
 
-    function showQuestion() {
+    function displayOverlayQuestion() {
         const overlay = document.getElementById("quiz-overlay");
         overlay.style.display = "flex";
         
@@ -471,59 +469,62 @@
             const btn = document.createElement("button");
             btn.className = "opt-btn";
             btn.innerText = opt;
-            btn.onclick = () => verifyAnswer(btn, index, qData.a);
+            btn.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                verifyQuizResponse(btn, index, qData.a);
+            });
             optContainer.appendChild(btn);
         });
     }
 
-    function verifyAnswer(clickedBtn, chosen, correct) {
+    function verifyQuizResponse(clickedBtn, chosen, correct) {
         const buttons = document.querySelectorAll(".opt-btn");
-        buttons.forEach(b => b.disabled = true);
+        buttons.forEach(b => b.style.pointerEvents = "none");
         
         const msg = document.getElementById("msg-box");
         
         if(chosen === correct) {
             clickedBtn.classList.add("correct-choice");
             msg.style.color = "var(--mint-green)";
-            msg.innerText = "🎉 Correct! Excellent Safety Knowledge! (+20 Points)";
-            document.getElementById("snd-correct").play().catch(e=>{});
+            msg.innerText = "🎉 Correct! Great job! (+20 Points)";
+            document.getElementById("snd-correct").play().catch(()=>{});
             score += 20;
             document.getElementById("score-display").innerText = score;
         } else {
             clickedBtn.classList.add("wrong-choice");
             buttons[correct].classList.add("correct-choice");
             msg.style.color = "var(--coral-pink)";
-            msg.innerText = "❌ Look closer at the safety rule guidelines!";
-            document.getElementById("snd-wrong").play().catch(e=>{});
+            msg.innerText = "❌ Remember the textbook safety rule!";
+            document.getElementById("snd-wrong").play().catch(()=>{});
         }
 
         setTimeout(() => {
             document.getElementById("quiz-overlay").style.display = "none";
             activeQuestionIdx++;
             
-            // Check if level matches are finished, trigger bonus 4th question alternative condition
             if (matchesFound === 3 && activeQuestionIdx === 3) {
-                showQuestion();
+                displayOverlayQuestion();
             } else if (activeQuestionIdx > 3) {
-                document.getElementById("snd-cheer").play().catch(e=>{});
-                nextLevel();
+                document.getElementById("snd-cheer").play().catch(()=>{});
+                advanceProgression();
             }
-        }, 2800);
+        }, 2600);
     }
 
-    function nextLevel() {
+    function advanceProgression() {
         currentLevel++;
         if(currentLevel < gameData.length) {
             setupLevel();
         } else {
             document.getElementById("game-screen").innerHTML = `
-                <h1 class="game-title" style="margin-top:40px;">🏆 Certified Safety Hero!</h1>
-                <p class="subtitle" style="font-size:1.3rem; margin-bottom:20px;">Fantastic job completing all scenarios.</p>
-                <div class="instruction-box" style="text-align:center; background:#f3e5f5; border:none;">
+                <h1 class="game-title" style="margin-top:40px;">🏆 Safety Champion!</h1>
+                <p class="subtitle" style="font-size:1.2rem; margin-bottom:20px;">You completed all safety matching milestones perfectly!</p>
+                <div class="instruction-box" style="text-align:center; background:#f3e5f5; border:none; padding:20px;">
                     <span style="font-size:2rem; font-weight:bold; color:var(--purple-main);">${score} / 240 Points</span>
                 </div>
-                <button class="btn-friendly" onclick="location.reload()" style="margin-top:20px;">Play Again 🔄</button>
+                <button class="btn-friendly" id="btn-reload" style="margin-top:20px;">Restart Game 🔄</button>
             `;
+            document.getElementById('btn-reload').addEventListener('pointerup', () => location.reload());
         }
     }
 </script>
