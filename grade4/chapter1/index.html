@@ -3,696 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nutrient Ninja - Premium Edition</title>
+    <title>Nutrient Ninja</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Lilita+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Fredoka', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            background-color: #0b0704;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Fixed container dimensions with fail-safe fallback viewport heights */
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 500px;
-            max-height: 900px;
-            background: #2b170c radial-gradient(circle, #3d2213 20%, #170c06 100%);
-            border: 6px solid #361f14;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.85);
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .wood-panels {
-            background: linear-gradient(rgba(43, 23, 12, 0.85), rgba(23, 12, 6, 0.95)),
-                        repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.15) 120px, rgba(0,0,0,0.15) 122px),
-                        radial-gradient(circle, #3d2213 20%, #170c06 100%);
-        }
-
-        #canvas-view {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            display: block;
-        }
-
-        .ui-screen {
-            position: absolute;
-            inset: 0;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            text-align: center;
-            background: #2b170c;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        #splash-screen {
-            background: #ffffff;
-            z-index: 100;
-        }
-
-        .brand-logo {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 20px;
-            display: block;
-        }
+        /* Cross-device reset and strict performance rules */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; font-family: 'Fredoka', sans-serif; }
+        html, body { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a0f0a; overflow: hidden; }
         
-        .splash-text {
-            font-family: 'Lilita One', cursive;
-            font-size: 1.5rem;
-            color: #4a2c1b;
-            letter-spacing: 1px;
+        #game-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: block; }
+        
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; padding: 20px; text-align: center; background-color: #2d1a10;
+        }
+        .hidden { display: none !important; }
+
+        /* Splash Screen */
+        #screen-splash { background-color: #ffffff; z-index: 100; }
+        .logo { width: 80%; max-width: 300px; height: auto; }
+
+        /* Typography & Buttons */
+        h1.title { font-size: 3.5rem; color: #ffbe0b; margin-bottom: 40px; text-transform: uppercase; line-height: 1.1; }
+        p.text-simple { color: #ffffff; font-size: 1.2rem; line-height: 1.8; max-width: 500px; margin-bottom: 40px; text-align: left; }
+        
+        button.btn-primary { background-color: #e63946; color: #ffffff; border: none; padding: 16px 40px; font-size: 1.4rem; font-weight: 700; border-radius: 8px; cursor: pointer; outline: none; transition: 0.2s; }
+        button.btn-primary:active { background-color: #c1121f; }
+
+        /* HUD */
+        #hud {
+            position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between;
+            z-index: 5; color: #ffffff; font-size: 1.2rem; font-weight: 700; pointer-events: none;
         }
 
-        .title-badge-container {
-            background: #231209;
-            border: 4px solid #ffbe0b;
-            border-radius: 24px;
-            padding: 20px 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            margin-bottom: 40px;
-            transform: rotate(-1deg);
+        /* Quiz UI */
+        #screen-quiz { background-color: rgba(26, 15, 10, 0.98); z-index: 50; display: flex; justify-content: center; padding: 20px; }
+        .quiz-box { background: #ffffff; border-radius: 12px; padding: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .quiz-question { color: #1a0f0a; font-size: 1.3rem; font-weight: 700; margin-bottom: 24px; text-align: left; line-height: 1.4; }
+        
+        .quiz-option {
+            display: block; width: 100%; background: #f1faee; color: #1d3557; border: 2px solid #a8dadc;
+            padding: 14px; margin-bottom: 12px; border-radius: 8px; font-size: 1.1rem; font-weight: 700; text-align: left; cursor: pointer;
         }
+        .quiz-option:disabled { cursor: not-allowed; opacity: 0.7; }
+        .quiz-option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .quiz-option.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
 
-        .game-title {
-            font-family: 'Lilita One', cursive;
-            font-size: 3rem;
-            color: #ffbe0b;
-            text-shadow: 
-                -3px -3px 0 #000,  
-                 3px -3px 0 #000,
-                -3px  3px 0 #000,
-                 3px  3px 0 #000,
-                 0px  6px 0 #1f0b00;
-            line-height: 1.1;
-        }
-
-        .title-emoji {
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .btn-round {
-            font-family: 'Lilita One', cursive;
-            background: linear-gradient(180deg, #ff4d6d 0%, #c9184a 100%);
-            color: #ffffff;
-            border: 4px solid #fffdf7;
-            padding: 14px 40px;
-            font-size: 1.6rem;
-            border-radius: 100px;
-            cursor: pointer;
-            letter-spacing: 1px;
-            box-shadow: 0 6px 0 #800f2f, 0 10px 20px rgba(0,0,0,0.4);
-            transition: all 0.05s ease;
-            outline: none;
-        }
-        .btn-round:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #800f2f, 0 4px 10px rgba(0,0,0,0.4);
-        }
-
-        .card-board {
-            background: rgba(43, 24, 15, 0.95);
-            border: 4px solid #ffbe0b;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 8px 20px rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 20px;
-            color: #fffdf0;
-            text-align: left;
-            font-size: 1.05rem;
-            line-height: 1.5;
-            margin-bottom: 30px;
-            max-height: 55%;
-            overflow-y: auto;
-        }
-        .card-board b {
-            color: #ffbe0b;
-        }
-
-        #hud-header {
-            position: absolute;
-            top: 15px;
-            left: 0;
-            width: 100%;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 5;
-            pointer-events: none;
-        }
-        .hud-badge {
-            background: linear-gradient(180deg, #4a2c1b 0%, #2b170c 100%);
-            border: 2px solid #ffbe0b;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            border-radius: 12px;
-            padding: 6px 14px;
-            color: #fff;
-            font-family: 'Lilita One', cursive;
-            font-size: 1rem;
-        }
-        .hud-lives {
-            color: #ff4d6d;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-        }
-
-        #quiz-layer {
-            position: absolute;
-            inset: 0;
-            background: rgba(12, 6, 3, 0.9);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            z-index: 50;
-        }
-        .quiz-panel {
-            background: #fffbf4;
-            border: 5px solid #ffbe0b;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 400px;
-            padding: 24px 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-        .quiz-tag {
-            font-family: 'Lilita One', cursive;
-            color: #e63946;
-            font-size: 1rem;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        .quiz-question {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #2b170c;
-            line-height: 1.4;
-            margin-bottom: 20px;
-        }
-        .quiz-options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .quiz-opt-btn {
-            background: #ffffff;
-            border: 2px solid #e1d6c6;
-            padding: 12px 16px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #4a2c1b;
-            border-radius: 14px;
-            cursor: pointer;
-            text-align: left;
-            box-shadow: 0 3px 0 #e1d6c6;
-        }
-
-        #end-screen h2 {
-            font-family: 'Lilita One', cursive;
-            font-size: 3.2rem;
-            color: #ffbe0b;
-            text-shadow: 2px 2px 0 #000;
-            margin-bottom: 10px;
-        }
-        .score-pouch {
-            font-family: 'Lilita One', cursive;
-            font-size: 2.2rem;
-            border: 3px dashed #ffbe0b;
-            padding: 10px 30px;
-            border-radius: 20px;
-            margin: 20px 0 30px 0;
-            color: #fff;
-        }
+        .hint-box { background: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-weight: 700; text-align: left; font-size: 1rem; }
+        .exp-box { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin-top: 15px; font-weight: 700; text-align: left; font-size: 1rem; }
+        
+        #quiz-status { font-size: 1rem; font-weight: 700; color: #e63946; margin-bottom: 15px; text-align: right; }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <canvas id="canvas-view"></canvas>
+    <div id="game-wrapper">
+        <canvas id="game-canvas"></canvas>
 
-        <div id="hud-header" class="hidden">
-            <div class="hud-badge">SCORE: <span id="hud-score">0</span></div>
-            <div class="hud-lives" id="hud-lives">❤️❤️❤️</div>
-            <div class="hud-badge">LVL: <span id="hud-level">1/3</span></div>
+        <div id="hud" class="hidden">
+            <div>SCORE: <span id="val-score">0</span></div>
+            <div>LEVEL <span id="val-level">1</span></div>
+            <div>COLLECTED: <span id="val-healthy">0</span>/3</div>
         </div>
 
-        <div id="splash-screen" class="ui-screen">
-            <img class="brand-logo" src="assets/innovine-logo.png" alt="Innovine Solutions Logo" onerror="this.style.display='none';">
-            <div class="splash-text">LOADING PLATFORM...</div>
+        <div id="screen-splash" class="screen">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo">
         </div>
 
-        <div id="menu-screen" class="ui-screen wood-panels hidden">
-            <div class="title-badge-container">
-                <span class="title-emoji">🥷⚔️</span>
-                <h1 class="game-title">NUTRIENT<br>NINJA</h1>
+        <div id="screen-title" class="screen hidden">
+            <h1 class="title">Nutrient Ninja</h1>
+            <button class="btn-primary" onclick="navToInstructions()">PLAY</button>
+        </div>
+
+        <div id="screen-instructions" class="screen hidden">
+            <p class="text-simple">
+                1. Swipe to collect healthy foods.<br>
+                2. Avoid junk foods.<br>
+                3. Collect 3 healthy foods to unlock a quiz.<br>
+                4. You have 3 attempts per question. Hints will help if you get stuck.<br>
+                5. Complete all 3 levels to win.
+            </p>
+            <button class="btn-primary" onclick="startGame()">START</button>
+        </div>
+
+        <div id="screen-quiz" class="screen hidden">
+            <div class="quiz-box">
+                <div id="quiz-status">Attempt 1 / 3</div>
+                <div class="quiz-question" id="quiz-q"></div>
+                <div id="quiz-hint" class="hint-box hidden"></div>
+                <div id="quiz-options"></div>
+                <div id="quiz-exp" class="exp-box hidden"></div>
             </div>
-            <button class="btn-round" onclick="showInstructions()">PLAY GAME</button>
         </div>
 
-        <div id="instructions-screen" class="ui-screen wood-panels hidden">
-            <h1 class="game-title" style="font-size: 2.2rem; margin-bottom: 15px;">NINJA TRAINING</h1>
-            <div class="card-board">
-                🍎 <b>Swipe & Slice</b> healthy nutritious items launched up onto the wood board!<br><br>
-                💥 <b>Avoid Spoiled Junk Food Bombs</b> (Burgers & Sodas). Cutting them loses a life instantly!<br><br>
-                🧠 <b>Slice 3 Healthy Foods</b> to unlock the textbook quiz checkboard! Ace your curriculum questions to rank up levels.
-            </div>
-            <button class="btn-round" onclick="launchGameEngine()">START SLICING</button>
-        </div>
-
-        <div id="quiz-layer" class="hidden">
-            <div class="quiz-panel">
-                <div class="quiz-tag" id="quiz-level-indicator">Level Milestone Challenge</div>
-                <div class="quiz-question" id="quiz-question-text">Question Text Loading...</div>
-                <div class="quiz-options-list" id="quiz-options-wrapper"></div>
-            </div>
-        </div>
-
-        <div id="end-screen" class="ui-screen wood-panels hidden">
-            <h2 id="end-header-status">GAME OVER</h2>
-            <p id="end-commentary" style="color:#ffd0a1; font-size:1.05rem; margin:0 10px;">Review your textbook pages and try again!</p>
-            <div class="score-pouch">
-                <span id="end-final-marks">0</span> MARKS
-            </div>
-            <button class="btn-round" onclick="resetAndReturnToMenu()">PLAY AGAIN</button>
+        <div id="screen-end" class="screen hidden">
+            <h1 class="title" id="end-title">GAME OVER</h1>
+            <p class="text-simple" style="text-align: center;" id="end-msg"></p>
+            <p class="text-simple" style="text-align: center; font-size: 2.5rem; color: #ffbe0b;">FINAL SCORE: <span id="end-score">0</span></p>
+            <button class="btn-primary" onclick="resetGame()">PLAY AGAIN</button>
         </div>
     </div>
 
     <script>
-        // Centralized Safe Asset Handles
-        let sndCorrect = null, sndWrong = null, sndClaps = null;
-        
-        // Comprehensive Grade 4 Chapter 1 Textbook Curriculum Database
+        // Scenario-Based Curriculum Database (Grade 4, Chapter 1)
         const textbookDatabase = {
             1: [
-                { q: "What type of nutrients provide our body with instant energy?", a: "Carbohydrates", options: ["Carbohydrates", "Proteins", "Vitamins"] },
-                { q: "Growing children require large amounts of which body-building nutrient to build muscles and make new cells?", a: "Proteins", options: ["Fats", "Proteins", "Carbohydrates"] },
-                { q: "Which food group provides more heat and energy than carbohydrates?", a: "Fats", options: ["Fats", "Vitamins", "Roughage"] },
-                { q: "Why are vitamins and minerals known as 'protective foods'?", a: "They help us fight against diseases", options: ["They give instant energy", "They help us fight against diseases", "They build strong bones only"] },
-                { q: "Lack of Vitamin A in a person's diet can lead to which deficiency disease?", a: "Night blindness", options: ["Scurvy", "Beriberi", "Night blindness"] }
+                { q: "Rahul is playing a football match and feels very tired at half-time. What should he eat for instant energy?", a: "Carbohydrates", options: ["Proteins", "Carbohydrates", "Vitamins"], hint: "Athletes eat a lot of this before a big race! Examples include bananas, potatoes, and bread.", exp: "Carbohydrates are 'energy-giving foods' that our body quickly breaks down to give us instant energy." },
+                { q: "Meera fell off her bicycle and got a deep cut on her knee. Which nutrient will help her body repair the damaged cells and heal the wound?", a: "Proteins", options: ["Fats", "Carbohydrates", "Proteins"], hint: "You can find this nutrient packed inside milk, eggs, pulses (daal), and chicken.", exp: "Proteins are 'body-building foods.' They help in the growth of the body and repair damaged cells." },
+                { q: "It is a freezing cold winter morning. Which nutrient will help keep Rohan's body warm if he eats a handful of almonds and walnuts?", a: "Fats", options: ["Fats", "Vitamins", "Roughage"], hint: "Butter, cooking oil, ghee, and nuts are very rich in this nutrient.", exp: "Fats give us more energy and heat than carbohydrates. They help keep our bodies warm." },
+                { q: "Sita's doctor told her she falls sick often because her body cannot fight germs well. Which 'protective' foods should she eat more of?", a: "Vitamins and Minerals", options: ["Carbohydrates and Fats", "Vitamins and Minerals", "Proteins and Water"], hint: "Think about what a shield does for a knight in battle! Fresh fruits and vegetables are full of these.", exp: "Vitamins and minerals protect our body from various diseases and keep our organs, bones, and teeth healthy." },
+                { q: "Anil is finding it very difficult to read his book when the room gets dim in the evening. His doctor says he lacks Vitamin A. Which disease might he have?", a: "Night blindness", options: ["Scurvy", "Beriberi", "Night blindness"], hint: "This condition makes it very difficult for a person to see clearly in the dark.", exp: "Vitamin A is essential for good eyesight. Without enough of it, a person can develop night blindness." }
             ],
             2: [
-                { q: "The process of breaking down food into simpler, soluble substances is called:", a: "Digestion", options: ["Preservation", "Digestion", "Churning"] },
-                { q: "Which fluid in our mouth turns insoluble starch into sweet, soluble sugar while we chew?", a: "Saliva", options: ["Bile juice", "Acid", "Saliva"] },
-                { q: "What is the long muscular pipe connecting the mouth directly to your stomach?", a: "Oesophagus", options: ["Oesophagus", "Small Intestine", "Anus"] },
-                { q: "Inside which J-shaped muscular bag is food churned and mixed with strong digestive juices?", a: "Stomach", options: ["Liver", "Stomach", "Large Intestine"] },
-                { q: "Where is the digestion of food completed and its nutrients absorbed by the body?", a: "Small Intestine", options: ["Mouth", "Small Intestine", "Large Intestine"] }
+                { q: "You just took a bite of a sweet apple. What is the fluid in your mouth that instantly starts breaking down the apple's starch into sweet sugar?", a: "Saliva", options: ["Bile juice", "Acid", "Saliva"], hint: "It's the watery liquid that makes your 'mouth water' when you smell your favorite tasty food!", exp: "Saliva is a digestive juice produced in the mouth. It mixes with food to make it soft and starts digesting starches." },
+                { q: "After you swallow a bite of a sandwich, it travels down a long muscular tube to reach your stomach. What is this tube formally called?", a: "Oesophagus", options: ["Oesophagus", "Small Intestine", "Windpipe"], hint: "It is also commonly known as the 'food pipe.'", exp: "The oesophagus is the tube that swallows your chewed food and pushes it down into the stomach." },
+                { q: "Your lunch has just reached a J-shaped muscular bag in your body where it gets churned and mixed with strong juices. Where is your food right now?", a: "Stomach", options: ["Liver", "Large Intestine", "Stomach"], hint: "When you are very hungry, this organ might make a loud rumbling noise!", exp: "The stomach acts like a mixer. It churns the food and mixes it with acidic digestive juices." },
+                { q: "The food you ate is now completely digested into a simple liquid, and your blood is absorbing all the useful nutrients. Which organ is doing this job?", a: "Small Intestine", options: ["Mouth", "Small Intestine", "Large Intestine"], hint: "It is a very long, tightly coiled tube that comes right after the stomach.", exp: "The small intestine completes the digestion process. Here, the useful nutrients are fully absorbed into the bloodstream." },
+                { q: "You drank a lot of water today. The undigested food passes into an organ that absorbs this extra water before pushing the solid waste out. Which organ is this?", a: "Large Intestine", options: ["Liver", "Small Intestine", "Large Intestine"], hint: "This is the final major stop for food before waste leaves the body.", exp: "The large intestine's main job is to absorb extra water from the undigested food, forming solid waste." }
             ],
             3: [
-                { q: "What causes bread left out for too long to spoil and grow a brownish-green cotton-like formation?", a: "Germs growing in warm, moist air", options: ["Loss of water", "Germs growing in warm, moist air", "Excess salt"] },
-                { q: "The process by which we keep food fresh, safe, and free from germ spoilage for a long time is called:", a: "Food preservation", options: ["Digestion", "Food preservation", "Churning"] },
-                { q: "Which kitchen preservation method kills present germs instantly in fluids like milk?", a: "Boiling method", options: ["Freezing method", "Boiling method", "Drying method"] },
-                { q: "Why does keeping fresh vegetables or meat inside a refrigerator prevent them from spoiling quickly?", a: "Low temperatures do not allow germs to grow fast", options: ["Low temperatures do not allow germs to grow fast", "It removes all water content", "It adds healthy salt coatings"] },
-                { q: "Which method removes moisture content to preserve foods like red chillies, ginger, and turmeric?", a: "Drying method", options: ["Canning process", "Freezing method", "Drying method"] }
+                { q: "Aman left his bread sandwich on the kitchen counter for three days. When he found it, it had greenish-black cotton-like patches. What caused this?", a: "Germs growing in warm, moist air", options: ["Loss of water", "Germs growing in warm, moist air", "Excess salt"], hint: "These are tiny living things (like mold) that love to grow in wet and warm places.", exp: "Germs multiply rapidly in warm, moist conditions, which is why food left outside spoils and gets moldy." },
+                { q: "Grandma wants to make sure the fresh mangoes she bought last for a long time without spoiling. What is this process called?", a: "Food preservation", options: ["Food preservation", "Digestion", "Churning"], hint: "Think of a word that means 'to protect' or 'to keep safe.'", exp: "Food preservation involves treating and handling food in special ways to stop germs from destroying it." },
+                { q: "Before drinking milk straight from the dairy farm, Rohan's mother always heats it on the stove until it bubbles. What method is she using to kill germs?", a: "Boiling", options: ["Freezing", "Boiling", "Drying"], hint: "You do this by heating the liquid at very high temperatures.", exp: "Boiling liquid at high temperatures instantly kills the harmful germs present in it." },
+                { q: "It is a hot summer day. Why did Neha's mother put the leftover chicken curry inside the refrigerator?", a: "Low temperatures do not allow germs to grow fast", options: ["Low temperatures do not allow germs to grow fast", "It removes all water content", "It adds healthy salt coatings"], hint: "Think about how ice-cold weather affects bugs and living things—it slows them down!", exp: "Germs need warmth to survive. The cold temperatures inside a refrigerator prevent germs from multiplying rapidly." },
+                { q: "The farmer harvested red chillies and spread them out under the hot sun for many days before packing them into bags. Which preservation method is this?", a: "Drying", options: ["Canning", "Freezing", "Drying"], hint: "This method removes all the water (moisture) from the food.", exp: "The drying method removes moisture. Because germs cannot survive without water, the food is preserved for a long time." }
             ]
         };
 
-        const healthyIngredients = ["🍎", "🍉", "🍌", "🥦", "🥕", "🍍", "🥛", "🥚", "🍞", "🍗"];
-        const junkIngredients = ["🍔", "🍟", "🥤", "🍩", "🍕"];
-
-        // State Scoping variables
-        let score = 0, lives = 3, currentLevel = 1, healthySlicesCount = 0;
-        let targetSlicesRequired = 3, activeQuizArray = [], activeQuizIdx = 0;
-        let isEngineRunning = false, loopId = null;
-        let entitiesList = [], splatsList = [], swipePath = [];
-        let spawnTick = 0, spawnRateFrequency = 45; 
-
-        // DOM Handles (will safely assign inside initializeGameSetup)
+        const healthyFoods = ["🍎", "🍉", "🍌", "🥦", "🥕", "🥛", "🥚", "🍞"];
+        const junkFoods = ["🍔", "🍟", "🥤", "🍩"];
+        
         let canvas, ctx;
+        let score = 0, level = 1, healthySlices = 0;
+        let gameLoop, isPlaying = false, spawnTimer = 0;
+        let items = [], swipeTrail = [];
+        let currentQuiz = [], quizIndex = 0, attempts = 0, qData = null;
+        let sndCorrect, sndWrong, sndClaps;
 
-        function initializeGameSetup() {
-            canvas = document.getElementById('canvas-view');
-            ctx = canvas.getContext('2d');
+        // Shuffle Utility to randomize questions and options
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Init
+        window.onload = () => {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d', { alpha: false }); 
             
-            adjustCanvasSizing();
+            resize();
+            window.addEventListener('resize', resize);
+            setupInput();
 
-            // Safety Audio Assignment Injection
+            // Assets load silently so game won't crash if paths are missing
             try { sndCorrect = new Audio('assets/correct.mp3'); } catch(e){}
             try { sndWrong = new Audio('assets/wrong.mp3'); } catch(e){}
             try { sndClaps = new Audio('assets/freesound_community-claps-44774.mp3'); } catch(e){}
 
-            // Seamless bypass transition out of splash loading view
+            // Screen 1 Splash Timing
             setTimeout(() => {
-                document.getElementById('splash-screen').classList.add('hidden');
-                document.getElementById('menu-screen').classList.remove('hidden');
-            }, 1000);
+                document.getElementById('screen-splash').classList.add('hidden');
+                document.getElementById('screen-title').classList.remove('hidden');
+            }, 5000);
+        };
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
 
-        // Defer entry calls until DOM elements are fully resident in memory
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeGameSetup);
-        } else {
-            initializeGameSetup();
+        function navToInstructions() {
+            document.getElementById('screen-title').classList.add('hidden');
+            document.getElementById('screen-instructions').classList.remove('hidden');
         }
 
-        window.addEventListener('resize', adjustCanvasSizing);
-
-        function adjustCanvasSizing() {
-            const wrapper = document.getElementById('game-container');
-            if(!wrapper || !canvas) return;
-            canvas.width = wrapper.clientWidth;
-            canvas.height = wrapper.clientHeight;
+        function resetGame() {
+            document.getElementById('screen-end').classList.add('hidden');
+            startGame();
         }
 
-        function renderBackgroundWoodTexture() {
-            if (!canvas || canvas.width === 0 || canvas.height === 0) return;
-            ctx.save();
-            let grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, canvas.height*0.8);
-            grad.addColorStop(0, '#2d1a10');
-            grad.addColorStop(1, '#120a06');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.25)";
-            ctx.lineWidth = 6;
-            let plankWidth = canvas.width / 4;
-            for(let i = 1; i < 4; i++) {
-                ctx.beginPath();
-                ctx.moveTo(i * plankWidth, 0);
-                ctx.lineTo(i * plankWidth, canvas.height);
-                ctx.stroke();
-            }
-            ctx.restore();
+        function playAudio(audioObj) {
+            if(audioObj) { try { audioObj.currentTime = 0; audioObj.play().catch(()=>{}); } catch(e){} }
         }
 
-        function showInstructions() {
-            document.getElementById('menu-screen').classList.add('hidden');
-            document.getElementById('instructions-screen').classList.remove('hidden');
+        // Gameplay Initialization
+        function startGame() {
+            document.getElementById('screen-instructions').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+            score = 0; level = 1; 
+            startLevelPhase();
         }
 
-        function launchGameEngine() {
-            document.getElementById('instructions-screen').classList.add('hidden');
-            document.getElementById('hud-header').classList.remove('hidden');
-
-            score = 0; lives = 3; currentLevel = 1; healthySlicesCount = 0;
-            entitiesList = []; splatsList = []; swipePath = []; spawnTick = 0;
-
-            refreshHUD();
-            isEngineRunning = true;
-            tickEngineLoop();
+        function startLevelPhase() {
+            healthySlices = 0;
+            items = []; swipeTrail = []; spawnTimer = 0;
+            updateHUD();
+            
+            // Randomize the 5 questions for this level
+            currentQuiz = shuffle(textbookDatabase[level]);
+            
+            isPlaying = true;
+            requestAnimationFrame(engine);
         }
 
-        function refreshHUD() {
-            document.getElementById('hud-score').textContent = score;
-            document.getElementById('hud-level').textContent = `${currentLevel}/3`;
-            let hearts = "";
-            for(let i=0; i<3; i++) hearts += (i < lives) ? "❤️" : "🖤";
-            document.getElementById('hud-lives').textContent = hearts;
+        function updateHUD() {
+            document.getElementById('val-score').innerText = score;
+            document.getElementById('val-level').innerText = level;
+            document.getElementById('val-healthy').innerText = healthySlices;
         }
 
-        class LauncherItem {
+        // Falling Items Logic
+        class Item {
             constructor() {
-                this.x = Math.random() * (canvas.width - 100) + 50;
-                this.y = canvas.height + 50;
-                this.isBomb = Math.random() < 0.25;
-                this.emoji = this.isBomb ? junkIngredients[Math.floor(Math.random() * junkIngredients.length)] : healthyIngredients[Math.floor(Math.random() * healthyIngredients.length)];
-                this.hitRadius = 30;
-                this.vx = (canvas.width / 2 - this.x) * 0.016 + (Math.random() * 4 - 2);
-                this.vy = -(Math.random() * 3 + (canvas.height * 0.015) + 12);
-                this.gravityAcc = 0.25;
-                this.isCut = false;
-                this.cutRotationAngle = 0;
-                this.splitLeftOffsetX = 0;
-                this.splitRightOffsetX = 0;
-                this.rotationSpinSpeed = Math.random() * 0.06 - 0.03;
-                this.currentBaseAngle = Math.random() * Math.PI;
+                this.x = Math.random() * (canvas.width - 80) + 40;
+                this.y = canvas.height + 40;
+                this.isJunk = Math.random() > 0.6;
+                this.emoji = this.isJunk ? junkFoods[Math.floor(Math.random()*junkFoods.length)] : healthyFoods[Math.floor(Math.random()*healthyFoods.length)];
+                this.vx = (canvas.width/2 - this.x) * 0.012 + (Math.random()*2-1);
+                this.vy = -(canvas.height * 0.016 + 8);
+                this.gravity = 0.22;
+                this.active = true;
+                this.radius = 40;
             }
-
-            advancePhysics() {
-                this.vy += this.gravityAcc;
+            update() {
+                this.vy += this.gravity;
                 this.x += this.vx;
                 this.y += this.vy;
-                this.currentBaseAngle += this.rotationSpinSpeed;
+                if(this.y > canvas.height + 60) this.active = false;
             }
-
-            render() {
-                ctx.save();
-                if(!this.isCut) {
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.currentBaseAngle);
-                    ctx.font = "48px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillText(this.emoji, 0, 0);
-                } else {
-                    ctx.save();
-                    ctx.translate(this.x + this.splitLeftOffsetX, this.y);
-                    ctx.rotate(this.currentBaseAngle - this.cutRotationAngle);
-                    ctx.font = "46px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.beginPath(); ctx.rect(-60, -60, 60, 120); ctx.clip();
-                    ctx.fillText(this.emoji, 0, 0);
-                    ctx.restore();
-
-                    ctx.save();
-                    ctx.translate(this.x + this.splitRightOffsetX, this.y);
-                    ctx.rotate(this.currentBaseAngle + this.cutRotationAngle);
-                    ctx.font = "46px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.beginPath(); ctx.rect(0, -60, 60, 120); ctx.clip();
-                    ctx.fillText(this.emoji, 0, 0);
-                    ctx.restore();
-
-                    this.splitLeftOffsetX -= 3;
-                    this.splitRightOffsetX += 3;
-                    this.cutRotationAngle += 0.07;
-                }
-                ctx.restore();
+            draw() {
+                ctx.font = "55px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(this.emoji, this.x, this.y);
             }
         }
 
-        class DynamicSplat {
-            constructor(x, y, isBomb) {
-                this.x = x; this.y = y;
-                this.color = isBomb ? "rgba(230, 57, 70, 0.6)" : "rgba(255, 190, 11, 0.6)";
-                this.sizeRadius = Math.random() * 20 + 15;
-                this.lifeTicksMax = 35; this.currentLife = this.lifeTicksMax;
-            }
-            render() {
-                ctx.save();
-                ctx.globalAlpha = this.currentLife / this.lifeTicksMax;
-                ctx.fillStyle = this.color;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.sizeRadius, 0, Math.PI * 2); ctx.fill();
-                ctx.restore();
-                this.currentLife--;
-            }
-        }
-
-        function tickEngineLoop() {
-            if(!isEngineRunning) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            renderBackgroundWoodTexture();
-
-            for (let i = splatsList.length - 1; i >= 0; i--) {
-                splatsList[i].render();
-                if(splatsList[i].currentLife <= 0) splatsList.splice(i, 1);
-            }
-
-            spawnTick++;
-            if(spawnTick >= spawnRateFrequency) {
-                entitiesList.push(new LauncherItem());
-                spawnTick = 0;
-            }
-
-            for (let i = entitiesList.length - 1; i >= 0; i--) {
-                let entity = entitiesList[i];
-                entity.advancePhysics();
-                entity.render();
-                if(entity.y > canvas.height + 80) entitiesList.splice(i, 1);
-            }
-            renderWeaponSwipeTrail();
-            loopId = requestAnimationFrame(tickEngineLoop);
-        }
-
-        function renderWeaponSwipeTrail() {
-            if(swipePath.length < 2) return;
-            ctx.save();
-            ctx.lineCap = "round"; ctx.lineJoin = "round";
-            ctx.beginPath(); ctx.strokeStyle = "rgba(255, 237, 186, 0.85)"; ctx.lineWidth = 6;
-            ctx.moveTo(swipePath[0].x, swipePath[0].y);
-            for(let i = 1; i < swipePath.length; i++) ctx.lineTo(swipePath[i].x, swipePath[i].y);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function processSliceIntersections(point) {
-            entitiesList.forEach(item => {
-                if(item.isCut) return;
-                let spatialDistance = Math.hypot(item.x - point.x, item.y - point.y);
-                if(spatialDistance < item.hitRadius + 15) {
-                    item.isCut = true;
-                    splatsList.push(new DynamicSplat(item.x, item.y, item.isBomb));
-
-                    if(item.isBomb) {
-                        playSoundSafely(sndWrong);
-                        lives--;
-                        refreshHUD();
-                        if(lives <= 0) terminateActiveRun(false);
-                    } else {
-                        playSoundSafely(sndCorrect);
-                        healthySlicesCount++;
-                        if(healthySlicesCount >= targetSlicesRequired) haltEngineAndTriggerQuiz();
-                    }
-                }
-            });
-        }
-
-        function playSoundSafely(audioObj) {
-            try {
-                if(audioObj) {
-                    audioObj.currentTime = 0;
-                    audioObj.play().catch(e => console.log("Audio play blocked"));
-                }
-            } catch(e){}
-        }
-
-        function processTrackMove(clientX, clientY) {
-            if(!isEngineRunning) return;
-            const containerBoundRect = canvas.getBoundingClientRect();
-            const trackedCoordinates = { x: clientX - containerBoundRect.left, y: clientY - containerBoundRect.top };
-            swipePath.push(trackedCoordinates);
-            if(swipePath.length > 6) swipePath.shift();
-            processSliceIntersections(trackedCoordinates);
-        }
-
-        function endWeaponTrail() { swipePath = []; }
-
-        // Event Interceptors
-        window.addEventListener('mouseup', endWeaponTrail);
-        window.addEventListener('touchend', endWeaponTrail);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const tgtCanvas = document.getElementById('canvas-view');
-            tgtCanvas.addEventListener('mousemove', (e) => { if(e.buttons === 1) processTrackMove(e.clientX, e.clientY); });
-            tgtCanvas.addEventListener('touchmove', (e) => {
-                if(e.touches.length > 0) processTrackMove(e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: true });
-        });
-
-        function haltEngineAndTriggerQuiz() {
-            isEngineRunning = false;
-            if(loopId) cancelAnimationFrame(loopId);
-            endWeaponTrail();
-            activeQuizArray = textbookDatabase[currentLevel];
-            activeQuizIdx = 0;
-            displayQuizQuestionOverlay();
-        }
-
-        function displayQuizQuestionOverlay() {
-            const currentQuestionDataset = activeQuizArray[activeQuizIdx];
-            document.getElementById('quiz-level-indicator').textContent = `Level ${currentLevel} Milestone: Question ${activeQuizIdx + 1} of 5`;
-            document.getElementById('quiz-question-text').textContent = currentQuestionDataset.q;
+        function engine() {
+            if(!isPlaying) return;
             
-            const interactiveWrapper = document.getElementById('quiz-options-wrapper');
-            interactiveWrapper.innerHTML = '';
-            let randomizedOptions = [...currentQuestionDataset.options].sort(() => 0.5 - Math.random());
+            // Fill background
+            ctx.fillStyle = "#2d1a10";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            randomizedOptions.forEach(optionStr => {
-                const optBtn = document.createElement('button');
-                optBtn.className = 'quiz-opt-btn';
-                optBtn.textContent = optionStr;
-                optBtn.onclick = () => evaluateSubmittedQuizChoice(optionStr, currentQuestionDataset.a, optBtn);
-                interactiveWrapper.appendChild(optBtn);
-            });
-            document.getElementById('quiz-layer').classList.remove('hidden');
+            // Spawn rate
+            spawnTimer++;
+            if(spawnTimer > 45) { items.push(new Item()); spawnTimer = 0; }
+
+            // Update items
+            for (let i = items.length - 1; i >= 0; i--) {
+                let itm = items[i];
+                itm.update();
+                itm.draw();
+                if(!itm.active) items.splice(i, 1);
+            }
+
+            // Draw swipe path
+            if(swipeTrail.length > 1) {
+                ctx.beginPath(); ctx.strokeStyle = "#ffbe0b"; ctx.lineWidth = 6; ctx.lineCap = "round";
+                ctx.moveTo(swipeTrail[0].x, swipeTrail[0].y);
+                for(let i=1; i<swipeTrail.length; i++) ctx.lineTo(swipeTrail[i].x, swipeTrail[i].y);
+                ctx.stroke();
+            }
+            gameLoop = requestAnimationFrame(engine);
         }
 
-        function evaluateSubmittedQuizChoice(selectedAnswer, correctSolutionKey, DOMNodeRef) {
-            if(selectedAnswer === correctSolutionKey) {
-                DOMNodeRef.style.background = "#2a9d8f"; DOMNodeRef.style.color = "#ffffff";
-                playSoundSafely(sndCorrect);
-                score += 20; refreshHUD(); activeQuizIdx++;
+        // Input & Slicing Control
+        function setupInput() {
+            const track = (x, y) => {
+                if(!isPlaying) return;
+                swipeTrail.push({x, y});
+                if(swipeTrail.length > 6) swipeTrail.shift();
+                checkSlice(x, y);
+            };
+            const clearSwipe = () => { swipeTrail = []; };
 
-                setTimeout(() => {
-                    if(activeQuizIdx < 5) displayQuizQuestionOverlay();
-                    else {
-                        document.getElementById('quiz-layer').classList.add('hidden');
-                        if(currentLevel >= 3) terminateActiveRun(true);
-                        else {
-                            currentLevel++; healthySlicesCount = 0; entitiesList = [];
-                            refreshHUD(); isEngineRunning = true; tickEngineLoop();
+            canvas.addEventListener('mousemove', e => { if(e.buttons === 1) track(e.clientX, e.clientY); });
+            canvas.addEventListener('touchmove', e => { track(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
+            window.addEventListener('mouseup', clearSwipe);
+            window.addEventListener('touchend', clearSwipe);
+        }
+
+        function checkSlice(x, y) {
+            items.forEach(itm => {
+                if(!itm.active) return;
+                let dist = Math.hypot(itm.x - x, itm.y - y);
+                if(dist < itm.radius + 15) {
+                    itm.active = false;
+                    
+                    if(itm.isJunk) {
+                        playAudio(sndWrong); // No lives lost, just audio feedback
+                    } else {
+                        playAudio(sndCorrect);
+                        healthySlices++;
+                        updateHUD();
+                        
+                        if(healthySlices >= 3) {
+                            isPlaying = false;
+                            cancelAnimationFrame(gameLoop);
+                            setTimeout(startQuizPhase, 500); 
                         }
                     }
-                }, 600);
-            } else {
-                DOMNodeRef.style.background = "#e63946"; DOMNodeRef.style.color = "#ffffff";
-                playSoundSafely(sndWrong);
-                const panel = document.querySelector('.quiz-panel');
-                panel.style.transform = 'translateX(-8px)';
-                setTimeout(() => { panel.style.transform = 'translateX(8px)'; }, 70);
-                setTimeout(() => { 
-                    panel.style.transform = 'translateX(0)'; 
-                    DOMNodeRef.style.background = "#ffffff"; DOMNodeRef.style.color = "#4a2c1b";
-                }, 140);
-            }
+                }
+            });
         }
 
-        function terminateActiveRun(isVictoryResult) {
-            isEngineRunning = false;
-            if(loopId) cancelAnimationFrame(loopId);
-            document.getElementById('quiz-layer').classList.add('hidden');
-            document.getElementById('hud-header').classList.add('hidden');
+        // Quiz Handling
+        function startQuizPhase() {
+            document.getElementById('hud').classList.add('hidden');
+            quizIndex = 0;
+            renderQuestion();
+            document.getElementById('screen-quiz').classList.remove('hidden');
+        }
+
+        function renderQuestion() {
+            attempts = 0;
+            qData = currentQuiz[quizIndex];
             
-            const endScreenView = document.getElementById('end-screen');
-            const endTitleNode = document.getElementById('end-header-status');
-            const endCommentaryNode = document.getElementById('end-commentary');
+            document.getElementById('quiz-status').innerText = `Question ${quizIndex + 1} of 5 | Attempt 1 / 3`;
+            document.getElementById('quiz-q').innerText = qData.q;
+            
+            const hintBox = document.getElementById('quiz-hint');
+            hintBox.classList.add('hidden');
+            hintBox.innerText = `💡 HINT: ${qData.hint}`;
 
-            if(isVictoryResult) {
-                playSoundSafely(sndClaps);
-                endTitleNode.textContent = "VICTORY!";
-                endCommentaryNode.textContent = "Outstanding work! You answered every curriculum question block perfectly!";
-            } else {
-                endTitleNode.textContent = "GAME OVER";
-                endCommentaryNode.textContent = "You sliced too many junk food item bombs! Review the food groups and try again.";
-            }
-            document.getElementById('end-final-marks').textContent = score;
-            endScreenView.classList.remove('hidden');
+            const expBox = document.getElementById('quiz-exp');
+            expBox.classList.add('hidden');
+            expBox.innerText = `📘 EXPLANATION: ${qData.exp}`;
+
+            const optBox = document.getElementById('quiz-options');
+            optBox.innerHTML = '';
+            
+            // Randomize options for display
+            let opts = shuffle(qData.options);
+            opts.forEach(opt => {
+                let btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.innerText = opt;
+                btn.onclick = (e) => evalAnswer(opt, btn);
+                optBox.appendChild(btn);
+            });
         }
 
-        function resetAndReturnToMenu() {
-            document.getElementById('end-screen').classList.add('hidden');
-            document.getElementById('menu-screen').classList.remove('hidden');
-            if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function evalAnswer(selected, btnElement) {
+            attempts++;
+            const opts = document.querySelectorAll('.quiz-option');
+
+            if(selected === qData.a) {
+                // Correct logic
+                playAudio(sndCorrect);
+                let points = (attempts === 1) ? 20 : (attempts === 2) ? 10 : 5;
+                score += points;
+                
+                btnElement.classList.add('correct');
+                opts.forEach(b => b.disabled = true);
+                
+                document.getElementById('quiz-status').innerText = "Correct! Great Job.";
+                document.getElementById('quiz-exp').classList.remove('hidden');
+                
+                setTimeout(nextQuestion, 4000); // Time to read explanation
+            } else {
+                // Wrong logic
+                playAudio(sndWrong);
+                btnElement.classList.add('wrong');
+                btnElement.disabled = true;
+
+                if(attempts === 1) {
+                    document.getElementById('quiz-hint').classList.remove('hidden');
+                    document.getElementById('quiz-status').innerText = `Attempt 2 / 3`;
+                } else if(attempts === 2) {
+                    document.getElementById('quiz-status').innerText = `Attempt 3 / 3 - Last Chance!`;
+                } else {
+                    // Out of attempts, show correct answer and explanation
+                    opts.forEach(b => {
+                        b.disabled = true;
+                        if(b.innerText === qData.a) b.classList.add('correct');
+                    });
+                    document.getElementById('quiz-status').innerText = "Out of attempts!";
+                    document.getElementById('quiz-exp').classList.remove('hidden');
+                    
+                    setTimeout(nextQuestion, 4500); 
+                }
+            }
+        }
+
+        function nextQuestion() {
+            quizIndex++;
+            if(quizIndex >= 5) {
+                document.getElementById('screen-quiz').classList.add('hidden');
+                
+                if(level >= 3) {
+                    endGame(); // Finished all 15 questions
+                } else {
+                    level++;
+                    document.getElementById('hud').classList.remove('hidden');
+                    startLevelPhase();
+                }
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function endGame() {
+            isPlaying = false;
+            cancelAnimationFrame(gameLoop);
+            
+            let msg = "";
+            if(score >= 250) msg = "Incredible job! You have mastered the nutrients!";
+            else if(score >= 150) msg = "Great effort! You know your curriculum well.";
+            else msg = "Good try! Review your notes and play again to improve.";
+
+            document.getElementById('end-title').innerText = "VICTORY!";
+            document.getElementById('end-msg').innerText = msg;
+            document.getElementById('end-score').innerText = score;
+            
+            playAudio(sndClaps);
+            document.getElementById('screen-end').classList.remove('hidden');
         }
     </script>
 </body>
