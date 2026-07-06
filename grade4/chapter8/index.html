@@ -8,13 +8,14 @@
         :root {
             --purple-main: #8e44ad;
             --purple-dark: #6c3483;
-            --purple-light: #f5eeeb;
+            --purple-light: #f4ecf7;
             --mint-green: #2ecc71;
             --coral-pink: #ff6b6b;
-            --sky-blue: #00a8cc;
-            --amber-yellow: #ffe494;
+            --sky-blue: #3498db;
+            --sky-light: #eaf2f8;
+            --amber-yellow: #f1c40f;
             --text-dark: #2c3e50;
-            --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-family: 'Comic Sans MS', 'Segoe UI', Roboto, sans-serif;
         }
 
         * {
@@ -27,29 +28,28 @@
             margin: 0;
             padding: 0;
             font-family: var(--font-family);
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4ede9 100%);
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
             color: var(--text-dark);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
-            padding: 10px;
+            padding: 15px;
         }
 
         .screen {
             display: none;
             width: 100%;
-            max-width: 550px;
-            min-height: 620px;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-            padding: 25px;
+            max-width: 500px;
+            min-height: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            padding: 30px;
             text-align: center;
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             position: relative;
-            border: 6px solid #fff;
+            border: 8px solid #fff;
         }
 
         .screen.active {
@@ -59,198 +59,231 @@
             align-items: center;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
-        /* --- SCREEN 1: SPLASH --- */
+        /* --- SCREEN 1: SPLASH LOGO --- */
         .logo-container img {
-            max-width: 240px;
+            max-width: 220px;
             height: auto;
-            animation: pulse 2s infinite ease-in-out;
+            animation: bounceLogo 2s infinite ease-in-out;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.04); }
-            100% { transform: scale(1); }
+        @keyframes bounceLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
-        /* --- SCREEN 2 & 3: TITLE & INSTRUCTIONS --- */
+        /* --- TITLE & INSTRUCTIONS --- */
         h1.game-title {
-            font-size: 2.4rem;
+            font-size: 2.6rem;
             color: var(--purple-main);
-            margin-bottom: 10px;
+            margin: 10px 0;
+            animation: rainbowText 4s infinite linear;
         }
         .subtitle {
-            font-size: 1.2rem;
-            color: #7f8c8d;
+            font-size: 1.3rem;
+            color: #566573;
             margin-bottom: 40px;
+            font-weight: bold;
         }
-        .instruction-box {
-            background: #f9f9f9;
-            border-radius: 16px;
+        .instruction-card {
+            background: var(--sky-light);
+            border-radius: 20px;
             padding: 20px;
             text-align: left;
-            margin-bottom: 30px;
-            border-left: 5px solid var(--sky-blue);
+            margin-bottom: 35px;
+            border: 3px dashed var(--sky-blue);
         }
-        .instruction-box ul {
+        .instruction-card ul {
             padding-left: 20px;
-            line-height: 1.6;
+            margin: 0;
         }
-        .instruction-box li {
-            margin-bottom: 10px;
-            font-size: 1.05rem;
+        .instruction-card li {
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            color: #34495e;
         }
 
-        /* --- BUTTONS --- */
-        .btn-friendly {
-            background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-dark) 100%);
+        /* --- PLAYFUL BUTTONS --- */
+        .btn-playful {
+            background: linear-gradient(135deg, #ff5e62 0%, #ff9966 100%);
             color: white;
             border: none;
-            padding: 16px 45px;
-            font-size: 1.3rem;
+            padding: 16px 50px;
+            font-size: 1.4rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 15px rgba(142, 68, 173, 0.3);
-            transition: all 0.2s ease;
+            box-shadow: 0 8px 15px rgba(255, 94, 98, 0.4);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            border: 3px solid #fff;
         }
-        .btn-friendly:active {
-            transform: scale(0.97);
+        .btn-playful:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(255, 94, 98, 0.3);
         }
 
-        /* --- SCREEN 4: MAIN GAME --- */
+        /* --- GAME HUD HEADER --- */
         .game-header {
             width: 100%;
             margin-bottom: 15px;
         }
         .level-indicator {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            color: var(--purple-main);
-            margin-bottom: 8px;
+            color: var(--purple-dark);
+            margin-bottom: 12px;
+            background: var(--purple-light);
+            padding: 5px 15px;
+            border-radius: 15px;
+            display: inline-block;
         }
         .status-bar {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             width: 100%;
-            background: #f3e5f5;
-            padding: 10px 20px;
-            border-radius: 50px;
+            background: #fff;
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             font-weight: bold;
-            color: var(--purple-main);
+            font-size: 1.1rem;
+            border: 2px solid var(--purple-light);
+        }
+        .lives-box {
+            color: var(--coral-pink);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+        .score-box {
+            color: var(--mint-green);
         }
 
-        /* 4x4 Grid Board Layout matching images exactly */
+        /* --- 3-PAIR GRID LAYOUT (6 CARDS TOTAL) --- */
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             width: 100%;
-            margin: 15px 0;
+            margin: 20px 0;
         }
 
-        /* Touch Flexible Card Architecture */
         .card {
             aspect-ratio: 1;
-            background-color: var(--sky-blue);
+            background: radial-gradient(circle, #00c6ff 0%, #0072ff 100%);
             color: white;
-            font-size: 2rem;
+            font-size: 2.8rem;
             font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 14px;
+            border-radius: 24px;
             cursor: pointer;
             user-select: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-            position: relative;
-            transform: scale(1);
-            transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s ease;
+            box-shadow: 0 6px 12px rgba(0,114,255,0.3);
+            border: 4px solid #fff;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
-        /* Interactive touch responses without getting stuck */
         .card:active {
-            transform: scale(0.92);
+            transform: scale(0.9);
         }
-
         .card.flipped {
-            background-color: var(--amber-yellow);
-            color: #d35400;
+            background: #fff;
+            border-color: var(--amber-yellow);
+            box-shadow: 0 6px 12px rgba(241, 196, 15, 0.2);
+            transform: rotateY(180deg);
         }
-        
         .card.matched {
-            background-color: var(--amber-yellow);
-            color: #d35400;
+            background: var(--purple-light);
+            border-color: var(--purple-main);
             cursor: default;
-            animation: matchPop 0.35s ease-out forwards;
+            animation: matchAnimate 0.4s ease-out;
         }
-        
-        @keyframes matchPop {
+        @keyframes matchAnimate {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.15) rotate(5deg); }
             100% { transform: scale(1); }
         }
 
-        /* --- QUIZ OVERLAY LAYER --- */
+        /* --- BEAUTIFIED QUIZ OVERLAY --- */
         #quiz-overlay {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 24px;
+            background: radial-gradient(circle, #ffffff 60%, #f4ecf7 100%);
+            border-radius: 22px;
             padding: 25px;
             flex-direction: column;
             justify-content: center;
             text-align: left;
             z-index: 10;
         }
-        .quiz-title {
-            color: #d35400;
-            margin: 0 0 10px 0;
-            font-size: 1.3rem;
+        .quiz-top-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px dashed var(--purple-light);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .quiz-tag {
+            background: #e67e22;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .q-number-tracker {
+            font-weight: bold;
+            color: var(--purple-main);
         }
         #q-text {
-            font-size: 1.15rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: bold;
             line-height: 1.5;
-            margin-bottom: 15px;
+            margin: 10px 0 20px 0;
+            color: var(--text-dark);
         }
         .opt-btn {
             display: block;
             width: 100%;
             padding: 14px 18px;
-            margin: 8px 0;
+            margin: 10px 0;
             background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
+            border: 3px solid #e5e8e8;
+            border-radius: 18px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             text-align: left;
-            font-weight: 500;
-            transition: background-color 0.2s;
+            font-weight: bold;
+            color: #5d6d7e;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
         }
-        .opt-btn:active {
-            background-color: #f7fafc;
+        .opt-btn:hover {
+            border-color: var(--sky-blue);
+            background: var(--sky-light);
         }
         .opt-btn.correct-choice {
             background-color: #d4edda !important;
             border-color: var(--mint-green) !important;
-            color: #155724;
+            color: #155724 !important;
         }
         .opt-btn.wrong-choice {
             background-color: #f8d7da !important;
             border-color: var(--coral-pink) !important;
-            color: #721c24;
+            color: #721c24 !important;
         }
         #msg-box {
             font-weight: bold;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             margin-top: 15px;
             text-align: center;
-            min-height: 24px;
+            min-height: 25px;
         }
     </style>
 </head>
@@ -267,37 +300,39 @@
 </div>
 
 <div id="title-screen" class="screen">
-    <h1 class="game-title">🛡️ Safety First!</h1>
+    <h1 class="game-title">🛡️ Safety Quest!</h1>
     <p class="subtitle">Match & Quiz Challenge</p>
-    <button class="btn-friendly" id="btn-start">START</button>
+    <button class="btn-playful" id="btn-start">START</button>
 </div>
 
 <div id="instruction-screen" class="screen">
-    <h1 class="game-title" style="font-size: 1.9rem;">How to Play 📜</h1>
-    <div class="instruction-box">
+    <h1 class="game-title" style="font-size: 2rem;">Rules 📜</h1>
+    <div class="instruction-card">
         <ul>
-            <li>Tap cards to discover safe matching pairs.</li>
-            <li>Link a <b>Danger/Hazard tile</b> to its <b>Safe Solution tile</b>!</li>
-            <li>Finding a pair opens up an interactive challenge.</li>
-            <li>Secure <b>+20 points</b> for accurate answers!</li>
+            <li>Tap pairs of identical safety items to match them.</li>
+            <li>Matching a pair unlocks a vital Safety Quiz question.</li>
+            <li>Answer correctly to gain points! Watch out for your hearts!</li>
         </ul>
     </div>
-    <button class="btn-friendly" id="btn-play">PLAY</button>
+    <button class="btn-playful" id="btn-play">PLAY NOW</button>
 </div>
 
 <div id="game-screen" class="screen">
     <div class="game-header">
         <div id="level-title" class="level-indicator">Level 1: Safety at Home 🏠</div>
         <div class="status-bar">
-            <span>Score: <span id="score-display">0</span>/240</span>
-            <span>Matches: <span id="match-count">0</span>/3</span>
+            <span class="score-box">Score: <span id="score-display">0</span></span>
+            <span class="lives-box" id="lives-display">❤️❤️❤️</span>
         </div>
     </div>
 
     <div class="grid" id="card-grid"></div>
 
     <div id="quiz-overlay">
-        <h3 class="quiz-title">⚠️ Safety Quiz!</h3>
+        <div class="quiz-top-info">
+            <span class="quiz-tag">⚠️ Safety Quiz</span>
+            <span class="q-number-tracker" id="q-number-display">Question 1 of 4</span>
+        </div>
         <p id="q-text"></p>
         <div id="q-options"></div>
         <div id="msg-box"></div>
@@ -309,46 +344,37 @@
         {
             levelName: "Level 1: Safety at Home 🏠",
             pairs: [
-                { id: 1, matchId: 1, type: "A", icon: "🧼" }, // Wet Floor
-                { id: 2, matchId: 1, type: "B", icon: "🧹" }, // Dry Action
-                { id: 3, matchId: 2, type: "A", icon: "🧸" }, // Leftover Toys
-                { id: 4, matchId: 2, type: "B", icon: "📦" }, // Clean Box
-                { id: 5, matchId: 3, type: "A", icon: "⚡" }, // Wet Hands
-                { id: 6, matchId: 3, type: "B", icon: "🔌" }  // Power Isolation
+                { id: 1, matchId: 1, icon: "🧹" }, { id: 2, matchId: 1, icon: "🧹" },
+                { id: 3, matchId: 2, icon: "📦" }, { id: 4, matchId: 2, icon: "📦" },
+                { id: 5, matchId: 3, icon: "🔌" }, { id: 6, matchId: 3, icon: "🔌" }
             ],
             questions: [
                 { q: "You see soap and water spilled on the bathroom floor. What should you do?", o: ["Walk over it quickly.", "Clean the floor and keep it dry so no one slips.", "Leave it for someone else."], a: 1 },
-                { q: "You just finished playing with your favorite toys. What is the safest rule?", o: ["Leave them on the floor.", "Hide them under the bed.", "Keep your toys back in their place so no one trips."], a: 2 },
-                { q: "Your hands are completely wet. Is it safe to flip an electrical switch?", o: ["Yes, if you do it very fast.", "No, never touch electrical switches with wet hands.", "Yes, water protects you."], a: 1 },
+                { q: "You just finished playing with your toys. What is the safest rule?", o: ["Leave them on the floor.", "Hide them under the bed.", "Keep your toys back in their place so no one trips over them."], a: 2 },
+                { q: "Your hands are completely wet. Is it safe to flip a switch?", o: ["Yes, if you do it very fast.", "No, never touch electrical switches with wet hands.", "Yes, water protects you."], a: 1 },
                 { q: "Why should we check cooking gas pipes in the kitchen regularly?", o: ["To see if they look clean.", "To avoid dangerous gas leakages.", "To make food cook faster."], a: 1 }
             ]
         },
         {
             levelName: "Level 2: Safety at School 🏫",
             pairs: [
-                { id: 7, matchId: 4, type: "A", icon: "🪜" },
-                { id: 8, matchId: 4, type: "B", icon: "🙋‍♂️" },
-                { id: 9, matchId: 5, type: "A", icon: "🏃‍♂️" },
-                { id: 10, matchId: 5, type: "B", icon: "🚶‍♂️" },
-                { id: 11, matchId: 6, type: "A", icon: "🤝" },
-                { id: 12, matchId: 6, type: "B", icon: "🗣️" }
+                { id: 7, matchId: 4, icon: "🙋‍♂️" }, { id: 8, matchId: 4, icon: "🙋‍♂️" },
+                { id: 9, matchId: 5, icon: "🚶‍♂️" }, { id: 10, matchId: 5, icon: "🚶‍♂️" },
+                { id: 11, matchId: 6, icon: "🗣️" }, { id: 12, matchId: 6, icon: "🗣️" }
             ],
             questions: [
                 { q: "You want to reach a book from a high shelf in the classroom. What should you do?", o: ["Climb onto a shaky chair.", "Ask a teacher or an adult for help.", "Jump as high as you can."], a: 1 },
                 { q: "The bell rings for recess! How should you leave your classroom?", o: ["Run and push past your friends.", "Stay calm, walk in a line, and follow instructions.", "Crawl on the floor."], a: 1 },
-                { q: "You see someone being mean or bullying another classmate. What should you do?", o: ["Join in the fight.", "Stand and watch the fun.", "Tell a teacher or a trusted adult immediately."], a: 2 },
+                { q: "You see someone being mean or bullying a classmate. What should you do?", o: ["Join in the fight.", "Stand and watch the fun.", "Tell a teacher or a trusted adult immediately."], a: 2 },
                 { q: "What does the safety rule 'Haste makes waste' mean?", o: ["Doing things too fast can cause accidents.", "You should run as fast as you can.", "Wasting food is bad."], a: 0 }
             ]
         },
         {
             levelName: "Level 3: Outside & Touch Safety 🌳",
             pairs: [
-                { id: 13, matchId: 7, type: "A", icon: "👤" },
-                { id: 14, matchId: 7, type: "B", icon: "🛑" },
-                { id: 15, matchId: 8, type: "A", icon: "🤫" },
-                { id: 16, matchId: 8, type: "B", icon: "🗣️" },
-                { id: 17, matchId: 9, type: "A", icon: "🩹" },
-                { id: 18, matchId: 9, type: "B", icon: "🧴" }
+                { id: 13, matchId: 7, icon: "🛑" }, { id: 14, matchId: 7, icon: "🛑" },
+                { id: 15, matchId: 8, icon: "🩹" }, { id: 16, matchId: 8, icon: "🩹" },
+                { id: 17, matchId: 9, icon: "🧴" }, { id: 18, matchId: 9, icon: "🧴" }
             ],
             questions: [
                 { q: "An unknown person in the park offers you candy. What should you do?", o: ["Take it and say thank you.", "Never take anything from a stranger.", "Ask them for more candy."], a: 1 },
@@ -361,6 +387,7 @@
 
     let currentLevel = 0;
     let score = 0;
+    let lives = 3;
     let matchesFound = 0;
     let selectedCards = [];
     let activeQuestionIdx = 0;
@@ -371,12 +398,8 @@
         document.getElementById(screenId).classList.add('active');
     }
 
-    // Auto router splash display for 5000ms
-    setTimeout(() => {
-        showScreen('title-screen');
-    }, 5000);
+    setTimeout(() => { showScreen('title-screen'); }, 5000);
 
-    // Touch-flexible navigation triggers
     document.getElementById('btn-start').addEventListener('pointerup', () => showScreen('instruction-screen'));
     document.getElementById('btn-play').addEventListener('pointerup', () => {
         showScreen('game-screen');
@@ -388,17 +411,22 @@
         activeQuestionIdx = 0;
         selectedCards = [];
         document.getElementById("quiz-overlay").style.display = "none";
-        document.getElementById("match-count").innerText = matchesFound;
         document.getElementById("level-title").innerText = gameData[currentLevel].levelName;
-        
+        updateHUD();
+
         let dataset = [...gameData[currentLevel].pairs];
-        while(dataset.length < 16) {
-            dataset.push({ id: -1, matchId: -2, type: "X", icon: "❓" });
-        }
-        
         dataset.sort(() => Math.random() - 0.5);
         levelCards = dataset;
         renderGrid();
+    }
+
+    function updateHUD() {
+        document.getElementById("score-display").innerText = score;
+        let hearts = "";
+        for(let i=0; i<3; i++) {
+            hearts += (i < lives) ? "❤️" : "🖤";
+        }
+        document.getElementById("lives-display").innerText = hearts;
     }
 
     function renderGrid() {
@@ -409,7 +437,6 @@
             cardEl.className = "card";
             cardEl.innerText = "?";
             
-            // Pointerup offers flexible responsive selection for physical screens and emulation tracking alike
             cardEl.addEventListener('pointerup', (e) => {
                 e.preventDefault();
                 handleCardInteraction(idx, cardEl);
@@ -420,7 +447,7 @@
 
     function handleCardInteraction(idx, cardEl) {
         let card = levelCards[idx];
-        if (card.id === -1 || cardEl.classList.contains("matched") || cardEl.classList.contains("flipped") || selectedCards.length >= 2) return;
+        if (cardEl.classList.contains("matched") || cardEl.classList.contains("flipped") || selectedCards.length >= 2) return;
 
         cardEl.innerText = card.icon;
         cardEl.classList.add("flipped");
@@ -433,16 +460,13 @@
 
     function processMatchCheck() {
         let [c1, c2] = selectedCards;
-        if (c1.data.matchId === c2.data.matchId && c1.data.type !== c2.data.type) {
-            c1.element.className = "card matched";
-            c2.element.className = "card matched";
+        if (c1.data.matchId === c2.data.matchId && c1.data.id !== c2.data.id) {
+            c1.element.className = "card flipped matched";
+            c2.element.className = "card flipped matched";
             matchesFound++;
-            document.getElementById("match-count").innerText = matchesFound;
             selectedCards = [];
             
-            setTimeout(() => {
-                displayOverlayQuestion();
-            }, 500);
+            setTimeout(() => { displayOverlayQuestion(); }, 600);
         } else {
             setTimeout(() => {
                 c1.element.innerText = "?";
@@ -457,6 +481,8 @@
     function displayOverlayQuestion() {
         const overlay = document.getElementById("quiz-overlay");
         overlay.style.display = "flex";
+        
+        document.getElementById("q-number-display").innerText = `Question ${activeQuestionIdx + 1} of 4`;
         
         let qData = gameData[currentLevel].questions[activeQuestionIdx];
         document.getElementById("q-text").innerText = qData.q;
@@ -486,22 +512,29 @@
         if(chosen === correct) {
             clickedBtn.classList.add("correct-choice");
             msg.style.color = "var(--mint-green)";
-            msg.innerText = "🎉 Correct! Great job! (+20 Points)";
+            msg.innerText = "🎉 Correct! (+20 Points)";
             document.getElementById("snd-correct").play().catch(()=>{});
             score += 20;
-            document.getElementById("score-display").innerText = score;
         } else {
             clickedBtn.classList.add("wrong-choice");
             buttons[correct].classList.add("correct-choice");
             msg.style.color = "var(--coral-pink)";
-            msg.innerText = "❌ Remember the textbook safety rule!";
+            msg.innerText = "❌ Uh oh! Incorrect action!";
             document.getElementById("snd-wrong").play().catch(()=>{});
+            lives--;
         }
+
+        updateHUD();
 
         setTimeout(() => {
             document.getElementById("quiz-overlay").style.display = "none";
             activeQuestionIdx++;
             
+            if (lives <= 0) {
+                gameOver(false);
+                return;
+            }
+
             if (matchesFound === 3 && activeQuestionIdx === 3) {
                 displayOverlayQuestion();
             } else if (activeQuestionIdx > 3) {
@@ -516,16 +549,23 @@
         if(currentLevel < gameData.length) {
             setupLevel();
         } else {
-            document.getElementById("game-screen").innerHTML = `
-                <h1 class="game-title" style="margin-top:40px;">🏆 Safety Champion!</h1>
-                <p class="subtitle" style="font-size:1.2rem; margin-bottom:20px;">You completed all safety matching milestones perfectly!</p>
-                <div class="instruction-box" style="text-align:center; background:#f3e5f5; border:none; padding:20px;">
-                    <span style="font-size:2rem; font-weight:bold; color:var(--purple-main);">${score} / 240 Points</span>
-                </div>
-                <button class="btn-friendly" id="btn-reload" style="margin-top:20px;">Restart Game 🔄</button>
-            `;
-            document.getElementById('btn-reload').addEventListener('pointerup', () => location.reload());
+            gameOver(true);
         }
+    }
+
+    function gameOver(isWin) {
+        const title = isWin ? "🏆 Safety Hero!" : "🚨 Game Over!";
+        const subtitle = isWin ? "Splendid! All levels cleared." : "You ran out of lives! Try again to score better.";
+        
+        document.getElementById("game-screen").innerHTML = `
+            <h1 class="game-title">${title}</h1>
+            <p class="subtitle" style="margin-bottom:20px;">${subtitle}</p>
+            <div class="instruction-card" style="text-align:center; background:var(--purple-light); border:none;">
+                <span style="font-size:2rem; font-weight:bold; color:var(--purple-main);">${score} / 240 Points</span>
+            </div>
+            <button class="btn-playful" id="btn-reload" style="margin-top:20px;">Try Again 🔄</button>
+        `;
+        document.getElementById('btn-reload').addEventListener('pointerup', () => location.reload());
     }
 </script>
 
