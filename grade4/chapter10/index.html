@@ -22,12 +22,13 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
             background: linear-gradient(135deg, #d7ebd9 0%, #ccebe6 50%, #d2e7f7 100%);
             color: var(--text-dark);
             display: flex;
@@ -44,7 +45,7 @@
             height: 85vh;
             min-height: 590px;
             max-height: 740px;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.72);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 40px;
@@ -72,6 +73,29 @@
         @keyframes smoothFade {
             0% { opacity: 0; transform: scale(0.97); }
             100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- IN-GAME TOAST HINT NOTIFICATION --- */
+        .toast-hint {
+            position: absolute;
+            top: -100px;
+            left: 20px;
+            right: 20px;
+            background: #fffde7;
+            border: 3px solid var(--soft-gold);
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #f57f17;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+            text-align: left;
+            pointer-events: none;
+        }
+        .toast-hint.show {
+            transform: translateY(120px);
         }
 
         /* --- SCREEN 1: SPLASH SCREEN --- */
@@ -130,7 +154,7 @@
             color: white;
             border: none;
             padding: 16px 32px;
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 700;
             border-radius: 24px;
             cursor: pointer;
@@ -139,6 +163,7 @@
             width: 85%;
             border-bottom: 4px solid #3b9189;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-family: inherit;
         }
         .btn-bubbly:active {
             transform: translateY(3px);
@@ -146,22 +171,22 @@
             box-shadow: 0 4px 10px rgba(77, 182, 172, 0.2);
         }
 
-        /* --- TEXT STYLES --- */
+        /* --- TYPOGRAPHY --- */
         h1 {
-            font-size: 2.15rem;
+            font-size: 2.25rem;
             color: #2c4a45;
             margin: 10px 0;
             font-weight: 800;
             line-height: 1.2;
         }
         p {
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             color: #556b67;
             line-height: 1.4;
             margin: 5px 0;
         }
 
-        /* --- RULES CARD --- */
+        /* --- RULES VIEW --- */
         .rules-wrapper {
             background: rgba(255, 255, 255, 0.45);
             border-radius: 24px;
@@ -176,7 +201,7 @@
             align-items: flex-start;
             gap: 12px;
             margin-bottom: 14px;
-            font-size: 1.02rem;
+            font-size: 1.05rem;
             font-weight: 600;
             color: #3b4d49;
         }
@@ -192,13 +217,13 @@
             padding: 11px 16px;
             border-radius: 18px;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             border: 1px solid rgba(255,255,255,0.8);
         }
         .score-box { color: #388e3c; }
         .lives-box { color: var(--soft-red); letter-spacing: 2px; }
 
-        /* --- GRID MATRIX --- */
+        /* --- GRID CONTAINER --- */
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -208,11 +233,11 @@
             flex-grow: 1;
         }
         .card {
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.8);
             border: 2px solid #e0f2f1;
             border-radius: 20px;
             padding: 12px 10px;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--text-dark);
             cursor: pointer;
@@ -227,18 +252,20 @@
             text-align: center;
         }
         .card .icon {
-            font-size: 1.8rem;
+            font-size: 2rem;
+            pointer-events: none;
         }
         .card .card-text {
-            font-size: 0.88rem;
+            font-size: 0.95rem;
             color: #455a64;
             line-height: 1.25;
+            pointer-events: none;
         }
         .card.selected {
             border-color: var(--accent-blue);
             background: #e3f2fd;
             transform: scale(0.96);
-            box-shadow: 0 2px 5px rgba(100,181,246,0.2);
+            box-shadow: 0 2px 5px rgba(100,181,246,0.3);
         }
         .card.matched {
             background: #e8f5e9 !important;
@@ -272,13 +299,13 @@
             background: #9575cd;
             color: white;
             padding: 4px 14px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 700;
             border-radius: 12px;
             align-self: center;
         }
         .popup-q {
-            font-size: 1.08rem;
+            font-size: 1.12rem;
             font-weight: 700;
             color: var(--text-dark);
             line-height: 1.4;
@@ -295,12 +322,14 @@
             border: 2px solid #e2e8f0;
             padding: 14px 16px;
             border-radius: 16px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             text-align: left;
             transition: all 0.15s ease;
             color: var(--text-dark);
+            font-family: inherit;
+            touch-action: none;
         }
         .opt-btn.correct { background: #e8f5e9 !important; border-color: var(--accent-green) !important; color: #2e7d32 !important; }
         .opt-btn.wrong { background: #ffebee !important; border-color: var(--soft-red) !important; color: #c62828 !important; }
@@ -311,7 +340,7 @@
             border: 2px solid var(--soft-gold);
             border-radius: 16px;
             padding: 10px 12px;
-            font-size: 0.86rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: #f57f17;
             text-align: left;
@@ -323,6 +352,8 @@
 <body>
 
 <div class="game-window">
+    <div class="toast-hint" id="toast-hint-view">💡 Hint Alert Banner Container...</div>
+
     <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
@@ -330,28 +361,28 @@
     <div id="screen-splash" class="screen active">
         <div class="splash-logo-box">
             <img class="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
-            <h2 id="fallback-logo" style="display:none; color: #004d40; font-weight:800; margin:0; font-size: 2rem;">INNOVINE</h2>
+            <h2 id="fallback-logo" style="display:none; color: #004d40; font-weight:800; margin:0; font-size: 2.2rem;">INNOVINE</h2>
         </div>
         <div class="bar-bg"><div class="bar-fill"></div></div>
     </div>
 
     <div id="screen-welcome" class="screen">
         <div style="text-align: center; margin-top: 25px;">
-            <span style="font-size: 3.5rem;">✨</span>
+            <span style="font-size: 3.8rem;">✨</span>
             <h1>Civic Chain<br>Reaction</h1>
             <p style="font-weight: 600; color: #78909c;">Explore Our Rights & Duties Together</p>
         </div>
-        <button class="btn-bubbly" onclick="goToRules()">START GAME</button>
+        <button class="btn-bubbly" id="btn-start-welcome">START GAME</button>
     </div>
 
     <div id="screen-rules" class="screen">
         <h1>How To Play 🧩</h1>
         <div class="rules-wrapper">
-            <div class="rule-item"><span>🟢</span><span>Connect an action or scenario tile with its correct constitutional value. Order doesn't matter!</span></div>
-            <div class="rule-item"><span>🔥</span><span>Every successful match instantly triggers <b>2 Bonus Chain Questions</b>!</span></div>
-            <div class="rule-item"><span>❤️</span><span>You start with <b>4 lives</b>. Your first mistake unlocks a helpful hint!</span></div>
+            <div class="rule-item"><span>🟢</span><span>Connect an action scenario tile with its matching value. Order doesn't matter!</span></div>
+            <div class="rule-item"><span>🔥</span><span>Every successful match instantly triggers <b>2 Randomized Bonus Questions</b>!</span></div>
+            <div class="rule-item"><span>❤️</span><span>You start with <b>4 lives</b>. Your first mistake unlocks an instant layout hint!</span></div>
         </div>
-        <button class="btn-bubbly" onclick="goToPlay()">PLAY NOW 🚀</button>
+        <button class="btn-bubbly" id="btn-play-rules">PLAY NOW 🚀</button>
     </div>
 
     <div id="screen-play" class="screen">
@@ -361,17 +392,17 @@
             <span class="lives-box" id="val-lives">❤️❤️❤️❤️</span>
         </div>
 
-        <p style="font-size: 0.92rem; font-weight: 700; color: #78909c; text-align: center; margin: 8px 0 0 0;">Tap two matching cards:</p>
+        <p style="font-size: 0.95rem; font-weight: 700; color: #78909c; text-align: center; margin: 8px 0 0 0;">Tap two matching cards:</p>
 
         <div class="grid" id="game-grid-matrix">
             </div>
 
         <div class="popup-modal" id="bonus-chain-modal">
             <div class="popup-tag" id="tag-bonus-title">BONUS QUESTION</div>
-            <div class="popup-q" id="text-bonus-q">Question text line...</div>
+            <div class="popup-q" id="text-bonus-q">Question line prompt content template...</div>
             <div class="options-list" id="box-options-list">
                 </div>
-            <div class="hint-container" id="box-hint-view">Hint container...</div>
+            <div class="hint-container" id="box-hint-view">Hint description container...</div>
         </div>
     </div>
 
@@ -379,17 +410,16 @@
         <div style="text-align: center; margin-top: 25px;">
             <span style="font-size: 3.5rem;">🏆</span>
             <h1>Finished!</h1>
-            <div style="background: #e8f5e9; padding: 12px 28px; border-radius: 20px; font-size: 1.9rem; font-weight: 800; color: #2e7d32; display: inline-block; margin: 15px 0;">
+            <div style="background: #e8f5e9; padding: 12px 28px; border-radius: 20px; font-size: 2rem; font-weight: 800; color: #2e7d32; display: inline-block; margin: 15px 0;">
                 <span id="val-final-score">0</span> Points
             </div>
-            <p id="text-final-feedback" style="font-weight: 600; padding: 0 10px; font-size: 1.05rem;"></p>
+            <p id="text-final-feedback" style="font-weight: 600; padding: 0 10px; font-size: 1.1rem;"></p>
         </div>
-        <button class="btn-bubbly" onclick="restartGame()">PLAY AGAIN 🔄</button>
+        <button class="btn-bubbly" id="btn-replay-results">PLAY AGAIN 🔄</button>
     </div>
 </div>
 
 <script>
-    // Curriculum Content Configuration
     const contentPool = [
         {
             id: "edu",
@@ -404,7 +434,7 @@
                 },
                 {
                     q: "Providing learning opportunities to a child is a parent's:",
-                    o: ["Fundamental Right", "Fundamental Duty", "Personal Choice", "Optional Target"],
+                    o: ["Fundamental Duty", "Fundamental Right", "Personal Choice", "Optional Target"],
                     a: "Fundamental Duty",
                     info: "It is a fundamental duty of a parent or guardian to provide educational opportunities."
                 }
@@ -417,13 +447,13 @@
             bonus: [
                 {
                     q: "What is the minimum age required for an Indian citizen to vote?",
-                    o: ["16 Years", "21 Years", "18 Years", "25 Years"],
+                    o: ["18 Years", "16 Years", "21 Years", "25 Years"],
                     a: "18 Years",
                     info: "Every adult citizen of India who is 18 years of age or older has the right to vote."
                 },
                 {
                     q: "Democracy means a system where supreme power belongs to the:",
-                    o: ["Monarch", "People", "Military", "Government Officials"],
+                    o: ["People", "Monarch", "Military", "Government Officials"],
                     a: "People",
                     info: "Democratic setup means all citizens elect their own representatives to run the government."
                 }
@@ -442,7 +472,7 @@
                 },
                 {
                     q: "What should you do if someone is defacing a historic wall monument?",
-                    o: ["Join them", "Ignore them", "Stop them or inform guides", "Run away"],
+                    o: ["Stop them or inform guides", "Join them", "Ignore them", "Run away"],
                     a: "Stop them or inform guides",
                     info: "It is our shared national civic duty to value and protect historical monuments."
                 }
@@ -455,13 +485,13 @@
             bonus: [
                 {
                     q: "Which elements are part of the environment we must defend?",
-                    o: ["Concrete roads", "Forests, rivers, & wildlife", "Industrial complexes", "Airplanes"],
+                    o: ["Forests, rivers, & wildlife", "Concrete roads", "Industrial complexes", "Airplanes"],
                     a: "Forests, rivers, & wildlife",
                     info: "Our core civic duties expect us to protect natural environments including lakes and animals."
                 },
                 {
                     q: "Protecting the environment is listed in our Constitution as a:",
-                    o: ["Fundamental Right", "Fundamental Duty", "Optional Task", "Directive Principle"],
+                    o: ["Fundamental Duty", "Fundamental Right", "Optional Task", "Directive Principle"],
                     a: "Fundamental Duty",
                     info: "Caring for nature is a direct fundamental duty for every citizen of India."
                 }
@@ -480,7 +510,7 @@
     let currentBonusIdx = 0;
     let lockInput = false;
 
-    // Splash Screen timeout trigger
+    // Fixed 5-Second Splash Loader View Sequence
     setTimeout(() => { changeView('screen-welcome'); }, 5000);
 
     function changeView(id) {
@@ -488,8 +518,25 @@
         document.getElementById(id).classList.add('active');
     }
 
-    function goToRules() { changeView('screen-rules'); }
-    function goToPlay() { changeView('screen-play'); restartGame(); }
+    // Zero-lag instant touch listener helper
+    function bindInstantTouch(elementId, callback) {
+        const item = document.getElementById(elementId);
+        item.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            callback();
+        });
+    }
+
+    bindInstantTouch('btn-start-welcome', () => changeView('screen-rules'));
+    bindInstantTouch('btn-play-rules', () => { changeView('screen-play'); restartGame(); });
+    bindInstantTouch('btn-replay-results', () => { restartGame(); });
+
+    function launchCustomToastHint(msg) {
+        const banner = document.getElementById('toast-hint-view');
+        banner.innerText = "💡 " + msg;
+        banner.classList.add('show');
+        setTimeout(() => { banner.classList.remove('show'); }, 4000);
+    }
 
     function restartGame() {
         totalScore = 0;
@@ -520,7 +567,9 @@
             }
         });
 
+        // Full Randomization of board layout positioning
         tilesList.sort(() => Math.random() - 0.5);
+        
         const container = document.getElementById('game-grid-matrix');
         container.innerHTML = "";
 
@@ -528,7 +577,12 @@
             const block = document.createElement('div');
             block.className = "card";
             block.innerHTML = `<div class="icon">${data.icon}</div><div class="card-text">${data.text}</div>`;
-            block.onclick = () => handleCardInteraction(block, data);
+            
+            // Lag-free responsive pointerdown binding
+            block.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                handleCardInteraction(block, data);
+            });
             container.appendChild(block);
         });
     }
@@ -559,7 +613,7 @@
 
             let currentActiveMatchId = roundsOrder[activeRoundIndex].id;
 
-            // Bidirectional Matching (Handles Scene-to-Rule AND Rule-to-Scene cleanly)
+            // Bidirectional Matching (Scene-to-Rule AND Rule-to-Scene match perfectly)
             if (previousSelection.data.id === cardInfo.id && cardInfo.id === currentActiveMatchId && previousSelection.data.type !== cardInfo.type) {
                 previousSelection.dom.className = "card matched";
                 element.className = "card matched";
@@ -577,7 +631,7 @@
 
                 if (!initialMistakeMade) {
                     initialMistakeMade = true;
-                    alert(`💡 Hint: Find the items matching the ${roundsOrder[activeRoundIndex].scenario.icon} behavior or rule category!`);
+                    launchCustomToastHint(`Match items belonging to the ${roundsOrder[activeRoundIndex].scenario.icon} behavior or duty option category!`);
                 }
 
                 if (userLives <= 0) setTimeout(() => concludeGameFlow(false), 600);
@@ -586,7 +640,8 @@
     }
 
     function triggerBonusSequence(questionsArray) {
-        queueBonusData = questionsArray;
+        // Shuffling the order of the questions entirely
+        queueBonusData = [...questionsArray].sort(() => Math.random() - 0.5);
         currentBonusIdx = 0;
         displayBonusPrompt();
     }
@@ -602,11 +657,18 @@
         const container = document.getElementById('box-options-list');
         container.innerHTML = "";
 
-        quizData.o.forEach(choice => {
+        // Shuffling multiple choice answer positions dynamically
+        let dynamicShuffledOptions = [...quizData.o].sort(() => Math.random() - 0.5);
+
+        dynamicShuffledOptions.forEach(choice => {
             const button = document.createElement('button');
             button.className = "opt-btn";
             button.innerText = choice;
-            button.onclick = () => processBonusSelection(button, choice, quizData.a, quizData.info);
+            
+            button.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                processBonusSelection(button, choice, quizData.a, quizData.info);
+            });
             container.appendChild(button);
         });
 
@@ -670,7 +732,7 @@
 
         const dashboardText = document.getElementById('text-final-feedback');
         if (isVictory && totalScore >= 240) {
-            dashboardText.innerText = "Fantastic! You are a model citizen. You answered all bonus questions flawlessly!";
+            dashboardText.innerText = "Fantastic! You are a model citizen. You completed everything flawlessly!";
         } else if (isVictory) {
             dashboardText.innerText = "Great job! You connected the circuits successfully. Play again to get a perfect score!";
         } else {
