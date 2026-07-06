@@ -1,1 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plaque Attack! - Grade 4 EVS</title>
+    <style>
+        /* --- DESIGN SYSTEM & PASTEL PALETTE --- */
+        :root {
+            --bg-pastel: #F3F7FA;
+            --primary: #FF9AA2;
+            --primary-dark: #FF7B87;
+            --secondary: #B5EAD7;
+            --accent: #FFDAC1;
+            --text-dark: #4A4A4A;
+            --white: #FFFFFF;
+            --tooth-clean: #FAFAFA;
+            --plaque-yellow: #F3E39D;
+            --plaque-green: #C7ECCE;
+            --cavity-black: #444444;
+            --font-stack: 'Comic Sans MS', 'Chalkboard SE', 'Bubbles', sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-pastel);
+            color: var(--text-dark);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- RESPONSIVE WRAPPER --- */
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 850px;
+            background-color: var(--white);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 601px) {
+            #game-container {
+                border-radius: 30px;
+                height: 94vh;
+            }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            z-index: 0;
+        }
+
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 0px var(--accent);
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.25rem;
+            font-family: var(--font-stack);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px var(--primary-dark);
+            transition: all 0.1s ease;
+            transform: translateY(0);
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px var(--primary-dark);
+        }
+
+        /* --- SCREEN 1: INNOVINE LOGO --- */
+        #screen-logo {
+            background-color: #FFFFFF;
+        }
+        
+        .logo-img {
+            max-width: 220px;
+            height: auto;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* --- SCREEN 2 & 3: TITLE & INSTRUCTIONS --- */
+        .mascot-art {
+            font-size: 4.5rem;
+            margin-bottom: 16px;
+            animation: bounce 2s infinite ease;
+        }
+
+        .instruction-card {
+            background-color: var(--bg-pastel);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .instruction-card li {
+            margin-left: 16px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* --- HUD HEADER PANEL --- */
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--bg-pastel);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 20;
+            border-bottom: 2px solid #EAEAEA;
+        }
+
+        .stat-badge {
+            background: var(--white);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        /* --- SCREEN 4: ARCADE GAMEPLAY (TEETH GRID) --- */
+        .arcade-ui-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding-top: 60px;
+        }
+
+        .jaw-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #B0B0B0;
+            margin: 6px 0;
+            letter-spacing: 1px;
+        }
+
+        .teeth-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            width: 100%;
+            padding: 12px 10px;
+            background-color: #FFD3D6; /* Pink pastel gums color */
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.06);
+        }
+
+        #upper-jaw {
+            border-radius: 20px 20px 6px 6px;
+            margin-bottom: 24px;
+        }
+
+        #lower-jaw {
+            border-radius: 6px 6px 20px 20px;
+        }
+
+        .tooth {
+            aspect-ratio: 1 / 1.2;
+            background-color: var(--tooth-clean);
+            border-radius: 4px 4px 10px 10px;
+            box-shadow: 0 3px 0px #DDD, inset 0 -3px 4px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: background-color 0.15s ease, transform 0.05s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #upper-jaw .tooth {
+            border-radius: 10px 10px 4px 4px;
+            box-shadow: 0 -3px 0px #DDD, inset 0 3px 4px rgba(0,0,0,0.02);
+        }
+
+        .tooth:active {
+            transform: scale(0.9);
+        }
+
+        /* Tooth Infection States */
+        .tooth.yellow {
+            background-color: var(--plaque-yellow) !important;
+            box-shadow: 0 3px 0px #CDB55E !important;
+        }
+        #upper-jaw .tooth.yellow { box-shadow: 0 -3px 0px #CDB55E !important; }
+
+        .tooth.green {
+            background-color: var(--plaque-green) !important;
+            box-shadow: 0 3px 0px #97C79F !important;
+        }
+        #upper-jaw .tooth.green { box-shadow: 0 -3px 0px #97C79F !important; }
+
+        .tooth.black {
+            background-color: var(--cavity-black) !important;
+            box-shadow: 0 3px 0px #222 !important;
+            animation: shake 0.2s infinite alternate;
+        }
+        #upper-jaw .tooth.black { box-shadow: 0 -3px 0px #222 !important; }
+
+        /* --- SCREEN 5: QUIZ挑戰 CHALLENGE --- */
+        .quiz-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-top: 60px;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .question-card {
+            background-color: #F8FAFC;
+            border-radius: 20px;
+            padding: 18px;
+            border: 2px dashed var(--primary);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background-color: var(--white);
+            border: 2px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 14px 18px;
+            text-align: left;
+            font-family: var(--font-stack);
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 0px #E2E8F0;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #E2E8F0;
+        }
+
+        .option-btn.correct {
+            background-color: var(--secondary) !important;
+            border-color: #9BD2C0 !important;
+            box-shadow: 0 4px 0px #82BEAB !important;
+            color: #235141 !important;
+        }
+
+        .option-btn.wrong {
+            background-color: #FFCCD0 !important;
+            border-color: #FFA4AC !important;
+            box-shadow: 0 4px 0px #E0828A !important;
+            color: #722229 !important;
+        }
+
+        .banner-panel {
+            background-color: #FFF9E6;
+            border-left: 5px solid #FFE082;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        .banner-panel strong {
+            color: #C69500;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* --- CONFETTI OVERLAY --- */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes shake {
+            0% { transform: translateX(-1px); }
+            100% { transform: translateX(1px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="confetti-canvas"></canvas>
+
+        <div id="game-hud" class="game-header hidden">
+            <div id="hud-round" class="stat-badge">Round: 1/5</div>
+            <div id="hud-score" class="stat-badge">⭐ 0</div>
+            <div id="hud-lives" class="stat-badge">❤️ 4</div>
+        </div>
+
+        <div id="screen-logo" class="screen">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <div id="logo-fallback" style="display:none; font-size:2rem; font-weight:bold; color:var(--primary-dark);">INNOVINE EDU</div>
+        </div>
+
+        <div id="screen-title" class="screen hidden">
+            <div class="mascot-art">🦷</div>
+            <h1>Plaque Attack!</h1>
+            <p>Brush away the sticky germ monsters and protect your sparkling white teeth!</p>
+            <button class="btn" onclick="goToInstructions()">Start Game</button>
+        </div>
+
+        <div id="screen-instructions" class="screen hidden">
+            <h1>How To Play</h1>
+            <div class="instruction-card">
+                <ul style="list-style-type: none;">
+                    <li>🧼 <strong>Step 1:</strong> Random teeth will turn yellow or green. Tap them instantly to brush them clean!</li>
+                    <li>👾 <strong>Watch Out:</strong> If left ignored, they become black <strong>Cavities</strong> and you lose a life!</li>
+                    <li>🧠 <strong>Step 2:</strong> Finish the brushing drill to unlock 3 fun textbook questions.</li>
+                </ul>
+            </div>
+            <button class="btn" onclick="startGame()">Play Now 🚀</button>
+        </div>
+
+        <div id="screen-arcade" class="screen hidden">
+            <div class="arcade-ui-wrapper">
+                <div class="jaw-title">UPPER JAW</div>
+                <div id="upper-jaw" class="teeth-grid"></div>
+                
+                <div id="lower-jaw" class="teeth-grid"></div>
+                <div class="jaw-title">LOWER JAW</div>
+                
+                <p style="margin-top:15px; font-size:0.9rem; color:#777;" id="arcade-timer-text">
+                    Tap the dirty teeth quickly!
+                </p>
+            </div>
+        </div>
+
+        <div id="screen-quiz" class="screen hidden">
+            <div class="quiz-wrapper">
+                <div id="quiz-question" class="question-card">
+                    Loading question...
+                </div>
+                
+                <div id="quiz-options" class="options-container">
+                    </div>
+                
+                <div id="quiz-banner" class="banner-panel hidden">
+                    </div>
+            </div>
+        </div>
+
+        <div id="screen-gameover" class="screen hidden">
+            <div id="gameover-icon" style="font-size: 4.5rem; margin-bottom:10px;">🏆</div>
+            <h1 id="gameover-title">Fantastic!</h1>
+            <p id="gameover-feedback">Loading report card...</p>
+            
+            <div class="instruction-card" style="text-align:center; background:#FAFAFA;">
+                <span style="font-size:1rem; color:#666;">Your Score:</span>
+                <div id="gameover-score" style="font-size:3rem; font-weight:bold; color:var(--primary-dark);">0</div>
+            </div>
+            
+            <button class="btn" onclick="resetToTitle()">Play Again 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- BOOK DATA EXTRAPOLATED INTEGRATION --- */
+        const SIMPLIFIED_QUESTIONS = [
+            {
+                q: "Tim is 6 years old. His front tooth just wiggled and fell out. What kind of temporary tooth fell out?",
+                options: ["Permanent tooth", "Milk tooth", "Wisdom tooth", "Animal tusk"],
+                answer: 1,
+                hint: "These are the first temporary teeth we grow when we are small babies.",
+                explanation: "Children grow a temporary set of 20 milk teeth. They begin to fall out around age 6 to allow big permanent adult teeth to grow."
+            },
+            {
+                q: "An adult has 16 teeth in the top jaw and 16 teeth in the bottom jaw. How many teeth do they have in total?",
+                options: ["20 teeth", "32 teeth", "28 teeth", "16 teeth"],
+                answer: 1,
+                hint: "Add 16 from the upper jaw and 16 from the lower jaw together!",
+                explanation: "An adult human mouth has a full complete set of 32 permanent teeth total inside the jaws."
+            },
+            {
+                q: "Between the ages of 17 and 25 years, four new back teeth grow in adults. What are these teeth called?",
+                options: ["Wisdom teeth", "Milk teeth", "Incisors", "Canines"],
+                answer: 0,
+                hint: "These four extra molars only grow when you grow up and become much older.",
+                explanation: "The four extra grinding molars that grow at the very back corners of an adult's mouth are called wisdom teeth."
+            },
+            {
+                q: "What is the name of the hard, shiny white outer layer that covers and protects our teeth?",
+                options: ["Enamel", "Dentine", "Pulp", "Root"],
+                answer: 0,
+                hint: "It is the bright white surface layer you see directly when you smile into a mirror.",
+                explanation: "Enamel is the white outer cover layer of teeth. It is the hardest substance found anywhere in the human body!"
+            },
+            {
+                q: "What is the very soft innermost layer of the tooth that holds blood vessels and nerves?",
+                options: ["Pulp", "Enamel", "Dentine", "Crown"],
+                answer: 0,
+                hint: "This living middle core is very soft and feels pain if cold ice cream hits a cavity.",
+                explanation: "The pulp is the innermost soft part of the tooth. It contains tiny blood vessels and nerves that feel pain."
+            },
+            {
+                q: "Which part of the tooth is hidden deep inside the gums and anchors it into the jawbone?",
+                options: ["Crown", "Root", "Enamel", "Pulp"],
+                answer: 1,
+                hint: "Think of how a tree uses its underground parts to stay locked tightly inside the ground.",
+                explanation: "The root of a tooth sits completely inside the gums to hold and anchor the tooth into the stable jawbone."
+            },
+            {
+                q: "Ravi uses his sharp, straight front teeth to cut into a crunchy apple. Which type of teeth is he using?",
+                options: ["Incisors", "Canines", "Molars", "Premolars"],
+                answer: 0,
+                hint: "These are the 8 straight-edged front teeth built like scissors for biting food pieces.",
+                explanation: "Incisors are flat and sharp teeth situated right at the front of each jaw. They act like scissors to cut and bite food."
+            },
+            {
+                q: "Lily uses her sharp, pointed teeth to tear a piece of tough food. What are these teeth called?",
+                options: ["Incisors", "Canines", "Molars", "Gums"],
+                answer: 1,
+                hint: "Lions and tigers have very long, pointed versions of these teeth to tear up meat.",
+                explanation: "Canines are sharp, pointed teeth sitting on each side of your incisors. Their main job is tearing food apart."
+            },
+            {
+                q: "Sam uses his big, flat back teeth to grind up and chew his food properly. What are these broad teeth called?",
+                options: ["Canines", "Incisors", "Molars", "Milk teeth"],
+                answer: 2,
+                hint: "These are the broadest, largest teeth sitting at the very back of our mouth.",
+                explanation: "Molars are broad, large flat teeth at the back of our jaws used for crushing, grinding, and chewing food properly."
+            },
+            {
+                q: "If we do not brush our teeth, a thin and sticky layer of germs forms on them. What is this layer called?",
+                options: ["Plaque", "Enamel", "Saliva", "Water"],
+                answer: 0,
+                hint: "The title of our game is completely named after cleaning this pale yellow germ film away!",
+                explanation: "Plaque is a thin, sticky layer of germs that grows over unbrushed teeth and can form harmful acids."
+            },
+            {
+                q: "To keep our teeth healthy and clean, how many times should we brush them every day?",
+                options: ["Twice a day", "Once a week", "Only on Sundays", "Five times an hour"],
+                answer: 0,
+                hint: "You must clean them once when you wake up in the morning, and once right before sleeping.",
+                explanation: "We must brush our teeth twice a day—in the morning and at night—to stop food rotting and forming cavities."
+            },
+            {
+                q: "How often should we change our toothbrush to keep it fresh and working well?",
+                options: ["Every month", "Every year", "Every day", "Never change it"],
+                answer: 0,
+                hint: "You should ask your parents for a brand new fresh toothbrush regularly after a few weeks pass.",
+                explanation: "Dentists recommend changing your toothbrush regularly after a month to make sure it cleans effectively."
+            },
+            {
+                q: "Your tongue is covered in tiny reddish bumps called papillae. What lives inside these bumps to help you taste food?",
+                options: ["Taste buds", "Small teeth", "Cavities", "Plaque"],
+                answer: 0,
+                hint: "These tiny nerve parts tell your brain if a sweet item or a sour lemon has entered your mouth.",
+                explanation: "The surface of your tongue is covered in tiny bumps called papillae, which contain groups of taste buds."
+            },
+            {
+                q: "Deer are herbivores that only eat plants. Which type of big teeth do they use to crop and tear out plants?",
+                options: ["Incisors", "Canines", "Sharp tusks", "Flesh tearers"],
+                answer: 0,
+                hint: "They use their wide front teeth to clip grass and do not have sharp pointed meat-tearing teeth.",
+                explanation: "Herbivores like deer have big incisors in their lower jaw to gnaw and crop grass, and completely lack sharp canines."
+            },
+            {
+                q: "We should avoid eating or drinking things that are too hot. What could hot food damage on our tongue?",
+                options: ["Taste buds", "Enamel layers", "Jawbones", "Root anchors"],
+                answer: 0,
+                hint: "Burning this sensory layer can make you temporarily lose your ability to taste food flavours.",
+                explanation: "Taking in very hot food or drinks should be avoided because it can damage the sensitive taste buds on the tongue."
+            }
+        ];
+
+        /* --- GAME ENGINE VARIABLES --- */
+        let activeQuestions = [];
+        let currentQuestionIndex = 0;
+        let gameScore = 0;
+        let gameRound = 1; 
+        let arcadeLives = 4;
+        let quizLives = 3;
+        let currentWrongAttempts = 0;
+        
+        let arcadeTimer = null;
+        let plaqueSpawnInterval = null;
+        let arcadeActive = false;
+        let teethState = Array(16).fill(null).map((_, i) => ({ id: i, status: "clean", timer: null }));
+
+        /* --- CROSS DEVICE AUDIO CONTROLLER --- */
+        function playAudio(src) {
+            const sound = new Audio(src);
+            sound.volume = 0.5;
+            sound.play().catch(e => console.log("Audio play delayed until interaction:", e));
+        }
+
+        /* --- CONFETTI ENGINE (CANVAS) --- */
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+        let confettiParticles = [];
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerConfettiEffect() {
+            confettiParticles = [];
+            const colors = ['#FF9AA2', '#B5EAD7', '#FFDAC1', '#E2C974', '#C7CEEA'];
+            for(let i=0; i<50; i++) {
+                confettiParticles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.7) * 10,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    radius: Math.random() * 3 + 4,
+                    gravity: 0.2
+                });
+            }
+            animateConfettiLoop();
+        }
+
+        function animateConfettiLoop() {
+            if (confettiParticles.length === 0) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            confettiParticles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                
+                if(p.y > canvas.height) confettiParticles.splice(index, 1);
+            });
+            requestAnimationFrame(animateConfettiLoop);
+        }
+
+        /* --- STATE NAVIGATION --- */
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            const hud = document.getElementById('game-hud');
+            if (screenId === 'screen-arcade' || screenId === 'screen-quiz') {
+                hud.classList.remove('hidden');
+                refreshHUD();
+            } else {
+                hud.classList.add('hidden');
+            }
+        }
+
+        window.onload = () => {
+            setTimeout(() => { showScreen('screen-title'); }, 5000);
+            createTeethDOM();
+        };
+
+        function goToInstructions() { showScreen('screen-instructions'); }
+        function resetToTitle() { showScreen('screen-title'); }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startGame() {
+            gameScore = 0;
+            gameRound = 1;
+            arcadeLives = 4;
+            quizLives = 3;
+            currentQuestionIndex = 0;
+            
+            activeQuestions = JSON.parse(JSON.stringify(SIMPLIFIED_QUESTIONS));
+            shuffle(activeQuestions);
+            
+            initiateArcadeWave();
+        }
+
+        function refreshHUD() {
+            document.getElementById('hud-round').innerText = `Round: ${gameRound}/5`;
+            document.getElementById('hud-score').innerText = `⭐ ${gameScore}`;
+            
+            const currentScreen = document.querySelector('.screen:not(.hidden)').id;
+            if (currentScreen === 'screen-arcade') {
+                document.getElementById('hud-lives').innerText = `❤️ Gums: ${arcadeLives}`;
+            } else {
+                document.getElementById('hud-lives').innerText = `❤️ Quiz: ${quizLives}`;
+            }
+        }
+
+        /* --- ARCADE SYSTEM LOGIC --- */
+        function createTeethDOM() {
+            const upperContainer = document.getElementById('upper-jaw');
+            const lowerContainer = document.getElementById('lower-jaw');
+            upperContainer.innerHTML = '';
+            lowerContainer.innerHTML = '';
+
+            for(let i=0; i<16; i++) {
+                const tooth = document.createElement('div');
+                tooth.className = 'tooth';
+                tooth.dataset.id = i;
+                
+                tooth.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    brushTooth(i);
+                });
+
+                if(i < 8) upperContainer.appendChild(tooth);
+                else lowerContainer.appendChild(tooth);
+            }
+        }
+
+        function initiateArcadeWave() {
+            showScreen('screen-arcade');
+            arcadeActive = true;
+            
+            teethState.forEach(t => {
+                t.status = "clean";
+                if(t.timer) clearTimeout(t.timer);
+                t.timer = null;
+            });
+            drawTeethGraphics();
+
+            let timeLeft = 12;
+            document.getElementById('arcade-timer-text').innerText = `Keep teeth clean! Time remaining: ${timeLeft}s`;
+            
+            arcadeTimer = setInterval(() => {
+                timeLeft--;
+                if(timeLeft <= 0) {
+                    endArcadeWave(true);
+                } else {
+                    document.getElementById('arcade-timer-text').innerText = `Keep teeth clean! Time remaining: ${timeLeft}s`;
+                }
+            }, 1000);
+
+            let speed = Math.max(1200 - (gameRound * 150), 500);
+            plaqueSpawnInterval = setInterval(() => { spawnPlaque(); }, speed);
+        }
+
+        function spawnPlaque() {
+            if(!arcadeActive) return;
+            const cleanTeeth = teethState.filter(t => t.status === "clean");
+            if(cleanTeeth.length === 0) return;
+
+            const target = cleanTeeth[Math.floor(Math.random() * cleanTeeth.length)];
+            target.status = Math.random() > 0.5 ? "yellow" : "green";
+            drawTeethGraphics();
+
+            let delay = Math.max(2400 - (gameRound * 200), 1200);
+            target.timer = setTimeout(() => {
+                if(target.status === "yellow" || target.status === "green") {
+                    target.status = "black"; // Turns to cavity
+                    arcadeLives--;
+                    refreshHUD();
+                    drawTeethGraphics();
+                    playAudio('assets/wrong.mp3');
+                    
+                    if(arcadeLives <= 0) endArcadeWave(false);
+                }
+            }, delay);
+        }
+
+        function brushTooth(id) {
+            if(!arcadeActive) return;
+            let tooth = teethState[id];
+            if(tooth.status === "yellow" || tooth.status === "green") {
+                if(tooth.timer) clearTimeout(tooth.timer);
+                tooth.timer = null;
+                tooth.status = "clean";
+                gameScore += 5;
+                refreshHUD();
+                drawTeethGraphics();
+            }
+        }
+
+        function drawTeethGraphics() {
+            const domTeeth = document.querySelectorAll('.tooth');
+            teethState.forEach(t => {
+                const element = domTeeth[t.id];
+                element.className = 'tooth';
+                if(t.status !== "clean") element.classList.add(t.status);
+            });
+        }
+
+        function endArcadeWave(passed) {
+            arcadeActive = false;
+            clearInterval(arcadeTimer);
+            clearInterval(plaqueSpawnInterval);
+            teethState.forEach(t => { if(t.timer) clearTimeout(t.timer); });
+
+            if(!passed || arcadeLives <= 0) {
+                wrapUpGameSession(false);
+            } else {
+                initiateQuizWave();
+            }
+        }
+
+        /* --- QUIZ CHALLENGE ENGINE --- */
+        function initiateQuizWave() {
+            showScreen('screen-quiz');
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            currentWrongAttempts = 0;
+            document.getElementById('quiz-banner').classList.add('hidden');
+            refreshHUD();
+
+            let data = activeQuestions[currentQuestionIndex];
+            document.getElementById('quiz-question').innerText = data.q;
+            
+            const optionsBox = document.getElementById('quiz-options');
+            optionsBox.innerHTML = '';
+
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(idx, btn);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectOption(idx, btn) {
+            let data = activeQuestions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.style.pointerEvents = 'none'); // Lock selections
+
+            if(idx === data.answer) {
+                btn.classList.add('correct');
+                gameScore += 10;
+                playAudio('assets/correct.mp3');
+                playAudio('assets/freesound_community-claps-44774.mp3');
+                triggerConfettiEffect();
+                
+                setTimeout(() => { proceedQuizFlow(); }, 1500);
+            } else {
+                btn.classList.add('wrong');
+                currentWrongAttempts++;
+                quizLives--;
+                refreshHUD();
+                playAudio('assets/wrong.mp3');
+
+                if(quizLives <= 0) {
+                    setTimeout(() => { wrapUpGameSession(false); }, 1200);
+                    return;
+                }
+
+                const banner = document.getElementById('quiz-banner');
+                banner.classList.remove('hidden');
+                
+                if(currentWrongAttempts === 1) {
+                    banner.innerHTML = `<strong>💡 Try Again Hint:</strong> ${data.hint}`;
+                    buttons.forEach(b => {
+                        if(!b.classList.contains('wrong')) b.style.pointerEvents = 'auto';
+                    });
+                } else {
+                    banner.innerHTML = `<strong>📘 Learning Core:</strong> ${data.explanation}`;
+                    buttons[data.answer].classList.add('correct');
+                    
+                    setTimeout(() => { proceedQuizFlow(); }, 4000);
+                }
+            }
+        }
+
+        function proceedQuizFlow() {
+            currentQuestionIndex++;
+            
+            // 3 Questions per round logic mapping to 15 questions across 5 rounds total
+            if(currentQuestionIndex === gameRound * 3) {
+                if(gameRound >= 5) {
+                    wrapUpGameSession(true);
+                } else {
+                    gameRound++;
+                    initiateArcadeWave();
+                }
+            } else {
+                loadNextQuestion();
+            }
+        }
+
+        /* --- GAME SUMMARY / OVERBOARD REPORT --- */
+        function wrapUpGameSession(didWin) {
+            showScreen('screen-gameover');
+            
+            const title = document.getElementById('gameover-title');
+            const feedback = document.getElementById('gameover-feedback');
+            const icon = document.getElementById('gameover-icon');
+            document.getElementById('gameover-score').innerText = gameScore;
+
+            if(didWin) {
+                icon.innerText = "🏆";
+                title.innerText = "Teeth Champion!";
+                feedback.innerText = "Amazing smile! You protected your teeth from plaque and completed your textbook challenge perfectly!";
+            } else {
+                icon.innerText = "🧼";
+                title.innerText = "Keep Brushing!";
+                feedback.innerText = "Those stubborn cavities got the best of us this time! Let's clean our brush and try again to improve our score.";
+            }
+        }
+    </script>
+</body>
+</html>
