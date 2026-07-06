@@ -36,13 +36,14 @@
             align-items: center;
             min-height: 100vh;
             padding: 12px;
+            overflow: hidden;
         }
 
         .screen {
             display: none;
             width: 100%;
             max-width: 500px;
-            min-height: 580px;
+            min-height: 560px;
             background: rgba(255, 255, 255, 0.98);
             border-radius: 28px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.12);
@@ -50,8 +51,9 @@
             text-align: center;
             border-top: 8px solid var(--saffron);
             border-bottom: 8px solid var(--green-india);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             position: relative;
+            z-index: 2;
         }
 
         .screen.active {
@@ -62,109 +64,130 @@
         }
 
         @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.9); }
+            0% { opacity: 0; transform: scale(0.92); }
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* --- SPLASH SCREEN LOGO LAYOUT --- */
+        /* --- SPLASH LOGO --- */
         #screen-splash {
             background: white !important;
             justify-content: center !important;
             align-items: center !important;
         }
         .logo-container img {
-            max-width: 240px;
+            max-width: 220px;
             height: auto;
             animation: pulseLogo 2s infinite ease-in-out;
         }
         @keyframes pulseLogo {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.04); }
         }
 
         h1 {
             color: var(--navy-blue);
             margin: auto 0;
-            font-size: 2.5rem;
+            font-size: 2.4rem;
+        }
+
+        /* --- EXPLO GUIDE RULES CARD --- */
+        .rules-container {
+            text-align: left;
+            background: #fffdf6;
+            border: 3px dashed var(--saffron);
+            border-radius: 20px;
+            padding: 20px;
+            margin: auto 0;
+            width: 100%;
+        }
+        .rules-container ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .rules-container li {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            color: #34495e;
+            font-weight: bold;
         }
 
         .btn-action {
             background: linear-gradient(135deg, var(--saffron) 0%, #ff7700 100%);
             color: white;
             border: none;
-            padding: 16px 45px;
-            font-size: 1.4rem;
+            padding: 15px 40px;
+            font-size: 1.35rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 6px 12px rgba(255, 153, 51, 0.3);
             transition: transform 0.1s ease;
             width: 85%;
-            margin: 30px auto;
+            margin: 20px auto;
             border: 3px solid #fff;
         }
         .btn-action:active {
             transform: scale(0.96);
         }
 
-        /* --- HUD ELEMENTS --- */
+        /* --- HUD STATUS CONTROL --- */
         .hud-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
             background: var(--bg-light);
-            padding: 10px 15px;
+            padding: 10px 14px;
             border-radius: 16px;
             font-weight: bold;
-            font-size: 1.05rem;
+            font-size: 1rem;
             border: 2px solid #e5e8e8;
         }
         .lives-box {
             color: var(--coral-pink);
-            letter-spacing: 2px;
-            font-size: 1.1rem;
+            letter-spacing: 1px;
         }
         .score-box {
             color: var(--green-india);
         }
 
-        /* --- SCENARIO QUESTION BOX --- */
+        /* --- SCENARIO DATA TEXT BOX --- */
         .question-box {
             width: 100%;
             background: var(--sky-light);
             border: 3px solid var(--sky-blue);
             border-radius: 20px;
-            padding: 18px;
-            margin: 20px 0;
+            padding: 16px;
+            margin: 15px 0;
             text-align: left;
         }
         .question-box .category-tag {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             background: var(--navy-blue);
             color: white;
             padding: 3px 10px;
             border-radius: 8px;
             font-weight: bold;
             display: inline-block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .question-box p {
             margin: 5px 0 0 0;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: bold;
             line-height: 1.4;
             color: var(--text-dark);
         }
 
-        /* --- CONVEYOR BELT TRACK SYSTEM --- */
+        /* --- GPU-OPTIMIZED CONVEYOR BELT --- */
         .conveyor-window {
             width: 100%;
             overflow: hidden;
             background: #eaeded;
             border: 4px solid var(--navy-blue);
             border-radius: 20px;
-            padding: 15px 0;
+            padding: 14px 0;
             margin: 15px 0;
             position: relative;
             display: flex;
@@ -177,12 +200,14 @@
             gap: 20px;
             white-space: nowrap;
             width: max-content;
+            will-change: transform;
             animation: scrollBelt 14s linear infinite;
+            transform: translate3d(0, 0, 0);
         }
 
         @keyframes scrollBelt {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
         }
 
         .conveyor-track.paused {
@@ -193,22 +218,19 @@
             background: white;
             border: 3px solid #bdc3c7;
             border-radius: 16px;
-            padding: 15px 25px;
-            font-size: 1.15rem;
+            padding: 14px 22px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-            transition: transform 0.15s ease, background-color 0.2s ease;
             color: #34495e;
             display: inline-block;
-            min-width: 150px;
+            min-width: 140px;
             text-align: center;
-        }
-        .item-card:active {
-            transform: scale(0.95);
+            user-select: none;
         }
 
-        /* --- SELECTION FEEDBACK COLORS --- */
+        /* --- SELECTION FEEDBACK ANIMATIONS --- */
         .item-card.correct-pick {
             background-color: #d4edda !important;
             border-color: var(--green-india) !important;
@@ -220,7 +242,6 @@
             color: #721c24 !important;
         }
 
-        /* --- HINT WARNING BOX --- */
         .hint-alert-box {
             width: 100%;
             background: #fff9e6;
@@ -234,9 +255,44 @@
             display: none;
             text-align: left;
         }
+
+        /* --- CONFETTI SYSTEM LAYOUT --- */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.8;
+            border-radius: 2px;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+
+        .feedback-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: #566573;
+            margin: 10px 20px;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
+
+<div id="confetti-container"></div>
 
 <audio id="sound-win" src="assets/correct.mp3" preload="auto"></audio>
 <audio id="sound-fail" src="assets/wrong.mp3" preload="auto"></audio>
@@ -254,7 +310,16 @@
 </div>
 
 <div id="screen-rules" class="screen">
-    <h1>Game Rules 📜</h1>
+    <h1>The Explorer's Guide 📜</h1>
+    <div class="rules-container">
+        <ul>
+            <li>✨ Answer questions correctly to score <b>+20 points</b>!</li>
+            <li>❤️ You start the game with 5 Lives.</li>
+            <li>❌ Missing an answer costs 1 Life.</li>
+            <li>💡 Get a hint on your second attempt!</li>
+            <li>🎯 Tap cards as they move on the belt!</li>
+        </ul>
+    </div>
     <button class="btn-action" id="btn-start-game">PLAY</button>
 </div>
 
@@ -267,7 +332,7 @@
 
     <div class="question-box">
         <span class="category-tag" id="label-category-name">CATEGORY</span>
-        <p id="label-question-text">Loading question text template...</p>
+        <p id="label-question-text">Loading map question...</p>
     </div>
 
     <div class="conveyor-window">
@@ -279,14 +344,16 @@
 
 <div id="screen-results" class="screen">
     <h1 id="results-heading">Complete! 🎉</h1>
-    <div style="background: var(--bg-light); padding: 20px; border-radius: 16px; width: 80%; margin: 20px 0; font-size: 1.6rem; font-weight: bold; color: var(--navy-blue);">
+    <div style="background: var(--bg-light); padding: 20px; border-radius: 16px; width: 80%; margin: 15px 0; font-size: 1.8rem; font-weight: bold; color: var(--navy-blue);">
         Score: <span id="label-final-score">0</span>
     </div>
-    <button class="btn-action" onclick="location.reload()">Play Again 🔄</button>
+    <p class="feedback-text" id="label-feedback">Great job out there explorer!</p>
+    <button class="btn-action" id="btn-restart-game">Play Again 🔄</button>
 </div>
 
 <script>
-    const gameDatabase = [
+    // Core Game Database
+    const masterDatabase = [
         {
             category: "Neighboring Countries 🗺️",
             questions: [
@@ -381,22 +448,55 @@
         }
     ];
 
+    let sessionActiveDatabase = [];
     let currentCategoryIdx = 0;
     let currentQuestionIdx = 0; 
     let score = 0;
     let lives = 5;
     let attemptsOnCurrentQuestion = 0; 
 
+    function randomizeArray(targetArray) {
+        let shuffled = [...targetArray];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    function prepareRandomizedDatabase() {
+        let structuralShuffled = randomizeArray(masterDatabase);
+        sessionActiveDatabase = structuralShuffled.map(categoryItem => {
+            let questionsShuffled = randomizeArray(categoryItem.questions);
+            let processedQuestions = questionsShuffled.map(qObj => {
+                return { ...qObj, o: randomizeArray(qObj.o) };
+            });
+            return { ...categoryItem, questions: processedQuestions };
+        });
+    }
+
     function displayActiveScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    // Fixed 5-Second Splash Screen Delay Control
+    // 5-Second Splash Screen Delay Control
     setTimeout(() => { displayActiveScreen('screen-welcome'); }, 5000);
 
-    document.getElementById('btn-to-rules').addEventListener('pointerup', () => displayActiveScreen('screen-rules'));
-    document.getElementById('btn-start-game').addEventListener('pointerup', () => {
+    const setupInputHandler = (id, callback) => {
+        const el = document.getElementById(id);
+        el.addEventListener('pointerup', (e) => {
+            e.preventDefault();
+            callback();
+        });
+    };
+
+    setupInputHandler('btn-to-rules', () => displayActiveScreen('screen-rules'));
+    setupInputHandler('btn-start-game', () => {
+        displayActiveScreen('screen-play');
+        initGameEngine();
+    });
+    setupInputHandler('btn-restart-game', () => {
         displayActiveScreen('screen-play');
         initGameEngine();
     });
@@ -406,6 +506,8 @@
         lives = 5;
         currentCategoryIdx = 0;
         currentQuestionIdx = 0;
+        document.getElementById('confetti-container').innerHTML = '';
+        prepareRandomizedDatabase();
         loadQuestionCycle();
     }
 
@@ -414,7 +516,7 @@
         document.getElementById('box-hint-display').style.display = 'none';
         updateHUD();
 
-        let currentCatData = gameDatabase[currentCategoryIdx];
+        let currentCatData = sessionActiveDatabase[currentCategoryIdx];
         let qData = currentCatData.questions[currentQuestionIdx];
 
         document.getElementById('label-category-name').innerText = currentCatData.category;
@@ -422,13 +524,11 @@
         document.getElementById('label-question-text').innerText = qData.q;
 
         const track = document.getElementById('belt-track');
-        track.className = "conveyor-track"; // Ensure animation plays smoothly
+        track.className = "conveyor-track"; 
         track.innerHTML = "";
 
-        // Double options array length to achieve endless loop background effect
         let repeatedPool = [...qData.o, ...qData.o];
-
-        repeatedPool.forEach((optionText, internalIdx) => {
+        repeatedPool.forEach((optionText) => {
             const card = document.createElement('div');
             card.className = 'item-card';
             card.innerText = optionText;
@@ -457,19 +557,20 @@
         const track = document.getElementById('belt-track');
 
         if (chosenText === correctText) {
-            track.classList.add('paused'); // Lock belt movement during selection feedback
+            track.classList.add('paused'); 
             
-            // Highlight instances matching the text strings inside the doubled tracks container
             document.querySelectorAll('.item-card').forEach(c => {
                 if(c.innerText === correctText) c.classList.add('correct-pick');
             });
 
             document.getElementById('sound-win').play().catch(()=>{});
-            score += (attemptsOnCurrentQuestion === 1) ? 20 : 10;
+            
+            // Standard static +20 rule mapping allocation logic setup
+            score += 20;
             document.getElementById('label-score').innerText = score;
 
             lockAllCards();
-            setTimeout(advanceGameProgress, 1500);
+            setTimeout(advanceGameProgress, 1400);
         } else {
             selectedCard.classList.add('wrong-pick');
             document.getElementById('sound-fail').play().catch(()=>{});
@@ -479,7 +580,7 @@
             if (lives <= 0) {
                 track.classList.add('paused');
                 lockAllCards();
-                setTimeout(() => terminateGameEngine(false), 1500);
+                setTimeout(() => terminateGameEngine(false), 1400);
                 return;
             }
 
@@ -488,17 +589,15 @@
                 hintBox.innerText = "💡 Hint: " + hintMessage;
                 hintBox.style.display = 'block';
                 
-                // Only disable the single instances clicked by the user
                 selectedCard.style.pointerEvents = 'none';
                 selectedCard.style.opacity = '0.4';
             } else {
                 track.classList.add('paused');
                 lockAllCards();
-                // Flag correct answer on screen natively
                 document.querySelectorAll('.item-card').forEach(c => {
                     if (c.innerText === correctText) c.classList.add('correct-pick');
                 });
-                setTimeout(advanceGameProgress, 2000);
+                setTimeout(advanceGameProgress, 1800);
             }
         }
     }
@@ -514,10 +613,28 @@
             currentCategoryIdx++;
         }
 
-        if (currentCategoryIdx >= gameDatabase.length) {
+        if (currentCategoryIdx >= sessionActiveDatabase.length) {
             terminateGameEngine(true);
         } else {
             loadQuestionCycle();
+        }
+    }
+
+    // High Performance CSS Confetti Generator Engine
+    function launchConfettiBurst() {
+        const container = document.getElementById('confetti-container');
+        container.innerHTML = '';
+        const colors = ['#FF9933', '#138808', '#000080', '#FFC107', '#E91E63', '#00BCD4'];
+        
+        for (let i = 0; i < 100; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            confetti.style.animationDelay = (Math.random() * 1.5) + 's';
+            confetti.style.transform = `scale(${Math.random() * 0.6 + 0.6})`;
+            container.appendChild(confetti);
         }
     }
 
@@ -525,7 +642,22 @@
         displayActiveScreen('screen-results');
         document.getElementById('label-final-score').innerText = score;
         document.getElementById('sound-end').play().catch(()=>{});
-        document.getElementById('results-heading').innerText = isWin ? "🏆 Quiz Hero!" : "🚨 Try Again!";
+        
+        const heading = document.getElementById('results-heading');
+        const feedback = document.getElementById('label-feedback');
+
+        if (isWin) {
+            heading.innerText = "🏆 Quiz Hero!";
+            feedback.innerText = "Incredible! You navigated all landforms, states, and borders flawlessly. You're a certified Map Master!";
+            launchConfettiBurst();
+        } else {
+            heading.innerText = "🚨 Game Over!";
+            feedback.innerText = "Nice try explorer! Review Chapter 9 Geography again to beat your top high score next time.";
+            if (score >= 120) {
+                // If they scored highly but ran out of lives right at the end, throw a mini celebration burst anyway
+                launchConfettiBurst(); 
+            }
+        }
     }
 </script>
 </body>
