@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chapter 7: Push or Pull Sorting Arcade</title>
+    <title>Chapter 7: The Magic Push-Pull Forest Canopy</title>
     <style>
         :root {
-            --bg-canvas: #FFFDF6; 
-            --primary-mint: #4CAF50;
-            --primary-dark: #2E7D32;
-            --accent-blue: #2196F3;
-            --accent-blue-dark: #1565C0;
-            --white: #FFFFFF;
-            --slate-grey: #455A64;
-            --font-kids: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            --bg-gradient: linear-gradient(135deg, #FFF5F5 0%, #E8F5E9 50%, #E3F2FD 100%);
+            --leaf-green: #81C784;
+            --leaf-dark: #388E3C;
+            --berry-blue: #4FC3F7;
+            --berry-dark: #0288D1;
+            --text-dark: #2E4057;
+            --bubble-hint: #FFFDE7;
+            --font-fancy: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
         }
 
         * {
@@ -25,9 +25,9 @@
         }
 
         body {
-            font-family: var(--font-kids);
-            background-color: #ECEFF1;
-            color: var(--slate-grey);
+            font-family: var(--font-fancy);
+            background: #ECEFF1;
+            color: var(--text-dark);
             overflow: hidden;
             position: fixed;
             width: 100%;
@@ -42,9 +42,9 @@
             max-width: 440px;
             height: 100%;
             max-height: 820px;
-            background-color: var(--bg-canvas);
+            background: var(--bg-gradient);
             position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            box-shadow: 0 30px 60px rgba(121, 186, 137, 0.25);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -52,9 +52,10 @@
 
         @media (min-width: 601px) {
             #game-wrapper {
-                border-radius: 30px;
-                height: 96vh;
-                border: 6px solid #81C784;
+                border-radius: 40px;
+                height: 95vh;
+                border: 8px solid #FFFFFF;
+                outline: 4px solid rgba(129, 199, 132, 0.4);
             }
         }
 
@@ -68,270 +69,270 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 24px;
+            padding: 30px;
             text-align: center;
-            background-color: var(--bg-canvas);
             z-index: 10;
+            transition: opacity 0.3s ease;
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* --- SCREEN 1: BRAND SPLASH --- */
+        /* --- BEAUTIFUL LOGO SPLASH --- */
         #screen-logo {
-            background-color: #FFFFFF;
+            background: #FFFFFF;
         }
         .brand-logo-img {
             width: 220px;
             height: auto;
-            max-height: 220px;
-            object-fit: contain;
-            animation: pulsePlayful 1.6s infinite ease-in-out;
+            animation: softFloat 2.5s infinite ease-in-out;
         }
 
-        /* --- SCREEN 2 & 3: MENU / RULES --- */
-        .mascot-icon {
-            font-size: 5rem;
-            margin-bottom: 12px;
-            animation: floatUpDown 3s infinite ease-in-out;
+        /* --- UNIQUE MAIN MENU & RULES --- */
+        .magical-avatar {
+            font-size: 5.5rem;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.08));
+            animation: softFloat 3s infinite ease-in-out;
+            margin-bottom: 15px;
         }
 
-        .main-title {
-            color: var(--primary-dark);
-            font-size: 2.1rem;
-            line-height: 1.2;
+        .dreamy-title {
+            color: #1B5E20;
+            font-size: 2.3rem;
+            line-height: 1.15;
             margin-bottom: 15px;
             font-weight: 900;
+            text-shadow: 3px 3px 0px #FFFFFF;
         }
 
-        .subtitle-desc {
-            font-size: 1.1rem;
-            color: #78909C;
-            margin-bottom: 30px;
+        .dreamy-desc {
+            font-size: 1.15rem;
+            color: #607D8B;
+            margin-bottom: 40px;
+            padding: 0 15px;
         }
 
-        .btn-playful {
-            background-color: var(--primary-mint);
-            color: var(--white);
-            border: none;
-            padding: 16px 45px;
-            font-size: 1.3rem;
-            font-family: var(--font-kids);
+        .btn-magical {
+            background: linear-gradient(145deg, #FF8A80, #FF5252);
+            color: white;
+            border: 3px solid #FFFFFF;
+            padding: 16px 50px;
+            font-size: 1.35rem;
+            font-family: var(--font-fancy);
             font-weight: bold;
-            border-radius: 50px;
+            border-radius: 35px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #2E7D32;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
-        }
-
-        .btn-playful:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #2E7D32;
-        }
-
-        .rules-paper {
-            background: #FFFFFF;
-            border: 3px dashed #AED581;
-            border-radius: 24px;
-            padding: 20px;
-            text-align: left;
-            width: 100%;
-            margin-bottom: 30px;
-        }
-
-        .rules-paper li {
-            margin-bottom: 10px;
-            font-size: 1.05rem;
-            line-height: 1.5;
-        }
-
-        /* --- HUD --- */
-        .top-hud-bar {
-            width: 100%;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #FFFFFF;
-            border-bottom: 2px solid #F1F4F5;
-        }
-
-        .badge-capsule {
-            background: #E8F5E9;
-            color: var(--primary-dark);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        .lives-container {
-            font-size: 1.3rem;
-            letter-spacing: 2px;
-        }
-
-        /* --- PLAY ARENA --- */
-        .arena-container {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-            position: relative;
-        }
-
-        /* CURRENT LEVEL BANNER */
-        .level-indicator-tag {
-            background: #FFF3E0;
-            color: #E65100;
-            padding: 4px 16px;
-            border-radius: 30px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        /* FLYING NOTEBOOK CARD DECK */
-        .card-stage-window {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .notebook-sliding-card {
-            background: #FFFFFF;
-            border: 3px solid #E0E0E0;
-            border-radius: 24px;
-            padding: 24px 20px;
-            width: 100%;
-            max-width: 340px;
-            min-height: 160px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.25rem;
-            line-height: 1.5;
-            font-weight: bold;
-            color: #37474F;
-            box-shadow: 0 12px 24px rgba(0,0,0,0.06);
-            text-align: center;
-            position: absolute;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s;
-            z-index: 5;
-        }
-
-        /* CARD FLY AWAY ANIMATIONS */
-        .notebook-sliding-card.shoot-left {
-            transform: translateX(-500px) rotate(-25deg) !important;
-            opacity: 0;
-        }
-
-        .notebook-sliding-card.shoot-right {
-            transform: translateX(500px) rotate(25deg) !important;
-            opacity: 0;
-        }
-
-        .notebook-sliding-card.shake-wrong {
-            animation: cardBumpShake 0.4s ease;
-        }
-
-        /* LEVER MACHINE BUTTONS PANEL */
-        .lever-machine-panel {
-            width: 100%;
-            display: flex;
-            gap: 16px;
-            padding-bottom: 10px;
-        }
-
-        .giant-machine-lever {
-            flex: 1;
-            height: 85px;
-            border: none;
-            border-radius: 24px;
-            font-family: var(--font-kids);
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: var(--white);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
+            box-shadow: 0 10px 25px rgba(255, 82, 82, 0.35);
             transition: all 0.1s ease;
         }
 
-        .giant-machine-lever.btn-push-left {
-            background-color: var(--primary-mint);
-            box-shadow: 0 8px 0 var(--primary-dark);
+        .btn-magical:active {
+            transform: scale(0.96) translateY(4px);
+            box-shadow: 0 4px 10px rgba(255, 82, 82, 0.2);
         }
 
-        .giant-machine-lever.btn-push-left:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 var(--primary-dark);
-        }
-
-        .giant-machine-lever.btn-pull-right {
-            background-color: var(--accent-blue);
-            box-shadow: 0 8px 0 var(--accent-blue-dark);
-        }
-
-        .giant-machine-lever.btn-pull-right:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 var(--accent-blue-dark);
-        }
-
-        /* HINT SYSTEM BANNER */
-        .arcade-hint-footer {
-            background: #FFF9C4;
-            border: 2px solid #FFF59D;
-            border-radius: 16px;
-            padding: 12px 16px;
-            font-size: 0.95rem;
-            color: #F57F17;
-            width: 100%;
-            margin-top: 12px;
+        .scrollable-parchment {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 3px solid #FFF;
+            border-radius: 32px;
+            padding: 24px;
             text-align: left;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-            animation: popInUp 0.3s ease;
+            width: 100%;
+            margin-bottom: 35px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.03);
         }
 
-        /* --- RESULTS --- */
-        .score-giant-badge {
+        .scrollable-parchment li {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            list-style-type: '✨ ';
+        }
+
+        /* --- PRETTY HUD --- */
+        .forest-hud-bar {
+            width: 100%;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hud-pill {
             background: #FFFFFF;
-            border: 4px solid var(--primary-mint);
+            padding: 8px 18px;
             border-radius: 30px;
-            padding: 20px 40px;
-            margin: 15px 0;
-            font-size: 3.5rem;
             font-weight: 900;
-            color: var(--primary-dark);
-            box-shadow: 0 10px 25px rgba(76,175,80,0.15);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+            border: 2px solid rgba(255,255,255,0.8);
         }
 
-        /* --- KEYFRAMES --- */
-        @keyframes pulsePlayful {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
+        .hearts-cloud {
+            font-size: 1.4rem;
+            background: rgba(255,255,255,0.7);
+            padding: 4px 14px;
+            border-radius: 30px;
         }
-        @keyframes floatUpDown {
+
+        /* --- THE CORE CANOPY PLAYSTAGE --- */
+        .canopy-container {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px 24px 24px;
+        }
+
+        .chapter-ribbon {
+            background: linear-gradient(90deg, #CE93D8, #E1BEE7);
+            color: #4A148C;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* THE FLOATING GLOWING LEAF CARD */
+        .leaf-card-viewport {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .glowing-leaf-card {
+            background: #FFFFFF;
+            border-radius: 40px;
+            padding: 30px 24px;
+            width: 100%;
+            max-width: 350px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3rem;
+            line-height: 1.5;
+            font-weight: bold;
+            color: #37474F;
+            box-shadow: 0 20px 40px rgba(129, 199, 132, 0.15);
+            border: 4px solid #FFFFFF;
+            outline: 3px solid #C8E6C9;
+            text-align: center;
+            position: absolute;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.25), opacity 0.3s;
+        }
+
+        /* UNIQUE FLIGHT MECHANICS */
+        .glowing-leaf-card.shoot-left {
+            transform: translateX(-450px) rotate(-30deg) scale(0.9) !important;
+            opacity: 0;
+        }
+
+        .glowing-leaf-card.shoot-right {
+            transform: translateX(450px) rotate(30deg) scale(0.9) !important;
+            opacity: 0;
+        }
+
+        .glowing-leaf-card.bump-wrong {
+            animation: softPoppingShake 0.4s ease;
+        }
+
+        /* DYNAMIC FRUIT LEVER BUTTONS */
+        .fruit-levers-deck {
+            width: 100%;
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .3d-fruit-button {
+            flex: 1;
+            height: 95px;
+            border: 4px solid #FFFFFF;
+            border-radius: 35px;
+            font-family: var(--font-fancy);
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .3d-fruit-button.melon-push {
+            background: linear-gradient(145deg, #A5D6A7, #66BB6A);
+            box-shadow: 0 10px 0 #388E3C, 0 15px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .3d-fruit-button.melon-push:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #388E3C, 0 5px 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .3d-fruit-button.berry-pull {
+            background: linear-gradient(145deg, #90CAF9, #42A5F5);
+            box-shadow: 0 10px 0 #1976D2, 0 15px 25px rgba(33, 150, 243, 0.3);
+        }
+
+        .3d-fruit-button.berry-pull:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #1976D2, 0 5px 10px rgba(33, 150, 243, 0.2);
+        }
+
+        /* PASTEL CLUE BOX */
+        .pastel-clue-bubble {
+            background: var(--bubble-hint);
+            border-radius: 24px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            color: #E65100;
+            width: 100%;
+            margin-bottom: 15px;
+            text-align: left;
+            border: 2px dashed #FFE082;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+            animation: popUpIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+        }
+
+        /* --- THE END BADGE --- */
+        .end-ribbon-score {
+            background: #FFFFFF;
+            border: 4px solid #FF8A80;
+            border-radius: 35px;
+            padding: 25px 50px;
+            margin: 20px 0;
+            font-size: 3.8rem;
+            font-weight: 900;
+            color: #D32F2F;
+            display: inline-block;
+            box-shadow: 0 15px 35px rgba(255,138,128,0.25);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes softFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-12px); }
         }
-        @keyframes popInUp {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        @keyframes popUpIn {
+            from { opacity: 0; transform: scale(0.9) translateY(10px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        @keyframes cardBumpShake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-12px); }
-            40%, 80% { transform: translateX(12px); }
+        @keyframes softPoppingShake {
+            0%, 100% { transform: translateX(0) scale(1); }
+            20%, 60% { transform: translateX(-15px) rotate(-2deg); }
+            40%, 80% { transform: translateX(15px) rotate(2deg); }
         }
     </style>
 </head>
@@ -344,54 +345,54 @@
         </div>
 
         <div id="screen-intro" class="screen hidden">
-            <div class="mascot-icon">🕹️</div>
-            <h1 class="main-title">Push or Pull?<br>Sorting Arcade</h1>
-            <p class="subtitle-desc">Tap the correct mechanical levers instantly to sort all forces, energy types, and work cases!</p>
-            <button class="btn-playful" onclick="showInstructionsMenu()">Start Game ➔</button>
+            <div class="magical-avatar">🍃</div>
+            <h1 class="dreamy-title">The Push & Pull<br>Magic Canopy</h1>
+            <p class="dreamy-desc">Slide and sort items through the matching whimsical machines!</p>
+            <button class="btn-magical" onclick="openParchmentRules()">Enter Arcade ➔</button>
         </div>
 
         <div id="screen-instructions" class="screen hidden">
-            <div class="mascot-icon">🎒</div>
-            <h1 class="main-title" style="font-size: 1.8rem;">Arcade Rules</h1>
+            <div class="magical-avatar">🧚‍♀️</div>
+            <h1 class="dreamy-title" style="font-size: 1.8rem;">How To Play</h1>
             
-            <div class="rules-paper">
+            <div class="scrollable-parchment">
                 <ul>
-                    <li>💡 Read the 2-line scenario that flies onto the screen card.</li>
-                    <li>🟢 Tap <b>PUSH</b> if the action is moving away or forcing power out!</li>
-                    <li>🔵 Tap <b>PULL</b> if it attracts, drags closer, or absorbs energy!</li>
-                    <li>❌ You have 3 lives. First mistake unlocks a helpful text clue!</li>
+                    <li>A magical leafy card will bring a physics mystery scenario.</li>
+                    <li>Tap the <b>GREEN MELON</b> button if it pushes away!</li>
+                    <li>Tap the <b>BLUE BERRY</b> button if it pulls things closer!</li>
+                    <li>Watch out! Every wrong tap drops 1 precious life heart!</li>
                 </ul>
             </div>
 
-            <button class="btn-playful" onclick="startPushPullGame()">Play 🚀</button>
+            <button class="btn-magical" onclick="launchMagicCanopyStage()">Let's Go! ✨</button>
         </div>
 
         <div id="screen-gameplay" class="screen hidden" style="padding: 0; justify-content: flex-start;">
-            <div class="top-hud-bar">
-                <div class="badge-capsule" id="hud-score-label">Score: 0</div>
-                <div class="lives-container" id="hud-hearts-label">❤️❤️❤️</div>
+            <div class="forest-hud-bar">
+                <div class="hud-pill" id="hud-score-label" style="color: var(--leaf-dark);">Score: 0</div>
+                <div class="hearts-cloud" id="hud-hearts-label">❤️❤️❤️</div>
             </div>
 
-            <div class="arena-container">
-                <div class="level-indicator-tag" id="game-level-tag">LEVEL 1: FORCES TYPES</div>
+            <div class="canopy-container">
+                <div class="chapter-ribbon" id="game-level-tag">LEVEL 1: FORCES TYPES</div>
 
-                <div class="card-stage-window">
-                    <div class="notebook-sliding-card" id="active-scenario-card">
-                        Loading challenge card...
+                <div class="leaf-card-viewport">
+                    <div class="glowing-leaf-card" id="active-scenario-card">
+                        Growing leaf scenario...
                     </div>
                 </div>
 
-                <div class="arcade-hint-footer hidden" id="active-hint-box">
-                    💡 <strong>Clue:</strong> <span id="active-hint-text">Hint content here...</span>
+                <div class="pastel-clue-bubble hidden" id="active-hint-box">
+                    🪐 <strong>Clue:</strong> <span id="active-hint-text">Hint content...</span>
                 </div>
 
-                <div class="lever-machine-panel">
-                    <button class="giant-machine-lever btn-push-left" onclick="triggerLeverSelection('PUSH')">
-                        <span>🟢</span>
+                <div class="fruit-levers-deck">
+                    <button class="3d-fruit-button melon-push" onclick="handleCanopyLever('LEFT')">
+                        <span>🍈</span>
                         <span id="label-lever-left">PUSH</span>
                     </button>
-                    <button class="giant-machine-lever btn-pull-right" onclick="triggerLeverSelection('PULL')">
-                        <span>🔵</span>
+                    <button class="3d-fruit-button berry-pull" onclick="handleCanopyLever('RIGHT')">
+                        <span>🍇</span>
                         <span id="label-lever-right">PULL</span>
                     </button>
                 </div>
@@ -399,56 +400,55 @@
         </div>
 
         <div id="screen-results" class="screen hidden">
-            <div class="mascot-icon" id="end-emoticon-box">🏆</div>
-            <h1 class="main-title">Amazing Job!</h1>
+            <div class="magical-avatar" id="end-emoticon-box">🏆</div>
+            <h1 class="dreamy-title">Canopy Completed!</h1>
             
-            <p style="font-size: 1.1rem; color: #546E7A; margin-bottom: 5px;">Your Final Score</p>
-            <div class="score-giant-badge" id="end-score-label">0</div>
+            <p style="font-size: 1.1rem; color: #78909C; margin-bottom: 5px;">Your Forest Score</p>
+            <div class="end-ribbon-score" id="end-score-label">0</div>
 
-            <div style="background: white; padding: 18px; border-radius: 20px; border: 2px dashed #B0BEC5; font-size: 1.1rem; line-height: 1.5; color: #37474F; margin-bottom: 30px; width: 100%;" id="end-feedback-message">
-                Excellent sorting speed!
+            <div style="background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); padding: 20px; border-radius: 28px; border: 2px dashed #CE93D8; font-size: 1.1rem; line-height: 1.5; color: #37474F; margin-bottom: 35px; width: 100%;" id="end-feedback-message">
+                Amazing score results!
             </div>
 
-            <button class="btn-playful" onclick="restartFreshSession()">Play Again 🔄</button>
+            <button class="btn-magical" onclick="backToMenuFresh()">Play Again 🔄</button>
         </div>
 
     </div>
 
     <script>
-        // --- ASSET SOUND LINK BUFFERS ---
+        // --- SECURE SOUND SYSTEM LINKS ---
         const sndCorrect = new Audio('assets/correct.mp3');
         const sndWrong = new Audio('assets/wrong.mp3');
         const sndVictory = new Audio('assets/freesound_community-claps-44774.mp3');
 
-        // --- CHAPTER 7 DESIGNATED QUESTIONS (ADAPTED FOR BINARY PUSH/PULL SYSTEM) ---
-        const PUSH_PULL_QUESTIONS = [
-            // LEVEL 1: PUSH VS PULL BASICS
-            { q: "A gardener drives a heavy lawnmower forward away from him to cut grass.", left: "PUSH", right: "PULL", correct: "PUSH", levelStr: "LEVEL 1: CORE FORCES", hint: "You exert a force away from your body to drive something forward!" },
-            { q: "A child firmly squeezes a soft piece of play dough to flatten its round shape.", left: "PUSH", right: "PULL", correct: "PUSH", levelStr: "LEVEL 1: CORE FORCES", hint: "Squeezing forces the outer sides together!" },
-            { q: "A delivery man firmly grabs the handle of a heavy metal cart and drags it behind him.", left: "PUSH", right: "PULL", correct: "PULL", levelStr: "LEVEL 1: CORE FORCES", hint: "Dragging something behind you brings it closer to where you go!" },
+        // --- EXCLUSIVE HIGH RESPONSIVE DATA DECK ---
+        const CANOPY_DATA = [
+            // STAGE 1
+            { q: "A gardener drives a heavy lawnmower forward away from him to cut grass.", left: "PUSH", right: "PULL", correct: "PUSH", tag: "LEVEL 1: FIELD FORCES", hint: "You apply a force away from your hands to slide it forward!" },
+            { q: "A child firmly squeezes a soft piece of play dough to flatten its round shape.", left: "PUSH", right: "PULL", correct: "PUSH", tag: "LEVEL 1: FIELD FORCES", hint: "Squeezing moves the sides inwards to compress it!" },
+            { q: "A delivery man firmly grabs the handle of a heavy metal cart and drags it behind him.", left: "PUSH", right: "PULL", correct: "PULL", tag: "LEVEL 1: FIELD FORCES", hint: "Dragging brings the wagon closer along behind your back!" },
             
-            // LEVEL 2: INVISIBLE FORCES (GRAVITY, FRICTION, MAGNETS)
-            { q: "An apple detaches from a branch. Earth's gravity drags it straight down to the soil.", left: "PUSH", right: "PULL", correct: "PULL", levelStr: "LEVEL 2: INVISIBLE FORCES", hint: "Gravity never pushes; it always drags objects down toward the ground!" },
-            { q: "A magnetic bar snaps iron nails straight onto its shiny surface from a distance.", left: "PUSH", right: "PULL", correct: "PULL", levelStr: "LEVEL 2: INVISIBLE FORCES", hint: "The items are being attracted and brought closer to the magnet!" },
-            { q: "A rough sand pit rubs against rolling toy tires to slow them down to a complete stop.", left: "PUSH", right: "PULL", correct: "PUSH", levelStr: "LEVEL 2: INVISIBLE FORCES", hint: "Friction acts against movement, pushing back to slow things down!" },
+            // STAGE 2
+            { q: "An apple detaches from a branch. Earth's gravity drags it straight down to the soil.", left: "PUSH", right: "PULL", correct: "PULL", tag: "LEVEL 2: HIDDEN POWERS", hint: "Gravity pulls everything downwards to the core of the Earth!" },
+            { q: "A magnetic bar snaps iron nails straight onto its shiny surface from a distance.", left: "PUSH", right: "PULL", correct: "PULL", tag: "LEVEL 2: HIDDEN POWERS", hint: "The metal objects are pulled inwards by the magnetic field!" },
+            { q: "A rough sand pit rubs against rolling toy tires to slow them down to a complete stop.", left: "PUSH", right: "PULL", correct: "PUSH", tag: "LEVEL 2: HIDDEN POWERS", hint: "Friction acts against movement, pushing back to block the tires!" },
             
-            // LEVEL 3: SCIENTIFIC WORK DONE VS NO WORK DONE
-            { q: "Maya uses her leg muscles to successfully roll a toy box 5 meters across her bedroom.", left: "WORK DONE", right: "NO WORK", correct: "WORK DONE", levelStr: "LEVEL 3: SCIENTIFIC WORK", hint: "Force was used AND the box traveled a real distance!" },
-            { q: "Rohan sits perfectly still reading a textbook. The book does not move a single centimeter.", left: "WORK DONE", right: "NO WORK", correct: "NO WORK", levelStr: "LEVEL 3: SCIENTIFIC WORK", hint: "Even though his brain is busy, nothing moved a distance!" },
+            // STAGE 3
+            { q: "Maya uses her leg muscles to successfully roll a toy box 5 meters across her bedroom.", left: "WORK DONE", right: "NO WORK", correct: "WORK DONE", tag: "LEVEL 3: EXPERIMENT CASES", hint: "Force was used AND the box traveled a real distance!" },
+            { q: "Rohan sits perfectly still reading a textbook. The book does not move a single centimeter.", left: "WORK DONE", right: "NO WORK", correct: "NO WORK", tag: "LEVEL 3: EXPERIMENT CASES", hint: "No matter how heavy the lesson is, the book has zero distance movement!" },
             
-            // LEVEL 4: SYSTEM ENERGY GENERATION
-            { q: "Giant blue solar panels absorb radiation coming directly from the warm Sun.", left: "GIVE OUT", right: "ABSORB / PULL", correct: "ABSORB / PULL", levelStr: "LEVEL 4: ENERGY SOURCES", hint: "Panels act like a sponge to take the hot sunlight inside!" },
-            { q: "Stormy wind currents slam into windmill blades to force them to spin around.", left: "PUSH", right: "PULL", correct: "PUSH", levelStr: "LEVEL 4: ENERGY SOURCES", hint: "The blowing air knocks into the blades to make them move!" },
-            { q: "Rushing river water plunges down from a high dam to crash onto spinning generator wheels.", left: "PUSH", right: "PULL", correct: "PUSH", levelStr: "LEVEL 4: ENERGY SOURCES", hint: "The falling water strikes the turbines hard to force them into action!" },
-            { q: "Engineers drill deep into underground rocks to trap escaping volcanic steam heat.", left: "TRAP / PULL", right: "PUSH AWAY", correct: "TRAP / PULL", levelStr: "LEVEL 4: ENERGY SOURCES", hint: "We pull the hidden hot steam out from inside the deep Earth!" }
+            // STAGE 4
+            { q: "Giant blue solar panels absorb radiation coming directly from the warm Sun.", left: "EMIT OUT", right: "ABSORB / PULL", correct: "ABSORB / PULL", tag: "LEVEL 4: SYSTEM ENERGY", hint: "The panels act like a solar net to trap incoming rays inside!" },
+            { q: "Stormy wind currents slam into windmill blades to force them to spin around.", left: "PUSH", right: "PULL", correct: "PUSH", tag: "LEVEL 4: SYSTEM ENERGY", hint: "The breeze beats hard against the blades to trigger rotation!" },
+            { q: "Rushing river water plunges down from a high dam to crash onto spinning generator wheels.", left: "PUSH", right: "PULL", correct: "PUSH", tag: "LEVEL 4: SYSTEM ENERGY", hint: "Falling waterfalls strike turbine blades with a solid downwards push!" },
+            { q: "Engineers drill deep into underground rocks to trap escaping volcanic steam heat.", left: "TRAP / PULL", right: "REJECT", correct: "TRAP / PULL", tag: "LEVEL 4: SYSTEM ENERGY", hint: "We pull the warm escaping steam out from inside the deep Earth rocks!" }
         ];
 
-        // --- GAME LOGIC STATE MANAGEMENT ---
-        let score = 0;
-        let lives = 3;
-        let currentQuestionIdx = 0;
-        let mistakesOnCurrentQuestion = 0;
-        let isTransitioning = false;
+        // --- ARCHITECTURE SYSTEM VALUES ---
+        let currentScoreValue = 0;
+        let livesLeftCount = 3;
+        let activeIdx = 0;
+        let lockedState = false;
 
         // FIXED TIMED LOGO VISIBILITY (EXACTLY 5 SECONDS)
         window.addEventListener("DOMContentLoaded", () => {
@@ -458,139 +458,128 @@
             }, 5000);
         });
 
-        function showInstructionsMenu() {
+        function openParchmentRules() {
             document.getElementById('screen-intro').classList.add('hidden');
             document.getElementById('screen-instructions').classList.remove('hidden');
         }
 
-        function startPushPullGame() {
+        function launchMagicCanopyStage() {
             document.getElementById('screen-instructions').classList.add('hidden');
             document.getElementById('screen-gameplay').classList.remove('hidden');
             
-            score = 0;
-            lives = 3;
-            currentQuestionIdx = 0;
+            currentScoreValue = 0;
+            livesLeftCount = 3;
+            activeIdx = 0;
             
             document.getElementById('hud-score-label').innerText = `Score: 0`;
-            updateHeartsHUD();
-            loadActiveChallengeCard();
+            refreshHeartsCanopy();
+            renderCanopyCard();
         }
 
-        function loadActiveChallengeCard() {
-            if (currentQuestionIdx >= PUSH_PULL_QUESTIONS.length) {
-                endGameSession(true);
+        function renderCanopyCard() {
+            if (activeIdx >= CANOPY_DATA.length) {
+                wrapUpCanopySession(true);
                 return;
             }
 
-            mistakesOnCurrentQuestion = 0;
-            isTransitioning = false;
+            lockedState = false;
             document.getElementById('active-hint-box').classList.add('hidden');
 
-            const currentData = PUSH_PULL_QUESTIONS[currentQuestionIdx];
+            const item = CANOPY_DATA[activeIdx];
             
-            // Set dynamic header text and question data
-            document.getElementById('game-level-tag').innerText = currentData.levelStr;
+            document.getElementById('game-level-tag').innerText = item.tag;
             
-            const cardElement = document.getElementById('active-scenario-card');
-            cardElement.className = "notebook-sliding-card"; // Reset animation classes
-            cardElement.innerText = currentData.q;
+            const elementCard = document.getElementById('active-scenario-card');
+            elementCard.className = "glowing-leaf-card"; 
+            elementCard.innerText = item.q;
 
-            // Dynamically alter buttons according to level context
-            document.getElementById('label-lever-left').innerText = currentData.left;
-            document.getElementById('label-lever-right').innerText = currentData.right;
+            document.getElementById('label-lever-left').innerText = item.left;
+            document.getElementById('label-lever-right').innerText = item.right;
         }
 
-        function triggerLeverSelection(chosenSide) {
-            if (isTransitioning) return;
+        function handleCanopyLever(sideHit) {
+            if (lockedState) return;
 
-            const currentData = PUSH_PULL_QUESTIONS[currentQuestionIdx];
-            const cardElement = document.getElementById('active-scenario-card');
+            const item = CANOPY_DATA[activeIdx];
+            const elementCard = document.getElementById('active-scenario-card');
             
-            // Determine user string response based on side clicked
-            const userStringValue = (chosenSide === 'PUSH') ? currentData.left : currentData.right;
+            const structuralAnswer = (sideHit === 'LEFT') ? item.left : item.right;
 
-            if (userStringValue === currentData.correct) {
-                isTransitioning = true;
-                // Play correct audio answer file
+            if (structuralAnswer === item.correct) {
+                lockedState = true;
                 sndCorrect.currentTime = 0;
                 sndCorrect.play().catch(() => {});
 
-                // MICRO-ANIMATION: Shoot card off the screen in the corresponding direction!
-                if (chosenSide === 'PUSH') {
-                    cardElement.classList.add('shoot-left');
+                if (sideHit === 'LEFT') {
+                    elementCard.classList.add('shoot-left');
                 } else {
-                    cardElement.classList.add('shoot-right');
+                    elementCard.classList.add('shoot-right');
                 }
 
-                score += 20;
-                document.getElementById('hud-score-label').innerText = `Score: ${score}`;
-                currentQuestionIdx++;
+                currentScoreValue += 20;
+                document.getElementById('hud-score-label').innerText = `Score: ${currentScoreValue}`;
+                activeIdx++;
 
-                setTimeout(loadActiveChallengeCard, 500);
+                setTimeout(renderCanopyCard, 450);
             } else {
-                // Play mistake noise
+                // IMMEDIATE PENALTY: Deduct a life instantly on every single error!
+                livesLeftCount--;
+                refreshHeartsCanopy();
+
                 sndWrong.currentTime = 0;
                 sndWrong.play().catch(() => {});
 
-                cardElement.classList.add('shake-wrong');
-                setTimeout(() => cardElement.classList.remove('shake-wrong'), 400);
+                elementCard.classList.add('bump-wrong');
+                setTimeout(() => elementCard.classList.remove('bump-wrong'), 400);
 
-                mistakesOnCurrentQuestion++;
+                // Show the helpful text hint right away so they learn
+                document.getElementById('active-hint-text').innerText = item.hint;
+                document.getElementById('active-hint-box').classList.remove('hidden');
 
-                if (mistakesOnCurrentQuestion === 1) {
-                    // Deploy hint banner after 1st mistake
-                    document.getElementById('active-hint-text').innerText = currentData.hint;
-                    document.getElementById('active-hint-box').classList.remove('hidden');
-                } else {
-                    // Deduct life on second wrong click
-                    lives--;
-                    updateHeartsHUD();
-
-                    if (lives <= 0) {
-                        isTransitioning = true;
-                        setTimeout(() => endGameSession(false), 600);
-                    }
+                if (livesLeftCount <= 0) {
+                    lockedState = true;
+                    setTimeout(() => wrapUpCanopySession(false), 600);
                 }
             }
         }
 
-        function updateHeartsHUD() {
-            let containerStr = "";
+        function refreshHeartsCanopy() {
+            let trackerStr = "";
             for (let i = 0; i < 3; i++) {
-                containerStr += (i < lives) ? "❤️" : "🖤";
+                trackerStr += (i < livesLeftCount) ? "❤️" : "🖤";
             }
-            document.getElementById('hud-hearts-label').innerText = containerStr;
+            document.getElementById('hud-hearts-label').innerText = trackerStr;
         }
 
-        function endGameSession(reachedVictory) {
+        function wrapUpCanopySession(victoryResult) {
             document.getElementById('screen-gameplay').classList.add('hidden');
             document.getElementById('screen-results').classList.remove('hidden');
-            document.getElementById('end-score-label').innerText = score;
+            document.getElementById('end-score-label').innerText = currentScoreValue;
 
-            if (reachedVictory) {
+            if (victoryResult) {
                 sndVictory.currentTime = 0;
                 sndVictory.play().catch(() => {});
             }
 
-            let msg = "";
-            let icon = "🏆";
+            let statusMsg = "";
+            let statusIcon = "🏆";
 
-            if (reachedVictory && score === 240) {
-                icon = "👑";
-                msg = "<strong>Perfect Arcade Rank!</strong> You sorted every scenario effortlessly! You understand push vs pull forces, work metrics, and energy generators perfectly.";
-            } else if (score >= 160) {
-                icon = "🦁";
-                msg = "<strong>Super Force Explorer!</strong> Fantastic job! You know how friction behaves, how gravity drags downward, and how renewable power is harnessed.";
+            if (victoryResult && currentScoreValue === 240) {
+                statusIcon = "👑";
+                statusMsg = "<strong>Flawless Canopy Royalty!</strong> Every force push, pull drag, work rule, and eco solar generator case was sorted with absolute perfection!";
+            } else if (currentScoreValue >= 160) {
+                statusIcon = "🦄";
+                statusMsg = "<strong>Magical Force Sage!</strong> Wonderful job! You perfectly understand friction drag vectors, gravitational acceleration, and earth steam conversion paths!";
             } else {
-                icon = "🌱";
-                msg = "<strong>Good Try!</strong> You sorted several force actions correctly. Play again to see if you can achieve a perfect 240 score!";
+                statusIcon = "🌱";
+                statusMsg = "<strong>Sweet Journey!</strong> You mapped multiple mechanical scenarios accurately. Re-enter the canopy to see if you can sweep a perfect 240 score!";
             }
 
-            document.getElementById('end-emoticon-box').innerText = icon;
-            document.getElementById('end-feedback-message').innerHTML = msg;
+            document.getElementById('end-emoticon-box').innerText = statusIcon;
+            document.getElementById('end-feedback-message').innerHTML = statusMsg;
         }
 
-        function restartFreshSession() {
+        function backToMenuFresh() {
             document.getElementById('screen-results').classList.add('hidden');
             document.getElementById('screen-intro').classList.remove('hidden');
         }
