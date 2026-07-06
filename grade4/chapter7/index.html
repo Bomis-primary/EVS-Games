@@ -377,7 +377,7 @@
             
             <div class="rules-paper">
                 <ul>
-                    <li>Read the quick 2-line science case on the pad.</li>
+                    <li>Read the quick science case on the pad.</li>
                     <li>Tap the matching interactive card below it!</li>
                     <li>Score <b>+20 points</b> for every correct match.</li>
                     <li>Watch out for hints if you make a mistake!</li>
@@ -427,24 +427,10 @@
     </div>
 
     <script>
-        // --- SECURE SOUND WRAPPERS ---
-        let sfxSuccess, sfxFailure, sfxCheer;
-
-        try {
-            sfxSuccess = new Audio('assets/correct.mp3');
-            sfxFailure = new Audio('assets/wrong.mp3');
-            sfxCheer = new Audio('assets/freesound_community-claps-44774.mp3');
-            
-            sfxSuccess.preload = 'auto';
-            sfxFailure.preload = 'auto';
-            sfxCheer.preload = 'auto';
-        } catch (error) {
-            console.warn("Audio Contexts missing. Switching to silent operation.");
-            const silentStub = { play: () => Promise.resolve(), currentTime: 0 };
-            sfxSuccess = silentStub;
-            sfxFailure = silentStub;
-            sfxCheer = silentStub;
-        }
+        // --- ASSET PATH CONFIGURATION ---
+        const sndCorrect = new Audio('assets/correct.mp3');
+        const sndWrong = new Audio('assets/wrong.mp3');
+        const sndVictory = new Audio('assets/freesound_community-claps-44774.mp3');
 
         // --- CHAPTER 7 DATA ARRAY ---
         const CHAPTER_7_QUESTIONS = [
@@ -493,7 +479,6 @@
             document.getElementById('hud-score-label').innerText = `Score: 0`;
             updateHeartsUI();
 
-            // Randomize questions sequence array
             randomizedActivePool = [...CHAPTER_7_QUESTIONS].sort(() => Math.random() - 0.5);
             loadNextCardScenario();
         }
@@ -514,7 +499,6 @@
             const scenarioItem = randomizedActivePool[currentQuestionIndex];
             document.getElementById('active-scenario-text').innerText = scenarioItem.q;
 
-            // Randomize the cards layout grid distribution
             const dynamicCardsOrder = [...scenarioItem.opts].sort(() => Math.random() - 0.5);
             
             const cardDeckContainer = document.getElementById('active-cards-box');
@@ -534,10 +518,12 @@
             const allAvailableCards = document.querySelectorAll('.animal-option-card');
 
             if (selectedValue === itemData.correct) {
-                try { sfxSuccess.currentTime = 0; sfxSuccess.play().catch(()=>{}); } catch(e){}
-                
                 cardNode.classList.add('pop-correct');
                 allAvailableCards.forEach(card => card.style.pointerEvents = 'none');
+
+                // Play correct audio effect
+                sndCorrect.currentTime = 0;
+                sndCorrect.play().catch(() => {});
 
                 currentScore += 20;
                 document.getElementById('hud-score-label').innerText = `Score: ${currentScore}`;
@@ -545,10 +531,12 @@
                 currentQuestionIndex++;
                 setTimeout(loadNextCardScenario, 1300);
             } else {
-                try { sfxFailure.currentTime = 0; sfxFailure.play().catch(()=>{}); } catch(e){}
-                
                 cardNode.classList.add('shake-wrong');
                 mistakesOnThisQuestion++;
+
+                // Play wrong buzzer audio effect
+                sndWrong.currentTime = 0;
+                sndWrong.play().catch(() => {});
 
                 if (mistakesOnThisQuestion === 1) {
                     const hintField = document.getElementById('active-hint-box');
@@ -587,14 +575,17 @@
             let emojiMascot = "🏆";
             let positiveFeedbackMessage = "";
 
+            if (isVictory) {
+                sndVictory.currentTime = 0;
+                sndVictory.play().catch(() => {});
+            }
+
             if (isVictory && currentScore === (CHAPTER_7_QUESTIONS.length * 20)) {
                 emojiMascot = "👑";
                 positiveFeedbackMessage = "⭐ <strong>Perfect Arcade Score!</strong> You perfectly know how pushing and pulling changes shape, how friction works, and how solar and hydro generators run!";
-                try { sfxCheer.play().catch(()=>{}); } catch(e){}
             } else if (currentScore >= 160) {
-                emojiMascot = "🦁";
+                emojiMascot = "🌟";
                 positiveFeedbackMessage = "🌟 <strong>Super Science Master!</strong> Incredible work! You understand gravitational pull and geothermal energy concepts flawlessly!";
-                try { sfxCheer.play().catch(()=>{}); } catch(e){}
             } else {
                 emojiMascot = "🌱";
                 positiveFeedbackMessage = "✨ <strong>Good Effort!</strong> You learned how forces stop moving items and how wind currents work. Try again to match a perfect 240 score!";
@@ -608,11 +599,6 @@
             document.getElementById('screen-results').classList.add('hidden');
             document.getElementById('screen-intro').classList.remove('hidden');
         }
-
-        document.addEventListener('click', () => {
-            const context = new (window.AudioContext || window.webkitAudioContext)();
-            if (context.state === 'suspended') context.resume();
-        }, { once: true });
     </script>
 </body>
 </html>
