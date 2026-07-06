@@ -402,16 +402,26 @@
     </div>
 
     <script>
-        // --- AUDIO FILE DEFINITIONS (MAPPED FROM YOUR SCREENSHOT) ---
-        const sfxCorrect = new Audio('assets/correct.mp3');
-        const sfxWrong = new Audio('assets/wrong.mp3');
-        const sfxStar = new Audio('assets/freesound_community-claps-44774.mp3');
+        // --- ROOT AUDIO RESOURCE PRELOAD HANDLERS WITH CORS CRASH PROTECTION ---
+        let sfxCorrect, sfxWrong, sfxStar;
 
-        sfxCorrect.preload = 'auto';
-        sfxWrong.preload = 'auto';
-        sfxStar.preload = 'auto';
+        try {
+            sfxCorrect = new Audio('assets/correct.mp3');
+            sfxWrong = new Audio('assets/wrong.mp3');
+            sfxStar = new Audio('assets/freesound_community-claps-44774.mp3');
 
-        // --- CORE QUESTION DATASET ---
+            sfxCorrect.preload = 'auto';
+            sfxWrong.preload = 'auto';
+            sfxStar.preload = 'auto';
+        } catch (e) {
+            console.warn("Audio loading skipped due to local browser security restriction. Running in silent fallback mode.");
+            const silentFallback = { play: () => Promise.resolve(), currentTime: 0 };
+            sfxCorrect = silentFallback;
+            sfxWrong = silentFallback;
+            sfxStar = silentFallback;
+        }
+
+        // --- CHAPTER 5 CORE SIMPLIFIED NATURE POOL ---
         const MASTER_QUESTIONS_ARRAY = [
             { q: "What is the changing of an animal's features to fit its home environment called?", opts: ["Adaptation", "Extinction", "Migration"], correctStr: "Adaptation", hint: "It means adjusting to stay alive comfortably!" },
             { q: "Into how many main habitat groups can we divide animals on Earth?", opts: ["Five groups", "Three groups", "Eight groups"], correctStr: "Five groups", hint: "Think of Terrestrial, Aquatic, Amphibians, Arboreal, and Aerial!" },
@@ -523,7 +533,8 @@
 
         function startSnakeClockTimer() {
             if (engineClockTimerId) clearInterval(engineClockTimerId);
-            engineClockTimerId = setInterval(processSnakeGameFrame, 160);
+            // REDUCED PACE: Shifted interval tick rate from 160ms to 320ms for comfortable elementary student play
+            engineClockTimerId = setInterval(processSnakeGameFrame, 320);
         }
 
         function processSnakeGameFrame() {
@@ -553,8 +564,10 @@
                 consumedStarsCounter++;
                 document.getElementById('hud-berries').innerText = `Stars: ${consumedStarsCounter}/2`;
                 
-                sfxStar.currentTime = 0;
-                sfxStar.play().catch(() => {});
+                try {
+                    sfxStar.currentTime = 0;
+                    sfxStar.play().catch(() => {});
+                } catch(err){}
 
                 if (consumedStarsCounter >= 2) {
                     clearInterval(engineClockTimerId);
@@ -610,7 +623,6 @@
             document.getElementById('quiz-header-badge').innerText = `Question ${batchCounterCount + 1} / 3`;
             document.getElementById('quiz-question-lbl').innerText = activeQuestionData.q;
 
-            // RANDOMISE OPTIONS EACH TIME
             activeShuffledOptions = [...activeQuestionData.opts].sort(() => Math.random() - 0.5);
             correctOptionIndexInActive = activeShuffledOptions.indexOf(activeQuestionData.correctStr);
 
@@ -633,8 +645,10 @@
             allOptionNodes.forEach(b => b.style.pointerEvents = 'none');
 
             if (selectedIdx === correctOptionIndexInActive) {
-                sfxCorrect.currentTime = 0;
-                sfxCorrect.play().catch(() => {});
+                try {
+                    sfxCorrect.currentTime = 0;
+                    sfxCorrect.play().catch(() => {});
+                } catch(err){}
 
                 btnNode.classList.add('correct-choice');
                 gameScore += 20;
@@ -642,8 +656,10 @@
 
                 setTimeout(advanceQuizLoopState, 1200);
             } else {
-                sfxWrong.currentTime = 0;
-                sfxWrong.play().catch(() => {});
+                try {
+                    sfxWrong.currentTime = 0;
+                    sfxWrong.play().catch(() => {});
+                } catch(err){}
 
                 btnNode.classList.add('wrong-choice');
                 questionAttemptsTracker++;
