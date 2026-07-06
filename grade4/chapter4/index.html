@@ -448,6 +448,16 @@
     </div>
 
     <script>
+        // --- NATIVE LIGHTWEIGHT HTML5 AUDIO OBJECTS INITIALIZATION ---
+        const audioTimelineSuccess = new Audio('assets/freesound_community-claps-44774.mp3');
+        const audioQuizCorrect = new Audio('assets/correct.mp3');
+        const audioQuizWrong = new Audio('assets/wrong.mp3');
+
+        // Preload files so audio plays instantly on interaction
+        audioTimelineSuccess.preload = 'auto';
+        audioQuizCorrect.preload = 'auto';
+        audioQuizWrong.preload = 'auto';
+
         // STAGES SYSTEM MANIFEST
         const STAGES_MANIFEST = [
             { id: 0, title: "Ploughing 🚜", desc: "Turning and loosening the field soil." },
@@ -557,7 +567,7 @@
                     q: "Why does the papery husk fly away in the wind while the grains fall straight down?",
                     opts: ["Because the grain is much heavier than the light husk", "Because the husk has tiny wings", "Because grains are sticky"],
                     ans: 0,
-                    hint: "Think about blowing on a heavy coin compared to blowing on a light feather!"
+                    hint: "Think about blowing on a heavy coin compared to blowing on a light feather."
                 }
             ],
             7: [
@@ -660,7 +670,10 @@
 
         function evaluateTimelineTap(stageId) {
             if (stageId === activeTargetTimelineIndex) {
-                // Correct Choice matched! Award +5 score variables instantly
+                // --- CORRECT TIMELINE MATCH: PLAY COMMUNITY CLAPS SOUND ---
+                audioTimelineSuccess.currentTime = 0;
+                audioTimelineSuccess.play().catch(e => console.log("Audio prevented:", e));
+
                 currentArcadeScore += 5;
                 syncDashboardHUD();
                 
@@ -673,12 +686,15 @@
                 // Burst particles celebration
                 triggerWinConfetti();
 
-                // FIXED: Reset timeline delay threshold to 800ms for rapid interface generation loop
+                // Snappy 800ms delay to let the sound start before modal changes screen
                 setTimeout(() => {
                     initiateStageMiniQuiz();
                 }, 800); 
             } else {
-                // Flash shaking feedback on mismatch
+                // --- WRONG TIMELINE MATCH: PLAY GENTLE ERROR SOUND ---
+                audioQuizWrong.currentTime = 0;
+                audioQuizWrong.play().catch(e => console.log("Audio prevented:", e));
+
                 const incorrectCard = document.getElementById(`scramble-card-entity-${stageId}`);
                 incorrectCard.style.borderColor = "#FF7B7B";
                 setTimeout(() => { incorrectCard.style.borderColor = "#E3DFED"; }, 500);
@@ -722,9 +738,12 @@
             choicesButtons.forEach(b => b.style.pointerEvents = 'none');
 
             if (index === dataset.ans) {
+                // --- CORRECT OPTION: PLAY CORRECT JINGLE ---
+                audioQuizCorrect.currentTime = 0;
+                audioQuizCorrect.play().catch(e => console.log("Audio prevented:", e));
+
                 btnElement.classList.add('right-hit');
                 
-                // If both question variables are processed safely, yield +15 completion score marks
                 if (miniQuizRoundProgress === 1) {
                     currentArcadeScore += 15;
                 }
@@ -732,7 +751,6 @@
                 setTimeout(() => {
                     miniQuizRoundProgress++;
                     if (miniQuizRoundProgress >= 2) {
-                        // All questions complete, return control back to board layout
                         document.getElementById('screen-quiz-modal').classList.add('hidden');
                         activeTargetTimelineIndex++;
                         
@@ -751,6 +769,10 @@
                     }
                 }, 1200);
             } else {
+                // --- WRONG OPTION: PLAY WRONG CHIME ---
+                audioQuizWrong.currentTime = 0;
+                audioQuizWrong.play().catch(e => console.log("Audio prevented:", e));
+
                 btnElement.classList.add('wrong-hit');
                 incorrectChoiceCounter++;
 
@@ -758,13 +780,11 @@
                 hintBox.classList.remove('hidden');
 
                 if (incorrectChoiceCounter === 1) {
-                    // First wrong answer attempt gives friendly context hint
                     hintBox.innerHTML = `<strong>💡 Hint:</strong> ${dataset.hint}`;
                     choicesButtons.forEach(b => {
                         if (!b.classList.contains('wrong-hit')) b.style.pointerEvents = 'auto';
                     });
                 } else {
-                    // Second wrong choice displays structural text explanation banner correction
                     hintBox.innerHTML = `<strong>📘 Lesson:</strong> ${STAGES_MANIFEST[activeTargetTimelineIndex].desc}`;
                     choicesButtons[dataset.ans].classList.add('right-hit');
 
