@@ -1,1 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eco-Spinner! - Grade 4 EVS</title>
+    <style>
+        /* --- DESIGN SYSTEM & PASTEL PALETTE --- */
+        :root {
+            --bg-pastel: #F4F8FA;
+            --primary: #FF9AA2;
+            --primary-dark: #FF7B87;
+            --secondary: #B5EAD7;
+            --accent: #FFDAC1;
+            --text-dark: #4A4A4A;
+            --white: #FFFFFF;
+            --grey-slice: #D3D3D3;
+            --font-stack: 'Comic Sans MS', 'Chalkboard SE', 'Bubbles', sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-pastel);
+            color: var(--text-dark);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- RESPONSIVE WRAPPER --- */
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 850px;
+            background-color: var(--white);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 601px) {
+            #game-container {
+                border-radius: 30px;
+                height: 94vh;
+            }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            z-index: 0;
+        }
+
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        h1 {
+            font-size: 2.2rem;
+            color: #55B493;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 0px var(--accent);
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .btn {
+            background-color: #6C5B7B;
+            color: var(--white);
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.25rem;
+            font-family: var(--font-stack);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #4B3C56;
+            transition: all 0.1s ease;
+            transform: translateY(0);
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #4B3C56;
+        }
+
+        .btn:disabled {
+            background-color: #CCC !important;
+            box-shadow: 0 6px 0px #999 !important;
+            cursor: not-allowed;
+        }
+
+        /* --- SPLASH SCREEN --- */
+        #screen-logo {
+            background-color: #FFFFFF;
+        }
+        
+        .logo-img {
+            max-width: 220px;
+            height: auto;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .mascot-art {
+            font-size: 4.5rem;
+            margin-bottom: 16px;
+            animation: bounce 2s infinite ease;
+        }
+
+        .instruction-card {
+            background-color: var(--bg-pastel);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .instruction-card li {
+            margin-left: 16px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* --- HUD HEADER PANEL --- */
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--bg-pastel);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 20;
+            border-bottom: 2px solid #EAEAEA;
+        }
+
+        .stat-badge {
+            background: var(--white);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        /* --- SPIN WHEEL INTERACTIVE AREA --- */
+        .wheel-ui-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding-top: 60px;
+            gap: 20px;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 40px;
+            z-index: 30;
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.15));
+            animation: pointerWiggle 0.5s infinite alternate ease-in-out paused;
+        }
+
+        #wheel-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 10px #FAF8F5;
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.25, 1);
+        }
+
+        /* --- QUIZ CHALLENGE --- */
+        .quiz-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-top: 60px;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .question-card {
+            background-color: #F8FAFC;
+            border-radius: 20px;
+            padding: 18px;
+            border: 2px dashed #55B493;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background-color: var(--white);
+            border: 2px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 14px 18px;
+            text-align: left;
+            font-family: var(--font-stack);
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 0px #E2E8F0;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #E2E8F0;
+        }
+
+        .option-btn.correct {
+            background-color: var(--secondary) !important;
+            border-color: #9BD2C0 !important;
+            box-shadow: 0 4px 0px #82BEAB !important;
+            color: #235141 !important;
+        }
+
+        .option-btn.wrong {
+            background-color: #FFCCD0 !important;
+            border-color: #FFA4AC !important;
+            box-shadow: 0 4px 0px #E0828A !important;
+            color: #722229 !important;
+        }
+
+        .banner-panel {
+            background-color: #FFF9E6;
+            border-left: 5px solid #FFE082;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        .banner-panel strong {
+            color: #C69500;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pointerWiggle {
+            0% { transform: translateX(-50%) rotate(-10deg); }
+            100% { transform: translateX(-50%) rotate(10deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="confetti-canvas"></canvas>
+
+        <div id="game-hud" class="game-header hidden">
+            <div id="hud-progress" class="stat-badge">Cleared: 0/5</div>
+            <div id="hud-score" class="stat-badge">⭐ 0</div>
+            <div id="hud-lives" class="stat-badge">❤️ 3</div>
+        </div>
+
+        <div id="screen-logo" class="screen">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" id="main-logo-asset">
+        </div>
+
+        <div id="screen-title" class="screen hidden">
+            <div class="mascot-art">🌿</div>
+            <h1>Eco-Spinner!</h1>
+            <p>Spin the lucky pastel wheel and discover amazing facts about our green friends, plants!</p>
+            <button class="btn" onclick="goToInstructions()">Start Game</button>
+        </div>
+
+        <div id="screen-instructions" class="screen hidden">
+            <h1>How To Play</h1>
+            <div class="instruction-card">
+                <ul style="list-style-type: none;">
+                    <li>🎡 <strong>Step 1:</strong> Tap the SPIN button to whirl the colorful wheel around category slices.</li>
+                    <li>🩶 <strong>Step 2:</strong> Clearing all questions inside a slice turns it grey and locks it out!</li>
+                    <li>🧠 <strong>Step 3:</strong> Answer questions correctly to win +20 points. Keep your hearts safe!</li>
+                </ul>
+            </div>
+            <button class="btn" onclick="startGame()">Play Now 🚀</button>
+        </div>
+
+        <div id="screen-wheel" class="screen hidden">
+            <div class="wheel-ui-wrapper">
+                <h3 style="font-size:1.2rem; color:#6C5B7B;" id="wheel-instruction-status">Tap spin to choose a topic!</h3>
+                <div class="wheel-container">
+                    <svg class="wheel-pointer" id="pointer-arrow" viewBox="0 0 30 40">
+                        <path d="M 15 40 L 30 10 L 22 10 L 22 0 L 8 0 L 8 10 L 0 10 Z" fill="#FF4B5C"/>
+                    </svg>
+                    <canvas id="wheel-canvas" width="400" height="400"></canvas>
+                </div>
+                <button class="btn" id="spin-action-btn" onclick="executeWheelSpin()">SPIN! 👇</button>
+            </div>
+        </div>
+
+        <div id="screen-quiz" class="screen hidden">
+            <div class="quiz-wrapper">
+                <div id="quiz-question" class="question-card">
+                    Loading question text...
+                </div>
+                
+                <div id="quiz-options" class="options-container"></div>
+                
+                <div id="quiz-banner" class="banner-panel hidden"></div>
+            </div>
+        </div>
+
+        <div id="screen-gameover" class="screen hidden">
+            <div id="gameover-icon" style="font-size: 4.5rem; margin-bottom:10px;">🏆</div>
+            <h1 id="gameover-title">Superb job!</h1>
+            <p id="gameover-feedback">Loading final statistics panel...</p>
+            
+            <div class="instruction-card" style="text-align:center; background:#FAFAFA;">
+                <span style="font-size:1rem; color:#666;">Total Eco Score:</span>
+                <div id="gameover-score" style="font-size:3rem; font-weight:bold; color:#55B493;">0</div>
+            </div>
+            
+            <button class="btn" onclick="resetToTitle()">Play Again 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        const SLICES_CONFIG = [
+            { id: 0, label: "🍃 Leaf Parts", color: "#B5EAD7", cleared: false }, // Pastel Green
+            { id: 1, label: "☀️ Plant Food", color: "#F3E39D", cleared: false }, // Pastel Yellow
+            { id: 2, label: "🌵 Land Plants", color: "#FFDAC1", cleared: false }, // Pastel Orange
+            { id: 3, label: "🪷 Water Plants", color: "#C7CEEA", cleared: false }, // Pastel Blue
+            { id: 4, label: "🌾 Grass & Odd", color: "#FFB7B2", cleared: false }  // Pastel Pink
+        ];
+
+        const LESSON_QUESTIONS = {
+            0: [
+                {
+                    q: "What do we call the broad, flat part of a green leaf?",
+                    options: ["Midrib", "Leaf Blade or Lamina", "Petiole", "Stalk"],
+                    answer: 1,
+                    hint: "Look closely at the main, wide surface that catches sunlight.",
+                    explanation: "The broad and flat part of a leaf is called the leaf blade or lamina."
+                },
+                {
+                    q: "Leaves have tiny holes on their lower surface that help the plant breathe. What are these holes called?",
+                    options: ["Stomata", "Chlorophyll", "Veins", "Lamina"],
+                    answer: 0,
+                    hint: "These holes are so small that they are only visible using a magnifying glass.",
+                    explanation: "The lower part of the leaf has many tiny holes called stomata, which allow air to enter or leave the leaf."
+                },
+                {
+                    q: "What is the process called when leaves give out excess water in the form of water vapour through the stomata?",
+                    options: ["Photosynthesis", "Transpiration", "Storage", "Adaptation"],
+                    answer: 1,
+                    hint: "This process helps in keeping the plant cool during hot days.",
+                    explanation: "Transpiration is the process where leaves give out excess water, helping the plant stay cool and draw more water from roots."
+                }
+            ],
+            1: [
+                {
+                    q: "Which green coloring matter inside leaves is responsible for trapping sunlight to make food?",
+                    options: ["Stomata", "Lamina", "Chlorophyll", "Sap"],
+                    answer: 2,
+                    hint: "It is the natural green substance that makes the leaves look green.",
+                    explanation: "Leaves have a green coloring matter called chlorophyll which traps sunlight for making food."
+                },
+                {
+                    q: "During photosynthesis, what do green plants release into the air that is essential for animals and humans to breathe?",
+                    options: ["Carbon dioxide", "Water vapour", "Nitrogen", "Oxygen"],
+                    answer: 3,
+                    hint: "It is the gas that animals and human beings need to survive.",
+                    explanation: "Oxygen is released into the air during photosynthesis, which is essential for all living things to breathe."
+                },
+                {
+                    q: "What would happen if the number of animals in nature suddenly increased way too much?",
+                    options: ["Plants would make more food", "The amount of carbon dioxide given out would be too much for plants", "Plants would stop growing leaves", "Nothing would change"],
+                    answer: 1,
+                    hint: "Think about the balance between what animals breathe out and what plants can use.",
+                    explanation: "An increase in the number of animals would release too much carbon dioxide, making it difficult for plants to maintain a balance."
+                }
+            ],
+            2: [
+                {
+                    q: "Trees growing on the mountains (like pine and cedar) have straight, tall trunks and a special shape. What shape do their crowns have?",
+                    options: ["Round shapes", "Conical crowns", "Flat tops", "Oval crowns"],
+                    answer: 1,
+                    hint: "This shape acts like a sloping roof so that snow slides off easily.",
+                    explanation: "Mountain plants have conical crowns and needle-shaped leaves to help snow slide off easily and protect against frost."
+                },
+                {
+                    q: "How do desert plants like the cactus prevent the loss of water in dry conditions?",
+                    options: ["They grow broad leaves", "Their leaves are modified into spines or thorns", "They grow tall like mountain trees", "They don't use roots"],
+                    answer: 1,
+                    hint: "These sharp parts also protect the plant against hungry herbivores.",
+                    explanation: "In desert plants, leaves are modified into spines or thorns to prevent water loss and safeguard the plant."
+                },
+                {
+                    q: "Mangrove trees grow in swampy or marshy areas where the soil is clayey and full of water. What special features help them breathe?",
+                    options: ["Long, feather-like leaves", "Breathing roots that grow above the soil", "Thick, fleshy stems", "Waxy coatings on stems"],
+                    answer: 1,
+                    hint: "Because the swampy soil is full of water, there isn't enough air down inside it.",
+                    explanation: "Mangrove trees have special roots called breathing roots that grow above the soil to take in air."
+                }
+            ],
+            3: [
+                {
+                    q: "Water lettuce and duckweed float freely on water. What makes their stems capable of floating easily?",
+                    options: ["Heavy wooden structures", "Stems are filled with stones", "Light, spongy stems filled with air", "They do not have any stems"],
+                    answer: 2,
+                    hint: "Air spaces inside their tissues make them very light on the water's surface.",
+                    explanation: "Floating plants have light, spongy stems filled with air, which keeps them light enough to float."
+                },
+                {
+                    q: "Fixed plants like the lotus stay rooted in the mud. What special feature helps their broad leaves prevent rotting?",
+                    options: ["Broad thorns", "A waxy coating on their leaves", "Thick bark", "Conical surfaces"],
+                    answer: 1,
+                    hint: "This slippery coating also facilitates enough air and sunlight absorption while keeping water away.",
+                    explanation: "The leaves of fixed plants are broad and flat with a waxy coating that prevents them from rotting in water."
+                },
+                {
+                    q: "Hydrilla and tape grass are underwater plants. How do they help the animals living in a pond or river?",
+                    options: ["By making the water salty", "By giving out oxygen during photosynthesis to support aquatic life", "By blocking all sunlight from reaching the bottom", "By absorbing all the water"],
+                    answer: 1,
+                    hint: "Aquatic animals need to breathe gases dissolved in water just like land animals.",
+                    explanation: "Submerged plants give out oxygen during photosynthesis, supporting the life of aquatic animals to a great extent."
+                }
+            ],
+            4: [
+                {
+                    q: "Which ancient civilization first made paper from a grass called papyrus?",
+                    options: ["People of Rome", "People of Egypt", "People of Greece", "People of India"],
+                    answer: 1,
+                    hint: "The very word 'paper' comes from the name of this historical grass.",
+                    explanation: "Paper was first made by the people of Egypt from a grass called papyrus."
+                },
+                {
+                    q: "Non-green plants like mushrooms and toadstools cannot make their own food. Why is this?",
+                    options: ["They do not have roots", "They do not have chlorophyll", "They live underwater", "They grow too fast"],
+                    answer: 1,
+                    hint: "Without this green substance, a plant cannot capture sunlight to perform photosynthesis.",
+                    explanation: "Non-green plants like mushrooms lack chlorophyll, so they adapt by absorbing nutrients from dead plants and animals."
+                },
+                {
+                    q: "Plants like the Venus flytrap and pitcher plant trap and eat insects. What are these plants called?",
+                    options: ["Terrestrial plants", "Fixed aquatic plants", "Insectivorous or Carnivorous plants", "Cereal plants"],
+                    answer: 2,
+                    hint: "They grow in nutrient-deficient soils, so they use specially modified leaves to trap live insects.",
+                    explanation: "Plants that trap insects with their specially modified leaves are called insectivorous or carnivorous plants."
+                }
+            ]
+        };
+
+        let gameScore = 0;
+        let quizLives = 3;
+        let totalSlicesCleared = 0;
+        let currentActiveSliceId = null;
+        let currentSliceQuestionProgress = 0;
+        let currentWrongAttempts = 0;
+        let isWheelSpinning = false;
+        let currentWheelRotation = 0;
+
+        const canvasWheel = document.getElementById("wheel-canvas");
+        const ctxWheel = canvasWheel.getContext("2d");
+        const canvasConfetti = document.getElementById("confetti-canvas");
+        const ctxConfetti = canvasConfetti.getContext("2d");
+        let confettiParticles = [];
+
+        function playAudio(src) {
+            const sound = new Audio(src);
+            sound.volume = 0.4;
+            sound.play().catch(() => { console.log(`Audio safe bypass: ${src}`); });
+        }
+
+        function resizeConfetti() {
+            canvasConfetti.width = canvasConfetti.parentElement.clientWidth;
+            canvasConfetti.height = canvasConfetti.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeConfetti);
+        resizeConfetti();
+
+        function triggerConfetti() {
+            confettiParticles = [];
+            const colors = ['#FF9AA2', '#B5EAD7', '#FFDAC1', '#E2C974', '#C7CEEA'];
+            for(let i=0; i<40; i++) {
+                confettiParticles.push({
+                    x: canvasConfetti.width / 2,
+                    y: canvasConfetti.height / 2,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.7) * 10,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    radius: Math.random() * 3 + 3,
+                    gravity: 0.25
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            if (confettiParticles.length === 0) return;
+            ctxConfetti.clearRect(0, 0, canvasConfetti.width, canvasConfetti.height);
+            confettiParticles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                ctxConfetti.beginPath();
+                ctxConfetti.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctxConfetti.fillStyle = p.color;
+                ctxConfetti.fill();
+                if(p.y > canvasConfetti.height) confettiParticles.splice(idx, 1);
+            });
+            requestAnimationFrame(animateConfetti);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            const hud = document.getElementById('game-hud');
+            if (screenId === 'screen-wheel' || screenId === 'screen-quiz') {
+                hud.classList.remove('hidden');
+                refreshHUD();
+            } else {
+                hud.classList.add('hidden');
+            }
+        }
+
+        window.onload = () => {
+            const logo = document.getElementById('main-logo-asset');
+            logo.onerror = function() { this.style.display = 'none'; };
+            
+            // Forces exactly 5 seconds display on Splash screen before Title screen triggers
+            setTimeout(() => { showScreen('screen-title'); }, 5000);
+            drawWheelGraphics();
+        };
+
+        function goToInstructions() { showScreen('screen-instructions'); }
+        function resetToTitle() { showScreen('screen-title'); }
+
+        function startGame() {
+            gameScore = 0;
+            quizLives = 3;
+            totalSlicesCleared = 0;
+            currentWheelRotation = 0;
+            canvasWheel.style.transform = `rotate(0deg)`;
+            SLICES_CONFIG.forEach(s => s.cleared = false);
+            
+            drawWheelGraphics();
+            showScreen('screen-wheel');
+        }
+
+        function refreshHUD() {
+            document.getElementById('hud-progress').innerText = `Cleared: ${totalSlicesCleared}/5`;
+            document.getElementById('hud-score').innerText = `⭐ ${gameScore}`;
+            document.getElementById('hud-lives').innerText = `❤️ Lives: ${quizLives}`;
+        }
+
+        function drawWheelGraphics() {
+            const numSlices = SLICES_CONFIG.length;
+            const arcAngle = (2 * Math.PI) / numSlices;
+            const cx = 200, cy = 200, r = 190;
+
+            ctxWheel.clearRect(0, 0, 400, 400);
+
+            SLICES_CONFIG.forEach((slice, i) => {
+                const startAng = i * arcAngle - Math.PI / 2;
+                const endAng = startAng + arcAngle;
+
+                ctxWheel.beginPath();
+                ctxWheel.moveTo(cx, cy);
+                ctxWheel.arc(cx, cy, r, startAng, endAng);
+                ctxWheel.closePath();
+                ctxWheel.fillStyle = slice.cleared ? varStyle('--grey-slice') : slice.color;
+                ctxWheel.fill();
+                ctxWheel.strokeStyle = "#FFFFFF";
+                ctxWheel.lineWidth = 4;
+                ctxWheel.stroke();
+
+                // Draw Text inside slice
+                ctxWheel.save();
+                ctxWheel.translate(cx, cy);
+                ctxWheel.rotate(startAng + arcAngle / 2);
+                ctxWheel.textAlign = "right";
+                ctxWheel.fillStyle = slice.cleared ? "#888888" : varStyle('--text-dark');
+                ctxWheel.font = `bold 16px ${varStyle('--font-stack')}`;
+                ctxWheel.fillText(slice.label, r - 20, 5);
+                ctxWheel.restore();
+            });
+
+            // Draw center cap pin
+            ctxWheel.beginPath();
+            ctxWheel.arc(cx, cy, 25, 0, 2 * Math.PI);
+            ctxWheel.fillStyle = "#FAF8F5";
+            ctxWheel.fill();
+            ctxWheel.strokeStyle = "#6C5B7B";
+            ctxWheel.lineWidth = 3;
+            ctxWheel.stroke();
+        }
+
+        function varStyle(varName) {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        }
+
+        function executeWheelSpin() {
+            if (isWheelSpinning) return;
+
+            const activeSlices = SLICES_CONFIG.filter(s => !s.cleared);
+            if (activeSlices.length === 0) {
+                wrapUpGame(true);
+                return;
+            }
+
+            isWheelSpinning = true;
+            document.getElementById('spin-action-btn').disabled = true;
+            document.getElementById('pointer-arrow').style.animationPlayState = 'running';
+            document.getElementById('wheel-instruction-status').innerText = "Spun! Looking for a fresh puzzle...";
+
+            const selectedTarget = activeSlices[Math.floor(Math.random() * activeSlices.length)];
+            currentActiveSliceId = selectedTarget.id;
+
+            const sliceCount = SLICES_CONFIG.length;
+            const sliceDegrees = 360 / sliceCount;
+            
+            const centerOfTargetDegree = (currentActiveSliceId * sliceDegrees) + (sliceDegrees / 2);
+            const physicalOffsetDegree = 360 - centerOfTargetDegree;
+
+            const extraSpins = 4 * 360; 
+            currentWheelRotation = extraSpins + physicalOffsetDegree;
+
+            canvasWheel.style.transform = `rotate(${currentWheelRotation}deg)`;
+
+            setTimeout(() => {
+                isWheelSpinning = false;
+                document.getElementById('pointer-arrow').style.animationPlayState = 'paused';
+                document.getElementById('spin-action-btn').disabled = false;
+                
+                currentSliceQuestionProgress = 0;
+                playAudio('assets/correct.mp3');
+                initiateQuizModule();
+            }, 4000);
+        }
+
+        function initiateQuizModule() {
+            showScreen('screen-quiz');
+            renderQuestionFlow();
+        }
+
+        function renderQuestionFlow() {
+            currentWrongAttempts = 0;
+            document.getElementById('quiz-banner').classList.add('hidden');
+            refreshHUD();
+
+            const questionsList = LESSON_QUESTIONS[currentActiveSliceId];
+            const activeQuestionData = questionsList[currentSliceQuestionProgress];
+
+            document.getElementById('quiz-question').innerText = activeQuestionData.q;
+            const containerBox = document.getElementById('quiz-options');
+            containerBox.innerHTML = '';
+
+            activeQuestionData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => verifySelectedAnswer(idx, btn);
+                containerBox.appendChild(btn);
+            });
+        }
+
+        function verifySelectedAnswer(idx, btn) {
+            const questionsList = LESSON_QUESTIONS[currentActiveSliceId];
+            const activeQuestionData = questionsList[currentSliceQuestionProgress];
+            const allOptionButtons = document.querySelectorAll('.option-btn');
+            
+            allOptionButtons.forEach(b => b.style.pointerEvents = 'none');
+
+            if (idx === activeQuestionData.answer) {
+                btn.classList.add('correct');
+                gameScore += 20; // +20 Points for correct responses
+                refreshHUD();
+                playAudio('assets/correct.mp3');
+                triggerConfetti();
+                
+                setTimeout(() => {
+                    currentSliceQuestionProgress++;
+                    if (currentSliceQuestionProgress >= questionsList.length) {
+                        SLICES_CONFIG[currentActiveSliceId].cleared = true;
+                        totalSlicesCleared++;
+                        drawWheelGraphics();
+                        
+                        if (totalSlicesCleared >= SLICES_CONFIG.length) {
+                            wrapUpGame(true);
+                        } else {
+                            showScreen('screen-wheel');
+                            document.getElementById('wheel-instruction-status').innerText = "Category cleared! Give it another spin!";
+                        }
+                    } else {
+                        renderQuestionFlow();
+                    }
+                }, 1500);
+            } else {
+                btn.classList.add('wrong');
+                currentWrongAttempts++;
+                quizLives--;
+                refreshHUD();
+                playAudio('assets/wrong.mp3');
+
+                if (quizLives <= 0) {
+                    setTimeout(() => { wrapUpGame(false); }, 1200);
+                    return;
+                }
+
+                const banner = document.getElementById('quiz-banner');
+                banner.classList.remove('hidden');
+
+                if (currentWrongAttempts === 1) {
+                    banner.innerHTML = `<strong>💡 Try Again Hint:</strong> ${activeQuestionData.hint}`;
+                    allOptionButtons.forEach(b => {
+                        if (!b.classList.contains('wrong')) b.style.pointerEvents = 'auto';
+                    });
+                } else {
+                    banner.innerHTML = `<strong>📘 Textbook Lesson:</strong> ${activeQuestionData.explanation}`;
+                    allOptionButtons[activeQuestionData.answer].classList.add('correct');
+                    
+                    setTimeout(() => {
+                        currentSliceQuestionProgress++;
+                        if (currentSliceQuestionProgress >= questionsList.length) {
+                            SLICES_CONFIG[currentActiveSliceId].cleared = true;
+                            totalSlicesCleared++;
+                            drawWheelGraphics();
+                            if (totalSlicesCleared >= SLICES_CONFIG.length) {
+                                wrapUpGame(true);
+                            } else {
+                                showScreen('screen-wheel');
+                            }
+                        } else {
+                            renderQuestionFlow();
+                        }
+                    }, 4000);
+                }
+            }
+        }
+
+        function wrapUpGame(didWin) {
+            showScreen('screen-gameover');
+            const headline = document.getElementById('gameover-title');
+            const summary = document.getElementById('gameover-feedback');
+            const icon = document.getElementById('gameover-icon');
+            document.getElementById('gameover-score').innerText = gameScore;
+
+            if (didWin) {
+                icon.innerText = "🏆";
+                headline.innerText = "Eco Champion!";
+                summary.innerText = "Amazing! You completely conquered the plant survival wheel and learned how our green friends thrive across nature!";
+            } else {
+                icon.innerText = "🍂";
+                headline.innerText = "Try Again!";
+                summary.innerText = "You ran out of lives this round. Let's spin again to practice leaf structures and plant adaptations!";
+            }
+        }
+    </script>
+</body>
+</html>
