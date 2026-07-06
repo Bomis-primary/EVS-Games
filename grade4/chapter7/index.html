@@ -1,1 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chapter 7: Force, Work and Energy Arcade</title>
+    <style>
+        :root {
+            --bg-canvas: #FFFDF6; 
+            --primary-mint: #4CAF50;
+            --primary-dark: #2E7D32;
+            --accent-purple: #9C27B0;
+            --accent-blue: #2196F3;
+            --accent-orange: #FF9800;
+            --white: #FFFFFF;
+            --slate-grey: #455A64;
+            --font-kids: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: var(--font-kids);
+            background-color: #ECEFF1;
+            color: var(--slate-grey);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-wrapper {
+            width: 100%;
+            max-width: 440px;
+            height: 100%;
+            max-height: 820px;
+            background-color: var(--bg-canvas);
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 601px) {
+            #game-wrapper {
+                border-radius: 30px;
+                height: 96vh;
+                border: 6px solid #81C784;
+            }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            background-color: var(--bg-canvas);
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- LOGO SPLASH SCREEN --- */
+        #screen-logo {
+            background-color: #FFFFFF;
+        }
+        .brand-logo-img {
+            width: 220px;
+            height: auto;
+            max-height: 220px;
+            object-fit: contain;
+            animation: pulsePlayful 1.6s infinite ease-in-out;
+        }
+
+        /* --- TITLE & RULES SCREENS --- */
+        .mascot-icon {
+            font-size: 5rem;
+            margin-bottom: 12px;
+            animation: floatUpDown 3s infinite ease-in-out;
+        }
+
+        .main-title {
+            color: var(--primary-dark);
+            font-size: 2.1rem;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            font-weight: 900;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+        }
+
+        .subtitle-desc {
+            font-size: 1.1rem;
+            color: #78909C;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .btn-playful {
+            background-color: var(--primary-mint);
+            color: var(--white);
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.3rem;
+            font-family: var(--font-kids);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #2E7D32;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .btn-playful:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2E7D32;
+        }
+
+        .rules-paper {
+            background: #FFFFFF;
+            border: 3px dashed #AED581;
+            border-radius: 24px;
+            padding: 20px;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .rules-paper ul {
+            padding-left: 24px;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .rules-paper li {
+            margin-bottom: 8px;
+        }
+
+        /* --- HUD --- */
+        .top-hud-bar {
+            width: 100%;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #FFFFFF;
+            border-bottom: 2px solid #F1F4F5;
+            flex-shrink: 0;
+        }
+
+        .score-capsule {
+            background: #E8F5E9;
+            color: var(--primary-dark);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .lives-container {
+            display: flex;
+            gap: 4px;
+            font-size: 1.3rem;
+        }
+
+        /* --- PROGRESS BAR --- */
+        .progress-container {
+            width: 85%;
+            height: 12px;
+            background: #E0E0E0;
+            border-radius: 6px;
+            margin: 15px auto 5px auto;
+            overflow: hidden;
+            border: 2px solid #FFFFFF;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #81C784, #4CAF50);
+            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
+
+        /* --- SCROLLABLE CONTAINER --- */
+        .arena-scroll-container {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 20px 25px 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .notebook-case-box {
+            background: #FFFFFF;
+            border: 2px solid #E0E0E0;
+            border-radius: 24px;
+            padding: 20px;
+            font-size: 1.15rem;
+            line-height: 1.45;
+            font-weight: bold;
+            color: #37474F;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.02);
+            text-align: left;
+            position: relative;
+            animation: cardEntrance 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+            flex-shrink: 0;
+            margin-bottom: 15px;
+        }
+
+        .notebook-case-box::before {
+            content: '⚡';
+            position: absolute;
+            top: -15px;
+            right: 15px;
+            font-size: 1.6rem;
+        }
+
+        /* --- INTERACTIVE CARDS STACK --- */
+        .cards-deck-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .animal-option-card {
+            background: #FFFFFF;
+            border: 3px solid #CFD8DC;
+            border-bottom: 8px solid #B0BEC5;
+            border-radius: 24px;
+            padding: 18px 22px;
+            font-family: var(--font-kids);
+            font-size: 1.15rem;
+            font-weight: 800;
+            text-align: left;
+            cursor: pointer;
+            color: #455A64;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.1s ease;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.03);
+        }
+
+        .animal-option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+        }
+
+        .animal-option-card:active {
+            transform: translateY(6px);
+            border-bottom-width: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .animal-option-card.card-0 { border-color: #B3E5FC; border-bottom-color: #81D4FA; color: #0277BD; }
+        .animal-option-card.card-1 { border-color: #E1BEE7; border-bottom-color: #CE93D8; color: #6A1B9A; }
+        .animal-option-card.card-2 { border-color: #FFE082; border-bottom-color: #FFD54F; color: #FF8F00; }
+
+        .animal-option-card.shake-wrong {
+            animation: headShake 0.4s ease;
+            background-color: #FFEBEE !important;
+            border-color: #FFCDD2 !important;
+            border-bottom-color: #E57373 !important;
+            color: #C62828 !important;
+            opacity: 0.4;
+            pointer-events: none;
+            transform: translateY(0);
+        }
+
+        .animal-option-card.pop-correct {
+            background-color: #E8F5E9 !important;
+            border-color: #C8E6C9 !important;
+            border-bottom-color: #81C784 !important;
+            color: #2E7D32 !important;
+            transform: scale(1.02);
+            pointer-events: none;
+        }
+
+        /* --- DETECTIVE HINT --- */
+        .owl-hint-bubble {
+            background: #FFF9C4;
+            border: 2px solid #FFF59D;
+            border-radius: 18px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            line-height: 1.4;
+            text-align: left;
+            color: #F57F17;
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            animation: popInUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(255,235,59,0.2);
+        }
+
+        /* --- RESULTS --- */
+        .score-giant-badge {
+            background: #FFFFFF;
+            border: 4px solid var(--primary-mint);
+            border-radius: 30px;
+            padding: 20px 40px;
+            margin: 15px 0;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+            display: inline-block;
+            box-shadow: 0 10px 25px rgba(76,175,80,0.15);
+        }
+
+        /* --- KEYFRAMES --- */
+        @keyframes pulsePlayful {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        @keyframes floatUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popInUp {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes headShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+
+        <div id="screen-logo" class="screen">
+            <img src="assets/innovine-logo.png" class="brand-logo-img" alt="Innovine Logo">
+        </div>
+
+        <div id="screen-intro" class="screen hidden">
+            <div class="mascot-icon">🕹️</div>
+            <h1 class="main-title">Force & Energy<br>Arcade</h1>
+            <p class="subtitle-desc">Master the powers of friction, gravity, work, and solar energy sources!</p>
+            <button class="btn-playful" onclick="showInstructionsMenu()">Start Game ➔</button>
+        </div>
+
+        <div id="screen-instructions" class="screen hidden">
+            <div class="mascot-icon">🎒</div>
+            <h1 class="main-title" style="font-size: 1.8rem;">How To Play</h1>
+            
+            <div class="rules-paper">
+                <ul>
+                    <li>Read the quick 2-line science case on the pad.</li>
+                    <li>Tap the matching interactive card below it!</li>
+                    <li>Score <b>+20 points</b> for every correct match.</li>
+                    <li>Watch out for hints if you make a mistake!</li>
+                </ul>
+            </div>
+
+            <button class="btn-playful" onclick="startCardMatchingGame()">Play 🚀</button>
+        </div>
+
+        <div id="screen-gameplay" class="screen hidden" style="padding: 0; justify-content: flex-start;">
+            <div class="top-hud-bar">
+                <div class="score-capsule" id="hud-score-label">Score: 0</div>
+                <div class="lives-container" id="hud-hearts-label">❤️❤️❤️</div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-fill-bar" id="game-progress-fill"></div>
+            </div>
+
+            <div class="arena-scroll-container">
+                <div class="notebook-case-box" id="active-scenario-text">Loading physics scenario...</div>
+                
+                <div class="cards-deck-stack" id="active-cards-box">
+                    </div>
+
+                <div class="owl-hint-bubble hidden" id="active-hint-box">
+                    <span>💡</span>
+                    <div id="active-hint-text">Hint content.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-results" class="screen hidden">
+            <div class="mascot-icon" id="end-emoticon-box">🏆</div>
+            <h1 class="main-title">Amazing Job!</h1>
+            
+            <p style="font-size: 1.1rem; color: #546E7A; margin-bottom: 5px;">Your Final Score</p>
+            <div class="score-giant-badge" id="end-score-label">0</div>
+
+            <div style="background: white; padding: 18px; border-radius: 20px; border: 2px dashed #B0BEC5; font-size: 1.1rem; line-height: 1.5; color: #37474F; margin-bottom: 30px; width: 100%;" id="end-feedback-message">
+                Excellent work!
+            </div>
+
+            <button class="btn-playful" onclick="restartFreshSession()">Play Again 🔄</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- SECURE SOUND WRAPPERS ---
+        let sfxSuccess, sfxFailure, sfxCheer;
+
+        try {
+            sfxSuccess = new Audio('assets/correct.mp3');
+            sfxFailure = new Audio('assets/wrong.mp3');
+            sfxCheer = new Audio('assets/freesound_community-claps-44774.mp3');
+            
+            sfxSuccess.preload = 'auto';
+            sfxFailure.preload = 'auto';
+            sfxCheer.preload = 'auto';
+        } catch (error) {
+            console.warn("Audio Contexts missing. Switching to silent operation.");
+            const silentStub = { play: () => Promise.resolve(), currentTime: 0 };
+            sfxSuccess = silentStub;
+            sfxFailure = silentStub;
+            sfxCheer = silentStub;
+        }
+
+        // --- CHAPTER 7 DATA ARRAY ---
+        const CHAPTER_7_QUESTIONS = [
+            { q: "A gardener pushes a heavy lawnmower forward across the green grass. What is this push or pull action called?", opts: ["A Force", "Energy Source", "Work Done"], correct: "A Force", hint: "It is a simple push or pull that moves things!" },
+            { q: "A fast rolling soccer ball hits a thick brick wall and comes to a complete stop. What did the force do here?", opts: ["Stopped a moving object", "Changed its shape", "Made it move faster"], correct: "Stopped a moving object", hint: "The wall's force made the rolling ball stand perfectly still!" },
+            { q: "You squeeze a soft, round piece of play dough tightly between your fingers. What did the force do here?", opts: ["Changed its shape", "Stopped it from moving", "Made it colder"], correct: "Changed its shape", hint: "It went from a round ball to a flat pancake shape!" },
+            { q: "A ripe red apple detaches from a tree branch and falls straight down to the grass. What force pulled it?", opts: ["Gravitational Force", "Frictional Force", "Magnetic Force"], correct: "Gravitational Force", hint: "This invisible force pulls everything down toward the Earth!" },
+            { q: "You roll a toy car across a rough sand pit, and it slows down very quickly. What force slows it down?", opts: ["Frictional Force", "Electrostatic Force", "Gravity"], correct: "Frictional Force", hint: "This force rubs against moving things to slow them down!" },
+            { q: "A student holds a horseshoe bar close to iron nails, and they snap instantly to it. What force is this?", opts: ["Magnetic Force", "Gravitational Force", "Frictional Force"], correct: "Magnetic Force", hint: "This force pulls on metals like iron and steel!" },
+            { q: "Maya uses her muscles to push a heavy box 5 meters all the way across her room. Is this scientific work?", opts: ["Yes! Work is done", "No! No work is done", "Only gravity worked"], correct: "Yes! Work is done", hint: "Force was used and the heavy box actually moved a distance!" },
+            { q: "Rohan sits completely still in a chair reading a school textbook for an hour. Is this scientific work?", opts: ["No! No work is done", "Yes! Work is done", "Friction did work"], correct: "No! No work is done", hint: "Even though his brain is busy, the book is not moving anywhere!" },
+            { q: "Giant shiny blue panels are placed on top of a school roof to catch bright sunlight. What energy is this?", opts: ["Solar Energy", "Wind Energy", "Atomic Energy"], correct: "Solar Energy", hint: "This power comes directly from our bright, warm Sun!" },
+            { q: "Large white blades on a tall windmill spin fast when a stormy breeze blows through. What energy is this?", opts: ["Wind Energy", "Geothermal Energy", "Hydro Energy"], correct: "Wind Energy", hint: "This type of power is made by moving air currents!" },
+            { q: "Rushing water from a high mountain dam plunges down to spin giant city generators. What energy is this?", opts: ["Hydro Energy", "Solar Energy", "Magnetic Energy"], correct: "Hydro Energy", hint: "The word 'Hydro' means it uses the power of moving water!" },
+            { q: "Engineers drill deep underground to trap natural hot steam escaping from rocks. What energy is this?", opts: ["Geothermal Energy", "Wind Energy", "Atomic Energy"], correct: "Geothermal Energy", hint: "This energy comes from the deep, fiery heat inside the Earth!" }
+        ];
+
+        // --- CORE LOGIC HANDLERS ---
+        let currentScore = 0;
+        let totalLivesRemaining = 3;
+        let randomizedActivePool = [];
+        let currentQuestionIndex = 0;
+        let mistakesOnThisQuestion = 0;
+
+        // FIXED TIMED LOGO VISIBILITY (EXACTLY 5 SECONDS)
+        window.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                document.getElementById('screen-logo').classList.add('hidden');
+                document.getElementById('screen-intro').classList.remove('hidden');
+            }, 5000);
+        });
+
+        function showInstructionsMenu() {
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-instructions').classList.remove('hidden');
+        }
+
+        function startCardMatchingGame() {
+            document.getElementById('screen-instructions').classList.add('hidden');
+            document.getElementById('screen-gameplay').classList.remove('hidden');
+            
+            currentScore = 0;
+            totalLivesRemaining = 3;
+            currentQuestionIndex = 0;
+            
+            document.getElementById('hud-score-label').innerText = `Score: 0`;
+            updateHeartsUI();
+
+            // Randomize questions sequence array
+            randomizedActivePool = [...CHAPTER_7_QUESTIONS].sort(() => Math.random() - 0.5);
+            loadNextCardScenario();
+        }
+
+        function loadNextCardScenario() {
+            mistakesOnThisQuestion = 0;
+            document.getElementById('active-hint-box').classList.add('hidden');
+            document.querySelector('.arena-scroll-container').scrollTop = 0;
+
+            const progressionPercentage = (currentQuestionIndex / randomizedActivePool.length) * 100;
+            document.getElementById('game-progress-fill').style.width = `${progressionPercentage}%`;
+
+            if (currentQuestionIndex >= randomizedActivePool.length) {
+                concludeGameSession(true);
+                return;
+            }
+
+            const scenarioItem = randomizedActivePool[currentQuestionIndex];
+            document.getElementById('active-scenario-text').innerText = scenarioItem.q;
+
+            // Randomize the cards layout grid distribution
+            const dynamicCardsOrder = [...scenarioItem.opts].sort(() => Math.random() - 0.5);
+            
+            const cardDeckContainer = document.getElementById('active-cards-box');
+            cardDeckContainer.innerHTML = '';
+
+            dynamicCardsOrder.forEach((optionValue, idx) => {
+                const cardElement = document.createElement('button');
+                cardElement.className = `animal-option-card card-${idx % 3}`;
+                cardElement.innerHTML = `<span>${optionValue}</span><span>🃏</span>`;
+                
+                cardElement.onclick = () => evaluateCardChoice(optionValue, scenarioItem, cardElement);
+                cardDeckContainer.appendChild(cardElement);
+            });
+        }
+
+        function evaluateCardChoice(selectedValue, itemData, cardNode) {
+            const allAvailableCards = document.querySelectorAll('.animal-option-card');
+
+            if (selectedValue === itemData.correct) {
+                try { sfxSuccess.currentTime = 0; sfxSuccess.play().catch(()=>{}); } catch(e){}
+                
+                cardNode.classList.add('pop-correct');
+                allAvailableCards.forEach(card => card.style.pointerEvents = 'none');
+
+                currentScore += 20;
+                document.getElementById('hud-score-label').innerText = `Score: ${currentScore}`;
+
+                currentQuestionIndex++;
+                setTimeout(loadNextCardScenario, 1300);
+            } else {
+                try { sfxFailure.currentTime = 0; sfxFailure.play().catch(()=>{}); } catch(e){}
+                
+                cardNode.classList.add('shake-wrong');
+                mistakesOnThisQuestion++;
+
+                if (mistakesOnThisQuestion === 1) {
+                    const hintField = document.getElementById('active-hint-box');
+                    document.getElementById('active-hint-text').innerHTML = `<strong>Hint:</strong> ${itemData.hint}`;
+                    hintField.classList.remove('hidden');
+
+                    setTimeout(() => {
+                        const arena = document.querySelector('.arena-scroll-container');
+                        arena.scrollTo({ top: arena.scrollHeight, behavior: 'smooth' });
+                    }, 100);
+                } else {
+                    totalLivesRemaining--;
+                    updateHeartsUI();
+
+                    if (totalLivesRemaining <= 0) {
+                        setTimeout(() => concludeGameSession(false), 1000);
+                    }
+                }
+            }
+        }
+
+        function updateHeartsUI() {
+            let heartString = "";
+            for (let i = 0; i < 3; i++) {
+                heartString += (i < totalLivesRemaining) ? "❤️" : "🖤";
+            }
+            document.getElementById('hud-hearts-label').innerText = heartString;
+        }
+
+        function concludeGameSession(isVictory) {
+            document.getElementById('screen-gameplay').classList.add('hidden');
+            document.getElementById('screen-results').classList.remove('hidden');
+
+            document.getElementById('end-score-label').innerText = currentScore;
+            
+            let emojiMascot = "🏆";
+            let positiveFeedbackMessage = "";
+
+            if (isVictory && currentScore === (CHAPTER_7_QUESTIONS.length * 20)) {
+                emojiMascot = "👑";
+                positiveFeedbackMessage = "⭐ <strong>Perfect Arcade Score!</strong> You perfectly know how pushing and pulling changes shape, how friction works, and how solar and hydro generators run!";
+                try { sfxCheer.play().catch(()=>{}); } catch(e){}
+            } else if (currentScore >= 160) {
+                emojiMascot = "🦁";
+                positiveFeedbackMessage = "🌟 <strong>Super Science Master!</strong> Incredible work! You understand gravitational pull and geothermal energy concepts flawlessly!";
+                try { sfxCheer.play().catch(()=>{}); } catch(e){}
+            } else {
+                emojiMascot = "🌱";
+                positiveFeedbackMessage = "✨ <strong>Good Effort!</strong> You learned how forces stop moving items and how wind currents work. Try again to match a perfect 240 score!";
+            }
+
+            document.getElementById('end-emoticon-box').innerText = emojiMascot;
+            document.getElementById('end-feedback-message').innerHTML = positiveFeedbackMessage;
+        }
+
+        function restartFreshSession() {
+            document.getElementById('screen-results').classList.add('hidden');
+            document.getElementById('screen-intro').classList.remove('hidden');
+        }
+
+        document.addEventListener('click', () => {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            if (context.state === 'suspended') context.resume();
+        }, { once: true });
+    </script>
+</body>
+</html>
