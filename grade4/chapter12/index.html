@@ -1,1 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rupee Express - Travel & Currency</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
 
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background-color: #87CEEB;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 1000px;
+            height: 100vh;
+            max-height: 600px;
+            position: relative;
+            background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        /* --- SPLASH & MENUS --- */
+        #splash-screen { background: #fff; z-index: 50; }
+        .logo { width: 250px; animation: pop 1s ease-in-out infinite alternate; }
+        @keyframes pop { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        #title-screen, #rules-screen, #result-screen {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            text-align: center;
+            padding: 20px;
+        }
+        
+        h1 { 
+            font-family: 'Fredoka One', cursive; 
+            font-size: 3.5rem; color: #fff; 
+            text-shadow: 4px 4px 0 #ff4757, 0 10px 20px rgba(0,0,0,0.2); 
+            margin-bottom: 20px; 
+        }
+        
+        .rules-box {
+            background: rgba(255,255,255,0.95);
+            padding: 25px; border-radius: 20px;
+            font-size: 1.3rem; color: #2f3542; margin-bottom: 30px;
+            border: 4px dashed #ff4757; text-align: left; line-height: 1.6;
+        }
+
+        .btn {
+            background: #ff4757; color: #fff; border: 4px solid #fff;
+            padding: 15px 40px; font-size: 1.8rem; font-family: 'Fredoka One', cursive;
+            border-radius: 40px; cursor: pointer;
+            box-shadow: 0 8px 0 #c0392b, 0 15px 20px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+        }
+        .btn:active { transform: translateY(8px); box-shadow: 0 0 0 #c0392b; }
+
+        /* --- SCENERY --- */
+        .scenery { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .sun { position: absolute; top: 20px; right: 40px; width: 80px; height: 80px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 40px #FFD700; }
+        .cloud { position: absolute; background: #fff; border-radius: 50px; opacity: 0.8; }
+        .c1 { width: 120px; height: 40px; top: 50px; left: 10%; animation: float 20s linear infinite; }
+        .c2 { width: 160px; height: 50px; top: 80px; left: 60%; animation: float 25s linear infinite reverse; }
+        @keyframes float { from { transform: translateX(-100px); } to { transform: translateX(100vw); } }
+
+        .mountains {
+            position: absolute; bottom: 120px; width: 100%; height: 150px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1000 150" xmlns="http://www.w3.org/2000/svg"><path d="M0,150 L150,20 L300,150 L500,40 L700,150 L850,10 L1000,150 Z" fill="%232ed573" opacity="0.8"/></svg>') repeat-x bottom;
+            background-size: contain;
+        }
+        .ground { position: absolute; bottom: 0; width: 100%; height: 120px; background: #7bed9f; border-top: 10px solid #2ed573; }
+        .tracks {
+            position: absolute; bottom: 20px; width: 100%; height: 25px;
+            background: repeating-linear-gradient(90deg, #7f8fa6, #7f8fa6 15px, transparent 15px, transparent 30px);
+            border-top: 4px solid #353b48; border-bottom: 4px solid #353b48;
+        }
+
+        /* --- HUD --- */
+        .hud {
+            position: absolute; top: 15px; width: 100%; padding: 0 20px;
+            display: flex; justify-content: space-between; z-index: 5;
+        }
+        .wallet, .tickets {
+            background: #fff; padding: 10px 20px; border-radius: 30px;
+            font-size: 1.5rem; font-weight: 900; color: #2f3542;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: 3px solid #ff4757;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .wallet { border-color: #2ed573; color: #2ed573; }
+
+        /* --- BILLBOARD (QUESTION & HINT) --- */
+        .billboard-container {
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 650px; z-index: 5; text-align: center;
+        }
+        .billboard {
+            background: #f1f2f6; border: 8px solid #576574; border-radius: 15px;
+            padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            font-size: 1.4rem; font-weight: 900; color: #2f3542;
+            line-height: 1.4;
+        }
+        .hint-board {
+            background: #fff9c4; border: 4px solid #fbc02d; color: #d84315;
+            margin-top: 15px; padding: 15px; border-radius: 12px; font-size: 1.15rem;
+            display: none; animation: dropIn 0.3s forwards; font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .correct-text-highlight { color: #2e7d32; font-size: 1.25rem; font-weight: 900; margin-bottom: 5px; display: block; }
+        @keyframes dropIn { from{ transform: translateY(-20px); opacity:0;} to{transform: translateY(0); opacity:1;} }
+
+        /* --- THE TRAIN (Right to Left) --- */
+        .train-wrapper {
+            position: absolute; bottom: 35px; right: -1500px; /* Starts off-screen right */
+            display: flex; align-items: flex-end; gap: 10px; z-index: 10;
+            transition: right 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            flex-direction: row-reverse; /* Flips the flex order so engine is on the left side of the right-moving train */
+        }
+        
+        /* When moving right-to-left, if we want engine on the left end of the cars, 
+           and it enters from the right screen edge moving left... */
+        .train-wrapper { flex-direction: row; left: 100vw; right: auto; transition: left 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .train-wrapper.in-station { left: 50px; }
+        .train-wrapper.leaving { left: -2000px; transition: left 1.5s ease-in; }
+
+        /* Engine (Facing Left) */
+        .engine {
+            width: 140px; height: 110px; background: #ff4757;
+            border-radius: 30px 10px 0 0; position: relative;
+            box-shadow: inset -10px -10px 0 rgba(0,0,0,0.2);
+            border: 4px solid #333;
+            transform: scaleX(-1); /* Flips engine to face left */
+        }
+        .engine::before { 
+            content: ''; position: absolute; top: 15px; left: 15px;
+            width: 40px; height: 40px; background: #87CEEB; border: 4px solid #333; border-radius: 10px;
+        }
+        .engine::after { 
+            content: ''; position: absolute; top: -30px; right: 15px;
+            width: 25px; height: 30px; background: #333; border-radius: 5px 5px 0 0;
+        }
+        .wheel {
+            position: absolute; bottom: -15px; width: 40px; height: 40px;
+            background: #333; border-radius: 50%; border: 4px solid #7f8fa6;
+            animation: spinLeft 2s linear infinite;
+        }
+        .w1 { left: 10px; } .w2 { right: 10px; }
+        @keyframes spinLeft { 100% { transform: rotate(-360deg); } }
+
+        /* Cars */
+        .car {
+            width: 190px; height: 30px; background: #353b48;
+            border-radius: 5px; position: relative;
+            display: flex; justify-content: center; align-items: flex-end;
+            padding-bottom: 25px;
+        }
+        .car .wheel { bottom: -15px; width: 30px; height: 30px; }
+        .car-link {
+            position: absolute; left: -10px; bottom: 5px;
+            width: 10px; height: 8px; background: #333;
+        }
+
+        /* Option Buttons inside Cars */
+        .opt-btn {
+            background: #ffa502; color: #fff; border: 4px solid #ff7f50;
+            padding: 12px 10px; width: 170px; border-radius: 10px;
+            font-size: 1.05rem; font-family: 'Nunito', sans-serif; font-weight: 900;
+            cursor: pointer; position: absolute; bottom: 30px;
+            box-shadow: 0 5px 0 #d35400; transition: all 0.2s;
+            line-height: 1.2;
+        }
+        .opt-btn:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 #d35400; }
+        .opt-btn:disabled { cursor: not-allowed; }
+        
+        /* Answer Feedback Styles */
+        .opt-btn.correct { 
+            background: #2ed573 !important; border-color: #218c53 !important; box-shadow: 0 5px 0 #218c53; 
+        }
+        .opt-btn.wrong { 
+            background: #ff4757 !important; border-color: #c0392b !important; box-shadow: 0 5px 0 #c0392b; opacity: 0.5; 
+        }
+        .opt-btn.show-correct {
+            background: #2ed573 !important; border-color: #fff !important; 
+            box-shadow: 0 0 20px #2ed573; animation: pulse 1s infinite; z-index: 20;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Caboose */
+        .caboose {
+            width: 80px; height: 80px; background: #eccc68; border: 4px solid #333;
+            border-radius: 10px 10px 0 0; position: relative; margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <audio id="snd-correct" src="./assets/correct.mp3"></audio>
+    <audio id="snd-wrong" src="./assets/wrong.mp3"></audio>
+    <audio id="snd-win" src="./assets/freesound_community-claps-44774.mp3"></audio>
+
+    <div id="splash-screen" class="screen active">
+        <img class="logo" src="./assets/innovine-logo.png" alt="Innovine" onerror="this.style.display='none'; document.getElementById('alt-logo').style.display='block';">
+        <h1 id="alt-logo" style="display:none; color: #ff4757;">INNOVINE</h1>
+    </div>
+
+    <div id="title-screen" class="screen">
+        <h1>Rupee Express 🚂</h1>
+        <button class="btn" onclick="showScreen('rules-screen')">START</button>
+    </div>
+
+    <div id="rules-screen" class="screen">
+        <div class="rules-box">
+            🚂 <b>Travel & Currency Challenge!</b><br><br>
+            💸 Earn <b>₹100</b> for every correct answer.<br>
+            🎟️ You have <b>4 Golden Tickets</b> (Lives).<br>
+            ❌ Guessing wrong costs 1 Ticket, but reveals the <b>Correct Answer</b> and a Hint!<br>
+            🏆 Answer all questions to win!
+        </div>
+        <button class="btn" onclick="startGame()">PLAY</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="scenery">
+            <div class="sun"></div>
+            <div class="cloud c1"></div>
+            <div class="cloud c2"></div>
+            <div class="mountains"></div>
+            <div class="ground"></div>
+            <div class="tracks"></div>
+        </div>
+
+        <div class="hud">
+            <div class="wallet">💰 <span id="val-wallet">₹0</span></div>
+            <div class="tickets">🎟️ <span id="val-tickets">4</span></div>
+        </div>
+
+        <div class="billboard-container">
+            <div class="billboard" id="q-text">Question goes here?</div>
+            <div class="hint-board" id="hint-text"></div>
+        </div>
+
+        <div class="train-wrapper" id="train">
+            <div class="engine">
+                <div class="wheel w1"></div><div class="wheel w2"></div>
+            </div>
+            
+            <div class="car"><div class="car-link"></div>
+                <button class="opt-btn" id="opt-0">Option 1</button>
+                <div class="wheel w1"></div><div class="wheel w2"></div>
+            </div>
+            <div class="car"><div class="car-link"></div>
+                <button class="opt-btn" id="opt-1">Option 2</button>
+                <div class="wheel w1"></div><div class="wheel w2"></div>
+            </div>
+            <div class="car"><div class="car-link"></div>
+                <button class="opt-btn" id="opt-2">Option 3</button>
+                <div class="wheel w1"></div><div class="wheel w2"></div>
+            </div>
+
+            <div class="car" style="width: 100px;">
+                <div class="car-link"></div>
+                <div class="caboose">
+                    <div style="text-align: center; font-weight: bold; margin-top: 20px; font-family: 'Nunito', sans-serif;">GUARD</div>
+                </div>
+                <div class="wheel w1"></div><div class="wheel w2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h1 id="end-title">Journey Complete!</h1>
+        <div class="rules-box" style="text-align: center;">
+            <h2 id="end-msg">You reached the destination!</h2>
+            <h1 style="color: #2ed573; text-shadow: none;" id="end-wallet">Total Earned: ₹0</h1>
+        </div>
+        <button class="btn" onclick="startGame()">PLAY AGAIN</button>
+    </div>
+</div>
+
+<script>
+    // Strictly updated questions based on Chapter 12 facts (Travel & Currency)
+    const questions = [
+        { q: "Which mode of transport is the fastest to travel to another country?", o: ["Air Transport", "Water Transport", "Land Transport"], a: "Air Transport", h: "Aeroplanes and helicopters belong to this category." },
+        { q: "Which mode of transport is considered the cheapest for carrying heavy goods?", o: ["Water Transport", "Air Transport", "Road Transport"], a: "Water Transport", h: "Ships and boats move slowly on oceans and rivers." },
+        { q: "What is the official currency of India called?", o: ["Rupee", "Dollar", "Euro"], a: "Rupee", h: "It is represented by the symbol ₹." },
+        { q: "Which bank has the authority to issue currency notes in India?", o: ["Reserve Bank of India", "State Bank of India", "Bank of India"], a: "Reserve Bank of India", h: "It is the central bank of our country." },
+        { q: "Whose picture is printed on the front side of Indian currency notes?", o: ["Mahatma Gandhi", "Jawaharlal Nehru", "B. R. Ambedkar"], a: "Mahatma Gandhi", h: "He is known as the Father of the Nation." },
+        { q: "How many languages are printed in the language panel on the back of a Rupee note?", o: ["15 Languages", "22 Languages", "10 Languages"], a: "15 Languages", h: "Check the rectangular box on the back of any currency note!" },
+        { q: "What is the national emblem of India that can be seen on all coins and notes?", o: ["The Lion Capital", "The Bengal Tiger", "The Lotus"], a: "The Lion Capital", h: "It features four Asiatic lions standing back to back." },
+        { q: "Which document must you buy before boarding a public train?", o: ["A Ticket", "A Passport", "A Bank Cheque"], a: "A Ticket", h: "The ticket checker will ask to see this during your journey." },
+        { q: "What shiny feature is placed on currency notes to prove they are real and not fake?", o: ["Security Thread", "Silver Coin", "Plastic Cover"], a: "Security Thread", h: "It is a thin strip that runs from top to bottom." },
+        { q: "Who is the person in a black coat who checks tickets inside the train?", o: ["TTE (Ticket Examiner)", "Train Driver", "Station Master"], a: "TTE (Ticket Examiner)", h: "They ensure everyone has paid for their seat." },
+        { q: "What vehicle is pulled by animals and mostly used in villages?", o: ["Bullock Cart", "Tractor", "Bus"], a: "Bullock Cart", h: "It is a traditional land transport." },
+        { q: "Which special vehicle takes sick or injured people to the hospital?", o: ["Ambulance", "Fire Engine", "Police Car"], a: "Ambulance", h: "It has a loud siren and a medical cross symbol." },
+        { q: "Where do we go to deposit or safely keep our money?", o: ["A Bank", "A Post Office", "A Railway Station"], a: "A Bank", h: "You can also exchange old or torn notes here." },
+        { q: "Who helps passengers carry their heavy luggage at the railway station?", o: ["Porter (Coolie)", "Guard", "Driver"], a: "Porter (Coolie)", h: "They usually wear a red uniform shirt." },
+        { q: "Who designed the new symbol (₹) for the Indian Rupee?", o: ["Udaya Kumar", "Mahatma Gandhi", "Rabindranath Tagore"], a: "Udaya Kumar", h: "He created it by combining the Devanagari 'Ra' and Roman 'R'." }
+    ];
+
+    let currentQ = 0;
+    let wallet = 0;
+    let tickets = 4;
+    let shuffledBank = [];
+    let isAnswering = false;
+    let currentCorrectAnswer = "";
+
+    // Show Logo for 5 seconds
+    setTimeout(() => {
+        if(document.getElementById('splash-screen').classList.contains('active')) {
+            showScreen('title-screen');
+        }
+    }, 5000);
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function startGame() {
+        wallet = 0;
+        tickets = 4;
+        currentQ = 0;
+        shuffledBank = [...questions].sort(() => Math.random() - 0.5);
+        updateHUD();
+        showScreen('game-screen');
+        loadQuestion();
+    }
+
+    function updateHUD() {
+        document.getElementById('val-wallet').innerText = `₹${wallet}`;
+        document.getElementById('val-tickets').innerText = tickets;
+    }
+
+    function loadQuestion() {
+        isAnswering = false;
+        const qData = shuffledBank[currentQ];
+        currentCorrectAnswer = qData.a;
+        
+        document.getElementById('q-text').innerText = `Q${currentQ + 1}: ${qData.q}`;
+        document.getElementById('hint-text').style.display = 'none';
+
+        let opts = [...qData.o].sort(() => Math.random() - 0.5);
+        
+        for(let i=0; i<3; i++) {
+            let btn = document.getElementById(`opt-${i}`);
+            btn.innerText = opts[i];
+            btn.className = 'opt-btn'; // reset class
+            btn.disabled = false;
+            btn.onclick = () => checkAnswer(btn, opts[i], qData);
+        }
+
+        // Drive train in from the right
+        const train = document.getElementById('train');
+        train.className = 'train-wrapper';
+        setTimeout(() => train.classList.add('in-station'), 50);
+    }
+
+    function checkAnswer(btn, selectedOption, qData) {
+        if(isAnswering || btn.disabled) return;
+        isAnswering = true;
+
+        // Disable all buttons immediately
+        for(let i=0; i<3; i++) document.getElementById(`opt-${i}`).disabled = true;
+
+        if(selectedOption === qData.a) {
+            btn.classList.add('correct');
+            wallet += 100;
+            updateHUD();
+            try { document.getElementById('snd-correct').play(); } catch(e){}
+            
+            setTimeout(() => {
+                document.getElementById('train').classList.replace('in-station', 'leaving');
+                setTimeout(() => {
+                    currentQ++;
+                    if(currentQ < shuffledBank.length) loadQuestion();
+                    else endGame(true);
+                }, 1500); 
+            }, 1000);
+
+        } else {
+            btn.classList.add('wrong');
+            tickets--;
+            updateHUD();
+            try { document.getElementById('snd-wrong').play(); } catch(e){}
+
+            // EXPLICITLY REVEAL CORRECT ANSWER
+            for(let i=0; i<3; i++) {
+                let checkBtn = document.getElementById(`opt-${i}`);
+                if(checkBtn.innerText === qData.a) {
+                    checkBtn.classList.add('show-correct');
+                }
+            }
+
+            // SHOW EXPLICIT TEXT HINT
+            let hintEl = document.getElementById('hint-text');
+            hintEl.innerHTML = `
+                <span class="correct-text-highlight">✔️ Correct Answer: ${qData.a}</span>
+                💡 Hint: ${qData.h}
+            `;
+            hintEl.style.display = 'block';
+
+            if(tickets <= 0) {
+                setTimeout(() => {
+                    document.getElementById('train').classList.replace('in-station', 'leaving');
+                    setTimeout(() => endGame(false), 1500);
+                }, 3000); // Give them a few seconds to read the right answer before game over
+            } else {
+                // If they still have lives, wait 3 seconds, then move to next question
+                setTimeout(() => {
+                    document.getElementById('train').classList.replace('in-station', 'leaving');
+                    setTimeout(() => {
+                        currentQ++;
+                        if(currentQ < shuffledBank.length) loadQuestion();
+                        else endGame(true);
+                    }, 1500);
+                }, 3500);
+            }
+        }
+    }
+
+    function endGame(won) {
+        showScreen('result-screen');
+        document.getElementById('end-wallet').innerText = `Total Earned: ₹${wallet}`;
+        
+        const title = document.getElementById('end-title');
+        const msg = document.getElementById('end-msg');
+
+        if(won) {
+            title.innerText = "Destination Reached! 🏆";
+            msg.innerText = "Amazing job! You know all about travel and currency!";
+            try { document.getElementById('snd-win').play(); } catch(e){}
+        } else {
+            title.innerText = "Out of Tickets! 🎫";
+            msg.innerText = "Oh no, the journey ended early! Better luck next time.";
+        }
+    }
+</script>
+</body>
+</html>
