@@ -137,19 +137,35 @@
         .correct-text-highlight { color: #2e7d32; font-size: 1.25rem; font-weight: 900; margin-bottom: 5px; display: block; }
         @keyframes dropIn { from{ transform: translateY(-20px); opacity:0;} to{transform: translateY(0); opacity:1;} }
 
-        /* --- THE TRAIN (Right to Left) --- */
+        /* --- THE TRAIN (Right to Left Movement Logic) --- */
         .train-wrapper {
-            position: absolute; bottom: 35px; right: -1500px; /* Starts off-screen right */
-            display: flex; align-items: flex-end; gap: 10px; z-index: 10;
-            transition: right 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            flex-direction: row-reverse; /* Flips the flex order so engine is on the left side of the right-moving train */
+            position: absolute; 
+            bottom: 35px; 
+            left: 50px; /* Base position inside the station */
+            display: flex; 
+            flex-direction: row; /* Engine on the left, cars follow to the right */
+            align-items: flex-end; 
+            gap: 10px; 
+            z-index: 10;
         }
         
-        /* When moving right-to-left, if we want engine on the left end of the cars, 
-           and it enters from the right screen edge moving left... */
-        .train-wrapper { flex-direction: row; left: 100vw; right: auto; transition: left 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .train-wrapper.in-station { left: 50px; }
-        .train-wrapper.leaving { left: -2000px; transition: left 1.5s ease-in; }
+        /* 1. Reset State: Instantly snap off-screen to the right */
+        .train-wrapper.resetting {
+            transform: translateX(150vw);
+            transition: none; /* No transition so it snaps invisibly */
+        }
+
+        /* 2. Entering/In Station: Slide in from the right to the center */
+        .train-wrapper.in-station {
+            transform: translateX(0);
+            transition: transform 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* 3. Leaving: Drive off-screen to the left */
+        .train-wrapper.leaving {
+            transform: translateX(-200vw);
+            transition: transform 1.5s ease-in;
+        }
 
         /* Engine (Facing Left) */
         .engine {
@@ -157,7 +173,7 @@
             border-radius: 30px 10px 0 0; position: relative;
             box-shadow: inset -10px -10px 0 rgba(0,0,0,0.2);
             border: 4px solid #333;
-            transform: scaleX(-1); /* Flips engine to face left */
+            transform: scaleX(-1); /* Flips engine visually so it faces left */
         }
         .engine::before { 
             content: ''; position: absolute; top: 15px; left: 15px;
@@ -173,7 +189,7 @@
             animation: spinLeft 2s linear infinite;
         }
         .w1 { left: 10px; } .w2 { right: 10px; }
-        @keyframes spinLeft { 100% { transform: rotate(-360deg); } }
+        @keyframes spinLeft { 100% { transform: rotate(-360deg); } } /* Wheels spin counter-clockwise for left movement */
 
         /* Cars */
         .car {
@@ -271,7 +287,7 @@
             <div class="hint-board" id="hint-text"></div>
         </div>
 
-        <div class="train-wrapper" id="train">
+        <div class="train-wrapper resetting" id="train">
             <div class="engine">
                 <div class="wheel w1"></div><div class="wheel w2"></div>
             </div>
@@ -310,7 +326,6 @@
 </div>
 
 <script>
-    // Strictly updated questions based on Chapter 12 facts (Travel & Currency)
     const questions = [
         { q: "Which mode of transport is the fastest to travel to another country?", o: ["Air Transport", "Water Transport", "Land Transport"], a: "Air Transport", h: "Aeroplanes and helicopters belong to this category." },
         { q: "Which mode of transport is considered the cheapest for carrying heavy goods?", o: ["Water Transport", "Air Transport", "Road Transport"], a: "Water Transport", h: "Ships and boats move slowly on oceans and rivers." },
@@ -334,7 +349,6 @@
     let tickets = 4;
     let shuffledBank = [];
     let isAnswering = false;
-    let currentCorrectAnswer = "";
 
     // Show Logo for 5 seconds
     setTimeout(() => {
@@ -366,7 +380,6 @@
     function loadQuestion() {
         isAnswering = false;
         const qData = shuffledBank[currentQ];
-        currentCorrectAnswer = qData.a;
         
         document.getElementById('q-text').innerText = `Q${currentQ + 1}: ${qData.q}`;
         document.getElementById('hint-text').style.display = 'none';
@@ -381,10 +394,28 @@
             btn.onclick = () => checkAnswer(btn, opts[i], qData);
         }
 
-        // Drive train in from the right
+        // Animation Sequence: Snap train to the RIGHT off-screen, then drive IN to the station
         const train = document.getElementById('train');
-        train.className = 'train-wrapper';
-        setTimeout(() => train.classList.add('in-station'), 50);
+        train.className = 'train-wrapper resetting'; // Instantly snaps to Right
+        
+        // Force browser reflow so the "resetting" takes effect immediately before transitioning
+        void train.offsetWidth; 
+        
+        train.className = 'train-wrapper in-station'; // Smoothly drives in to Left
+    }
+
+    function animateTrainLeavingAndNext() {
+        // Drive train OFF-SCREEN to the LEFT
+        document.getElementById('train').className = 'train-wrapper leaving';
+        
+        setTimeout(() => {
+            currentQ++;
+            if(currentQ < shuffledBank.length) {
+                loadQuestion();
+            } else {
+                endGame(true);
+            }
+        }, 1500); // Wait for the 1.5s drive-off animation to finish
     }
 
     function checkAnswer(btn, selectedOption, qData) {
@@ -401,13 +432,8 @@
             try { document.getElementById('snd-correct').play(); } catch(e){}
             
             setTimeout(() => {
-                document.getElementById('train').classList.replace('in-station', 'leaving');
-                setTimeout(() => {
-                    currentQ++;
-                    if(currentQ < shuffledBank.length) loadQuestion();
-                    else endGame(true);
-                }, 1500); 
-            }, 1000);
+                animateTrainLeavingAndNext();
+            }, 1000); // Small pause for celebration before driving off
 
         } else {
             btn.classList.add('wrong');
@@ -433,19 +459,13 @@
 
             if(tickets <= 0) {
                 setTimeout(() => {
-                    document.getElementById('train').classList.replace('in-station', 'leaving');
+                    document.getElementById('train').className = 'train-wrapper leaving';
                     setTimeout(() => endGame(false), 1500);
-                }, 3000); // Give them a few seconds to read the right answer before game over
+                }, 3000);
             } else {
-                // If they still have lives, wait 3 seconds, then move to next question
                 setTimeout(() => {
-                    document.getElementById('train').classList.replace('in-station', 'leaving');
-                    setTimeout(() => {
-                        currentQ++;
-                        if(currentQ < shuffledBank.length) loadQuestion();
-                        else endGame(true);
-                    }, 1500);
-                }, 3500);
+                    animateTrainLeavingAndNext();
+                }, 3500); // Give them a few seconds to read the right answer before driving off
             }
         }
     }
