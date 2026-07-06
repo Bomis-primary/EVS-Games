@@ -9,12 +9,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Cross-device reset and strict performance rules */
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; font-family: 'Fredoka', sans-serif; }
-        html, body { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a0f0a; overflow: hidden; }
+        /* Strict performance reset for all modern devices */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            user-select: none; 
+            -webkit-user-select: none; 
+            touch-action: none; 
+            font-family: 'Fredoka', sans-serif; 
+        }
+        html, body { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: #1a0f0a; 
+            overflow: hidden; 
+        }
         
         #game-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: block; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: block; touch-action: none; }
         
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -24,8 +40,9 @@
         .hidden { display: none !important; }
 
         /* Splash Screen */
-        #screen-splash { background-color: #ffffff; z-index: 100; }
-        .logo { width: 80%; max-width: 300px; height: auto; }
+        #screen-splash { background-color: #ffffff; z-index: 100; cursor: pointer; }
+        .logo { width: 80%; max-width: 300px; height: auto; pointer-events: none; }
+        .skip-hint { color: #888888; font-size: 0.9rem; margin-top: 20px; }
 
         /* Typography & Buttons */
         h1.title { font-size: 3.5rem; color: #ffbe0b; margin-bottom: 40px; text-transform: uppercase; line-height: 1.1; }
@@ -40,7 +57,7 @@
             z-index: 5; color: #ffffff; font-size: 1.2rem; font-weight: 700; pointer-events: none;
         }
 
-        /* Quiz UI */
+        /* Quiz UI Layout */
         #screen-quiz { background-color: rgba(26, 15, 10, 0.98); z-index: 50; display: flex; justify-content: center; padding: 20px; }
         .quiz-box { background: #ffffff; border-radius: 12px; padding: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .quiz-question { color: #1a0f0a; font-size: 1.3rem; font-weight: 700; margin-bottom: 24px; text-align: left; line-height: 1.4; }
@@ -70,8 +87,9 @@
             <div>COLLECTED: <span id="val-healthy">0</span>/3</div>
         </div>
 
-        <div id="screen-splash" class="screen">
+        <div id="screen-splash" class="screen" onclick="skipSplash()">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo">
+            <div class="skip-hint">Tap anywhere to skip</div>
         </div>
 
         <div id="screen-title" class="screen hidden">
@@ -81,11 +99,11 @@
 
         <div id="screen-instructions" class="screen hidden">
             <p class="text-simple">
-                1. Swipe to collect healthy foods.<br>
-                2. Avoid junk foods.<br>
-                3. Collect 3 healthy foods to unlock a quiz.<br>
-                4. You have 3 attempts per question. Hints will help if you get stuck.<br>
-                5. Complete all 3 levels to win.
+                1. Swipe your finger/mouse to collect healthy foods.<br>
+                2. Avoid slicing junk foods.<br>
+                3. Collect 3 healthy foods to unlock your level quiz.<br>
+                4. You have 3 attempts per question. Hints appear after the first mistake!<br>
+                5. Complete all 3 chapters to finish the game.
             </p>
             <button class="btn-primary" onclick="startGame()">START</button>
         </div>
@@ -101,7 +119,7 @@
         </div>
 
         <div id="screen-end" class="screen hidden">
-            <h1 class="title" id="end-title">GAME OVER</h1>
+            <h1 class="title" id="end-title">VICTORY</h1>
             <p class="text-simple" style="text-align: center;" id="end-msg"></p>
             <p class="text-simple" style="text-align: center; font-size: 2.5rem; color: #ffbe0b;">FINAL SCORE: <span id="end-score">0</span></p>
             <button class="btn-primary" onclick="resetGame()">PLAY AGAIN</button>
@@ -109,7 +127,7 @@
     </div>
 
     <script>
-        // Scenario-Based Curriculum Database (Grade 4, Chapter 1)
+        // Grade 4 Chapter 1 Textbook Database Context
         const textbookDatabase = {
             1: [
                 { q: "Rahul is playing a football match and feels very tired at half-time. What should he eat for instant energy?", a: "Carbohydrates", options: ["Proteins", "Carbohydrates", "Vitamins"], hint: "Athletes eat a lot of this before a big race! Examples include bananas, potatoes, and bread.", exp: "Carbohydrates are 'energy-giving foods' that our body quickly breaks down to give us instant energy." },
@@ -143,8 +161,10 @@
         let items = [], swipeTrail = [];
         let currentQuiz = [], quizIndex = 0, attempts = 0, qData = null;
         let sndCorrect, sndWrong, sndClaps;
+        let isDrawing = false;
+        let splashTimeout;
 
-        // Shuffle Utility to randomize questions and options
+        // Array Shuffle Logic
         function shuffle(array) {
             let arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -154,7 +174,6 @@
             return arr;
         }
 
-        // Init
         window.onload = () => {
             canvas = document.getElementById('game-canvas');
             ctx = canvas.getContext('2d', { alpha: false }); 
@@ -163,17 +182,20 @@
             window.addEventListener('resize', resize);
             setupInput();
 
-            // Assets load silently so game won't crash if paths are missing
+            // Load audio tracks smoothly
             try { sndCorrect = new Audio('assets/correct.mp3'); } catch(e){}
             try { sndWrong = new Audio('assets/wrong.mp3'); } catch(e){}
             try { sndClaps = new Audio('assets/freesound_community-claps-44774.mp3'); } catch(e){}
 
-            // Screen 1 Splash Timing
-            setTimeout(() => {
-                document.getElementById('screen-splash').classList.add('hidden');
-                document.getElementById('screen-title').classList.remove('hidden');
-            }, 5000);
+            // Auto-advance splash after 3 seconds if not clicked manually
+            splashTimeout = setTimeout(skipSplash, 3000);
         };
+
+        function skipSplash() {
+            if(splashTimeout) clearTimeout(splashTimeout);
+            document.getElementById('screen-splash').classList.add('hidden');
+            document.getElementById('screen-title').classList.remove('hidden');
+        }
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -194,7 +216,6 @@
             if(audioObj) { try { audioObj.currentTime = 0; audioObj.play().catch(()=>{}); } catch(e){} }
         }
 
-        // Gameplay Initialization
         function startGame() {
             document.getElementById('screen-instructions').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
@@ -207,7 +228,7 @@
             items = []; swipeTrail = []; spawnTimer = 0;
             updateHUD();
             
-            // Randomize the 5 questions for this level
+            // Randomize questions within the target level pool
             currentQuiz = shuffle(textbookDatabase[level]);
             
             isPlaying = true;
@@ -220,7 +241,7 @@
             document.getElementById('val-healthy').innerText = healthySlices;
         }
 
-        // Falling Items Logic
+        // Object Engine Mapping
         class Item {
             constructor() {
                 this.x = Math.random() * (canvas.width - 80) + 40;
@@ -250,15 +271,12 @@
         function engine() {
             if(!isPlaying) return;
             
-            // Fill background
             ctx.fillStyle = "#2d1a10";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Spawn rate
             spawnTimer++;
             if(spawnTimer > 45) { items.push(new Item()); spawnTimer = 0; }
 
-            // Update items
             for (let i = items.length - 1; i >= 0; i--) {
                 let itm = items[i];
                 itm.update();
@@ -266,7 +284,6 @@
                 if(!itm.active) items.splice(i, 1);
             }
 
-            // Draw swipe path
             if(swipeTrail.length > 1) {
                 ctx.beginPath(); ctx.strokeStyle = "#ffbe0b"; ctx.lineWidth = 6; ctx.lineCap = "round";
                 ctx.moveTo(swipeTrail[0].x, swipeTrail[0].y);
@@ -276,7 +293,7 @@
             gameLoop = requestAnimationFrame(engine);
         }
 
-        // Input & Slicing Control
+        // Modern Unified Pointer Event Controls
         function setupInput() {
             const track = (x, y) => {
                 if(!isPlaying) return;
@@ -284,12 +301,17 @@
                 if(swipeTrail.length > 6) swipeTrail.shift();
                 checkSlice(x, y);
             };
-            const clearSwipe = () => { swipeTrail = []; };
+            const clearSwipe = () => { swipeTrail = []; isDrawing = false; };
 
-            canvas.addEventListener('mousemove', e => { if(e.buttons === 1) track(e.clientX, e.clientY); });
-            canvas.addEventListener('touchmove', e => { track(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
-            window.addEventListener('mouseup', clearSwipe);
-            window.addEventListener('touchend', clearSwipe);
+            canvas.addEventListener('pointerdown', e => {
+                isDrawing = true;
+                track(e.clientX, e.clientY);
+            });
+            canvas.addEventListener('pointermove', e => {
+                if(isDrawing) track(e.clientX, e.clientY);
+            });
+            window.addEventListener('pointerup', clearSwipe);
+            window.addEventListener('pointercancel', clearSwipe);
         }
 
         function checkSlice(x, y) {
@@ -300,7 +322,7 @@
                     itm.active = false;
                     
                     if(itm.isJunk) {
-                        playAudio(sndWrong); // No lives lost, just audio feedback
+                        playAudio(sndWrong); // Plays warning chime; explicitly zero progression penalty
                     } else {
                         playAudio(sndCorrect);
                         healthySlices++;
@@ -309,14 +331,13 @@
                         if(healthySlices >= 3) {
                             isPlaying = false;
                             cancelAnimationFrame(gameLoop);
-                            setTimeout(startQuizPhase, 500); 
+                            setTimeout(startQuizPhase, 400); 
                         }
                     }
                 }
             });
         }
 
-        // Quiz Handling
         function startQuizPhase() {
             document.getElementById('hud').classList.add('hidden');
             quizIndex = 0;
@@ -342,13 +363,12 @@
             const optBox = document.getElementById('quiz-options');
             optBox.innerHTML = '';
             
-            // Randomize options for display
             let opts = shuffle(qData.options);
             opts.forEach(opt => {
                 let btn = document.createElement('button');
                 btn.className = 'quiz-option';
                 btn.innerText = opt;
-                btn.onclick = (e) => evalAnswer(opt, btn);
+                btn.onclick = () => evalAnswer(opt, btn);
                 optBox.appendChild(btn);
             });
         }
@@ -358,7 +378,6 @@
             const opts = document.querySelectorAll('.quiz-option');
 
             if(selected === qData.a) {
-                // Correct logic
                 playAudio(sndCorrect);
                 let points = (attempts === 1) ? 20 : (attempts === 2) ? 10 : 5;
                 score += points;
@@ -369,9 +388,8 @@
                 document.getElementById('quiz-status').innerText = "Correct! Great Job.";
                 document.getElementById('quiz-exp').classList.remove('hidden');
                 
-                setTimeout(nextQuestion, 4000); // Time to read explanation
+                setTimeout(nextQuestion, 4000); 
             } else {
-                // Wrong logic
                 playAudio(sndWrong);
                 btnElement.classList.add('wrong');
                 btnElement.disabled = true;
@@ -382,7 +400,6 @@
                 } else if(attempts === 2) {
                     document.getElementById('quiz-status').innerText = `Attempt 3 / 3 - Last Chance!`;
                 } else {
-                    // Out of attempts, show correct answer and explanation
                     opts.forEach(b => {
                         b.disabled = true;
                         if(b.innerText === qData.a) b.classList.add('correct');
@@ -401,7 +418,7 @@
                 document.getElementById('screen-quiz').classList.add('hidden');
                 
                 if(level >= 3) {
-                    endGame(); // Finished all 15 questions
+                    endGame();
                 } else {
                     level++;
                     document.getElementById('hud').classList.remove('hidden');
@@ -417,9 +434,9 @@
             cancelAnimationFrame(gameLoop);
             
             let msg = "";
-            if(score >= 250) msg = "Incredible job! You have mastered the nutrients!";
-            else if(score >= 150) msg = "Great effort! You know your curriculum well.";
-            else msg = "Good try! Review your notes and play again to improve.";
+            if(score >= 250) msg = "Incredible job! You have completely mastered Chapter 1!";
+            else if(score >= 150) msg = "Great effort! You know your textbook concepts well.";
+            else msg = "Good try! Review your notes and play again to improve your score.";
 
             document.getElementById('end-title').innerText = "VICTORY!";
             document.getElementById('end-msg').innerText = msg;
