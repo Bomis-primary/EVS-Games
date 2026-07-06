@@ -30,12 +30,14 @@
             overflow: hidden;
         }
 
+        /* FIXED: Changed from percentage to viewport units to prevent layout collapsing */
         #game-container {
             position: relative;
-            width: 100%;
+            width: 100vw;
             max-width: 500px;
-            height: 100%;
+            height: 100vh;
             max-height: 900px;
+            flex-shrink: 0; /* Prevents flexbox from squishing the container to 0 height */
             background: #2b170c radial-gradient(circle, #3d2213 20%, #170c06 100%);
             border: 8px solid #361f14;
             border-radius: 32px;
@@ -82,30 +84,51 @@
             background: #ffffff;
             z-index: 100;
         }
+
+        /* Branding logo styling */
+        .brand-logo {
+            max-width: 220px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: bouncePulse 2s infinite ease-in-out;
+        }
         
-        /* Fallback text if logo image is missing */
         .splash-text {
             font-family: 'Lilita One', cursive;
-            font-size: 2.5rem;
-            color: #ff4d6d;
-            animation: bouncePulse 2s infinite ease-in-out;
+            font-size: 1.8rem;
+            color: #4a2c1b;
+            letter-spacing: 2px;
+        }
+
+        /* Premium wooden header style for title */
+        .title-badge-container {
+            background: #231209;
+            border: 4px solid #ffbe0b;
+            border-radius: 24px;
+            padding: 20px 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            transform: rotate(-1deg);
         }
 
         .game-title {
             font-family: 'Lilita One', cursive;
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             color: #ffbe0b;
             text-shadow: 
-                -3px -3px 0 #3a1a05,  
-                 3px -3px 0 #3a1a05,
-                -3px  3px 0 #3a1a05,
-                 3px  3px 0 #3a1a05,
-                 0px  6px 0 #1f0b00,
-                 0px 12px 20px rgba(0,0,0,0.6);
-            letter-spacing: 2px;
+                -3px -3px 0 #000,  
+                 3px -3px 0 #000,
+                -3px  3px 0 #000,
+                 3px  3px 0 #000,
+                 0px  6px 0 #1f0b00;
+            letter-spacing: 1px;
             line-height: 1.05;
-            margin-bottom: 30px;
-            transform: rotate(-2deg);
+        }
+
+        .title-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            display: block;
         }
 
         .btn-round {
@@ -260,7 +283,7 @@
 
         @keyframes bouncePulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.06); }
+            50% { transform: scale(1.05); }
         }
         @keyframes modalPop {
             from { transform: scale(0.7) translateY(30px); opacity: 0; }
@@ -281,16 +304,20 @@
         </div>
 
         <div id="splash-screen" class="ui-screen">
+            <img class="brand-logo" src="assets/innovine-logo.png" alt="Innovine Solutions Logo" onerror="this.style.display='none';">
             <div class="splash-text">LOADING...</div>
         </div>
 
         <div id="menu-screen" class="ui-screen wood-panels hidden">
-            <h1 class="game-title">NUTRIENT<br>NINJA</h1>
+            <div class="title-badge-container">
+                <span class="title-emoji">🥷⚔️</span>
+                <h1 class="game-title">NUTRIENT<br>NINJA!</h1>
+            </div>
             <button class="btn-round" onclick="showInstructions()">PLAY GAME</button>
         </div>
 
         <div id="instructions-screen" class="ui-screen wood-panels hidden">
-            <h1 class="game-title" style="font-size: 2.5rem;">NINJA TRAINING</h1>
+            <h1 class="game-title" style="font-size: 2.5rem; margin-bottom: 20px;">NINJA TRAINING</h1>
             <div class="card-board">
                 🍎 <b>Swipe & Slice</b> healthy nutritious items launched up onto the wood board!<br><br>
                 💥 <b>Avoid Spoiled Junk Food Bombs</b> (Burgers & Sodas). Cutting them loses a life instantly!<br><br>
@@ -319,12 +346,13 @@
     </div>
 
     <script>
-        // Wrapped audio in try/catch instantly so missing files won't crash the script
+        // Wrapped audio setup inside absolute safety blocks
         let sndCorrect, sndWrong, sndClaps;
         try { sndCorrect = new Audio('assets/correct.mp3'); } catch(e){}
         try { sndWrong = new Audio('assets/wrong.mp3'); } catch(e){}
         try { sndClaps = new Audio('assets/freesound_community-claps-44774.mp3'); } catch(e){}
 
+        // Complete Grade 4 Chapter 1 Content verified from textbook pages
         const textbookDatabase = {
             1: [
                 { q: "What type of nutrients provide our body with instant energy?", a: "Carbohydrates", options: ["Carbohydrates", "Proteins", "Vitamins"] },
@@ -361,15 +389,16 @@
         const canvas = document.getElementById('canvas-view');
         const ctx = canvas.getContext('2d');
 
-        // FIXED INITIALIZATION: Uses DOMContentLoaded instead of window.onload
         function initializeGameSetup() {
             adjustCanvasSizing();
+            // Let the splash screen sit beautifully for 1.2 seconds before transitioning
             setTimeout(() => {
                 document.getElementById('splash-screen').classList.add('hidden');
                 document.getElementById('menu-screen').classList.remove('hidden');
-            }, 1000); // reduced wait time
+            }, 1200);
         }
 
+        // Secure state engine activation setup
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initializeGameSetup);
         } else {
@@ -404,11 +433,6 @@
                 ctx.lineTo(i * plankWidth, canvas.height);
                 ctx.stroke();
             }
-            
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
-            ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.moveTo(20, 80); ctx.lineTo(canvas.width-40, canvas.height*0.4); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(canvas.width-20, canvas.height*0.2); ctx.lineTo(30, canvas.height*0.8); ctx.stroke();
             ctx.restore();
         }
 
@@ -518,12 +542,6 @@
                 ctx.globalAlpha = this.currentLife / this.lifeTicksMax;
                 ctx.fillStyle = this.color;
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.sizeRadius, 0, Math.PI * 2); ctx.fill();
-                
-                for(let i=0; i<3; i++) {
-                    ctx.beginPath();
-                    ctx.arc(this.x + Math.sin(i)*this.sizeRadius*1.2, this.y + Math.cos(i)*this.sizeRadius*1.2, this.sizeRadius*0.25, 0, Math.PI*2);
-                    ctx.fill();
-                }
                 ctx.restore();
                 this.currentLife--;
             }
