@@ -123,7 +123,7 @@
             box-shadow: 0 2px 0px var(--primary-dark);
         }
 
-        /* --- SCREEN 1: INNOVINE LOGO --- */
+        /* --- SPLASH SCREEN --- */
         #screen-logo {
             background-color: #FFFFFF;
         }
@@ -134,7 +134,6 @@
             animation: pulse 2s infinite ease-in-out;
         }
 
-        /* --- SCREEN 2 & 3: TITLE & INSTRUCTIONS --- */
         .mascot-art {
             font-size: 4.5rem;
             margin-bottom: 16px;
@@ -182,7 +181,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.04);
         }
 
-        /* --- SCREEN 4: ARCADE GAMEPLAY (TEETH GRID) --- */
+        /* --- ARCADE TEETH GRID --- */
         .arcade-ui-wrapper {
             display: flex;
             flex-direction: column;
@@ -207,7 +206,7 @@
             gap: 6px;
             width: 100%;
             padding: 12px 10px;
-            background-color: #FFD3D6; /* Pink pastel gums color */
+            background-color: #FFD3D6;
             box-shadow: inset 0 4px 8px rgba(0,0,0,0.06);
         }
 
@@ -239,7 +238,6 @@
             transform: scale(0.9);
         }
 
-        /* Tooth Infection States */
         .tooth.yellow {
             background-color: var(--plaque-yellow) !important;
             box-shadow: 0 3px 0px #CDB55E !important;
@@ -259,7 +257,7 @@
         }
         #upper-jaw .tooth.black { box-shadow: 0 -3px 0px #222 !important; }
 
-        /* --- SCREEN 5: QUIZ挑戰 CHALLENGE --- */
+        /* --- QUIZ CHALLENGE --- */
         .quiz-wrapper {
             width: 100%;
             display: flex;
@@ -343,7 +341,6 @@
             margin-bottom: 2px;
         }
 
-        /* --- CONFETTI OVERLAY --- */
         #confetti-canvas {
             position: absolute;
             top: 0;
@@ -354,7 +351,6 @@
             z-index: 100;
         }
 
-        /* --- ANIMATIONS --- */
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -385,8 +381,8 @@
         </div>
 
         <div id="screen-logo" class="screen">
-            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
-            <div id="logo-fallback" style="display:none; font-size:2rem; font-weight:bold; color:var(--primary-dark);">INNOVINE EDU</div>
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" id="main-logo-asset">
+            <div id="logo-fallback" style="font-size:2.2rem; font-weight:bold; color:var(--primary-dark); margin-top:10px;">INNOVINE</div>
         </div>
 
         <div id="screen-title" class="screen hidden">
@@ -400,9 +396,9 @@
             <h1>How To Play</h1>
             <div class="instruction-card">
                 <ul style="list-style-type: none;">
-                    <li>🧼 <strong>Step 1:</strong> Random teeth will turn yellow or green. Tap them instantly to brush them clean!</li>
-                    <li>👾 <strong>Watch Out:</strong> If left ignored, they become black <strong>Cavities</strong> and you lose a life!</li>
-                    <li>🧠 <strong>Step 2:</strong> Finish the brushing drill to unlock 3 fun textbook questions.</li>
+                    <li>🧼 <strong>Step 1:</strong> Dirty teeth will turn yellow or green. Tap them quickly to brush them clean!</li>
+                    <li>👾 <strong>Watch Out:</strong> If left ignored, they turn into black <strong>Cavities</strong> and you lose a life!</li>
+                    <li>🧠 <strong>Step 2:</strong> Finish the brushing level to unlock 3 fun textbook questions.</li>
                 </ul>
             </div>
             <button class="btn" onclick="startGame()">Play Now 🚀</button>
@@ -428,11 +424,9 @@
                     Loading question...
                 </div>
                 
-                <div id="quiz-options" class="options-container">
-                    </div>
+                <div id="quiz-options" class="options-container"></div>
                 
-                <div id="quiz-banner" class="banner-panel hidden">
-                    </div>
+                <div id="quiz-banner" class="banner-panel hidden"></div>
             </div>
         </div>
 
@@ -451,7 +445,6 @@
     </div>
 
     <script>
-        /* --- BOOK DATA EXTRAPOLATED INTEGRATION --- */
         const SIMPLIFIED_QUESTIONS = [
             {
                 q: "Tim is 6 years old. His front tooth just wiggled and fell out. What kind of temporary tooth fell out?",
@@ -560,7 +553,6 @@
             }
         ];
 
-        /* --- GAME ENGINE VARIABLES --- */
         let activeQuestions = [];
         let currentQuestionIndex = 0;
         let gameScore = 0;
@@ -574,14 +566,16 @@
         let arcadeActive = false;
         let teethState = Array(16).fill(null).map((_, i) => ({ id: i, status: "clean", timer: null }));
 
-        /* --- CROSS DEVICE AUDIO CONTROLLER --- */
+        /* Safe Audio Core with asset fallback bypass rules */
         function playAudio(src) {
             const sound = new Audio(src);
-            sound.volume = 0.5;
-            sound.play().catch(e => console.log("Audio play delayed until interaction:", e));
+            sound.volume = 0.4;
+            sound.play().catch(() => {
+                // Silently bypass file path routing crashes on GitHub Pages
+                console.log(`Audio fallback handled safely for path: ${src}`);
+            });
         }
 
-        /* --- CONFETTI ENGINE (CANVAS) --- */
         const canvas = document.getElementById("confetti-canvas");
         const ctx = canvas.getContext("2d");
         let confettiParticles = [];
@@ -596,15 +590,15 @@
         function triggerConfettiEffect() {
             confettiParticles = [];
             const colors = ['#FF9AA2', '#B5EAD7', '#FFDAC1', '#E2C974', '#C7CEEA'];
-            for(let i=0; i<50; i++) {
+            for(let i=0; i<40; i++) {
                 confettiParticles.push({
                     x: canvas.width / 2,
                     y: canvas.height / 2,
                     vx: (Math.random() - 0.5) * 8,
                     vy: (Math.random() - 0.7) * 10,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    radius: Math.random() * 3 + 4,
-                    gravity: 0.2
+                    radius: Math.random() * 3 + 3,
+                    gravity: 0.25
                 });
             }
             animateConfettiLoop();
@@ -613,23 +607,19 @@
         function animateConfettiLoop() {
             if (confettiParticles.length === 0) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             confettiParticles.forEach((p, index) => {
                 p.x += p.vx;
                 p.y += p.vy;
                 p.vy += p.gravity;
-                
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fillStyle = p.color;
                 ctx.fill();
-                
                 if(p.y > canvas.height) confettiParticles.splice(index, 1);
             });
             requestAnimationFrame(animateConfettiLoop);
         }
 
-        /* --- STATE NAVIGATION --- */
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
@@ -644,7 +634,13 @@
         }
 
         window.onload = () => {
-            setTimeout(() => { showScreen('screen-title'); }, 5000);
+            // Safe image handling to avoid freezing if file paths fail
+            const logo = document.getElementById('main-logo-asset');
+            logo.onerror = function() {
+                this.style.display = 'none';
+            };
+            
+            setTimeout(() => { showScreen('screen-title'); }, 3000);
             createTeethDOM();
         };
 
@@ -667,7 +663,6 @@
             
             activeQuestions = JSON.parse(JSON.stringify(SIMPLIFIED_QUESTIONS));
             shuffle(activeQuestions);
-            
             initiateArcadeWave();
         }
 
@@ -683,7 +678,6 @@
             }
         }
 
-        /* --- ARCADE SYSTEM LOGIC --- */
         function createTeethDOM() {
             const upperContainer = document.getElementById('upper-jaw');
             const lowerContainer = document.getElementById('lower-jaw');
@@ -694,12 +688,10 @@
                 const tooth = document.createElement('div');
                 tooth.className = 'tooth';
                 tooth.dataset.id = i;
-                
                 tooth.addEventListener('pointerdown', (e) => {
                     e.preventDefault();
                     brushTooth(i);
                 });
-
                 if(i < 8) upperContainer.appendChild(tooth);
                 else lowerContainer.appendChild(tooth);
             }
@@ -708,7 +700,6 @@
         function initiateArcadeWave() {
             showScreen('screen-arcade');
             arcadeActive = true;
-            
             teethState.forEach(t => {
                 t.status = "clean";
                 if(t.timer) clearTimeout(t.timer);
@@ -716,7 +707,7 @@
             });
             drawTeethGraphics();
 
-            let timeLeft = 12;
+            let timeLeft = 10;
             document.getElementById('arcade-timer-text').innerText = `Keep teeth clean! Time remaining: ${timeLeft}s`;
             
             arcadeTimer = setInterval(() => {
@@ -728,7 +719,7 @@
                 }
             }, 1000);
 
-            let speed = Math.max(1200 - (gameRound * 150), 500);
+            let speed = Math.max(1200 - (gameRound * 150), 600);
             plaqueSpawnInterval = setInterval(() => { spawnPlaque(); }, speed);
         }
 
@@ -741,15 +732,14 @@
             target.status = Math.random() > 0.5 ? "yellow" : "green";
             drawTeethGraphics();
 
-            let delay = Math.max(2400 - (gameRound * 200), 1200);
+            let delay = Math.max(2200 - (gameRound * 200), 1200);
             target.timer = setTimeout(() => {
                 if(target.status === "yellow" || target.status === "green") {
-                    target.status = "black"; // Turns to cavity
+                    target.status = "black";
                     arcadeLives--;
                     refreshHUD();
                     drawTeethGraphics();
                     playAudio('assets/wrong.mp3');
-                    
                     if(arcadeLives <= 0) endArcadeWave(false);
                 }
             }, delay);
@@ -772,8 +762,10 @@
             const domTeeth = document.querySelectorAll('.tooth');
             teethState.forEach(t => {
                 const element = domTeeth[t.id];
-                element.className = 'tooth';
-                if(t.status !== "clean") element.classList.add(t.status);
+                if(element) {
+                    element.className = 'tooth';
+                    if(t.status !== "clean") element.classList.add(t.status);
+                }
             });
         }
 
@@ -790,7 +782,6 @@
             }
         }
 
-        /* --- QUIZ CHALLENGE ENGINE --- */
         function initiateQuizWave() {
             showScreen('screen-quiz');
             loadNextQuestion();
@@ -819,7 +810,7 @@
         function selectOption(idx, btn) {
             let data = activeQuestions[currentQuestionIndex];
             const buttons = document.querySelectorAll('.option-btn');
-            buttons.forEach(b => b.style.pointerEvents = 'none'); // Lock selections
+            buttons.forEach(b => b.style.pointerEvents = 'none');
 
             if(idx === data.answer) {
                 btn.classList.add('correct');
@@ -827,7 +818,6 @@
                 playAudio('assets/correct.mp3');
                 playAudio('assets/freesound_community-claps-44774.mp3');
                 triggerConfettiEffect();
-                
                 setTimeout(() => { proceedQuizFlow(); }, 1500);
             } else {
                 btn.classList.add('wrong');
@@ -852,7 +842,6 @@
                 } else {
                     banner.innerHTML = `<strong>📘 Learning Core:</strong> ${data.explanation}`;
                     buttons[data.answer].classList.add('correct');
-                    
                     setTimeout(() => { proceedQuizFlow(); }, 4000);
                 }
             }
@@ -860,8 +849,6 @@
 
         function proceedQuizFlow() {
             currentQuestionIndex++;
-            
-            // 3 Questions per round logic mapping to 15 questions across 5 rounds total
             if(currentQuestionIndex === gameRound * 3) {
                 if(gameRound >= 5) {
                     wrapUpGameSession(true);
@@ -874,10 +861,8 @@
             }
         }
 
-        /* --- GAME SUMMARY / OVERBOARD REPORT --- */
         function wrapUpGameSession(didWin) {
             showScreen('screen-gameover');
-            
             const title = document.getElementById('gameover-title');
             const feedback = document.getElementById('gameover-feedback');
             const icon = document.getElementById('gameover-icon');
@@ -886,11 +871,11 @@
             if(didWin) {
                 icon.innerText = "🏆";
                 title.innerText = "Teeth Champion!";
-                feedback.innerText = "Amazing smile! You protected your teeth from plaque and completed your textbook challenge perfectly!";
+                feedback.innerText = "Amazing job! You protected your teeth from plaque and successfully solved your textbook challenge perfectly!";
             } else {
                 icon.innerText = "🧼";
                 title.innerText = "Keep Brushing!";
-                feedback.innerText = "Those stubborn cavities got the best of us this time! Let's clean our brush and try again to improve our score.";
+                feedback.innerText = "Those stubborn cavities took over this round! Let's clear our brush and try again to improve our score.";
             }
         }
     </script>
