@@ -1,1 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Journey of Food Timeline</title>
+    <style>
+        /* --- DESIGN SYSTEM: COSMIC-GARDEN SYSTEM --- */
+        :root {
+            --bg-canvas: #FAF9FE;
+            --purple-main: #6C5B7B;
+            --purple-dark: #4B3C56;
+            --blue-sky: #45B6FE;
+            --green-leaf: #55B493;
+            --white: #FFFFFF;
+            --gray-card: #F1EFF7;
+            --text-dark: #3A3543;
+            --font-stack: 'Comic Sans MS', 'Chalkboard SE', 'Bubbles', sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- MOBILE WRAPPER --- */
+        #game-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            max-height: 850px;
+            background-color: var(--white);
+            position: relative;
+            box-shadow: 0 12px 40px rgba(108, 91, 123, 0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 601px) {
+            #game-container {
+                border-radius: 32px;
+                height: 94vh;
+                border: 4px solid var(--purple-main);
+            }
+        }
+
+        /* --- SCREENS ENGINE --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            background-color: var(--white);
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- SPLASH SCREEN --- */
+        #screen-splash {
+            background-color: #FFFFFF;
+            z-index: 100;
+        }
+
+        .splash-logo {
+            max-width: 200px;
+            height: auto;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* --- CUTE ROUNDED BUTTONS --- */
+        .btn {
+            background-color: var(--purple-main);
+            color: var(--white);
+            border: none;
+            padding: 14px 36px;
+            font-size: 1.2rem;
+            font-family: var(--font-stack);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px var(--purple-dark);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            margin-top: 15px;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px var(--purple-dark);
+        }
+
+        /* --- GAME ENGINE OVERLAY HEADERS --- */
+        .game-hud {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--gray-card);
+            border-bottom: 2px solid rgba(108, 91, 123, 0.1);
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .hud-badge {
+            background-color: var(--white);
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: var(--purple-main);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        /* --- MAIN TIMELINE ENGINE GRID --- */
+        .main-board-layout {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .timeline-scroll-dock {
+            flex: 1.2;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: linear-gradient(180deg, #FFFFFF, #F6F4FA);
+        }
+
+        .timeline-slot {
+            display: flex;
+            align-items: center;
+            background-color: var(--white);
+            border: 2px dashed #D1C9E3;
+            border-radius: 16px;
+            padding: 10px 14px;
+            gap: 12px;
+            min-height: 58px;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-slot.active-target {
+            border: 2px solid var(--blue-sky);
+            background-color: #EBF7FF;
+            animation: breatheBorder 1.5s infinite alternate;
+        }
+
+        .timeline-slot.filled {
+            border: 2px solid var(--green-leaf);
+            background-color: #EFFFF9;
+        }
+
+        .slot-index-bubble {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #D1C9E3;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .active-target .slot-index-bubble {
+            background-color: var(--blue-sky);
+        }
+
+        .filled .slot-index-bubble {
+            background-color: var(--green-leaf);
+        }
+
+        .slot-title-text {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #7A7286;
+        }
+
+        .filled .slot-title-text {
+            color: var(--text-dark);
+        }
+
+        /* --- BOTTOM CHOICES CARD DECK --- */
+        .scrambled-deck-container {
+            flex: 0.9;
+            background-color: var(--gray-card);
+            border-top: 3px solid rgba(108, 91, 123, 0.1);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .deck-header-prompt {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--purple-main);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cards-flex-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .scramble-card {
+            background-color: var(--white);
+            border: 2px solid #E3DFED;
+            border-radius: 16px;
+            padding: 12px 8px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            cursor: pointer;
+            box-shadow: 0 4px 0px #D0C9DF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            transition: transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .scramble-card:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #D0C9DF;
+        }
+
+        .scramble-card.used-up {
+            opacity: 0.25;
+            pointer-events: none;
+            box-shadow: none;
+            background-color: #E6E4ED;
+        }
+
+        /* --- MINI QUIZ MODAL PANELS --- */
+        .quiz-modal-sheet {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--white);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            animation: slideInUp 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .modal-headline-badge {
+            background-color: #FFF3CD;
+            color: #856404;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin: 0 auto 15px auto;
+            text-transform: uppercase;
+        }
+
+        .modal-q-box {
+            background-color: #FAF9FD;
+            border: 2px dashed var(--purple-main);
+            border-radius: 20px;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .quiz-opt-row {
+            background-color: var(--white);
+            border: 2px solid #E1DCEB;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-family: var(--font-stack);
+            font-size: 0.92rem;
+            font-weight: bold;
+            text-align: left;
+            color: var(--text-dark);
+            cursor: pointer;
+            box-shadow: 0 4px 0px #E1DCEB;
+            transition: all 0.1s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .quiz-opt-row:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #E1DCEB;
+        }
+
+        .quiz-opt-row.right-hit {
+            background-color: #EFFFF9 !important;
+            border-color: var(--green-leaf) !important;
+            box-shadow: 0 4px 0px #41997A !important;
+            color: #1D4B3B !important;
+        }
+
+        .quiz-opt-row.wrong-hit {
+            background-color: #FFEFEF !important;
+            border-color: #FF7B7B !important;
+            box-shadow: 0 4px 0px #D65A5A !important;
+            color: #5C1E1E !important;
+        }
+
+        .tip-banner-panel {
+            margin-top: auto;
+            background-color: #EBF7FF;
+            border-left: 5px solid var(--blue-sky);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.88rem;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* --- ANIMATIONS ENGINE --- */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        @keyframes breatheBorder {
+            from { box-shadow: 0 0 4px rgba(69,182,254,0.2); }
+            to { box-shadow: 0 0 12px rgba(69,182,254,0.6); }
+        }
+        @keyframes slideInUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="confetti-canvas"></canvas>
+
+        <div id="screen-splash" class="screen">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo" id="innovine-brand-asset">
+        </div>
+
+        <div id="screen-title" class="screen hidden">
+            <div style="font-size: 4rem; margin-bottom: 10px;">🌾</div>
+            <h1 style="font-size: 2.2rem; color: var(--purple-main); margin-bottom: 8px;">Journey of Food</h1>
+            <p style="font-size: 1.05rem; padding: 0 10px; color: #666;">Can you arrange the scrambled agricultural tasks into the perfect timeline order?</p>
+            <button class="btn" onclick="openGameDashboard()">Start Arcade 🚀</button>
+        </div>
+
+        <div id="screen-board" class="screen hidden" style="padding:0;">
+            <div class="game-hud">
+                <div id="hud-stage-tracker">Stage: 1 / 8</div>
+                <div id="hud-score-tracker">Score: ⭐ 0</div>
+            </div>
+
+            <div class="main-board-layout">
+                <div class="timeline-scroll-dock" id="timeline-slots-box"></div>
+
+                <div class="scrambled-deck-container">
+                    <div class="deck-header-prompt">Tap the correct matching step!</div>
+                    <div class="cards-flex-grid" id="scrambled-cards-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-quiz-modal" class="quiz-modal-sheet hidden">
+            <div class="modal-headline-badge" id="quiz-badge-title">🌟 Stage Challenge 🌟</div>
+            <div class="modal-q-box" id="modal-question-text">Loading question script...</div>
+            <div class="quiz-options-list" id="modal-options-box"></div>
+            <div class="tip-banner-panel hidden" id="modal-hint-box"></div>
+        </div>
+
+        <div id="screen-summary" class="screen hidden">
+            <div style="font-size: 4.5rem; margin-bottom: 12px;">🏆</div>
+            <h1 style="color: var(--green-leaf); font-size: 2.1rem; margin-bottom: 6px;">Timeline Complete!</h1>
+            <p style="color: #666; margin-bottom: 20px;">Superb work! You successfully mapped how food travels from a farmer's field to your dinner plate!</p>
+            
+            <div style="background-color: var(--gray-card); padding: 16px 40px; border-radius: 24px; margin-bottom: 24px;">
+                <span style="font-size: 0.9rem; color: #777;">Your Final Score:</span>
+                <div style="font-size: 3.2rem; font-weight: bold; color: var(--purple-main);" id="final-score-value">⭐ 0</div>
+            </div>
+
+            <button class="btn" onclick="restartWholeTimelineGame()">Play Again 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // STAGES SYSTEM MANIFEST
+        const STAGES_MANIFEST = [
+            { id: 0, title: "Ploughing 🚜", desc: "Turning and loosening the field soil." },
+            { id: 1, title: "Sowing 🌱", desc: "Planting healthy seeds into furrows." },
+            { id: 2, title: "Irrigation 💧", desc: "Watering the fields using pipes." },
+            { id: 3, title: "Adding Nutrients 💩", desc: "Adding natural compost or manure." },
+            { id: 4, title: "Harvesting 🌾", desc: "Cutting the ripe golden crops." },
+            { id: 5, title: "Threshing 🔨", desc: "Separating grains from the stalks." },
+            { id: 6, title: "Winnowing 💨", desc: "Blowing away light papery husks." },
+            { id: 7, title: "Transportation 🚛", desc: "Sending crop bags to the market." }
+        ];
+
+        // HAND-TUNED SIMPLIFIED UK ENGLISH SCENARIOS (2 per stage)
+        const SCENARIOS_DATABASE = {
+            0: [
+                {
+                    q: "Farmer George's field is hard and dry. Why must he use his tractor to break and loosen the soil first?",
+                    opts: ["To help the roots of new plants breathe and grow easily", "To look for earthworms", "To make the ground look neat"],
+                    ans: 0,
+                    hint: "Think about how tiny roots can grow in soft dirt compared to hard rock!"
+                },
+                {
+                    q: "What are the long, straight rows dug into the ground by the plough called?",
+                    opts: ["Paths", "Furrows", "Tunnels"],
+                    ans: 1,
+                    hint: "These are the small trenches where seeds will be dropped safely."
+                }
+            ],
+            1: [
+                {
+                    q: "Lily drops seeds into the ground. Why must she cover them with a light layer of soil?",
+                    opts: ["To keep them warm", "To stop hungry birds from eating them", "To hide them from the sun"],
+                    ans: 1,
+                    hint: "Birds love to fly down and peck at seeds left out in the open."
+                },
+                {
+                    q: "Why does the farmer throw away broken or light seeds before planting?",
+                    opts: ["Only healthy seeds grow into strong crops", "Broken seeds change the soil's colour", "Light seeds fly away in the wind"],
+                    ans: 0,
+                    hint: "A damaged seed does not have the strength to make a healthy plant."
+                }
+            ],
+            2: [
+                {
+                    q: "It has not rained for weeks and the crops are dry. What do we call it when a farmer waters the fields using pipes or sprinklers?",
+                    opts: ["Harvesting", "Irrigation", "Ploughing"],
+                    ans: 1,
+                    hint: "This is the special word for giving water to plants artificially."
+                },
+                {
+                    q: "Why is it important to give the field the right amount of water?",
+                    opts: ["Too much or too little water can hurt the plants", "Water makes the crops turn blue", "It stops weeds from growing completely"],
+                    ans: 0,
+                    hint: "Plants can drown if the field is flooded, or dry up if it's too dry."
+                }
+            ],
+            3: [
+                {
+                    q: "Why does Farmer Sam add manure made of decayed leaves and cow dung to his soil?",
+                    opts: ["To give the plants rich food to grow strong", "To make the field smell nice", "To scare away wild insects"],
+                    ans: 0,
+                    hint: "Manure adds vitamins to the soil, just like healthy food helps you grow!"
+                },
+                {
+                    q: "What does 'organic farming' mean?",
+                    opts: ["Farming using big computers", "Using natural manures instead of chemical sprays", "Growing plants without any soil"],
+                    ans: 1,
+                    hint: "This type of farming uses natural things like compost instead of factory chemicals."
+                }
+            ],
+            4: [
+                {
+                    q: "The wheat stalks in the field have turned a golden-yellow colour. What should the farmer do now?",
+                    opts: ["Water them again", "Harvest the ripe crop", "Dig up the field"],
+                    ans: 1,
+                    hint: "When crops turn golden, they are fully grown and ready to be gathered."
+                },
+                {
+                    q: "What curved hand-tool do farm workers use to cut ripe stalks by hand?",
+                    opts: ["A Sickle", "A Plough", "A Broom"],
+                    ans: 0,
+                    hint: "It is a sharp, hook-shaped metal tool held in one hand."
+                }
+            ],
+            5: [
+                {
+                    q: "After cutting, the food grains are still locked inside the hard plant stalks. What is the process of separating grains from the stalks called?",
+                    opts: ["Sowing", "Threshing", "Irrigation"],
+                    ans: 1,
+                    hint: "This involves beating the plant bundles against a hard board or using a machine."
+                },
+                {
+                    q: "Why does a farmer beat dried rice bundles against a heavy wooden bench?",
+                    opts: ["To clean the dirt off the leaves", "To shake out the edible grains from the stems", "To break the stalks into tiny toys"],
+                    ans: 1,
+                    hint: "Hitting the stalks makes the little food grains pop right out!"
+                }
+            ],
+            6: [
+                {
+                    q: "The grain is free from stalks but is mixed with light, papery skins called husks. How can a farmer clean them using the wind?",
+                    opts: ["By washing them in a river", "By dropping them from a height on a windy day", "By blowing on them with a tiny straw"],
+                    ans: 1,
+                    hint: "The breeze will blow the light skins away, while the heavy grains drop straight down."
+                },
+                {
+                    q: "Why does the papery husk fly away in the wind while the grains fall straight down?",
+                    opts: ["Because the grain is much heavier than the light husk", "Because the husk has tiny wings", "Because grains are sticky"],
+                    ans: 0,
+                    hint: "Think about blowing on a heavy coin compared to blowing on a light feather!"
+                }
+            ],
+            7: [
+                {
+                    q: "Where do farmers take their large sacks of grains to sell them to shopkeepers in bulk?",
+                    opts: ["A Wholesale Market or Mandi", "A School kitchen", "A Sweet shop"],
+                    ans: 0,
+                    hint: "This is a giant central marketplace where shopkeepers go to buy food bags in bulk."
+                },
+                {
+                    q: "What are the tough, stitched sacks used to pack and carry grains safely in the lorry called?",
+                    opts: ["Plastic bags", "Gunny bags", "Paper envelopes"],
+                    ans: 1,
+                    hint: "These are coarse, strong sacks woven from jute fibers to hold heavy loads."
+                }
+            ]
+        };
+
+        // RUNTIME TRACKER VARIABLES
+        let currentArcadeScore = 0;
+        let activeTargetTimelineIndex = 0;
+        let miniQuizRoundProgress = 0;
+        let incorrectChoiceCounter = 0;
+
+        const cCanvas = document.getElementById("confetti-canvas");
+        const cCtx = cCanvas.getContext("2d");
+        let confettiArray = [];
+
+        function renderScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        window.onload = () => {
+            const logo = document.getElementById('innovine-brand-asset');
+            logo.onerror = function() { this.style.display = 'none'; };
+
+            // Explicitly locks the splash screen visibility for 5 full seconds
+            setTimeout(() => { renderScreen('screen-title'); }, 5000);
+            resizeParticlesCanvas();
+        };
+
+        function resizeParticlesCanvas() {
+            cCanvas.width = cCanvas.parentElement.clientWidth;
+            cCanvas.height = cCanvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeParticlesCanvas);
+
+        function openGameDashboard() {
+            currentArcadeScore = 0;
+            activeTargetTimelineIndex = 0;
+            renderScreen('screen-board');
+            buildTimelineSlotsStructure();
+            generateScrambledCardPool();
+            syncDashboardHUD();
+        }
+
+        function syncDashboardHUD() {
+            document.getElementById('hud-stage-tracker').innerText = `Stage: ${activeTargetTimelineIndex + 1} / 8`;
+            document.getElementById('hud-score-tracker').innerText = `Score: ⭐ ${currentArcadeScore}`;
+        }
+
+        function buildTimelineSlotsStructure() {
+            const container = document.getElementById('timeline-slots-box');
+            container.innerHTML = '';
+            
+            STAGES_MANIFEST.forEach((stage, idx) => {
+                const slot = document.createElement('div');
+                slot.id = `timeline-slot-row-${idx}`;
+                slot.className = 'timeline-slot';
+                
+                if (idx === activeTargetTimelineIndex) {
+                    slot.className = 'timeline-slot active-target';
+                }
+
+                slot.innerHTML = `
+                    <div class="slot-index-bubble">${idx + 1}</div>
+                    <div class="slot-title-text" id="slot-label-${idx}">🔒 Locked Slot</div>
+                `;
+                container.appendChild(slot);
+            });
+        }
+
+        function generateScrambledCardPool() {
+            const grid = document.getElementById('scrambled-cards-grid');
+            grid.innerHTML = '';
+
+            // Clone and scramble data array using standard random sequence
+            let shuffled = [...STAGES_MANIFEST].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(cardData => {
+                const card = document.createElement('div');
+                card.id = `scramble-card-entity-${cardData.id}`;
+                card.className = 'scramble-card';
+                card.innerText = cardData.title;
+                card.onclick = () => evaluateTimelineTap(cardData.id);
+                grid.appendChild(card);
+            });
+        }
+
+        function evaluateTimelineTap(stageId) {
+            if (stageId === activeTargetTimelineIndex) {
+                // Correct Choice matched! Award +5 score variables instantly
+                currentArcadeScore += 5;
+                syncDashboardHUD();
+                
+                const targetRow = document.getElementById(`timeline-slot-row-${activeTargetTimelineIndex}`);
+                targetRow.className = 'timeline-slot filled';
+                document.getElementById(`slot-label-${activeTargetTimelineIndex}`).innerText = STAGES_MANIFEST[activeTargetTimelineIndex].title;
+                
+                document.getElementById(`scramble-card-entity-${stageId}`).classList.add('used-up');
+
+                // Burst particles celebration
+                triggerWinConfetti();
+
+                setTimeout(() => {
+                    initiateStageMiniQuiz();
+                }, 8000); // 800ms delayed pause for effect
+            } else {
+                // Flash shaking feedback on mismatch
+                const incorrectCard = document.getElementById(`scramble-card-entity-${stageId}`);
+                incorrectCard.style.borderColor = "#FF7B7B";
+                setTimeout(() => { incorrectCard.style.borderColor = "#E3DFED"; }, 500);
+            }
+        }
+
+        function initiateStageMiniQuiz() {
+            miniQuizRoundProgress = 0;
+            incorrectChoiceCounter = 0;
+            document.getElementById('screen-quiz-modal').classList.remove('hidden');
+            renderQuizQuestionSlide();
+        }
+
+        function renderQuizQuestionSlide() {
+            incorrectChoiceCounter = 0;
+            document.getElementById('modal-hint-box').classList.add('hidden');
+
+            const currentStageSet = SCENARIOS_DATABASE[activeTargetTimelineIndex];
+            const dataset = currentStageSet[miniQuizRoundProgress];
+
+            document.getElementById('quiz-badge-title').innerText = `Challenge ${miniQuizRoundProgress + 1} / 2`;
+            document.getElementById('modal-question-text').innerText = dataset.q;
+
+            const box = document.getElementById('modal-options-box');
+            box.innerHTML = '';
+
+            dataset.opts.forEach((o, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-row';
+                btn.innerText = o;
+                btn.onclick = () => parseQuizChoice(index, btn);
+                box.appendChild(btn);
+            });
+        }
+
+        function parseQuizChoice(index, btnElement) {
+            const currentStageSet = SCENARIOS_DATABASE[activeTargetTimelineIndex];
+            const dataset = currentStageSet[miniQuizRoundProgress];
+            const choicesButtons = document.querySelectorAll('.quiz-opt-row');
+
+            choicesButtons.forEach(b => b.style.pointerEvents = 'none');
+
+            if (index === dataset.ans) {
+                btnElement.classList.add('right-hit');
+                
+                // If both question variables are processed safely, yield +15 completion score marks
+                if (miniQuizRoundProgress === 1) {
+                    currentArcadeScore += 15;
+                }
+                
+                setTimeout(() => {
+                    miniQuizRoundProgress++;
+                    if (miniQuizRoundProgress >= 2) {
+                        // All questions complete, return control back to board layout
+                        document.getElementById('screen-quiz-modal').classList.add('hidden');
+                        activeTargetTimelineIndex++;
+                        
+                        if (activeTargetTimelineIndex >= STAGES_MANIFEST.length) {
+                            wrapUpGameSession();
+                        } else {
+                            syncDashboardHUD();
+                            const nextRow = document.getElementById(`timeline-slot-row-${activeTargetTimelineIndex}`);
+                            if (nextRow) {
+                                nextRow.className = 'timeline-slot active-target';
+                                nextRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                        }
+                    } else {
+                        renderQuizQuestionSlide();
+                    }
+                }, 1200);
+            } else {
+                btnElement.classList.add('wrong-hit');
+                incorrectChoiceCounter++;
+
+                const hintBox = document.getElementById('modal-hint-box');
+                hintBox.classList.remove('hidden');
+
+                if (incorrectChoiceCounter === 1) {
+                    // First wrong answer attempt gives friendly context hint
+                    hintBox.innerHTML = `<strong>💡 Hint:</strong> ${dataset.hint}`;
+                    choicesButtons.forEach(b => {
+                        if (!b.classList.contains('wrong-hit')) b.style.pointerEvents = 'auto';
+                    });
+                } else {
+                    // Second wrong choice displays structural text explanation banner correction
+                    hintBox.innerHTML = `<strong>📘 Lesson:</strong> ${STAGES_MANIFEST[activeTargetTimelineIndex].desc}`;
+                    choicesButtons[dataset.ans].classList.add('right-hit');
+
+                    setTimeout(() => {
+                        miniQuizRoundProgress++;
+                        if (miniQuizRoundProgress >= 2) {
+                            document.getElementById('screen-quiz-modal').classList.add('hidden');
+                            activeTargetTimelineIndex++;
+                            if (activeTargetTimelineIndex >= STAGES_MANIFEST.length) {
+                                wrapUpGameSession();
+                            } else {
+                                syncDashboardHUD();
+                                const nextRow = document.getElementById(`timeline-slot-row-${activeTargetTimelineIndex}`);
+                                if (nextRow) nextRow.className = 'timeline-slot active-target';
+                            }
+                        } else {
+                            renderQuizQuestionSlide();
+                        }
+                    }, 3500);
+                }
+            }
+        }
+
+        function wrapUpGameSession() {
+            renderScreen('screen-summary');
+            document.getElementById('final-score-value').innerText = `⭐ ${currentArcadeScore}`;
+        }
+
+        function restartWholeTimelineGame() {
+            openGameDashboard();
+        }
+
+        function triggerWinConfetti() {
+            confettiArray = [];
+            const hexColors = ['#6C5B7B', '#45B6FE', '#55B493', '#FFD166', '#FF6B6B'];
+            for(let i=0; i<35; i++) {
+                confettiArray.push({
+                    x: cCanvas.width / 2,
+                    y: cCanvas.height / 3,
+                    xVelocity: (Math.random() - 0.5) * 6,
+                    yVelocity: (Math.random() - 0.6) * 8,
+                    color: hexColors[Math.floor(Math.random() * hexColors.length)],
+                    radius: Math.random() * 3 + 3,
+                    gravityFactor: 0.2
+                });
+            }
+            tickConfettiFrameLoop();
+        }
+
+        function tickConfettiFrameLoop() {
+            if (confettiArray.length === 0) return;
+            cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+            confettiArray.forEach((part, index) => {
+                part.x += part.xVelocity;
+                part.y += part.yVelocity;
+                part.yVelocity += part.gravityFactor;
+
+                cCtx.beginPath();
+                cCtx.arc(part.x, part.y, part.radius, 0, Math.PI * 2);
+                cCtx.fillStyle = part.color;
+                cCtx.fill();
+
+                if (part.y > cCanvas.height) confettiArray.splice(index, 1);
+            });
+            requestAnimationFrame(tickConfettiFrameLoop);
+        }
+    </script>
+</body>
+</html>
