@@ -24,13 +24,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;      /* Fallback for older browsers */
-            height: 100dvh;     /* Modern viewport handling */
+            height: 100vh;      
+            height: 100dvh;     
             margin: 0;
             overflow: hidden;
         }
 
-        /* Fixed container sizing so it never collapses to 0 height */
         #game-container {
             position: relative;
             width: 100%;
@@ -83,10 +82,12 @@
             background: #ffffff;
             z-index: 100;
         }
-        .splash-logo {
-            max-width: 250px;
-            width: 70%;
-            height: auto;
+        
+        /* Fallback text if logo image is missing */
+        .splash-text {
+            font-family: 'Lilita One', cursive;
+            font-size: 2.5rem;
+            color: #ff4d6d;
             animation: bouncePulse 2s infinite ease-in-out;
         }
 
@@ -280,7 +281,7 @@
         </div>
 
         <div id="splash-screen" class="ui-screen">
-            <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
+            <div class="splash-text">LOADING...</div>
         </div>
 
         <div id="menu-screen" class="ui-screen wood-panels hidden">
@@ -301,7 +302,7 @@
         <div id="quiz-layer" class="hidden">
             <div class="quiz-panel">
                 <div class="quiz-tag" id="quiz-level-indicator">Level 1 Milestone Challenge</div>
-                <div class="quiz-question" id="quiz-question-text">Dynamic Curriculum Question Field Placeholder Text?</div>
+                <div class="quiz-question" id="quiz-question-text">Question Text?</div>
                 <div class="quiz-options-list" id="quiz-options-wrapper"></div>
             </div>
         </div>
@@ -318,9 +319,11 @@
     </div>
 
     <script>
-        const sndCorrect = new Audio('assets/correct.mp3');
-        const sndWrong = new Audio('assets/wrong.mp3');
-        const sndClaps = new Audio('assets/freesound_community-claps-44774.mp3');
+        // Wrapped audio in try/catch instantly so missing files won't crash the script
+        let sndCorrect, sndWrong, sndClaps;
+        try { sndCorrect = new Audio('assets/correct.mp3'); } catch(e){}
+        try { sndWrong = new Audio('assets/wrong.mp3'); } catch(e){}
+        try { sndClaps = new Audio('assets/freesound_community-claps-44774.mp3'); } catch(e){}
 
         const textbookDatabase = {
             1: [
@@ -349,32 +352,29 @@
         const healthyIngredients = ["🍎", "🍉", "🍌", "🥦", "🥕", "🍍", "🥛", "🥚", "🍞", "🍗"];
         const junkIngredients = ["🍔", "🍟", "🥤", "🍩", "🍕"];
 
-        let score = 0;
-        let lives = 3;
-        let currentLevel = 1;
-        let healthySlicesCount = 0;
-        let targetSlicesRequired = 3;
-        let activeQuizArray = [];
-        let activeQuizIdx = 0;
-        let isEngineRunning = false;
+        let score = 0, lives = 3, currentLevel = 1, healthySlicesCount = 0;
+        let targetSlicesRequired = 3, activeQuizArray = [], activeQuizIdx = 0;
+        let isEngineRunning = false, loopId;
+        let entitiesList = [], splatsList = [], swipePath = [];
+        let spawnTick = 0, spawnRateFrequency = 50; 
 
         const canvas = document.getElementById('canvas-view');
         const ctx = canvas.getContext('2d');
-        let loopId;
 
-        let entitiesList = [];
-        let splatsList = [];
-        let swipePath = [];
-        let spawnTick = 0;
-        let spawnRateFrequency = 50; 
-
-        window.addEventListener('load', () => {
+        // FIXED INITIALIZATION: Uses DOMContentLoaded instead of window.onload
+        function initializeGameSetup() {
             adjustCanvasSizing();
             setTimeout(() => {
                 document.getElementById('splash-screen').classList.add('hidden');
                 document.getElementById('menu-screen').classList.remove('hidden');
-            }, 2500);
-        });
+            }, 1000); // reduced wait time
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeGameSetup);
+        } else {
+            initializeGameSetup();
+        }
 
         window.addEventListener('resize', adjustCanvasSizing);
         window.addEventListener('orientationchange', () => setTimeout(adjustCanvasSizing, 200));
@@ -388,7 +388,6 @@
 
         function renderBackgroundWoodTexture() {
             if (canvas.width === 0 || canvas.height === 0) return;
-            
             ctx.save();
             let grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, canvas.height*0.8);
             grad.addColorStop(0, '#2d1a10');
@@ -422,14 +421,8 @@
             document.getElementById('instructions-screen').classList.add('hidden');
             document.getElementById('hud-header').classList.remove('hidden');
 
-            score = 0;
-            lives = 3;
-            currentLevel = 1;
-            healthySlicesCount = 0;
-            entitiesList = [];
-            splatsList = [];
-            swipePath = [];
-            spawnTick = 0;
+            score = 0; lives = 3; currentLevel = 1; healthySlicesCount = 0;
+            entitiesList = []; splatsList = []; swipePath = []; spawnTick = 0;
 
             refreshHUD();
             isEngineRunning = true;
@@ -439,11 +432,8 @@
         function refreshHUD() {
             document.getElementById('hud-score').textContent = score;
             document.getElementById('hud-level').textContent = `${currentLevel}/3`;
-            
             let hearts = "";
-            for(let i=0; i<3; i++) {
-                hearts += (i < lives) ? "❤️" : "🖤";
-            }
+            for(let i=0; i<3; i++) hearts += (i < lives) ? "❤️" : "🖤";
             document.getElementById('hud-lives').textContent = hearts;
         }
 
@@ -453,12 +443,10 @@
                 this.y = canvas.height + 50;
                 this.isBomb = Math.random() < 0.25;
                 this.emoji = this.isBomb ? junkIngredients[Math.floor(Math.random() * junkIngredients.length)] : healthyIngredients[Math.floor(Math.random() * healthyIngredients.length)];
-                
                 this.hitRadius = 32;
                 this.vx = (canvas.width / 2 - this.x) * 0.015 + (Math.random() * 3 - 1.5);
                 this.vy = -(Math.random() * 4 + (canvas.height * 0.016) + 11);
                 this.gravityAcc = 0.26;
-                
                 this.isCut = false;
                 this.cutRotationAngle = 0;
                 this.splitLeftOffsetX = 0;
@@ -479,11 +467,9 @@
                 if(!this.isCut) {
                     ctx.translate(this.x, this.y);
                     ctx.rotate(this.currentBaseAngle);
-                    
                     ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
                     ctx.shadowBlur = 8;
                     ctx.shadowOffsetY = 10;
-                    
                     ctx.font = "52px Arial";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
@@ -497,10 +483,7 @@
                     ctx.font = "50px Arial";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    
-                    ctx.beginPath();
-                    ctx.rect(-60, -60, 60, 120);
-                    ctx.clip();
+                    ctx.beginPath(); ctx.rect(-60, -60, 60, 120); ctx.clip();
                     ctx.fillText(this.emoji, 0, 0);
                     ctx.restore();
 
@@ -510,10 +493,7 @@
                     ctx.font = "50px Arial";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    
-                    ctx.beginPath();
-                    ctx.rect(0, -60, 60, 120);
-                    ctx.clip();
+                    ctx.beginPath(); ctx.rect(0, -60, 60, 120); ctx.clip();
                     ctx.fillText(this.emoji, 0, 0);
                     ctx.restore();
 
@@ -528,22 +508,17 @@
 
         class DynamicSplat {
             constructor(x, y, isBomb) {
-                this.x = x;
-                this.y = y;
+                this.x = x; this.y = y;
                 this.color = isBomb ? "rgba(80, 50, 40, 0.6)" : "rgba(255, 190, 11, 0.7)";
                 this.sizeRadius = Math.random() * 25 + 15;
-                this.lifeTicksMax = 45;
-                this.currentLife = this.lifeTicksMax;
+                this.lifeTicksMax = 45; this.currentLife = this.lifeTicksMax;
             }
             render() {
                 ctx.save();
                 ctx.globalAlpha = this.currentLife / this.lifeTicksMax;
                 ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.sizeRadius, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.sizeRadius, 0, Math.PI * 2); ctx.fill();
                 
-                ctx.fillStyle = this.color;
                 for(let i=0; i<3; i++) {
                     ctx.beginPath();
                     ctx.arc(this.x + Math.sin(i)*this.sizeRadius*1.2, this.y + Math.cos(i)*this.sizeRadius*1.2, this.sizeRadius*0.25, 0, Math.PI*2);
@@ -556,7 +531,6 @@
 
         function tickEngineLoop() {
             if(!isEngineRunning) return;
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             renderBackgroundWoodTexture();
 
@@ -575,42 +549,26 @@
                 let entity = entitiesList[i];
                 entity.advancePhysics();
                 entity.render();
-
-                if(entity.y > canvas.height + 80) {
-                    entitiesList.splice(i, 1);
-                }
+                if(entity.y > canvas.height + 80) entitiesList.splice(i, 1);
             }
-
             renderWeaponSwipeTrail();
-
             loopId = requestAnimationFrame(tickEngineLoop);
         }
 
         function renderWeaponSwipeTrail() {
             if(swipePath.length < 2) return;
-            
             ctx.save();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#ffffff";
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
+            ctx.shadowBlur = 10; ctx.shadowColor = "#ffffff";
+            ctx.lineCap = "round"; ctx.lineJoin = "round";
             
-            ctx.beginPath();
-            ctx.strokeStyle = "rgba(255, 237, 186, 0.8)";
-            ctx.lineWidth = 8;
+            ctx.beginPath(); ctx.strokeStyle = "rgba(255, 237, 186, 0.8)"; ctx.lineWidth = 8;
             ctx.moveTo(swipePath[0].x, swipePath[0].y);
-            for(let i = 1; i < swipePath.length; i++) {
-                ctx.lineTo(swipePath[i].x, swipePath[i].y);
-            }
+            for(let i = 1; i < swipePath.length; i++) ctx.lineTo(swipePath[i].x, swipePath[i].y);
             ctx.stroke();
 
-            ctx.beginPath();
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
             ctx.moveTo(swipePath[0].x, swipePath[0].y);
-            for(let i = 1; i < swipePath.length; i++) {
-                ctx.lineTo(swipePath[i].x, swipePath[i].y);
-            }
+            for(let i = 1; i < swipePath.length; i++) ctx.lineTo(swipePath[i].x, swipePath[i].y);
             ctx.stroke();
             ctx.restore();
         }
@@ -618,26 +576,20 @@
         function processSliceIntersections(point) {
             entitiesList.forEach(item => {
                 if(item.isCut) return;
-
                 let spatialDistance = Math.hypot(item.x - point.x, item.y - point.y);
                 if(spatialDistance < item.hitRadius + 15) {
                     item.isCut = true;
                     splatsList.push(new DynamicSplat(item.x, item.y, item.isBomb));
 
                     if(item.isBomb) {
-                        try { sndWrong.currentTime = 0; sndWrong.play(); } catch(e){}
+                        try { if(sndWrong) { sndWrong.currentTime = 0; sndWrong.play(); } } catch(e){}
                         lives--;
                         refreshHUD();
-                        if(lives <= 0) {
-                            terminateActiveRun(false);
-                        }
+                        if(lives <= 0) terminateActiveRun(false);
                     } else {
-                        try { sndCorrect.currentTime = 0; sndCorrect.play(); } catch(e){}
+                        try { if(sndCorrect) { sndCorrect.currentTime = 0; sndCorrect.play(); } } catch(e){}
                         healthySlicesCount++;
-
-                        if(healthySlicesCount >= targetSlicesRequired) {
-                            haltEngineAndTriggerQuiz();
-                        }
+                        if(healthySlicesCount >= targetSlicesRequired) haltEngineAndTriggerQuiz();
                     }
                 }
             });
@@ -646,24 +598,16 @@
         function processTrackMove(clientX, clientY) {
             if(!isEngineRunning) return;
             const containerBoundRect = canvas.getBoundingClientRect();
-            const trackedCoordinates = {
-                x: clientX - containerBoundRect.left,
-                y: clientY - containerBoundRect.top
-            };
-
+            const trackedCoordinates = { x: clientX - containerBoundRect.left, y: clientY - containerBoundRect.top };
             swipePath.push(trackedCoordinates);
             if(swipePath.length > 7) swipePath.shift();
-
             processSliceIntersections(trackedCoordinates);
         }
 
-        function endWeaponTrail() {
-            swipePath = [];
-        }
+        function endWeaponTrail() { swipePath = []; }
 
         canvas.addEventListener('mousemove', (e) => { if(e.buttons === 1) processTrackMove(e.clientX, e.clientY); });
         window.addEventListener('mouseup', endWeaponTrail);
-
         canvas.addEventListener('touchmove', (e) => {
             if(e.touches.length > 0) processTrackMove(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: true });
@@ -673,22 +617,18 @@
             isEngineRunning = false;
             cancelAnimationFrame(loopId);
             endWeaponTrail();
-
             activeQuizArray = textbookDatabase[currentLevel];
             activeQuizIdx = 0;
-
             displayQuizQuestionOverlay();
         }
 
         function displayQuizQuestionOverlay() {
             const currentQuestionDataset = activeQuizArray[activeQuizIdx];
-            
             document.getElementById('quiz-level-indicator').textContent = `Level ${currentLevel} Milestone: Question ${activeQuizIdx + 1} of 5`;
             document.getElementById('quiz-question-text').textContent = currentQuestionDataset.q;
             
             const interactiveWrapper = document.getElementById('quiz-options-wrapper');
             interactiveWrapper.innerHTML = '';
-
             let randomizedOptions = [...currentQuestionDataset.options].sort(() => 0.5 - Math.random());
 
             randomizedOptions.forEach(optionStr => {
@@ -698,58 +638,40 @@
                 optBtn.onclick = () => evaluateSubmittedQuizChoice(optionStr, currentQuestionDataset.a, optBtn);
                 interactiveWrapper.appendChild(optBtn);
             });
-
             document.getElementById('quiz-layer').classList.remove('hidden');
         }
 
         function evaluateSubmittedQuizChoice(selectedAnswer, correctSolutionKey, DOMNodeRef) {
             if(selectedAnswer === correctSolutionKey) {
-                DOMNodeRef.style.background = "#2a9d8f";
-                DOMNodeRef.style.borderColor = "#264653";
-                DOMNodeRef.style.color = "#ffffff";
-                DOMNodeRef.style.boxShadow = "0 4px 0 #264653";
+                DOMNodeRef.style.background = "#2a9d8f"; DOMNodeRef.style.borderColor = "#264653";
+                DOMNodeRef.style.color = "#ffffff"; DOMNodeRef.style.boxShadow = "0 4px 0 #264653";
 
-                try { sndCorrect.currentTime = 0; sndCorrect.play(); } catch(e){}
-                
-                score += 20;
-                refreshHUD();
-                activeQuizIdx++;
+                try { if(sndCorrect) { sndCorrect.currentTime = 0; sndCorrect.play(); } } catch(e){}
+                score += 20; refreshHUD(); activeQuizIdx++;
 
                 setTimeout(() => {
-                    if(activeQuizIdx < 5) {
-                        displayQuizQuestionOverlay();
-                    } else {
+                    if(activeQuizIdx < 5) displayQuizQuestionOverlay();
+                    else {
                         document.getElementById('quiz-layer').classList.add('hidden');
-                        if(currentLevel >= 3) {
-                            terminateActiveRun(true);
-                        } else {
-                            currentLevel++;
-                            healthySlicesCount = 0;
-                            entitiesList = [];
-                            refreshHUD();
-                            
-                            isEngineRunning = true;
-                            tickEngineLoop();
+                        if(currentLevel >= 3) terminateActiveRun(true);
+                        else {
+                            currentLevel++; healthySlicesCount = 0; entitiesList = [];
+                            refreshHUD(); isEngineRunning = true; tickEngineLoop();
                         }
                     }
                 }, 500);
             } else {
-                DOMNodeRef.style.background = "#e63946";
-                DOMNodeRef.style.borderColor = "#9b1c26";
-                DOMNodeRef.style.color = "#ffffff";
-                DOMNodeRef.style.boxShadow = "0 4px 0 #9b1c26";
+                DOMNodeRef.style.background = "#e63946"; DOMNodeRef.style.borderColor = "#9b1c26";
+                DOMNodeRef.style.color = "#ffffff"; DOMNodeRef.style.boxShadow = "0 4px 0 #9b1c26";
 
-                try { sndWrong.currentTime = 0; sndWrong.play(); } catch(e){}
-
+                try { if(sndWrong) { sndWrong.currentTime = 0; sndWrong.play(); } } catch(e){}
                 const panel = document.querySelector('.quiz-panel');
                 panel.style.transform = 'translateX(-10px)';
                 setTimeout(() => { panel.style.transform = 'translateX(10px)'; }, 80);
                 setTimeout(() => { 
                     panel.style.transform = 'translateX(0)'; 
-                    DOMNodeRef.style.background = "#ffffff";
-                    DOMNodeRef.style.borderColor = "#e1d6c6";
-                    DOMNodeRef.style.color = "#4a2c1b";
-                    DOMNodeRef.style.boxShadow = "0 4px 0 #e1d6c6";
+                    DOMNodeRef.style.background = "#ffffff"; DOMNodeRef.style.borderColor = "#e1d6c6";
+                    DOMNodeRef.style.color = "#4a2c1b"; DOMNodeRef.style.boxShadow = "0 4px 0 #e1d6c6";
                 }, 160);
             }
         }
@@ -765,14 +687,13 @@
             const endCommentaryNode = document.getElementById('end-commentary');
 
             if(isVictoryResult) {
-                try { sndClaps.currentTime = 0; sndClaps.play(); } catch(e){}
+                try { if(sndClaps) { sndClaps.currentTime = 0; sndClaps.play(); } } catch(e){}
                 endTitleNode.textContent = "VICTORY!";
                 endCommentaryNode.textContent = "Outstanding work! You answered every curriculum question block perfectly!";
             } else {
                 endTitleNode.textContent = "GAME OVER";
                 endCommentaryNode.textContent = "You sliced too many junk food item bombs! Review the food groups and try again.";
             }
-
             document.getElementById('end-final-marks').textContent = score;
             endScreenView.classList.remove('hidden');
         }
