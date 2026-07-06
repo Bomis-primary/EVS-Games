@@ -292,7 +292,7 @@
             animation: popUpEffect 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
         }
         @keyframes popUpEffect {
-            0% { transform: translateY(20px); opacity: 0; }
+            0 { transform: translateY(20px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
         .popup-tag {
@@ -410,8 +410,8 @@
         <div style="text-align: center; margin-top: 25px;">
             <span style="font-size: 3.5rem;">🏆</span>
             <h1>Finished!</h1>
-            <div style="background: #e8f5e9; padding: 12px 28px; border-radius: 20px; font-size: 2rem; font-weight: 800; color: #2e7d32; display: inline-block; margin: 15px 0;">
-                <span id="val-final-score">0</span> Points
+            <div style="background: #e8f5e9; padding: 12px 28px; border-radius: 20px; font-size: 1.8rem; font-weight: 800; color: #2e7d32; display: inline-block; margin: 15px 0;">
+                <span id="val-final-score">0 / 0</span>
             </div>
             <p id="text-final-feedback" style="font-weight: 600; padding: 0 10px; font-size: 1.1rem;"></p>
         </div>
@@ -502,6 +502,7 @@
     let roundsOrder = [];
     let activeRoundIndex = 0;
     let totalScore = 0;
+    let maxPossibleScore = 0;
     let userLives = 4;
     let initialMistakeMade = false;
     let selectedFirstCard = null;
@@ -540,6 +541,7 @@
 
     function restartGame() {
         totalScore = 0;
+        maxPossibleScore = 0;
         userLives = 4;
         activeRoundIndex = 0;
         initialMistakeMade = false;
@@ -620,6 +622,7 @@
 
                 try { document.getElementById('snd-correct').play(); } catch(e){}
                 totalScore += 20;
+                maxPossibleScore += 20;
                 refreshHUD();
 
                 setTimeout(() => { triggerBonusSequence(roundsOrder[activeRoundIndex].bonus); }, 600);
@@ -634,7 +637,10 @@
                     launchCustomToastHint(`Match items belonging to the ${roundsOrder[activeRoundIndex].scenario.icon} behavior or duty option category!`);
                 }
 
-                if (userLives <= 0) setTimeout(() => concludeGameFlow(false), 600);
+                if (userLives <= 0) {
+                    maxPossibleScore += 20; // Include this round's grid match in total points
+                    setTimeout(() => concludeGameFlow(false), 600);
+                }
             }
         }
     }
@@ -678,6 +684,8 @@
     function processBonusSelection(buttonDOM, chosenAnswer, correctAnswer, learningHint) {
         if (lockInput) return;
         lockInput = true;
+
+        maxPossibleScore += 30; // Every bonus question presented adds to potential total
 
         const hintContainer = document.getElementById('box-hint-view');
         hintContainer.innerText = "💡 " + learningHint;
@@ -727,11 +735,11 @@
 
     function concludeGameFlow(isVictory) {
         changeView('screen-results');
-        document.getElementById('val-final-score').innerText = totalScore;
+        document.getElementById('val-final-score').innerText = `${totalScore} / ${maxPossibleScore} Points`;
         try { document.getElementById('snd-claps').play(); } catch(e){}
 
         const dashboardText = document.getElementById('text-final-feedback');
-        if (isVictory && totalScore >= 240) {
+        if (isVictory && totalScore === maxPossibleScore) {
             dashboardText.innerText = "Fantastic! You are a model citizen. You completed everything flawlessly!";
         } else if (isVictory) {
             dashboardText.innerText = "Great job! You connected the circuits successfully. Play again to get a perfect score!";
