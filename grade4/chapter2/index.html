@@ -382,7 +382,6 @@
 
         <div id="screen-logo" class="screen">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" id="main-logo-asset">
-            <div id="logo-fallback" style="font-size:2.2rem; font-weight:bold; color:var(--primary-dark); margin-top:10px;">INNOVINE</div>
         </div>
 
         <div id="screen-title" class="screen hidden">
@@ -566,13 +565,11 @@
         let arcadeActive = false;
         let teethState = Array(16).fill(null).map((_, i) => ({ id: i, status: "clean", timer: null }));
 
-        /* Safe Audio Core with asset fallback bypass rules */
         function playAudio(src) {
             const sound = new Audio(src);
             sound.volume = 0.4;
             sound.play().catch(() => {
-                // Silently bypass file path routing crashes on GitHub Pages
-                console.log(`Audio fallback handled safely for path: ${src}`);
+                console.log(`Audio handled for path: ${src}`);
             });
         }
 
@@ -634,7 +631,6 @@
         }
 
         window.onload = () => {
-            // Safe image handling to avoid freezing if file paths fail
             const logo = document.getElementById('main-logo-asset');
             logo.onerror = function() {
                 this.style.display = 'none';
@@ -719,7 +715,8 @@
                 }
             }, 1000);
 
-            let speed = Math.max(1200 - (gameRound * 150), 600);
+            // Pacified: Reduced the speed at which plaque pops up sequentially
+            let speed = Math.max(2400 - (gameRound * 200), 1400);
             plaqueSpawnInterval = setInterval(() => { spawnPlaque(); }, speed);
         }
 
@@ -732,7 +729,8 @@
             target.status = Math.random() > 0.5 ? "yellow" : "green";
             drawTeethGraphics();
 
-            let delay = Math.max(2200 - (gameRound * 200), 1200);
+            // Pacified: Added a longer grace period before it rots completely to cavity
+            let delay = Math.max(3800 - (gameRound * 300), 2400);
             target.timer = setTimeout(() => {
                 if(target.status === "yellow" || target.status === "green") {
                     target.status = "black";
@@ -814,7 +812,9 @@
 
             if(idx === data.answer) {
                 btn.classList.add('correct');
-                gameScore += 10;
+                // Updated: Awards +20 for each question correctly answered
+                gameScore += 20;
+                refreshHUD();
                 playAudio('assets/correct.mp3');
                 playAudio('assets/freesound_community-claps-44774.mp3');
                 triggerConfettiEffect();
