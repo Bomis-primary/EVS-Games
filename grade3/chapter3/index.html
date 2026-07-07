@@ -65,30 +65,41 @@
             z-index: 0;
         }
 
-        /* Splash Screen & Logo Styles */
+        /* FIXED & IMPROVED SPLASH SCREEN & LOGO BOUNDING */
         #splash-screen {
             background: #ffffff;
             z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+        
         .logo-container {
+            width: 100%;
+            max-width: 550px; /* Enhanced view limits */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: pulse 1.5s infinite ease-in-out;
+            padding: 40px;
+            animation: pulse 2s infinite ease-in-out;
         }
+        
         #splash-logo {
-            max-width: 280px;
-            width: 70%;
+            width: 100%;
+            max-width: 480px; /* Fits elegantly and prominently in the center */
             height: auto;
             object-fit: contain;
+            display: block;
         }
+        
         .fallback-logo-text {
-            font-size: 2.5rem;
+            font-size: 3.5rem;
             font-weight: 900;
             color: #2d3436;
-            letter-spacing: 1px;
+            letter-spacing: 3px;
         }
+        
         .fallback-logo-text span {
             color: #6c5ce7;
         }
@@ -189,7 +200,7 @@
             height: 100%;
             align-items: center;
             justify-content: space-between;
-            padding: 60px 40px 20px 40px;
+            padding: 80px 40px 20px 40px;
         }
 
         #arena-wrapper {
@@ -198,11 +209,11 @@
             justify-content: center;
             align-items: center;
             height: 100%;
-            max-width: 60%;
+            min-height: 320px;
         }
 
         #canvas-arena {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.85);
             border-radius: 24px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             border: 6px solid #fff;
@@ -287,7 +298,7 @@
         }
 
         #control-panel-wrapper {
-            width: 35%;
+            width: 40%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -334,28 +345,25 @@
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
+            50% { transform: scale(1.02); }
             100% { transform: scale(1); }
         }
 
         @media (max-width: 680px) {
             #game-play-area {
                 flex-direction: column;
-                padding-top: 80px;
+                padding-top: 85px;
             }
             #arena-wrapper {
-                max-width: 100%;
-                height: 55%;
+                width: 100%;
+                height: 50%;
             }
             #control-panel-wrapper {
                 width: 100%;
-                height: 40%;
+                height: 45%;
             }
             .dpad-container {
                 transform: scale(0.85);
-            }
-            .options-grid {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -545,7 +553,7 @@
         ]
     ];
 
-    // Splash screen transitions to main board after 3 seconds
+    // Auto splash exit handling
     window.addEventListener('load', () => {
         setTimeout(() => {
             transitionScreen('splash-screen', 'title-screen');
@@ -587,15 +595,26 @@
         setupInputListeners();
         buildLevelMap(currentRoundIndex - 1);
         
-        window.addEventListener('resize', () => buildLevelMap(currentRoundIndex - 1));
+        // Dynamically fix bounds on viewport modifications
+        window.removeEventListener('resize', handleResizeAdjustment);
+        window.addEventListener('resize', handleResizeAdjustment);
         
         lastTime = performance.now();
-        runPhysicsLoop(lastTime);
+        if(!animationFrameId) {
+            runPhysicsLoop(lastTime);
+        }
     }
 
+    function handleResizeAdjustment() {
+        if (!document.getElementById('game-play-area').classList.contains('hidden')) {
+            buildLevelMap(currentRoundIndex - 1);
+        }
+    }
+
+    /* THE STUCK FIX: Evaluates parent wrapper offset calculations robustly */
     function buildLevelMap(idx) {
         const wrapper = document.getElementById('arena-wrapper');
-        const optimalSize = Math.min(wrapper.clientWidth, wrapper.clientHeight - 40);
+        const optimalSize = Math.max(280, Math.min(wrapper.clientWidth, wrapper.clientHeight - 20));
         
         canvas.width = optimalSize;
         canvas.height = optimalSize;
@@ -721,6 +740,8 @@
 
     function drawActiveArena() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (currentCellScale === 0) return;
+        
         const palette = roundColors[currentRoundIndex - 1];
         const grid = mazes[currentRoundIndex - 1];
 
@@ -729,7 +750,7 @@
                 if (grid[r][c] === 1) {
                     ctx.fillStyle = palette.wall;
                     ctx.beginPath();
-                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 6);
+                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 5);
                     ctx.fill();
                 } else {
                     ctx.fillStyle = palette.track;
@@ -740,11 +761,11 @@
 
         ctx.fillStyle = palette.target;
         ctx.beginPath();
-        ctx.roundRect(targetZone.x + 2, targetZone.y + 2, targetZone.size - 4, targetZone.size - 4, 12);
+        ctx.roundRect(targetZone.x + 2, targetZone.y + 2, targetZone.size - 4, targetZone.size - 4, 8);
         ctx.fill();
         
         ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${currentCellScale * 0.65}px Arial`;
+        ctx.font = `bold ${currentCellScale * 0.6}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("⭐", targetZone.x + targetZone.size / 2, targetZone.y + targetZone.size / 2);
@@ -854,6 +875,7 @@
 
     function terminateGameSession(victoryFlag) {
         cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
         document.getElementById('quiz-overlay').classList.add('hidden');
         document.getElementById('game-play-area').classList.add('hidden');
 
