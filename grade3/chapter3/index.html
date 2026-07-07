@@ -65,7 +65,7 @@
             z-index: 0;
         }
 
-        /* Screen 1: Splash Screen */
+        /* Splash Screen */
         #splash-screen {
             background: #ffffff;
             z-index: 40;
@@ -77,7 +77,7 @@
             animation: pulse 1.5s infinite ease-in-out;
         }
 
-        /* Screen 2: Title Screen */
+        /* Title Screen */
         #title-screen {
             background: var(--bg-gradient);
             z-index: 30;
@@ -90,7 +90,7 @@
             font-weight: 900;
         }
 
-        /* Screen 3: Instructions Screen */
+        /* Instructions Screen */
         #instruction-screen {
             background: var(--bg-gradient);
             z-index: 20;
@@ -126,7 +126,7 @@
             margin-right: 10px;
         }
 
-        /* Premium Buttons */
+        /* Buttons */
         .btn-premium {
             background: linear-gradient(135deg, var(--primary) 0%, #54a0ff 100%);
             color: white;
@@ -171,7 +171,7 @@
             gap: 5px;
         }
 
-        /* Game Screen Layout Adjustment */
+        /* Game Play Screen */
         #game-play-area {
             display: flex;
             width: 100%;
@@ -181,7 +181,7 @@
             padding: 60px 40px 20px 40px;
         }
 
-        /* Canvas Wrapper Setup to Stop Pixelation */
+        /* Canvas Arena Setup */
         #arena-wrapper {
             flex: 1;
             display: flex;
@@ -198,7 +198,7 @@
             border: 6px solid #fff;
         }
 
-        /* Assessment Overlay UI Popup */
+        /* Assessment Popup Overlay UI */
         #quiz-overlay {
             position: absolute;
             width: 100%;
@@ -285,7 +285,7 @@
             animation: fadeIn 0.3s ease-in;
         }
 
-        /* Persistent Control Panel on Screen Right Side Layout */
+        /* Navigation Control Panels */
         #control-panel-wrapper {
             width: 35%;
             display: flex;
@@ -349,7 +349,7 @@
             to { opacity: 1; }
         }
 
-        /* Adjustments for pure portrait smaller devices */
+        /* Mobile Adjustments */
         @media (max-width: 680px) {
             #game-play-area {
                 flex-direction: column;
@@ -440,7 +440,6 @@
 </div>
 
 <script>
-    // Game State Metrics Constants
     let marksScore = 0;
     let currentRoundIndex = 1; 
     let absoluteQuestionCounter = 0; 
@@ -448,50 +447,40 @@
     let wrongAttemptsOnCurrentQuestion = 0;
     let mazeCompletedThisRound = false;
 
-    // Canvas Engine Physics Framework Variables
     const canvas = document.getElementById('canvas-arena');
     const ctx = canvas.getContext('2d');
     let animationFrameId;
     
-    // Marble Entity Definition
-    let ball = { x: 0, y: 0, radius: 0, speed: 4 };
+    // Smooth physics configuration properties
+    let ball = { x: 0, y: 0, radius: 0, speed: 0 };
     let targetZone = { x: 0, y: 0, size: 0 };
-    
-    // User Input Matrix Flags
     let keyControls = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
-    // Strict Scenario Question Deck Database
     const masterDeck = [
-        // ROUND 1
         { q: "Professor Kabir says, \"Just like a big wall is built out of small individual bricks, our real body is made of tiny parts!\"\nWhat are these smallest building blocks of life that join together inside us called?", o: ["Bricks", "Cells", "Toys", "Bones"], a: 1, h: "They are the tiny microscopic structures that make up all your organs!" },
         { q: "Maya is controlling a toy robot that collects messages, remembers codes, and plans moves.\nWhich system acts as the main supercomputer to control all your real body actions?", o: ["Digestive System", "Nervous System", "Skeletal System", "Respiratory System"], a: 1, h: "This system uses your brain and long, wire-like nerves to send lightning-fast signals!" },
         { q: "Rahul learns that adult frameworks have 206 bones, but human babies are born with many more.\nHow many small bones does a newborn baby have before they fuse together as they grow?", o: ["206", "300", "600", "100"], a: 1, h: "It is a large, clean number that stands for exactly three hundreds." },
-        // ROUND 2
         { q: "In the lab, Sonu sees cells join to make tissue. Then, a group of tissues join to do a special job.\nWhat do we call a big structure—like your stomach, heart, or lungs—made of these tissues?", o: ["An Organ", "A Brick", "An Organ System", "An Organism"], a: 0, h: "It is a single body part that performs a specific life function, like how your eyes help you see!" },
         { q: "Tina wants to know how she can pull her heavy school bag and run around during recess.\nBones cannot move alone, so how many fleshy, stretchy muscle helpers do we have in our bodies?", o: ["Exactly 206", "Around 300", "More than 600", "Less than 100"], a: 2, h: "There are way more of these pulling muscles than there are hard bones in an adult!" },
         { q: "Rohit sits down all day eating chips and playing mobile games, making his body feel weak.\nWhat fun daily prescription should the doctor give Rohit to make his muscles strong and flexible?", o: ["Play video games", "Run and play outdoor games", "Sleep all afternoon", "Drink sweet fizzy soda"], a: 1, h: "Moving your body frame out in the fresh air keeps your muscular system perfectly fit!" },
-        // ROUND 3
         { q: "Simran is taking deep breaths of fresh air to calm down before her big school presentation.\nThe air goes into her nose, down the windpipe, and lands inside which balloon-like chest organs?", o: ["Hearts", "Stomachs", "Lungs", "Kidneys"], a: 2, h: "These two lightweight breathing organs fill up with clean oxygen when you inhale!" },
         { q: "Amit ate a sandwich that was chewed up well and mixed around inside his stomach.\nWhere does the leftover, undigested food go to be turned into solid waste before leaving the body?", o: ["Mouth", "Large Intestine", "Food Pipe", "Windpipe"], a: 1, h: "Look at the bottom of the digestive tract; it is the wide tube wrapped around the smaller ones!" },
         { q: "A machine needs to clear out dirty liquid waste so its engine elements do not rust or break.\nWhich body system acts like this filter team to throw out bad liquid waste like urine and sweat?", o: ["Nervous System", "Circulatory System", "Excretory System", "Digestive System"], a: 2, h: "This cleaning system uses your skin to sweat and two bean-shaped kidneys to filter your blood!" },
-        // ROUND 4
         { q: "Imagine a grand palace with a central water pump that pushes fresh water through hidden pipes.\nWhich muscular organ inside your chest pumps blood non-stop to every single corner of your body?", o: ["Brain", "Heart", "Kidney", "Liver"], a: 1, h: "It sits slightly to the left side of your chest and makes a regular \"thump-thump\" beating sound!" },
         { q: "Priya looks at a medical map and notices a massive network of tiny tubes running under the skin.\nWhat is the proper scientific name for these hollow channels that carry blood through our bodies?", o: ["Air Winds", "Food Pipes", "Blood Vessels", "Spinal Cords"], a: 2, h: "They form a complex red and blue pipeline network to keep blood moving to your cells!" },
         { q: "Sana is turning pages in her family album, looking at pictures of her grandma, mother, and herself.\nWhich body system allows humans to give birth to new babies so that life continues across generations?", o: ["Nervous System", "Circulatory System", "Reproductive System", "Excretory System"], a: 2, h: "This vital system ensures that living beings can multiply and grow their family trees!" }
     ];
 
-    // High Aesthetic Cute Color Profiles - Rounded & Warm Pastels
     const roundColors = [
-        { wall: "#ff9f43", track: "#ffffff", target: "#10ac84" }, // Round 1 Cute Orange Lab
-        { wall: "#00d2d3", track: "#f5f6fa", target: "#ff6b6b" }, // Round 2 Bright Cyan Lab
-        { wall: "#5f27cd", track: "#ffffff", target: "#ff9f43" }, // Round 3 Royal Neon Velvet
-        { wall: "#ff6b6b", track: "#f5f6fa", target: "#10ac84" }  // Round 4 Sweet Coral Finish
+        { wall: "#6c5ce7", track: "#ffffff", target: "#10ac84" }, 
+        { wall: "#00d2d3", track: "#f5f6fa", target: "#ff6b6b" }, 
+        { wall: "#5f27cd", track: "#ffffff", target: "#ff9f43" }, 
+        { wall: "#ff6b6b", track: "#f5f6fa", target: "#10ac84" }  
     ];
 
     const originalGridSize = 16;
     let currentCellScale = 0;
 
-    // Generated Fixed Map Grids
     const mazes = [
         [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -567,7 +556,6 @@
         ]
     ];
 
-    // Splash Screen timeout execution
     window.addEventListener('load', () => {
         setTimeout(() => {
             transitionScreen('splash-screen', 'title-screen');
@@ -579,7 +567,6 @@
         document.getElementById(to).classList.remove('hidden');
     }
 
-    // Engine Start Sequence
     function startGameEngine() {
         transitionScreen('instruction-screen', 'game-play-area');
         
@@ -605,8 +592,7 @@
         currentCellScale = optimalSize / originalGridSize;
 
         const currentGrid = mazes[idx];
-        
-        ball.x = 0; ball.y = 0; // Fresh Position Initialization
+        ball.x = 0; ball.y = 0;
         
         for (let r = 0; r < originalGridSize; r++) {
             for (let c = 0; c < originalGridSize; c++) {
@@ -620,8 +606,9 @@
                 }
             }
         }
-        ball.radius = currentCellScale * 0.38;
-        ball.speed = currentCellScale * 0.12; 
+        // Perfect sizing padding ratios to avoid tracking map locks
+        ball.radius = currentCellScale * 0.32;
+        ball.speed = currentCellScale * 0.09; 
         mazeCompletedThisRound = false;
     }
 
@@ -633,15 +620,10 @@
             if (keyControls.hasOwnProperty(e.key)) keyControls[e.key] = false;
         });
 
-        // Setup touch and click logic for the persistent controls
         const assignControlEvents = (btnId, keyStr) => {
             const el = document.getElementById(btnId);
-            
-            // Touch Trigger Interactions
             el.addEventListener('touchstart', (e) => { e.preventDefault(); keyControls[keyStr] = true; });
             el.addEventListener('touchend', (e) => { e.preventDefault(); keyControls[keyStr] = false; });
-            
-            // Mouse Click Trigger Interactions for Laptops
             el.addEventListener('mousedown', () => { keyControls[keyStr] = true; });
             el.addEventListener('mouseup', () => { keyControls[keyStr] = false; });
             el.addEventListener('mouseleave', () => { keyControls[keyStr] = false; });
@@ -659,42 +641,74 @@
         animationFrameId = requestAnimationFrame(runPhysicsLoop);
     }
 
+    /* SUPER SMOOTH ENGINE PHYSICS
+       Processes directional moves dynamically with a buffer check to snap, slide, and prevent sticking
+    */
     function updateGamePhysics() {
         if (mazeCompletedThisRound) return;
 
-        let nextX = ball.x;
-        let nextY = ball.y;
+        let dx = 0;
+        let dy = 0;
 
-        if (keyControls.ArrowUp) nextY -= ball.speed;
-        if (keyControls.ArrowDown) nextY += ball.speed;
-        if (keyControls.ArrowLeft) nextX -= ball.speed;
-        if (keyControls.ArrowRight) nextX += ball.speed;
+        if (keyControls.ArrowUp) dy -= ball.speed;
+        if (keyControls.ArrowDown) dy += ball.speed;
+        if (keyControls.ArrowLeft) dx -= ball.speed;
+        if (keyControls.ArrowRight) dx += ball.speed;
 
-        if (checkMapCollision(nextX, ball.y)) ball.x = nextX;
-        if (checkMapCollision(ball.x, nextY)) ball.y = nextY;
+        if (dx === 0 && dy === 0) return;
 
-        let ballGridC = Math.floor(ball.x / currentCellScale);
-        let ballGridR = Math.floor(ball.y / currentCellScale);
-        
-        if (mazes[currentRoundIndex - 1][ballGridR][ballGridC] === 2) {
+        let nextX = ball.x + dx;
+        let nextY = ball.y + dy;
+
+        // Try moving along both vectors simultaneously
+        if (checkMapCollision(nextX, nextY)) {
+            ball.x = nextX;
+            ball.y = nextY;
+        } else {
+            // Sliding Logic: If corner blocked, process single coordinates cleanly so marble slides effortlessly
+            if (checkMapCollision(nextX, ball.y)) {
+                ball.x = nextX;
+            } else if (checkMapCollision(ball.x, nextY)) {
+                ball.y = nextY;
+            }
+        }
+
+        // Snap to center of track axis line buffer if moving parallel 
+        const currentGrid = mazes[currentRoundIndex - 1];
+        let tileC = Math.floor(ball.x / currentCellScale);
+        let tileR = Math.floor(ball.y / currentCellScale);
+
+        if (dy !== 0 && dx === 0) {
+            let targetCenterX = (tileC * currentCellScale) + (currentCellScale / 2);
+            ball.x += (targetCenterX - ball.x) * 0.15;
+        }
+        if (dx !== 0 && dy === 0) {
+            let targetCenterY = (tileR * currentCellScale) + (currentCellScale / 2);
+            ball.y += (targetCenterY - ball.y) * 0.15;
+        }
+
+        if (currentGrid[tileR] && currentGrid[tileR][tileC] === 2) {
             triggerTargetReached();
         }
     }
 
     function checkMapCollision(targetCoordX, targetCoordY) {
-        const checkPoints = [
-            { x: targetCoordX - ball.radius, y: targetCoordY - ball.radius },
-            { x: targetCoordX + ball.radius, y: targetCoordY - ball.radius },
-            { x: targetCoordX - ball.radius, y: targetCoordY + ball.radius },
-            { x: targetCoordX + ball.radius, y: targetCoordY + ball.radius }
+        const grid = mazes[currentRoundIndex - 1];
+        // 4-point safety boundary calculations matching physical wall coordinates
+        const padding = 2; 
+        const points = [
+            { x: targetCoordX - ball.radius + padding, y: targetCoordY - ball.radius + padding },
+            { x: targetCoordX + ball.radius - padding, y: targetCoordY - ball.radius + padding },
+            { x: targetCoordX - ball.radius + padding, y: targetCoordY + ball.radius - padding },
+            { x: targetCoordX + ball.radius - padding, y: targetCoordY + ball.radius - padding }
         ];
 
-        for (let pt of checkPoints) {
+        for (let pt of points) {
             let c = Math.floor(pt.x / currentCellScale);
             let r = Math.floor(pt.y / currentCellScale);
             
             if (c < 0 || c >= originalGridSize || r < 0 || r >= originalGridSize) return false;
-            if (mazes[currentRoundIndex - 1][r][c] === 1) return false;
+            if (grid[r][c] === 1) return false;
         }
         return true;
     }
@@ -704,14 +718,13 @@
         const palette = roundColors[currentRoundIndex - 1];
         const grid = mazes[currentRoundIndex - 1];
 
-        // Anti-aliased high-contrast game tracks
+        // Renders modern anti-aliased puzzle shapes
         for (let r = 0; r < originalGridSize; r++) {
             for (let c = 0; c < originalGridSize; c++) {
                 if (grid[r][c] === 1) {
                     ctx.fillStyle = palette.wall;
                     ctx.beginPath();
-                    // Smooth, modern corner structures instead of sharp squares
-                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 8);
+                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 6);
                     ctx.fill();
                 } else {
                     ctx.fillStyle = palette.track;
@@ -720,36 +733,35 @@
             }
         }
 
-        // Draw dynamic target destination zone
+        // Target Zone
         ctx.fillStyle = palette.target;
         ctx.beginPath();
-        ctx.roundRect(targetZone.x + 3, targetZone.y + 3, targetZone.size - 6, targetZone.size - 6, 14);
+        ctx.roundRect(targetZone.x + 2, targetZone.y + 2, targetZone.size - 4, targetZone.size - 4, 12);
         ctx.fill();
         
-        // Trophy target icon overlay
         ctx.fillStyle = "#ffffff";
         ctx.font = `bold ${currentCellScale * 0.65}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("🏆", targetZone.x + targetZone.size / 2, targetZone.y + targetZone.size / 2);
+        ctx.fillText("⭐", targetZone.x + targetZone.size / 2, targetZone.y + targetZone.size / 2);
 
-        // Render the player marble with depth shading
-        ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
-        ctx.shadowBlur = 6;
-        ctx.shadowOffsetY = 4;
+        // Player Marble
+        ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetY = 3;
         
-        ctx.fillStyle = "#ff4757"; // Sweet red candy theme ball
+        ctx.fillStyle = "#ff4757"; 
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
         ctx.fill();
         
-        // Anti-glare marble reflections
+        // Clean anti-glare aesthetic reflection lines
         ctx.shadowBlur = 0;
         ctx.shadowOffsetY = 0;
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "rgba(255,255,255,0.6)";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(ball.x - ball.radius * 0.25, ball.y - ball.radius * 0.25, ball.radius * 0.4, 0, Math.PI, true);
+        ctx.arc(ball.x - ball.radius * 0.2, ball.y - ball.radius * 0.2, ball.radius * 0.35, 0, Math.PI, true);
         ctx.stroke();
     }
 
@@ -761,7 +773,7 @@
         
         setTimeout(() => {
             launchAssessmentPopupOverlay();
-        }, 600);
+        }, 500);
     }
 
     function launchAssessmentPopupOverlay() {
