@@ -55,17 +55,12 @@
             padding: 20px;
             text-align: center;
             z-index: 10;
-            transition: opacity 0.3s ease, visibility 0.3s;
         }
 
         .hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            z-index: 0;
+            display: none !important;
         }
 
-        /* FIXED & IMPROVED SPLASH SCREEN & LOGO BOUNDING */
         #splash-screen {
             background: #ffffff;
             z-index: 50;
@@ -76,7 +71,7 @@
         
         .logo-container {
             width: 100%;
-            max-width: 550px; /* Enhanced view limits */
+            max-width: 550px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -87,7 +82,7 @@
         
         #splash-logo {
             width: 100%;
-            max-width: 480px; /* Fits elegantly and prominently in the center */
+            max-width: 480px;
             height: auto;
             object-fit: contain;
             display: block;
@@ -173,6 +168,7 @@
         #hud-layer {
             position: absolute;
             top: 15px;
+            left: 4%;
             width: 92%;
             display: flex;
             justify-content: space-between;
@@ -209,7 +205,8 @@
             justify-content: center;
             align-items: center;
             height: 100%;
-            min-height: 320px;
+            width: 60%;
+            min-height: 300px;
         }
 
         #canvas-arena {
@@ -217,6 +214,7 @@
             border-radius: 24px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             border: 6px solid #fff;
+            display: block;
         }
 
         #quiz-overlay {
@@ -402,7 +400,7 @@
         <button class="btn-premium" onclick="startGameEngine()">PLAY</button>
     </div>
 
-    <div id="game-play-area" class="hidden">
+    <div id="game-play-area" class="screen hidden">
         <div id="hud-layer">
             <div class="hud-item">🏆 Marks: <span id="lbl-score">0</span></div>
             <div class="hud-item">🎮 Game: <span id="lbl-round">1</span>/4</div>
@@ -444,7 +442,7 @@
 
     const canvas = document.getElementById('canvas-arena');
     const ctx = canvas.getContext('2d');
-    let animationFrameId;
+    let animationFrameId = null;
     let lastTime = 0;
     
     let ball = { x: 0, y: 0, radius: 0, speed: 0 };
@@ -553,7 +551,6 @@
         ]
     ];
 
-    // Auto splash exit handling
     window.addEventListener('load', () => {
         setTimeout(() => {
             transitionScreen('splash-screen', 'title-screen');
@@ -583,6 +580,7 @@
     }
 
     function startGameEngine() {
+        // First transition to expose the play layout to the browser DOM engine
         transitionScreen('instruction-screen', 'game-play-area');
         
         marksScore = 0;
@@ -593,16 +591,19 @@
         
         initializeRandomDeck();
         setupInputListeners();
-        buildLevelMap(currentRoundIndex - 1);
-        
-        // Dynamically fix bounds on viewport modifications
-        window.removeEventListener('resize', handleResizeAdjustment);
-        window.addEventListener('resize', handleResizeAdjustment);
-        
-        lastTime = performance.now();
-        if(!animationFrameId) {
-            runPhysicsLoop(lastTime);
-        }
+
+        // Canvas measurements are executed AFTER viewport rendering has completed
+        setTimeout(() => {
+            buildLevelMap(currentRoundIndex - 1);
+            
+            window.removeEventListener('resize', handleResizeAdjustment);
+            window.addEventListener('resize', handleResizeAdjustment);
+            
+            lastTime = performance.now();
+            if(!animationFrameId) {
+                runPhysicsLoop(lastTime);
+            }
+        }, 50);
     }
 
     function handleResizeAdjustment() {
@@ -611,10 +612,18 @@
         }
     }
 
-    /* THE STUCK FIX: Evaluates parent wrapper offset calculations robustly */
     function buildLevelMap(idx) {
         const wrapper = document.getElementById('arena-wrapper');
-        const optimalSize = Math.max(280, Math.min(wrapper.clientWidth, wrapper.clientHeight - 20));
+        if (!wrapper || wrapper.clientWidth === 0) return;
+
+        // Uses a robust safe-fallback scale if parent returns unstable values
+        const widthLimit = wrapper.clientWidth;
+        const heightLimit = wrapper.clientHeight - 20;
+        let optimalSize = Math.min(widthLimit, heightLimit);
+        
+        if (optimalSize < 200) {
+            optimalSize = 300; 
+        }
         
         canvas.width = optimalSize;
         canvas.height = optimalSize;
@@ -650,6 +659,7 @@
 
         const assignControlEvents = (btnId, keyStr) => {
             const el = document.getElementById(btnId);
+            if(!el) return;
             el.addEventListener('touchstart', (e) => { e.preventDefault(); keyControls[keyStr] = true; });
             el.addEventListener('touchend', (e) => { e.preventDefault(); keyControls[keyStr] = false; });
             el.addEventListener('mousedown', () => { keyControls[keyStr] = true; });
@@ -674,7 +684,7 @@
     }
 
     function updateGamePhysics(dt) {
-        if (mazeCompletedThisRound) return;
+        if (mazeCompletedThisRound || currentCellScale === 0) return;
 
         let dx = 0;
         let dy = 0;
@@ -719,6 +729,7 @@
     }
 
     function checkMapCollision(targetCoordX, targetCoordY) {
+        if (currentCellScale === 0) return false;
         const grid = mazes[currentRoundIndex - 1];
         const padding = 2; 
         const points = [
@@ -874,8 +885,10 @@
     }
 
     function terminateGameSession(victoryFlag) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
+        if(animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
         document.getElementById('quiz-overlay').classList.add('hidden');
         document.getElementById('game-play-area').classList.add('hidden');
 
