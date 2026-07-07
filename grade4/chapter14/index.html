@@ -69,10 +69,11 @@
             position: absolute; top: 0; left: 0; z-index: 20; pointer-events: none;
         }
         .hud-badge {
-            background: #e8f5e9; padding: 8px 16px; border-radius: 20px;
-            font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 900; color: #2e7d32; border: 2.5px solid #81c784;
+            background: #e8f5e9; padding: 8px 14px; border-radius: 20px;
+            font-size: clamp(0.9rem, 2.2vw, 1.1rem); font-weight: 900; color: #2e7d32; border: 2.5px solid #81c784;
         }
         .hud-badge.lives { color: #d32f2f; border-color: #ef5350; background: #ffebee; }
+        .hud-badge.score-badge { color: #e65100; border-color: #ffb74d; background: #fff3e0; }
 
         /* --- STAGE 1: ECO-SORTER LAYOUT --- */
         #sort-container { width: 100%; max-width: 650px; display: none; flex-direction: column; align-items: center; margin-top: 50px; }
@@ -128,23 +129,37 @@
             display: none; width: 100%; animation: slideIn 0.3s ease-out;
         }
 
+        /* Score Display Wrapper on Result Screen */
+        .final-score-container {
+            background: #f1f8e9; border: 4px solid #81c784; padding: 20px 40px;
+            border-radius: 20px; font-size: clamp(2rem, 6vw, 3rem); font-family: 'Fredoka One', cursive;
+            color: #2e7d32; margin: 20px 0; box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+        }
+
+        /* Embedded Confetti Canvas Overlay */
+        #confetti-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100; display: none;
+        }
+
         /* --- SCREEN SIZE RESPONSIVE ADAPTATIONS --- */
         @media (max-width: 580px) {
             #game-container { height: 100%; max-height: 100vh; border-radius: 0; border: none; }
-            .screen { padding: 12px; justify-content: flex-start; padding-top: 65px; }
+            .screen { padding: 12px; justify-content: flex-start; padding-top: 75px; }
             #splash-screen { justify-content: center; padding-top: 0; }
             #title-screen { justify-content: center; padding-top: 0; }
             .bins { flex-direction: column; gap: 12px; width: 90%; }
-            .bin { max-width: 100%; height: 85px; flex-direction: row; gap: 15px; box-shadow: 0 6px 0 rgba(0,0,0,0.15); }
+            .bin { max-width: 100%; height: 80px; flex-direction: row; gap: 15px; box-shadow: 0 6px 0 rgba(0,0,0,0.15); }
             .bin span { margin-top: 0; }
             .sort-item { margin-bottom: 15px; padding: 15px 10px; }
             .key { width: calc(14.28% - 6px); height: 42px; }
+            .hud { padding: 10px; }
         }
 
         @keyframes popIn { 0% { transform: scale(0.6); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
         @keyframes slideIn { from { transform: translateY(-15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        @keyframes fadeIn { from { opacity: 0; } to { transform: opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -155,6 +170,8 @@
 
 <div id="game-container">
     
+    <canvas id="confetti-canvas"></canvas>
+
     <div id="splash-screen" class="screen active">
         <img class="logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('alt-logo').style.display='block';">
         <h1 id="alt-logo" style="display:none; color: #2e7d32; font-size: 3rem;">INNOVINE</h1>
@@ -168,10 +185,10 @@
     <div id="rules-screen" class="screen" style="justify-content: center;">
         <h2>HOW TO PLAY</h2>
         <div style="font-size: 1.3rem; color: #424242; text-align: left; line-height: 1.8; margin: 15px 0; background: #f1f8e9; padding: 20px; border-radius: 16px; border: 3px solid #c5e1a5; max-width: 500px; width: 100%;">
-            <p style="margin: 4px 0; font-weight:700;">🗑️ <b>Step 1:</b> Sort the waste item into the right bin.</p>
-            <p style="margin: 4px 0; font-weight:700;">🔤 <b>Step 2:</b> Read the scenario and solve the puzzle word.</p>
-            <p style="margin: 4px 0; font-weight:700;">✨ <b>Bonus:</b> The first and last letters are revealed instantly!</p>
-            <p style="margin: 4px 0; font-weight:700;">❤️ You have <b>4 Lives</b> for the total challenge.</p>
+            <p style="margin: 4px 0; font-weight:700;">🗑️ <b>Step 1:</b> Sort the item to score <span style="color:#2e7d32;">+5 Points</span>.</p>
+            <p style="margin: 4px 0; font-weight:700;">🔤 <b>Step 2:</b> Solve the spelling puzzle to score <span style="color:#2e7d32;">+15 Points</span>.</p>
+            <p style="margin: 4px 0; font-weight:700;">✨ <b>Bonus:</b> First and last letters are unlocked immediately!</p>
+            <p style="margin: 4px 0; font-weight:700;">❤️ Watch your <b>4 Lives</b> closely!</p>
         </div>
         <button class="btn" onclick="startGame()">PLAY GAME</button>
     </div>
@@ -179,7 +196,8 @@
     <div id="game-screen" class="screen">
         <div class="hud">
             <div class="hud-badge">ROUND: <span id="hud-round">1 / 12</span></div>
-            <div class="hud-badge lives">LIVES: <span id="hud-lives">❤️❤️❤️❤️</span></div>
+            <div class="hud-badge score-badge">SCORE: <span id="hud-score">0</span></div>
+            <div class="hud-badge lives"><span id="hud-lives">❤️❤️❤️❤️</span></div>
         </div>
 
         <div id="sort-container">
@@ -201,6 +219,7 @@
 
     <div id="result-screen" class="screen" style="justify-content: center;">
         <h1 id="end-title">MISSION OVER</h1>
+        <div class="final-score-container" id="final-score-box">0 / 240</div>
         <p id="end-msg">Loading summary report...</p>
         <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
     </div>
@@ -212,11 +231,19 @@
         const soundModule = document.getElementById(elementId);
         if (soundModule) {
             soundModule.currentTime = 0;
-            soundModule.play().catch(err => console.log("Audio framework interaction exception handled safely."));
+            soundModule.play().catch(err => console.log("Audio pipeline handling complete."));
         }
     }
 
-    const sortCatalog = [
+    // High-Performance Array Randomization Driver (Fisher-Yates)
+    function shuffleDataCatalog(targetArray) {
+        for (let idx = targetArray.length - 1; idx > 0; idx--) {
+            const randomIdx = Math.floor(Math.random() * (idx + 1));
+            [targetArray[idx], targetArray[randomIdx]] = [targetArray[randomIdx], targetArray[idx]];
+        }
+    }
+
+    const originalSortCatalog = [
         { item: "Leftover Maggi Noodles", category: "green" },
         { item: "Broken Plastic Ruler", category: "blue" },
         { item: "Watermelon Rinds", category: "green" },
@@ -231,7 +258,7 @@
         { item: "Broken Glass Marbles", category: "blue" }
     ];
 
-    const puzzleCatalog = [
+    const originalPuzzleCatalog = [
         { word: "CLEAN", scenario: "A wonderful neighborhood where families throw all their wrappers safely into bins is beautiful, healthy, and perfectly...?", hint: "It is the direct opposite of a messy or dirty room." },
         { word: "DISEASE", scenario: "Uh oh! Nasty buzzing mosquitoes and dirty houseflies love hanging out near open trash piles. What do they spread that makes kids fall sick?", hint: "Starts with 'D' and means catching an illness." },
         { word: "RECYCLE", scenario: "What is the magical factory word for melting down old, discarded plastic bottles to manufacture brand-new playground slides?", hint: "Starts with 'R' and saves processing energy by reusing materials." },
@@ -246,11 +273,15 @@
         { word: "HEALTH", scenario: "Keeping our school and home surroundings sparkling clean results in fewer harmful germs, fewer sick days, and wonderful energetic...?", hint: "Rhymes with 'wealth'. It represents how fit, strong, and well your body feels!" }
     ];
 
+    let sortCatalog = [];
+    let puzzleCatalog = [];
     let currentRound = 0;
     let lives = 4;
+    let currentScore = 0;
     let targetWord = "";
     let activeGuesses = [];
     let failureCountThisRound = 0;
+    let confettiInterval = null;
 
     setTimeout(() => {
         if(document.getElementById('splash-screen').classList.contains('active')) {
@@ -265,6 +296,7 @@
 
     function syncHUDState() {
         document.getElementById('hud-round').innerText = `${currentRound + 1} / 12`;
+        document.getElementById('hud-score').innerText = currentScore;
         document.getElementById('hud-lives').innerText = '❤️'.repeat(lives);
     }
 
@@ -284,8 +316,18 @@
     }
 
     function startGame() {
+        // Create isolated deep copies of arrays for standalone randomization
+        sortCatalog = [...originalSortCatalog];
+        puzzleCatalog = [...originalPuzzleCatalog];
+        
+        shuffleDataCatalog(sortCatalog);
+        shuffleDataCatalog(puzzleCatalog);
+
         currentRound = 0;
         lives = 4;
+        currentScore = 0;
+        stopConfetti();
+        
         showScreen('game-screen');
         initiateSortingPhase();
     }
@@ -307,6 +349,7 @@
     function checkSort(selectedBin) {
         if (selectedBin === sortCatalog[currentRound].category) {
             triggerAudio('sfx-correct');
+            currentScore += 5; // Allocation logic: +5 for sort operation
             initiateSpellingPhase();
         } else {
             dropUserLife();
@@ -320,6 +363,7 @@
 
     // --- PHASE 2 ---
     function initiateSpellingPhase() {
+        syncHUDState();
         document.getElementById('sort-container').style.display = 'none';
         document.getElementById('spell-container').style.display = 'flex';
         
@@ -327,7 +371,7 @@
         activeGuesses = [];
         failureCountThisRound = 0;
         
-        // Instant Scaffold: Automatically reveal first and last character of target word upfront
+        // Auto scaffold: pre-reveal terminal string points
         if (targetWord.length > 0) activeGuesses.push(targetWord[0]);
         if (targetWord.length > 1) activeGuesses.push(targetWord[targetWord.length - 1]);
 
@@ -362,7 +406,6 @@
             keyBtn.className = 'key';
             keyBtn.innerText = char;
             
-            // If the letter was automatically pre-revealed, highlight and disable it instantly
             if (activeGuesses.includes(char)) {
                 keyBtn.classList.add('correct');
                 keyBtn.disabled = true;
@@ -384,6 +427,8 @@
             
             let currentPuzzleCleared = targetWord.split('').every(ch => activeGuesses.includes(ch));
             if (currentPuzzleCleared) {
+                currentScore += 15; // Allocation logic: +15 for full matrix resolution
+                syncHUDState();
                 setTimeout(() => {
                     currentRound++;
                     if (currentRound < 12) {
@@ -409,16 +454,87 @@
         showScreen('result-screen');
         const summaryTitle = document.getElementById('end-title');
         const summaryMessage = document.getElementById('end-msg');
+        const scoreDisplay = document.getElementById('final-score-box');
 
-        if(isVictory) {
+        scoreDisplay.innerText = `${currentScore} / 240 Points`;
+
+        if(isVictory || currentScore >= 180) {
             triggerAudio('sfx-clap');
             summaryTitle.innerText = "MISSION COMPLETE! 🌍";
-            summaryMessage.innerText = "Fantastic job! You sorted the items correctly and mastered your spelling skills. The Earth is a cleaner place because of you!";
+            summaryMessage.innerText = "Fantastic job! You cleaned up the environment and solved the puzzles beautifully. You are an official Green Hero!";
             summaryTitle.style.color = "#2e7d32";
+            startConfetti();
         } else {
-            summaryTitle.innerText = "OUT OF LIVES! 💔";
-            summaryMessage.innerText = "Don't worry, clean green heroes never give up! Re-read Chapter 14: A Clean World and try again.";
+            summaryTitle.innerText = "GAME OVER 💔";
+            summaryMessage.innerText = "Good try! Let's read through Chapter 14: A Clean World again to improve your final score next time!";
             summaryTitle.style.color = "#d32f2f";
+        }
+    }
+
+    // --- LIGHTWEIGHT CROSS-DEVICE CONFETTI ENGINE ---
+    function startConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.style.display = 'block';
+        
+        // Dynamically compute layout bounds for device resolution independence
+        const resizeCanvas = () => {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+        };
+        resizeCanvas();
+
+        const colors = ['#ff9800', '#4caf50', '#2196f3', '#e91e63', '#9c27b0', '#ffeb3b'];
+        const particles = Array.from({ length: 65 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            r: Math.random() * 6 + 4,
+            d: Math.random() * canvas.height,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            tilt: Math.random() * 10 - 5
+        }));
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, idx) => {
+                p.y += Math.cos(p.d) + 1 + p.r / 2;
+                p.tilt += 0.1;
+                p.x += Math.sin(p.tilt) * 0.5;
+                
+                if (p.y > canvas.height) {
+                    particles[idx] = {
+                        x: Math.random() * canvas.width,
+                        y: -20,
+                        r: p.r,
+                        d: p.d,
+                        color: p.color,
+                        tilt: p.tilt
+                    };
+                }
+                
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                ctx.stroke();
+            });
+        }
+        
+        if(confettiInterval) clearInterval(confettiInterval);
+        confettiInterval = setInterval(drawFrame, 1000 / 30); // Capped at stable 30fps baseline to conserve low-spec CPU performance
+    }
+
+    function stopConfetti() {
+        if(confettiInterval) {
+            clearInterval(confettiInterval);
+            confettiInterval = null;
+        }
+        const canvas = document.getElementById('confetti-canvas');
+        if(canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'none';
         }
     }
 </script>
