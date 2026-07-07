@@ -65,7 +65,6 @@
             z-index: 0;
         }
 
-        /* Splash Screen */
         #splash-screen {
             background: #ffffff;
             z-index: 40;
@@ -77,7 +76,6 @@
             animation: pulse 1.5s infinite ease-in-out;
         }
 
-        /* Title Screen */
         #title-screen {
             background: var(--bg-gradient);
             z-index: 30;
@@ -90,7 +88,6 @@
             font-weight: 900;
         }
 
-        /* Instructions Screen */
         #instruction-screen {
             background: var(--bg-gradient);
             z-index: 20;
@@ -126,7 +123,6 @@
             margin-right: 10px;
         }
 
-        /* Buttons */
         .btn-premium {
             background: linear-gradient(135deg, var(--primary) 0%, #54a0ff 100%);
             color: white;
@@ -146,7 +142,6 @@
             border-bottom: 1px solid #341f97;
         }
 
-        /* Active Core HUD Layer */
         #hud-layer {
             position: absolute;
             top: 15px;
@@ -171,7 +166,6 @@
             gap: 5px;
         }
 
-        /* Game Play Screen */
         #game-play-area {
             display: flex;
             width: 100%;
@@ -181,7 +175,6 @@
             padding: 60px 40px 20px 40px;
         }
 
-        /* Canvas Arena Setup */
         #arena-wrapper {
             flex: 1;
             display: flex;
@@ -198,7 +191,6 @@
             border: 6px solid #fff;
         }
 
-        /* Assessment Popup Overlay UI */
         #quiz-overlay {
             position: absolute;
             width: 100%;
@@ -285,7 +277,6 @@
             animation: fadeIn 0.3s ease-in;
         }
 
-        /* Navigation Control Panels */
         #control-panel-wrapper {
             width: 35%;
             display: flex;
@@ -349,7 +340,6 @@
             to { opacity: 1; }
         }
 
-        /* Mobile Adjustments */
         @media (max-width: 680px) {
             #game-play-area {
                 flex-direction: column;
@@ -451,25 +441,27 @@
     const ctx = canvas.getContext('2d');
     let animationFrameId;
     
-    // Smooth physics configuration properties
     let ball = { x: 0, y: 0, radius: 0, speed: 0 };
     let targetZone = { x: 0, y: 0, size: 0 };
     let keyControls = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
-    const masterDeck = [
-        { q: "Professor Kabir says, \"Just like a big wall is built out of small individual bricks, our real body is made of tiny parts!\"\nWhat are these smallest building blocks of life that join together inside us called?", o: ["Bricks", "Cells", "Toys", "Bones"], a: 1, h: "They are the tiny microscopic structures that make up all your organs!" },
-        { q: "Maya is controlling a toy robot that collects messages, remembers codes, and plans moves.\nWhich system acts as the main supercomputer to control all your real body actions?", o: ["Digestive System", "Nervous System", "Skeletal System", "Respiratory System"], a: 1, h: "This system uses your brain and long, wire-like nerves to send lightning-fast signals!" },
-        { q: "Rahul learns that adult frameworks have 206 bones, but human babies are born with many more.\nHow many small bones does a newborn baby have before they fuse together as they grow?", o: ["206", "300", "600", "100"], a: 1, h: "It is a large, clean number that stands for exactly three hundreds." },
-        { q: "In the lab, Sonu sees cells join to make tissue. Then, a group of tissues join to do a special job.\nWhat do we call a big structure—like your stomach, heart, or lungs—made of these tissues?", o: ["An Organ", "A Brick", "An Organ System", "An Organism"], a: 0, h: "It is a single body part that performs a specific life function, like how your eyes help you see!" },
-        { q: "Tina wants to know how she can pull her heavy school bag and run around during recess.\nBones cannot move alone, so how many fleshy, stretchy muscle helpers do we have in our bodies?", o: ["Exactly 206", "Around 300", "More than 600", "Less than 100"], a: 2, h: "There are way more of these pulling muscles than there are hard bones in an adult!" },
-        { q: "Rohit sits down all day eating chips and playing mobile games, making his body feel weak.\nWhat fun daily prescription should the doctor give Rohit to make his muscles strong and flexible?", o: ["Play video games", "Run and play outdoor games", "Sleep all afternoon", "Drink sweet fizzy soda"], a: 1, h: "Moving your body frame out in the fresh air keeps your muscular system perfectly fit!" },
-        { q: "Simran is taking deep breaths of fresh air to calm down before her big school presentation.\nThe air goes into her nose, down the windpipe, and lands inside which balloon-like chest organs?", o: ["Hearts", "Stomachs", "Lungs", "Kidneys"], a: 2, h: "These two lightweight breathing organs fill up with clean oxygen when you inhale!" },
-        { q: "Amit ate a sandwich that was chewed up well and mixed around inside his stomach.\nWhere does the leftover, undigested food go to be turned into solid waste before leaving the body?", o: ["Mouth", "Large Intestine", "Food Pipe", "Windpipe"], a: 1, h: "Look at the bottom of the digestive tract; it is the wide tube wrapped around the smaller ones!" },
-        { q: "A machine needs to clear out dirty liquid waste so its engine elements do not rust or break.\nWhich body system acts like this filter team to throw out bad liquid waste like urine and sweat?", o: ["Nervous System", "Circulatory System", "Excretory System", "Digestive System"], a: 2, h: "This cleaning system uses your skin to sweat and two bean-shaped kidneys to filter your blood!" },
-        { q: "Imagine a grand palace with a central water pump that pushes fresh water through hidden pipes.\nWhich muscular organ inside your chest pumps blood non-stop to every single corner of your body?", o: ["Brain", "Heart", "Kidney", "Liver"], a: 1, h: "It sits slightly to the left side of your chest and makes a regular \"thump-thump\" beating sound!" },
-        { q: "Priya looks at a medical map and notices a massive network of tiny tubes running under the skin.\nWhat is the proper scientific name for these hollow channels that carry blood through our bodies?", o: ["Air Winds", "Food Pipes", "Blood Vessels", "Spinal Cords"], a: 2, h: "They form a complex red and blue pipeline network to keep blood moving to your cells!" },
-        { q: "Sana is turning pages in her family album, looking at pictures of her grandma, mother, and herself.\nWhich body system allows humans to give birth to new babies so that life continues across generations?", o: ["Nervous System", "Circulatory System", "Reproductive System", "Excretory System"], a: 2, h: "This vital system ensures that living beings can multiply and grow their family trees!" }
+    // Academic Curriculum Assessment Question Bank
+    const sourceDeck = [
+        { q: "What are the fundamental microscopic structures that serve as the basic living units of the human body?", o: ["Cells", "Tissues", "Organs", "Bones"], a: "Cells", h: "These structures are often compared to the individual bricks used to construct a house." },
+        { q: "Which primary organ system function acts as the control center of the entire body by receiving and transmitting signals?", o: ["Nervous System", "Digestive System", "Skeletal System", "Respiratory System"], a: "Nervous System", h: "This system relies on the brain, spinal cord, and a complex network of nerves." },
+        { q: "Approximately how many bones comprise the skeleton of a human infant at birth?", o: ["300", "206", "100", "600"], a: "300", h: "Infants are born with more bones than adults, which gradually fuse together as they grow." },
+        { q: "What structural level of organization is formed when multiple types of specialized tissues work together to perform a specific function?", o: ["An Organ", "A Cell", "An Organ System", "An Organism"], a: "An Organ", h: "Examples of this structural level include the stomach, heart, lungs, and liver." },
+        { q: "Approximately how many individual muscles make up the muscular system of the human body?", o: ["More than 600", "Exactly 206", "Around 300", "Less than 100"], a: "More than 600", h: "There are nearly three times as many muscles in your body as there are adult bones." },
+        { q: "Which habit is essential for maintaining the strength, flexibility, and overall health of the muscular system?", o: ["Regular outdoor games and physical exercise", "Extended sedentary screen time", "Irregular sleep patterns", "Consuming carbonated beverages"], a: "Regular outdoor games and physical exercise", h: "Active movement and physical recreation keep your muscles strong and flexible." },
+        { q: "Which pair of balloon-like respiratory organs expand and contract inside the chest cavity during inhalation and exhalation?", o: ["Lungs", "Hearts", "Stomachs", "Kidneys"], a: "Lungs", h: "These organs exchange oxygen and carbon dioxide when air travels down the windpipe." },
+        { q: "Into which specific part of the digestive tract does undigested food pass to turn into solid waste?", o: ["Large Intestine", "Mouth", "Food Pipe", "Small Intestine"], a: "Large Intestine", h: "This part follows the small intestine and removes remaining water from solid waste." },
+        { q: "Which organ system filters liquid waste products from the bloodstream and eliminates them from the body?", o: ["Excretory System", "Circulatory System", "Nervous System", "Digestive System"], a: "Excretory System", h: "This clean-up system utilizes the skin and the two bean-shaped kidneys." },
+        { q: "Which muscular organ located in the chest cavity works non-stop to pump blood through the body's network of vessels?", o: ["Heart", "Brain", "Kidney", "Liver"], a: "Heart", h: "It sits slightly to the left side of your chest and makes a regular rhythmic beat." },
+        { q: "What is the collective scientific term for the hollow tubes that distribute blood to all parts of the human body?", o: ["Blood Vessels", "Air Winds", "Food Pipes", "Spinal Cords"], a: "Blood Vessels", h: "This vast internal distribution highway includes arteries, veins, and capillaries." },
+        { q: "Which fundamental organ system ensures the long-term survival and continuity of a biological species across generations?", o: ["Reproductive System", "Circulatory System", "Nervous System", "Excretory System"], a: "Reproductive System", h: "This system allows living organisms to reproduce and give birth to new offspring." }
     ];
+
+    let activeSessionDeck = [];
 
     const roundColors = [
         { wall: "#6c5ce7", track: "#ffffff", target: "#10ac84" }, 
@@ -481,6 +473,7 @@
     const originalGridSize = 16;
     let currentCellScale = 0;
 
+    // VALIDATED MAZE ARRAYS: Entry corridors to target areas (2) are completely clear
     const mazes = [
         [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -497,7 +490,7 @@
             [1,0,0,0,1,0,1,0,0,0,1,0,1,1,0,1],
             [1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1],
             [1,0,1,0,1,0,0,0,1,0,1,1,0,1,0,1],
-            [1,0,1,0,0,0,1,0,1,0,0,0,0,0,2,1],
+            [1,0,1,0,0,0,1,0,0,0,0,0,0,0,2,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ],
         [
@@ -515,7 +508,7 @@
             [1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,1],
             [1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
-            [1,1,1,1,1,1,1,1,1,1,0,0,0,1,2,1],
+            [1,1,1,1,1,1,1,1,1,1,0,0,0,0,2,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ],
         [
@@ -548,7 +541,7 @@
             [1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1],
             [1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1],
             [1,0,1,0,1,2,0,1,0,1,0,1,0,1,0,1],
-            [1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1],
             [1,0,1,0,0,0,0,0,0,1,0,0,0,1,0,1],
             [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -567,6 +560,23 @@
         document.getElementById(to).classList.remove('hidden');
     }
 
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function initializeRandomDeck() {
+        let clonedDeck = JSON.parse(JSON.stringify(sourceDeck));
+        clonedDeck = shuffleArray(clonedDeck);
+        clonedDeck.forEach(item => {
+            item.o = shuffleArray(item.o);
+        });
+        activeSessionDeck = clonedDeck;
+    }
+
     function startGameEngine() {
         transitionScreen('instruction-screen', 'game-play-area');
         
@@ -576,6 +586,7 @@
         playerLivesCount = 4;
         updateHUDCounters();
         
+        initializeRandomDeck();
         setupInputListeners();
         buildLevelMap(currentRoundIndex - 1);
         
@@ -606,7 +617,6 @@
                 }
             }
         }
-        // Perfect sizing padding ratios to avoid tracking map locks
         ball.radius = currentCellScale * 0.32;
         ball.speed = currentCellScale * 0.09; 
         mazeCompletedThisRound = false;
@@ -641,9 +651,6 @@
         animationFrameId = requestAnimationFrame(runPhysicsLoop);
     }
 
-    /* SUPER SMOOTH ENGINE PHYSICS
-       Processes directional moves dynamically with a buffer check to snap, slide, and prevent sticking
-    */
     function updateGamePhysics() {
         if (mazeCompletedThisRound) return;
 
@@ -660,12 +667,10 @@
         let nextX = ball.x + dx;
         let nextY = ball.y + dy;
 
-        // Try moving along both vectors simultaneously
         if (checkMapCollision(nextX, nextY)) {
             ball.x = nextX;
             ball.y = nextY;
         } else {
-            // Sliding Logic: If corner blocked, process single coordinates cleanly so marble slides effortlessly
             if (checkMapCollision(nextX, ball.y)) {
                 ball.x = nextX;
             } else if (checkMapCollision(ball.x, nextY)) {
@@ -673,7 +678,6 @@
             }
         }
 
-        // Snap to center of track axis line buffer if moving parallel 
         const currentGrid = mazes[currentRoundIndex - 1];
         let tileC = Math.floor(ball.x / currentCellScale);
         let tileR = Math.floor(ball.y / currentCellScale);
@@ -694,7 +698,6 @@
 
     function checkMapCollision(targetCoordX, targetCoordY) {
         const grid = mazes[currentRoundIndex - 1];
-        // 4-point safety boundary calculations matching physical wall coordinates
         const padding = 2; 
         const points = [
             { x: targetCoordX - ball.radius + padding, y: targetCoordY - ball.radius + padding },
@@ -718,7 +721,6 @@
         const palette = roundColors[currentRoundIndex - 1];
         const grid = mazes[currentRoundIndex - 1];
 
-        // Renders modern anti-aliased puzzle shapes
         for (let r = 0; r < originalGridSize; r++) {
             for (let c = 0; c < originalGridSize; c++) {
                 if (grid[r][c] === 1) {
@@ -728,12 +730,11 @@
                     ctx.fill();
                 } else {
                     ctx.fillStyle = palette.track;
-                    ctx.fillRect(c * currentCellScale, r * currentCellScale, currentCellScale, currentCellScale);
+                    ctx.fillRect(c * currentCellScale, r * currentCellScale, currentCellScale);
                 }
             }
         }
 
-        // Target Zone
         ctx.fillStyle = palette.target;
         ctx.beginPath();
         ctx.roundRect(targetZone.x + 2, targetZone.y + 2, targetZone.size - 4, targetZone.size - 4, 12);
@@ -745,7 +746,6 @@
         ctx.textBaseline = "middle";
         ctx.fillText("⭐", targetZone.x + targetZone.size / 2, targetZone.y + targetZone.size / 2);
 
-        // Player Marble
         ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
         ctx.shadowBlur = 4;
         ctx.shadowOffsetY = 3;
@@ -755,7 +755,6 @@
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
         ctx.fill();
         
-        // Clean anti-glare aesthetic reflection lines
         ctx.shadowBlur = 0;
         ctx.shadowOffsetY = 0;
         ctx.strokeStyle = "rgba(255,255,255,0.6)";
@@ -780,27 +779,27 @@
         wrongAttemptsOnCurrentQuestion = 0;
         document.getElementById('quiz-hint-box').style.display = "none";
         
-        const activeQuestionData = masterDeck[absoluteQuestionCounter];
+        const activeQuestionData = activeSessionDeck[absoluteQuestionCounter];
         document.getElementById('quiz-q-text').innerText = activeQuestionData.q;
         
         const optionsGrid = document.getElementById('quiz-options-container');
         optionsGrid.innerHTML = "";
         
-        activeQuestionData.o.forEach((optText, index) => {
+        activeQuestionData.o.forEach((optText) => {
             const optBtn = document.createElement('button');
             optBtn.className = "btn-option";
             optBtn.innerText = optText;
-            optBtn.onclick = () => validateSelectedAnswer(index, optBtn);
+            optBtn.onclick = () => validateSelectedAnswer(optText, optBtn);
             optionsGrid.appendChild(optBtn);
         });
         
         document.getElementById('quiz-overlay').classList.remove('hidden');
     }
 
-    function validateSelectedAnswer(chosenIdx, elementRef) {
-        const activeQuestionData = masterDeck[absoluteQuestionCounter];
+    function validateSelectedAnswer(chosenStringValue, elementRef) {
+        const activeQuestionData = activeSessionDeck[absoluteQuestionCounter];
         
-        if (chosenIdx === activeQuestionData.a) {
+        if (chosenStringValue === activeQuestionData.a) {
             playAudioTone('snd-correct');
             elementRef.style.background = "#20bf6b";
             elementRef.style.color = "white";
@@ -877,13 +876,13 @@
         
         if (victoryFlag) {
             playAudioTone('snd-cheer');
-            titleH1.innerHTML = `🎉 VICTORY! 🎉<br><span style="font-size: 1.8rem; color:#fff;">Total Score: ${marksScore} Marks</span>`;
+            titleH1.innerHTML = `🎉 VICTORY! 🎉<br><span style="font-size: 1.8rem; color:#fff;">Total Score: ${marksScore} / 200 Marks</span>`;
         } else {
-            titleH1.innerHTML = `💀 GAME OVER 💀<br><span style="font-size: 1.8rem; color:#fff;">Final Score: ${marksScore} Marks</span>`;
+            titleH1.innerHTML = `💀 GAME OVER 💀<br><span style="font-size: 1.8rem; color:#fff;">Final Score: ${marksScore} / 200 Marks</span>`;
         }
         
         titleScr.querySelector('.btn-premium').innerText = "PLAY AGAIN";
-        titleScr.querySelector('.btn-premium').onclick = () => { location.reload(); };
+        titleScr.querySelector('.btn-premium').onclick = () => { startGameEngine(); };
         titleScr.classList.remove('hidden');
     }
 </script>
