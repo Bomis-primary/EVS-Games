@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eco-Sorter & Speller</title>
+    <title>Eco-Sorter & Speller Challenge</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Fredoka+One&display=swap');
 
@@ -12,127 +12,140 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
+            margin: 0; padding: 0;
         }
 
         body {
-            margin: 0; padding: 0;
             font-family: 'Nunito', sans-serif;
-            /* Rich greenery background */
             background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden;
+            min-height: 100vh; height: 100vh;
+            padding: 10px; overflow: hidden;
         }
 
         #game-container {
-            width: 100%; max-width: 900px;
-            height: 100vh; max-height: 750px;
+            width: 100%; max-width: 850px;
+            height: 95vh; max-height: 680px;
             position: relative;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border: 8px solid #ffffff;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 24px;
+            overflow-y: auto; overflow-x: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            border: 6px solid #ffffff;
+            display: flex; flex-direction: column;
         }
 
-        /* --- SCREENS --- */
+        /* --- SCREENS ENGINE --- */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; padding: 20px; text-align: center;
-            animation: fadeIn 0.5s ease-in-out;
+            padding: 20px; text-align: center; z-index: 10;
+            animation: fadeIn 0.4s ease-out;
         }
         .screen.active { display: flex; }
 
         /* Splash Screen */
         #splash-screen { background: #ffffff; z-index: 50; }
-        .logo { width: 300px; animation: pulseLogo 1.5s infinite alternate; }
-        @keyframes pulseLogo { from { transform: scale(0.95); } to { transform: scale(1.05); } }
+        .logo { width: 65%; max-width: 260px; animation: pulseLogo 1.5s infinite alternate ease-in-out; }
+        @keyframes pulseLogo { from { transform: scale(0.96); } to { transform: scale(1.04); } }
 
-        /* Typography */
-        h1 { font-family: 'Fredoka One', cursive; font-size: 4rem; color: #2e7d32; margin-bottom: 20px; letter-spacing: 2px; text-shadow: 2px 2px 0px #c8e6c9; }
-        h2 { font-size: 2.2rem; color: #1b5e20; margin-bottom: 15px; font-family: 'Fredoka One', cursive;}
-        p { font-size: 1.5rem; color: #333; line-height: 1.6; max-width: 600px; }
+        /* Global Typography & UI Elements */
+        h1 { font-family: 'Fredoka One', cursive; font-size: clamp(2.2rem, 5vw, 3.5rem); color: #2e7d32; line-height: 1.2; margin-bottom: 15px; text-shadow: 2px 2px 0px #c8e6c9; }
+        h2 { font-family: 'Fredoka One', cursive; font-size: clamp(1.6rem, 4vw, 2.3rem); color: #1b5e20; margin-bottom: 12px; }
+        p { font-size: clamp(1.1rem, 3vw, 1.4rem); color: #333333; line-height: 1.5; max-width: 580px; }
 
-        /* Buttons */
         .btn {
-            background: #ff9800; color: #fff; border: none; padding: 15px 60px;
-            font-size: 2rem; font-family: 'Fredoka One', cursive;
-            border-radius: 50px; cursor: pointer; margin-top: 20px;
-            box-shadow: 0 8px 0 #e65100; transition: all 0.1s;
+            background: #ff9800; color: #ffffff; border: none; padding: 12px 50px;
+            font-size: clamp(1.4rem, 3vw, 1.8rem); font-family: 'Fredoka One', cursive;
+            border-radius: 40px; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 6px 0 #e65100; transition: transform 0.1s, box-shadow 0.1s;
         }
-        .btn:active { transform: translateY(8px); box-shadow: 0 0 0 #e65100; }
+        .btn:active { transform: translateY(6px); box-shadow: 0 0 0 #e65100; }
 
-        /* --- HUD --- */
+        /* --- HUD SYSTEM --- */
         .hud {
-            position: absolute; top: 20px; width: 100%; padding: 0 30px;
-            display: flex; justify-content: space-between; z-index: 20;
+            width: 100%; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: absolute; top: 0; left: 0; z-index: 20; pointer-events: none;
         }
         .hud-badge {
-            background: #e8f5e9; padding: 10px 25px; border-radius: 30px;
-            font-size: 1.4rem; font-weight: 900; color: #2e7d32; border: 3px solid #81c784;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            background: #e8f5e9; padding: 8px 16px; border-radius: 20px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 900; color: #2e7d32; border: 2.5px solid #81c784;
         }
         .hud-badge.lives { color: #d32f2f; border-color: #ef5350; background: #ffebee; }
 
-        /* --- SORTING PHASE --- */
-        #sort-container { width: 100%; max-width: 700px; display: none; flex-direction: column; align-items: center; }
+        /* --- STAGE 1: ECO-SORTER LAYOUT --- */
+        #sort-container { width: 100%; max-width: 650px; display: none; flex-direction: column; align-items: center; margin-top: 50px; }
         .sort-item {
-            background: #fff; border: 5px dashed #4caf50; border-radius: 20px;
-            padding: 30px; font-size: 2.5rem; font-weight: 900; color: #2e7d32;
-            margin-bottom: 40px; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            background: #ffffff; border: 4px dashed #4caf50; border-radius: 16px;
+            padding: 20px 15px; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; color: #2e7d32;
+            margin-bottom: 25px; width: 100%; box-shadow: 0 6px 15px rgba(0,0,0,0.04);
         }
-        .bins { display: flex; gap: 40px; width: 100%; justify-content: center; }
+        .bins { display: flex; gap: 20px; width: 100%; justify-content: center; }
         .bin {
-            width: 220px; height: 240px; border-radius: 20px 20px 10px 10px;
+            flex: 1; max-width: 220px; height: 180px; border-radius: 16px 16px 10px 10px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            font-size: 1.8rem; font-weight: 900; color: #fff; cursor: pointer;
-            box-shadow: 0 12px 0 rgba(0,0,0,0.2); transition: transform 0.1s;
+            font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 900; color: #ffffff; cursor: pointer;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.15); transition: transform 0.1s;
         }
-        .bin:active { transform: translateY(12px); box-shadow: 0 0 0 rgba(0,0,0,0.2); }
-        .bin-green { background: #4caf50; border: 4px solid #2e7d32; }
-        .bin-blue { background: #2196f3; border: 4px solid #1565c0; }
-        .bin span { font-size: 1.2rem; margin-top: 10px; opacity: 0.9; font-weight: 700; }
+        .bin:active { transform: translateY(10px); box-shadow: 0 0 0 rgba(0,0,0,0.15); }
+        .bin-green { background: #4caf50; border: 3px solid #2e7d32; }
+        .bin-blue { background: #2196f3; border: 3px solid #1565c0; }
+        .bin span { font-size: clamp(0.9rem, 2vw, 1.1rem); margin-top: 6px; opacity: 0.9; font-weight: 700; }
 
-        /* --- SPELLING PHASE --- */
-        #spell-container { width: 100%; max-width: 800px; display: none; flex-direction: column; align-items: center; }
+        /* --- STAGE 2: SPELLING ENGINE --- */
+        #spell-container { width: 100%; max-width: 750px; display: none; flex-direction: column; align-items: center; margin-top: 45px; }
         .scenario-text {
-            background: #fff9c4; border: 4px solid #fbc531; border-radius: 15px;
-            padding: 20px; font-size: 1.5rem; color: #424242; margin-top: 60px; margin-bottom: 20px; width: 100%;
-            font-weight: 700; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #fff9c4; border: 3px solid #fbc531; border-radius: 14px;
+            padding: 15px; font-size: clamp(1.1rem, 2.8vw, 1.4rem); color: #333333; margin-bottom: 15px; width: 100%;
+            font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         
-        .word-board { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
+        .word-board { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
         .letter-box {
-            width: 55px; height: 65px; background: #eeeeee; border: 4px solid #bdbdbd;
-            border-radius: 12px; display: flex; justify-content: center; align-items: center;
-            font-size: 2.2rem; font-weight: 900; color: #212121; text-transform: uppercase;
+            width: clamp(34px, 8vw, 50px); height: clamp(44px, 10vw, 60px); background: #eeeeee; border: 3px solid #bdbdbd;
+            border-radius: 10px; display: flex; justify-content: center; align-items: center;
+            font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900; color: #212121; text-transform: uppercase;
         }
-        .letter-box.filled { background: #69f0ae; border-color: #00c853; color: #000; animation: popIn 0.3s; }
+        .letter-box.filled { background: #69f0ae; border-color: #00c853; animation: popIn 0.25s ease-out; }
 
-        /* Keyboard */
-        .keyboard { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 700px; }
+        /* Adaptive Keyboard Matrix */
+        .keyboard { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 600px; width: 100%; }
         .key {
-            background: #ab47bc; color: white; border: none; border-radius: 10px;
-            width: 50px; height: 60px; font-size: 1.8rem; font-weight: 900;
-            cursor: pointer; box-shadow: 0 6px 0 #7b1fa2; transition: all 0.1s;
+            background: #ab47bc; color: #ffffff; border: none; border-radius: 8px;
+            width: calc(10% - 6px); min-width: 28px; height: clamp(38px, 9vw, 52px); 
+            font-size: clamp(1.1rem, 3.2vw, 1.6rem); font-weight: 900;
+            cursor: pointer; box-shadow: 0 4px 0 #7b1fa2; transition: all 0.1s;
         }
-        .key:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 0 0 #7b1fa2; }
-        .key:disabled { background: #e0e0e0; box-shadow: 0 6px 0 #9e9e9e; color: #9e9e9e; cursor: not-allowed; }
-        .key.correct { background: #4caf50; box-shadow: 0 6px 0 #2e7d32; color: #fff; }
+        .key:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #7b1fa2; }
+        .key:disabled { background: #e0e0e0; box-shadow: 0 4px 0 #9e9e9e; color: #9e9e9e; cursor: not-allowed; }
+        .key.correct { background: #4caf50; box-shadow: 0 4px 0 #2e7d32; }
         
-        /* Hint System */
+        /* Interactive Hint System */
         .hint-box {
-            background: #ffebee; color: #c62828; padding: 15px 25px; border-radius: 12px;
-            font-size: 1.3rem; font-weight: 900; margin-bottom: 20px; border: 3px dashed #ef5350;
-            display: none; animation: slideIn 0.3s;
+            background: #ffebee; color: #c62828; padding: 10px 18px; border-radius: 10px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 900; margin-bottom: 15px; border: 2.5px dashed #ef5350;
+            display: none; width: 100%; animation: slideIn 0.3s ease-out;
         }
 
-        /* Animations */
-        @keyframes popIn { 0% { transform: scale(0.5); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- SCREEN SIZE RESPONSIVE ADAPTATIONS --- */
+        @media (max-width: 580px) {
+            #game-container { height: 100%; max-height: 100vh; border-radius: 0; border: none; }
+            .screen { padding: 12px; justify-content: flex-start; padding-top: 65px; }
+            #splash-screen { justify-content: center; padding-top: 0; }
+            #title-screen { justify-content: center; padding-top: 0; }
+            .bins { flex-direction: column; gap: 12px; width: 90%; }
+            .bin { max-width: 100%; height: 85px; flex-direction: row; gap: 15px; box-shadow: 0 6px 0 rgba(0,0,0,0.15); }
+            .bin span { margin-top: 0; }
+            .sort-item { margin-bottom: 15px; padding: 15px 10px; }
+            .key { width: calc(14.28% - 6px); height: 42px; } /* 7 keys per row layout compatibility for tiny screens */
+        }
 
+        /* Performance Graphics Accelerators */
+        @keyframes popIn { 0% { transform: scale(0.6); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        @keyframes slideIn { from { transform: translateY(-15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -145,7 +158,7 @@
     
     <div id="splash-screen" class="screen active">
         <img class="logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('alt-logo').style.display='block';">
-        <h1 id="alt-logo" style="display:none; color: #2e7d32;">INNOVINE</h1>
+        <h1 id="alt-logo" style="display:none; color: #2e7d32; font-size: 3rem;">INNOVINE</h1>
     </div>
 
     <div id="title-screen" class="screen">
@@ -153,26 +166,26 @@
         <button class="btn" onclick="showScreen('rules-screen')">START</button>
     </div>
 
-    <div id="rules-screen" class="screen">
+    <div id="rules-screen" class="screen" style="justify-content: center;">
         <h2>HOW TO PLAY</h2>
-        <div style="font-size: 1.6rem; color: #424242; text-align: left; line-height: 2; margin-bottom: 30px; background: #f1f8e9; padding: 30px; border-radius: 15px; border: 3px solid #c5e1a5;">
-            <p style="margin: 5px 0;">🗑️ <b>Step 1:</b> Sort the waste into the correct bin.</p>
-            <p style="margin: 5px 0;">🔤 <b>Step 2:</b> Read the clue and spell the hidden word.</p>
-            <p style="margin: 5px 0;">❤️ You have <b>4 Lives</b>.</p>
-            <p style="margin: 5px 0;">💡 A hint will appear if you guess a wrong letter.</p>
+        <div style="font-size: 1.3rem; color: #424242; text-align: left; line-height: 1.8; margin: 15px 0; background: #f1f8e9; padding: 20px; border-radius: 16px; border: 3px solid #c5e1a5; max-width: 500px; width: 100%;">
+            <p style="margin: 4px 0; font-weight:700;">🗑️ <b>Step 1:</b> Sort the waste item into the right bin.</p>
+            <p style="margin: 4px 0; font-weight:700;">🔤 <b>Step 2:</b> Read the scenario and solve the puzzle word.</p>
+            <p style="margin: 4px 0; font-weight:700;">❤️ You have <b>4 Lives</b> for the challenge.</p>
+            <p style="margin: 4px 0; font-weight:700;">💡 Hints pop up if you guess an incorrect letter!</p>
         </div>
         <button class="btn" onclick="startGame()">PLAY GAME</button>
     </div>
 
-    <div id="game-screen" class="screen" style="justify-content: flex-start; padding-top: 80px;">
+    <div id="game-screen" class="screen">
         <div class="hud">
             <div class="hud-badge">ROUND: <span id="hud-round">1 / 12</span></div>
             <div class="hud-badge lives">LIVES: <span id="hud-lives">❤️❤️❤️❤️</span></div>
         </div>
 
         <div id="sort-container">
-            <h2>Sort the Waste!</h2>
-            <div class="sort-item" id="sort-text">Loading...</div>
+            <h2 style="color: #4caf50; margin-bottom:10px;">Sort the Waste!</h2>
+            <div class="sort-item" id="sort-text">Processing...</div>
             <div class="bins">
                 <div class="bin bin-green" onclick="checkSort('green')">GREEN BIN<span>(Rots Easily)</span></div>
                 <div class="bin bin-blue" onclick="checkSort('blue')">BLUE BIN<span>(Does Not Rot)</span></div>
@@ -180,81 +193,145 @@
         </div>
 
         <div id="spell-container">
-            <div class="scenario-text" id="scenario-text">Loading...</div>
-            <div class="hint-box" id="hint-box">💡 Hint: ...</div>
+            <div class="scenario-text" id="scenario-text">Processing...</div>
+            <div class="hint-box" id="hint-box">💡 Hint Active...</div>
             <div class="word-board" id="word-board"></div>
             <div class="keyboard" id="keyboard"></div>
         </div>
     </div>
 
-    <div id="result-screen" class="screen">
-        <h1 id="end-title">GREAT JOB!</h1>
-        <p id="end-msg">You are a true Earth Saver!</p>
+    <div id="result-screen" class="screen" style="justify-content: center;">
+        <h1 id="end-title">MISSION OVER</h1>
+        <p id="end-msg">Loading summary report...</p>
         <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
     </div>
 
 </div>
 
 <script>
-    // Audio Context functions for better browser compatibility
-    function playSound(id) {
-        const sound = document.getElementById(id);
-        if (sound) {
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log("Audio play blocked by browser:", e));
+    // Asset Core Execution Engine
+    function triggerAudio(elementId) {
+        const soundModule = document.getElementById(elementId);
+        if (soundModule) {
+            soundModule.currentTime = 0;
+            soundModule.play().catch(err => console.log("Audio pipeline muted by engine layout constraints."));
         }
     }
 
-    // 12 Rounds Data based on the provided textbook
-    const gameData = [
-        { sort: "Plastic Water Bottle", bin: "blue", word: "BLUE", scenario: "The color of the dustbin used for non-biodegradable waste.", hint: "Think of the color of the ocean or the sky!" },
-        { sort: "Banana Peels", bin: "green", word: "GREEN", scenario: "The color of the dustbin used for waste that rots easily and mixes with soil.", hint: "It is the color of fresh grass and leaves!" },
-        { sort: "Empty Chips Packet", bin: "blue", word: "GARBAGE", scenario: "Unwanted or unusable things that we throw away every day.", hint: "Another word for trash or rubbish." },
-        { sort: "Broken Toy", bin: "blue", word: "PLASTIC", scenario: "A material used to make bags and bottles that is very bad for the soil because it does not rot.", hint: "Starts with 'P' and is used to make polybags." },
-        { sort: "Apple Core", bin: "green", word: "ROT", scenario: "When things like fruit peels break down naturally and mix into the earth.", hint: "A 3-letter word that rhymes with 'hot'." },
-        { sort: "Dry Leaves", bin: "green", word: "SOIL", scenario: "Biodegradable waste mixes with this to make it fertile for plants to grow.", hint: "It is the brown dirt on the ground." },
-        { sort: "Old Newspaper", bin: "green", word: "PAPER", scenario: "We should use bags made of this or cloth instead of plastic.", hint: "Your books and notebooks are made of this." },
-        { sort: "Broken Jar", bin: "blue", word: "GLASS", scenario: "A breakable material used for windows and bottles that goes in the blue bin.", hint: "You can look through it, and it can shatter into sharp pieces." },
-        { sort: "Soda Can", bin: "blue", word: "METAL", scenario: "Cans and old spoons are made of this strong material that does not rot easily.", hint: "It is hard, shiny, and rings when you hit it." },
-        { sort: "Animal Dung", bin: "green", word: "COMPOST", scenario: "A nutrient-rich mixture made from rotting plant and food waste that helps plants grow.", hint: "Starts with 'C' and farmers use it as a natural fertilizer." },
-        { sort: "Onion Skins", bin: "green", word: "PLANTS", scenario: "We must grow more of these to keep the air clean and fresh.", hint: "Trees and bushes are big ones!" },
-        { sort: "Leftover Rice", bin: "green", word: "EARTH", scenario: "Our beautiful home planet that we must keep clean and green.", hint: "It is the third planet from the sun!" }
+    // High Variety Data System (12 Distinct Sorting Elements vs 12 Distinct Spelling Words)
+    const sortCatalog = [
+        { item: "Leftover Maggi Noodles", category: "green" },
+        { item: "Broken Plastic Ruler", category: "blue" },
+        { item: "Watermelon Rinds", category: "green" },
+        { item: "Rotten Egg Shells", category: "green" },
+        { item: "Crushed Aluminum Foil", category: "blue" },
+        { item: "Dead Flower Petals", category: "green" },
+        { item: "Ripped Metal Tin Can", category: "blue" },
+        { item: "Old Plastic Comb", category: "blue" },
+        { item: "Soggy Used Tea Bags", category: "green" },
+        { item: "Used AA Battery Cells", category: "blue" },
+        { item: "Orange Peels", category: "green" },
+        { item: "Broken Glass Marbles", category: "blue" }
+    ];
+
+    const puzzleCatalog = [
+        { 
+            word: "CLEAN", 
+            scenario: "A wonderful neighborhood where families throw all their wrappers safely into bins is beautiful, healthy, and perfectly...?", 
+            hint: "It is the direct opposite of a messy or dirty room." 
+        },
+        { 
+            word: "DISEASE", 
+            scenario: "Uh oh! Nasty buzzing mosquitoes and dirty houseflies love hanging out near open trash piles. What do they spread that makes kids fall sick?", 
+            hint: "Starts with 'D' and means catching an illness." 
+        },
+        { 
+            word: "RECYCLE", 
+            scenario: "What is the magical factory word for melting down old, discarded plastic bottles to manufacture brand-new playground slides or t-shirts?", 
+            hint: "Starts with 'R' and saves processing energy by reusing waste materials." 
+        },
+        { 
+            word: "DUSTBIN", 
+            scenario: "I stand quietly in the corner of your classroom with a wide open mouth, eating up pencil shavings and trash to keep your room tidy. What am I?", 
+            hint: "Drop your trash into me! My name rhymes with 'must-pin'." 
+        },
+        { 
+            word: "COVER", 
+            scenario: "To completely stop stray dogs from digging up garbage and pesky flies from laying eggs in your kitchen bin, you must always keep it under a... what?", 
+            hint: "A protective lid or top piece that keeps the bin closed." 
+        },
+        { 
+            word: "BURROWS", 
+            scenario: "Squeak! Rats and mice absolutely love to tunnel deep inside huge piles of uncovered public street garbage to dig their secret underground homes called...?", 
+            hint: "Starts with 'B' and describes holes dug by animals like rabbits." 
+        },
+        { 
+            word: "MOSQUITO", 
+            scenario: "High-pitched buzzing alert! This annoying little flying insect loves to lay hundreds of eggs in stagnant water collected inside dirty, abandoned tires.", 
+            hint: "Be careful! This insect can give people Dengue or Malaria fevers." 
+        },
+        { 
+            word: "COMPOST", 
+            scenario: "If you bury leftover organic kitchen waste inside the ground, it naturally transforms into a super-rich plant fertilizer called...?", 
+            hint: "Starts with 'C' and works like natural vitamin food for crops and soil." 
+        },
+        { 
+            word: "NATURE", 
+            scenario: "The stunning green world right outside your window—including beautiful tall trees, singing birds, clean rivers, and fresh air—is part of beautiful...?", 
+            hint: "Starts with 'N'. It means the physical world and wildlife together." 
+        },
+        { 
+            word: "LITTER", 
+            scenario: "When lazy people throw empty juice cartons out of a moving car window instead of holding onto them, they are committing a bad environmental crime called...?", 
+            hint: "Starts with 'L' and means throwing garbage around on public streets." 
+        },
+        { 
+            word: "SMOKE", 
+            scenario: "Cough, cough! When communities burn piles of polybags and dried leaves out in the open, this dark, smelly stuff goes into the sky and hurts our lungs.", 
+            hint: "It rises from raging fires and makes your eyes water." 
+        },
+        { 
+            word: "HEALTH", 
+            scenario: "Keeping our school and home surroundings sparkling clean results in fewer harmful germs, fewer sick days, and wonderful energetic...?", 
+            hint: "Rhymes with 'wealth'. It represents how fit, strong, and well your body feels!" 
+        }
     ];
 
     let currentRound = 0;
     let lives = 4;
-    let currentWord = "";
-    let guessedLetters = [];
-    let wrongGuessesInRound = 0;
+    let targetWord = "";
+    let activeGuesses = [];
+    let failureCountThisRound = 0;
 
-    // Strict 5-second Splash Screen to Title Screen Transition
+    // Rigid 5-Second Core Splash Monitor
     setTimeout(() => {
         if(document.getElementById('splash-screen').classList.contains('active')) {
             showScreen('title-screen');
         }
     }, 5000);
 
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
     }
 
-    function updateHUD() {
+    function syncHUDState() {
         document.getElementById('hud-round').innerText = `${currentRound + 1} / 12`;
         document.getElementById('hud-lives').innerText = '❤️'.repeat(lives);
     }
 
-    function loseLife() {
-        playSound('sfx-wrong');
+    function dropUserLife() {
+        triggerAudio('sfx-wrong');
         lives--;
-        updateHUD();
-        const screenEl = document.getElementById('game-screen');
-        screenEl.style.animation = 'none';
-        void screenEl.offsetWidth; 
-        screenEl.style.animation = 'shake 0.3s';
+        syncHUDState();
+        
+        const runtimeScreen = document.getElementById('game-screen');
+        runtimeScreen.style.animation = 'none';
+        void runtimeScreen.offsetWidth; 
+        runtimeScreen.style.animation = 'shake 0.35s ease-in-out';
         
         if (lives <= 0) {
-            setTimeout(() => endGame(false), 800);
+            setTimeout(() => triggerGameOver(false), 600);
         }
     }
 
@@ -262,132 +339,128 @@
         currentRound = 0;
         lives = 4;
         showScreen('game-screen');
-        loadSortingPhase();
+        initiateSortingPhase();
     }
 
-    // --- PHASE 1: SORTING ---
-    function loadSortingPhase() {
-        updateHUD();
+    // --- PHASE 1 RUNTIME ---
+    function initiateSortingPhase() {
+        syncHUDState();
         document.getElementById('spell-container').style.display = 'none';
         document.getElementById('sort-container').style.display = 'flex';
         
-        // Reset animation on sort text
-        const sortText = document.getElementById('sort-text');
-        sortText.style.animation = 'none';
-        void sortText.offsetWidth;
-        sortText.style.animation = 'fadeIn 0.5s ease-in-out';
-        sortText.innerText = gameData[currentRound].sort;
-        sortText.style.color = '#2e7d32'; // Reset color
+        const dynamicText = document.getElementById('sort-text');
+        dynamicText.style.animation = 'none';
+        void dynamicText.offsetWidth;
+        dynamicText.style.animation = 'fadeIn 0.4s ease-out';
+        dynamicText.innerText = sortCatalog[currentRound].item;
+        dynamicText.style.color = '#2e7d32'; 
     }
 
     function checkSort(selectedBin) {
-        if (selectedBin === gameData[currentRound].bin) {
-            playSound('sfx-correct');
-            loadSpellingPhase();
+        if (selectedBin === sortCatalog[currentRound].category) {
+            triggerAudio('sfx-correct');
+            initiateSpellingPhase();
         } else {
-            loseLife();
-            const sortBox = document.getElementById('sort-text');
-            sortBox.style.animation = 'none';
-            void sortBox.offsetWidth;
-            sortBox.style.animation = 'shake 0.3s';
-            sortBox.style.color = '#d32f2f'; // Turn text red to indicate error
+            dropUserLife();
+            const sortingNode = document.getElementById('sort-text');
+            sortingNode.style.animation = 'none';
+            void sortingNode.offsetWidth;
+            sortingNode.style.animation = 'shake 0.3s ease-in-out';
+            sortingNode.style.color = '#d32f2f';
         }
     }
 
-    // --- PHASE 2: SPELLING ---
-    function loadSpellingPhase() {
+    // --- PHASE 2 RUNTIME ---
+    function initiateSpellingPhase() {
         document.getElementById('sort-container').style.display = 'none';
         document.getElementById('spell-container').style.display = 'flex';
         
-        currentWord = gameData[currentRound].word;
-        guessedLetters = [];
-        wrongGuessesInRound = 0;
+        targetWord = puzzleCatalog[currentRound].word;
+        activeGuesses = [];
+        failureCountThisRound = 0;
         
-        document.getElementById('scenario-text').innerText = gameData[currentRound].scenario;
+        document.getElementById('scenario-text').innerText = puzzleCatalog[currentRound].scenario;
         document.getElementById('hint-box').style.display = 'none';
 
-        renderBoard();
-        renderKeyboard();
+        drawGameBoard();
+        buildInteractiveKeyboard();
     }
 
-    function renderBoard() {
-        const board = document.getElementById('word-board');
-        board.innerHTML = '';
-        for (let char of currentWord) {
-            let box = document.createElement('div');
-            box.className = 'letter-box';
-            if (guessedLetters.includes(char)) {
-                box.innerText = char;
-                box.classList.add('filled');
+    function drawGameBoard() {
+        const boardNode = document.getElementById('word-board');
+        boardNode.innerHTML = '';
+        for (let character of targetWord) {
+            let spaceBlock = document.createElement('div');
+            spaceBlock.className = 'letter-box';
+            if (activeGuesses.includes(character)) {
+                spaceBlock.innerText = character;
+                spaceBlock.classList.add('filled');
             }
-            board.appendChild(box);
+            boardNode.appendChild(spaceBlock);
         }
     }
 
-    function renderKeyboard() {
-        const kb = document.getElementById('keyboard');
-        kb.innerHTML = '';
-        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    function buildInteractiveKeyboard() {
+        const matrixContainer = document.getElementById('keyboard');
+        matrixContainer.innerHTML = '';
+        const matrixAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         
-        alphabet.forEach(letter => {
-            let btn = document.createElement('button');
-            btn.className = 'key';
-            btn.innerText = letter;
-            btn.onclick = () => guessLetter(letter, btn);
-            kb.appendChild(btn);
+        matrixAlphabet.forEach(char => {
+            let keyBtn = document.createElement('button');
+            keyBtn.className = 'key';
+            keyBtn.innerText = char;
+            keyBtn.onclick = () => submitMatrixLetter(char, keyBtn);
+            matrixContainer.appendChild(keyBtn);
         });
     }
 
-    function guessLetter(letter, btnEl) {
-        btnEl.disabled = true;
+    function submitMatrixLetter(pickedChar, elementRef) {
+        elementRef.disabled = true;
 
-        if (currentWord.includes(letter)) {
-            // Correct letter
-            playSound('sfx-correct');
-            guessedLetters.push(letter);
-            btnEl.classList.add('correct');
-            renderBoard();
+        if (targetWord.includes(pickedChar)) {
+            triggerAudio('sfx-correct');
+            activeGuesses.push(pickedChar);
+            elementRef.classList.add('correct');
+            drawGameBoard();
             
-            // Check if word is complete
-            let isComplete = currentWord.split('').every(l => guessedLetters.includes(l));
-            if (isComplete) {
+            let currentPuzzleCleared = targetWord.split('').every(ch => activeGuesses.includes(ch));
+            if (currentPuzzleCleared) {
                 setTimeout(() => {
                     currentRound++;
-                    if (currentRound < gameData.length) {
-                        loadSortingPhase();
+                    if (currentRound < 12) {
+                        initiateSortingPhase();
                     } else {
-                        endGame(true);
+                        triggerGameOver(true);
                     }
-                }, 1200);
+                }, 1000);
             }
         } else {
-            // Wrong letter
-            loseLife();
-            wrongGuessesInRound++;
+            dropUserLife();
+            failureCountThisRound++;
             
-            // Trigger hint on first wrong guess
-            if (wrongGuessesInRound === 1 && lives > 0) {
-                let hintBox = document.getElementById('hint-box');
-                hintBox.innerText = "💡 Hint: " + gameData[currentRound].hint;
-                hintBox.style.display = 'block';
+            // Evaluates step condition: Deploy hint strictly upon the 1st wrong round attempt
+            if (failureCountThisRound === 1 && lives > 0) {
+                let textPlaceholder = document.getElementById('hint-box');
+                textPlaceholder.innerText = "💡 Hint: " + puzzleCatalog[currentRound].hint;
+                textPlaceholder.style.display = 'block';
             }
         }
     }
 
-    function endGame(won) {
+    function triggerGameOver(isVictory) {
         showScreen('result-screen');
-        const title = document.getElementById('end-title');
-        const msg = document.getElementById('end-msg');
+        const summaryTitle = document.getElementById('end-title');
+        const summaryMessage = document.getElementById('end-msg');
 
-        if(won) {
-            playSound('sfx-clap');
-            title.innerText = "MISSION COMPLETE! 🌍";
-            msg.innerText = "You correctly sorted the waste and found all the hidden words. The Earth is cleaner because of you!";
-            title.style.color = "#2e7d32";
+        if(isVictory) {
+            triggerAudio('sfx-clap');
+            summaryTitle.innerText = "MISSION COMPLETE! 🌍";
+            summaryMessage.innerText = "Fantastic job! You sorted the items correctly and mastered your spelling skills. The Earth is a cleaner place because of you!";
+            summaryTitle.style.color = "#2e7d32";
         } else {
-            title.innerText = "OUT OF LIVES! 💔";
-            msg.innerText = "Don't give up! Review the chapters on Biodegradable and Non-biodegradable waste and try again.";
-            title.style.color = "#d32f2f";
+            summaryTitle.innerText = "OUT OF LIVES! 💔";
+            summaryMessage.innerText = "Don't worry, clean green heroes never give up! Re-read Chapter 14: A Clean World and try again.";
+            summaryTitle.style.color = "#d32f2f";
         }
     }
 </script>
