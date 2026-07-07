@@ -55,7 +55,7 @@
             padding: 20px;
             text-align: center;
             z-index: 10;
-            transition: opacity 0.5s ease, visibility 0.5s;
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
 
         .hidden {
@@ -63,17 +63,6 @@
             visibility: hidden;
             pointer-events: none;
             z-index: 0;
-        }
-
-        #splash-screen {
-            background: #ffffff;
-            z-index: 40;
-        }
-        #splash-logo {
-            max-width: 250px;
-            width: 60%;
-            height: auto;
-            animation: pulse 1.5s infinite ease-in-out;
         }
 
         #title-screen {
@@ -213,13 +202,11 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             border: 5px solid var(--primary);
             text-align: center;
-            transform: scale(0.9);
-            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: scale(1);
         }
         .trophy-header {
             font-size: 4rem;
             margin-bottom: 5px;
-            animation: bounce 1s infinite alternate;
         }
         .quiz-title {
             font-size: 1.2rem;
@@ -257,7 +244,7 @@
             font-weight: 600;
             color: var(--text-dark);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.1s;
         }
         .btn-option:hover {
             background: var(--primary-light);
@@ -274,7 +261,6 @@
             font-weight: 600;
             margin-top: 10px;
             display: none;
-            animation: fadeIn 0.3s ease-in;
         }
 
         #control-panel-wrapper {
@@ -311,7 +297,7 @@
             color: var(--primary);
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-            transition: transform 0.1s, background 0.1s;
+            transition: transform 0.05s, background 0.05s;
         }
         .dpad-btn:active {
             transform: scale(0.92);
@@ -322,23 +308,6 @@
         #btn-left { grid-column: 1; grid-row: 2; }
         #btn-right { grid-column: 3; grid-row: 2; }
         #btn-down { grid-column: 2; grid-row: 3; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        @keyframes popUp {
-            to { transform: scale(1); }
-        }
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-10px); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
 
         @media (max-width: 680px) {
             #game-play-area {
@@ -371,15 +340,7 @@
 <body>
 
 <div id="game-container">
-    <audio id="snd-correct" src="assets/correct.mp3"></audio>
-    <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
-    <audio id="snd-cheer" src="assets/freesound_community-claps-44744.mp3"></audio>
-
-    <div id="splash-screen" class="screen">
-        <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo">
-    </div>
-
-    <div id="title-screen" class="screen hidden">
+    <div id="title-screen" class="screen">
         <h1 class="game-title">✨ MARBLE MAZE<br>LAB ADVENTURE ✨</h1>
         <button class="btn-premium" onclick="transitionScreen('title-screen', 'instruction-screen')">START</button>
     </div>
@@ -440,25 +401,26 @@
     const canvas = document.getElementById('canvas-arena');
     const ctx = canvas.getContext('2d');
     let animationFrameId;
+    let lastTime = 0;
     
     let ball = { x: 0, y: 0, radius: 0, speed: 0 };
     let targetZone = { x: 0, y: 0, size: 0 };
     let keyControls = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
-    // Academic Curriculum Assessment Question Bank
+    // Redesigned Academic Curriculum Assessment Deck
     const sourceDeck = [
-        { q: "What are the fundamental microscopic structures that serve as the basic living units of the human body?", o: ["Cells", "Tissues", "Organs", "Bones"], a: "Cells", h: "These structures are often compared to the individual bricks used to construct a house." },
-        { q: "Which primary organ system function acts as the control center of the entire body by receiving and transmitting signals?", o: ["Nervous System", "Digestive System", "Skeletal System", "Respiratory System"], a: "Nervous System", h: "This system relies on the brain, spinal cord, and a complex network of nerves." },
-        { q: "Approximately how many bones comprise the skeleton of a human infant at birth?", o: ["300", "206", "100", "600"], a: "300", h: "Infants are born with more bones than adults, which gradually fuse together as they grow." },
-        { q: "What structural level of organization is formed when multiple types of specialized tissues work together to perform a specific function?", o: ["An Organ", "A Cell", "An Organ System", "An Organism"], a: "An Organ", h: "Examples of this structural level include the stomach, heart, lungs, and liver." },
-        { q: "Approximately how many individual muscles make up the muscular system of the human body?", o: ["More than 600", "Exactly 206", "Around 300", "Less than 100"], a: "More than 600", h: "There are nearly three times as many muscles in your body as there are adult bones." },
-        { q: "Which habit is essential for maintaining the strength, flexibility, and overall health of the muscular system?", o: ["Regular outdoor games and physical exercise", "Extended sedentary screen time", "Irregular sleep patterns", "Consuming carbonated beverages"], a: "Regular outdoor games and physical exercise", h: "Active movement and physical recreation keep your muscles strong and flexible." },
-        { q: "Which pair of balloon-like respiratory organs expand and contract inside the chest cavity during inhalation and exhalation?", o: ["Lungs", "Hearts", "Stomachs", "Kidneys"], a: "Lungs", h: "These organs exchange oxygen and carbon dioxide when air travels down the windpipe." },
-        { q: "Into which specific part of the digestive tract does undigested food pass to turn into solid waste?", o: ["Large Intestine", "Mouth", "Food Pipe", "Small Intestine"], a: "Large Intestine", h: "This part follows the small intestine and removes remaining water from solid waste." },
-        { q: "Which organ system filters liquid waste products from the bloodstream and eliminates them from the body?", o: ["Excretory System", "Circulatory System", "Nervous System", "Digestive System"], a: "Excretory System", h: "This clean-up system utilizes the skin and the two bean-shaped kidneys." },
-        { q: "Which muscular organ located in the chest cavity works non-stop to pump blood through the body's network of vessels?", o: ["Heart", "Brain", "Kidney", "Liver"], a: "Heart", h: "It sits slightly to the left side of your chest and makes a regular rhythmic beat." },
-        { q: "What is the collective scientific term for the hollow tubes that distribute blood to all parts of the human body?", o: ["Blood Vessels", "Air Winds", "Food Pipes", "Spinal Cords"], a: "Blood Vessels", h: "This vast internal distribution highway includes arteries, veins, and capillaries." },
-        { q: "Which fundamental organ system ensures the long-term survival and continuity of a biological species across generations?", o: ["Reproductive System", "Circulatory System", "Nervous System", "Excretory System"], a: "Reproductive System", h: "This system allows living organisms to reproduce and give birth to new offspring." }
+        { q: "What are the fundamental microscopic units that serve as the basic structural and functional building blocks of the human body?", o: ["Cells", "Tissues", "Organs", "Bones"], a: "Cells", h: "These structures serve as the microscopic foundation, comparable to individual structural bricks." },
+        { q: "Which primary organ system coordinates bodily activities by processing sensory input and transmitting electrical signals?", o: ["Nervous System", "Digestive System", "Skeletal System", "Respiratory System"], a: "Nervous System", h: "This system comprises the brain, spinal cord, and specialized nerve networks." },
+        { q: "Approximately how many distinct bones constitute the skeletal framework of a human infant at birth?", o: ["300", "206", "100", "600"], a: "300", h: "Infants possess a higher count of skeletal elements, several of which fuse during physiological maturation." },
+        { q: "Which structural level of biological organization is established when distinct types of specialized tissues cooperate to execute a common function?", o: ["An Organ", "A Cell", "An Organ System", "An Organism"], a: "An Organ", h: "Structures representing this operational level include the stomach, heart, and lungs." },
+        { q: "Approximately how many individual muscles comprise the human muscular system?", o: ["More than 600", "Exactly 206", "Around 300", "Less than 100"], a: "More than 600", h: "The total muscular count is nearly threefold the number of independent adult bones." },
+        { q: "Which physiological habit is essential for maintaining optimal strength, flexibility, and performance within the muscular system?", o: ["Regular physical exercise", "Extended sedentary periods", "Irregular sleep cycles", "Consuming carbonated soft drinks"], a: "Regular physical exercise", h: "Consistent physiological exertion preserves muscular tonicity and joint elasticity." },
+        { q: "Which anatomical organs expand and contract inside the thoracic cavity to facilitate gaseous exchange during respiration?", o: ["Lungs", "Hearts", "Stomachs", "Kidneys"], a: "Lungs", h: "These paired structures extract atmospheric oxygen and expel metabolic carbon dioxide." },
+        { q: "Into which specialized region of the gastrointestinal tract does indigestible material pass for compaction and water reabsorption?", o: ["Large Intestine", "Mouth", "Esophagus", "Small Intestine"], a: "Large Intestine", h: "This terminal segment absorbs remaining fluids and prepares waste for excretion." },
+        { q: "Which organ system is primarily responsible for filtering metabolic liquid waste products directly from the bloodstream?", o: ["Excretory System", "Circulatory System", "Nervous System", "Digestive System"], a: "Excretory System", h: "This filtration network is anchored by the dermis and a pair of kidneys." },
+        { q: "Which specialized muscular organ continuously contracts to circulate blood throughout the vascular network?", o: ["Heart", "Brain", "Kidney", "Liver"], a: "Heart", h: "This thoracic organ maintains rhythmic muscular contractions throughout an organism's lifespan." },
+        { q: "What is the collective anatomical designation for the tubular structures that distribute blood throughout the body?", o: ["Blood Vessels", "Bronchioles", "Esophageal Ducts", "Spinal Tracts"], a: "Blood Vessels", h: "This vascular network consists of specialized arteries, veins, and capillaries." },
+        { q: "Which primary biological system is responsible for ensuring the continuation of a species across successive generations?", o: ["Reproductive System", "Circulatory System", "Nervous System", "Excretory System"], a: "Reproductive System", h: "This system produces specialized gametes to facilitate the generation of offspring." }
     ];
 
     let activeSessionDeck = [];
@@ -473,7 +435,7 @@
     const originalGridSize = 16;
     let currentCellScale = 0;
 
-    // VALIDATED MAZE ARRAYS: Entry corridors to target areas (2) are completely clear
+    // EXPLICITLY MODIFIED MAZES: All inner blockages removed
     const mazes = [
         [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -549,12 +511,6 @@
         ]
     ];
 
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            transitionScreen('splash-screen', 'title-screen');
-        }, 5000);
-    });
-
     function transitionScreen(from, to) {
         document.getElementById(from).classList.add('hidden');
         document.getElementById(to).classList.remove('hidden');
@@ -591,7 +547,9 @@
         buildLevelMap(currentRoundIndex - 1);
         
         window.addEventListener('resize', () => buildLevelMap(currentRoundIndex - 1));
-        runPhysicsLoop();
+        
+        lastTime = performance.now();
+        runPhysicsLoop(lastTime);
     }
 
     function buildLevelMap(idx) {
@@ -618,7 +576,8 @@
             }
         }
         ball.radius = currentCellScale * 0.32;
-        ball.speed = currentCellScale * 0.09; 
+        // Adjusted base physics coefficients to normalize delta spikes
+        ball.speed = currentCellScale * 0.005; 
         mazeCompletedThisRound = false;
     }
 
@@ -645,22 +604,26 @@
         assignControlEvents('btn-right', 'ArrowRight');
     }
 
-    function runPhysicsLoop() {
-        updateGamePhysics();
+    function runPhysicsLoop(timestamp) {
+        let dt = timestamp - lastTime;
+        if (dt > 100) dt = 16.66; // Limit anomalies
+        lastTime = timestamp;
+
+        updateGamePhysics(dt);
         drawActiveArena();
         animationFrameId = requestAnimationFrame(runPhysicsLoop);
     }
 
-    function updateGamePhysics() {
+    function updateGamePhysics(dt) {
         if (mazeCompletedThisRound) return;
 
         let dx = 0;
         let dy = 0;
 
-        if (keyControls.ArrowUp) dy -= ball.speed;
-        if (keyControls.ArrowDown) dy += ball.speed;
-        if (keyControls.ArrowLeft) dx -= ball.speed;
-        if (keyControls.ArrowRight) dx += ball.speed;
+        if (keyControls.ArrowUp) dy -= ball.speed * dt;
+        if (keyControls.ArrowDown) dy += ball.speed * dt;
+        if (keyControls.ArrowLeft) dx -= ball.speed * dt;
+        if (keyControls.ArrowRight) dx += ball.speed * dt;
 
         if (dx === 0 && dy === 0) return;
 
@@ -746,17 +709,11 @@
         ctx.textBaseline = "middle";
         ctx.fillText("⭐", targetZone.x + targetZone.size / 2, targetZone.y + targetZone.size / 2);
 
-        ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetY = 3;
-        
         ctx.fillStyle = "#ff4757"; 
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
         ctx.fill();
         
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
         ctx.strokeStyle = "rgba(255,255,255,0.6)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -768,11 +725,10 @@
         mazeCompletedThisRound = true;
         marksScore += 5;
         updateHUDCounters();
-        playAudioTone('snd-cheer');
         
         setTimeout(() => {
             launchAssessmentPopupOverlay();
-        }, 500);
+        }, 300);
     }
 
     function launchAssessmentPopupOverlay() {
@@ -800,7 +756,6 @@
         const activeQuestionData = activeSessionDeck[absoluteQuestionCounter];
         
         if (chosenStringValue === activeQuestionData.a) {
-            playAudioTone('snd-correct');
             elementRef.style.background = "#20bf6b";
             elementRef.style.color = "white";
             marksScore += 15;
@@ -811,9 +766,8 @@
 
             setTimeout(() => {
                 advanceAssessmentState();
-            }, 1500);
+            }, 1200);
         } else {
-            playAudioTone('snd-wrong');
             elementRef.style.background = "#ff3f34";
             elementRef.style.color = "white";
             elementRef.disabled = true;
@@ -858,14 +812,6 @@
         document.getElementById('lbl-lives').innerText = playerLivesCount;
     }
 
-    function playAudioTone(elementId) {
-        const aud = document.getElementById(elementId);
-        if (aud) {
-            aud.currentTime = 0;
-            aud.play().catch(() => {});
-        }
-    }
-
     function terminateGameSession(victoryFlag) {
         cancelAnimationFrame(animationFrameId);
         document.getElementById('quiz-overlay').classList.add('hidden');
@@ -875,7 +821,6 @@
         const titleH1 = titleScr.querySelector('.game-title');
         
         if (victoryFlag) {
-            playAudioTone('snd-cheer');
             titleH1.innerHTML = `🎉 VICTORY! 🎉<br><span style="font-size: 1.8rem; color:#fff;">Total Score: ${marksScore} / 200 Marks</span>`;
         } else {
             titleH1.innerHTML = `💀 GAME OVER 💀<br><span style="font-size: 1.8rem; color:#fff;">Final Score: ${marksScore} / 200 Marks</span>`;
