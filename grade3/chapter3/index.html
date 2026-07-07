@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Man: The Living Machine - Marble Maze Game</title>
+    <title>Bio-Column Sorting Expedition</title>
     <style>
         :root {
-            --primary: #6c5ce7;
-            --primary-light: #a29bfe;
-            --accent: #fd79a8;
-            --bg-gradient: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
-            --panel-bg: rgba(255, 255, 255, 0.95);
-            --text-dark: #2d3436;
+            --bg-canvas: #f7d794;
+            --primary: #4b7bec;
+            --accent: #ff4757;
+            --success: #20bf6b;
+            --dark: #2f3542;
         }
 
         * {
@@ -26,884 +25,525 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #2d3436;
+            background: #f1f2f6;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        #game-container {
+        #app-wrapper {
             position: relative;
             width: 100%;
             height: 100%;
             max-width: 1024px;
             max-height: 768px;
             margin: auto;
-            background: var(--bg-gradient);
-            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #f5f6fa 0%, #dcdde1 100%);
+            box-shadow: 0 0 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+
+        /* Top Bar Interface Metrics Layout */
+        #hud-dashboard {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 10px;
+        }
+        .hud-widget {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            color: var(--dark);
+            border: 2px solid #fff;
+        }
+
+        /* Sorting Play Workspace */
+        #gameplay-arena {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .stage-banner {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+            text-align: center;
+            background: rgba(75, 119, 236, 0.1);
+            padding: 6px 20px;
+            border-radius: 20px;
+        }
+
+        /* Dynamic Container for the Host Columns */
+        #columns-container {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 20px;
+            width: 100%;
+            padding: 10px;
+            min-height: 220px;
+        }
+
+        .host-column {
+            flex: 1;
+            background: white;
+            border: 3px dashed #ced6e0;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 15px 10px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+        }
+        .host-column.hovered {
+            border-color: var(--primary);
+            background: rgba(75, 119, 236, 0.05);
+        }
+
+        .column-title {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .drop-zone {
+            width: 100%;
+            flex: 1;
+            min-height: 120px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
-        .screen {
+        /* Item Deck Pool */
+        #cards-deck {
+            width: 100%;
+            min-height: 100px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            flex-wrap: wrap;
+            border: 2px solid #e4e7eb;
+        }
+
+        .draggable-card {
+            background: linear-gradient(135deg, #70a1ff 0%, #1e90ff 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: grab;
+            box-shadow: 0 4px 8px rgba(30, 144, 255, 0.25);
+            border: 2px solid white;
+            transition: transform 0.2s;
+        }
+        .draggable-card:active { cursor: grabbing; transform: scale(0.96); }
+        .draggable-card.placed {
+            background: linear-gradient(135deg, #2ed573 0%, #7bed9f 100%);
+            box-shadow: none;
+            cursor: default;
+            border-color: transparent;
+        }
+
+        /* Interactive Quiz Modal Overlays */
+        #quiz-overlay, #certificate-overlay {
             position: absolute;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-            z-index: 10;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        #splash-screen {
-            background: #ffffff;
+            background: rgba(47, 53, 66, 0.95);
+            backdrop-filter: blur(5px);
             z-index: 50;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-        
-        .logo-container {
-            width: 100%;
-            max-width: 550px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            animation: pulse 2s infinite ease-in-out;
-        }
-        
-        #splash-logo {
-            width: 100%;
-            max-width: 480px;
-            height: auto;
-            object-fit: contain;
-            display: block;
-        }
-        
-        .fallback-logo-text {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: #2d3436;
-            letter-spacing: 3px;
-        }
-        
-        .fallback-logo-text span {
-            color: #6c5ce7;
-        }
-
-        #title-screen {
-            background: var(--bg-gradient);
-            z-index: 30;
-        }
-        .game-title {
-            font-size: 3rem;
-            color: var(--primary);
-            text-shadow: 3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.1);
-            margin-bottom: 40px;
-            font-weight: 900;
-        }
-
-        #instruction-screen {
-            background: var(--bg-gradient);
-            z-index: 20;
-        }
-        .instruction-box {
-            background: var(--panel-bg);
-            padding: 30px;
-            border-radius: 24px;
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-            max-width: 500px;
-            width: 90%;
-            margin-bottom: 30px;
-            border: 4px solid var(--primary-light);
-        }
-        .instruction-box h2 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            font-size: 1.8rem;
-        }
-        .instruction-box ul {
-            text-align: left;
-            list-style-type: none;
-        }
-        .instruction-box li {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-        }
-        .instruction-box li::before {
-            content: "🌟";
-            margin-right: 10px;
-        }
-
-        .btn-premium {
-            background: linear-gradient(135deg, var(--primary) 0%, #54a0ff 100%);
-            color: white;
-            border: none;
-            padding: 16px 45px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 16px rgba(108, 92, 231, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border-bottom: 5px solid #341f97;
-        }
-        .btn-premium:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 6px rgba(108, 92, 231, 0.4);
-            border-bottom: 1px solid #341f97;
-        }
-
-        #hud-layer {
-            position: absolute;
-            top: 15px;
-            left: 4%;
-            width: 92%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 5;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: var(--text-dark);
-            pointer-events: none;
-        }
-        .hud-item {
-            background: var(--panel-bg);
-            padding: 8px 18px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border: 2px solid white;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        #game-play-area {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            align-items: center;
-            justify-content: space-between;
-            padding: 80px 40px 20px 40px;
-        }
-
-        #arena-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            width: 60%;
-            min-height: 300px;
-        }
-
-        #canvas-arena {
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            border: 6px solid #fff;
-            display: block;
-        }
-
-        #quiz-overlay {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(45, 52, 54, 0.75);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            z-index: 15;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
-        .quiz-card {
+
+        .modal-card {
             background: white;
             width: 100%;
-            max-width: 580px;
-            border-radius: 28px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border: 5px solid var(--primary);
+            max-width: 520px;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .quiz-title {
-            font-size: 1.2rem;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            font-weight: 800;
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
-        .quiz-question {
-            font-size: 1.25rem;
-            color: var(--text-dark);
-            margin-bottom: 25px;
-            line-height: 1.5;
-            font-weight: 600;
-            background: #f7f1e3;
+
+        .quiz-q-box {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--dark);
+            background: #f1f2f6;
             padding: 15px;
-            border-radius: 16px;
-            border-left: 5px solid var(--accent);
+            border-radius: 12px;
+            margin: 15px 0;
+            text-align: left;
+            line-height: 1.4;
         }
+
+        .hint-alert-box {
+            background: #ffeaa7;
+            color: #d63031;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: left;
+            border-left: 5px solid #f1c40f;
+        }
+
         .options-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
+
         .btn-option {
             background: #f1f2f6;
             border: 2px solid #ced6e0;
-            padding: 14px 20px;
-            border-radius: 16px;
-            text-align: left;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            cursor: pointer;
-            transition: all 0.1s;
-        }
-        .btn-option:hover {
-            background: var(--primary-light);
-            color: white;
-            border-color: var(--primary);
-        }
-        .hint-box {
-            background: #fff9db;
-            border: 2px dashed #f5cd79;
-            padding: 12px;
+            padding: 12px 15px;
             border-radius: 12px;
-            color: #cf6a17;
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-top: 10px;
-            display: none;
-        }
-
-        #control-panel-wrapper {
-            width: 40%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .dpad-container {
-            display: grid;
-            grid-template-columns: 70px 70px 70px;
-            grid-template-rows: 70px 70px 70px;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.6);
-            padding: 20px;
-            border-radius: 30px;
-            border: 4px solid #fff;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-
-        .dpad-btn {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #ffffff 0%, #f1f2f6 100%);
-            border: 3px solid var(--primary);
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.8rem;
             font-weight: bold;
-            color: var(--primary);
+            font-size: 1rem;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-            transition: transform 0.05s, background 0.05s;
+            text-align: left;
+            color: var(--dark);
+            transition: all 0.2s;
         }
-        .dpad-btn:active {
-            transform: scale(0.92);
-            background: var(--primary);
-            color: white;
-        }
-        #btn-up { grid-column: 2; grid-row: 1; }
-        #btn-left { grid-column: 1; grid-row: 2; }
-        #btn-right { grid-column: 3; grid-row: 2; }
-        #btn-down { grid-column: 2; grid-row: 3; }
+        .btn-option:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
-        @media (max-width: 680px) {
-            #game-play-area {
-                flex-direction: column;
-                padding-top: 85px;
-            }
-            #arena-wrapper {
-                width: 100%;
-                height: 50%;
-            }
-            #control-panel-wrapper {
-                width: 100%;
-                height: 45%;
-            }
-            .dpad-container {
-                transform: scale(0.85);
-            }
+        /* Certificate View Sheet Component */
+        .cert-canvas {
+            background: #fff;
+            border: 10px double #f1c40f;
+            border-radius: 4px;
+            padding: 30px;
+            width: 100%;
+            max-width: 620px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: var(--dark);
         }
 
-        @media (min-width: 681px) {
-            .options-grid {
-                grid-template-columns: 1fr 1fr;
-            }
+        .cert-input-field {
+            border: none;
+            border-bottom: 3px solid var(--dark);
+            width: 80%;
+            font-size: 1.6rem;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+            outline: none;
+            color: var(--primary);
+            text-transform: uppercase;
         }
+
+        .hidden { display: none !important; }
+        .invisible { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="splash-screen" class="screen">
-        <div class="logo-container">
-            <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
-            <div id="fallback-logo" class="fallback-logo-text" style="display:none;">INNO<span>VINE</span></div>
-        </div>
+<div id="app-wrapper">
+
+    <div id="hud-dashboard">
+        <div class="hud-widget">🏆 Marks: <span id="lbl-marks">0</span></div>
+        <div class="hud-widget" style="color: var(--accent);" id="quiz-lives-container">❤️ Quiz Lives: <span id="lbl-lives">3</span></div>
     </div>
 
-    <div id="title-screen" class="screen hidden">
-        <h1 class="game-title">✨ MARBLE MAZE<br>LAB ADVENTURE ✨</h1>
-        <button class="btn-premium" onclick="transitionScreen('title-screen', 'instruction-screen')">START</button>
-    </div>
+    <div id="gameplay-arena">
+        <div class="stage-banner" id="lbl-stage-status">Level 1: Fill 2 Target Columns</div>
+        
+        <div id="columns-container"></div>
 
-    <div id="instruction-screen" class="screen hidden">
-        <div class="instruction-box">
-            <h2>How to Play</h2>
-            <ul>
-                <li>Roll your marble to the target destination path inside the maze.</li>
-                <li>Use Keyboard Arrow keys or screen Touch Buttons to roll.</li>
-                <li>Reaching the target adds +5 Marks and unlocks Chapter Questions!</li>
-                <li>Answer questions to score +15 Marks. You have 4 precious lives!</li>
-            </ul>
-        </div>
-        <button class="btn-premium" onclick="startGameEngine()">PLAY</button>
-    </div>
-
-    <div id="game-play-area" class="screen hidden">
-        <div id="hud-layer">
-            <div class="hud-item">🏆 Marks: <span id="lbl-score">0</span></div>
-            <div class="hud-item">🎮 Game: <span id="lbl-round">1</span>/4</div>
-            <div class="hud-item">❤️ Lives: <span id="lbl-lives">4</span></div>
-        </div>
-
-        <div id="arena-wrapper">
-            <canvas id="canvas-arena"></canvas>
-        </div>
-
-        <div id="control-panel-wrapper">
-            <div class="dpad-container">
-                <button class="dpad-btn" id="btn-up">▲</button>
-                <button class="dpad-btn" id="btn-left">◀</button>
-                <button class="dpad-btn" id="btn-right">▶</button>
-                <button class="dpad-btn" id="btn-down">▼</button>
-            </div>
-        </div>
+        <div id="cards-deck"></div>
     </div>
 
     <div id="quiz-overlay" class="hidden">
-        <div class="quiz-card">
-            <div style="font-size:4rem; margin-bottom:5px;">🏆</div>
-            <div class="quiz-title">Level Complete! Quiz Time</div>
-            <div class="quiz-question" id="quiz-q-text">Loading question text scenario...</div>
-            <div class="options-grid" id="quiz-options-container"></div>
-            <div class="hint-box" id="quiz-hint-box"></div>
+        <div class="modal-card">
+            <h3 id="lbl-quiz-headline" style="color: var(--primary); font-weight: 800; font-size: 1.3rem;">🔬 DIAGNOSTIC SCANNER</h3>
+            <div class="quiz-q-box" id="box-question-text">Question content descriptive string prompt text goes here...</div>
+            <div class="hint-alert-box hidden" id="box-hint-alert">💡 HINT: Sample hint system text data goes here.</div>
+            <div class="options-grid" id="box-options-layout"></div>
         </div>
     </div>
+
+    <div id="certificate-overlay" class="hidden">
+        <div class="cert-canvas">
+            <div style="font-size: 3.5rem; margin-bottom: 5px;">📜</div>
+            <h1 style="font-size: 2.2rem; font-family: 'Georgia', serif; letter-spacing: 1px; color: #b33939;">BIO-MASTER CERTIFICATE</h1>
+            <p style="margin-top: 10px; font-weight: 600; font-size: 1rem; color: #57606f;">This certifies that the young scientist</p>
+            <input type="text" class="cert-input-field" placeholder="[ TYPE YOUR NAME HERE ]" id="txt-student-name">
+            <p style="font-weight: bold; font-size: 1.1rem; color: var(--success); margin-bottom: 20px;">
+                Has successfully sorted all columns and mastered all 9 anatomical system categories!
+            </p>
+            <button class="btn-option" style="text-align:center; display:inline-block; background: var(--primary); color:white; padding: 12px 35px;" onclick="window.location.reload()">PLAY AGAIN</button>
+        </div>
+    </div>
+
 </div>
 
 <script>
+    // Master database containing custom content for all required elements cleanly segmented
+    const systemDatabase = [
+        { id: "sys1", name: "Body Composition", host: "Cells & Tissues", q: "What basic structural building blocks work together to form tissues inside the human body?", o: ["Cells", "Bricks", "Bones", "Muscles"], a: "Cells", h: "These are the microscopic living building blocks of life." },
+        { id: "sys2", name: "Skeletal System", host: "Bony Framework", q: "Approximately how many structural bones make up the entire framework of an adult human skeleton?", o: ["206 Bones", "300 Bones", "100 Bones", "500 Bones"], a: "206 Bones", h: "Adults have fewer bones than babies because some bones fuse together." },
+        { id: "sys3", name: "Muscular System", host: "Muscle Web", q: "How many independent muscles comprise the network responsible for body movement?", o: ["More than 600", "Exactly 206", "Around 100", "Precisely 50"], a: "More than 600", h: "There are nearly three times as many muscles as there are bones." },
+        { id: "sys4", name: "Respiratory System", host: "Breathing Lungs", q: "Which primary chest cavities expand and contract continuously to absorb oxygen from air?", o: ["Lungs", "Heart", "Stomach", "Kidneys"], a: "Lungs", h: "These sponge-like organs fill up with air when you breathe in." },
+        { id: "sys5", name: "Digestive System", host: "Food Pipeline", q: "In which processing segment of the gastrointestinal tract is water reabsorbed from indigestible material?", o: ["Large Intestine", "Stomach", "Mouth", "Windpipe"], a: "Large Intestine", h: "It's the long tube near the end of the digestive journey." },
+        { id: "sys6", name: "Nervous System", host: "Brain Core", q: "Which core organ serves as the command headquarters, controlling every action your body performs?", o: ["Brain", "Heart", "Lungs", "Skin"], a: "Brain", h: "This head organ sends electrical signals through your nerves." },
+        { id: "sys7", name: "Circulatory System", host: "Heart Network", q: "Which muscle engine acts as the pump that continuously drives blood flow throughout your vessels?", o: ["Heart", "Brain", "Stomach", "Liver"], a: "Heart" , h: "This fist-sized muscle thumps rhythmically inside your chest." },
+        { id: "sys8", name: "Excretory System", host: "Waste Filter", q: "Which filtration organs extract liquid metabolic wastes directly out of your bloodstream?", o: ["Kidneys", "Lungs", "Muscles", "Bones"], a: "Kidneys", h: "You have a pair of these bean-shaped filters in your lower back." },
+        { id: "sys9", name: "Reproductive System", host: "Life Generation", q: "What is the primary function of the biological system responsible for creating offspring to continue a species?", o: ["Reproduction", "Digestion", "Breathing", "Excretory"], a: "Reproduction", h: "It ensures that living things can have families and continue across generations." }
+    ];
+
+    // High-stakes tier bonus level scenario block item
+    const bonusQuestionData = {
+        q: "Ultimate Challenge: How do your body systems work together to keep you alive and healthy?",
+        o: ["They work completely alone", "They coordinate together as a team", "They stop working when you run", "Only the brain works"],
+        a: "They coordinate together as a team",
+        h: "Think about how your heart pumps blood to help your muscles move when you exercise!"
+    };
+
+    // Tracking variables for engine state loops
+    let currentColumnsCount = 2; // Iteratively steps from 2 -> 3 -> 4
     let marksScore = 0;
-    let currentRoundIndex = 1; 
-    let absoluteQuestionCounter = 0; 
-    let playerLivesCount = 4;
-    let wrongAttemptsOnCurrentQuestion = 0;
-    let mazeCompletedThisRound = false;
-
-    const canvas = document.getElementById('canvas-arena');
-    const ctx = canvas.getContext('2d');
-    let animationFrameId = null;
-    let lastTime = 0;
+    let quizLives = 3;
+    let poolUnusedItems = [];
+    let currentTierActiveHosts = [];
+    let placedMatchesCount = 0;
     
-    let ball = { x: 0, y: 0, radius: 0, speed: 0 };
-    let targetZone = { x: 0, y: 0, size: 0 };
-    let keyControls = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+    let activeQuizQuestionsQueue = [];
+    let targetQuizAnswersNeeded = 0;
+    let activeQuestionIndex = 0;
+    let incorrectAttemptsThisQuestion = 0;
 
-    const sourceDeck = [
-        { q: "What are the fundamental microscopic units that serve as the basic structural and functional building blocks of the human body?", o: ["Cells", "Tissues", "Organs", "Bones"], a: "Cells", h: "These structures serve as the microscopic foundation, comparable to individual structural bricks." },
-        { q: "Which primary organ system coordinates bodily activities by processing sensory input and transmitting electrical signals?", o: ["Nervous System", "Digestive System", "Skeletal System", "Respiratory System"], a: "Nervous System", h: "This system comprises the brain, spinal cord, and specialized nerve networks." },
-        { q: "Approximately how many distinct bones constitute the skeletal framework of a human infant at birth?", o: ["300", "206", "100", "600"], a: "300", h: "Infants possess a higher count of skeletal elements, several of which fuse during physiological maturation." },
-        { q: "Which structural level of biological organization is established when distinct types of specialized tissues cooperate to execute a common function?", o: ["An Organ", "A Cell", "An Organ System", "An Organism"], a: "An Organ", h: "Structures representing this operational level include the stomach, heart, and lungs." },
-        { q: "Approximately how many individual muscles comprise the human muscular system?", o: ["More than 600", "Exactly 206", "Around 300", "Less than 100"], a: "More than 600", h: "The total muscular count is nearly threefold the number of independent adult bones." },
-        { q: "Which physiological habit is essential for maintaining optimal strength, flexibility, and performance within the muscular system?", o: ["Regular physical exercise", "Extended sedentary periods", "Irregular sleep cycles", "Consuming carbonated soft drinks"], a: "Regular physical exercise", h: "Consistent physiological exertion preserves muscular tonicity and joint elasticity." },
-        { q: "Which anatomical organs expand and contract inside the thoracic cavity to facilitate gaseous exchange during respiration?", o: ["Lungs", "Hearts", "Stomachs", "Kidneys"], a: "Lungs", h: "These paired structures extract atmospheric oxygen and expel metabolic carbon dioxide." },
-        { q: "Into which specialized region of the gastrointestinal tract does indigestible material pass for compaction and water reabsorption?", o: ["Large Intestine", "Mouth", "Esophagus", "Small Intestine"], a: "Large Intestine", h: "This terminal segment absorbs remaining fluids and prepares waste for excretion." },
-        { q: "Which organ system is primarily responsible for filtering metabolic liquid waste products directly from the bloodstream?", o: ["Excretory System", "Circulatory System", "Nervous System", "Digestive System"], a: "Excretory System", h: "This filtration network is anchored by the dermis and a pair of kidneys." },
-        { q: "Which specialized muscular organ continuously contracts to circulate blood throughout the vascular network?", o: ["Heart", "Brain", "Kidney", "Liver"], a: "Heart", h: "This thoracic organ maintains rhythmic muscular contractions throughout an organism's lifespan." },
-        { q: "What is the collective anatomical designation for the tubular structures that distribute blood throughout the body?", o: ["Blood Vessels", "Bronchioles", "Esophageal Ducts", "Spinal Tracts"], a: "Blood Vessels", h: "This vascular network consists of specialized arteries, veins, and capillaries." },
-        { q: "Which primary biological system is responsible for ensuring the continuation of a species across successive generations?", o: ["Reproductive System", "Circulatory System", "Nervous System", "Excretory System"], a: "Reproductive System", h: "This system produces specialized gametes to facilitate the generation of offspring." }
-    ];
+    window.onload = function() {
+        poolUnusedItems = [...systemDatabase];
+        // Scramble array sequence to serve randomized item flows securely
+        poolUnusedItems.sort(() => Math.random() - 0.5);
+        initiateColumnFillingPhase();
+    };
 
-    let activeSessionDeck = [];
-
-    const roundColors = [
-        { wall: "#6c5ce7", track: "#ffffff", target: "#10ac84" }, 
-        { wall: "#00d2d3", track: "#f5f6fa", target: "#ff6b6b" }, 
-        { wall: "#5f27cd", track: "#ffffff", target: "#ff9f43" }, 
-        { wall: "#ff6b6b", track: "#f5f6fa", target: "#10ac84" }  
-    ];
-
-    const originalGridSize = 16;
-    let currentCellScale = 0;
-
-    const mazes = [
-        [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1],
-            [1,0,1,0,1,0,1,1,1,0,1,0,1,1,0,1],
-            [1,0,1,0,0,0,1,0,1,0,0,0,1,0,0,1],
-            [1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1],
-            [1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1],
-            [1,0,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
-            [1,0,1,0,0,0,0,0,1,0,1,0,0,1,0,1],
-            [1,0,1,1,1,1,1,0,1,0,1,0,0,1,0,1],
-            [1,0,0,0,0,0,1,0,0,0,1,1,0,1,0,1],
-            [1,1,1,1,1,0,1,1,1,1,1,0,0,1,0,1],
-            [1,0,0,0,1,0,1,0,0,0,1,0,1,1,0,1],
-            [1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1],
-            [1,0,1,0,1,0,0,0,1,0,1,1,0,1,0,1],
-            [1,0,1,0,0,0,1,0,0,0,0,0,0,0,2,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ],
-        [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1],
-            [1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1],
-            [1,0,1,1,1,1,1,1,1,0,1,1,0,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,1,0,0,1,0,1],
-            [1,0,1,0,1,1,1,1,1,1,1,0,1,1,0,1],
-            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1],
-            [1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1],
-            [1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,1],
-            [1,0,1,0,1,0,1,0,1,1,1,1,1,1,0,1],
-            [1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
-            [1,1,1,1,1,1,1,1,1,1,0,0,0,0,2,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ],
-        [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,1],
-            [1,0,1,0,1,0,1,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,0,1,0,1,1,1,1,0,1,0,1],
-            [1,0,1,0,0,0,1,0,1,0,0,1,0,1,0,1],
-            [1,0,1,1,1,1,1,0,1,0,2,1,0,1,0,1],
-            [1,0,0,0,0,0,0,0,1,0,0,1,0,1,0,1],
-            [1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
-            [1,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
-            [1,0,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
-            [1,0,1,0,0,0,0,1,0,1,0,0,0,1,0,1],
-            [1,0,1,0,1,1,0,1,0,1,1,1,1,1,0,1],
-            [1,0,1,0,1,0,0,1,0,0,0,0,0,1,0,1],
-            [1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ],
-        [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
-            [1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
-            [1,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1],
-            [1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1],
-            [1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1],
-            [1,0,1,0,1,2,0,1,0,1,0,1,0,1,0,1],
-            [1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1],
-            [1,0,1,0,0,0,0,0,0,1,0,0,0,1,0,1],
-            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ]
-    ];
-
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            transitionScreen('splash-screen', 'title-screen');
-        }, 3000);
-    });
-
-    function transitionScreen(from, to) {
-        document.getElementById(from).classList.add('hidden');
-        document.getElementById(to).classList.remove('hidden');
-    }
-
-    function shuffleArray(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-    }
-
-    function initializeRandomDeck() {
-        let clonedDeck = JSON.parse(JSON.stringify(sourceDeck));
-        clonedDeck = shuffleArray(clonedDeck);
-        clonedDeck.forEach(item => {
-            item.o = shuffleArray(item.o);
-        });
-        activeSessionDeck = clonedDeck;
-    }
-
-    function startGameEngine() {
-        // First transition to expose the play layout to the browser DOM engine
-        transitionScreen('instruction-screen', 'game-play-area');
+    function initiateColumnFillingPhase() {
+        document.getElementById('quiz-lives-container').classList.add('invisible');
+        document.getElementById('lbl-stage-status').innerText = `Level State: Match & Fill ${currentColumnsCount} Columns`;
         
-        marksScore = 0;
-        currentRoundIndex = 1;
-        absoluteQuestionCounter = 0;
-        playerLivesCount = 4;
-        updateHUDCounters();
-        
-        initializeRandomDeck();
-        setupInputListeners();
+        placedMatchesCount = 0;
+        currentTierActiveHosts = [];
 
-        // Canvas measurements are executed AFTER viewport rendering has completed
-        setTimeout(() => {
-            buildLevelMap(currentRoundIndex - 1);
-            
-            window.removeEventListener('resize', handleResizeAdjustment);
-            window.addEventListener('resize', handleResizeAdjustment);
-            
-            lastTime = performance.now();
-            if(!animationFrameId) {
-                runPhysicsLoop(lastTime);
-            }
-        }, 50);
-    }
-
-    function handleResizeAdjustment() {
-        if (!document.getElementById('game-play-area').classList.contains('hidden')) {
-            buildLevelMap(currentRoundIndex - 1);
-        }
-    }
-
-    function buildLevelMap(idx) {
-        const wrapper = document.getElementById('arena-wrapper');
-        if (!wrapper || wrapper.clientWidth === 0) return;
-
-        // Uses a robust safe-fallback scale if parent returns unstable values
-        const widthLimit = wrapper.clientWidth;
-        const heightLimit = wrapper.clientHeight - 20;
-        let optimalSize = Math.min(widthLimit, heightLimit);
-        
-        if (optimalSize < 200) {
-            optimalSize = 300; 
-        }
-        
-        canvas.width = optimalSize;
-        canvas.height = optimalSize;
-        currentCellScale = optimalSize / originalGridSize;
-
-        const currentGrid = mazes[idx];
-        ball.x = 0; ball.y = 0;
-        
-        for (let r = 0; r < originalGridSize; r++) {
-            for (let c = 0; c < originalGridSize; c++) {
-                if (currentGrid[r][c] === 0 && ball.x === 0 && ball.y === 0) {
-                    ball.x = (c * currentCellScale) + (currentCellScale / 2);
-                    ball.y = (r * currentCellScale) + (currentCellScale / 2);
-                } else if (currentGrid[r][c] === 2) {
-                    targetZone.x = c * currentCellScale;
-                    targetZone.y = r * currentCellScale;
-                    targetZone.size = currentCellScale;
-                }
+        // Pull the exact amount of items needed for the current grid level layout
+        for(let i = 0; i < currentColumnsCount; i++) {
+            if(poolUnusedItems.length > 0) {
+                currentTierActiveHosts.push(poolUnusedItems.pop());
             }
         }
-        ball.radius = currentCellScale * 0.32;
-        ball.speed = currentCellScale * 0.005; 
-        mazeCompletedThisRound = false;
+
+        buildSortingInterfaceElements();
     }
 
-    function setupInputListeners() {
-        window.addEventListener('keydown', (e) => {
-            if (keyControls.hasOwnProperty(e.key)) keyControls[e.key] = true;
-        });
-        window.addEventListener('keyup', (e) => {
-            if (keyControls.hasOwnProperty(e.key)) keyControls[e.key] = false;
-        });
-
-        const assignControlEvents = (btnId, keyStr) => {
-            const el = document.getElementById(btnId);
-            if(!el) return;
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); keyControls[keyStr] = true; });
-            el.addEventListener('touchend', (e) => { e.preventDefault(); keyControls[keyStr] = false; });
-            el.addEventListener('mousedown', () => { keyControls[keyStr] = true; });
-            el.addEventListener('mouseup', () => { keyControls[keyStr] = false; });
-            el.addEventListener('mouseleave', () => { keyControls[keyStr] = false; });
-        };
+    function buildSortingInterfaceElements() {
+        const columnsWrapper = document.getElementById('columns-container');
+        const cardsDeck = document.getElementById('cards-deck');
         
-        assignControlEvents('btn-up', 'ArrowUp');
-        assignControlEvents('btn-down', 'ArrowDown');
-        assignControlEvents('btn-left', 'ArrowLeft');
-        assignControlEvents('btn-right', 'ArrowRight');
+        columnsWrapper.innerHTML = "";
+        cardsDeck.innerHTML = "";
+
+        // Build HTML Host Target Slots
+        currentTierActiveHosts.forEach(item => {
+            const col = document.createElement('div');
+            col.className = "host-column";
+            col.id = `host-${item.id}`;
+            col.innerHTML = `<div class="column-title">${item.host}</div><div class="drop-zone" id="drop-${item.id}">[ Drop ${item.name} Here ]</div>`;
+            
+            // Set up Native Drag & Drop Handlers
+            col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('hovered'); });
+            col.addEventListener('dragleave', () => col.classList.remove('hovered'));
+            col.addEventListener('drop', (e) => {
+                e.preventDefault();
+                col.classList.remove('hovered');
+                const draggedId = e.dataTransfer.getData("text/plain");
+                handleItemPlacementVerification(draggedId, item.id, col.querySelector('.drop-zone'));
+            });
+
+            columnsWrapper.appendChild(col);
+        });
+
+        // Build Scrambled Draggable Entities at Bottom Deck
+        const scrambledDeckItems = [...currentTierActiveHosts].sort(() => Math.random() - 0.5);
+        scrambledDeckItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = "draggable-card";
+            card.id = `card-${item.id}`;
+            card.innerText = item.name;
+            card.setAttribute('draggable', 'true');
+            
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData("text/plain", item.id);
+            });
+
+            cardsDeck.appendChild(card);
+        });
     }
 
-    function runPhysicsLoop(timestamp) {
-        let dt = timestamp - lastTime;
-        if (dt > 100) dt = 16.66; 
-        lastTime = timestamp;
+    function handleItemPlacementVerification(draggedId, hostId, dropZoneElement) {
+        if(draggedId === hostId) {
+            // Success: Snap the card cleanly inside the drop zone
+            const targetCard = document.getElementById(`card-${draggedId}`);
+            targetCard.setAttribute('draggable', 'false');
+            targetCard.classList.add('placed');
+            
+            dropZoneElement.innerHTML = "";
+            dropZoneElement.appendChild(targetCard);
+            
+            placedMatchesCount++;
+            marksScore += 10;
+            document.getElementById('lbl-marks').innerText = marksScore;
 
-        updateGamePhysics(dt);
-        drawActiveArena();
-        animationFrameId = requestAnimationFrame(runPhysicsLoop);
-    }
-
-    function updateGamePhysics(dt) {
-        if (mazeCompletedThisRound || currentCellScale === 0) return;
-
-        let dx = 0;
-        let dy = 0;
-
-        if (keyControls.ArrowUp) dy -= ball.speed * dt;
-        if (keyControls.ArrowDown) dy += ball.speed * dt;
-        if (keyControls.ArrowLeft) dx -= ball.speed * dt;
-        if (keyControls.ArrowRight) dx += ball.speed * dt;
-
-        if (dx === 0 && dy === 0) return;
-
-        let nextX = ball.x + dx;
-        let nextY = ball.y + dy;
-
-        if (checkMapCollision(nextX, nextY)) {
-            ball.x = nextX;
-            ball.y = nextY;
+            if(placedMatchesCount === currentColumnsCount) {
+                setTimeout(() => { launchQuizPhaseSequence(); }, 600);
+            }
         } else {
-            if (checkMapCollision(nextX, ball.y)) {
-                ball.x = nextX;
-            } else if (checkMapCollision(ball.x, nextY)) {
-                ball.y = nextY;
-            }
-        }
-
-        const currentGrid = mazes[currentRoundIndex - 1];
-        let tileC = Math.floor(ball.x / currentCellScale);
-        let tileR = Math.floor(ball.y / currentCellScale);
-
-        if (dy !== 0 && dx === 0) {
-            let targetCenterX = (tileC * currentCellScale) + (currentCellScale / 2);
-            ball.x += (targetCenterX - ball.x) * 0.15;
-        }
-        if (dx !== 0 && dy === 0) {
-            let targetCenterY = (tileR * currentCellScale) + (currentCellScale / 2);
-            ball.y += (targetCenterY - ball.y) * 0.15;
-        }
-
-        if (currentGrid[tileR] && currentGrid[tileR][tileC] === 2) {
-            triggerTargetReached();
+            // Visual mismatch warning indicator feedback
+            dropZoneElement.style.background = "rgba(255, 71, 87, 0.2)";
+            setTimeout(() => { dropZoneElement.style.background = ""; }, 400);
         }
     }
 
-    function checkMapCollision(targetCoordX, targetCoordY) {
-        if (currentCellScale === 0) return false;
-        const grid = mazes[currentRoundIndex - 1];
-        const padding = 2; 
-        const points = [
-            { x: targetCoordX - ball.radius + padding, y: targetCoordY - ball.radius + padding },
-            { x: targetCoordX + ball.radius - padding, y: targetCoordY - ball.radius + padding },
-            { x: targetCoordX - ball.radius + padding, y: targetCoordY + ball.radius - padding },
-            { x: targetCoordX + ball.radius - padding, y: targetCoordY + ball.radius - padding }
-        ];
-
-        for (let pt of points) {
-            let c = Math.floor(pt.x / currentCellScale);
-            let r = Math.floor(pt.y / currentCellScale);
-            
-            if (c < 0 || c >= originalGridSize || r < 0 || r >= originalGridSize) return false;
-            if (grid[r][c] === 1) return false;
-        }
-        return true;
+    function launchQuizPhaseSequence() {
+        document.getElementById('quiz-lives-container').classList.remove('invisible');
+        activeQuizQuestionsQueue = [...currentTierActiveHosts];
+        targetQuizAnswersNeeded = currentColumnsCount;
+        activeQuestionIndex = 0;
+        quizLives = 3; 
+        document.getElementById('lbl-lives').innerText = quizLives;
+        
+        serveQuizQuestionOverlay();
     }
 
-    function drawActiveArena() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (currentCellScale === 0) return;
+    function serveQuizQuestionOverlay() {
+        incorrectAttemptsThisQuestion = 0;
+        document.getElementById('box-hint-alert').classList.add('hidden');
         
-        const palette = roundColors[currentRoundIndex - 1];
-        const grid = mazes[currentRoundIndex - 1];
-
-        for (let r = 0; r < originalGridSize; r++) {
-            for (let c = 0; c < originalGridSize; c++) {
-                if (grid[r][c] === 1) {
-                    ctx.fillStyle = palette.wall;
-                    ctx.beginPath();
-                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 5);
-                    ctx.fill();
-                } else {
-                    ctx.fillStyle = palette.track;
-                    ctx.fillRect(c * currentCellScale, r * currentCellScale, currentCellScale);
-                }
-            }
+        let currentQuestionData;
+        if(currentColumnsCount === 5) {
+            // Final Bonus State
+            currentQuestionData = bonusQuestionData;
+            document.getElementById('lbl-quiz-headline').innerText = "🌟 GRAND BONUS QUESTION 🌟";
+        } else {
+            currentQuestionData = activeQuizQuestionsQueue[activeQuestionIndex];
+            document.getElementById('lbl-quiz-headline').innerText = `🔬 QUESTION ${activeQuestionIndex + 1} OF ${targetQuizAnswersNeeded}`;
         }
 
-        ctx.fillStyle = palette.target;
-        ctx.beginPath();
-        ctx.roundRect(targetZone.x + 2, targetZone.y + 2, targetZone.size - 4, targetZone.size - 4, 8);
-        ctx.fill();
+        document.getElementById('box-question-text').innerText = currentQuestionData.q;
         
-        ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${currentCellScale * 0.6}px Arial`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("⭐", targetZone.x + targetZone.size / 2, targetZone.y + targetZone.size / 2);
+        const optionsBox = document.getElementById('box-options-layout');
+        optionsBox.innerHTML = "";
 
-        ctx.fillStyle = "#ff4757"; 
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fill();
+        // Scramble options randomly so they are never in the same layout order
+        const shuffledOptions = [...currentQuestionData.o].sort(() => Math.random() - 0.5);
         
-        ctx.strokeStyle = "rgba(255,255,255,0.6)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(ball.x - ball.radius * 0.2, ball.y - ball.radius * 0.2, ball.radius * 0.35, 0, Math.PI, true);
-        ctx.stroke();
-    }
-
-    function triggerTargetReached() {
-        mazeCompletedThisRound = true;
-        marksScore += 5;
-        updateHUDCounters();
-        
-        setTimeout(() => {
-            launchAssessmentPopupOverlay();
-        }, 300);
-    }
-
-    function launchAssessmentPopupOverlay() {
-        wrongAttemptsOnCurrentQuestion = 0;
-        document.getElementById('quiz-hint-box').style.display = "none";
-        
-        const activeQuestionData = activeSessionDeck[absoluteQuestionCounter];
-        document.getElementById('quiz-q-text').innerText = activeQuestionData.q;
-        
-        const optionsGrid = document.getElementById('quiz-options-container');
-        optionsGrid.innerHTML = "";
-        
-        activeQuestionData.o.forEach((optText) => {
-            const optBtn = document.createElement('button');
-            optBtn.className = "btn-option";
-            optBtn.innerText = optText;
-            optBtn.onclick = () => validateSelectedAnswer(optText, optBtn);
-            optionsGrid.appendChild(optBtn);
+        shuffledOptions.forEach(optText => {
+            const btn = document.createElement('button');
+            btn.className = "btn-option";
+            btn.innerText = optText;
+            btn.onclick = () => verifyQuizAnswerSelection(optText, currentQuestionData.a, currentQuestionData.h);
+            optionsBox.appendChild(btn);
         });
-        
+
         document.getElementById('quiz-overlay').classList.remove('hidden');
     }
 
-    function validateSelectedAnswer(chosenStringValue, elementRef) {
-        const activeQuestionData = activeSessionDeck[absoluteQuestionCounter];
-        
-        if (chosenStringValue === activeQuestionData.a) {
-            elementRef.style.background = "#20bf6b";
-            elementRef.style.color = "white";
-            marksScore += 15;
-            updateHUDCounters();
+    function verifyQuizAnswerSelection(selectedText, correctAnswer, hintText) {
+        if(selectedText === correctAnswer) {
+            marksScore += 25;
+            document.getElementById('lbl-marks').innerText = marksScore;
             
-            const options = document.getElementsByClassName('btn-option');
-            for(let btn of options) btn.disabled = true;
-
-            setTimeout(() => {
-                advanceAssessmentState();
-            }, 1200);
-        } else {
-            elementRef.style.background = "#ff3f34";
-            elementRef.style.color = "white";
-            elementRef.disabled = true;
-            
-            wrongAttemptsOnCurrentQuestion++;
-            playerLivesCount--;
-            updateHUDCounters();
-
-            if (playerLivesCount <= 0) {
-                terminateGameSession(false);
+            if(currentColumnsCount === 5) {
+                // Clear bonus game end
+                document.getElementById('quiz-overlay').classList.add('hidden');
+                document.getElementById('certificate-overlay').classList.remove('hidden');
                 return;
             }
 
-            if (wrongAttemptsOnCurrentQuestion >= 1) {
-                const hintPanel = document.getElementById('quiz-hint-box');
-                hintPanel.innerText = "💡 Hint: " + activeQuestionData.h;
-                hintPanel.style.display = "block";
-            }
-        }
-    }
-
-    function advanceAssessmentState() {
-        absoluteQuestionCounter++;
-        document.getElementById('quiz-overlay').classList.add('hidden');
-
-        if (absoluteQuestionCounter % 3 === 0) {
-            currentRoundIndex++;
-            if (currentRoundIndex > 4) {
-                terminateGameSession(true);
+            activeQuestionIndex++;
+            if(activeQuestionIndex < targetQuizAnswersNeeded) {
+                serveQuizQuestionOverlay();
             } else {
-                updateHUDCounters();
-                buildLevelMap(currentRoundIndex - 1);
+                // Tier completed safely. Increment layout scaling step logic engines
+                document.getElementById('quiz-overlay').classList.add('hidden');
+                if(currentColumnsCount === 2) {
+                    currentColumnsCount = 3;
+                    initiateColumnFillingPhase();
+                } else if(currentColumnsCount === 3) {
+                    currentColumnsCount = 4;
+                    initiateColumnFillingPhase();
+                } else if(currentColumnsCount === 4) {
+                    // Activate Bonus Level
+                    currentColumnsCount = 5; 
+                    launchBonusRoundTransition();
+                }
             }
         } else {
-            launchAssessmentPopupOverlay();
+            // Handle incorrect question answer attempt tracking loops
+            quizLives--;
+            incorrectAttemptsThisQuestion++;
+            document.getElementById('lbl-lives').innerText = quizLives;
+
+            if(quizLives <= 0) {
+                alert("Game Over! Running out of question lives. Restarting current layout step.");
+                window.location.reload();
+                return;
+            }
+
+            // Provide Hint dynamically after the 1st wrong attempt
+            if(incorrectAttemptsThisQuestion >= 1) {
+                const hintAlert = document.getElementById('box-hint-alert');
+                hintAlert.innerText = `💡 HINT: ${hintText}`;
+                hintAlert.classList.remove('hidden');
+            }
         }
     }
 
-    function updateHUDCounters() {
-        document.getElementById('lbl-score').innerText = marksScore;
-        document.getElementById('lbl-round').innerText = Math.min(currentRoundIndex, 4);
-        document.getElementById('lbl-lives').innerText = playerLivesCount;
-    }
-
-    function terminateGameSession(victoryFlag) {
-        if(animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
-        document.getElementById('quiz-overlay').classList.add('hidden');
-        document.getElementById('game-play-area').classList.add('hidden');
-
-        const titleScr = document.getElementById('title-screen');
-        const titleH1 = titleScr.querySelector('.game-title');
+    function launchBonusRoundTransition() {
+        document.getElementById('columns-container').innerHTML = "";
+        document.getElementById('cards-deck').innerHTML = "";
+        document.getElementById('lbl-stage-status').innerText = "🏆 ALL COLUMNS FILLED! BONUS STAGE UNLOCKED 🏆";
         
-        if (victoryFlag) {
-            titleH1.innerHTML = `🎉 VICTORY! 🎉<br><span style="font-size: 1.8rem; color:#fff;">Total Score: ${marksScore} / 200 Marks</span>`;
-        } else {
-            titleH1.innerHTML = `💀 GAME OVER 💀<br><span style="font-size: 1.8rem; color:#fff;">Final Score: ${marksScore} / 200 Marks</span>`;
-        }
-        
-        titleScr.querySelector('.btn-premium').innerText = "PLAY AGAIN";
-        titleScr.querySelector('.btn-premium').onclick = () => { startGameEngine(); };
-        titleScr.classList.remove('hidden');
+        setTimeout(() => { serveQuizQuestionOverlay(); }, 1500);
     }
 </script>
 
