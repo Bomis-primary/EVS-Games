@@ -171,11 +171,31 @@
             gap: 5px;
         }
 
-        /* Canvas Arena */
-        #canvas-arena {
+        /* Game Screen Layout Adjustment */
+        #game-play-area {
+            display: flex;
             width: 100%;
             height: 100%;
-            background: transparent;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 40px 20px 40px;
+        }
+
+        /* Canvas Wrapper Setup to Stop Pixelation */
+        #arena-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            max-width: 60%;
+        }
+
+        #canvas-arena {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: 6px solid #fff;
         }
 
         /* Assessment Overlay UI Popup */
@@ -265,35 +285,52 @@
             animation: fadeIn 0.3s ease-in;
         }
 
-        /* Joysticks for Touch Devices */
-        #touch-controls {
-            position: absolute;
-            bottom: 25px;
-            width: 100%;
+        /* Persistent Control Panel on Screen Right Side Layout */
+        #control-panel-wrapper {
+            width: 35%;
             display: flex;
-            justify-content: space-around;
-            pointer-events: none;
-            z-index: 6;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
+
+        .dpad-container {
+            display: grid;
+            grid-template-columns: 70px 70px 70px;
+            grid-template-rows: 70px 70px 70px;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 20px;
+            border-radius: 30px;
+            border: 4px solid #fff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
         .dpad-btn {
-            width: 65px;
-            height: 65px;
-            background: rgba(255,255,255,0.85);
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f2f6 100%);
             border: 3px solid var(--primary);
-            border-radius: 50%;
+            border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 1.8rem;
             font-weight: bold;
             color: var(--primary);
-            pointer-events: auto;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.1s, background 0.1s;
         }
         .dpad-btn:active {
+            transform: scale(0.92);
             background: var(--primary);
             color: white;
         }
+        #btn-up { grid-column: 2; grid-row: 1; }
+        #btn-left { grid-column: 1; grid-row: 2; }
+        #btn-right { grid-column: 3; grid-row: 2; }
+        #btn-down { grid-column: 2; grid-row: 3; }
 
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -312,19 +349,45 @@
             to { opacity: 1; }
         }
 
-        @media (min-width: 600px) {
+        /* Adjustments for pure portrait smaller devices */
+        @media (max-width: 680px) {
+            #game-play-area {
+                flex-direction: column;
+                padding-top: 80px;
+            }
+            #arena-wrapper {
+                max-width: 100%;
+                height: 55%;
+            }
+            #control-panel-wrapper {
+                width: 100%;
+                height: 40%;
+            }
+            .dpad-container {
+                transform: scale(0.85);
+            }
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 681px) {
             .options-grid {
                 grid-template-columns: 1fr 1fr;
             }
-            #touch-controls { display: none; }
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <audio id="snd-correct" src="assets/correct.mp3"></audio> <audio id="snd-wrong" src="assets/wrong.mp3"></audio> <audio id="snd-cheer" src="assets/freesound_community-claps-44774.mp3"></audio> <div id="splash-screen" class="screen">
-        <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo"> </div>
+    <audio id="snd-correct" src="assets/correct.mp3"></audio>
+    <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
+    <audio id="snd-cheer" src="assets/freesound_community-claps-44744.mp3"></audio>
+
+    <div id="splash-screen" class="screen">
+        <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo">
+    </div>
 
     <div id="title-screen" class="screen hidden">
         <h1 class="game-title">✨ MARBLE MAZE<br>LAB ADVENTURE ✨</h1>
@@ -344,22 +407,24 @@
         <button class="btn-premium" onclick="startGameEngine()">PLAY</button>
     </div>
 
-    <div id="hud-layer" class="hidden">
-        <div class="hud-item">🏆 Marks: <span id="lbl-score">0</span></div>
-        <div class="hud-item">🎮 Game: <span id="lbl-round">1</span>/4</div>
-        <div class="hud-item">❤️ Lives: <span id="lbl-lives">4</span></div>
-    </div>
+    <div id="game-play-area" class="hidden">
+        <div id="hud-layer">
+            <div class="hud-item">🏆 Marks: <span id="lbl-score">0</span></div>
+            <div class="hud-item">🎮 Game: <span id="lbl-round">1</span>/4</div>
+            <div class="hud-item">❤️ Lives: <span id="lbl-lives">4</span></div>
+        </div>
 
-    <canvas id="canvas-arena" class="hidden"></canvas>
+        <div id="arena-wrapper">
+            <canvas id="canvas-arena"></canvas>
+        </div>
 
-    <div id="touch-controls" class="hidden">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 40px;">
-            <button class="dpad-btn" id="btn-up">▲</button>
-            <div style="display: flex; gap: 40px;">
+        <div id="control-panel-wrapper">
+            <div class="dpad-container">
+                <button class="dpad-btn" id="btn-up">▲</button>
                 <button class="dpad-btn" id="btn-left">◀</button>
                 <button class="dpad-btn" id="btn-right">▶</button>
+                <button class="dpad-btn" id="btn-down">▼</button>
             </div>
-            <button class="dpad-btn" id="btn-down">▼</button>
         </div>
     </div>
 
@@ -415,15 +480,14 @@
         { q: "Sana is turning pages in her family album, looking at pictures of her grandma, mother, and herself.\nWhich body system allows humans to give birth to new babies so that life continues across generations?", o: ["Nervous System", "Circulatory System", "Reproductive System", "Excretory System"], a: 2, h: "This vital system ensures that living beings can multiply and grow their family trees!" }
     ];
 
-    // High Aesthetic Color Profiles
+    // High Aesthetic Cute Color Profiles - Rounded & Warm Pastels
     const roundColors = [
-        { wall: "#6c5ce7", track: "#f8f9fa", target: "#20bf6b" }, // Round 1 Accentuation
-        { wall: "#05c46b", track: "#ffffff", target: "#ff3f34" }, // Round 2 Accentuation
-        { wall: "#ff5e57", track: "#f1f2f6", target: "#ffa801" }, // Round 3 Accentuation
-        { wall: "#ef5777", track: "#ffffff", target: "#05c46b" }  // Round 4 Accentuation
+        { wall: "#ff9f43", track: "#ffffff", target: "#10ac84" }, // Round 1 Cute Orange Lab
+        { wall: "#00d2d3", track: "#f5f6fa", target: "#ff6b6b" }, // Round 2 Bright Cyan Lab
+        { wall: "#5f27cd", track: "#ffffff", target: "#ff9f43" }, // Round 3 Royal Neon Velvet
+        { wall: "#ff6b6b", track: "#f5f6fa", target: "#10ac84" }  // Round 4 Sweet Coral Finish
     ];
 
-    // Responsive Native Resolution Matrix
     const originalGridSize = 16;
     let currentCellScale = 0;
 
@@ -503,11 +567,11 @@
         ]
     ];
 
-    // Initial Screen Engine Splash Sequences
+    // Splash Screen timeout execution
     window.addEventListener('load', () => {
         setTimeout(() => {
             transitionScreen('splash-screen', 'title-screen');
-        }, 5000); // 5 Seconds Strict Splash Screen Rule Execution
+        }, 5000);
     });
 
     function transitionScreen(from, to) {
@@ -515,15 +579,10 @@
         document.getElementById(to).classList.remove('hidden');
     }
 
-    // Engine Ignition Sequence
+    // Engine Start Sequence
     function startGameEngine() {
-        transitionScreen('instruction-screen', 'canvas-arena');
-        document.getElementById('hud-layer').classList.remove('hidden');
-        if (window.matchMedia("(max-width: 600px)").matches) {
-            document.getElementById('touch-controls').classList.remove('hidden');
-        }
-
-        // Variable Initialization setup
+        transitionScreen('instruction-screen', 'game-play-area');
+        
         marksScore = 0;
         currentRoundIndex = 1;
         absoluteQuestionCounter = 0;
@@ -537,11 +596,9 @@
         runPhysicsLoop();
     }
 
-    // Level Builder Map Mapper
     function buildLevelMap(idx) {
-        const displayWidth = Math.min(window.innerWidth, 1024);
-        const displayHeight = Math.min(window.innerHeight - 100, 768);
-        const optimalSize = Math.min(displayWidth, displayHeight);
+        const wrapper = document.getElementById('arena-wrapper');
+        const optimalSize = Math.min(wrapper.clientWidth, wrapper.clientHeight - 40);
         
         canvas.width = optimalSize;
         canvas.height = optimalSize;
@@ -549,13 +606,11 @@
 
         const currentGrid = mazes[idx];
         
-        // Dynamic scan layout mappings
+        ball.x = 0; ball.y = 0; // Fresh Position Initialization
+        
         for (let r = 0; r < originalGridSize; r++) {
             for (let c = 0; c < originalGridSize; c++) {
-                if (currentGrid[r][c] === 1) {
-                    // Wall padding boundaries
-                } else if (currentGrid[r][c] === 0 && ball.x === 0 && ball.y === 0) {
-                    // Set Player Start Coordinates dynamically inside local variable space
+                if (currentGrid[r][c] === 0 && ball.x === 0 && ball.y === 0) {
                     ball.x = (c * currentCellScale) + (currentCellScale / 2);
                     ball.y = (r * currentCellScale) + (currentCellScale / 2);
                 } else if (currentGrid[r][c] === 2) {
@@ -565,12 +620,11 @@
                 }
             }
         }
-        ball.radius = currentCellScale * 0.35;
+        ball.radius = currentCellScale * 0.38;
         ball.speed = currentCellScale * 0.12; 
         mazeCompletedThisRound = false;
     }
 
-    // Capture Interaction Triggers
     function setupInputListeners() {
         window.addEventListener('keydown', (e) => {
             if (keyControls.hasOwnProperty(e.key)) keyControls[e.key] = true;
@@ -579,19 +633,26 @@
             if (keyControls.hasOwnProperty(e.key)) keyControls[e.key] = false;
         });
 
-        // Touch Control Interfaces Execution mapping
-        const assignTouch = (btnId, keyStr) => {
+        // Setup touch and click logic for the persistent controls
+        const assignControlEvents = (btnId, keyStr) => {
             const el = document.getElementById(btnId);
+            
+            // Touch Trigger Interactions
             el.addEventListener('touchstart', (e) => { e.preventDefault(); keyControls[keyStr] = true; });
             el.addEventListener('touchend', (e) => { e.preventDefault(); keyControls[keyStr] = false; });
+            
+            // Mouse Click Trigger Interactions for Laptops
+            el.addEventListener('mousedown', () => { keyControls[keyStr] = true; });
+            el.addEventListener('mouseup', () => { keyControls[keyStr] = false; });
+            el.addEventListener('mouseleave', () => { keyControls[keyStr] = false; });
         };
-        assignTouch('btn-up', 'ArrowUp');
-        assignTouch('btn-down', 'ArrowDown');
-        assignTouch('btn-left', 'ArrowLeft');
-        assignTouch('btn-right', 'ArrowRight');
+        
+        assignControlEvents('btn-up', 'ArrowUp');
+        assignControlEvents('btn-down', 'ArrowDown');
+        assignControlEvents('btn-left', 'ArrowLeft');
+        assignControlEvents('btn-right', 'ArrowRight');
     }
 
-    // Core Canvas Logic Framework Execution loop
     function runPhysicsLoop() {
         updateGamePhysics();
         drawActiveArena();
@@ -609,15 +670,9 @@
         if (keyControls.ArrowLeft) nextX -= ball.speed;
         if (keyControls.ArrowRight) nextX += ball.speed;
 
-        // Vector Bound Mapping Calculations 
-        if (checkMapCollision(nextX, ball.y)) {
-            ball.x = nextX;
-        }
-        if (checkMapCollision(ball.x, nextY)) {
-            ball.y = nextY;
-        }
+        if (checkMapCollision(nextX, ball.y)) ball.x = nextX;
+        if (checkMapCollision(ball.x, nextY)) ball.y = nextY;
 
-        // Target Boundary Collision Scanning Execution
         let ballGridC = Math.floor(ball.x / currentCellScale);
         let ballGridR = Math.floor(ball.y / currentCellScale);
         
@@ -649,13 +704,14 @@
         const palette = roundColors[currentRoundIndex - 1];
         const grid = mazes[currentRoundIndex - 1];
 
-        // Draw Map Structures Beautifully
+        // Anti-aliased high-contrast game tracks
         for (let r = 0; r < originalGridSize; r++) {
             for (let c = 0; c < originalGridSize; c++) {
                 if (grid[r][c] === 1) {
                     ctx.fillStyle = palette.wall;
                     ctx.beginPath();
-                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 6);
+                    // Smooth, modern corner structures instead of sharp squares
+                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 8);
                     ctx.fill();
                 } else {
                     ctx.fillStyle = palette.track;
@@ -664,42 +720,42 @@
             }
         }
 
-        // Draw Target Zone End Marker Destination
+        // Draw dynamic target destination zone
         ctx.fillStyle = palette.target;
         ctx.beginPath();
-        ctx.roundRect(targetZone.x + 2, targetZone.y + 2, targetZone.size - 4, targetZone.size - 4, 12);
+        ctx.roundRect(targetZone.x + 3, targetZone.y + 3, targetZone.size - 6, targetZone.size - 6, 14);
         ctx.fill();
         
-        // Draw Target Flag/Star Overlay icon
+        // Trophy target icon overlay
         ctx.fillStyle = "#ffffff";
-        ctx.font = `${currentCellScale * 0.6}px Arial`;
+        ctx.font = `bold ${currentCellScale * 0.65}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("⭐", targetZone.x + targetZone.size/2, targetZone.y + targetZone.size/2);
+        ctx.fillText("🏆", targetZone.x + targetZone.size / 2, targetZone.y + targetZone.size / 2);
 
-        // Draw Main Player Aesthetic Soft Vector Marble Entity
-        ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
-        ctx.shadowBlur = 8;
+        // Render the player marble with depth shading
+        ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
+        ctx.shadowBlur = 6;
         ctx.shadowOffsetY = 4;
         
-        ctx.fillStyle = "linear-gradient(135deg, #ff7675 0%, #d63031 100%)";
+        ctx.fillStyle = "#ff4757"; // Sweet red candy theme ball
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
         ctx.fill();
         
-        // Inner Marble Accent Line
+        // Anti-glare marble reflections
         ctx.shadowBlur = 0;
         ctx.shadowOffsetY = 0;
-        ctx.strokeStyle = "rgba(255,255,255,0.4)";
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.arc(ball.x - ball.radius*0.2, ball.y - ball.radius*0.2, ball.radius * 0.5, 0, Math.PI, true);
+        ctx.arc(ball.x - ball.radius * 0.25, ball.y - ball.radius * 0.25, ball.radius * 0.4, 0, Math.PI, true);
         ctx.stroke();
     }
 
     function triggerTargetReached() {
         mazeCompletedThisRound = true;
-        marksScore += 5; // Automatic Addition Matrix +5 Rule Implementation
+        marksScore += 5;
         updateHUDCounters();
         playAudioTone('snd-cheer');
         
@@ -708,7 +764,6 @@
         }, 600);
     }
 
-    // Assessment Logic Engine Architecture Block
     function launchAssessmentPopupOverlay() {
         wrongAttemptsOnCurrentQuestion = 0;
         document.getElementById('quiz-hint-box').style.display = "none";
@@ -734,14 +789,12 @@
         const activeQuestionData = masterDeck[absoluteQuestionCounter];
         
         if (chosenIdx === activeQuestionData.a) {
-            // Correct Track Sequence Execution
             playAudioTone('snd-correct');
             elementRef.style.background = "#20bf6b";
             elementRef.style.color = "white";
-            marksScore += 15; // Score Evaluation Metric Rule Update
+            marksScore += 15;
             updateHUDCounters();
             
-            // Disable all option clicks immediately during success transition latency 
             const options = document.getElementsByClassName('btn-option');
             for(let btn of options) btn.disabled = true;
 
@@ -749,7 +802,6 @@
                 advanceAssessmentState();
             }, 1500);
         } else {
-            // Mistake Event Track Mapping Sequence
             playAudioTone('snd-wrong');
             elementRef.style.background = "#ff3f34";
             elementRef.style.color = "white";
@@ -776,19 +828,15 @@
         absoluteQuestionCounter++;
         document.getElementById('quiz-overlay').classList.add('hidden');
 
-        // Evaluate Round Segment Limits (3 Questions Per Level Execution Module Rule)
         if (absoluteQuestionCounter % 3 === 0) {
             currentRoundIndex++;
             if (currentRoundIndex > 4) {
-                terminateGameSession(true); // Game complete!
+                terminateGameSession(true);
             } else {
                 updateHUDCounters();
-                // Load Next Round Arena seamlessly
-                ball.x = 0; ball.y = 0; // Reset positions
                 buildLevelMap(currentRoundIndex - 1);
             }
         } else {
-            // Pop up the next question in the current round sequence immediately
             launchAssessmentPopupOverlay();
         }
     }
@@ -803,16 +851,14 @@
         const aud = document.getElementById(elementId);
         if (aud) {
             aud.currentTime = 0;
-            aud.play().catch(() => {/* Handle browsers dynamic autoplay policies blocking events safely */});
+            aud.play().catch(() => {});
         }
     }
 
     function terminateGameSession(victoryFlag) {
         cancelAnimationFrame(animationFrameId);
         document.getElementById('quiz-overlay').classList.add('hidden');
-        document.getElementById('hud-layer').classList.add('hidden');
-        document.getElementById('touch-controls').classList.add('hidden');
-        canvas.classList.add('hidden');
+        document.getElementById('game-play-area').classList.add('hidden');
 
         const titleScr = document.getElementById('title-screen');
         const titleH1 = titleScr.querySelector('.game-title');
