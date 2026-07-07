@@ -159,7 +159,7 @@
         @keyframes popIn { 0% { transform: scale(0.6); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
         @keyframes slideIn { from { transform: translateY(-15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { transform: opacity: 1; } }
     </style>
 </head>
 <body>
@@ -235,7 +235,6 @@
         }
     }
 
-    // High-Performance Array Randomization Driver (Fisher-Yates)
     function shuffleDataCatalog(targetArray) {
         for (let idx = targetArray.length - 1; idx > 0; idx--) {
             const randomIdx = Math.floor(Math.random() * (idx + 1));
@@ -267,7 +266,7 @@
         { word: "BURROWS", scenario: "Squeak! Rats and mice absolutely love to tunnel deep inside huge piles of uncovered public street garbage to dig their secret underground homes called...?", hint: "Starts with 'B' and describes holes dug by animals like rabbits." },
         { word: "MOSQUITO", scenario: "High-pitched buzzing alert! This annoying little flying insect loves to lay hundreds of eggs in stagnant water collected inside dirty, abandoned tires.", hint: "Be careful! This insect can give people Dengue or Malaria fevers." },
         { word: "COMPOST", scenario: "If you bury leftover organic kitchen waste inside the ground, it naturally transforms into a super-rich plant fertilizer called...?", hint: "Starts with 'C' and works like natural vitamin food for crops and soil." },
-        { word: "NATURE", scenario: "The stunning green world right outside your window including beautiful tall trees, singing birds, clean rivers, and fresh air is part of beautiful...?", hint: "Starts with 'N'. It means the physical world and wildlife together." },
+        { word: "NATURE", scenario: "The stunning green world right outside your window—including beautiful tall trees, singing birds, clean rivers, and fresh air—is part of beautiful...?", hint: "Starts with 'N'. It means the physical world and wildlife together." },
         { word: "LITTER", scenario: "When lazy people throw empty juice cartons out of a moving car window instead of holding onto them, they are committing a bad environmental crime called...?", hint: "Starts with 'L' and means throwing garbage around on public streets." },
         { word: "SMOKE", scenario: "Cough, cough! When communities burn piles of polybags and dried leaves out in the open, this dark, smelly stuff goes into the sky and hurts our lungs.", hint: "It rises from raging fires and makes your eyes water." },
         { word: "HEALTH", scenario: "Keeping our school and home surroundings sparkling clean results in fewer harmful germs, fewer sick days, and wonderful energetic...?", hint: "Rhymes with 'wealth'. It represents how fit, strong, and well your body feels!" }
@@ -316,7 +315,6 @@
     }
 
     function startGame() {
-        // Create isolated deep copies of arrays for standalone randomization
         sortCatalog = [...originalSortCatalog];
         puzzleCatalog = [...originalPuzzleCatalog];
         
@@ -349,7 +347,7 @@
     function checkSort(selectedBin) {
         if (selectedBin === sortCatalog[currentRound].category) {
             triggerAudio('sfx-correct');
-            currentScore += 5; // Allocation logic: +5 for sort operation
+            currentScore += 5; 
             initiateSpellingPhase();
         } else {
             dropUserLife();
@@ -371,7 +369,6 @@
         activeGuesses = [];
         failureCountThisRound = 0;
         
-        // Auto scaffold: pre-reveal terminal string points
         if (targetWord.length > 0) activeGuesses.push(targetWord[0]);
         if (targetWord.length > 1) activeGuesses.push(targetWord[targetWord.length - 1]);
 
@@ -427,7 +424,7 @@
             
             let currentPuzzleCleared = targetWord.split('').every(ch => activeGuesses.includes(ch));
             if (currentPuzzleCleared) {
-                currentScore += 15; // Allocation logic: +15 for full matrix resolution
+                currentScore += 15; 
                 syncHUDState();
                 setTimeout(() => {
                     currentRound++;
@@ -458,26 +455,26 @@
 
         scoreDisplay.innerText = `${currentScore} / 240 Points`;
 
-        if(isVictory || currentScore >= 180) {
+        // Strict Enforcement: Clapping audio and confetti only activate upon clearing ALL words
+        if(isVictory) {
             triggerAudio('sfx-clap');
             summaryTitle.innerText = "MISSION COMPLETE! 🌍";
-            summaryMessage.innerText = "Fantastic job! You cleaned up the environment and solved the puzzles beautifully. You are an official Green Hero!";
+            summaryMessage.innerText = "Fantastic job! You cleaned up the environment and solved all 12 puzzles beautifully. You are an official Green Hero!";
             summaryTitle.style.color = "#2e7d32";
             startConfetti();
         } else {
             summaryTitle.innerText = "GAME OVER 💔";
-            summaryMessage.innerText = "Good try! Let's read through Chapter 14: A Clean World again to improve your final score next time!";
+            summaryMessage.innerText = "Good try! Let's read through Chapter 14: A Clean World again to improve your final score next time.";
             summaryTitle.style.color = "#d32f2f";
         }
     }
 
-    // --- LIGHTWEIGHT CROSS-DEVICE CONFETTI ENGINE ---
+    // --- LIGHTWEIGHT CONFETTI ENGINE ---
     function startConfetti() {
         const canvas = document.getElementById('confetti-canvas');
         const ctx = canvas.getContext('2d');
         canvas.style.display = 'block';
         
-        // Dynamically compute layout bounds for device resolution independence
         const resizeCanvas = () => {
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
@@ -522,7 +519,7 @@
         }
         
         if(confettiInterval) clearInterval(confettiInterval);
-        confettiInterval = setInterval(drawFrame, 1000 / 30); // Capped at stable 30fps baseline to conserve low-spec CPU performance
+        confettiInterval = setInterval(drawFrame, 1000 / 30); 
     }
 
     function stopConfetti() {
