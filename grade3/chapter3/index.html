@@ -1,1 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Man: The Living Machine - Marble Maze Game</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --accent: #fd79a8;
+            --bg-gradient: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            --panel-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #2d3436;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #2d3436;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1024px;
+            max-height: 768px;
+            margin: auto;
+            background: var(--bg-gradient);
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Screen 1: Splash Screen */
+        #splash-screen {
+            background: #ffffff;
+            z-index: 40;
+        }
+        #splash-logo {
+            max-width: 250px;
+            width: 60%;
+            height: auto;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        /* Screen 2: Title Screen */
+        #title-screen {
+            background: var(--bg-gradient);
+            z-index: 30;
+        }
+        .game-title {
+            font-size: 3rem;
+            color: var(--primary);
+            text-shadow: 3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            font-weight: 900;
+        }
+
+        /* Screen 3: Instructions Screen */
+        #instruction-screen {
+            background: var(--bg-gradient);
+            z-index: 20;
+        }
+        .instruction-box {
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            max-width: 500px;
+            width: 90%;
+            margin-bottom: 30px;
+            border: 4px solid var(--primary-light);
+        }
+        .instruction-box h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        .instruction-box ul {
+            text-align: left;
+            list-style-type: none;
+        }
+        .instruction-box li {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+        .instruction-box li::before {
+            content: "🌟";
+            margin-right: 10px;
+        }
+
+        /* Premium Buttons */
+        .btn-premium {
+            background: linear-gradient(135deg, var(--primary) 0%, #54a0ff 100%);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(108, 92, 231, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-bottom: 5px solid #341f97;
+        }
+        .btn-premium:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 6px rgba(108, 92, 231, 0.4);
+            border-bottom: 1px solid #341f97;
+        }
+
+        /* Active Core HUD Layer */
+        #hud-layer {
+            position: absolute;
+            top: 15px;
+            width: 92%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            pointer-events: none;
+        }
+        .hud-item {
+            background: var(--panel-bg);
+            padding: 8px 18px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Canvas Arena */
+        #canvas-arena {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        /* Assessment Overlay UI Popup */
+        #quiz-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 52, 54, 0.75);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 15;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .quiz-card {
+            background: white;
+            width: 100%;
+            max-width: 580px;
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 5px solid var(--primary);
+            text-align: center;
+            transform: scale(0.9);
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .trophy-header {
+            font-size: 4rem;
+            margin-bottom: 5px;
+            animation: bounce 1s infinite alternate;
+        }
+        .quiz-title {
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .quiz-question {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-weight: 600;
+            background: #f7f1e3;
+            padding: 15px;
+            border-radius: 16px;
+            border-left: 5px solid var(--accent);
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .btn-option {
+            background: #f1f2f6;
+            border: 2px solid #ced6e0;
+            padding: 14px 20px;
+            border-radius: 16px;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-option:hover {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary);
+        }
+        .hint-box {
+            background: #fff9db;
+            border: 2px dashed #f5cd79;
+            padding: 12px;
+            border-radius: 12px;
+            color: #cf6a17;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-top: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        /* Joysticks for Touch Devices */
+        #touch-controls {
+            position: absolute;
+            bottom: 25px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            pointer-events: none;
+            z-index: 6;
+        }
+        .dpad-btn {
+            width: 65px;
+            height: 65px;
+            background: rgba(255,255,255,0.85);
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            pointer-events: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .dpad-btn:active {
+            background: var(--primary);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes popUp {
+            to { transform: scale(1); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            #touch-controls { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <audio id="snd-correct" src="assets/correct.mp3"></audio> <audio id="snd-wrong" src="assets/wrong.mp3"></audio> <audio id="snd-cheer" src="assets/freesound_community-claps-44744.mp3"></audio> <div id="splash-screen" class="screen">
+        <img id="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo"> </div>
+
+    <div id="title-screen" class="screen hidden">
+        <h1 class="game-title">✨ MARBLE MAZE<br>LAB ADVENTURE ✨</h1>
+        <button class="btn-premium" onclick="transitionScreen('title-screen', 'instruction-screen')">START</button>
+    </div>
+
+    <div id="instruction-screen" class="screen hidden">
+        <div class="instruction-box">
+            <h2>How to Play</h2>
+            <ul>
+                <li>Roll your marble to the target destination path inside the maze.</li>
+                <li>Use Keyboard Arrow keys or screen Touch Buttons to roll.</li>
+                <li>Reaching the target adds +5 Marks and unlocks Chapter Questions!</li>
+                <li>Answer questions to score +15 Marks. You have 4 precious lives!</li>
+            </ul>
+        </div>
+        <button class="btn-premium" onclick="startGameEngine()">PLAY</button>
+    </div>
+
+    <div id="hud-layer" class="hidden">
+        <div class="hud-item">🏆 Marks: <span id="lbl-score">0</span></div>
+        <div class="hud-item">🎮 Game: <span id="lbl-round">1</span>/4</div>
+        <div class="hud-item">❤️ Lives: <span id="lbl-lives">4</span></div>
+    </div>
+
+    <canvas id="canvas-arena" class="hidden"></canvas>
+
+    <div id="touch-controls" class="hidden">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 40px;">
+            <button class="dpad-btn" id="btn-up">▲</button>
+            <div style="display: flex; gap: 40px;">
+                <button class="dpad-btn" id="btn-left">◀</button>
+                <button class="dpad-btn" id="btn-right">▶</button>
+            </div>
+            <button class="dpad-btn" id="btn-down">▼</button>
+        </div>
+    </div>
+
+    <div id="quiz-overlay" class="hidden">
+        <div class="quiz-card">
+            <div class="trophy-header">🏆</div>
+            <div class="quiz-title">Level Complete! Quiz Time</div>
+            <div class="quiz-question" id="quiz-q-text">Loading question text scenario...</div>
+            <div class="options-grid" id="quiz-options-container"></div>
+            <div class="hint-box" id="quiz-hint-box"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Game State Metrics Constants
+    let marksScore = 0;
+    let currentRoundIndex = 1; 
+    let absoluteQuestionCounter = 0; 
+    let playerLivesCount = 4;
+    let wrongAttemptsOnCurrentQuestion = 0;
+    let mazeCompletedThisRound = false;
+
+    // Canvas Engine Physics Framework Variables
+    const canvas = document.getElementById('canvas-arena');
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    
+    // Marble Entity Definition
+    let ball = { x: 0, y: 0, radius: 0, speed: 4 };
+    let targetZone = { x: 0, y: 0, size: 0 };
+    
+    // User Input Matrix Flags
+    let keyControls = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+    // Strict Scenario Question Deck Database
+    const masterDeck = [
+        // ROUND 1
+        { q: "Professor Kabir says, \"Just like a big wall is built out of small individual bricks, our real body is made of tiny parts!\"\nWhat are these smallest building blocks of life that join together inside us called?", o: ["Bricks", "Cells", "Toys", "Bones"], a: 1, h: "They are the tiny microscopic structures that make up all your organs!" },
+        { q: "Maya is controlling a toy robot that collects messages, remembers codes, and plans moves.\nWhich system acts as the main supercomputer to control all your real body actions?", o: ["Digestive System", "Nervous System", "Skeletal System", "Respiratory System"], a: 1, h: "This system uses your brain and long, wire-like nerves to send lightning-fast signals!" },
+        { q: "Rahul learns that adult frameworks have 206 bones, but human babies are born with many more.\nHow many small bones does a newborn baby have before they fuse together as they grow?", o: ["206", "300", "600", "100"], a: 1, h: "It is a large, clean number that stands for exactly three hundreds." },
+        // ROUND 2
+        { q: "In the lab, Sonu sees cells join to make tissue. Then, a group of tissues join to do a special job.\nWhat do we call a big structure—like your stomach, heart, or lungs—made of these tissues?", o: ["An Organ", "A Brick", "An Organ System", "An Organism"], a: 0, h: "It is a single body part that performs a specific life function, like how your eyes help you see!" },
+        { q: "Tina wants to know how she can pull her heavy school bag and run around during recess.\nBones cannot move alone, so how many fleshy, stretchy muscle helpers do we have in our bodies?", o: ["Exactly 206", "Around 300", "More than 600", "Less than 100"], a: 2, h: "There are way more of these pulling muscles than there are hard bones in an adult!" },
+        { q: "Rohit sits down all day eating chips and playing mobile games, making his body feel weak.\nWhat fun daily prescription should the doctor give Rohit to make his muscles strong and flexible?", o: ["Play video games", "Run and play outdoor games", "Sleep all afternoon", "Drink sweet fizzy soda"], a: 1, h: "Moving your body frame out in the fresh air keeps your muscular system perfectly fit!" },
+        // ROUND 3
+        { q: "Simran is taking deep breaths of fresh air to calm down before her big school presentation.\nThe air goes into her nose, down the windpipe, and lands inside which balloon-like chest organs?", o: ["Hearts", "Stomachs", "Lungs", "Kidneys"], a: 2, h: "These two lightweight breathing organs fill up with clean oxygen when you inhale!" },
+        { q: "Amit ate a sandwich that was chewed up well and mixed around inside his stomach.\nWhere does the leftover, undigested food go to be turned into solid waste before leaving the body?", o: ["Mouth", "Large Intestine", "Food Pipe", "Windpipe"], a: 1, h: "Look at the bottom of the digestive tract; it is the wide tube wrapped around the smaller ones!" },
+        { q: "A machine needs to clear out dirty liquid waste so its engine elements do not rust or break.\nWhich body system acts like this filter team to throw out bad liquid waste like urine and sweat?", o: ["Nervous System", "Circulatory System", "Excretory System", "Digestive System"], a: 2, h: "This cleaning system uses your skin to sweat and two bean-shaped kidneys to filter your blood!" },
+        // ROUND 4
+        { q: "Imagine a grand palace with a central water pump that pushes fresh water through hidden pipes.\nWhich muscular organ inside your chest pumps blood non-stop to every single corner of your body?", o: ["Brain", "Heart", "Kidney", "Liver"], a: 1, h: "It sits slightly to the left side of your chest and makes a regular \"thump-thump\" beating sound!" },
+        { q: "Priya looks at a medical map and notices a massive network of tiny tubes running under the skin.\nWhat is the proper scientific name for these hollow channels that carry blood through our bodies?", o: ["Air Winds", "Food Pipes", "Blood Vessels", "Spinal Cords"], a: 2, h: "They form a complex red and blue pipeline network to keep blood moving to your cells!" },
+        { q: "Sana is turning pages in her family album, looking at pictures of her grandma, mother, and herself.\nWhich body system allows humans to give birth to new babies so that life continues across generations?", o: ["Nervous System", "Circulatory System", "Reproductive System", "Excretory System"], a: 2, h: "This vital system ensures that living beings can multiply and grow their family trees!" }
+    ];
+
+    // High Aesthetic Color Profiles
+    const roundColors = [
+        { wall: "#6c5ce7", track: "#f8f9fa", target: "#20bf6b" }, // Round 1 Accentuation
+        { wall: "#05c46b", track: "#ffffff", target: "#ff3f34" }, // Round 2 Accentuation
+        { wall: "#ff5e57", track: "#f1f2f6", target: "#ffa801" }, // Round 3 Accentuation
+        { wall: "#ef5777", track: "#ffffff", target: "#05c46b" }  // Round 4 Accentuation
+    ];
+
+    // Responsive Native Resolution Matrix
+    const originalGridSize = 16;
+    let currentCellScale = 0;
+
+    // Generated Fixed Map Grids
+    const mazes = [
+        [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1],
+            [1,0,1,0,1,0,1,1,1,0,1,0,1,1,0,1],
+            [1,0,1,0,0,0,1,0,1,0,0,0,1,0,0,1],
+            [1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1],
+            [1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1],
+            [1,0,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,1,0,1,0,0,1,0,1],
+            [1,0,1,1,1,1,1,0,1,0,1,0,0,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,1,1,0,1,0,1],
+            [1,1,1,1,1,0,1,1,1,1,1,0,0,1,0,1],
+            [1,0,0,0,1,0,1,0,0,0,1,0,1,1,0,1],
+            [1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1],
+            [1,0,1,0,1,0,0,0,1,0,1,1,0,1,0,1],
+            [1,0,1,0,0,0,1,0,1,0,0,0,0,0,2,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ],
+        [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1],
+            [1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1],
+            [1,0,1,1,1,1,1,1,1,0,1,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,1,0,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,1,1,0,1,1,0,1],
+            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1],
+            [1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1],
+            [1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,1],
+            [1,0,1,0,1,0,1,0,1,1,1,1,1,1,0,1],
+            [1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
+            [1,1,1,1,1,1,1,1,1,1,0,0,0,1,2,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ],
+        [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,1],
+            [1,0,1,0,1,0,1,0,0,0,0,0,0,1,0,1],
+            [1,0,1,0,1,0,1,0,1,1,1,1,0,1,0,1],
+            [1,0,1,0,0,0,1,0,1,0,0,1,0,1,0,1],
+            [1,0,1,1,1,1,1,0,1,0,2,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,1,0,0,1,0,1,0,1],
+            [1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
+            [1,0,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
+            [1,0,1,0,0,0,0,1,0,1,0,0,0,1,0,1],
+            [1,0,1,0,1,1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,1,0,1,0,0,1,0,0,0,0,0,1,0,1],
+            [1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ],
+        [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
+            [1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,2,0,1,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,0,1,0,0,0,1,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ]
+    ];
+
+    // Initial Screen Engine Splash Sequences
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            transitionScreen('splash-screen', 'title-screen');
+        }, 5000); // 5 Seconds Strict Splash Screen Rule Execution
+    });
+
+    function transitionScreen(from, to) {
+        document.getElementById(from).classList.add('hidden');
+        document.getElementById(to).classList.remove('hidden');
+    }
+
+    // Engine Ignition Sequence
+    function startGameEngine() {
+        transitionScreen('instruction-screen', 'canvas-arena');
+        document.getElementById('hud-layer').classList.remove('hidden');
+        if (window.matchMedia("(max-width: 600px)").matches) {
+            document.getElementById('touch-controls').classList.remove('hidden');
+        }
+
+        // Variable Initialization setup
+        marksScore = 0;
+        currentRoundIndex = 1;
+        absoluteQuestionCounter = 0;
+        playerLivesCount = 4;
+        updateHUDCounters();
+        
+        setupInputListeners();
+        buildLevelMap(currentRoundIndex - 1);
+        
+        window.addEventListener('resize', () => buildLevelMap(currentRoundIndex - 1));
+        runPhysicsLoop();
+    }
+
+    // Level Builder Map Mapper
+    function buildLevelMap(idx) {
+        const displayWidth = Math.min(window.innerWidth, 1024);
+        const displayHeight = Math.min(window.innerHeight - 100, 768);
+        const optimalSize = Math.min(displayWidth, displayHeight);
+        
+        canvas.width = optimalSize;
+        canvas.height = optimalSize;
+        currentCellScale = optimalSize / originalGridSize;
+
+        const currentGrid = mazes[idx];
+        
+        // Dynamic scan layout mappings
+        for (let r = 0; r < originalGridSize; r++) {
+            for (let c = 0; c < originalGridSize; c++) {
+                if (currentGrid[r][c] === 1) {
+                    // Wall padding boundaries
+                } else if (currentGrid[r][c] === 0 && ball.x === 0 && ball.y === 0) {
+                    // Set Player Start Coordinates dynamically inside local variable space
+                    ball.x = (c * currentCellScale) + (currentCellScale / 2);
+                    ball.y = (r * currentCellScale) + (currentCellScale / 2);
+                } else if (currentGrid[r][c] === 2) {
+                    targetZone.x = c * currentCellScale;
+                    targetZone.y = r * currentCellScale;
+                    targetZone.size = currentCellScale;
+                }
+            }
+        }
+        ball.radius = currentCellScale * 0.35;
+        ball.speed = currentCellScale * 0.12; 
+        mazeCompletedThisRound = false;
+    }
+
+    // Capture Interaction Triggers
+    function setupInputListeners() {
+        window.addEventListener('keydown', (e) => {
+            if (keyControls.hasOwnProperty(e.key)) keyControls[e.key] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            if (keyControls.hasOwnProperty(e.key)) keyControls[e.key] = false;
+        });
+
+        // Touch Control Interfaces Execution mapping
+        const assignTouch = (btnId, keyStr) => {
+            const el = document.getElementById(btnId);
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); keyControls[keyStr] = true; });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); keyControls[keyStr] = false; });
+        };
+        assignTouch('btn-up', 'ArrowUp');
+        assignTouch('btn-down', 'ArrowDown');
+        assignTouch('btn-left', 'ArrowLeft');
+        assignTouch('btn-right', 'ArrowRight');
+    }
+
+    // Core Canvas Logic Framework Execution loop
+    function runPhysicsLoop() {
+        updateGamePhysics();
+        drawActiveArena();
+        animationFrameId = requestAnimationFrame(runPhysicsLoop);
+    }
+
+    function updateGamePhysics() {
+        if (mazeCompletedThisRound) return;
+
+        let nextX = ball.x;
+        let nextY = ball.y;
+
+        if (keyControls.ArrowUp) nextY -= ball.speed;
+        if (keyControls.ArrowDown) nextY += ball.speed;
+        if (keyControls.ArrowLeft) nextX -= ball.speed;
+        if (keyControls.ArrowRight) nextX += ball.speed;
+
+        // Vector Bound Mapping Calculations 
+        if (checkMapCollision(nextX, ball.y)) {
+            ball.x = nextX;
+        }
+        if (checkMapCollision(ball.x, nextY)) {
+            ball.y = nextY;
+        }
+
+        // Target Boundary Collision Scanning Execution
+        let ballGridC = Math.floor(ball.x / currentCellScale);
+        let ballGridR = Math.floor(ball.y / currentCellScale);
+        
+        if (mazes[currentRoundIndex - 1][ballGridR][ballGridC] === 2) {
+            triggerTargetReached();
+        }
+    }
+
+    function checkMapCollision(targetCoordX, targetCoordY) {
+        const checkPoints = [
+            { x: targetCoordX - ball.radius, y: targetCoordY - ball.radius },
+            { x: targetCoordX + ball.radius, y: targetCoordY - ball.radius },
+            { x: targetCoordX - ball.radius, y: targetCoordY + ball.radius },
+            { x: targetCoordX + ball.radius, y: targetCoordY + ball.radius }
+        ];
+
+        for (let pt of checkPoints) {
+            let c = Math.floor(pt.x / currentCellScale);
+            let r = Math.floor(pt.y / currentCellScale);
+            
+            if (c < 0 || c >= originalGridSize || r < 0 || r >= originalGridSize) return false;
+            if (mazes[currentRoundIndex - 1][r][c] === 1) return false;
+        }
+        return true;
+    }
+
+    function drawActiveArena() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const palette = roundColors[currentRoundIndex - 1];
+        const grid = mazes[currentRoundIndex - 1];
+
+        // Draw Map Structures Beautifully
+        for (let r = 0; r < originalGridSize; r++) {
+            for (let c = 0; c < originalGridSize; c++) {
+                if (grid[r][c] === 1) {
+                    ctx.fillStyle = palette.wall;
+                    ctx.beginPath();
+                    ctx.roundRect(c * currentCellScale, r * currentCellScale, currentCellScale + 0.5, currentCellScale + 0.5, 6);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = palette.track;
+                    ctx.fillRect(c * currentCellScale, r * currentCellScale, currentCellScale, currentCellScale);
+                }
+            }
+        }
+
+        // Draw Target Zone End Marker Destination
+        ctx.fillStyle = palette.target;
+        ctx.beginPath();
+        ctx.roundRect(targetZone.x + 2, targetZone.y + 2, targetZone.size - 4, targetZone.size - 4, 12);
+        ctx.fill();
+        
+        // Draw Target Flag/Star Overlay icon
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `${currentCellScale * 0.6}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("⭐", targetZone.x + targetZone.size/2, targetZone.y + targetZone.size/2);
+
+        // Draw Main Player Aesthetic Soft Vector Marble Entity
+        ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        
+        ctx.fillStyle = "linear-gradient(135deg, #ff7675 0%, #d63031 100%)";
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Inner Marble Accent Line
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.strokeStyle = "rgba(255,255,255,0.4)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(ball.x - ball.radius*0.2, ball.y - ball.radius*0.2, ball.radius * 0.5, 0, Math.PI, true);
+        ctx.stroke();
+    }
+
+    function triggerTargetReached() {
+        mazeCompletedThisRound = true;
+        marksScore += 5; // Automatic Addition Matrix +5 Rule Implementation
+        updateHUDCounters();
+        playAudioTone('snd-cheer');
+        
+        setTimeout(() => {
+            launchAssessmentPopupOverlay();
+        }, 600);
+    }
+
+    // Assessment Logic Engine Architecture Block
+    function launchAssessmentPopupOverlay() {
+        wrongAttemptsOnCurrentQuestion = 0;
+        document.getElementById('quiz-hint-box').style.display = "none";
+        
+        const activeQuestionData = masterDeck[absoluteQuestionCounter];
+        document.getElementById('quiz-q-text').innerText = activeQuestionData.q;
+        
+        const optionsGrid = document.getElementById('quiz-options-container');
+        optionsGrid.innerHTML = "";
+        
+        activeQuestionData.o.forEach((optText, index) => {
+            const optBtn = document.createElement('button');
+            optBtn.className = "btn-option";
+            optBtn.innerText = optText;
+            optBtn.onclick = () => validateSelectedAnswer(index, optBtn);
+            optionsGrid.appendChild(optBtn);
+        });
+        
+        document.getElementById('quiz-overlay').classList.remove('hidden');
+    }
+
+    function validateSelectedAnswer(chosenIdx, elementRef) {
+        const activeQuestionData = masterDeck[absoluteQuestionCounter];
+        
+        if (chosenIdx === activeQuestionData.a) {
+            // Correct Track Sequence Execution
+            playAudioTone('snd-correct');
+            elementRef.style.background = "#20bf6b";
+            elementRef.style.color = "white";
+            marksScore += 15; // Score Evaluation Metric Rule Update
+            updateHUDCounters();
+            
+            // Disable all option clicks immediately during success transition latency 
+            const options = document.getElementsByClassName('btn-option');
+            for(let btn of options) btn.disabled = true;
+
+            setTimeout(() => {
+                advanceAssessmentState();
+            }, 1500);
+        } else {
+            // Mistake Event Track Mapping Sequence
+            playAudioTone('snd-wrong');
+            elementRef.style.background = "#ff3f34";
+            elementRef.style.color = "white";
+            elementRef.disabled = true;
+            
+            wrongAttemptsOnCurrentQuestion++;
+            playerLivesCount--;
+            updateHUDCounters();
+
+            if (playerLivesCount <= 0) {
+                terminateGameSession(false);
+                return;
+            }
+
+            if (wrongAttemptsOnCurrentQuestion >= 1) {
+                const hintPanel = document.getElementById('quiz-hint-box');
+                hintPanel.innerText = "💡 Hint: " + activeQuestionData.h;
+                hintPanel.style.display = "block";
+            }
+        }
+    }
+
+    function advanceAssessmentState() {
+        absoluteQuestionCounter++;
+        document.getElementById('quiz-overlay').classList.add('hidden');
+
+        // Evaluate Round Segment Limits (3 Questions Per Level Execution Module Rule)
+        if (absoluteQuestionCounter % 3 === 0) {
+            currentRoundIndex++;
+            if (currentRoundIndex > 4) {
+                terminateGameSession(true); // Game complete!
+            } else {
+                updateHUDCounters();
+                // Load Next Round Arena seamlessly
+                ball.x = 0; ball.y = 0; // Reset positions
+                buildLevelMap(currentRoundIndex - 1);
+            }
+        } else {
+            // Pop up the next question in the current round sequence immediately
+            launchAssessmentPopupOverlay();
+        }
+    }
+
+    function updateHUDCounters() {
+        document.getElementById('lbl-score').innerText = marksScore;
+        document.getElementById('lbl-round').innerText = Math.min(currentRoundIndex, 4);
+        document.getElementById('lbl-lives').innerText = playerLivesCount;
+    }
+
+    function playAudioTone(elementId) {
+        const aud = document.getElementById(elementId);
+        if (aud) {
+            aud.currentTime = 0;
+            aud.play().catch(() => {/* Handle browsers dynamic autoplay policies blocking events safely */});
+        }
+    }
+
+    function terminateGameSession(victoryFlag) {
+        cancelAnimationFrame(animationFrameId);
+        document.getElementById('quiz-overlay').classList.add('hidden');
+        document.getElementById('hud-layer').classList.add('hidden');
+        document.getElementById('touch-controls').classList.add('hidden');
+        canvas.classList.add('hidden');
+
+        const titleScr = document.getElementById('title-screen');
+        const titleH1 = titleScr.querySelector('.game-title');
+        
+        if (victoryFlag) {
+            playAudioTone('snd-cheer');
+            titleH1.innerHTML = `🎉 VICTORY! 🎉<br><span style="font-size: 1.8rem; color:#fff;">Total Score: ${marksScore} Marks</span>`;
+        } else {
+            titleH1.innerHTML = `💀 GAME OVER 💀<br><span style="font-size: 1.8rem; color:#fff;">Final Score: ${marksScore} Marks</span>`;
+        }
+        
+        titleScr.querySelector('.btn-premium').innerText = "PLAY AGAIN";
+        titleScr.querySelector('.btn-premium').onclick = () => { location.reload(); };
+        titleScr.classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>
