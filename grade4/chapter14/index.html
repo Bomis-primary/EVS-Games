@@ -119,7 +119,7 @@
         }
         .key:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #7b1fa2; }
         .key:disabled { background: #e0e0e0; box-shadow: 0 4px 0 #9e9e9e; color: #9e9e9e; cursor: not-allowed; }
-        .key.correct { background: #4caf50; box-shadow: 0 4px 0 #2e7d32; }
+        .key.correct { background: #4caf50; box-shadow: 0 4px 0 #2e7d32; color: #ffffff; }
         
         /* Interactive Hint System */
         .hint-box {
@@ -138,14 +138,13 @@
             .bin { max-width: 100%; height: 85px; flex-direction: row; gap: 15px; box-shadow: 0 6px 0 rgba(0,0,0,0.15); }
             .bin span { margin-top: 0; }
             .sort-item { margin-bottom: 15px; padding: 15px 10px; }
-            .key { width: calc(14.28% - 6px); height: 42px; } /* 7 keys per row layout compatibility for tiny screens */
+            .key { width: calc(14.28% - 6px); height: 42px; }
         }
 
-        /* Performance Graphics Accelerators */
         @keyframes popIn { 0% { transform: scale(0.6); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
         @keyframes slideIn { from { transform: translateY(-15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { transform: opacity: 1; } }
     </style>
 </head>
 <body>
@@ -171,8 +170,8 @@
         <div style="font-size: 1.3rem; color: #424242; text-align: left; line-height: 1.8; margin: 15px 0; background: #f1f8e9; padding: 20px; border-radius: 16px; border: 3px solid #c5e1a5; max-width: 500px; width: 100%;">
             <p style="margin: 4px 0; font-weight:700;">🗑️ <b>Step 1:</b> Sort the waste item into the right bin.</p>
             <p style="margin: 4px 0; font-weight:700;">🔤 <b>Step 2:</b> Read the scenario and solve the puzzle word.</p>
-            <p style="margin: 4px 0; font-weight:700;">❤️ You have <b>4 Lives</b> for the challenge.</p>
-            <p style="margin: 4px 0; font-weight:700;">💡 Hints pop up if you guess an incorrect letter!</p>
+            <p style="margin: 4px 0; font-weight:700;">✨ <b>Bonus:</b> The first and last letters are revealed instantly!</p>
+            <p style="margin: 4px 0; font-weight:700;">❤️ You have <b>4 Lives</b> for the total challenge.</p>
         </div>
         <button class="btn" onclick="startGame()">PLAY GAME</button>
     </div>
@@ -209,16 +208,14 @@
 </div>
 
 <script>
-    // Asset Core Execution Engine
     function triggerAudio(elementId) {
         const soundModule = document.getElementById(elementId);
         if (soundModule) {
             soundModule.currentTime = 0;
-            soundModule.play().catch(err => console.log("Audio pipeline muted by engine layout constraints."));
+            soundModule.play().catch(err => console.log("Audio framework interaction exception handled safely."));
         }
     }
 
-    // High Variety Data System (12 Distinct Sorting Elements vs 12 Distinct Spelling Words)
     const sortCatalog = [
         { item: "Leftover Maggi Noodles", category: "green" },
         { item: "Broken Plastic Ruler", category: "blue" },
@@ -235,66 +232,18 @@
     ];
 
     const puzzleCatalog = [
-        { 
-            word: "CLEAN", 
-            scenario: "A wonderful neighborhood where families throw all their wrappers safely into bins is beautiful, healthy, and perfectly...?", 
-            hint: "It is the direct opposite of a messy or dirty room." 
-        },
-        { 
-            word: "DISEASE", 
-            scenario: "Uh oh! Nasty buzzing mosquitoes and dirty houseflies love hanging out near open trash piles. What do they spread that makes kids fall sick?", 
-            hint: "Starts with 'D' and means catching an illness." 
-        },
-        { 
-            word: "RECYCLE", 
-            scenario: "What is the magical factory word for melting down old, discarded plastic bottles to manufacture brand-new playground slides or t-shirts?", 
-            hint: "Starts with 'R' and saves processing energy by reusing waste materials." 
-        },
-        { 
-            word: "DUSTBIN", 
-            scenario: "I stand quietly in the corner of your classroom with a wide open mouth, eating up pencil shavings and trash to keep your room tidy. What am I?", 
-            hint: "Drop your trash into me! My name rhymes with 'must-pin'." 
-        },
-        { 
-            word: "COVER", 
-            scenario: "To completely stop stray dogs from digging up garbage and pesky flies from laying eggs in your kitchen bin, you must always keep it under a... what?", 
-            hint: "A protective lid or top piece that keeps the bin closed." 
-        },
-        { 
-            word: "BURROWS", 
-            scenario: "Squeak! Rats and mice absolutely love to tunnel deep inside huge piles of uncovered public street garbage to dig their secret underground homes called...?", 
-            hint: "Starts with 'B' and describes holes dug by animals like rabbits." 
-        },
-        { 
-            word: "MOSQUITO", 
-            scenario: "High-pitched buzzing alert! This annoying little flying insect loves to lay hundreds of eggs in stagnant water collected inside dirty, abandoned tires.", 
-            hint: "Be careful! This insect can give people Dengue or Malaria fevers." 
-        },
-        { 
-            word: "COMPOST", 
-            scenario: "If you bury leftover organic kitchen waste inside the ground, it naturally transforms into a super-rich plant fertilizer called...?", 
-            hint: "Starts with 'C' and works like natural vitamin food for crops and soil." 
-        },
-        { 
-            word: "NATURE", 
-            scenario: "The stunning green world right outside your window—including beautiful tall trees, singing birds, clean rivers, and fresh air—is part of beautiful...?", 
-            hint: "Starts with 'N'. It means the physical world and wildlife together." 
-        },
-        { 
-            word: "LITTER", 
-            scenario: "When lazy people throw empty juice cartons out of a moving car window instead of holding onto them, they are committing a bad environmental crime called...?", 
-            hint: "Starts with 'L' and means throwing garbage around on public streets." 
-        },
-        { 
-            word: "SMOKE", 
-            scenario: "Cough, cough! When communities burn piles of polybags and dried leaves out in the open, this dark, smelly stuff goes into the sky and hurts our lungs.", 
-            hint: "It rises from raging fires and makes your eyes water." 
-        },
-        { 
-            word: "HEALTH", 
-            scenario: "Keeping our school and home surroundings sparkling clean results in fewer harmful germs, fewer sick days, and wonderful energetic...?", 
-            hint: "Rhymes with 'wealth'. It represents how fit, strong, and well your body feels!" 
-        }
+        { word: "CLEAN", scenario: "A wonderful neighborhood where families throw all their wrappers safely into bins is beautiful, healthy, and perfectly...?", hint: "It is the direct opposite of a messy or dirty room." },
+        { word: "DISEASE", scenario: "Uh oh! Nasty buzzing mosquitoes and dirty houseflies love hanging out near open trash piles. What do they spread that makes kids fall sick?", hint: "Starts with 'D' and means catching an illness." },
+        { word: "RECYCLE", scenario: "What is the magical factory word for melting down old, discarded plastic bottles to manufacture brand-new playground slides?", hint: "Starts with 'R' and saves processing energy by reusing materials." },
+        { word: "DUSTBIN", scenario: "I stand quietly in the corner of your classroom with a wide open mouth, eating up pencil shavings and trash to keep your room tidy. What am I?", hint: "Drop your trash into me! My name rhymes with 'must-pin'." },
+        { word: "COVER", scenario: "To completely stop stray dogs from digging up garbage and pesky flies from laying eggs in your kitchen bin, you must always keep it under a... what?", hint: "A protective lid or top piece that keeps the bin closed." },
+        { word: "BURROWS", scenario: "Squeak! Rats and mice absolutely love to tunnel deep inside huge piles of uncovered public street garbage to dig their secret underground homes called...?", hint: "Starts with 'B' and describes holes dug by animals like rabbits." },
+        { word: "MOSQUITO", scenario: "High-pitched buzzing alert! This annoying little flying insect loves to lay hundreds of eggs in stagnant water collected inside dirty, abandoned tires.", hint: "Be careful! This insect can give people Dengue or Malaria fevers." },
+        { word: "COMPOST", scenario: "If you bury leftover organic kitchen waste inside the ground, it naturally transforms into a super-rich plant fertilizer called...?", hint: "Starts with 'C' and works like natural vitamin food for crops and soil." },
+        { word: "NATURE", scenario: "The stunning green world right outside your window—including beautiful tall trees, singing birds, clean rivers, and fresh air—is part of beautiful...?", hint: "Starts with 'N'. It means the physical world and wildlife together." },
+        { word: "LITTER", scenario: "When lazy people throw empty juice cartons out of a moving car window instead of holding onto them, they are committing a bad environmental crime called...?", hint: "Starts with 'L' and means throwing garbage around on public streets." },
+        { word: "SMOKE", scenario: "Cough, cough! When communities burn piles of polybags and dried leaves out in the open, this dark, smelly stuff goes into the sky and hurts our lungs.", hint: "It rises from raging fires and makes your eyes water." },
+        { word: "HEALTH", scenario: "Keeping our school and home surroundings sparkling clean results in fewer harmful germs, fewer sick days, and wonderful energetic...?", hint: "Rhymes with 'wealth'. It represents how fit, strong, and well your body feels!" }
     ];
 
     let currentRound = 0;
@@ -303,7 +252,6 @@
     let activeGuesses = [];
     let failureCountThisRound = 0;
 
-    // Rigid 5-Second Core Splash Monitor
     setTimeout(() => {
         if(document.getElementById('splash-screen').classList.contains('active')) {
             showScreen('title-screen');
@@ -342,7 +290,7 @@
         initiateSortingPhase();
     }
 
-    // --- PHASE 1 RUNTIME ---
+    // --- PHASE 1 ---
     function initiateSortingPhase() {
         syncHUDState();
         document.getElementById('spell-container').style.display = 'none';
@@ -370,7 +318,7 @@
         }
     }
 
-    // --- PHASE 2 RUNTIME ---
+    // --- PHASE 2 ---
     function initiateSpellingPhase() {
         document.getElementById('sort-container').style.display = 'none';
         document.getElementById('spell-container').style.display = 'flex';
@@ -379,6 +327,10 @@
         activeGuesses = [];
         failureCountThisRound = 0;
         
+        // Instant Scaffold: Automatically reveal first and last character of target word upfront
+        if (targetWord.length > 0) activeGuesses.push(targetWord[0]);
+        if (targetWord.length > 1) activeGuesses.push(targetWord[targetWord.length - 1]);
+
         document.getElementById('scenario-text').innerText = puzzleCatalog[currentRound].scenario;
         document.getElementById('hint-box').style.display = 'none';
 
@@ -409,6 +361,13 @@
             let keyBtn = document.createElement('button');
             keyBtn.className = 'key';
             keyBtn.innerText = char;
+            
+            // If the letter was automatically pre-revealed, highlight and disable it instantly
+            if (activeGuesses.includes(char)) {
+                keyBtn.classList.add('correct');
+                keyBtn.disabled = true;
+            }
+            
             keyBtn.onclick = () => submitMatrixLetter(char, keyBtn);
             matrixContainer.appendChild(keyBtn);
         });
@@ -438,7 +397,6 @@
             dropUserLife();
             failureCountThisRound++;
             
-            // Evaluates step condition: Deploy hint strictly upon the 1st wrong round attempt
             if (failureCountThisRound === 1 && lives > 0) {
                 let textPlaceholder = document.getElementById('hint-box');
                 textPlaceholder.innerText = "💡 Hint: " + puzzleCatalog[currentRound].hint;
