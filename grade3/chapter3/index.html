@@ -3,15 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anatomy Column Crawler</title>
+    <title>The Living Machine: Space Adventure</title>
     <style>
         :root {
             --primary-purple: #6c5ce7;
             --light-purple: #a55eea;
-            --bg-cream: #fcefe3;
+            --bg-cream: #fff9f2;
             --hud-bg: #ffffff;
             --accent-pink: #ff4757;
             --text-dark: #2f3542;
+            --success: #2ed573;
+            --danger: #ff4757;
+            --tile-yellow: #ffeaa7;
+            --tile-orange: #fab1a0;
+            --tile-teal: #55efc4;
+            --tile-blue: #74b9ff;
         }
 
         * {
@@ -43,8 +49,7 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
-            background: #121214;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             transition: opacity 0.5s ease;
         }
@@ -52,6 +57,7 @@
         #splash-screen { background: #121214; }
         .logo-img {
             max-width: 240px;
+            width: 80%;
             height: auto;
             animation: pulseLogo 2s infinite ease-in-out;
         }
@@ -60,19 +66,20 @@
             background: linear-gradient(135deg, #fbc531 0%, #f7b731 100%);
         }
         .menu-title {
-            font-size: 3.2rem;
+            font-size: 2.8rem;
             font-weight: 900;
             color: white;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
             margin-bottom: 30px;
+            line-height: 1.2;
         }
 
         .arcade-btn {
             background: var(--primary-purple);
             color: white;
             border: none;
-            padding: 18px 45px;
-            font-size: 1.4rem;
+            padding: 15px 40px;
+            font-size: 1.3rem;
             font-weight: 800;
             border-radius: 40px;
             cursor: pointer;
@@ -80,8 +87,8 @@
             transition: transform 0.2s, box-shadow 0.2s;
             text-transform: uppercase;
         }
-        .arcade-btn:hover {
-            transform: scale(1.06);
+        .arcade-btn:hover, .arcade-btn:active {
+            transform: scale(1.05);
             box-shadow: 0 12px 25px rgba(108, 92, 231, 0.6);
         }
 
@@ -90,45 +97,46 @@
             background: white;
             color: var(--text-dark);
             border-radius: 24px;
-            padding: 35px;
-            max-width: 520px;
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
-        .instruction-box h2 { color: var(--primary-purple); margin-bottom: 15px; font-size: 2rem;}
+        .instruction-box h2 { color: var(--primary-purple); margin-bottom: 15px; font-size: 1.8rem;}
         .instruction-box ul { list-style: none; text-align: left; margin-bottom: 25px; }
-        .instruction-box ul li { font-size: 1.1rem; margin-bottom: 12px; line-height: 1.4; }
+        .instruction-box ul li { font-size: 1.05rem; margin-bottom: 12px; line-height: 1.4; display: flex; gap: 8px;}
 
         /* Core Application Arena Layout */
         #app-wrapper {
             width: 100%;
             height: 100%;
-            max-width: 1100px;
+            max-width: 1000px;
             margin: auto;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 15px;
+            padding: 10px;
             box-sizing: border-box;
         }
 
-        /* Top HUD Row Bar */
+        /* Top HUD Dashboard Row */
         #hud-dashboard {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            gap: 5px;
         }
         .hud-widget {
             background: var(--hud-bg);
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 30px;
             font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.06);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         #widget-lives { color: var(--accent-pink); }
 
@@ -136,601 +144,576 @@
         #gameplay-arena {
             flex: 1;
             display: flex;
+            flex-direction: row;
             justify-content: center;
             align-items: center;
-            gap: 30px;
+            gap: 15px;
             width: 100%;
+            height: calc(100% - 60px);
         }
 
-        /* Original Snake Column Grid View */
-        #grid-canvas-box {
-            width: 480px;
-            height: 440px;
-            background-color: var(--bg-cream);
-            border: 8px solid white;
+        /* Grid Board Mapping Viewport Container */
+        #board-grid-box {
+            flex: 1;
+            height: 100%;
+            max-height: 520px;
+            background-color: #f1f2f6;
+            border: 6px solid white;
             border-radius: 24px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
             position: relative;
-            overflow: hidden;
             display: grid;
-            /* Grid sizing handled dynamically via Javascript */
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 8px;
+            padding: 8px;
         }
 
-        .grid-cell {
-            border: 1px solid rgba(0,0,0,0.02);
-            position: relative;
-            transition: background-color 0.1s ease;
-        }
-
-        /* Snake block styling exactly matching your purple image theme */
-        .snake-body-block {
-            background-color: var(--primary-purple);
-            border-radius: 6px;
-        }
-        .snake-head-block {
-            background-color: var(--light-purple);
-            border-radius: 6px;
-        }
-
-        /* Visual Targets columns matching your gameplay requirement */
-        .target-column-zone {
-            background-color: rgba(108, 92, 231, 0.12);
-            border-left: 2px dashed rgba(108, 92, 231, 0.3);
-            border-right: 2px dashed rgba(108, 92, 231, 0.3);
+        .board-tile {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 6px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
+            justify-content: space-between;
+            position: relative;
             font-weight: bold;
-            font-size: 0.75rem;
-            color: var(--primary-purple);
-            text-align: center;
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.05);
+            overflow: hidden;
         }
-        .column-label-tag {
-            position: absolute;
-            top: 5px;
-            background: white;
-            padding: 2px 6px;
-            border-radius: 6px;
+
+        .tile-num {
             font-size: 0.7rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            white-space: nowrap;
+            color: #7f8c8d;
+        }
+
+        .tile-term {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #2c3e50;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            word-break: keep-all;
+        }
+
+        .action-danger { border: 3px solid var(--danger) !important; color: var(--danger); }
+        .action-success { border: 3px solid var(--success) !important; color: var(--success); }
+
+        /* Coin Token Avatar Configuration */
+        #player-coin-token {
+            width: 32px;
+            height: 32px;
+            background: #e74c3c;
+            border: 4px solid white;
+            border-radius: 50%;
+            position: absolute;
             z-index: 10;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translate(-50%, -50%);
         }
 
-        /* Pad Controls Panel exactly mirroring image layout */
-        #pad-controls-panel {
-            background: var(--bg-cream);
-            border: 8px solid white;
+        /* Right Side Controls */
+        #right-control-panel {
+            width: 180px;
+            height: 100%;
+            max-height: 520px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 6px solid white;
             border-radius: 24px;
-            width: 240px;
-            height: 240px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 8px;
             padding: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
-        .dir-btn {
+        /* Mechanical Rolling Custom Dice */
+        #dice-box-container {
+            width: 80px;
+            height: 80px;
             background: white;
-            border: 2px solid #e0d4c8;
-            border-radius: 14px;
+            border-radius: 18px;
+            border: 4px solid var(--primary-purple);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.2);
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            font-size: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: 800;
             color: var(--primary-purple);
-            transition: all 0.1s;
+            cursor: pointer;
+            transition: transform 0.15s ease;
         }
-        .dir-btn:active {
-            transform: scale(0.95);
-            background: var(--primary-purple);
-            color: white;
+        #dice-box-container.rolling {
+            animation: bounceDice 0.15s infinite alternate;
         }
 
-        /* Overlay Frameworks */
-        #quiz-overlay, #certificate-overlay {
+        .roll-instructions {
+            font-size: 0.8rem;
+            color: #747d8c;
+            font-weight: 800;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Overlay Framework Components */
+        .overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(5px);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
             z-index: 200;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .modal-card {
             background: white;
-            width: 100%;
-            max-width: 520px;
+            padding: 25px;
             border-radius: 24px;
-            padding: 30px;
+            width: 100%;
+            max-width: 480px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .quiz-q-box {
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            background: #f8f9fa;
-            padding: 18px;
-            border-radius: 14px;
+            color: #34495e;
             margin: 15px 0;
-            text-align: left;
-            border-left: 5px solid var(--primary-purple);
+            line-height: 1.4;
         }
 
         .hint-alert-box {
             background: #fff9db;
             color: #f59f00;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 0.9rem;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 15px;
             text-align: left;
+            border-left: 4px solid #f59f00;
         }
 
-        .options-grid { display: flex; flex-direction: column; gap: 10px; }
+        .options-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
         .btn-option {
             background: #f1f2f6;
-            border: 1px solid #ced4da;
-            padding: 14px 18px;
-            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            border-radius: 14px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             text-align: left;
             transition: all 0.2s;
         }
-        .btn-option:hover { background: var(--primary-purple); color: white; }
-
-        .cert-canvas {
-            background: #ffffff;
-            border: 10px double #c5a847;
-            border-radius: 12px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-            color: #2f3542;
-        }
-        .cert-input-field {
-            border: none;
-            border-bottom: 3px dashed #2f3542;
-            width: 80%;
-            font-size: 1.8rem;
-            text-align: center;
-            font-weight: 800;
-            margin: 20px 0;
-            outline: none;
-            color: #0b7273;
-            text-transform: uppercase;
+        .btn-option:hover {
+            background: var(--primary-purple);
+            color: white;
+            border-color: var(--primary-purple);
         }
 
+        /* Animations */
         @keyframes pulseLogo {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes bounceDice {
+            from { transform: translateY(0) rotate(0deg); }
+            to { transform: translateY(-12px) rotate(15deg); }
+        }
 
         .hidden { display: none !important; }
-        .invisible { opacity: 0; pointer-events: none; }
+
+        /* Comprehensive Responsive Configurations */
+        @media (max-width: 680px) {
+            #gameplay-arena {
+                flex-direction: column;
+            }
+            #right-control-panel {
+                width: 100%;
+                height: 90px;
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 5px 15px;
+                border-radius: 16px;
+            }
+            #dice-box-container {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            .menu-title { font-size: 2.1rem; }
+        }
     </style>
 </head>
 <body>
+
+<audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
+<audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+<audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
 <div id="splash-screen" class="flow-screen">
     <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
 </div>
 
 <div id="menu-screen" class="flow-screen hidden">
-    <h1 class="menu-title">ANATOMY COLUMN CRAWLER</h1>
-    <button class="arcade-btn" onclick="showInstructions()">Start Game</button>
+    <h1 class="menu-title">THE LIVING MACHINE<br>COIN ADVENTURE 🎲</h1>
+    <button class="arcade-btn" onclick="goToInstructions()">Start Game</button>
 </div>
 
 <div id="instruction-screen" class="flow-screen hidden">
     <div class="instruction-box">
         <h2>How to Play! 🕹️</h2>
         <ul>
-            <li>🧭 <b>Step 1:</b> Use the On-Screen Arrow Buttons to move the purple tracking block.</li>
-            <li>📈 <b>Step 2:</b> Guide the block inside the designated columns to fill them completely!</li>
-            <li>🧠 <b>Step 3:</b> When you fill all columns for the level, answer the science questions correctly!</li>
+            <li>✨ <b>Step 1:</b> Click the Magic Dice Box to roll and advance your active coin!</li>
+            <li>🚀 <b>Step 2:</b> Land on Term spots to unlock interactive science challenges.</li>
+            <li>❤️ <b>Step 3:</b> Answer carefully! You have 3 lives to complete the whole route safely.</li>
         </ul>
-        <button class="arcade-btn" onclick="startGameEngine()">Let's Play! 🚀</button>
+        <button class="arcade-btn" onclick="beginAdventureGame()">Let's Play! 🚀</button>
     </div>
 </div>
 
 <div id="app-wrapper">
     <div id="hud-dashboard">
-        <div class="hud-widget">🏆 Score: <span id="lbl-marks">0</span></div>
-        <div class="hud-widget">🎮 Game: <span id="lbl-level-hud">1 / 3</span></div>
-        <div class="hud-widget" id="widget-lives">❤️ Lives: <span id="lbl-lives">3</span></div>
+        <div class="hud-widget">🏆 Score: <span id="lbl-score">0</span></div>
+        <div class="hud-widget" id="widget-lives">❤️ Lives: <span id="lbl-lives">❤️❤️❤️</span></div>
     </div>
 
     <div id="gameplay-arena">
-        <div id="grid-canvas-box"></div>
+        <div id="board-grid-box">
+            <div id="player-coin-token"></div>
+        </div>
 
-        <div id="pad-controls-panel">
-            <div></div>
-            <div class="dir-btn" onclick="changeSnakeDirection('UP')">▲</div>
-            <div></div>
-            <div class="dir-btn" onclick="changeSnakeDirection('LEFT')">◀</div>
-            <div></div>
-            <div class="dir-btn" onclick="changeSnakeDirection('RIGHT')">▶</div>
-            <div></div>
-            <div class="dir-btn" onclick="changeSnakeDirection('DOWN')">▼</div>
-            <div></div>
+        <div id="right-control-panel">
+            <div class="roll-instructions" id="lbl-roll-tag">Your Turn!</div>
+            <div id="dice-box-container" onclick="triggerDiceRollSequence()">🎲</div>
         </div>
     </div>
 </div>
 
-<div id="quiz-overlay" class="hidden">
+<div id="quiz-overlay" class="overlay hidden">
     <div class="modal-card">
-        <h3 id="lbl-quiz-headline" style="color: var(--primary-purple); font-weight: 800;">🔬 SYSTEM CHECKS</h3>
-        <div class="quiz-q-box" id="box-question-text">Loading diagnostic question loop...</div>
-        <div class="hint-alert-box hidden" id="box-hint-alert">💡 HINT: Helpful tip.</div>
-        <div class="options-grid" id="box-options-layout"></div>
+        <h3 id="lbl-quiz-headline" style="color: var(--primary-purple); font-weight: 800; font-size: 1.2rem;">🔬 SPACE CHALLENGE</h3>
+        <p id="box-question-text" class="quiz-q-box"></p>
+        <div class="hint-alert-box hidden" id="box-hint-alert"></div>
+        <div class="options-stack" id="box-options-layout"></div>
     </div>
 </div>
 
-<div id="certificate-overlay" class="hidden">
-    <div class="cert-canvas">
-        <div style="font-size: 3.5rem; margin-bottom: 10px;">📜</div>
-        <h1 style="font-size: 2.2rem; font-family: 'Georgia', serif; color: #7f2e2e;">BIO-MASTER CREDENTIAL</h1>
-        <p style="margin-top: 10px; font-weight: 600;">This certificate is proudly awarded to:</p>
-        <input type="text" class="cert-input-field" placeholder="[ ENTER YOUR NAME ]" id="txt-student-name">
-        <p style="font-weight: bold; font-size: 1.1rem; color: #10ac84; margin-bottom: 20px;">
-            For filling all scaling columns and answering all 9 Core Anatomy questions successfully!
-        </p>
-        <button class="arcade-btn" onclick="window.location.reload()">Replay Game</button>
+<div id="alert-overlay" class="overlay hidden">
+    <div class="modal-card">
+        <h2 id="lbl-alert-headline" style="font-size: 1.4rem; margin-bottom: 10px;">ACTION HAZARD</h2>
+        <p id="lbl-alert-body" style="font-size: 1.1rem; margin: 15px 0; font-weight: 600; line-height: 1.4;"></p>
+        <button class="arcade-btn" style="padding: 10px 30px; font-size: 1rem;" onclick="closeTrapBannerWindow()">OK, Go!</button>
+    </div>
+</div>
+
+<div id="victory-overlay" class="overlay hidden">
+    <div class="modal-card" style="border: 6px double #c5a847; background: #fffdf2;">
+        <div style="font-size: 3rem; margin-bottom: 5px;">📜</div>
+        <h2 style="font-family: 'Georgia', serif; color: #7f2e2e; font-size: 1.8rem;">ADVENTURE CLEAR!</h2>
+        <p style="margin: 10px 0; font-weight: bold; color: #10ac84;" id="lbl-final-feedback"></p>
+        <h3 style="font-size: 1.4rem; margin: 10px 0;">Final Score: <span id="lbl-final-score" style="color:var(--primary-purple);">0</span></h3>
+        <button class="arcade-btn" style="margin-top: 10px;" onclick="window.location.reload()">Play Again</button>
     </div>
 </div>
 
 <script>
-    // Asset sound paths mapping
-    const sfxCorrect = new Audio('assets/correct.mp3');
-    const sfxWrong = new Audio('assets/wrong.mp3');
-    const sfxClaps = new Audio('assets/freesound_community-claps-44774.mp3');
-
-    const masterQuestionPool = [
-        // Level 1 Questions (2 Columns)
-        { q: "What basic structural building blocks work together to form tissues inside the human body?", o: ["Cells", "Bones", "Bricks", "Muscles"], a: "Cells", h: "These are the tiny microscopic components found in every living thing." },
-        { q: "Approximately how many structural bones make up the entire framework of an adult human skeleton?", o: ["206 Bones", "300 Bones", "100 Bones", "600 Bones"], a: "206 Bones", h: "Adults have fewer bones than babies because some of them fuse together over time." },
-        
-        // Level 2 Questions (3 Columns)
-        { q: "How many independent muscles comprise the network responsible for body movement and strength?", o: ["More than 600", "Exactly 206", "Around 100", "Fewer than 50"], a: "More than 600", h: "There are nearly three times as many muscles as there are bones in your body!" },
-        { q: "Which primary chest organs expand and contract continuously to absorb fresh oxygen from air?", o: ["Lungs", "Heart", "Stomach", "Kidneys"], a: "Lungs", h: "These sponge-like organs fill up with air whenever you inhale." },
-        { q: "In which processing segment of the gastrointestinal tract is water reabsorbed from remaining undigested material?", o: ["Large Intestine", "Stomach", "Mouth", "Windpipe"], a: "Large Intestine", h: "It is the wide, smooth track located toward the very end of your digestion system." },
-        
-        // Level 3 Questions (4 Columns)
-        { q: "Which core organ serves as the main command center, managing every movement and thought your body performs?", o: ["Brain", "Heart", "Lungs", "Skin"], a: "Brain", h: "This organ sits safely inside your skull and communicates through electrical signals." },
-        { q: "Which muscle engine acts as a continuous pump that drives blood flow throughout your blood vessels?", o: ["Heart", "Brain", "Stomach", "Liver"], a: "Heart", h: "This fist-sized muscle beats rhythmically inside the center-left side of your chest." },
-        { q: "Which filtration organs extract liquid metabolic wastes directly out of your bloodstream to keep it clean?", o: ["Kidneys", "Lungs", "Muscles", "Bones"], a: "Kidneys", h: "You have a left and right one of these bean-shaped organs in your lower back area." },
-        { q: "What is the primary function of the biological system responsible for creating offspring to continue a species?", o: ["Reproduction", "Digestion", "Breathing", "Excretion"], a: "Reproduction", h: "This process ensures that living populations can raise families and pass life down to future generations." }
+    // Scenario-Based Questions Database
+    const scenarioQuestionPool = [
+        { q: "You build a toy house using plastic bricks. What tiny structural 'bricks' build up your body tissues?", o: ["Cells", "Bricks", "Organs"], a: "Cells", h: "Think of the smallest living building block that makes up your whole body!" },
+        { q: "You look at an adult and a tiny newborn baby. Who has fewer but larger bones in their framework?", o: ["The adult (206 bones)", "Both have the same", "The baby (300 bones)"], a: "The adult (206 bones)", h: "As babies grow up, some tiny bones fuse together into a smaller total number!" },
+        { q: "A soccer ball accidentally flies straight toward your head! What bony helmet stops it from hurting your brain?", o: ["The Skull", "The Backbone", "The Rib cage"], a: "The Skull", h: "Tap the hard bone on the very top of your head!" },
+        { q: "You smile at your friend and kick a ball into a goal. What attached parts pulled your bones to make you move?", o: ["Muscles", "Nails", "Skin"], a: "Muscles", h: "Over 600 of these flexible fleshy parts help you pull your limbs!" },
+        { q: "You walk through a dusty sandbox while playing outside. What tiny helpers inside your nose catch floating dirt particles?", o: ["Nose hairs", "Saliva drops", "Soft skin"], a: "Nose hairs", h: "They act like a tiny built-in filter net inside your nostrils!" },
+        { q: "You are feeling cold at night and want to sleep. Why should you never cover your face with a heavy blanket?", o: ["It blocks fresh oxygen", "It hurts your jaw", "It stops digestion"], a: "It blocks fresh oxygen", h: "Your balloon lungs need clear air loops to breathe while you dream!" },
+        { q: "You chew a piece of dry bread until it becomes soft and watery. What mouth fluid helped mash it up?", o: ["Saliva", "Stomach juice", "Pure water"], a: "Saliva", h: "It is the watery liquid made inside your mouth glands!" },
+        { q: "Your body took all the nutrients from lunch, leaving watery waste. Which long tube sucks out extra water?", o: ["Large Intestine", "Food Pipe", "Stomach Bag"], a: "Large Intestine", h: "It's the final wide tube that clears out liquids before solid waste leaves!" },
+        { q: "You touch a hot plate and pull your hand away instantly. What computer center inside your head ordered you to move?", o: ["Brain", "Heart", "Kidneys"], a: "Brain", h: "It connects to your nerves and acts like a master machine controller!" },
+        { q: "You accidentally get a tiny scratch on your leg and see red fluid. Why does your body bleed so quickly anywhere?", o: ["Blood vessels are everywhere", "The heart stops pumping", "Kidneys make blood fast"], a: "Blood vessels are everywhere", h: "Millions of microscopic transport pipes spread across your entire body!" },
+        { q: "Your blood needs a deep liquid wash to stay healthy. Which bean-shaped filter organs remove waste as urine?", o: ["Kidneys", "Lungs", "Muscles"], a: "Kidneys", h: "You have a pair of these washing filters sitting near your lower back!" },
+        { q: "You hear a beautiful bell ring at school. What grain-of-rice-sized stirrup bone inside your body helped you catch the sound?", o: ["Ear bone", "Toe bone", "Nose bone"], a: "Ear bone", h: "It is the absolute smallest bone in the human machine, deep inside your head!" }
     ];
 
-    const bonusQuestionData = {
-        q: "Ultimate Grand Challenge: How do all nine human body systems behave together inside a healthy individual?",
-        o: ["They coordinate together as a team", "They operate completely independently", "They shut down entirely during exercise", "Only the brain works at any time"],
-        a: "They coordinate together as a team",
-        h: "Think about how your heart beats faster to deliver oxygen from your lungs to your muscles when running!"
-    };
-
-    const columnLabelsByTier = [
-        ["Cells & Tissues", "Skeletal System"],
-        ["Muscular Web", "Breathing Lungs", "Food Pipeline"],
-        ["Brain Core", "Heart Network", "Waste Filter", "Life Generation"]
+    // Spiral Layout Mapping coordinates securely for a 4x4 Grid Board Track Loop
+    const boardTrackRoute = [
+        { term: "START 🏁", r: 0, c: 0, bg: "#dff9fb" },
+        { term: "Cell to Organism 🧱", r: 0, c: 1, bg: "var(--tile-yellow)" },
+        { term: "Adult vs Baby Bones 🦴", r: 0, c: 2, bg: "var(--tile-yellow)" },
+        { term: "💥 SLIPPERY!<br>Go Back 1", r: 0, c: 3, bg: "#ffdee2", isTrap: true, effect: "back", val: 1, msg: "Oops! You slipped on a wet floor tile. Slide back 1 space! 🎢" },
+        { term: "The Skull Helmet 🪖", r: 1, c: 3, bg: "var(--tile-orange)" },
+        { term: "600+ Muscles 💪", r: 2, c: 3, bg: "var(--tile-orange)" },
+        { term: "💤 YAWN!<br>Miss 1 Turn", r: 3, c: 3, bg: "#ffe3e3", isTrap: true, effect: "skip", msg: "You ran a lot today and need rest! This skips your next dice roll." },
+        { term: "Nose & Windpipe 👃", r: 3, c: 2, bg: "var(--tile-teal)" },
+        { term: "Balloon Lungs 🫁", r: 3, c: 1, bg: "var(--tile-teal)" },
+        { term: "🚀 BOOST!<br>Forward 1", r: 3, c: 0, bg: "#e3fafc", isTrap: true, effect: "forward", val: 1, msg: "Great nutrition! Your body got clean engine energy. Leap ahead 1 space! 🚀" },
+        { term: "The Stomach Juices 🍔", r: 2, c: 0, bg: "var(--tile-blue)" },
+        { term: "Water Recovery 💧", r: 1, c: 0, bg: "var(--tile-blue)" },
+        { term: "Brain Computer 🧠", r: 1, c: 1, bg: "var(--tile-yellow)" },
+        { term: "Continuous Pump ❤️", r: 1, c: 2, bg: "var(--tile-orange)" },
+        { term: "Fascinating Facts 🌟", r: 2, c: 2, bg: "var(--tile-teal)" },
+        { term: "FINISH 🏆", r: 2, c: 1, bg: "#2ed573" }
     ];
 
-    // Grid Mechanics Engine Configuration Constants
-    const rowsCount = 11;
-    const colsCount = 12;
-    
-    let currentTierLevel = 1; // Level 1 (2 Columns), Level 2 (3 Columns), Level 3 (4 Columns)
-    let totalMarks = 0;
-    let quizLives = 3;
-    let quizQuestionIndex = 0;
-    let wrongAttemptsOnThisQuestion = 0;
+    let coinPosition = 0;
+    let totalScore = 0;
+    let userLives = 3;
+    let wrongAttemptsOnQuestion = 0;
+    let isTurnSkipped = false;
 
-    let snakeBlocks = [];
-    let snakeDirection = "RIGHT";
-    let automatedLoopIntervalId = null;
-    let activeTargetColumnsPositions = [];
-    let filledColumnsCount = 0;
-    let isLevelGameplayRunning = false;
+    // Trigger explicit audio node playback helpers securely
+    function playSound(elementId) {
+        const audio = document.getElementById(elementId);
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(() => {});
+        }
+    }
 
     window.onload = function() {
+        // Screen 1: 5-Second Splash Delay
         setTimeout(() => {
             document.getElementById('splash-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('splash-screen').classList.add('hidden');
                 document.getElementById('menu-screen').classList.remove('hidden');
             }, 500);
-        }, 5000); // 5 Seconds Splash Loop
+        }, 5000);
     };
 
-    function showInstructions() {
+    function goToInstructions() {
         document.getElementById('menu-screen').classList.add('hidden');
         document.getElementById('instruction-screen').classList.remove('hidden');
     }
 
-    function startGameEngine() {
+    function beginAdventureGame() {
         document.getElementById('instruction-screen').classList.add('hidden');
-        loadSnakeLevelPhase();
+        buildBoardLayoutDOM();
+        renderTokenCoordinates();
     }
 
-    function loadSnakeLevelPhase() {
-        isLevelGameplayRunning = true;
-        filledColumnsCount = 0;
-        snakeDirection = "RIGHT";
-        document.getElementById('lbl-level-hud').innerText = `${currentTierLevel} / 3`;
-        document.getElementById('widget-lives').classList.add('invisible');
-
-        // Setup Snake Blocks array positioning initially at top row
-        snakeBlocks = [
-            { r: 0, c: 3 }, { r: 0, c: 2 }, { r: 0, c: 1 }
-        ];
-
-        calculateLevelColumns();
-        buildGridDOM();
-        startAutomatedSnakeLoop();
-    }
-
-    function calculateLevelColumns() {
-        activeTargetColumnsPositions = [];
-        let totalColumnsToCreate = currentTierLevel + 1; // 2 columns, then 3, then 4
-        
-        // Calculate spread layout mapping across the grid columns
-        let divisionMultiplier = Math.floor(colsCount / totalColumnsToCreate);
-        for(let i = 0; i < totalColumnsToCreate; i++) {
-            activeTargetColumnsPositions.push({
-                columnIndex: (i * divisionMultiplier) + Math.floor(divisionMultiplier / 2),
-                filledCellsCount: 0,
-                requiredCellsCount: rowsCount - 2, // Leave top row clear
-                label: columnLabelsByTier[currentTierLevel - 1][i]
-            });
-        }
-    }
-
-    function buildGridDOM() {
-        const gridBox = document.getElementById('grid-canvas-box');
-        gridBox.innerHTML = "";
-        gridBox.style.gridTemplateRows = `repeat(${rowsCount}, 1fr)`;
-        gridBox.style.gridTemplateColumns = `repeat(${colsCount}, 1fr)`;
-
-        for (let r = 0; r < rowsCount; r++) {
-            for (let c = 0; c < colsCount; c++) {
-                const cell = document.createElement('div');
-                cell.className = "grid-cell";
-                cell.id = `cell-${r}-${c}`;
-
-                // Mark and style specific Target Column zones
-                let activeColMatch = activeTargetColumnsPositions.find(col => col.columnIndex === c);
-                if (activeColMatch && r > 1) {
-                    cell.classList.add('target-column-zone');
-                }
-
-                gridBox.appendChild(cell);
+    function buildBoardLayoutDOM() {
+        const board = document.getElementById('board-grid-box');
+        boardTrackRoute.forEach((tile, index) => {
+            const div = document.createElement('div');
+            div.className = "board-tile";
+            if (tile.isTrap) {
+                div.classList.add(tile.effect === 'forward' ? 'action-success' : 'action-danger');
             }
-        }
+            div.style.gridRowStart = tile.r + 1;
+            div.style.gridColumnStart = tile.c + 1;
+            div.style.backgroundColor = tile.bg;
 
-        // Render clean label tags onto column fields safely
-        activeTargetColumnsPositions.forEach(col => {
-            const labelDiv = document.createElement('div');
-            labelDiv.className = "column-label-tag";
-            labelDiv.innerText = col.label;
-            
-            // Append label on top cell space
-            const targetCell = document.getElementById(`cell-1-${col.columnIndex}`);
-            if(targetCell) targetCell.appendChild(labelDiv);
+            div.innerHTML = `
+                <div class="tile-num">${index === 0 ? "START" : index === 15 ? "WIN" : "Space " + index}</div>
+                <div class="tile-term">${tile.term}</div>
+            `;
+            board.appendChild(div);
         });
-
-        updateSnakeGridGraphics();
     }
 
-    function startAutomatedSnakeLoop() {
-        if(automatedLoopIntervalId) clearInterval(automatedLoopIntervalId);
-        automatedLoopIntervalId = setInterval(processSnakeTickFrame, 300); // Friendly paced frame tick
+    function renderTokenCoordinates() {
+        const currentTile = boardTrackRoute[coinPosition];
+        const token = document.getElementById('player-coin-token');
+        const board = document.getElementById('board-grid-box');
+
+        const tileW = board.clientWidth / 4;
+        const tileH = board.clientHeight / 4;
+
+        // Perfect absolute centering offsets inside parent coordinates
+        token.style.top = `${(currentTile.r * tileH) + (tileH / 2)}px`;
+        token.style.left = `${(currentTile.c * tileW) + (tileW / 2)}px`;
     }
 
-    function changeSnakeDirection(newDir) {
-        if (!isLevelGameplayRunning) return;
-        // Block strict 180 degree instant reversal moves
-        if (newDir === "UP" && snakeDirection === "DOWN") return;
-        if (newDir === "DOWN" && snakeDirection === "UP") return;
-        if (newDir === "LEFT" && snakeDirection === "RIGHT") return;
-        if (newDir === "RIGHT" && snakeDirection === "LEFT") return;
-        snakeDirection = newDir;
-    }
+    function triggerDiceRollSequence() {
+        const diceBox = document.getElementById('dice-box-container');
+        if (diceBox.classList.contains('rolling')) return;
 
-    // Keyboard support for testing convenience
-    window.addEventListener('keydown', (e) => {
-        if (e.key === "ArrowUp" || e.key === "w") changeSnakeDirection("UP");
-        if (e.key === "ArrowDown" || e.key === "s") changeSnakeDirection("DOWN");
-        if (e.key === "ArrowLeft" || e.key === "a") changeSnakeDirection("LEFT");
-        if (e.key === "ArrowRight" || e.key === "d") changeSnakeDirection("RIGHT");
-    });
-
-    function processSnakeTickFrame() {
-        if (!isLevelGameplayRunning) return;
-
-        // Calculate Next Head block position coordinates
-        let head = { ...snakeBlocks[0] };
-        if (snakeDirection === "UP") head.r--;
-        if (snakeDirection === "DOWN") head.r++;
-        if (snakeDirection === "LEFT") head.c--;
-        if (snakeDirection === "RIGHT") head.c++;
-
-        // Boundary safety check resets placement loop wrappers
-        if (head.r < 0) head.r = rowsCount - 1;
-        if (head.r >= rowsCount) head.r = 0;
-        if (head.c < 0) head.c = colsCount - 1;
-        if (head.c >= colsCount) head.c = 0;
-
-        // Add head block 
-        snakeBlocks.unshift(head);
-
-        // Check if head landed inside a valid target column coordinate slot
-        let insideTargetCol = activeTargetColumnsPositions.find(col => col.columnIndex === head.c && head.r > 1);
-
-        if (insideTargetCol) {
-            // Keep head segment inside column and trigger growth instead of popping tail block
-            insideTargetCol.filledCellsCount++;
-            totalMarks += 5;
-            document.getElementById('lbl-marks').innerText = totalMarks;
-
-            // Check if column reached peak capacity limit status
-            checkColumnFillStates();
-        } else {
-            // Remove regular tail element block to maintain dynamic translation movement length
-            snakeBlocks.pop();
+        if (isTurnSkipped) {
+            isTurnSkipped = false;
+            document.getElementById('lbl-roll-tag').innerText = "Your Turn!";
+            alert("💤 Your missed turn penalty is over! You can roll normally now.");
+            return;
         }
 
-        updateSnakeGridGraphics();
+        diceBox.classList.add('rolling');
+        document.getElementById('lbl-roll-tag').innerText = "ROLLING...";
+
+        setTimeout(() => {
+            diceBox.classList.remove('rolling');
+            // Grade 3 optimized step limits (1-3) ensures kids interact with maximum questions
+            const rollValue = Math.floor(Math.random() * 3) + 1;
+            diceBox.innerText = rollValue;
+            document.getElementById('lbl-roll-tag').innerText = `Rolled a ${rollValue}!`;
+
+            executeTokenSteps(rollValue);
+        }, 800);
     }
 
-    function checkColumnFillStates() {
-        let totalTargetColumnsCount = currentTierLevel + 1;
-        let readyColumnsCount = 0;
+    function executeTokenSteps(steps) {
+        coinPosition += steps;
 
-        activeTargetColumnsPositions.forEach(col => {
-            // If at least 3 segments are tracked within the column path area
-            if(col.filledCellsCount >= 3) {
-                readyColumnsCount++;
+        if (coinPosition >= 15) {
+            coinPosition = 15;
+            renderTokenCoordinates();
+            setTimeout(triggerVictoryTerminalState, 600);
+            return;
+        }
+
+        renderTokenCoordinates();
+
+        setTimeout(() => {
+            const landedTile = boardTrackRoute[coinPosition];
+            if (landedTile.isTrap) {
+                launchTrapBanner(landedTile);
+            } else if (coinPosition > 0) {
+                launchQuestionBanner(landedTile);
+            } else {
+                resetDiceBoxFace();
             }
-        });
-
-        if (readyColumnsCount >= totalTargetColumnsCount) {
-            isLevelGameplayRunning = false;
-            clearInterval(automatedLoopIntervalId);
-            sfxCorrect.play();
-            setTimeout(triggerQuizPhaseTransition, 600);
-        }
+        }, 600);
     }
 
-    function updateSnakeGridGraphics() {
-        // Clear old classes
-        document.querySelectorAll('.grid-cell').forEach(cell => {
-            cell.classList.remove('snake-body-block', 'snake-head-block');
-        });
-
-        // Apply new positioning classes updates
-        snakeBlocks.forEach((block, index) => {
-            const cellNode = document.getElementById(`cell-${block.r}-${block.c}`);
-            if (cellNode) {
-                if (index === 0) {
-                    cellNode.classList.add('snake-head-block');
-                } else {
-                    cellNode.classList.add('snake-body-block');
-                }
-            }
-        });
-    }
-
-    // DIAGNOSTIC QUIZ SYSTEM INTERACTION LOGIC
-    function triggerQuizPhaseTransition() {
-        quizLives = 3;
-        quizQuestionIndex = 0;
-        document.getElementById('widget-lives').classList.remove('invisible');
-        document.getElementById('lbl-lives').innerText = quizLives;
-        serveQuizQuestionModal();
-    }
-
-    function serveQuizQuestionModal() {
-        wrongAttemptsOnThisQuestion = 0;
+    function launchQuestionBanner(tileObj) {
+        wrongAttemptsOnQuestion = 0;
         document.getElementById('box-hint-alert').classList.add('hidden');
+        document.getElementById('lbl-quiz-headline').innerText = `🔬 ${tileObj.term.replace('<br>', ' ').toUpperCase()}`;
 
-        let targetDataObj;
-        let questionsCountLimit = currentTierLevel + 1;
+        // Pull a randomized question matching the system checks sequence limits
+        const index = Math.floor(Math.random() * scenarioQuestionPool.length);
+        const targetQ = scenarioQuestionPool[index];
 
-        if (currentTierLevel === 4) {
-            targetDataObj = bonusQuestionData;
-            document.getElementById('lbl-quiz-headline').innerText = "🌟 GRAND BONUS CHALLENGE 🌟";
-        } else {
-            // Calculate slice index sequence to match exactly corresponding questions
-            let startIndex = (currentTierLevel === 1) ? 0 : (currentTierLevel === 2 ? 2 : 5);
-            targetDataObj = masterQuestionPool[startIndex + quizQuestionIndex];
-            document.getElementById('lbl-quiz-headline').innerText = `🔬 ANATOMY CHALLENGE ${quizQuestionIndex + 1} OF ${questionsCountLimit}`;
-        }
+        document.getElementById('box-question-text').innerText = targetQ.q;
 
-        document.getElementById('box-question-text').innerText = targetDataObj.q;
+        const container = document.getElementById('box-options-layout');
+        container.innerHTML = "";
 
-        const optionsContainer = document.getElementById('box-options-layout');
-        optionsContainer.innerHTML = "";
-
-        const scrambledOptions = [...targetDataObj.o].sort(() => Math.random() - 0.5);
+        // Scramble options completely
+        const scrambledOptions = [...targetQ.o].sort(() => Math.random() - 0.5);
         scrambledOptions.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = "btn-option";
             btn.innerText = opt;
-            btn.onclick = () => submitAnswerChoice(opt, targetDataObj.a, targetDataObj.h);
-            optionsContainer.appendChild(btn);
+            btn.onclick = () => verifyAnswerChoice(opt, targetQ.a, targetQ.h);
+            container.appendChild(btn);
         });
 
         document.getElementById('quiz-overlay').classList.remove('hidden');
     }
 
-    function submitAnswerChoice(selectedText, correctText, clueHintText) {
-        let maxQuestionsForThisLevel = currentTierLevel + 1;
-
-        if (selectedText === correctText) {
-            sfxCorrect.play();
-            totalMarks += 25;
-            document.getElementById('lbl-marks').innerText = totalMarks;
-
-            if (currentTierLevel === 4) {
-                // Perfect game completion bonus route victory trigger!
-                sfxClaps.play();
-                document.getElementById('quiz-overlay').classList.add('hidden');
-                document.getElementById('certificate-overlay').classList.remove('hidden');
-                return;
-            }
-
-            quizQuestionIndex++;
-            if (quizQuestionIndex < maxQuestionsForThisLevel) {
-                serveQuizQuestionModal();
-            } else {
-                // Completed all questions for this tier sequence level loop
-                document.getElementById('quiz-overlay').classList.add('hidden');
-                
-                if (currentTierLevel < 3) {
-                    currentTierLevel++;
-                    loadSnakeLevelPhase();
-                } else if (currentTierLevel === 3) {
-                    // Ready for high-stakes single bonus final round evaluation!
-                    currentTierLevel = 4;
-                    serveQuizQuestionModal();
-                }
-            }
+    function verifyAnswerChoice(chosen, correct, hintText) {
+        if (chosen === correct) {
+            playSound('snd-correct');
+            totalScore += 20;
+            document.getElementById('lbl-score').innerText = totalScore;
+            document.getElementById('quiz-overlay').classList.add('hidden');
+            alert("🌟 Fantastic job! That is correct!");
+            resetDiceBoxFace();
         } else {
-            sfxWrong.play();
-            quizLives--;
-            wrongAttemptsOnThisQuestion++;
-            document.getElementById('lbl-lives').innerText = quizLives;
-
-            if (quizLives <= 0) {
-                alert("Game Over! Let's try this column challenge once more!");
-                window.location.reload();
-                return;
-            }
-
-            if (wrongAttemptsOnThisQuestion >= 1) {
+            playSound('snd-wrong');
+            wrongAttemptsOnQuestion++;
+            
+            // Deploy hint system after 1st incorrect attempt
+            if (wrongAttemptsOnQuestion === 1) {
                 const hintBox = document.getElementById('box-hint-alert');
-                hintBox.innerText = `💡 HINT: ${clueHintText}`;
+                hintBox.innerText = `💡 HINT: ${hintText}`;
                 hintBox.classList.remove('hidden');
+                alert("Not quite! Look at the yellow hint box that just popped up!");
+            } else {
+                // Second incorrect guess triggers life depletion
+                userLives--;
+                updateLivesHUD();
+                document.getElementById('quiz-overlay').classList.add('hidden');
+
+                if (userLives <= 0) {
+                    alert("No lives remaining! Let's start fresh from the beginning.");
+                    window.location.reload();
+                } else {
+                    alert(`Oops! The textbook answer was: ${correct}.\nSlide back 1 space for safety!`);
+                    if (coinPosition > 0) coinPosition--;
+                    renderTokenCoordinates();
+                    resetDiceBoxFace();
+                }
             }
         }
     }
+
+    function launchTrapBanner(tileObj) {
+        document.getElementById('lbl-alert-headline').innerText = tileObj.effect === 'forward' ? "✨ SPECIAL BOOST" : "🚨 HAZARD TRAP";
+        document.getElementById('lbl-alert-headline').style.color = tileObj.effect === 'forward' ? "var(--success)" : "var(--danger)";
+        document.getElementById('lbl-alert-body').innerText = tileObj.msg;
+        document.getElementById('alert-overlay').classList.remove('hidden');
+    }
+
+    function closeTrapBannerWindow() {
+        document.getElementById('alert-overlay').classList.add('hidden');
+        const activeTile = boardTrackRoute[coinPosition];
+
+        if (activeTile.effect === 'back') {
+            coinPosition -= activeTile.val;
+            if (coinPosition < 0) coinPosition = 0;
+        } else if (activeTile.effect === 'forward') {
+            coinPosition += activeTile.val;
+        } else if (activeTile.effect === 'skip') {
+            isTurnSkipped = true;
+            document.getElementById('lbl-roll-tag').innerText = "SKIP ACTIVE 💤";
+        }
+
+        renderTokenCoordinates();
+        resetDiceBoxFace();
+    }
+
+    function updateLivesHUD() {
+        let hearts = "";
+        for (let i = 0; i < 3; i++) {
+            hearts += (i < userLives) ? "❤️" : "🖤";
+        }
+        document.getElementById('lbl-lives').innerText = hearts;
+    }
+
+    function resetDiceBoxFace() {
+        document.getElementById('dice-box-container').innerText = "🎲";
+        document.getElementById('lbl-roll-tag').innerText = "Your Turn!";
+    }
+
+    function triggerVictoryTerminalState() {
+        playSound('snd-claps');
+        document.getElementById('lbl-final-score').innerText = totalScore;
+        
+        let feedback = "Incredible Job! You are a certified Bio-Master! 🧠";
+        if (totalScore < 60) feedback = "Good effort! Try playing again to beat your high score! 🌟";
+        
+        document.getElementById('lbl-final-feedback').innerText = feedback;
+        document.getElementById('victory-overlay').classList.remove('hidden');
+    }
+
+    // Dynamic scale listener guarantees responsiveness on size changes
+    window.addEventListener('resize', renderTokenCoordinates);
 </script>
 
 </body>
