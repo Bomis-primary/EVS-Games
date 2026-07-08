@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bio-Column Sorting Expedition</title>
+    <title>Bio-Tube Matcher | Organ Adventure</title>
     <style>
         :root {
-            --bg-canvas: #f7d794;
-            --primary: #4b7bec;
+            --primary: #00d2d3;
             --accent: #ff4757;
-            --success: #20bf6b;
-            --dark: #2f3542;
+            --success: #1dd1a1;
+            --bg-dark: #121214;
+            --tube-border: #57606f;
+            --neon-glow: 0 0 20px rgba(0, 210, 211, 0.4);
         }
 
         * {
@@ -25,10 +26,106 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #f1f2f6;
+            background-color: var(--bg-dark);
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: white;
         }
 
+        /* Full Screen Flow Windows */
+        .flow-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            background: #121214;
+            padding: 30px;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Screen 1: Splash */
+        #splash-screen { background: #121214; }
+        .logo-img {
+            max-width: 250px;
+            height: auto;
+            filter: drop-shadow(0 0 25px rgba(255,255,255,0.1));
+            animation: pulseLogo 2s infinite ease-in-out;
+        }
+
+        /* Screen 2: Title Menu */
+        #menu-screen {
+            background: linear-gradient(135deg, #1e222b 0%, #111318 100%);
+        }
+        .game-main-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 4px 15px rgba(0, 210, 211, 0.4);
+            margin-bottom: 10px;
+        }
+        .game-subtitle {
+            font-size: 1.3rem;
+            color: #a4b0be;
+            margin-bottom: 40px;
+        }
+
+        /* Gamified Buttons */
+        .arcade-btn {
+            background: linear-gradient(135deg, #00d2d3 0%, #00a8ff 100%);
+            color: #121214;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 210, 211, 0.4);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .arcade-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 30px rgba(0, 210, 211, 0.6);
+        }
+
+        /* Screen 3: Instructions Card */
+        .instruction-box {
+            background: #1e222b;
+            border: 2px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 550px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .instruction-box h2 {
+            font-size: 2rem;
+            color: #ff9f43;
+            margin-bottom: 20px;
+        }
+        .kids-list {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        .kids-list li {
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            color: #daf1f9;
+        }
+
+        /* Main App Wrapper Engine */
         #app-wrapper {
             position: relative;
             width: 100%;
@@ -36,35 +133,31 @@
             max-width: 1024px;
             max-height: 768px;
             margin: auto;
-            background: linear-gradient(135deg, #f5f6fa 0%, #dcdde1 100%);
-            box-shadow: 0 0 30px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
+            padding: 20px;
         }
 
-        /* Top Bar Interface Metrics Layout */
         #hud-dashboard {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 5px 10px;
-        }
-        .hud-widget {
-            background: white;
-            padding: 10px 20px;
-            border-radius: 14px;
-            font-weight: bold;
-            font-size: 1.05rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            color: var(--dark);
-            border: 2px solid #fff;
         }
 
-        /* Sorting Play Workspace */
+        .hud-widget {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(5px);
+        }
+        #quiz-lives-container { color: var(--accent); border-color: rgba(255, 71, 87, 0.2); }
+
         #gameplay-arena {
             flex: 1;
             width: 100%;
@@ -77,107 +170,127 @@
 
         .stage-banner {
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--primary);
-            text-align: center;
-            background: rgba(75, 119, 236, 0.1);
-            padding: 6px 20px;
-            border-radius: 20px;
+            background: rgba(0, 210, 211, 0.08);
+            padding: 8px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 210, 211, 0.15);
         }
 
-        /* Dynamic Container for the Host Columns */
         #columns-container {
             display: flex;
             justify-content: center;
-            align-items: stretch;
-            gap: 20px;
+            align-items: flex-end;
+            gap: 40px;
             width: 100%;
-            padding: 10px;
-            min-height: 220px;
+            padding: 20px;
+            min-height: 310px;
         }
 
+        /* Interactive Tube Setup */
         .host-column {
-            flex: 1;
-            background: white;
-            border: 3px dashed #ced6e0;
-            border-radius: 16px;
+            width: 115px;
+            height: 270px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 3px solid var(--tube-border);
+            border-top: none;
+            border-bottom-left-radius: 60px;
+            border-bottom-right-radius: 60px;
             display: flex;
-            flex-direction: column;
+            flex-direction: column-reverse;
             align-items: center;
             justify-content: flex-start;
-            padding: 15px 10px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
+            padding: 15px 5px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .host-column.hovered {
+        .host-column:hover {
+            background: rgba(255, 255, 255, 0.05);
             border-color: var(--primary);
-            background: rgba(75, 119, 236, 0.05);
+            box-shadow: var(--neon-glow);
         }
 
         .column-title {
-            font-weight: 800;
-            font-size: 0.95rem;
-            color: var(--dark);
-            margin-bottom: 15px;
+            position: absolute;
+            top: -45px;
+            width: 140px;
+            left: -12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #ced6e0;
             text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .drop-zone {
-            width: 100%;
-            flex: 1;
-            min-height: 120px;
-            border-radius: 10px;
+        /* Bio Capsule Stacking Orbs */
+        .biocapsule-orb {
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            margin-bottom: 6px;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            font-weight: 800;
+            font-size: 0.8rem;
+            text-align: center;
+            color: white;
+            padding: 8px;
+            animation: dropInBall 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.6), inset 8px 8px 15px rgba(255,255,255,0.4);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
         }
 
-        /* Item Deck Pool */
+        @keyframes dropInBall {
+            from { transform: translateY(-250px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         #cards-deck {
             width: 100%;
-            min-height: 100px;
-            background: white;
-            border-radius: 18px;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.05);
+            min-height: 110px;
+            background: rgba(255,255,255,0.01);
+            border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 15px;
             padding: 15px;
             flex-wrap: wrap;
-            border: 2px solid #e4e7eb;
+            border: 1px solid rgba(255,255,255,0.04);
         }
 
         .draggable-card {
-            background: linear-gradient(135deg, #70a1ff 0%, #1e90ff 100%);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: grab;
-            box-shadow: 0 4px 8px rgba(30, 144, 255, 0.25);
-            border: 2px solid white;
-            transition: transform 0.2s;
+            background: linear-gradient(135deg, #2f3542 0%, #1e222b 100%);
+            color: #f1f2f6;
+            padding: 14px 22px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .draggable-card:active { cursor: grabbing; transform: scale(0.96); }
-        .draggable-card.placed {
-            background: linear-gradient(135deg, #2ed573 0%, #7bed9f 100%);
-            box-shadow: none;
-            cursor: default;
-            border-color: transparent;
+        .draggable-card.selected {
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+            border-color: #ff6b81;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+            transform: scale(1.05);
         }
 
-        /* Interactive Quiz Modal Overlays */
+        /* Interactive overlays */
         #quiz-overlay, #certificate-overlay {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: rgba(47, 53, 66, 0.95);
-            backdrop-filter: blur(5px);
+            background: rgba(10, 11, 14, 0.97);
+            backdrop-filter: blur(8px);
             z-index: 50;
             display: flex;
             justify-content: center;
@@ -186,89 +299,84 @@
         }
 
         .modal-card {
-            background: white;
+            background: #1e222b;
             width: 100%;
-            max-width: 520px;
+            max-width: 540px;
             border-radius: 24px;
-            padding: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            padding: 35px;
             text-align: center;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.5);
         }
 
         .quiz-q-box {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--dark);
-            background: #f1f2f6;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.04);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
             text-align: left;
+            border-left: 5px solid var(--primary);
             line-height: 1.4;
         }
 
         .hint-alert-box {
-            background: #ffeaa7;
-            color: #d63031;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: bold;
+            background: rgba(241, 196, 15, 0.15);
+            color: #f1c40f;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
             margin-bottom: 15px;
             text-align: left;
-            border-left: 5px solid #f1c40f;
+            border: 1px solid rgba(241, 196, 15, 0.25);
         }
 
-        .options-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
 
         .btn-option {
-            background: #f1f2f6;
-            border: 2px solid #ced6e0;
-            padding: 12px 15px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 1rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 15px 18px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1.05rem;
             cursor: pointer;
             text-align: left;
-            color: var(--dark);
+            color: #daf1f9;
             transition: all 0.2s;
         }
-        .btn-option:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-option:hover { background: var(--primary); color: #121214; font-weight: 700; }
 
-        /* Certificate View Sheet Component */
         .cert-canvas {
-            background: #fff;
-            border: 10px double #f1c40f;
-            border-radius: 4px;
-            padding: 30px;
+            background: #ffffff;
+            border: 10px double #c5a847;
+            border-radius: 12px;
+            padding: 40px 30px;
             width: 100%;
             max-width: 620px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            color: var(--dark);
+            color: #1e222b;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
         }
-
         .cert-input-field {
             border: none;
-            border-bottom: 3px solid var(--dark);
+            border-bottom: 3px dashed #1e222b;
             width: 80%;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             text-align: center;
-            font-weight: bold;
-            margin: 20px 0;
+            font-weight: 800;
+            margin: 25px 0;
             outline: none;
-            color: var(--primary);
+            color: #0b7273;
             text-transform: uppercase;
+        }
+
+        @keyframes pulseLogo {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.04); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
         }
 
         .hidden { display: none !important; }
@@ -277,273 +385,334 @@
 </head>
 <body>
 
-<div id="app-wrapper">
+<!-- SCREEN 1: SPLASH SCREEN (5 SECONDS) -->
+<div id="splash-screen" class="flow-screen">
+    <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
+</div>
 
+<!-- SCREEN 2: GAME MENU SCREEN -->
+<div id="menu-screen" class="flow-screen hidden">
+    <h1 class="game-main-title">ANATOMY TUBE SORT</h1>
+    <p class="game-subtitle">The Ultimate Biological Sorting Quest</p>
+    <button class="arcade-btn" onclick="showInstructionsScreen()">Start Game</button>
+</div>
+
+<!-- SCREEN 3: GRADE-3 FRIENDLY INSTRUCTIONS -->
+<div id="instruction-screen" class="flow-screen hidden">
+    <div class="instruction-box">
+        <h2>How To Play! 🎮</h2>
+        <ul class="kids-list">
+            <li>🎯 <b>Step 1:</b> Tap a floating body card at the bottom to pick it up!</li>
+            <li>🧪 <b>Step 2:</b> Tap the correct glass Tube above to drop it inside!</li>
+            <li>🧠 <b>Step 3:</b> When the tubes are full, solve the pop-up quiz questions!</li>
+            <li>❤️ <b>Watch Out:</b> Don't lose all your quiz lives! Check hints if you get stuck.</li>
+        </ul>
+        <button class="arcade-btn" onclick="launchMainGameEngine()">Let's Play! 🚀</button>
+    </div>
+</div>
+
+<!-- MAIN CORE CONTENT GAMEPLAY -->
+<div id="app-wrapper">
     <div id="hud-dashboard">
-        <div class="hud-widget">🏆 Marks: <span id="lbl-marks">0</span></div>
-        <div class="hud-widget" style="color: var(--accent);" id="quiz-lives-container">❤️ Quiz Lives: <span id="lbl-lives">3</span></div>
+        <div class="hud-widget">🏆 Score: <span id="lbl-marks">0</span></div>
+        <div class="hud-widget" id="quiz-lives-container">❤️ Quiz Lives: <span id="lbl-lives">3</span></div>
     </div>
 
     <div id="gameplay-arena">
-        <div class="stage-banner" id="lbl-stage-status">Level 1: Fill 2 Target Columns</div>
-        
+        <div class="stage-banner" id="lbl-stage-status">Level 1: Match 2 System Tubes</div>
         <div id="columns-container"></div>
-
         <div id="cards-deck"></div>
     </div>
 
     <div id="quiz-overlay" class="hidden">
         <div class="modal-card">
-            <h3 id="lbl-quiz-headline" style="color: var(--primary); font-weight: 800; font-size: 1.3rem;">🔬 DIAGNOSTIC SCANNER</h3>
-            <div class="quiz-q-box" id="box-question-text">Question content descriptive string prompt text goes here...</div>
-            <div class="hint-alert-box hidden" id="box-hint-alert">💡 HINT: Sample hint system text data goes here.</div>
+            <h3 id="lbl-quiz-headline" style="color: var(--primary); font-weight: 800; font-size: 1.3rem;">🔬 SCANNING QUESTION</h3>
+            <div class="quiz-q-box" id="box-question-text">Analyzing loop...</div>
+            <div class="hint-alert-box hidden" id="box-hint-alert">💡 HINT: Clue here.</div>
             <div class="options-grid" id="box-options-layout"></div>
         </div>
     </div>
 
     <div id="certificate-overlay" class="hidden">
         <div class="cert-canvas">
-            <div style="font-size: 3.5rem; margin-bottom: 5px;">📜</div>
-            <h1 style="font-size: 2.2rem; font-family: 'Georgia', serif; letter-spacing: 1px; color: #b33939;">BIO-MASTER CERTIFICATE</h1>
-            <p style="margin-top: 10px; font-weight: 600; font-size: 1rem; color: #57606f;">This certifies that the young scientist</p>
+            <div style="font-size: 4rem; margin-bottom: 10px;">📜</div>
+            <h1 style="font-size: 2.3rem; font-family: 'Georgia', serif; color: #7f2e2e;">BIO-MASTER CERTIFICATE</h1>
+            <p style="margin-top: 10px; font-weight: 600; color: #2f3542;">This credential is proudly awarded to:</p>
             <input type="text" class="cert-input-field" placeholder="[ TYPE YOUR NAME HERE ]" id="txt-student-name">
-            <p style="font-weight: bold; font-size: 1.1rem; color: var(--success); margin-bottom: 20px;">
-                Has successfully sorted all columns and mastered all 9 anatomical system categories!
+            <p style="font-weight: bold; font-size: 1.15rem; color: #10ac84; margin-bottom: 25px;">
+                For successfully sorting all biological tubes and mastering the 9 Core Anatomical Challenges!
             </p>
-            <button class="btn-option" style="text-align:center; display:inline-block; background: var(--primary); color:white; padding: 12px 35px;" onclick="window.location.reload()">PLAY AGAIN</button>
+            <button class="btn-option" style="text-align:center; display:inline-block; background: #2f3542; color:white; padding: 12px 35px; border-radius: 30px; border:none;" onclick="window.location.reload()">PLAY AGAIN</button>
         </div>
     </div>
-
 </div>
 
 <script>
-    // Master database containing custom content for all required elements cleanly segmented
-    const systemDatabase = [
-        { id: "sys1", name: "Body Composition", host: "Cells & Tissues", q: "What basic structural building blocks work together to form tissues inside the human body?", o: ["Cells", "Bricks", "Bones", "Muscles"], a: "Cells", h: "These are the microscopic living building blocks of life." },
-        { id: "sys2", name: "Skeletal System", host: "Bony Framework", q: "Approximately how many structural bones make up the entire framework of an adult human skeleton?", o: ["206 Bones", "300 Bones", "100 Bones", "500 Bones"], a: "206 Bones", h: "Adults have fewer bones than babies because some bones fuse together." },
-        { id: "sys3", name: "Muscular System", host: "Muscle Web", q: "How many independent muscles comprise the network responsible for body movement?", o: ["More than 600", "Exactly 206", "Around 100", "Precisely 50"], a: "More than 600", h: "There are nearly three times as many muscles as there are bones." },
-        { id: "sys4", name: "Respiratory System", host: "Breathing Lungs", q: "Which primary chest cavities expand and contract continuously to absorb oxygen from air?", o: ["Lungs", "Heart", "Stomach", "Kidneys"], a: "Lungs", h: "These sponge-like organs fill up with air when you breathe in." },
-        { id: "sys5", name: "Digestive System", host: "Food Pipeline", q: "In which processing segment of the gastrointestinal tract is water reabsorbed from indigestible material?", o: ["Large Intestine", "Stomach", "Mouth", "Windpipe"], a: "Large Intestine", h: "It's the long tube near the end of the digestive journey." },
-        { id: "sys6", name: "Nervous System", host: "Brain Core", q: "Which core organ serves as the command headquarters, controlling every action your body performs?", o: ["Brain", "Heart", "Lungs", "Skin"], a: "Brain", h: "This head organ sends electrical signals through your nerves." },
-        { id: "sys7", name: "Circulatory System", host: "Heart Network", q: "Which muscle engine acts as the pump that continuously drives blood flow throughout your vessels?", o: ["Heart", "Brain", "Stomach", "Liver"], a: "Heart" , h: "This fist-sized muscle thumps rhythmically inside your chest." },
-        { id: "sys8", name: "Excretory System", host: "Waste Filter", q: "Which filtration organs extract liquid metabolic wastes directly out of your bloodstream?", o: ["Kidneys", "Lungs", "Muscles", "Bones"], a: "Kidneys", h: "You have a pair of these bean-shaped filters in your lower back." },
-        { id: "sys9", name: "Reproductive System", host: "Life Generation", q: "What is the primary function of the biological system responsible for creating offspring to continue a species?", o: ["Reproduction", "Digestion", "Breathing", "Excretory"], a: "Reproduction", h: "It ensures that living things can have families and continue across generations." }
+    // Audio elements mapped directly to your assets structure
+    const sfxCorrect = new Audio('assets/correct.mp3');
+    const sfxWrong = new Audio('assets/wrong.mp3');
+    const sfxClap = new Audio('assets/freesound_community-claps-44774.mp3');
+
+    const colorSpectrum = ["#ff4757", "#2ed573", "#1e90ff", "#ffa502", "#9b59b6", "#00d2d3", "#ff6b81", "#32ff7e", "#70a1ff"];
+
+    const masterSystemPool = [
+        // Level 1 Items
+        { id: "sys1", name: "Cells & Tissues", host: "Body Composition", q: "What basic structural building blocks work together to form tissues inside the human body?", o: ["Cells", "Bones", "Bricks", "Muscles"], a: "Cells", h: "These are the tiny microscopic components found in every living thing." },
+        { id: "sys2", name: "Skeletal System", host: "Bony Framework", q: "Approximately how many structural bones make up the entire framework of an adult human skeleton?", o: ["206 Bones", "300 Bones", "100 Bones", "600 Bones"], a: "206 Bones", h: "Adults have fewer bones than babies because some of them fuse together over time." },
+        
+        // Level 2 Items
+        { id: "sys3", name: "Muscular System", host: "Muscle Web", q: "How many independent muscles comprise the network responsible for body movement and strength?", o: ["More than 600", "Exactly 206", "Around 100", "Fewer than 50"], a: "More than 600", h: "There are nearly three times as many muscles as there are bones in your body!" },
+        { id: "sys4", name: "Respiratory System", host: "Breathing Lungs", q: "Which primary chest organs expand and contract continuously to absorb fresh oxygen from air?", o: ["Lungs", "Heart", "Stomach", "Kidneys"], a: "Lungs", h: "These sponge-like organs fill up with air whenever you inhale." },
+        { id: "sys5", name: "Digestive System", host: "Food Pipeline", q: "In which processing segment of the gastrointestinal tract is water reabsorbed from remaining undigested material?", o: ["Large Intestine", "Stomach", "Mouth", "Windpipe"], a: "Large Intestine", h: "It is the wide, smooth track located toward the very end of your digestion system." },
+        
+        // Level 3 Items
+        { id: "sys6", name: "Nervous System", host: "Brain Core", q: "Which core organ serves as the main command center, managing every movement and thought your body performs?", o: ["Brain", "Heart", "Lungs", "Skin"], a: "Brain", h: "This organ sits safely inside your skull and communicates through electrical signals." },
+        { id: "sys7", name: "Circulatory System", host: "Heart Network", q: "Which muscle engine acts as a continuous pump that drives blood flow throughout your blood vessels?", o: ["Heart", "Brain", "Stomach", "Liver"], a: "Heart", h: "This fist-sized muscle beats rhythmically inside the center-left side of your chest." },
+        { id: "sys8", name: "Excretory System", host: "Waste Filter", q: "Which filtration organs extract liquid metabolic wastes directly out of your bloodstream to keep it clean?", o: ["Kidneys", "Lungs", "Muscles", "Bones"], a: "Kidneys", h: "You have a left and right one of these bean-shaped organs in your lower back area." },
+        { id: "sys9", name: "Reproductive System", host: "Life Generation", q: "What is the primary function of the biological system responsible for creating offspring to continue a species?", o: ["Reproduction", "Digestion", "Breathing", "Excretion"], a: "Reproduction", h: "This process ensures that living populations can raise families and pass life down to future generations." }
     ];
 
-    // High-stakes tier bonus level scenario block item
-    const bonusQuestionData = {
-        q: "Ultimate Challenge: How do your body systems work together to keep you alive and healthy?",
-        o: ["They work completely alone", "They coordinate together as a team", "They stop working when you run", "Only the brain works"],
+    const highStakesBonusRound = {
+        q: "Ultimate Grand Challenge: How do all nine human body systems behave together inside a healthy individual?",
+        o: ["They coordinate together as a team", "They operate completely independently", "They shut down entirely during exercise", "Only the brain works at any time"],
         a: "They coordinate together as a team",
-        h: "Think about how your heart pumps blood to help your muscles move when you exercise!"
+        h: "Think about how your heart beats faster to deliver oxygen from your lungs to your muscles when running!"
     };
 
-    // Tracking variables for engine state loops
-    let currentColumnsCount = 2; // Iteratively steps from 2 -> 3 -> 4
-    let marksScore = 0;
+    let currentTierColumns = 2; 
+    let totalMarks = 0;
     let quizLives = 3;
-    let poolUnusedItems = [];
-    let currentTierActiveHosts = [];
-    let placedMatchesCount = 0;
     
-    let activeQuizQuestionsQueue = [];
-    let targetQuizAnswersNeeded = 0;
-    let activeQuestionIndex = 0;
-    let incorrectAttemptsThisQuestion = 0;
+    let activeTierItems = [];
+    let successfullyPlacedCount = 0;
+    let quizQuestionIndex = 0;
+    let wrongQuizAttemptsOnThisQuestion = 0;
+    let currentlySelectedCardId = null;
 
+    // SCREEN FLOW ENGINE MANIPULATION
     window.onload = function() {
-        poolUnusedItems = [...systemDatabase];
-        // Scramble array sequence to serve randomized item flows securely
-        poolUnusedItems.sort(() => Math.random() - 0.5);
-        initiateColumnFillingPhase();
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                document.getElementById('menu-screen').classList.remove('hidden');
+            }, 500);
+        }, 5000); // Exactly 5 seconds splash display
     };
 
-    function initiateColumnFillingPhase() {
-        document.getElementById('quiz-lives-container').classList.add('invisible');
-        document.getElementById('lbl-stage-status').innerText = `Level State: Match & Fill ${currentColumnsCount} Columns`;
-        
-        placedMatchesCount = 0;
-        currentTierActiveHosts = [];
-
-        // Pull the exact amount of items needed for the current grid level layout
-        for(let i = 0; i < currentColumnsCount; i++) {
-            if(poolUnusedItems.length > 0) {
-                currentTierActiveHosts.push(poolUnusedItems.pop());
-            }
-        }
-
-        buildSortingInterfaceElements();
+    function showInstructionsScreen() {
+        document.getElementById('menu-screen').classList.add('hidden');
+        document.getElementById('instruction-screen').classList.remove('hidden');
     }
 
-    function buildSortingInterfaceElements() {
+    function launchMainGameEngine() {
+        document.getElementById('instruction-screen').classList.add('hidden');
+        startCurrentLevelPhase();
+    }
+
+    // GAMEPLAY LOGIC
+    function startCurrentLevelPhase() {
+        successfullyPlacedCount = 0;
+        activeTierItems = [];
+        currentlySelectedCardId = null;
+        
+        document.getElementById('quiz-lives-container').classList.add('invisible');
+
+        let startIndex = 0;
+        if (currentTierColumns === 3) startIndex = 2;
+        if (currentTierColumns === 4) startIndex = 5;
+
+        for(let i = 0; i < currentTierColumns; i++) {
+            activeTierItems.push(masterSystemPool[startIndex + i]);
+        }
+
+        document.getElementById('lbl-stage-status').innerText = `Level ${currentTierColumns - 1}: Fill ${currentTierColumns} Target Tubes`;
+        renderMatchingInterfaceGrid();
+    }
+
+    function renderMatchingInterfaceGrid() {
         const columnsWrapper = document.getElementById('columns-container');
         const cardsDeck = document.getElementById('cards-deck');
         
         columnsWrapper.innerHTML = "";
         cardsDeck.innerHTML = "";
 
-        // Build HTML Host Target Slots
-        currentTierActiveHosts.forEach(item => {
+        activeTierItems.forEach(item => {
             const col = document.createElement('div');
             col.className = "host-column";
-            col.id = `host-${item.id}`;
-            col.innerHTML = `<div class="column-title">${item.host}</div><div class="drop-zone" id="drop-${item.id}">[ Drop ${item.name} Here ]</div>`;
+            col.id = `column-${item.id}`;
+            col.innerHTML = `<div class="column-title">${item.host}</div>`;
             
-            // Set up Native Drag & Drop Handlers
-            col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('hovered'); });
-            col.addEventListener('dragleave', () => col.classList.remove('hovered'));
-            col.addEventListener('drop', (e) => {
-                e.preventDefault();
-                col.classList.remove('hovered');
-                const draggedId = e.dataTransfer.getData("text/plain");
-                handleItemPlacementVerification(draggedId, item.id, col.querySelector('.drop-zone'));
-            });
-
+            col.onclick = function() {
+                if (currentlySelectedCardId !== null) {
+                    evaluatePlacement(currentlySelectedCardId, item.id, col);
+                }
+            };
             columnsWrapper.appendChild(col);
         });
 
-        // Build Scrambled Draggable Entities at Bottom Deck
-        const scrambledDeckItems = [...currentTierActiveHosts].sort(() => Math.random() - 0.5);
-        scrambledDeckItems.forEach(item => {
+        const shuffledDeckList = [...activeTierItems].sort(() => Math.random() - 0.5);
+        shuffledDeckList.forEach(item => {
             const card = document.createElement('div');
             card.className = "draggable-card";
             card.id = `card-${item.id}`;
             card.innerText = item.name;
-            card.setAttribute('draggable', 'true');
             
-            card.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData("text/plain", item.id);
-            });
+            card.onclick = function(e) {
+                e.stopPropagation();
+                if (card.classList.contains('hidden')) return;
 
+                const wasSelected = card.classList.contains('selected');
+                document.querySelectorAll('.draggable-card').forEach(c => c.classList.remove('selected'));
+                
+                if (!wasSelected) {
+                    card.classList.add('selected');
+                    currentlySelectedCardId = item.id;
+                } else {
+                    currentlySelectedCardId = null;
+                }
+            };
             cardsDeck.appendChild(card);
         });
     }
 
-    function handleItemPlacementVerification(draggedId, hostId, dropZoneElement) {
-        if(draggedId === hostId) {
-            // Success: Snap the card cleanly inside the drop zone
-            const targetCard = document.getElementById(`card-${draggedId}`);
-            targetCard.setAttribute('draggable', 'false');
-            targetCard.classList.add('placed');
+    function evaluatePlacement(selectedCardId, targetColumnHostId, targetColumnElement) {
+        if (selectedCardId === targetColumnHostId) {
+            sfxCorrect.play(); // Play dynamic correct action trigger audio
             
-            dropZoneElement.innerHTML = "";
-            dropZoneElement.appendChild(targetCard);
+            const matchedItemObj = activeTierItems.find(i => i.id === selectedCardId);
+            const cardNode = document.getElementById(`card-${selectedCardId}`);
             
-            placedMatchesCount++;
-            marksScore += 10;
-            document.getElementById('lbl-marks').innerText = marksScore;
+            cardNode.classList.add('hidden');
+            cardNode.classList.remove('selected');
 
-            if(placedMatchesCount === currentColumnsCount) {
-                setTimeout(() => { launchQuizPhaseSequence(); }, 600);
+            const ballOrb = document.createElement('div');
+            ballOrb.className = "biocapsule-orb";
+            
+            const assignedColor = colorSpectrum[Math.floor(Math.random() * colorSpectrum.length)];
+            ballOrb.style.background = `radial-gradient(circle at 30% 30%, ${assignedColor} 0%, #000000 100%)`;
+            ballOrb.innerText = matchedItemObj.name;
+
+            targetColumnElement.appendChild(ballOrb);
+            
+            currentlySelectedCardId = null;
+            successfullyPlacedCount++;
+            totalMarks += 10;
+            document.getElementById('lbl-marks').innerText = totalMarks;
+
+            if (successfullyPlacedCount === currentTierColumns) {
+                setTimeout(() => { triggerQuizPhaseSequence(); }, 600);
             }
         } else {
-            // Visual mismatch warning indicator feedback
-            dropZoneElement.style.background = "rgba(255, 71, 87, 0.2)";
-            setTimeout(() => { dropZoneElement.style.background = ""; }, 400);
+            sfxWrong.play(); // Play error audio feedback loop trigger 
+            
+            targetColumnElement.style.borderColor = "var(--accent)";
+            targetColumnElement.style.boxShadow = "0 0 15px rgba(255, 71, 87, 0.4)";
+            
+            setTimeout(() => { 
+                targetColumnElement.style.borderColor = ""; 
+                targetColumnElement.style.boxShadow = "";
+            }, 400);
+            
+            currentlySelectedCardId = null;
+            document.querySelectorAll('.draggable-card').forEach(c => c.classList.remove('selected'));
         }
     }
 
-    function launchQuizPhaseSequence() {
-        document.getElementById('quiz-lives-container').classList.remove('invisible');
-        activeQuizQuestionsQueue = [...currentTierActiveHosts];
-        targetQuizAnswersNeeded = currentColumnsCount;
-        activeQuestionIndex = 0;
+    function triggerQuizPhaseSequence() {
         quizLives = 3; 
+        document.getElementById('quiz-lives-container').classList.remove('invisible');
         document.getElementById('lbl-lives').innerText = quizLives;
-        
-        serveQuizQuestionOverlay();
+        quizQuestionIndex = 0;
+        serveQuizQuestionModal();
     }
 
-    function serveQuizQuestionOverlay() {
-        incorrectAttemptsThisQuestion = 0;
+    function serveQuizQuestionModal() {
+        wrongQuizAttemptsOnThisQuestion = 0;
         document.getElementById('box-hint-alert').classList.add('hidden');
         
-        let currentQuestionData;
-        if(currentColumnsCount === 5) {
-            // Final Bonus State
-            currentQuestionData = bonusQuestionData;
-            document.getElementById('lbl-quiz-headline').innerText = "🌟 GRAND BONUS QUESTION 🌟";
+        let targetQuestionData;
+        if(currentTierColumns === 5) {
+            targetQuestionData = highStakesBonusRound;
+            document.getElementById('lbl-quiz-headline').innerText = "🌟 GRAND BONUS CHALLENGE 🌟";
         } else {
-            currentQuestionData = activeQuizQuestionsQueue[activeQuestionIndex];
-            document.getElementById('lbl-quiz-headline').innerText = `🔬 QUESTION ${activeQuestionIndex + 1} OF ${targetQuizAnswersNeeded}`;
+            targetQuestionData = activeTierItems[quizQuestionIndex];
+            document.getElementById('lbl-quiz-headline').innerText = `🔬 ANATOMY CHALLENGE ${quizQuestionIndex + 1} OF ${currentTierColumns}`;
         }
 
-        document.getElementById('box-question-text').innerText = currentQuestionData.q;
+        document.getElementById('box-question-text').innerText = targetQuestionData.q;
         
         const optionsBox = document.getElementById('box-options-layout');
         optionsBox.innerHTML = "";
 
-        // Scramble options randomly so they are never in the same layout order
-        const shuffledOptions = [...currentQuestionData.o].sort(() => Math.random() - 0.5);
+        const scrambledOptions = [...targetQuestionData.o].sort(() => Math.random() - 0.5);
         
-        shuffledOptions.forEach(optText => {
+        scrambledOptions.forEach(optionString => {
             const btn = document.createElement('button');
             btn.className = "btn-option";
-            btn.innerText = optText;
-            btn.onclick = () => verifyQuizAnswerSelection(optText, currentQuestionData.a, currentQuestionData.h);
+            btn.innerText = optionString;
+            btn.onclick = () => processQuizAnswerSubmission(optionString, targetQuestionData.a, targetQuestionData.h);
             optionsBox.appendChild(btn);
         });
 
         document.getElementById('quiz-overlay').classList.remove('hidden');
     }
 
-    function verifyQuizAnswerSelection(selectedText, correctAnswer, hintText) {
-        if(selectedText === correctAnswer) {
-            marksScore += 25;
-            document.getElementById('lbl-marks').innerText = marksScore;
+    function processQuizAnswerSubmission(chosenText, correctText, clueHintText) {
+        if(chosenText === correctText) {
+            sfxCorrect.play();
+            totalMarks += 25;
+            document.getElementById('lbl-marks').innerText = totalMarks;
             
-            if(currentColumnsCount === 5) {
-                // Clear bonus game end
+            if(currentTierColumns === 5) {
+                sfxClap.play(); // Play victory crowd claps!
                 document.getElementById('quiz-overlay').classList.add('hidden');
                 document.getElementById('certificate-overlay').classList.remove('hidden');
                 return;
             }
 
-            activeQuestionIndex++;
-            if(activeQuestionIndex < targetQuizAnswersNeeded) {
-                serveQuizQuestionOverlay();
+            quizQuestionIndex++;
+            if(quizQuestionIndex < currentTierColumns) {
+                serveQuizQuestionModal();
             } else {
-                // Tier completed safely. Increment layout scaling step logic engines
                 document.getElementById('quiz-overlay').classList.add('hidden');
-                if(currentColumnsCount === 2) {
-                    currentColumnsCount = 3;
-                    initiateColumnFillingPhase();
-                } else if(currentColumnsCount === 3) {
-                    currentColumnsCount = 4;
-                    initiateColumnFillingPhase();
-                } else if(currentColumnsCount === 4) {
-                    // Activate Bonus Level
-                    currentColumnsCount = 5; 
-                    launchBonusRoundTransition();
+                if(currentTierColumns === 2) {
+                    currentTierColumns = 3;
+                    startCurrentLevelPhase();
+                } else if(currentTierColumns === 3) {
+                    currentTierColumns = 4;
+                    startCurrentLevelPhase();
+                } else if(currentTierColumns === 4) {
+                    currentTierColumns = 5; 
+                    triggerBonusTransitionMode();
                 }
             }
         } else {
-            // Handle incorrect question answer attempt tracking loops
+            sfxWrong.play();
             quizLives--;
-            incorrectAttemptsThisQuestion++;
+            wrongQuizAttemptsOnThisQuestion++;
             document.getElementById('lbl-lives').innerText = quizLives;
 
             if(quizLives <= 0) {
-                alert("Game Over! Running out of question lives. Restarting current layout step.");
+                alert("Game Over! Let's refresh and try this level once more!");
                 window.location.reload();
                 return;
             }
 
-            // Provide Hint dynamically after the 1st wrong attempt
-            if(incorrectAttemptsThisQuestion >= 1) {
-                const hintAlert = document.getElementById('box-hint-alert');
-                hintAlert.innerText = `💡 HINT: ${hintText}`;
-                hintAlert.classList.remove('hidden');
+            if(wrongQuizAttemptsOnThisQuestion >= 1) {
+                const alertContainer = document.getElementById('box-hint-alert');
+                alertContainer.innerText = `💡 HINT: ${clueHintText}`;
+                alertContainer.classList.remove('hidden');
             }
         }
     }
 
-    function launchBonusRoundTransition() {
+    function triggerBonusTransitionMode() {
         document.getElementById('columns-container').innerHTML = "";
         document.getElementById('cards-deck').innerHTML = "";
-        document.getElementById('lbl-stage-status').innerText = "🏆 ALL COLUMNS FILLED! BONUS STAGE UNLOCKED 🏆";
+        document.getElementById('lbl-stage-status').innerText = "🏆 ALL TUBES FILLED! BONUS ROUND UNLOCKED 🏆";
         
-        setTimeout(() => { serveQuizQuestionOverlay(); }, 1500);
+        setTimeout(() => { serveQuizQuestionModal(); }, 1500);
     }
 </script>
 
