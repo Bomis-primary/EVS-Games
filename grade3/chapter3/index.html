@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bio-Tube Matcher | Organ Adventure</title>
+    <title>Anatomy Column Crawler</title>
     <style>
         :root {
-            --primary: #00d2d3;
-            --accent: #ff4757;
-            --success: #1dd1a1;
-            --bg-dark: #121214;
-            --tube-border: #57606f;
-            --neon-glow: 0 0 20px rgba(0, 210, 211, 0.4);
+            --primary-purple: #6c5ce7;
+            --light-purple: #a55eea;
+            --bg-cream: #fcefe3;
+            --hud-bg: #ffffff;
+            --accent-pink: #ff4757;
+            --text-dark: #2f3542;
         }
 
         * {
@@ -26,16 +26,12 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: var(--bg-dark);
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
+            background: linear-gradient(135deg, #fbc531 0%, #f7b731 100%);
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: white;
+            color: var(--text-dark);
         }
 
-        /* Full Screen Flow Windows */
+        /* Introduction Flow Screens */
         .flow-screen {
             position: absolute;
             top: 0;
@@ -53,245 +49,199 @@
             transition: opacity 0.5s ease;
         }
 
-        /* Screen 1: Splash */
         #splash-screen { background: #121214; }
         .logo-img {
-            max-width: 250px;
+            max-width: 240px;
             height: auto;
-            filter: drop-shadow(0 0 25px rgba(255,255,255,0.1));
             animation: pulseLogo 2s infinite ease-in-out;
         }
 
-        /* Screen 2: Title Menu */
         #menu-screen {
-            background: linear-gradient(135deg, #1e222b 0%, #111318 100%);
+            background: linear-gradient(135deg, #fbc531 0%, #f7b731 100%);
         }
-        .game-main-title {
-            font-size: 3rem;
+        .menu-title {
+            font-size: 3.2rem;
             font-weight: 900;
-            color: var(--primary);
-            text-shadow: 0 4px 15px rgba(0, 210, 211, 0.4);
-            margin-bottom: 10px;
-        }
-        .game-subtitle {
-            font-size: 1.3rem;
-            color: #a4b0be;
-            margin-bottom: 40px;
+            color: white;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
         }
 
-        /* Gamified Buttons */
         .arcade-btn {
-            background: linear-gradient(135deg, #00d2d3 0%, #00a8ff 100%);
-            color: #121214;
+            background: var(--primary-purple);
+            color: white;
             border: none;
             padding: 18px 45px;
             font-size: 1.4rem;
             font-weight: 800;
             border-radius: 40px;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(0, 210, 211, 0.4);
-            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
         .arcade-btn:hover {
-            transform: scale(1.08);
-            box-shadow: 0 12px 30px rgba(0, 210, 211, 0.6);
+            transform: scale(1.06);
+            box-shadow: 0 12px 25px rgba(108, 92, 231, 0.6);
         }
 
-        /* Screen 3: Instructions Card */
+        #instruction-screen { background: rgba(0,0,0,0.85); color: white; }
         .instruction-box {
-            background: #1e222b;
-            border: 2px solid rgba(255,255,255,0.05);
+            background: white;
+            color: var(--text-dark);
             border-radius: 24px;
             padding: 35px;
-            max-width: 550px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            max-width: 520px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
-        .instruction-box h2 {
-            font-size: 2rem;
-            color: #ff9f43;
-            margin-bottom: 20px;
-        }
-        .kids-list {
-            list-style: none;
-            text-align: left;
-            margin-bottom: 30px;
-        }
-        .kids-list li {
-            font-size: 1.15rem;
-            margin-bottom: 15px;
-            line-height: 1.4;
-            color: #daf1f9;
-        }
+        .instruction-box h2 { color: var(--primary-purple); margin-bottom: 15px; font-size: 2rem;}
+        .instruction-box ul { list-style: none; text-align: left; margin-bottom: 25px; }
+        .instruction-box ul li { font-size: 1.1rem; margin-bottom: 12px; line-height: 1.4; }
 
-        /* Main App Wrapper Engine */
+        /* Core Application Arena Layout */
         #app-wrapper {
-            position: relative;
             width: 100%;
             height: 100%;
-            max-width: 1024px;
-            max-height: 768px;
+            max-width: 1100px;
             margin: auto;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            padding: 20px;
+            padding: 15px;
+            box-sizing: border-box;
         }
 
+        /* Top HUD Row Bar */
         #hud-dashboard {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 10px;
         }
-
         .hud-widget {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 24px;
-            border-radius: 14px;
-            font-weight: bold;
+            background: var(--hud-bg);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 800;
             font-size: 1.1rem;
-            border: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        #quiz-lives-container { color: var(--accent); border-color: rgba(255, 71, 87, 0.2); }
+        #widget-lives { color: var(--accent-pink); }
 
+        /* Main Game Content Panels */
         #gameplay-arena {
             flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
             width: 100%;
+        }
+
+        /* Original Snake Column Grid View */
+        #grid-canvas-box {
+            width: 480px;
+            height: 440px;
+            background-color: var(--bg-cream);
+            border: 8px solid white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            /* Grid sizing handled dynamically via Javascript */
+        }
+
+        .grid-cell {
+            border: 1px solid rgba(0,0,0,0.02);
+            position: relative;
+            transition: background-color 0.1s ease;
+        }
+
+        /* Snake block styling exactly matching your purple image theme */
+        .snake-body-block {
+            background-color: var(--primary-purple);
+            border-radius: 6px;
+        }
+        .snake-head-block {
+            background-color: var(--light-purple);
+            border-radius: 6px;
+        }
+
+        /* Visual Targets columns matching your gameplay requirement */
+        .target-column-zone {
+            background-color: rgba(108, 92, 231, 0.12);
+            border-left: 2px dashed rgba(108, 92, 231, 0.3);
+            border-right: 2px dashed rgba(108, 92, 231, 0.3);
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            justify-content: flex-end;
             align-items: center;
-            margin: 15px 0;
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: var(--primary-purple);
+            text-align: center;
         }
-
-        .stage-banner {
-            font-weight: 800;
-            font-size: 1.3rem;
-            color: var(--primary);
-            background: rgba(0, 210, 211, 0.08);
-            padding: 8px 25px;
-            border-radius: 30px;
-            border: 1px solid rgba(0, 210, 211, 0.15);
-        }
-
-        #columns-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 40px;
-            width: 100%;
-            padding: 20px;
-            min-height: 310px;
-        }
-
-        /* Interactive Tube Setup */
-        .host-column {
-            width: 115px;
-            height: 270px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 3px solid var(--tube-border);
-            border-top: none;
-            border-bottom-left-radius: 60px;
-            border-bottom-right-radius: 60px;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 15px 5px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .host-column:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--primary);
-            box-shadow: var(--neon-glow);
-        }
-
-        .column-title {
+        .column-label-tag {
             position: absolute;
-            top: -45px;
-            width: 140px;
-            left: -12px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #ced6e0;
-            text-align: center;
-            background: rgba(0,0,0,0.5);
-            padding: 5px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            top: 5px;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            z-index: 10;
         }
 
-        /* Bio Capsule Stacking Orbs */
-        .biocapsule-orb {
-            width: 82px;
-            height: 82px;
-            border-radius: 50%;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: 800;
-            font-size: 0.8rem;
-            text-align: center;
-            color: white;
-            padding: 8px;
-            animation: dropInBall 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.6), inset 8px 8px 15px rgba(255,255,255,0.4);
-            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-        }
-
-        @keyframes dropInBall {
-            from { transform: translateY(-250px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        #cards-deck {
-            width: 100%;
-            min-height: 110px;
-            background: rgba(255,255,255,0.01);
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
+        /* Pad Controls Panel exactly mirroring image layout */
+        #pad-controls-panel {
+            background: var(--bg-cream);
+            border: 8px solid white;
+            border-radius: 24px;
+            width: 240px;
+            height: 240px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
             padding: 15px;
-            flex-wrap: wrap;
-            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
 
-        .draggable-card {
-            background: linear-gradient(135deg, #2f3542 0%, #1e222b 100%);
-            color: #f1f2f6;
-            padding: 14px 22px;
+        .dir-btn {
+            background: white;
+            border: 2px solid #e0d4c8;
             border-radius: 14px;
-            font-weight: 700;
-            font-size: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            box-shadow: 0 5px 12px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-size: 1.5rem;
+            color: var(--primary-purple);
+            transition: all 0.1s;
         }
-        .draggable-card.selected {
-            background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
-            border-color: #ff6b81;
-            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
-            transform: scale(1.05);
+        .dir-btn:active {
+            transform: scale(0.95);
+            background: var(--primary-purple);
+            color: white;
         }
 
-        /* Interactive overlays */
+        /* Overlay Frameworks */
         #quiz-overlay, #certificate-overlay {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 11, 14, 0.97);
-            backdrop-filter: blur(8px);
-            z-index: 50;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 200;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -299,55 +249,50 @@
         }
 
         .modal-card {
-            background: #1e222b;
+            background: white;
             width: 100%;
-            max-width: 540px;
+            max-width: 520px;
             border-radius: 24px;
-            padding: 35px;
+            padding: 30px;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.06);
-            box-shadow: 0 20px 45px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
         .quiz-q-box {
-            font-size: 1.25rem;
-            font-weight: 600;
-            background: rgba(255,255,255,0.04);
-            padding: 20px;
-            border-radius: 16px;
-            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 14px;
+            margin: 15px 0;
             text-align: left;
-            border-left: 5px solid var(--primary);
-            line-height: 1.4;
+            border-left: 5px solid var(--primary-purple);
         }
 
         .hint-alert-box {
-            background: rgba(241, 196, 15, 0.15);
-            color: #f1c40f;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 0.95rem;
+            background: #fff9db;
+            color: #f59f00;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 15px;
             text-align: left;
-            border: 1px solid rgba(241, 196, 15, 0.25);
         }
 
-        .options-grid { display: flex; flex-direction: column; gap: 12px; }
-
+        .options-grid { display: flex; flex-direction: column; gap: 10px; }
         .btn-option {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 15px 18px;
-            border-radius: 14px;
+            background: #f1f2f6;
+            border: 1px solid #ced4da;
+            padding: 14px 18px;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: 1.05rem;
+            font-size: 1rem;
             cursor: pointer;
             text-align: left;
-            color: #daf1f9;
             transition: all 0.2s;
         }
-        .btn-option:hover { background: var(--primary); color: #121214; font-weight: 700; }
+        .btn-option:hover { background: var(--primary-purple); color: white; }
 
         .cert-canvas {
             background: #ffffff;
@@ -355,28 +300,27 @@
             border-radius: 12px;
             padding: 40px 30px;
             width: 100%;
-            max-width: 620px;
+            max-width: 600px;
             text-align: center;
-            color: #1e222b;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            color: #2f3542;
         }
         .cert-input-field {
             border: none;
-            border-bottom: 3px dashed #1e222b;
+            border-bottom: 3px dashed #2f3542;
             width: 80%;
             font-size: 1.8rem;
             text-align: center;
             font-weight: 800;
-            margin: 25px 0;
+            margin: 20px 0;
             outline: none;
             color: #0b7273;
             text-transform: uppercase;
         }
 
         @keyframes pulseLogo {
-            0% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.04); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.9; }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .hidden { display: none !important; }
@@ -385,111 +329,126 @@
 </head>
 <body>
 
-<!-- SCREEN 1: SPLASH SCREEN (5 SECONDS) -->
 <div id="splash-screen" class="flow-screen">
     <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
 </div>
 
-<!-- SCREEN 2: GAME MENU SCREEN -->
 <div id="menu-screen" class="flow-screen hidden">
-    <h1 class="game-main-title">ANATOMY TUBE SORT</h1>
-    <p class="game-subtitle">The Ultimate Biological Sorting Quest</p>
-    <button class="arcade-btn" onclick="showInstructionsScreen()">Start Game</button>
+    <h1 class="menu-title">ANATOMY COLUMN CRAWLER</h1>
+    <button class="arcade-btn" onclick="showInstructions()">Start Game</button>
 </div>
 
-<!-- SCREEN 3: GRADE-3 FRIENDLY INSTRUCTIONS -->
 <div id="instruction-screen" class="flow-screen hidden">
     <div class="instruction-box">
-        <h2>How To Play! 🎮</h2>
-        <ul class="kids-list">
-            <li>🎯 <b>Step 1:</b> Tap a floating body card at the bottom to pick it up!</li>
-            <li>🧪 <b>Step 2:</b> Tap the correct glass Tube above to drop it inside!</li>
-            <li>🧠 <b>Step 3:</b> When the tubes are full, solve the pop-up quiz questions!</li>
-            <li>❤️ <b>Watch Out:</b> Don't lose all your quiz lives! Check hints if you get stuck.</li>
+        <h2>How to Play! 🕹️</h2>
+        <ul>
+            <li>🧭 <b>Step 1:</b> Use the On-Screen Arrow Buttons to move the purple tracking block.</li>
+            <li>📈 <b>Step 2:</b> Guide the block inside the designated columns to fill them completely!</li>
+            <li>🧠 <b>Step 3:</b> When you fill all columns for the level, answer the science questions correctly!</li>
         </ul>
-        <button class="arcade-btn" onclick="launchMainGameEngine()">Let's Play! 🚀</button>
+        <button class="arcade-btn" onclick="startGameEngine()">Let's Play! 🚀</button>
     </div>
 </div>
 
-<!-- MAIN CORE CONTENT GAMEPLAY -->
 <div id="app-wrapper">
     <div id="hud-dashboard">
         <div class="hud-widget">🏆 Score: <span id="lbl-marks">0</span></div>
-        <div class="hud-widget" id="quiz-lives-container">❤️ Quiz Lives: <span id="lbl-lives">3</span></div>
+        <div class="hud-widget">🎮 Game: <span id="lbl-level-hud">1 / 3</span></div>
+        <div class="hud-widget" id="widget-lives">❤️ Lives: <span id="lbl-lives">3</span></div>
     </div>
 
     <div id="gameplay-arena">
-        <div class="stage-banner" id="lbl-stage-status">Level 1: Match 2 System Tubes</div>
-        <div id="columns-container"></div>
-        <div id="cards-deck"></div>
-    </div>
+        <div id="grid-canvas-box"></div>
 
-    <div id="quiz-overlay" class="hidden">
-        <div class="modal-card">
-            <h3 id="lbl-quiz-headline" style="color: var(--primary); font-weight: 800; font-size: 1.3rem;">🔬 SCANNING QUESTION</h3>
-            <div class="quiz-q-box" id="box-question-text">Analyzing loop...</div>
-            <div class="hint-alert-box hidden" id="box-hint-alert">💡 HINT: Clue here.</div>
-            <div class="options-grid" id="box-options-layout"></div>
+        <div id="pad-controls-panel">
+            <div></div>
+            <div class="dir-btn" onclick="changeSnakeDirection('UP')">▲</div>
+            <div></div>
+            <div class="dir-btn" onclick="changeSnakeDirection('LEFT')">◀</div>
+            <div></div>
+            <div class="dir-btn" onclick="changeSnakeDirection('RIGHT')">▶</div>
+            <div></div>
+            <div class="dir-btn" onclick="changeSnakeDirection('DOWN')">▼</div>
+            <div></div>
         </div>
     </div>
+</div>
 
-    <div id="certificate-overlay" class="hidden">
-        <div class="cert-canvas">
-            <div style="font-size: 4rem; margin-bottom: 10px;">📜</div>
-            <h1 style="font-size: 2.3rem; font-family: 'Georgia', serif; color: #7f2e2e;">BIO-MASTER CERTIFICATE</h1>
-            <p style="margin-top: 10px; font-weight: 600; color: #2f3542;">This credential is proudly awarded to:</p>
-            <input type="text" class="cert-input-field" placeholder="[ TYPE YOUR NAME HERE ]" id="txt-student-name">
-            <p style="font-weight: bold; font-size: 1.15rem; color: #10ac84; margin-bottom: 25px;">
-                For successfully sorting all biological tubes and mastering the 9 Core Anatomical Challenges!
-            </p>
-            <button class="btn-option" style="text-align:center; display:inline-block; background: #2f3542; color:white; padding: 12px 35px; border-radius: 30px; border:none;" onclick="window.location.reload()">PLAY AGAIN</button>
-        </div>
+<div id="quiz-overlay" class="hidden">
+    <div class="modal-card">
+        <h3 id="lbl-quiz-headline" style="color: var(--primary-purple); font-weight: 800;">🔬 SYSTEM CHECKS</h3>
+        <div class="quiz-q-box" id="box-question-text">Loading diagnostic question loop...</div>
+        <div class="hint-alert-box hidden" id="box-hint-alert">💡 HINT: Helpful tip.</div>
+        <div class="options-grid" id="box-options-layout"></div>
+    </div>
+</div>
+
+<div id="certificate-overlay" class="hidden">
+    <div class="cert-canvas">
+        <div style="font-size: 3.5rem; margin-bottom: 10px;">📜</div>
+        <h1 style="font-size: 2.2rem; font-family: 'Georgia', serif; color: #7f2e2e;">BIO-MASTER CREDENTIAL</h1>
+        <p style="margin-top: 10px; font-weight: 600;">This certificate is proudly awarded to:</p>
+        <input type="text" class="cert-input-field" placeholder="[ ENTER YOUR NAME ]" id="txt-student-name">
+        <p style="font-weight: bold; font-size: 1.1rem; color: #10ac84; margin-bottom: 20px;">
+            For filling all scaling columns and answering all 9 Core Anatomy questions successfully!
+        </p>
+        <button class="arcade-btn" onclick="window.location.reload()">Replay Game</button>
     </div>
 </div>
 
 <script>
-    // Audio elements mapped directly to your assets structure
+    // Asset sound paths mapping
     const sfxCorrect = new Audio('assets/correct.mp3');
     const sfxWrong = new Audio('assets/wrong.mp3');
-    const sfxClap = new Audio('assets/freesound_community-claps-44774.mp3');
+    const sfxClaps = new Audio('assets/freesound_community-claps-44774.mp3');
 
-    const colorSpectrum = ["#ff4757", "#2ed573", "#1e90ff", "#ffa502", "#9b59b6", "#00d2d3", "#ff6b81", "#32ff7e", "#70a1ff"];
-
-    const masterSystemPool = [
-        // Level 1 Items
-        { id: "sys1", name: "Cells & Tissues", host: "Body Composition", q: "What basic structural building blocks work together to form tissues inside the human body?", o: ["Cells", "Bones", "Bricks", "Muscles"], a: "Cells", h: "These are the tiny microscopic components found in every living thing." },
-        { id: "sys2", name: "Skeletal System", host: "Bony Framework", q: "Approximately how many structural bones make up the entire framework of an adult human skeleton?", o: ["206 Bones", "300 Bones", "100 Bones", "600 Bones"], a: "206 Bones", h: "Adults have fewer bones than babies because some of them fuse together over time." },
+    const masterQuestionPool = [
+        // Level 1 Questions (2 Columns)
+        { q: "What basic structural building blocks work together to form tissues inside the human body?", o: ["Cells", "Bones", "Bricks", "Muscles"], a: "Cells", h: "These are the tiny microscopic components found in every living thing." },
+        { q: "Approximately how many structural bones make up the entire framework of an adult human skeleton?", o: ["206 Bones", "300 Bones", "100 Bones", "600 Bones"], a: "206 Bones", h: "Adults have fewer bones than babies because some of them fuse together over time." },
         
-        // Level 2 Items
-        { id: "sys3", name: "Muscular System", host: "Muscle Web", q: "How many independent muscles comprise the network responsible for body movement and strength?", o: ["More than 600", "Exactly 206", "Around 100", "Fewer than 50"], a: "More than 600", h: "There are nearly three times as many muscles as there are bones in your body!" },
-        { id: "sys4", name: "Respiratory System", host: "Breathing Lungs", q: "Which primary chest organs expand and contract continuously to absorb fresh oxygen from air?", o: ["Lungs", "Heart", "Stomach", "Kidneys"], a: "Lungs", h: "These sponge-like organs fill up with air whenever you inhale." },
-        { id: "sys5", name: "Digestive System", host: "Food Pipeline", q: "In which processing segment of the gastrointestinal tract is water reabsorbed from remaining undigested material?", o: ["Large Intestine", "Stomach", "Mouth", "Windpipe"], a: "Large Intestine", h: "It is the wide, smooth track located toward the very end of your digestion system." },
+        // Level 2 Questions (3 Columns)
+        { q: "How many independent muscles comprise the network responsible for body movement and strength?", o: ["More than 600", "Exactly 206", "Around 100", "Fewer than 50"], a: "More than 600", h: "There are nearly three times as many muscles as there are bones in your body!" },
+        { q: "Which primary chest organs expand and contract continuously to absorb fresh oxygen from air?", o: ["Lungs", "Heart", "Stomach", "Kidneys"], a: "Lungs", h: "These sponge-like organs fill up with air whenever you inhale." },
+        { q: "In which processing segment of the gastrointestinal tract is water reabsorbed from remaining undigested material?", o: ["Large Intestine", "Stomach", "Mouth", "Windpipe"], a: "Large Intestine", h: "It is the wide, smooth track located toward the very end of your digestion system." },
         
-        // Level 3 Items
-        { id: "sys6", name: "Nervous System", host: "Brain Core", q: "Which core organ serves as the main command center, managing every movement and thought your body performs?", o: ["Brain", "Heart", "Lungs", "Skin"], a: "Brain", h: "This organ sits safely inside your skull and communicates through electrical signals." },
-        { id: "sys7", name: "Circulatory System", host: "Heart Network", q: "Which muscle engine acts as a continuous pump that drives blood flow throughout your blood vessels?", o: ["Heart", "Brain", "Stomach", "Liver"], a: "Heart", h: "This fist-sized muscle beats rhythmically inside the center-left side of your chest." },
-        { id: "sys8", name: "Excretory System", host: "Waste Filter", q: "Which filtration organs extract liquid metabolic wastes directly out of your bloodstream to keep it clean?", o: ["Kidneys", "Lungs", "Muscles", "Bones"], a: "Kidneys", h: "You have a left and right one of these bean-shaped organs in your lower back area." },
-        { id: "sys9", name: "Reproductive System", host: "Life Generation", q: "What is the primary function of the biological system responsible for creating offspring to continue a species?", o: ["Reproduction", "Digestion", "Breathing", "Excretion"], a: "Reproduction", h: "This process ensures that living populations can raise families and pass life down to future generations." }
+        // Level 3 Questions (4 Columns)
+        { q: "Which core organ serves as the main command center, managing every movement and thought your body performs?", o: ["Brain", "Heart", "Lungs", "Skin"], a: "Brain", h: "This organ sits safely inside your skull and communicates through electrical signals." },
+        { q: "Which muscle engine acts as a continuous pump that drives blood flow throughout your blood vessels?", o: ["Heart", "Brain", "Stomach", "Liver"], a: "Heart", h: "This fist-sized muscle beats rhythmically inside the center-left side of your chest." },
+        { q: "Which filtration organs extract liquid metabolic wastes directly out of your bloodstream to keep it clean?", o: ["Kidneys", "Lungs", "Muscles", "Bones"], a: "Kidneys", h: "You have a left and right one of these bean-shaped organs in your lower back area." },
+        { q: "What is the primary function of the biological system responsible for creating offspring to continue a species?", o: ["Reproduction", "Digestion", "Breathing", "Excretion"], a: "Reproduction", h: "This process ensures that living populations can raise families and pass life down to future generations." }
     ];
 
-    const highStakesBonusRound = {
+    const bonusQuestionData = {
         q: "Ultimate Grand Challenge: How do all nine human body systems behave together inside a healthy individual?",
         o: ["They coordinate together as a team", "They operate completely independently", "They shut down entirely during exercise", "Only the brain works at any time"],
         a: "They coordinate together as a team",
         h: "Think about how your heart beats faster to deliver oxygen from your lungs to your muscles when running!"
     };
 
-    let currentTierColumns = 2; 
+    const columnLabelsByTier = [
+        ["Cells & Tissues", "Skeletal System"],
+        ["Muscular Web", "Breathing Lungs", "Food Pipeline"],
+        ["Brain Core", "Heart Network", "Waste Filter", "Life Generation"]
+    ];
+
+    // Grid Mechanics Engine Configuration Constants
+    const rowsCount = 11;
+    const colsCount = 12;
+    
+    let currentTierLevel = 1; // Level 1 (2 Columns), Level 2 (3 Columns), Level 3 (4 Columns)
     let totalMarks = 0;
     let quizLives = 3;
-    
-    let activeTierItems = [];
-    let successfullyPlacedCount = 0;
     let quizQuestionIndex = 0;
-    let wrongQuizAttemptsOnThisQuestion = 0;
-    let currentlySelectedCardId = null;
+    let wrongAttemptsOnThisQuestion = 0;
 
-    // SCREEN FLOW ENGINE MANIPULATION
+    let snakeBlocks = [];
+    let snakeDirection = "RIGHT";
+    let automatedLoopIntervalId = null;
+    let activeTargetColumnsPositions = [];
+    let filledColumnsCount = 0;
+    let isLevelGameplayRunning = false;
+
     window.onload = function() {
         setTimeout(() => {
             document.getElementById('splash-screen').style.opacity = '0';
@@ -497,222 +456,280 @@
                 document.getElementById('splash-screen').classList.add('hidden');
                 document.getElementById('menu-screen').classList.remove('hidden');
             }, 500);
-        }, 5000); // Exactly 5 seconds splash display
+        }, 5000); // 5 Seconds Splash Loop
     };
 
-    function showInstructionsScreen() {
+    function showInstructions() {
         document.getElementById('menu-screen').classList.add('hidden');
         document.getElementById('instruction-screen').classList.remove('hidden');
     }
 
-    function launchMainGameEngine() {
+    function startGameEngine() {
         document.getElementById('instruction-screen').classList.add('hidden');
-        startCurrentLevelPhase();
+        loadSnakeLevelPhase();
     }
 
-    // GAMEPLAY LOGIC
-    function startCurrentLevelPhase() {
-        successfullyPlacedCount = 0;
-        activeTierItems = [];
-        currentlySelectedCardId = null;
+    function loadSnakeLevelPhase() {
+        isLevelGameplayRunning = true;
+        filledColumnsCount = 0;
+        snakeDirection = "RIGHT";
+        document.getElementById('lbl-level-hud').innerText = `${currentTierLevel} / 3`;
+        document.getElementById('widget-lives').classList.add('invisible');
+
+        // Setup Snake Blocks array positioning initially at top row
+        snakeBlocks = [
+            { r: 0, c: 3 }, { r: 0, c: 2 }, { r: 0, c: 1 }
+        ];
+
+        calculateLevelColumns();
+        buildGridDOM();
+        startAutomatedSnakeLoop();
+    }
+
+    function calculateLevelColumns() {
+        activeTargetColumnsPositions = [];
+        let totalColumnsToCreate = currentTierLevel + 1; // 2 columns, then 3, then 4
         
-        document.getElementById('quiz-lives-container').classList.add('invisible');
+        // Calculate spread layout mapping across the grid columns
+        let divisionMultiplier = Math.floor(colsCount / totalColumnsToCreate);
+        for(let i = 0; i < totalColumnsToCreate; i++) {
+            activeTargetColumnsPositions.push({
+                columnIndex: (i * divisionMultiplier) + Math.floor(divisionMultiplier / 2),
+                filledCellsCount: 0,
+                requiredCellsCount: rowsCount - 2, // Leave top row clear
+                label: columnLabelsByTier[currentTierLevel - 1][i]
+            });
+        }
+    }
 
-        let startIndex = 0;
-        if (currentTierColumns === 3) startIndex = 2;
-        if (currentTierColumns === 4) startIndex = 5;
+    function buildGridDOM() {
+        const gridBox = document.getElementById('grid-canvas-box');
+        gridBox.innerHTML = "";
+        gridBox.style.gridTemplateRows = `repeat(${rowsCount}, 1fr)`;
+        gridBox.style.gridTemplateColumns = `repeat(${colsCount}, 1fr)`;
 
-        for(let i = 0; i < currentTierColumns; i++) {
-            activeTierItems.push(masterSystemPool[startIndex + i]);
+        for (let r = 0; r < rowsCount; r++) {
+            for (let c = 0; c < colsCount; c++) {
+                const cell = document.createElement('div');
+                cell.className = "grid-cell";
+                cell.id = `cell-${r}-${c}`;
+
+                // Mark and style specific Target Column zones
+                let activeColMatch = activeTargetColumnsPositions.find(col => col.columnIndex === c);
+                if (activeColMatch && r > 1) {
+                    cell.classList.add('target-column-zone');
+                }
+
+                gridBox.appendChild(cell);
+            }
         }
 
-        document.getElementById('lbl-stage-status').innerText = `Level ${currentTierColumns - 1}: Fill ${currentTierColumns} Target Tubes`;
-        renderMatchingInterfaceGrid();
-    }
-
-    function renderMatchingInterfaceGrid() {
-        const columnsWrapper = document.getElementById('columns-container');
-        const cardsDeck = document.getElementById('cards-deck');
-        
-        columnsWrapper.innerHTML = "";
-        cardsDeck.innerHTML = "";
-
-        activeTierItems.forEach(item => {
-            const col = document.createElement('div');
-            col.className = "host-column";
-            col.id = `column-${item.id}`;
-            col.innerHTML = `<div class="column-title">${item.host}</div>`;
+        // Render clean label tags onto column fields safely
+        activeTargetColumnsPositions.forEach(col => {
+            const labelDiv = document.createElement('div');
+            labelDiv.className = "column-label-tag";
+            labelDiv.innerText = col.label;
             
-            col.onclick = function() {
-                if (currentlySelectedCardId !== null) {
-                    evaluatePlacement(currentlySelectedCardId, item.id, col);
-                }
-            };
-            columnsWrapper.appendChild(col);
+            // Append label on top cell space
+            const targetCell = document.getElementById(`cell-1-${col.columnIndex}`);
+            if(targetCell) targetCell.appendChild(labelDiv);
         });
 
-        const shuffledDeckList = [...activeTierItems].sort(() => Math.random() - 0.5);
-        shuffledDeckList.forEach(item => {
-            const card = document.createElement('div');
-            card.className = "draggable-card";
-            card.id = `card-${item.id}`;
-            card.innerText = item.name;
-            
-            card.onclick = function(e) {
-                e.stopPropagation();
-                if (card.classList.contains('hidden')) return;
-
-                const wasSelected = card.classList.contains('selected');
-                document.querySelectorAll('.draggable-card').forEach(c => c.classList.remove('selected'));
-                
-                if (!wasSelected) {
-                    card.classList.add('selected');
-                    currentlySelectedCardId = item.id;
-                } else {
-                    currentlySelectedCardId = null;
-                }
-            };
-            cardsDeck.appendChild(card);
-        });
+        updateSnakeGridGraphics();
     }
 
-    function evaluatePlacement(selectedCardId, targetColumnHostId, targetColumnElement) {
-        if (selectedCardId === targetColumnHostId) {
-            sfxCorrect.play(); // Play dynamic correct action trigger audio
-            
-            const matchedItemObj = activeTierItems.find(i => i.id === selectedCardId);
-            const cardNode = document.getElementById(`card-${selectedCardId}`);
-            
-            cardNode.classList.add('hidden');
-            cardNode.classList.remove('selected');
+    function startAutomatedSnakeLoop() {
+        if(automatedLoopIntervalId) clearInterval(automatedLoopIntervalId);
+        automatedLoopIntervalId = setInterval(processSnakeTickFrame, 300); // Friendly paced frame tick
+    }
 
-            const ballOrb = document.createElement('div');
-            ballOrb.className = "biocapsule-orb";
-            
-            const assignedColor = colorSpectrum[Math.floor(Math.random() * colorSpectrum.length)];
-            ballOrb.style.background = `radial-gradient(circle at 30% 30%, ${assignedColor} 0%, #000000 100%)`;
-            ballOrb.innerText = matchedItemObj.name;
+    function changeSnakeDirection(newDir) {
+        if (!isLevelGameplayRunning) return;
+        // Block strict 180 degree instant reversal moves
+        if (newDir === "UP" && snakeDirection === "DOWN") return;
+        if (newDir === "DOWN" && snakeDirection === "UP") return;
+        if (newDir === "LEFT" && snakeDirection === "RIGHT") return;
+        if (newDir === "RIGHT" && snakeDirection === "LEFT") return;
+        snakeDirection = newDir;
+    }
 
-            targetColumnElement.appendChild(ballOrb);
-            
-            currentlySelectedCardId = null;
-            successfullyPlacedCount++;
-            totalMarks += 10;
+    // Keyboard support for testing convenience
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "ArrowUp" || e.key === "w") changeSnakeDirection("UP");
+        if (e.key === "ArrowDown" || e.key === "s") changeSnakeDirection("DOWN");
+        if (e.key === "ArrowLeft" || e.key === "a") changeSnakeDirection("LEFT");
+        if (e.key === "ArrowRight" || e.key === "d") changeSnakeDirection("RIGHT");
+    });
+
+    function processSnakeTickFrame() {
+        if (!isLevelGameplayRunning) return;
+
+        // Calculate Next Head block position coordinates
+        let head = { ...snakeBlocks[0] };
+        if (snakeDirection === "UP") head.r--;
+        if (snakeDirection === "DOWN") head.r++;
+        if (snakeDirection === "LEFT") head.c--;
+        if (snakeDirection === "RIGHT") head.c++;
+
+        // Boundary safety check resets placement loop wrappers
+        if (head.r < 0) head.r = rowsCount - 1;
+        if (head.r >= rowsCount) head.r = 0;
+        if (head.c < 0) head.c = colsCount - 1;
+        if (head.c >= colsCount) head.c = 0;
+
+        // Add head block 
+        snakeBlocks.unshift(head);
+
+        // Check if head landed inside a valid target column coordinate slot
+        let insideTargetCol = activeTargetColumnsPositions.find(col => col.columnIndex === head.c && head.r > 1);
+
+        if (insideTargetCol) {
+            // Keep head segment inside column and trigger growth instead of popping tail block
+            insideTargetCol.filledCellsCount++;
+            totalMarks += 5;
             document.getElementById('lbl-marks').innerText = totalMarks;
 
-            if (successfullyPlacedCount === currentTierColumns) {
-                setTimeout(() => { triggerQuizPhaseSequence(); }, 600);
-            }
+            // Check if column reached peak capacity limit status
+            checkColumnFillStates();
         } else {
-            sfxWrong.play(); // Play error audio feedback loop trigger 
-            
-            targetColumnElement.style.borderColor = "var(--accent)";
-            targetColumnElement.style.boxShadow = "0 0 15px rgba(255, 71, 87, 0.4)";
-            
-            setTimeout(() => { 
-                targetColumnElement.style.borderColor = ""; 
-                targetColumnElement.style.boxShadow = "";
-            }, 400);
-            
-            currentlySelectedCardId = null;
-            document.querySelectorAll('.draggable-card').forEach(c => c.classList.remove('selected'));
+            // Remove regular tail element block to maintain dynamic translation movement length
+            snakeBlocks.pop();
+        }
+
+        updateSnakeGridGraphics();
+    }
+
+    function checkColumnFillStates() {
+        let totalTargetColumnsCount = currentTierLevel + 1;
+        let readyColumnsCount = 0;
+
+        activeTargetColumnsPositions.forEach(col => {
+            // If at least 3 segments are tracked within the column path area
+            if(col.filledCellsCount >= 3) {
+                readyColumnsCount++;
+            }
+        });
+
+        if (readyColumnsCount >= totalTargetColumnsCount) {
+            isLevelGameplayRunning = false;
+            clearInterval(automatedLoopIntervalId);
+            sfxCorrect.play();
+            setTimeout(triggerQuizPhaseTransition, 600);
         }
     }
 
-    function triggerQuizPhaseSequence() {
-        quizLives = 3; 
-        document.getElementById('quiz-lives-container').classList.remove('invisible');
-        document.getElementById('lbl-lives').innerText = quizLives;
+    function updateSnakeGridGraphics() {
+        // Clear old classes
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.classList.remove('snake-body-block', 'snake-head-block');
+        });
+
+        // Apply new positioning classes updates
+        snakeBlocks.forEach((block, index) => {
+            const cellNode = document.getElementById(`cell-${block.r}-${block.c}`);
+            if (cellNode) {
+                if (index === 0) {
+                    cellNode.classList.add('snake-head-block');
+                } else {
+                    cellNode.classList.add('snake-body-block');
+                }
+            }
+        });
+    }
+
+    // DIAGNOSTIC QUIZ SYSTEM INTERACTION LOGIC
+    function triggerQuizPhaseTransition() {
+        quizLives = 3;
         quizQuestionIndex = 0;
+        document.getElementById('widget-lives').classList.remove('invisible');
+        document.getElementById('lbl-lives').innerText = quizLives;
         serveQuizQuestionModal();
     }
 
     function serveQuizQuestionModal() {
-        wrongQuizAttemptsOnThisQuestion = 0;
+        wrongAttemptsOnThisQuestion = 0;
         document.getElementById('box-hint-alert').classList.add('hidden');
-        
-        let targetQuestionData;
-        if(currentTierColumns === 5) {
-            targetQuestionData = highStakesBonusRound;
+
+        let targetDataObj;
+        let questionsCountLimit = currentTierLevel + 1;
+
+        if (currentTierLevel === 4) {
+            targetDataObj = bonusQuestionData;
             document.getElementById('lbl-quiz-headline').innerText = "🌟 GRAND BONUS CHALLENGE 🌟";
         } else {
-            targetQuestionData = activeTierItems[quizQuestionIndex];
-            document.getElementById('lbl-quiz-headline').innerText = `🔬 ANATOMY CHALLENGE ${quizQuestionIndex + 1} OF ${currentTierColumns}`;
+            // Calculate slice index sequence to match exactly corresponding questions
+            let startIndex = (currentTierLevel === 1) ? 0 : (currentTierLevel === 2 ? 2 : 5);
+            targetDataObj = masterQuestionPool[startIndex + quizQuestionIndex];
+            document.getElementById('lbl-quiz-headline').innerText = `🔬 ANATOMY CHALLENGE ${quizQuestionIndex + 1} OF ${questionsCountLimit}`;
         }
 
-        document.getElementById('box-question-text').innerText = targetQuestionData.q;
-        
-        const optionsBox = document.getElementById('box-options-layout');
-        optionsBox.innerHTML = "";
+        document.getElementById('box-question-text').innerText = targetDataObj.q;
 
-        const scrambledOptions = [...targetQuestionData.o].sort(() => Math.random() - 0.5);
-        
-        scrambledOptions.forEach(optionString => {
+        const optionsContainer = document.getElementById('box-options-layout');
+        optionsContainer.innerHTML = "";
+
+        const scrambledOptions = [...targetDataObj.o].sort(() => Math.random() - 0.5);
+        scrambledOptions.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = "btn-option";
-            btn.innerText = optionString;
-            btn.onclick = () => processQuizAnswerSubmission(optionString, targetQuestionData.a, targetQuestionData.h);
-            optionsBox.appendChild(btn);
+            btn.innerText = opt;
+            btn.onclick = () => submitAnswerChoice(opt, targetDataObj.a, targetDataObj.h);
+            optionsContainer.appendChild(btn);
         });
 
         document.getElementById('quiz-overlay').classList.remove('hidden');
     }
 
-    function processQuizAnswerSubmission(chosenText, correctText, clueHintText) {
-        if(chosenText === correctText) {
+    function submitAnswerChoice(selectedText, correctText, clueHintText) {
+        let maxQuestionsForThisLevel = currentTierLevel + 1;
+
+        if (selectedText === correctText) {
             sfxCorrect.play();
             totalMarks += 25;
             document.getElementById('lbl-marks').innerText = totalMarks;
-            
-            if(currentTierColumns === 5) {
-                sfxClap.play(); // Play victory crowd claps!
+
+            if (currentTierLevel === 4) {
+                // Perfect game completion bonus route victory trigger!
+                sfxClaps.play();
                 document.getElementById('quiz-overlay').classList.add('hidden');
                 document.getElementById('certificate-overlay').classList.remove('hidden');
                 return;
             }
 
             quizQuestionIndex++;
-            if(quizQuestionIndex < currentTierColumns) {
+            if (quizQuestionIndex < maxQuestionsForThisLevel) {
                 serveQuizQuestionModal();
             } else {
+                // Completed all questions for this tier sequence level loop
                 document.getElementById('quiz-overlay').classList.add('hidden');
-                if(currentTierColumns === 2) {
-                    currentTierColumns = 3;
-                    startCurrentLevelPhase();
-                } else if(currentTierColumns === 3) {
-                    currentTierColumns = 4;
-                    startCurrentLevelPhase();
-                } else if(currentTierColumns === 4) {
-                    currentTierColumns = 5; 
-                    triggerBonusTransitionMode();
+                
+                if (currentTierLevel < 3) {
+                    currentTierLevel++;
+                    loadSnakeLevelPhase();
+                } else if (currentTierLevel === 3) {
+                    // Ready for high-stakes single bonus final round evaluation!
+                    currentTierLevel = 4;
+                    serveQuizQuestionModal();
                 }
             }
         } else {
             sfxWrong.play();
             quizLives--;
-            wrongQuizAttemptsOnThisQuestion++;
+            wrongAttemptsOnThisQuestion++;
             document.getElementById('lbl-lives').innerText = quizLives;
 
-            if(quizLives <= 0) {
-                alert("Game Over! Let's refresh and try this level once more!");
+            if (quizLives <= 0) {
+                alert("Game Over! Let's try this column challenge once more!");
                 window.location.reload();
                 return;
             }
 
-            if(wrongQuizAttemptsOnThisQuestion >= 1) {
-                const alertContainer = document.getElementById('box-hint-alert');
-                alertContainer.innerText = `💡 HINT: ${clueHintText}`;
-                alertContainer.classList.remove('hidden');
+            if (wrongAttemptsOnThisQuestion >= 1) {
+                const hintBox = document.getElementById('box-hint-alert');
+                hintBox.innerText = `💡 HINT: ${clueHintText}`;
+                hintBox.classList.remove('hidden');
             }
         }
-    }
-
-    function triggerBonusTransitionMode() {
-        document.getElementById('columns-container').innerHTML = "";
-        document.getElementById('cards-deck').innerHTML = "";
-        document.getElementById('lbl-stage-status').innerText = "🏆 ALL TUBES FILLED! BONUS ROUND UNLOCKED 🏆";
-        
-        setTimeout(() => { serveQuizQuestionModal(); }, 1500);
     }
 </script>
 
