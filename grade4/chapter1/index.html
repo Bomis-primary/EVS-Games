@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Strict performance reset for all modern devices */
+        /* Strict performance reset for all modern and legacy devices */
         * { 
             box-sizing: border-box; 
             margin: 0; 
@@ -25,7 +25,7 @@
             left: 0; 
             width: 100%; 
             height: 100%; 
-            background-color: #1a0f0a; 
+            background-color: #4cc9f0; 
             overflow: hidden; 
         }
         
@@ -35,52 +35,90 @@
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; padding: 20px; text-align: center; background-color: #2d1a10;
+            z-index: 10; padding: 20px; text-align: center;
+            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
         }
         .hidden { display: none !important; }
 
         /* Splash Screen */
-        #screen-splash { background-color: #ffffff; z-index: 100; cursor: pointer; }
+        #screen-splash { background-color: #ffffff; z-index: 100; }
         .logo { width: 80%; max-width: 300px; height: auto; pointer-events: none; }
-        .skip-hint { color: #888888; font-size: 0.9rem; margin-top: 20px; }
 
-        /* Typography & Buttons */
-        h1.title { font-size: 3.5rem; color: #ffbe0b; margin-bottom: 40px; text-transform: uppercase; line-height: 1.1; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        p.text-simple { color: #ffffff; font-size: 1.2rem; line-height: 1.8; max-width: 500px; margin-bottom: 40px; text-align: left; }
-        
-        button.btn-primary { background-color: #e63946; color: #ffffff; border: none; padding: 16px 40px; font-size: 1.4rem; font-weight: 700; border-radius: 8px; cursor: pointer; outline: none; transition: 0.2s; box-shadow: 0 6px 0 #b11d29; margin-top: 10px; }
-        button.btn-primary:active { transform: translateY(4px); box-shadow: 0 2px 0 #b11d29; }
-
-        /* HUD Layout Dashboard */
-        #hud {
-            position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between;
-            z-index: 5; color: #ffffff; font-size: 1.3rem; font-weight: 700; pointer-events: none;
-            background: rgba(45, 26, 16, 0.4); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(4px);
+        /* Child-Friendly Typographic Accents & Buttons */
+        h1.title { 
+            font-size: 3.5rem; 
+            color: #ffff3f; 
+            margin-bottom: 30px; 
+            text-transform: uppercase; 
+            line-height: 1.1; 
+            text-shadow: 4px 4px 0px #ff006e, -2px -2px 0px #ff006e, 2px -2px 0px #ff006e, -2px 2px 0px #ff006e;
         }
-        .hud-item { display: flex; align-items: center; gap: 8px; }
+        h2.subtitle {
+            font-size: 2.2rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px #ff006e;
+        }
+        p.text-simple { color: #ffffff; font-size: 1.25rem; line-height: 1.7; max-width: 520px; margin-bottom: 35px; text-align: left; }
+        
+        button.btn-primary { 
+            background-color: #ff006e; 
+            color: #ffffff; 
+            border: 3px solid #ffffff; 
+            padding: 16px 45px; 
+            font-size: 1.6rem; 
+            font-weight: 700; 
+            border-radius: 24px; 
+            cursor: pointer; 
+            outline: none; 
+            transition: transform 0.1s; 
+            box-shadow: 0 8px 0 #a90049; 
+            margin-top: 10px; 
+        }
+        button.btn-primary:active { transform: translateY(4px); box-shadow: 0 4px 0 #a90049; }
 
-        /* Quiz UI Layout Sheets */
-        #screen-quiz { background-color: rgba(26, 15, 10, 0.98); z-index: 50; display: flex; justify-content: center; padding: 20px; }
-        .quiz-box { background: #ffffff; border-radius: 18px; padding: 28px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 4px solid #ffbe0b; }
-        .quiz-question { color: #1a0f0a; font-size: 1.4rem; font-weight: 700; margin-bottom: 24px; text-align: left; line-height: 1.5; }
+        /* HUD Dashboard Badge Elements */
+        #hud {
+            position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; gap: 10px;
+            z-index: 5; color: #333333; font-size: 1.15rem; font-weight: 700; pointer-events: none;
+            background: rgba(255, 255, 255, 0.95); padding: 12px 24px; border-radius: 50px; 
+            box-shadow: 0 6px 0px rgba(0, 0, 0, 0.15); border: 3px solid #ffb703;
+        }
+        .hud-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+        /* Quiz Overlay & Sheet Configurations */
+        #screen-quiz { background-color: rgba(67, 97, 238, 0.96); z-index: 50; display: flex; justify-content: center; padding: 20px; }
+        .quiz-box { background: #ffffff; border-radius: 28px; padding: 30px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 0px rgba(0,0,0,0.2); border: 6px solid #ff006e; }
+        .quiz-question { color: #2b2d42; font-size: 1.45rem; font-weight: 700; margin-bottom: 24px; text-align: left; line-height: 1.5; }
         
         .quiz-option {
-            display: block; width: 100%; background: #f1faee; color: #1d3557; border: 2px solid #a8dadc;
-            padding: 16px; margin-bottom: 14px; border-radius: 12px; font-size: 1.15rem; font-weight: 700; text-align: left; cursor: pointer;
-            transition: all 0.2s;
+            display: block; width: 100%; background: #ffb703; color: #ffffff; border: 3px solid #ffffff;
+            padding: 16px; margin-bottom: 14px; border-radius: 20px; font-size: 1.2rem; font-weight: 700; text-align: left; cursor: pointer;
+            box-shadow: 0 6px 0 #fb8500; transition: transform 0.1s; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
-        .quiz-option:disabled { cursor: not-allowed; opacity: 0.7; }
-        .quiz-option.correct { background: #d4edda; border-color: #28a745; color: #155724; box-shadow: 0 4px 0 #218838; }
-        .quiz-option.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; box-shadow: 0 4px 0 #c82333; }
+        .quiz-option:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 3px 0 #fb8500; }
+        .quiz-option:disabled { cursor: not-allowed; opacity: 0.8; }
+        .quiz-option.correct { background: #70e000; box-shadow: 0 6px 0 #38b000; color: #ffffff; }
+        .quiz-option.wrong { background: #ff4d6d; box-shadow: 0 6px 0 #c9184a; color: #ffffff; }
 
-        .hint-box { background: #fff3cd; color: #856404; padding: 14px; border-radius: 10px; margin-bottom: 18px; font-weight: 700; text-align: left; font-size: 1.05rem; border-left: 5px solid #ffc107; animation: popIn 0.3s ease; }
-        .exp-box { background: #d4edda; color: #155724; padding: 14px; border-radius: 10px; margin-top: 18px; font-weight: 700; text-align: left; font-size: 1.05rem; border-left: 5px solid #28a745; animation: popIn 0.3s ease; }
+        .hint-box { background: #fff3cd; color: #856404; padding: 16px; border-radius: 16px; margin-bottom: 18px; font-weight: 700; text-align: left; font-size: 1.1rem; border-left: 6px solid #ffc107; animation: popIn 0.3s ease; }
+        .exp-box { background: #d4edda; color: #155724; padding: 16px; border-radius: 16px; margin-top: 18px; font-weight: 700; text-align: left; font-size: 1.1rem; border-left: 6px solid #28a745; animation: popIn 0.3s ease; }
         
-        #quiz-status { font-size: 1.1rem; font-weight: 700; color: #e63946; margin-bottom: 15px; text-align: right; text-transform: uppercase; }
+        #quiz-status { font-size: 1.1rem; font-weight: 700; color: #ff006e; margin-bottom: 15px; text-align: right; text-transform: uppercase; }
 
         @keyframes popIn {
             from { transform: scale(0.95); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
+        }
+        
+        @media (max-width: 480px) {
+            h1.title { font-size: 2.4rem; }
+            h2.subtitle { font-size: 1.7rem; }
+            #hud { font-size: 0.9rem; padding: 8px 16px; }
+            .quiz-box { padding: 20px; border-width: 4px; }
+            .quiz-question { font-size: 1.2rem; }
+            .quiz-option { font-size: 1.05rem; padding: 12px; }
         }
     </style>
 </head>
@@ -92,12 +130,11 @@
         <div id="hud" class="hidden">
             <div class="hud-item">🏆 SCORE: <span id="val-score">0</span></div>
             <div class="hud-item">⭐ LEVEL: <span id="val-level">1</span></div>
-            <div class="hud-item">🍏 COLLECTED: <span id="val-healthy">0</span>/3</div>
+            <div class="hud-item">🍏 FRUITS: <span id="val-healthy">0</span>/3</div>
         </div>
 
-        <div id="screen-splash" class="screen" onclick="skipSplash()">
+        <div id="screen-splash" class="screen">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo">
-            <div class="skip-hint">Tap anywhere to skip</div>
         </div>
 
         <div id="screen-title" class="screen hidden">
@@ -106,11 +143,12 @@
         </div>
 
         <div id="screen-instructions" class="screen hidden">
-            <p class="text-simple" style="background: rgba(0,0,0,0.2); padding: 25px; border-radius: 16px;">
-                1. Swipe your finger or mouse to slice <b>healthy foods</b>.<br>
-                2. Avoid slicing oily or sugary <b>junk foods</b>.<br>
-                3. Slice 3 healthy foods to unlock your level quiz.<br>
-                4. You have 3 attempts per question. Helpful hints appear after your first mistake!<br>
+            <h2 class="subtitle">HOW TO PLAY 🤔</h2>
+            <p class="text-simple" style="background: rgba(255,255,255,0.15); padding: 25px; border-radius: 24px; border: 2px dashed #fff;">
+                1. Swipe your finger or mouse to slice <b>healthy foods</b>.<br><br>
+                2. Avoid slicing oily or sugary <b>junk foods</b>.<br><br>
+                3. Slice 3 healthy foods to unlock your level quiz.<br><br>
+                4. You have 3 attempts per question. Helpful hints appear after your first mistake!<br><br>
                 5. Complete all 3 levels to achieve ultimate victory!
             </p>
             <button class="btn-primary" onclick="startGame()">START GAME</button>
@@ -129,13 +167,13 @@
         <div id="screen-end" class="screen hidden">
             <h1 class="title" id="end-title">VICTORY</h1>
             <p class="text-simple" style="text-align: center; font-size: 1.4rem;" id="end-msg"></p>
-            <p class="text-simple" style="text-align: center; font-size: 2.8rem; color: #ffbe0b; font-weight:700;">SCORE: <span id="end-score">0</span></p>
+            <p class="text-simple" style="text-align: center; font-size: 3rem; color: #ffff3f; font-weight:700; text-shadow: 3px 3px 0 #ff006e;">SCORE: <span id="end-score">0</span></p>
             <button class="btn-primary" onclick="resetGame()">PLAY AGAIN</button>
         </div>
     </div>
 
     <script>
-        // Grade 4 Chapter 1 Textbook Database Context
+        // Full Grade 4 Chapter 1 Textbook Core Database Content
         const textbookDatabase = {
             1: [
                 { q: "Rahul is playing a football match and feels very tired at half-time. What should he eat for instant energy?", a: "Carbohydrates", options: ["Proteins", "Carbohydrates", "Vitamins"], hint: "Athletes eat a lot of this before a big race! Examples include bananas, potatoes, and bread.", exp: "Carbohydrates are 'energy-giving foods' that our body quickly breaks down to give us instant energy." },
@@ -160,15 +198,15 @@
             ]
         };
 
-        // Core Configuration Maps
+        // Core Configuration Elements
         const healthyFoods = ["🍎", "🍉", "🍌", "🥦", "🥕", "🥛", "🥚", "🍞"];
         const junkFoods = ["🍔", "🍟", "🥤", "🍩"];
         
-        // Dynamic Asset Particle Palette Map
+        // Vibrant Palette Engine Links
         const colorPaletteMap = {
-            "🍎": "#ff4d4d", "🍉": "#ff4d6d", "🍌": "#ffdf00", "🥦": "#2ec4b6", 
-            "🥕": "#ff9f1c", "🥛": "#ffffff", "🥚": "#f8f9fa", "🍞": "#e0a96d",
-            "🍔": "#b5838d", "🍟": "#ffb703", "🥤": "#e63946", "🍩": "#ffb5a7"
+            "🍎": "#ff4d4d", "🍉": "#ff4d6d", "🍌": "#ffdf00", "🥦": "#70e000", 
+            "🥕": "#ff9f1c", "🥛": "#e0f2fe", "🥚": "#f8f9fa", "🍞": "#fb8500",
+            "🍔": "#b5838d", "🍟": "#ffb703", "🥤": "#ff006e", "🍩": "#ffb5a7"
         };
         
         let canvas, ctx;
@@ -178,9 +216,11 @@
         let currentQuiz = [], quizIndex = 0, attempts = 0, qData = null;
         let sndCorrect, sndWrong, sndClaps;
         let isDrawing = false;
-        let splashTimeout;
         let levelClearedTransition = false;
         let countdownTimer = 0;
+
+        // Decorative background bubble layer arrays for the engine canvas wrapper
+        let bgBubbles = [];
 
         function shuffle(array) {
             let arr = [...array];
@@ -199,15 +239,25 @@
             window.addEventListener('resize', resize);
             setupInput();
 
+            // Populate cute background bubbles once
+            for(let i=0; i<15; i++) {
+                bgBubbles.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    r: Math.random() * 40 + 20,
+                    speed: Math.random() * 0.4 + 0.2
+                });
+            }
+
             try { sndCorrect = new Audio('assets/correct.mp3'); } catch(e){}
             try { sndWrong = new Audio('assets/wrong.mp3'); } catch(e){}
             try { sndClaps = new Audio('assets/freesound_community-claps-44774.mp3'); } catch(e){}
 
-            splashTimeout = setTimeout(skipSplash, 3000);
+            // Hold logo for exactly 5 seconds with zero skip intervention capabilities
+            setTimeout(revealTitleScreen, 5000);
         };
 
-        function skipSplash() {
-            if(splashTimeout) clearTimeout(splashTimeout);
+        function revealTitleScreen() {
             document.getElementById('screen-splash').classList.add('hidden');
             document.getElementById('screen-title').classList.remove('hidden');
         }
@@ -243,7 +293,7 @@
             items = []; particles = []; swipeTrail = []; spawnTimer = 0;
             levelClearedTransition = false;
             updateHUD();
-            currentQuiz = shuffle(textbookDatabase[level]);
+            currentQuiz = shuffle(textbookDatabase[level]); // Shuffles the level's question set completely
             isPlaying = true;
             requestAnimationFrame(engine);
         }
@@ -260,12 +310,12 @@
                 this.x = x;
                 this.y = y;
                 this.color = color;
-                this.radius = Math.random() * 5 + 4;
-                this.vx = (Math.random() * 8 - 4);
-                this.vy = (Math.random() * 8 - 4);
-                this.gravity = 0.12;
+                this.radius = Math.random() * 6 + 5;
+                this.vx = (Math.random() * 10 - 5);
+                this.vy = (Math.random() * 10 - 5);
+                this.gravity = 0.15;
                 this.alpha = 1;
-                this.decay = Math.random() * 0.02 + 0.015;
+                this.decay = Math.random() * 0.02 + 0.02;
             }
             update() {
                 this.vy += this.gravity;
@@ -284,41 +334,57 @@
             }
         }
 
-        // Downward Falling Food Engine (Calibrated medium pace for children)
+        // Downward Falling Food Engine (Medium pace with enhanced aesthetic bubble frames)
         class Item {
             constructor() {
                 this.x = Math.random() * (canvas.width - 120) + 60;
-                this.y = -50; // Spawns cleanly above the upper screen frame boundary
+                this.y = -60; 
                 this.isJunk = Math.random() > 0.65;
                 this.emoji = this.isJunk ? junkFoods[Math.floor(Math.random()*junkFoods.length)] : healthyFoods[Math.floor(Math.random()*healthyFoods.length)];
                 
-                // Stable horizontal drift parameters and predictable medium drop velocity rates
-                this.vx = Math.random() * 1.6 - 0.8; 
-                this.vy = 2.4 + Math.random() * 1.2; // Perfectly manageable child-friendly downward target speed
+                // Child-friendly controlled horizontal drift and medium drop speed
+                this.vx = Math.random() * 1.4 - 0.7; 
+                this.vy = 2.3 + Math.random() * 1.1; 
                 this.active = true;
-                this.radius = 35;
+                this.radius = 38;
+                this.rotation = Math.random() * Math.PI;
+                this.rotSpeed = Math.random() * 0.02 - 0.01;
             }
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
+                this.rotation += this.rotSpeed;
 
-                // Bounce gently off left/right side boundaries to guarantee accessibility on smaller screens
-                if(this.x < 40 || this.x > canvas.width - 40) {
+                if(this.x < 45 || this.x > canvas.width - 45) {
                     this.vx *= -1;
                 }
 
-                // Cleanly purge items traveling past the lower frame threshold
-                if(this.y > canvas.height + 50) this.active = false;
+                if(this.y > canvas.height + 60) this.active = false;
             }
             draw() {
-                ctx.font = "60px Arial";
+                ctx.save();
+                
+                // Cute white-glowing bubble circle frame backdrop to make food look pop and clean
+                ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+                ctx.strokeStyle = colorPaletteMap[this.emoji] || "#ffffff";
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw centered emoji asset
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.font = "48px Arial";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText(this.emoji, this.x, this.y);
+                ctx.fillText(this.emoji, 0, 0);
+                
+                ctx.restore();
             }
         }
 
-        // Geometry helper to calculate distance from point to a line segment
         function getDistanceToSegment(p, a, b) {
             let l2 = Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2);
             if (l2 === 0) return Math.hypot(p.x - a.x, p.y - a.y);
@@ -330,9 +396,22 @@
         function engine() {
             if(!isPlaying) return;
             
-            // Clean layout background pass
-            ctx.fillStyle = "#2d1a10";
+            // Render Cute Child-Friendly Blue Sky Canvas Background Gradient
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#4ea8de');
+            skyGrad.addColorStop(1, '#90e0ef');
+            ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw slow floating cute aesthetic background background spots
+            ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+            bgBubbles.forEach(b => {
+                b.y -= b.speed;
+                if(b.y < -b.r) b.y = canvas.height + b.r;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
 
             if (!levelClearedTransition) {
                 spawnTimer++;
@@ -342,7 +421,7 @@
                 }
             }
 
-            // Update & Draw Items
+            // Update & Draw Game Items
             for (let i = items.length - 1; i >= 0; i--) {
                 let itm = items[i];
                 itm.update();
@@ -350,7 +429,7 @@
                 if(!itm.active) items.splice(i, 1);
             }
 
-            // Update & Draw Splash Juice Particles
+            // Update & Draw Burst Splash Particles
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.update();
@@ -358,13 +437,13 @@
                 if(p.alpha <= 0) particles.splice(i, 1);
             }
 
-            // Render Blade Swipe Trail
+            // Render Polished Colorful Blade Swipe Trail
             if(swipeTrail.length > 1) {
                 for(let i = 1; i < swipeTrail.length; i++) {
                     ctx.beginPath();
                     let alpha = i / swipeTrail.length;
-                    ctx.strokeStyle = `rgba(255, 190, 11, ${alpha})`;
-                    ctx.lineWidth = i * 2;
+                    ctx.strokeStyle = `rgba(255, 255, 63, ${alpha})`;
+                    ctx.lineWidth = i * 2.5;
                     ctx.lineCap = "round";
                     ctx.moveTo(swipeTrail[i-1].x, swipeTrail[i-1].y);
                     ctx.lineTo(swipeTrail[i].x, swipeTrail[i].y);
@@ -372,20 +451,23 @@
                 }
             }
 
-            // Level Complete Transition Delay Overlay Handler
+            // Level Complete Banner Overlay Handler Loop Transitions
             if (levelClearedTransition) {
-                countdownTimer -= 16.66; // Loop decrement tick based on standard step estimation
-                ctx.fillStyle = "rgba(0,0,0,0.4)";
+                countdownTimer -= 16.66;
+                ctx.fillStyle = "rgba(67, 97, 238, 0.45)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                ctx.fillStyle = "#ffbe0b";
-                ctx.font = "bold 40px Fredoka";
+                ctx.fillStyle = "#ffff3f";
+                ctx.font = "bold 44px Fredoka";
                 ctx.textAlign = "center";
+                ctx.shadowColor = "#ff006e";
+                ctx.shadowBlur = 4;
                 ctx.fillText("LEVEL CLEARED! 🌟", canvas.width/2, canvas.height/2 - 20);
                 
                 ctx.fillStyle = "#ffffff";
-                ctx.font = "20px Fredoka";
-                ctx.fillText("Get ready for the textbook quiz...", canvas.width/2, canvas.height/2 + 30);
+                ctx.font = "700 22px Fredoka";
+                ctx.fillText("Get ready for your textbook quiz...", canvas.width/2, canvas.height/2 + 35);
+                ctx.shadowBlur = 0; 
 
                 if (countdownTimer <= 0) {
                     isPlaying = false;
@@ -398,7 +480,6 @@
             gameLoop = requestAnimationFrame(engine);
         }
 
-        // Unified Pointer Event Controls
         function setupInput() {
             const track = (x, y) => {
                 if(!isPlaying || levelClearedTransition) return;
@@ -407,7 +488,6 @@
                 swipeTrail.push(currentPoint);
                 if(swipeTrail.length > 8) swipeTrail.shift();
                 
-                // Continuous segment intersection detection loop
                 if (swipeTrail.length > 1) {
                     let prevPoint = swipeTrail[swipeTrail.length - 2];
                     checkSegmentSlice(prevPoint, currentPoint);
@@ -427,18 +507,16 @@
             window.addEventListener('pointercancel', clearSwipe);
         }
 
-        // Continuous Line Segment Collision Algorithm (Ensures rapid swipes never miss targets)
         function checkSegmentSlice(pA, pB) {
             items.forEach(itm => {
                 if(!itm.active) return;
                 
                 let distance = getDistanceToSegment({x: itm.x, y: itm.y}, pA, pB);
-                if(distance < itm.radius + 20) {
+                if(distance < itm.radius + 15) {
                     itm.active = false;
                     
-                    // Generate color-specific visual juice explosion burst particles
                     let particleColor = colorPaletteMap[itm.emoji] || "#ffffff";
-                    for(let k=0; k<12; k++) {
+                    for(let k=0; k<14; k++) {
                         particles.push(new VisualParticle(itm.x, itm.y, particleColor));
                     }
                     
@@ -451,7 +529,7 @@
                         
                         if(healthySlices >= 3) {
                             levelClearedTransition = true;
-                            countdownTimer = 2200; // 2.2 seconds buffer delay to celebrate level resolution smoothly
+                            countdownTimer = 2200; 
                         }
                     }
                 }
@@ -483,6 +561,7 @@
             const optBox = document.getElementById('quiz-options');
             optBox.innerHTML = '';
             
+            // Full Double Randomization Engine Hook: Shuffle the options dynamically on render
             let opts = shuffle(qData.options);
             opts.forEach(opt => {
                 let btn = document.createElement('button');
@@ -505,7 +584,7 @@
                 btnElement.classList.add('correct');
                 opts.forEach(b => b.disabled = true);
                 
-                document.getElementById('quiz-status').innerText = "Correct! Great Job.";
+                document.getElementById('quiz-status').innerText = "Correct! Great Job. 🎉";
                 document.getElementById('quiz-exp').classList.remove('hidden');
                 
                 setTimeout(nextQuestion, 4000); 
