@@ -37,7 +37,7 @@
             color: var(--text-dark);
         }
 
-        /* Snap Splash to Menu Intro Transitions */
+        /* Screen Layout Containers */
         .flow-screen {
             position: absolute;
             top: 0;
@@ -53,15 +53,15 @@
             text-align: center;
         }
 
+        /* Splash Screen handles its own smooth transition via JS now */
         #splash-screen { 
             background: #121214; 
-            animation: instantFadeOut 0.4s ease forwards;
-            animation-delay: 1.5s;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
         }
-        .logo-img {
-            max-width: 220px;
-            width: 70%;
-            height: auto;
+        
+        .fade-out {
+            opacity: 0 !important;
+            visibility: hidden !important;
         }
 
         #menu-screen {
@@ -141,7 +141,6 @@
             height: calc(100% - 70px);
         }
 
-        /* Path Track Playground Layout */
         #board-grid-box {
             flex: 1;
             background: #fff2e2;
@@ -183,7 +182,6 @@
         .action-danger { background: #ffbebe !important; border-color: var(--danger) !important; box-shadow: 0 6px 0 #c0392b !important;}
         .action-success { background: #cffff0 !important; border-color: var(--success) !important; box-shadow: 0 6px 0 #27ae60 !important;}
 
-        /* Player Avatar Piece */
         #player-coin-token {
             width: 36px;
             height: 36px;
@@ -197,7 +195,6 @@
             transform: translate(-50%, -50%);
         }
 
-        /* Sidebar Control Center Dashboard */
         #right-control-panel {
             width: 200px;
             background: white;
@@ -226,7 +223,6 @@
         }
         #dice-box-container.rolling { animation: bounceDice 0.15s infinite alternate; }
 
-        /* Overlay Layout Modals */
         .overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -250,7 +246,6 @@
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Dynamic Visual Status Banners */
         .hint-alert-box {
             background: #fff9db;
             color: #f59f00;
@@ -288,9 +283,6 @@
         }
         .btn-option:hover { background: var(--primary-purple); color: white; }
 
-        @keyframes instantFadeOut {
-            to { opacity: 0; visibility: hidden; }
-        }
         @keyframes playfulTitle {
             from { transform: scale(1) rotate(-2deg); }
             to { transform: scale(1.03) rotate(2deg); }
@@ -319,18 +311,15 @@
 <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
 <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
-<!-- Screen 1: Swift Intro Splash Screen -->
 <div id="splash-screen" class="flow-screen">
-    <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
+    <img src="assets/innovine-logo.png" alt="Innovine Logo" style="max-width: 220px; width: 70%; height: auto;">
 </div>
 
-<!-- Screen 2: Animated Title Screen -->
 <div id="menu-screen" class="flow-screen hidden">
     <h1 class="menu-title">THE LIVING MACHINE<br>SERPENT ROUTE 🐍</h1>
     <button class="arcade-btn" onclick="goToInstructions()">Start Game</button>
 </div>
 
-<!-- Screen 3: Guided Manual Explainer -->
 <div id="instruction-screen" class="flow-screen hidden">
     <div class="instruction-box">
         <h2>How to Play! 🕹️</h2>
@@ -343,7 +332,6 @@
     </div>
 </div>
 
-<!-- Interactive Engine Play Area Wrapper -->
 <div id="app-wrapper">
     <div id="hud-dashboard">
         <div class="hud-widget">🏆 Score: <span id="lbl-score">0</span></div>
@@ -362,7 +350,6 @@
     </div>
 </div>
 
-<!-- Quiz Banner Popup Container Modal -->
 <div id="quiz-overlay" class="overlay hidden">
     <div class="modal-card">
         <h3 id="lbl-quiz-headline" style="color: var(--primary-purple); font-weight:800;">CHALLENGE SPOT</h3>
@@ -376,7 +363,6 @@
     </div>
 </div>
 
-<!-- Action/Trap Window Modal Sheets -->
 <div id="alert-overlay" class="overlay hidden">
     <div class="modal-card">
         <h2 id="lbl-alert-headline">ALERT</h2>
@@ -385,7 +371,6 @@
     </div>
 </div>
 
-<!-- Terminal Victory Summary Board -->
 <div id="victory-overlay" class="overlay hidden">
     <div class="modal-card" style="border: 5px solid gold;">
         <h1 style="font-size:3rem;">🏆</h1>
@@ -434,15 +419,28 @@
     let isTurnSkipped = false;
     let askedQuestions = []; 
 
-    // Handle menu initialization perfectly through the document lifecycle
-    window.addEventListener('DOMContentLoaded', setupMenuTimeout);
-
-    function setupMenuTimeout() {
+    // Directly execute screen timing loop safely
+    function runGameScreenSequence() {
         setTimeout(() => {
-            document.getElementById('splash-screen').classList.add('hidden');
-            document.getElementById('menu-screen').classList.remove('hidden');
+            const splashElement = document.getElementById('splash-screen');
+            const menuElement = document.getElementById('menu-screen');
+            
+            if (splashElement && menuElement) {
+                // Fade out the dark splash view smoothly
+                splashElement.classList.add('fade-out');
+                // Unhide the title main menu container
+                menuElement.classList.remove('hidden');
+                
+                // Completely clear layout space after transition finishes
+                setTimeout(() => {
+                    splashElement.classList.add('hidden');
+                }, 400);
+            }
         }, 1500);
     }
+
+    // Call transition sequence immediately upon bottom-of-body parsing
+    runGameScreenSequence();
 
     function goToInstructions() {
         document.getElementById('menu-screen').classList.add('hidden');
