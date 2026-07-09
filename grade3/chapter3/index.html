@@ -193,7 +193,7 @@
             position: absolute;
             z-index: 10;
             box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             transform: translate(-50%, -50%);
         }
 
@@ -317,7 +317,7 @@
 
 <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
 <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
-<audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+<audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></preload>
 
 <!-- Screen 1: Swift Intro Splash Screen -->
 <div id="splash-screen" class="flow-screen">
@@ -335,7 +335,7 @@
     <div class="instruction-box">
         <h2>How to Play! 🕹️</h2>
         <ul>
-            <li>🎲 Roll the dice box to move your avatar along the serpentine route layout!</li>
+            <li>🎲 Roll the dice box to move your avatar step-by-step along the serpentine route layout!</li>
             <li>🔬 Match text concepts correctly when landing on the Term spots.</li>
             <li>❤️ Watch your lives! 3 incorrect choices will reset your position.</li>
         </ul>
@@ -368,7 +368,6 @@
         <h3 id="lbl-quiz-headline" style="color: var(--primary-purple); font-weight:800;">CHALLENGE SPOT</h3>
         <p id="box-question-text" style="font-size:1.1rem; font-weight:700; margin:15px 0; color:#34495e;"></p>
         
-        <!-- Status Feedback Area inside the card instead of browser alert popups -->
         <div id="box-status-banner" class="status-alert-banner hidden"></div>
         <div class="hint-alert-box hidden" id="box-hint-alert"></div>
         
@@ -399,14 +398,14 @@
 
 <script>
     const scenarioQuestionPool = [
-        { q: "You build a toy house using plastic bricks. What tiny structural 'bricks' build up your body tissues?", o: ["Cells", "Bricks", "Organs"], a: "Cells", h: "Think of the smallest living building block that makes up your whole body!" },
-        { q: "You look at an adult and a tiny newborn baby. Who has fewer but larger bones in their framework?", o: ["The adult (206 bones)", "Both have the same", "The baby (300 bones)"], a: "The adult (206 bones)", h: "As babies grow up, some tiny bones fuse together into a smaller total number!" },
-        { q: "A soccer ball accidentally flies straight toward your head! What bony helmet stops it from hurting your brain?", o: ["The Skull", "The Backbone", "The Rib cage"], a: "The Skull", h: "Tap the hard bone on the very top of your head!" },
-        { q: "You smile at your friend and kick a ball into a goal. What attached parts pulled your bones to make you move?", o: ["Muscles", "Nails", "Skin"], a: "Muscles", h: "Over 600 of these flexible fleshy parts help you pull your limbs!" },
-        { q: "You walk through a dusty sandbox while playing outside. What tiny helpers inside your nose catch floating dirt particles?", o: ["Nose hairs", "Saliva drops", "Soft skin"], a: "Nose hairs", h: "They act like a tiny built-in filter net inside your nostrils!" },
-        { q: "You are feeling cold at night and want to sleep. Why should you never cover your face with a heavy blanket?", o: ["It blocks fresh oxygen", "It hurts your jaw", "It stops digestion"], a: "It blocks fresh oxygen", h: "Your balloon lungs need clear air loops to breathe while you dream!" },
-        { q: "You chew a piece of dry bread until it becomes soft and watery. What mouth fluid helped mash it up?", o: ["Saliva", "Stomach juice", "Pure water"], a: "Saliva", h: "It is the watery liquid made inside your mouth glands!" },
-        { q: "Your body took all the nutrients from lunch, leaving watery waste. Which long tube sucks out extra water?", o: ["Large Intestine", "Food Pipe", "Stomach Bag"], a: "Large Intestine", h: "It's the final wide tube that clears out liquids before solid waste leaves!" }
+        { id: 1, q: "You build a toy house using plastic bricks. What tiny structural 'bricks' build up your body tissues?", o: ["Cells", "Bricks", "Organs"], a: "Cells", h: "Think of the smallest living building block that makes up your whole body!" },
+        { id: 2, q: "You look at an adult and a tiny newborn baby. Who has fewer but larger bones in their framework?", o: ["The adult (206 bones)", "Both have the same", "The baby (300 bones)"], a: "The adult (206 bones)", h: "As babies grow up, some tiny bones fuse together into a smaller total number!" },
+        { id: 3, q: "A soccer ball accidentally flies straight toward your head! What bony helmet stops it from hurting your brain?", o: ["The Skull", "The Backbone", "The Rib cage"], a: "The Skull", h: "Tap the hard bone on the very top of your head!" },
+        { id: 4, q: "You smile at your friend and kick a ball into a goal. What attached parts pulled your bones to make you move?", o: ["Muscles", "Nails", "Skin"], a: "Muscles", h: "Over 600 of these flexible fleshy parts help you pull your limbs!" },
+        { id: 5, q: "You walk through a dusty sandbox while playing outside. What tiny helpers inside your nose catch floating dirt particles?", o: ["Nose hairs", "Saliva drops", "Soft skin"], a: "Nose hairs", h: "They act like a tiny built-in filter net inside your nostrils!" },
+        { id: 6, q: "You are feeling cold at night and want to sleep. Why should you never cover your face with a heavy blanket?", o: ["It blocks fresh oxygen", "It hurts your jaw", "It stops digestion"], a: "It blocks fresh oxygen", h: "Your balloon lungs need clear air loops to breathe while you dream!" },
+        { id: 7, q: "You chew a piece of dry bread until it becomes soft and watery. What mouth fluid helped mash it up?", o: ["Saliva", "Stomach juice", "Pure water"], a: "Saliva", h: "It is the watery liquid made inside your mouth glands!" },
+        { id: 8, q: "Your body took all the nutrients from lunch, leaving watery waste. Which long tube sucks out extra water?", o: ["Large Intestine", "Food Pipe", "Stomach Bag"], a: "Large Intestine", h: "It's the final wide tube that clears out liquids before solid waste leaves!" }
     ];
 
     const boardTrackRoute = [
@@ -433,6 +432,7 @@
     let userLives = 3;
     let wrongAttemptsOnQuestion = 0;
     let isTurnSkipped = false;
+    let askedQuestions = []; // Tracks question history to prevent duplication
 
     function setupMenuTimeout() {
         setTimeout(() => {
@@ -490,7 +490,6 @@
             isTurnSkipped = false;
             document.getElementById('lbl-roll-tag').innerText = "TAP DICE";
             
-            // Replaced alert with custom trap layout banner
             document.getElementById('lbl-alert-headline').innerText = "💤 REST TIME OVER";
             document.getElementById('lbl-alert-body').innerText = "Your missed turn penalty is over. You can roll normally now!";
             document.getElementById('alert-overlay').classList.remove('hidden');
@@ -505,27 +504,48 @@
             const rollValue = Math.floor(Math.random() * 2) + 1; 
             diceBox.innerText = rollValue;
             document.getElementById('lbl-roll-tag').innerText = `Rolled a ${rollValue}!`;
-            executeTokenSteps(rollValue);
+            animateSteps(rollValue);
         }, 500);
     }
 
-    function executeTokenSteps(steps) {
-        coinPosition += steps;
-        if (coinPosition >= 15) {
-            coinPosition = 15;
-            renderTokenCoordinates();
-            setTimeout(triggerVictoryTerminalState, 500);
+    // Step-by-Step sequence movement animation mapping
+    function animateSteps(stepsRemaining) {
+        if (stepsRemaining <= 0) {
+            // Arrived at the final destination tile smoothly
+            const landedTile = boardTrackRoute[coinPosition];
+            setTimeout(() => {
+                if (landedTile.isTrap) launchTrapBanner(landedTile);
+                else if (coinPosition > 0) launchQuestionBanner(landedTile);
+                else resetDiceBoxFace();
+            }, 400);
             return;
         }
 
+        if (coinPosition >= 15) {
+            triggerVictoryTerminalState();
+            return;
+        }
+
+        coinPosition++;
         renderTokenCoordinates();
 
         setTimeout(() => {
-            const landedTile = boardTrackRoute[coinPosition];
-            if (landedTile.isTrap) launchTrapBanner(landedTile);
-            else if (coinPosition > 0) launchQuestionBanner(landedTile);
-            else resetDiceBoxFace();
-        }, 500);
+            animateSteps(stepsRemaining - 1);
+        }, 400); // 400ms time cadence per single board tile step block
+    }
+
+    function getUniqueQuestion() {
+        // Reset pool history if all questions have been asked
+        if (askedQuestions.length === scenarioQuestionPool.length) {
+            askedQuestions = [];
+        }
+
+        const availableQuestions = scenarioQuestionPool.filter(q => !askedQuestions.includes(q.id));
+        const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+        const chosenQuestion = availableQuestions[randomIndex];
+        
+        askedQuestions.push(chosenQuestion.id);
+        return chosenQuestion;
     }
 
     function launchQuestionBanner(tileObj) {
@@ -535,8 +555,7 @@
         document.getElementById('btn-quiz-continue').classList.add('hidden');
         document.getElementById('lbl-quiz-headline').innerText = `🔬 ${tileObj.term.replace('<br>', ' ').toUpperCase()}`;
 
-        const index = Math.floor(Math.random() * scenarioQuestionPool.length);
-        const targetQ = scenarioQuestionPool[index];
+        const targetQ = getUniqueQuestion();
         document.getElementById('box-question-text').innerText = targetQ.q;
 
         const container = document.getElementById('box-options-layout');
@@ -557,8 +576,6 @@
     function verifyAnswerChoice(clickedBtn, chosen, correct, hintText) {
         const statusBanner = document.getElementById('box-status-banner');
         const continueBtn = document.getElementById('btn-quiz-continue');
-        
-        // Disable other options while showing current result banner
         const options = document.querySelectorAll('.btn-option');
         
         if (chosen === correct) {
@@ -627,7 +644,6 @@
         document.getElementById('alert-overlay').classList.add('hidden');
         const activeTile = boardTrackRoute[coinPosition];
 
-        // Safety fallback checks prevent execution duplication errors
         if (activeTile.isTrap) {
             if (activeTile.effect === 'back') {
                 coinPosition -= activeTile.val;
@@ -638,7 +654,6 @@
                 isTurnSkipped = true;
                 document.getElementById('lbl-roll-tag').innerText = "SKIP ACTIVE 💤";
             }
-            // Temporarily clear trap state attribute flag to prevent loop traps
             activeTile.isTrap = false; 
         }
 
