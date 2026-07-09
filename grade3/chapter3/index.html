@@ -250,6 +250,7 @@
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        /* Dynamic Visual Status Banners */
         .hint-alert-box {
             background: #fff9db;
             color: #f59f00;
@@ -261,6 +262,18 @@
             border-left: 5px solid #f59f00;
             text-align: left;
         }
+
+        .status-alert-banner {
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+            animation: popIn 0.2s ease;
+        }
+        .status-success { background: #e8f5e9; color: var(--success); border: 2px solid var(--success); }
+        .status-danger { background: #ffebee; color: var(--danger); border: 2px solid var(--danger); }
 
         .options-stack { display: flex; flex-direction: column; gap: 12px; width: 100%; }
         .btn-option {
@@ -306,15 +319,18 @@
 <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
 <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
+<!-- Screen 1: Swift Intro Splash Screen -->
 <div id="splash-screen" class="flow-screen">
     <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" onload="setupMenuTimeout()">
 </div>
 
+<!-- Screen 2: Animated Title Screen -->
 <div id="menu-screen" class="flow-screen hidden">
     <h1 class="menu-title">THE LIVING MACHINE<br>SERPENT ROUTE 🐍</h1>
     <button class="arcade-btn" onclick="goToInstructions()">Start Game</button>
 </div>
 
+<!-- Screen 3: Guided Manual Explainer -->
 <div id="instruction-screen" class="flow-screen hidden">
     <div class="instruction-box">
         <h2>How to Play! 🕹️</h2>
@@ -327,6 +343,7 @@
     </div>
 </div>
 
+<!-- Interactive Engine Play Area Wrapper -->
 <div id="app-wrapper">
     <div id="hud-dashboard">
         <div class="hud-widget">🏆 Score: <span id="lbl-score">0</span></div>
@@ -345,15 +362,22 @@
     </div>
 </div>
 
+<!-- Quiz Banner Popup Container Modal -->
 <div id="quiz-overlay" class="overlay hidden">
     <div class="modal-card">
         <h3 id="lbl-quiz-headline" style="color: var(--primary-purple); font-weight:800;">CHALLENGE SPOT</h3>
         <p id="box-question-text" style="font-size:1.1rem; font-weight:700; margin:15px 0; color:#34495e;"></p>
+        
+        <!-- Status Feedback Area inside the card instead of browser alert popups -->
+        <div id="box-status-banner" class="status-alert-banner hidden"></div>
         <div class="hint-alert-box hidden" id="box-hint-alert"></div>
+        
         <div class="options-stack" id="box-options-layout"></div>
+        <button id="btn-quiz-continue" class="arcade-btn hidden" style="background:var(--primary-purple); color:white; margin-top:15px; width:100%; font-size:1.1rem; padding:10px;"></button>
     </div>
 </div>
 
+<!-- Action/Trap Window Modal Sheets -->
 <div id="alert-overlay" class="overlay hidden">
     <div class="modal-card">
         <h2 id="lbl-alert-headline">ALERT</h2>
@@ -362,6 +386,7 @@
     </div>
 </div>
 
+<!-- Terminal Victory Summary Board -->
 <div id="victory-overlay" class="overlay hidden">
     <div class="modal-card" style="border: 5px solid gold;">
         <h1 style="font-size:3rem;">🏆</h1>
@@ -373,7 +398,6 @@
 </div>
 
 <script>
-    // Scenario-Based Grade 3 Clean Questions Database
     const scenarioQuestionPool = [
         { q: "You build a toy house using plastic bricks. What tiny structural 'bricks' build up your body tissues?", o: ["Cells", "Bricks", "Organs"], a: "Cells", h: "Think of the smallest living building block that makes up your whole body!" },
         { q: "You look at an adult and a tiny newborn baby. Who has fewer but larger bones in their framework?", o: ["The adult (206 bones)", "Both have the same", "The baby (300 bones)"], a: "The adult (206 bones)", h: "As babies grow up, some tiny bones fuse together into a smaller total number!" },
@@ -385,7 +409,6 @@
         { q: "Your body took all the nutrients from lunch, leaving watery waste. Which long tube sucks out extra water?", o: ["Large Intestine", "Food Pipe", "Stomach Bag"], a: "Large Intestine", h: "It's the final wide tube that clears out liquids before solid waste leaves!" }
     ];
 
-    // True Serpentine Winding Route Map (Row-0 L to R, Row-1 R to L, Row-2 L to R, Row-3 R to L)
     const boardTrackRoute = [
         { term: "START 🏁", r: 0, c: 0, bg: "#ffffff" },
         { term: "Cell Block 🧱", r: 0, c: 1, bg: "var(--tile-yellow)" },
@@ -415,7 +438,7 @@
         setTimeout(() => {
             document.getElementById('splash-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
-        }, 1500); // Trigger transition instantly after the graphic loads cleanly
+        }, 1500);
     }
 
     function goToInstructions() {
@@ -466,7 +489,11 @@
         if (isTurnSkipped) {
             isTurnSkipped = false;
             document.getElementById('lbl-roll-tag').innerText = "TAP DICE";
-            alert("Missed turn penalty over. Roll normally now!");
+            
+            // Replaced alert with custom trap layout banner
+            document.getElementById('lbl-alert-headline').innerText = "💤 REST TIME OVER";
+            document.getElementById('lbl-alert-body').innerText = "Your missed turn penalty is over. You can roll normally now!";
+            document.getElementById('alert-overlay').classList.remove('hidden');
             return;
         }
 
@@ -475,7 +502,7 @@
 
         setTimeout(() => {
             diceBox.classList.remove('rolling');
-            const rollValue = Math.floor(Math.random() * 2) + 1; // Paced steps (1 or 2) for highest question engagement
+            const rollValue = Math.floor(Math.random() * 2) + 1; 
             diceBox.innerText = rollValue;
             document.getElementById('lbl-roll-tag').innerText = `Rolled a ${rollValue}!`;
             executeTokenSteps(rollValue);
@@ -504,6 +531,8 @@
     function launchQuestionBanner(tileObj) {
         wrongAttemptsOnQuestion = 0;
         document.getElementById('box-hint-alert').classList.add('hidden');
+        document.getElementById('box-status-banner').classList.add('hidden');
+        document.getElementById('btn-quiz-continue').classList.add('hidden');
         document.getElementById('lbl-quiz-headline').innerText = `🔬 ${tileObj.term.replace('<br>', ' ').toUpperCase()}`;
 
         const index = Math.floor(Math.random() * scenarioQuestionPool.length);
@@ -518,43 +547,72 @@
             const btn = document.createElement('button');
             btn.className = "btn-option";
             btn.innerText = opt;
-            btn.onclick = () => verifyAnswerChoice(opt, targetQ.a, targetQ.h);
+            btn.onclick = () => verifyAnswerChoice(btn, opt, targetQ.a, targetQ.h);
             container.appendChild(btn);
         });
 
         document.getElementById('quiz-overlay').classList.remove('hidden');
     }
 
-    function verifyAnswerChoice(chosen, correct, hintText) {
+    function verifyAnswerChoice(clickedBtn, chosen, correct, hintText) {
+        const statusBanner = document.getElementById('box-status-banner');
+        const continueBtn = document.getElementById('btn-quiz-continue');
+        
+        // Disable other options while showing current result banner
+        const options = document.querySelectorAll('.btn-option');
+        
         if (chosen === correct) {
             document.getElementById('snd-correct').play().catch(() => {});
             totalScore += 20;
             document.getElementById('lbl-score').innerText = totalScore;
-            document.getElementById('quiz-overlay').classList.add('hidden');
-            alert("🌟 Correct! Brilliant job.");
-            resetDiceBoxFace();
+            
+            options.forEach(b => b.disabled = true);
+            statusBanner.className = "status-alert-banner status-success";
+            statusBanner.innerText = "🌟 Correct! Brilliant job.";
+            statusBanner.classList.remove('hidden');
+            
+            continueBtn.innerText = "Awesome, Next!";
+            continueBtn.onclick = () => {
+                document.getElementById('quiz-overlay').classList.add('hidden');
+                resetDiceBoxFace();
+            };
+            continueBtn.classList.remove('hidden');
         } else {
             document.getElementById('snd-wrong').play().catch(() => {});
             wrongAttemptsOnQuestion++;
             
             if (wrongAttemptsOnQuestion === 1) {
+                statusBanner.className = "status-alert-banner status-danger";
+                statusBanner.innerText = "Not quite! Look closely at the hint below.";
+                statusBanner.classList.remove('hidden');
+                
+                clickedBtn.style.background = "#ffccd5";
+                clickedBtn.disabled = true;
+
                 const hintBox = document.getElementById('box-hint-alert');
                 hintBox.innerText = `💡 HINT: ${hintText}`;
                 hintBox.classList.remove('hidden');
             } else {
                 userLives--;
                 updateLivesHUD();
-                document.getElementById('quiz-overlay').classList.add('hidden');
+                options.forEach(b => b.disabled = true);
+                
+                statusBanner.className = "status-alert-banner status-danger";
+                statusBanner.innerText = `Incorrect! The answer was: ${correct}. Move back 1 space!`;
+                statusBanner.classList.remove('hidden');
 
-                if (userLives <= 0) {
-                    alert("Out of lives! Let's try the track again.");
-                    window.location.reload();
-                } else {
-                    alert(`Not quite! The textbook says: ${correct}. Move back 1 space!`);
-                    if (coinPosition > 0) coinPosition--;
-                    renderTokenCoordinates();
-                    resetDiceBoxFace();
-                }
+                continueBtn.innerText = userLives <= 0 ? "Restart Track" : "Continue";
+                continueBtn.onclick = () => {
+                    document.getElementById('quiz-overlay').classList.add('hidden');
+                    if (userLives <= 0) {
+                        window.location.reload();
+                    } else {
+                        if (coinPosition > 0) coinPosition--;
+                        renderTokenCoordinates();
+                        resetDiceBoxFace();
+                    }
+                };
+                continueBtn.classList.remove('hidden');
             }
         }
     }
@@ -569,14 +627,19 @@
         document.getElementById('alert-overlay').classList.add('hidden');
         const activeTile = boardTrackRoute[coinPosition];
 
-        if (activeTile.effect === 'back') {
-            coinPosition -= activeTile.val;
-            if (coinPosition < 0) coinPosition = 0;
-        } else if (activeTile.effect === 'forward') {
-            coinPosition += activeTile.val;
-        } else if (activeTile.effect === 'skip') {
-            isTurnSkipped = true;
-            document.getElementById('lbl-roll-tag').innerText = "SKIP ACTIVE 💤";
+        // Safety fallback checks prevent execution duplication errors
+        if (activeTile.isTrap) {
+            if (activeTile.effect === 'back') {
+                coinPosition -= activeTile.val;
+                if (coinPosition < 0) coinPosition = 0;
+            } else if (activeTile.effect === 'forward') {
+                coinPosition += activeTile.val;
+            } else if (activeTile.effect === 'skip') {
+                isTurnSkipped = true;
+                document.getElementById('lbl-roll-tag').innerText = "SKIP ACTIVE 💤";
+            }
+            // Temporarily clear trap state attribute flag to prevent loop traps
+            activeTile.isTrap = false; 
         }
 
         renderTokenCoordinates();
