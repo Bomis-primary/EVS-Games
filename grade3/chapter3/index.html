@@ -317,11 +317,11 @@
 
 <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
 <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
-<audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></preload>
+<audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
 <!-- Screen 1: Swift Intro Splash Screen -->
 <div id="splash-screen" class="flow-screen">
-    <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" onload="setupMenuTimeout()">
+    <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
 </div>
 
 <!-- Screen 2: Animated Title Screen -->
@@ -432,7 +432,10 @@
     let userLives = 3;
     let wrongAttemptsOnQuestion = 0;
     let isTurnSkipped = false;
-    let askedQuestions = []; // Tracks question history to prevent duplication
+    let askedQuestions = []; 
+
+    // Handle menu initialization perfectly through the document lifecycle
+    window.addEventListener('DOMContentLoaded', setupMenuTimeout);
 
     function setupMenuTimeout() {
         setTimeout(() => {
@@ -475,6 +478,8 @@
         const token = document.getElementById('player-coin-token');
         const board = document.getElementById('board-grid-box');
 
+        if (!board || !token || !currentTile) return;
+
         const tileW = board.clientWidth / 4;
         const tileH = board.clientHeight / 4;
 
@@ -508,10 +513,8 @@
         }, 500);
     }
 
-    // Step-by-Step sequence movement animation mapping
     function animateSteps(stepsRemaining) {
         if (stepsRemaining <= 0) {
-            // Arrived at the final destination tile smoothly
             const landedTile = boardTrackRoute[coinPosition];
             setTimeout(() => {
                 if (landedTile.isTrap) launchTrapBanner(landedTile);
@@ -531,11 +534,10 @@
 
         setTimeout(() => {
             animateSteps(stepsRemaining - 1);
-        }, 400); // 400ms time cadence per single board tile step block
+        }, 400); 
     }
 
     function getUniqueQuestion() {
-        // Reset pool history if all questions have been asked
         if (askedQuestions.length === scenarioQuestionPool.length) {
             askedQuestions = [];
         }
