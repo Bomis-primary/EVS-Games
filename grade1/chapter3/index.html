@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Zippy's Path of Adventure</title>
 <style>
 *{box-sizing:border-box}
@@ -10,7 +10,6 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f8ff;color:#2
 .screen{display:none;min-height:100vh;padding:12px}
 .active{display:block}
 
-/* PERFECT CENTERING AND SCALING FOR LOGO ON ALL DEVICES */
 #splashScreen{
   background:#fff;
   display:none;
@@ -30,7 +29,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f8ff;color:#2
 }
 
 h1{font-size:clamp(28px,5vw,46px);color:#ff7b54;margin:10px 0 8px}
-button{border:none;border-radius:18px;padding:12px 22px;margin:8px;font-size:18px;cursor:pointer;background:#ffd166;box-shadow:0 4px 0 #d99b16;font-weight:700}
+button{border:none;border-radius:18px;padding:12px 22px;margin:8px;font-size:18px;cursor:pointer;background:#ffd166;box-shadow:0 4px 0 #d99b16;font-weight:700;touch-action:manipulation}
 button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 .card{background:rgba(255,255,255,.95);border-radius:24px;padding:14px;max-width:1100px;margin:8px auto;box-shadow:0 8px 18px rgba(0,0,0,.12)}
 .topbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,.9);padding:8px;border-radius:18px;margin-bottom:8px}
@@ -39,7 +38,6 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 .question{font-size:clamp(18px,3vw,28px);font-weight:700;color:#5e3d2f;margin-bottom:6px;text-align:center}
 .message{min-height:28px;font-size:18px;font-weight:700;margin-top:6px;line-height:1.35;text-align:center}
 
-/* STACKED LAYOUT: OPTIONS DIRECTLY UNDER BOARD GAME */
 .game-layout{
   display:grid;
   grid-template-columns:1fr;
@@ -49,46 +47,96 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
   margin:8px auto 0;
 }
 
-/* TOUCH DRAGGABLE OVERFLOW MAP SYSTEM FOR MOBILE SCREEN PROTECTION */
 .path-zone{
-  min-height:60vh;
   border-radius:26px;
   position:relative;
   overflow-x:auto; 
   overflow-y:hidden;
   -webkit-overflow-scrolling:touch;
-  background:url('assets/boardgame.png') center/cover no-repeat;
   box-shadow:0 8px 18px rgba(0,0,0,.12);
+  background: #e3f2fd;
 }
 .path-zone-inner {
-  min-width: 750px; 
+  min-width: 800px; 
+  width: 100%;
   position: relative;
-  min-height: 60vh;
+  display: flex;
+  align-items: center;
 }
 
-#pathAvatar{position:absolute;left:4%;bottom:14%;width:clamp(52px,7vw,82px);transition:left .45s ease,transform .25s ease;z-index:5;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
-.path-zone::before{content:"Help Zippy move to school";position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.85);padding:6px 14px;border-radius:14px;font-weight:700;color:#2f7f57;font-size:15px;z-index:4}
-.milestones{position:absolute;left:7%;right:7%;bottom:12%;display:flex;justify-content:space-between;z-index:2}
-.dot{width:18px;height:18px;border-radius:50%;background:#d2d9ef;border:3px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.12)}
+.board-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#pathAvatar{
+  position:absolute;
+  left:4%;
+  bottom:20%;
+  width:clamp(45px,6vw,75px);
+  transition:left .45s ease,transform .25s ease;
+  z-index:5;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))
+}
+
+.path-zone::before{
+  content:"Help Zippy move to school";
+  position:sticky; /* Keeps label visible while scrolling horizontally */
+  left:50%;
+  transform:translateX(-50%);
+  display: inline-block;
+  margin-top: 12px;
+  background:rgba(255,255,255,.95);
+  padding:6px 14px;
+  border-radius:14px;
+  font-weight:700;
+  color:#2f7f57;
+  font-size:15px;
+  z-index:10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.milestones{
+  position:absolute;
+  left:7%;
+  right:7%;
+  bottom:18%;
+  display:flex;
+  justify-content:space-between;
+  z-index:2
+}
+
+.dot{
+  width:clamp(14px, 2vw, 20px);
+  height:clamp(14px, 2vw, 20px);
+  border-radius:50%;
+  background:#d2d9ef;
+  border:3px solid #fff;
+  box-shadow:0 2px 4px rgba(0,0,0,.12);
+  transition: background 0.3s ease;
+}
 .dot.done{background:#66bb6a}
 
 .options-panel{background:rgba(255,255,255,.96);padding:12px;border-radius:24px;box-shadow:0 5px 12px rgba(0,0,0,.12)}
-#options{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px}
-.option-btn{border:none;border-radius:18px;padding:10px;background:#f5f8ff;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);min-height:110px}
-.option-btn img{width:100%;max-width:150px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:14px;padding:6px;display:block;margin:0 auto}
+#options{display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px}
+.option-btn{border:none;border-radius:18px;padding:10px;background:#f5f8ff;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);min-height:110px;touch-action:manipulation;}
+.option-btn img{width:100%;max-width:140px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:14px;padding:6px;display:block;margin:0 auto}
 .option-btn.correct{background:#dff7eb;outline:3px solid #57b97c}
 .option-btn.wrong{background:#ffe3e3;outline:3px solid #e57373}
 .option-btn.hint-glow{outline:4px solid #42a5f5!important;box-shadow:0 0 18px #42a5f5}
-.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:10px}
-input[type="range"]{width:120px}
+.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:10px;align-items:center;}
+input[type="range"]{width:120px; accent-color: #ffd166;}
 .final{font-size:clamp(24px,5vw,40px);color:#2e7d32;font-weight:700}
-.confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999}
+.confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999;will-change:transform, opacity;}
 
-@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+@keyframes fall{to{transform:translate3d(0, 105vh, 0) rotate(720deg);opacity:0}}
 @media(max-width:420px){
   button{font-size:16px;padding:11px 18px}
+  #options{grid-template-columns: 1fr 1fr;}
   .option-btn{min-height:95px}
-  .option-btn img{max-width:120px}
+  .option-btn img{max-width:110px}
+  .path-zone-inner {min-width: 600px;} /* slightly scaled down for very small phones to avoid excessive scrolling */
 }
 </style>
 </head>
@@ -105,7 +153,7 @@ input[type="range"]{width:120px}
     <div class="controls">
       <button onclick="startGame()">▶ Start Game</button>
       <button onclick="toggleMusic()" id="musicBtn">🔊 Music</button>
-      <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.4">
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.4" aria-label="Volume">
     </div>
   </div>
 </div>
@@ -123,8 +171,10 @@ input[type="range"]{width:120px}
   </div>
 
   <div class="game-layout">
-    <div class="path-zone">
+    <div class="path-zone" id="pathZoneContainer">
       <div class="path-zone-inner">
+        <!-- Render the boardgame as an image so it dictates layout sizing -->
+        <img src="assets/boardgame.png" class="board-image" alt="Game Path">
         <img id="pathAvatar" src="assets/zippysmiling.png" alt="Zippy">
         <div id="milestones" class="milestones"></div>
       </div>
@@ -168,7 +218,7 @@ const questions=[
 const map={
   jointfamily:'assets/jointfamily.png',
   helpinginkitchen:'assets/helpinginkitchen.png',
-  wateringplant:'assets/wateringplants.png',
+  wateringplant:'assets/wateringplant.png', /* Fixed potential typo here */
   classroom:'assets/classroom.png',
   library:'assets/library.png',
   bussafety:'assets/bussafety.png',
@@ -185,7 +235,7 @@ const faces={
   sad:'assets/zippysad.png'
 };
 
-let gameQuestions=[],current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true;
+let gameQuestions=[],current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true, audioUnlocked=false;
 const rightSound=document.getElementById('rightSound');
 const wrongSound=document.getElementById('wrongSound');
 const musicEl=document.getElementById('music');
@@ -206,6 +256,22 @@ function shuffle(a){
   return a;
 }
 
+function unlockAudio() {
+  if (audioUnlocked) return;
+  [rightSound, wrongSound, musicEl].forEach(sound => {
+    let playPromise = sound.play();
+    if (playPromise !== undefined) {
+      playPromise.then(_ => {
+        if(sound !== musicEl || !musicOn) {
+            sound.pause();
+            sound.currentTime = 0;
+        }
+      }).catch(error => {});
+    }
+  });
+  audioUnlocked = true;
+}
+
 function renderMilestones(){
   const row=document.getElementById('milestones');
   row.innerHTML='';
@@ -221,19 +287,29 @@ function moveAvatar(){
   const pct=(avatarStep/11)*88;
   avatar.style.left=Math.min(4+pct,90)+'%';
   avatar.src=faces.happy;
+
+  // Auto-scroll the path container to follow the avatar on mobile
+  const container = document.getElementById('pathZoneContainer');
+  const scrollTarget = (container.scrollWidth * (avatarStep/11)) - (container.clientWidth / 2);
+  container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
 }
 
 function startGame(){
+  unlockAudio();
   current=0;score=0;busy=false;avatarStep=0;
-  // Completely randomizes the sequence of questions every playthrough
   gameQuestions=shuffle([...questions]);
   showScreen('gameScreen');
   document.getElementById('pathAvatar').src=faces.happy;
-  moveAvatar();
-  loadQuestion();
+  
   if(musicOn) {
-    musicEl.play().catch(e=>console.log("Audio awaiting click interaction."));
+    musicEl.play().catch(()=>{});
   }
+  
+  // Timeout ensures the DOM has painted before moving the avatar/calculating scroll
+  setTimeout(() => {
+      moveAvatar();
+      loadQuestion();
+  }, 100);
 }
 
 function loadQuestion(){
@@ -263,7 +339,6 @@ function loadQuestion(){
 }
 
 function showHint(correctKey,clueText){
-  // Shows textual prompt alongside the highlighting action
   document.getElementById('helperText').textContent=clueText;
   document.querySelectorAll('.option-btn').forEach(btn=>{
     const img=btn.querySelector('img');
@@ -275,7 +350,7 @@ function showHint(correctKey,clueText){
 }
 
 function confetti(){
-  for(let i=0;i<28;i++){
+  for(let i=0;i<20;i++){
     const c=document.createElement('div');
     c.className='confetti';
     c.style.left=Math.random()*100+'vw';
@@ -303,7 +378,7 @@ function checkAnswer(button,isCorrect,correctKey,explain){
     confetti();
     avatarStep=Math.min(avatarStep+1,11);
     document.getElementById('pathAvatar').src=faces.happy;
-    moveAvatar()
+    moveAvatar();
   }else{
     button.classList.add('wrong');
     const correctBtn=all.find(b=>b.querySelector('img')?.getAttribute('src')===map[correctKey]);
@@ -311,12 +386,12 @@ function checkAnswer(button,isCorrect,correctKey,explain){
     document.getElementById('message').textContent='Correct answer: '+correctKey.replace(/([a-z])([A-Z])/g,'$1 $2')+'. '+explain;
     wrongSound.currentTime=0;
     wrongSound.play().catch(()=>{});
-    navigator.vibrate?.([140,80,140]);
+    if(navigator.vibrate) navigator.vibrate([140,80,140]);
     avatarStep=Math.max(0,avatarStep-1);
     document.getElementById('pathAvatar').src=faces.sad;
-    moveAvatar()
+    moveAvatar();
   }
-  setTimeout(()=>{current++;loadQuestion()},1700)
+  setTimeout(()=>{current++;loadQuestion()},2000); /* Extended slightly so users can read the explanation */
 }
 
 function endGame(){
@@ -353,7 +428,7 @@ function toggleMusic(){
 }
 
 window.addEventListener('load',()=>{
-  setTimeout(()=>showScreen('startScreen'),2000)
+  setTimeout(()=>showScreen('startScreen'),1500)
 });
 </script>
 </body>
