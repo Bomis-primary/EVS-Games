@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>My Body Explorer</title>
 
 <style>
@@ -64,6 +64,7 @@ button{
   background:#ffca28;
   box-shadow:0 4px 0 #f57f17;
   font-weight:bold;
+  touch-action: manipulation;
 }
 
 button:active{
@@ -139,6 +140,7 @@ button:active{
   border-radius:26px;
   background:linear-gradient(#e3f2fd,#fffde7);
   position:relative;
+  padding-top: 40px; /* Prevents overlap with the pseudo-element label on small screens */
 }
 
 .body-zone::before{
@@ -151,6 +153,8 @@ button:active{
   font-weight:bold;
   color:#388e3c;
   font-size:15px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 #bodyOutline{
@@ -181,6 +185,7 @@ button:active{
   background:white;
   object-fit:contain;
   padding:3px;
+  touch-action: none; /* Crucial for custom touch drag implementation */
 }
 
 .draggable:hover{
@@ -206,11 +211,12 @@ button:active{
   pointer-events:none;
   animation:fall 2.5s linear forwards;
   z-index:999;
+  will-change: transform, opacity; /* Hardware acceleration for low-spec devices */
 }
 
 @keyframes fall{
   to{
-    transform:translateY(105vh) rotate(720deg);
+    transform:translate3d(0, 105vh, 0) rotate(720deg); /* 3D transform for better performance */
     opacity:0;
   }
 }
@@ -221,12 +227,13 @@ button:active{
   }
 
   .body-zone{
-    min-height:52vh;
+    min-height:48vh;
+    padding-top: 35px;
   }
 
   #bodyOutline{
     width:78%;
-    max-height:58vh;
+    max-height:45vh;
   }
 
   #draggables{
@@ -241,6 +248,7 @@ button:active{
 
   .body-zone::before{
     font-size:12px;
+    top: 6px;
   }
 }
 </style>
@@ -316,10 +324,14 @@ let lives=3;
 let tries=0;
 let selectedPart="";
 let hintTimeout;
+let audioUnlocked = false;
 
 const correctSound=new Audio("assets/correct.mp3");
 const wrongSound=new Audio("assets/wrong.mp3");
 const clapSound=new Audio("assets/freesound_community-claps-44774.mp3");
+
+// Preload audio
+[correctSound, wrongSound, clapSound].forEach(sound => sound.load());
 
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(screen=>{
@@ -328,7 +340,23 @@ function showScreen(id){
   document.getElementById(id).classList.add("active");
 }
 
+function unlockAudio() {
+  if (audioUnlocked) return;
+  // Unlock audio context for mobile browsers by playing and immediately pausing
+  [correctSound, wrongSound, clapSound].forEach(sound => {
+    let playPromise = sound.play();
+    if (playPromise !== undefined) {
+      playPromise.then(_ => {
+        sound.pause();
+        sound.currentTime = 0;
+      }).catch(error => {});
+    }
+  });
+  audioUnlocked = true;
+}
+
 function initGame(){
+  unlockAudio();
   score=0;
   lives=3;
   current=0;
@@ -374,17 +402,68 @@ function renderDraggables(){
     img.draggable=true;
     img.alt=part.replace(".png","");
 
+    // Native HTML5 Drag for Desktops
     img.addEventListener("dragstart",e=>{
       selectedPart=part;
       e.dataTransfer.setData("text/plain",part);
     });
 
+    // Click Fallback
     img.addEventListener("click",()=>{
       selectedPart=part;
       document.querySelectorAll(".draggable").forEach(i=>i.style.outline="none");
       img.style.outline="4px solid #29b6f6";
       document.getElementById("message").textContent="Now tap the body outline.";
     });
+
+    // Touch events for mobile drag-and-drop support
+    let dragClone = null;
+
+    img.addEventListener("touchstart", (e) => {
+      selectedPart = part;
+      // Visual feedback for selection
+      document.querySelectorAll(".draggable").forEach(i=>i.style.outline="none");
+      img.style.outline="4px solid #29b6f6";
+      
+      // Create a floating clone to follow the finger
+      dragClone = img.cloneNode(true);
+      dragClone.style.position = "fixed";
+      dragClone.style.zIndex = "1000";
+      dragClone.style.opacity = "0.8";
+      dragClone.style.pointerEvents = "none"; // Ensure drop target underneath registers
+      document.body.appendChild(dragClone);
+      
+      let touch = e.touches[0];
+      moveClone(touch.clientX, touch.clientY);
+      e.preventDefault(); 
+    }, {passive: false});
+
+    img.addEventListener("touchmove", (e) => {
+      if (!dragClone) return;
+      let touch = e.touches[0];
+      moveClone(touch.clientX, touch.clientY);
+      e.preventDefault();
+    }, {passive: false});
+
+    img.addEventListener("touchend", (e) => {
+      if (!dragClone) return;
+      let touch = e.changedTouches[0];
+      dragClone.remove();
+      dragClone = null;
+
+      // Find what element the finger was lifted over
+      let dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (dropTarget && (dropTarget.id === 'dropZone' || dropTarget.id === 'bodyOutline' || dropTarget.closest('#dropZone'))) {
+        checkAnswer(selectedPart);
+      }
+    });
+
+    function moveClone(x, y) {
+      if(dragClone) {
+        dragClone.style.left = (x - img.offsetWidth / 2) + "px";
+        dragClone.style.top = (y - img.offsetHeight / 2) + "px";
+      }
+    }
 
     container.appendChild(img);
   });
@@ -416,7 +495,7 @@ function checkAnswer(part){
     document.getElementById("score").textContent=score;
     document.getElementById("message").textContent="Correct!";
     correctSound.currentTime=0;
-    correctSound.play();
+    correctSound.play().catch(()=>{});
     confetti();
     clearTimeout(hintTimeout);
     selectedPart="";
@@ -427,8 +506,11 @@ function checkAnswer(part){
     lives--;
     document.getElementById("lives").textContent=lives;
     wrongSound.currentTime=0;
-    wrongSound.play();
-    navigator.vibrate?.(140);
+    wrongSound.play().catch(()=>{});
+    
+    if(navigator.vibrate){
+        navigator.vibrate(140);
+    }
 
     if(lives<=0){
       endGame();
@@ -471,11 +553,11 @@ function endGame(){
 
   if(score===12){
     feedback.textContent="Excellent! Body Explorer Champion!";
-    clapSound.play();
+    clapSound.play().catch(()=>{});
     confetti();
   }else if(score>=10){
     feedback.textContent="Very good work!";
-    clapSound.play();
+    clapSound.play().catch(()=>{});
     confetti();
   }else if(score>=8){
     feedback.textContent="Good effort! Play again to improve.";
@@ -485,7 +567,8 @@ function endGame(){
 }
 
 function confetti(){
-  for(let i=0;i<50;i++){
+  // Reduced to 25 nodes for low-spec device optimization
+  for(let i=0;i<25;i++){
     const c=document.createElement("div");
     c.className="confetti";
     c.style.left=Math.random()*100+"vw";
@@ -505,9 +588,10 @@ function shuffle(array){
 }
 
 window.addEventListener("load",()=>{
+  // Decreased arbitrary load timer to 1.5 seconds. Ensures the user isn't stuck on a blank screen if assets load instantly.
   setTimeout(()=>{
     showScreen("startScreen");
-  },5000);
+  },1500); 
 });
 </script>
 
