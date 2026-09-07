@@ -28,10 +28,33 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f8ff;color:#2
   object-fit:contain;
 }
 
+#startScreen{
+  background: linear-gradient(rgba(245,248,255,0.88), rgba(245,248,255,0.88)), url('assets/boardgame.png') center/cover no-repeat;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  position:fixed;
+  inset:0;
+  z-index:999;
+  padding:12px;
+}
+#startScreen.active{display:flex}
+
 h1{font-size:clamp(28px,5vw,46px);color:#ff7b54;margin:10px 0 8px}
-button{border:none;border-radius:18px;padding:12px 22px;margin:8px;font-size:18px;cursor:pointer;background:#ffd166;box-shadow:0 4px 0 #d99b16;font-weight:700;touch-action:manipulation}
+button{
+  border:none;
+  border-radius:18px;
+  padding:12px 22px;
+  margin:8px;
+  font-size:18px;
+  cursor:pointer;
+  background:#ffd166;
+  box-shadow:0 4px 0 #d99b16;
+  font-weight:700;
+  touch-action: manipulation;
+}
 button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
-.card{background:rgba(255,255,255,.95);border-radius:24px;padding:14px;max-width:1100px;margin:8px auto;box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.card{background:rgba(255,255,255,.95);border-radius:24px;padding:14px;max-width:1100px;margin:8px auto;box-shadow:0 8px 18px rgba(0,0,0,.12); width: 100%;}
 .topbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,.9);padding:8px;border-radius:18px;margin-bottom:8px}
 .badge{background:#fff;padding:8px 12px;border-radius:14px;font-weight:700;font-size:16px}
 .instructions-line{font-size:clamp(16px,2.6vw,21px);background:#fff7c9;padding:10px;border-radius:14px;margin:12px auto;max-width:850px;line-height:1.4;text-align:center}
@@ -48,33 +71,29 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 }
 
 .path-zone{
+  min-height:60vh;
   border-radius:26px;
   position:relative;
   overflow-x:auto; 
   overflow-y:hidden;
   -webkit-overflow-scrolling:touch;
+  background:#e3f2fd;
   box-shadow:0 8px 18px rgba(0,0,0,.12);
-  background: #e3f2fd;
 }
+
 .path-zone-inner {
   min-width: 800px; 
   width: 100%;
   position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.board-image {
-  width: 100%;
-  height: auto;
-  display: block;
+  min-height: 60vh;
+  background:url('assets/boardgame.png') center/100% 100% no-repeat;
 }
 
 #pathAvatar{
   position:absolute;
   left:4%;
-  bottom:20%;
-  width:clamp(45px,6vw,75px);
+  bottom:14%;
+  width:clamp(52px,7vw,82px);
   transition:left .45s ease,transform .25s ease;
   z-index:5;
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))
@@ -82,11 +101,10 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
 
 .path-zone::before{
   content:"Help Zippy move to school";
-  position:sticky; /* Keeps label visible while scrolling horizontally */
+  position:absolute;
+  top:12px;
   left:50%;
   transform:translateX(-50%);
-  display: inline-block;
-  margin-top: 12px;
   background:rgba(255,255,255,.95);
   padding:6px 14px;
   border-radius:14px;
@@ -94,49 +112,47 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #d99b16}
   color:#2f7f57;
   font-size:15px;
   z-index:10;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  white-space: nowrap;
 }
 
-.milestones{
-  position:absolute;
-  left:7%;
-  right:7%;
-  bottom:18%;
-  display:flex;
-  justify-content:space-between;
-  z-index:2
-}
-
-.dot{
-  width:clamp(14px, 2vw, 20px);
-  height:clamp(14px, 2vw, 20px);
-  border-radius:50%;
-  background:#d2d9ef;
-  border:3px solid #fff;
-  box-shadow:0 2px 4px rgba(0,0,0,.12);
-  transition: background 0.3s ease;
-}
+.milestones{position:absolute;left:7%;right:7%;bottom:12%;display:flex;justify-content:space-between;z-index:2}
+.dot{width:18px;height:18px;border-radius:50%;background:#d2d9ef;border:3px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.12)}
 .dot.done{background:#66bb6a}
 
 .options-panel{background:rgba(255,255,255,.96);padding:12px;border-radius:24px;box-shadow:0 5px 12px rgba(0,0,0,.12)}
-#options{display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px}
-.option-btn{border:none;border-radius:18px;padding:10px;background:#f5f8ff;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);min-height:110px;touch-action:manipulation;}
-.option-btn img{width:100%;max-width:140px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:14px;padding:6px;display:block;margin:0 auto}
+#options{display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:10px}
+.option-btn{border:none;border-radius:18px;padding:10px;background:#f5f8ff;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);min-height:110px;touch-action: manipulation;}
+.option-btn img{width:100%;max-width:150px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:14px;padding:6px;display:block;margin:0 auto}
 .option-btn.correct{background:#dff7eb;outline:3px solid #57b97c}
 .option-btn.wrong{background:#ffe3e3;outline:3px solid #e57373}
 .option-btn.hint-glow{outline:4px solid #42a5f5!important;box-shadow:0 0 18px #42a5f5}
-.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:10px;align-items:center;}
-input[type="range"]{width:120px; accent-color: #ffd166;}
+.controls{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;margin-top:10px}
+input[type="range"]{width:120px; accent-color: #ff7b54;}
 .final{font-size:clamp(24px,5vw,40px);color:#2e7d32;font-weight:700}
-.confetti{position:fixed;top:-20px;width:12px;height:12px;pointer-events:none;animation:fall 2.5s linear forwards;z-index:999;will-change:transform, opacity;}
+.confetti{
+  position:fixed;
+  top:-20px;
+  width:12px;
+  height:12px;
+  pointer-events:none;
+  animation:fall 2.5s linear forwards;
+  z-index:999;
+  will-change: transform, opacity;
+}
 
-@keyframes fall{to{transform:translate3d(0, 105vh, 0) rotate(720deg);opacity:0}}
+@keyframes fall{
+  to{
+    transform:translate3d(0, 105vh, 0) rotate(720deg);
+    opacity:0
+  }
+}
+
 @media(max-width:420px){
   button{font-size:16px;padding:11px 18px}
-  #options{grid-template-columns: 1fr 1fr;}
   .option-btn{min-height:95px}
-  .option-btn img{max-width:110px}
-  .path-zone-inner {min-width: 600px;} /* slightly scaled down for very small phones to avoid excessive scrolling */
+  .option-btn img{max-width:120px}
+  #options{grid-template-columns:repeat(2, 1fr);}
 }
 </style>
 </head>
@@ -147,8 +163,8 @@ input[type="range"]{width:120px; accent-color: #ffd166;}
 </div>
 
 <div id="startScreen" class="screen">
-  <div class="card">
-    <h1 style="text-align:center">Zippy's Path of Adventure</h1>
+  <div class="card" style="text-align:center;">
+    <h1>Zippy's Path of Adventure</h1>
     <div class="instructions-line">Tap the best picture to help Zippy move forward on his path.</div>
     <div class="controls">
       <button onclick="startGame()">▶ Start Game</button>
@@ -166,15 +182,13 @@ input[type="range"]{width:120px; accent-color: #ffd166;}
 
   <div class="card">
     <div class="question" id="questionText"></div>
-    <div class="message" id="helperText"></div>
+    <div class="message" id="helperText" style="color: #1976d2; font-size: 16px;"></div>
     <div class="message" id="message"></div>
   </div>
 
   <div class="game-layout">
-    <div class="path-zone" id="pathZoneContainer">
+    <div class="path-zone">
       <div class="path-zone-inner">
-        <!-- Render the boardgame as an image so it dictates layout sizing -->
-        <img src="assets/boardgame.png" class="board-image" alt="Game Path">
         <img id="pathAvatar" src="assets/zippysmiling.png" alt="Zippy">
         <div id="milestones" class="milestones"></div>
       </div>
@@ -201,33 +215,33 @@ input[type="range"]{width:120px; accent-color: #ffd166;}
 
 <script>
 const questions=[
-  {q:'Zippy is with a big family that includes grandparents. Which picture should he choose?',a:'jointfamily',h:'Hint: Look for grandparents in the picture.',e:'A joint family includes grandparents, parents, and children.',o:['jointfamily','nuclearfamily','classroom']},
-  {q:'Mumma is busy in the kitchen and Zippy wants to help. Which picture fits best?',a:'helpinginkitchen',h:'Hint: Look for helping with food at home.',e:'Helping at home is a good habit.',o:['helpinginkitchen','library','wateringplant']},
-  {q:'The flowers need water. Which picture shows Zippy taking care of them?',a:'wateringplant',h:'Hint: Look for the watering action.',e:'Plants need water to stay healthy.',o:['wateringplant','medicalroom','bussafety']},
-  {q:'Zippy is ready for study time. Which picture shows the learning place?',a:'classroom',h:'Hint: Look for a place with desks.',e:'A classroom is where lessons happen.',o:['classroom','library','playground']},
-  {q:'Zippy wants a quiet place full of books. Which picture should he go to?',a:'library',h:'Hint: Look for shelves full of books.',e:'The library is a place for reading.',o:['library','classroom','staffroom']},
-  {q:'The school bus is waiting. Which picture shows Zippy playing it safe?',a:'bussafety',h:'Hint: Look for the school bus safety scene.',e:'Bus safety helps children travel safely.',o:['bussafety','strangerdanger','playground']},
-  {q:'A stranger is calling Zippy near school. Which picture warns him to stay away?',a:'strangerdanger',h:'Hint: Look for the caution sign near a stranger.',e:'Children should stay away from strangers.',o:['strangerdanger','bussafety','jointfamily']},
-  {q:'The principal has called Zippy. Which picture shows the right office to visit?',a:'principleoffice',h:'Hint: Look for the school office door.',e:'The principal meets students in the principal office.',o:['principleoffice','staffroom','library']},
-  {q:'Zippy gets hurt while playing. Which picture shows where he should get help?',a:'medicalroom',h:'Hint: Look for the help room in school.',e:'The medical room helps when a child is hurt.',o:['medicalroom','playground','classroom']},
-  {q:'Zippy is back in class. Which picture shows the teacher and students together?',a:'classroom',h:'Hint: Look for the learning room scene.',e:'Children learn in the classroom.',o:['classroom','staffroom','library']},
-  {q:'Zippy spots himself in a picture with a little family nearby. Which scene matches what he sees?',a:'nuclearfamily',h:'Hint: Look for a child with only parents nearby.',e:'A nuclear family has parents and children.',o:['nuclearfamily','jointfamily','principleoffice']},
-  {q:'Zippy wants to run, jump, and play. Which picture shows that place?',a:'playground',h:'Hint: Look for swings, slides, and play.',e:'A playground is for play and exercise.',o:['playground','library','medicalroom']}
+  {q:'Zippy is with a big family that includes grandparents. Which picture should he choose?',a:'jointFamily',h:'Hint: Look for grandparents in the picture.',e:'A joint family includes grandparents, parents, and children.',o:['jointFamily','nuclearFamily','classRoom']},
+  {q:'Mumma is busy in the kitchen and Zippy wants to help. Which picture fits best?',a:'helpingInKitchen',h:'Hint: Look for helping with food at home.',e:'Helping at home is a good habit.',o:['helpingInKitchen','library','wateringPlant']},
+  {q:'The flowers need water. Which picture shows Zippy taking care of them?',a:'wateringPlant',h:'Hint: Look for the watering action.',e:'Plants need water to stay healthy.',o:['wateringPlant','medicalRoom','busSafety']},
+  {q:'Zippy is ready for study time. Which picture shows the learning place?',a:'classRoom',h:'Hint: Look for a place with desks.',e:'A classroom is where lessons happen.',o:['classRoom','library','playGround']},
+  {q:'Zippy wants a quiet place full of books. Which picture should he go to?',a:'library',h:'Hint: Look for shelves full of books.',e:'The library is a place for reading.',o:['library','classRoom','staffRoom']},
+  {q:'The school bus is waiting. Which picture shows Zippy playing it safe?',a:'busSafety',h:'Hint: Look for the school bus safety scene.',e:'Bus safety helps children travel safely.',o:['busSafety','strangerDanger','playGround']},
+  {q:'A stranger is calling Zippy near school. Which picture warns him to stay away?',a:'strangerDanger',h:'Hint: Look for the caution sign near a stranger.',e:'Children should stay away from strangers.',o:['strangerDanger','busSafety','jointFamily']},
+  {q:'The principal has called Zippy. Which picture shows the right office to visit?',a:'principalOffice',h:'Hint: Look for the school office door.',e:'The principal meets students in the principal office.',o:['principalOffice','staffRoom','library']},
+  {q:'Zippy gets hurt while playing. Which picture shows where he should get help?',a:'medicalRoom',h:'Hint: Look for the help room in school.',e:'The medical room helps when a child is hurt.',o:['medicalRoom','playGround','classRoom']},
+  {q:'Zippy is back in class. Which picture shows the teacher and students together?',a:'classRoom',h:'Hint: Look for the learning room scene.',e:'Children learn in the classroom.',o:['classRoom','staffRoom','library']},
+  {q:'Zippy spots himself in a picture with a little family nearby. Which scene matches what he sees?',a:'nuclearFamily',h:'Hint: Look for a child with only parents nearby.',e:'A nuclear family has parents and children.',o:['nuclearFamily','jointFamily','principalOffice']},
+  {q:'Zippy wants to run, jump, and play. Which picture shows that place?',a:'playGround',h:'Hint: Look for swings, slides, and play.',e:'A playground is for play and exercise.',o:['playGround','library','medicalRoom']}
 ];
 
 const map={
-  jointfamily:'assets/jointfamily.png',
-  helpinginkitchen:'assets/helpinginkitchen.png',
-  wateringplant:'assets/wateringplant.png', /* Fixed potential typo here */
-  classroom:'assets/classroom.png',
+  jointFamily:'assets/jointfamily.png',
+  helpingInKitchen:'assets/helpinginkitchen.png',
+  wateringPlant:'assets/wateringplants.png',
+  classRoom:'assets/classroom.png',
   library:'assets/library.png',
-  bussafety:'assets/bussafety.png',
-  strangerdanger:'assets/strangerdanger.png',
-  principleoffice:'assets/principleoffice.png',
-  staffroom:'assets/staffroom.png',
-  medicalroom:'assets/medicalroom.png',
-  playground:'assets/playground.png',
-  nuclearfamily:'assets/nuclearfamily.png'
+  busSafety:'assets/bussafety.png',
+  strangerDanger:'assets/strangerdanger.png',
+  principalOffice:'assets/principleoffice.png',
+  staffRoom:'assets/staffroom.png',
+  medicalRoom:'assets/medicalroom.png',
+  playGround:'assets/playground.png',
+  nuclearFamily:'assets/nuclearfamily.png'
 };
 
 const faces={
@@ -235,7 +249,7 @@ const faces={
   sad:'assets/zippysad.png'
 };
 
-let gameQuestions=[],current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true, audioUnlocked=false;
+let gameQuestions=[],current=0,score=0,busy=false,hintTimer,avatarStep=0,musicOn=true;
 const rightSound=document.getElementById('rightSound');
 const wrongSound=document.getElementById('wrongSound');
 const musicEl=document.getElementById('music');
@@ -256,22 +270,6 @@ function shuffle(a){
   return a;
 }
 
-function unlockAudio() {
-  if (audioUnlocked) return;
-  [rightSound, wrongSound, musicEl].forEach(sound => {
-    let playPromise = sound.play();
-    if (playPromise !== undefined) {
-      playPromise.then(_ => {
-        if(sound !== musicEl || !musicOn) {
-            sound.pause();
-            sound.currentTime = 0;
-        }
-      }).catch(error => {});
-    }
-  });
-  audioUnlocked = true;
-}
-
 function renderMilestones(){
   const row=document.getElementById('milestones');
   row.innerHTML='';
@@ -287,29 +285,22 @@ function moveAvatar(){
   const pct=(avatarStep/11)*88;
   avatar.style.left=Math.min(4+pct,90)+'%';
   avatar.src=faces.happy;
-
-  // Auto-scroll the path container to follow the avatar on mobile
-  const container = document.getElementById('pathZoneContainer');
-  const scrollTarget = (container.scrollWidth * (avatarStep/11)) - (container.clientWidth / 2);
-  container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
 }
 
 function startGame(){
-  unlockAudio();
   current=0;score=0;busy=false;avatarStep=0;
   gameQuestions=shuffle([...questions]);
   showScreen('gameScreen');
   document.getElementById('pathAvatar').src=faces.happy;
+  moveAvatar();
+  loadQuestion();
   
   if(musicOn) {
-    musicEl.play().catch(()=>{});
+    let playPromise = musicEl.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(error => console.log("Audio playback requires user interaction."));
+    }
   }
-  
-  // Timeout ensures the DOM has painted before moving the avatar/calculating scroll
-  setTimeout(() => {
-      moveAvatar();
-      loadQuestion();
-  }, 100);
 }
 
 function loadQuestion(){
@@ -334,8 +325,9 @@ function loadQuestion(){
     b.onclick=()=>checkAnswer(b,opt.correct,q.a,q.e);
     box.appendChild(b)
   });
+  
   renderMilestones();
-  hintTimer=setTimeout(()=>showHint(q.a,q.h),10000)
+  hintTimer=setTimeout(()=>showHint(q.a,q.h),10000);
 }
 
 function showHint(correctKey,clueText){
@@ -372,6 +364,7 @@ function checkAnswer(button,isCorrect,correctKey,explain){
     score++;
     document.getElementById('score').textContent=score;
     document.getElementById('message').textContent='Correct!';
+    document.getElementById('message').style.color = '#2e7d32';
     button.classList.add('correct');
     rightSound.currentTime=0;
     rightSound.play().catch(()=>{});
@@ -383,15 +376,24 @@ function checkAnswer(button,isCorrect,correctKey,explain){
     button.classList.add('wrong');
     const correctBtn=all.find(b=>b.querySelector('img')?.getAttribute('src')===map[correctKey]);
     if(correctBtn)correctBtn.classList.add('correct');
-    document.getElementById('message').textContent='Correct answer: '+correctKey.replace(/([a-z])([A-Z])/g,'$1 $2')+'. '+explain;
+    
+    const formattedKey = correctKey.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+    document.getElementById('message').textContent='Correct answer: '+ formattedKey + '. ' + explain;
+    document.getElementById('message').style.color = '#c62828';
+    
     wrongSound.currentTime=0;
     wrongSound.play().catch(()=>{});
     if(navigator.vibrate) navigator.vibrate([140,80,140]);
+    
     avatarStep=Math.max(0,avatarStep-1);
     document.getElementById('pathAvatar').src=faces.sad;
     moveAvatar();
   }
-  setTimeout(()=>{current++;loadQuestion()},2000); /* Extended slightly so users can read the explanation */
+  setTimeout(()=>{
+    document.getElementById('message').style.color = 'inherit';
+    current++;
+    loadQuestion();
+  }, 2200);
 }
 
 function endGame(){
