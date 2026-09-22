@@ -490,7 +490,66 @@
         let scoreCounter = 0; 
         let attemptCounter = 2;
 
+        // INSTANT ZERO-LATENCY AUDIO CONTROLLER
+        let audioCtx = null;
+        const audioBuffers = {};
+
+        function initAudioEngine() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Pre-warm HTML audio elements and fetch WebAudio buffers
+            ['snd-correct', 'snd-wrong', 'snd-claps', 'snd-bg'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.play().then(() => {
+                        if (id !== 'snd-bg') {
+                            el.pause();
+                            el.currentTime = 0;
+                        } else {
+                            el.volume = 0.3;
+                        }
+                    }).catch(() => {});
+
+                    // Fetch raw audio for Web Audio API instant playback
+                    if (id !== 'snd-bg' && audioCtx && !audioBuffers[id]) {
+                        fetch(el.src)
+                            .then(res => res.arrayBuffer())
+                            .then(buf => audioCtx.decodeAudioData(buf))
+                            .then(decoded => { audioBuffers[id] = decoded; })
+                            .catch(() => {});
+                    }
+                }
+            });
+        }
+
         function safePlayAudio(id, volume = 1.0) {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Use Web Audio API buffer if decoded for zero-latency response
+            if (audioCtx && audioBuffers[id]) {
+                try {
+                    const src = audioCtx.createBufferSource();
+                    const gainNode = audioCtx.createGain();
+                    src.buffer = audioBuffers[id];
+                    gainNode.gain.value = volume;
+                    src.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    src.start(0);
+                    return;
+                } catch(e) {}
+            }
+
+            // Fallback to HTML5 audio element
             try {
                 const snd = document.getElementById(id);
                 if (snd) {
@@ -521,12 +580,14 @@
         });
 
         function transitionToInstructions() {
+            initAudioEngine();
             safePlayAudio('snd-bg', 0.3);
             document.getElementById('screen-title').style.display = 'none';
             document.getElementById('screen-instructions').style.display = 'flex';
         }
 
         function launchActiveGameplay() {
+            initAudioEngine();
             document.getElementById('screen-instructions').style.display = 'none';
             document.getElementById('game-workspace-frame').style.display = 'flex';
             
@@ -585,6 +646,7 @@
             let activeDropBox = null;
 
             const onPointerDown = (e) => {
+                initAudioEngine();
                 el.classList.add('dragging');
                 startX = e.clientX;
                 startY = e.clientY;
@@ -633,9 +695,9 @@
                 const activeQuestion = playDeck[cursorIdx];
 
                 if (activeDropBox && activeDropBox.dataset.id === el.dataset.id && el.dataset.id === activeQuestion.id) {
-                    // Correct Match
+                    // Correct Match - Play instantly
                     safePlayAudio('snd-correct');
-                    setTimeout(() => safePlayAudio('snd-claps'), 250);
+                    safePlayAudio('snd-claps', 0.8);
 
                     scoreCounter += 1;
                     document.getElementById('score-counter-text').innerText = `SCORE: ${scoreCounter}`;
@@ -648,7 +710,7 @@
                         renderRegistryLevel();
                     }, 1200);
                 } else {
-                    // Wrong Match or Dropped Outside
+                    // Wrong Match or Dropped Outside - Play instantly
                     safePlayAudio('snd-wrong');
 
                     if (activeDropBox) {
