@@ -62,12 +62,6 @@
         .ui-element { background: rgba(255, 255, 255, 0.92); color: #1e3a8a; padding: 8px 14px; border-radius: 20px; font-size: clamp(14px, 3.5vw, 18px); font-weight: bold; border: 2px solid #93c5fd; box-shadow: 0 4px rgba(0,0,0,0.05); }
         #trackerBar { background: rgba(255, 255, 255, 0.85); width: 100%; padding: 6px; border-radius: 12px; display: flex; gap: 4px; justify-content: center; font-size: clamp(14px, 3.5vw, 20px); border: 1px dashed #93c5fd; overflow-x: auto; }
         
-        /* Lesson Dialogue Overlay Panel */
-        #lessonOverlay { position: absolute; bottom: 130px; left: 5%; width: 90%; background: #ffffff; border: 4px solid #3b82f6; padding: 16px; text-align: center; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: none; z-index: 40; animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #lessonText { font-size: clamp(16px, 4vw, 20px); font-weight: bold; color: #1e293b; margin-bottom: 12px; line-height: 1.4; }
-        .continue-btn { background: #10b981; color: white; border: none; padding: 10px 28px; font-size: 18px; font-weight: bold; border-radius: 25px; cursor: pointer; box-shadow: 0 4px #059669; -webkit-tap-highlight-color: transparent; }
-        .continue-btn:active { box-shadow: 0 1px #059669; transform: translateY(3px); }
-
         /* Mobile Controller Layout */
         #controlPanel { position: absolute; bottom: 0; left: 0; width: 100%; height: 110px; background: #fef3c7; border-top: 6px solid #f59e0b; display: none; justify-content: space-around; align-items: center; z-index: 30; padding: 0 10px; }
         .control-btn { width: 44%; height: 75px; border: none; border-radius: 18px; color: white; font-size: clamp(18px, 5vw, 24px); font-weight: bold; font-family: inherit; cursor: pointer; box-shadow: 0 6px rgba(0,0,0,0.1); text-shadow: 1px 1px rgba(0,0,0,0.2); transition: transform 0.05s ease; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -76,11 +70,6 @@
         .control-btn:active { transform: translateY(4px); box-shadow: 0 2px rgba(0,0,0,0.1); }
 
         #completionScreen { background: linear-gradient(to bottom, #fef3c7 0%, #d1fae5 100%); display: none; z-index: 80; }
-
-        @keyframes popUp {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
     </style>
 </head>
 <body>
@@ -96,24 +85,19 @@
     </div>
 
     <div id="instructionScreen" class="screen">
-        <div class="big-bold-text" style="color: #1e3a8a; font-size: clamp(20px, 5vw, 28px);">Your Flying Eco-Mission!</div>
-        <div class="big-bold-text" style="font-size: clamp(14px, 3.5vw, 18px); background: #e0f2fe; padding: 10px; border-radius: 12px;">The game will move slowly so you can read every habit clearly!</div>
-        <div class="big-bold-text" style="font-size: clamp(16px, 4vw, 20px);">☁️ Fly UP into <span style="color: #059669;">Good Habit Clouds</span> to help Earth!</div>
+        <div class="big-bold-text" style="color: #1e3a8a; font-size: clamp(20px, 5vw, 28px);">Your Continuous Eco-Mission!</div>
+        <div class="big-bold-text" style="font-size: clamp(14px, 3.5vw, 18px); background: #e0f2fe; padding: 10px; border-radius: 12px;">Fly continuously without pauses! Collect good habits and avoid bad ones!</div>
+        <div class="big-bold-text" style="font-size: clamp(16px, 4vw, 20px);">☁️ Fly UP into <span style="color: #059669;">Good Habit Clouds</span> for points!</div>
         <div class="big-bold-text" style="font-size: clamp(16px, 4vw, 20px);">⚠️ Fly DOWN to avoid <span style="color: #dc2626;">Bad Habit Pillars</span>!</div>
         <button class="btn" style="background: #10b981; box-shadow: 0 8px #059669;" onclick="startGame()">Fly Now! 🚀</button>
     </div>
 
     <div id="uiOverlay">
         <div class="hud-row">
-            <div id="scoreLabel" class="ui-element">Score: 0 / 12</div>
-            <div id="attemptsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2;">Hearts: 2 Left</div>
+            <div id="scoreLabel" class="ui-element">Score: 0</div>
+            <div id="attemptsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2;">Hearts: 3 Left</div>
         </div>
         <div id="trackerBar"></div>
-    </div>
-    
-    <div id="lessonOverlay">
-        <div id="lessonText">Lesson details pop up dynamically here...</div>
-        <button class="continue-btn" onclick="closeLesson()">Keep Flying ➔</button>
     </div>
     
     <div id="controlPanel">
@@ -122,9 +106,9 @@
     </div>
 
     <div id="completionScreen" class="screen">
-        <h1 style="color: #065f46; font-size: clamp(32px, 8vw, 44px); margin-bottom: 15px; text-shadow: none;">Fantastic Job!</h1>
-        <p style="font-size: clamp(18px, 4.5vw, 22px); margin-bottom: 25px; font-weight: bold; color: #374151;">You are officially an Earth Protector!</p>
-        <div class="ui-element" id="finalScore" style="font-size: clamp(20px, 5vw, 30px); padding: 14px 28px; border-color: #10b981; background: white; margin-bottom: 25px;">Final Score: 0/12</div>
+        <h1 style="color: #065f46; font-size: clamp(32px, 8vw, 44px); margin-bottom: 15px; text-shadow: none;">Mission Complete!</h1>
+        <p style="font-size: clamp(18px, 4.5vw, 22px); margin-bottom: 25px; font-weight: bold; color: #374151;">You are an incredible Earth Protector!</p>
+        <div class="ui-element" id="finalScore" style="font-size: clamp(20px, 5vw, 30px); padding: 14px 28px; border-color: #10b981; background: white; margin-bottom: 25px;">Final Score: 0</div>
         <button class="btn" style="background: #fcd34d; color: #78350f; box-shadow: 0 8px #d97706;" onclick="restartGame()">Play Again 🔄</button>
     </div>
 
@@ -152,18 +136,18 @@
     resize();
 
     let score = 0;
-    let attemptsLeft = 2;
+    let attemptsLeft = 3;
     let gameActive = false;
-    let interactivePaused = false;
     let speechBubbleMsg = "";
     let speechBubbleColor = "#10b981";
+    let speechTimer = null;
     let trackerHistory = [];
     
     let bird = { 
         x: 100, 
         y: 350, 
         radius: 20, 
-        speed: 4.2,
+        speed: 4.5,
         wingAngle: 0, 
         wingFlapSpeed: 0.15 
     };
@@ -176,24 +160,24 @@
     let activePipe = null;
 
     const tasksDataset = [
-        { eco: "Planting more trees", dirty: "Cutting down trees", correctMsg: "🎉 Perfect! Planting trees gives animals homes and fills our world with fresh, clean oxygen!", wrongMsg: "❌ Oh no! Cutting down trees takes away clean air and nesting spaces for birds!", bubbleGood: "Yay for green leaves! 🌲", bubbleBad: "Oh no! The poor birds! 😟" },
-        { eco: "Using a covered dustbin", dirty: "Throwing garbage on road", correctMsg: "🎉 Awesome! Covered dustbins safely lock away germs, flies, and bad smells!", wrongMsg: "❌ Oh no! Throwing trash on the street attracts flies and spreads nasty sickness!", bubbleGood: "Keep germs locked up! 🗑️", bubbleBad: "Yuck! Watch out! 🪰" },
-        { eco: "Riding a bicycle nearby", dirty: "Driving cars everywhere", correctMsg: "🎉 Yes! Riding a bike keeps your body strong and keeps the air clean and smoke-free!", wrongMsg: "❌ Oh no! Driving cars for tiny trips pumps thick dark smoke into the sky!", bubbleGood: "Zooming cleanly! 🚲", bubbleBad: "Too much smoke! 💨" },
-        { eco: "Carrying cloth bags", dirty: "Using plastic bags", correctMsg: "🎉 Beautiful! Cloth bags can be used again and again without creating waste!", wrongMsg: "❌ Oh no! Plastic bags stay in the dirt forever and hurt curious animals!", bubbleGood: "My reusable bag! 🛍️", bubbleBad: "Plastic lasts too long! 🚫" },
-        { eco: "Switching off lights", dirty: "Leaving lights & TVs on", correctMsg: "🎉 Great! Turning off appliances when you leave a room saves valuable electricity!", wrongMsg: "❌ Oh no! Leaving televisions running empty wastes Earth's power resources!", bubbleGood: "Saving power! 💡", bubbleBad: "No one is watching! 📺" },
-        { eco: "Walking to nearby places", dirty: "Spitting in open spaces", correctMsg: "🎉 Yes! Walking short distances exercises your legs and protects our paths!", wrongMsg: "❌ Oh no! Spitting on open walkways spreads germs into the air we breathe!", bubbleGood: "Healthy footsteps! 🚶", bubbleBad: "That spreads germs! 🦠" },
-        { eco: "Keeping surroundings neat", dirty: "Bursting loud firecrackers", correctMsg: "🎉 Wonderful! Keeping our common neighborhoods clean makes them safe for everyone!", wrongMsg: "❌ Oh no! Loud firecrackers pollute the night air and terrify outdoor pets!", bubbleGood: "Peaceful and tidy! ✨", bubbleBad: "Too loud for ears! 🎆" },
-        { eco: "Saving clean water", dirty: "Leaving water taps running", correctMsg: "🎉 Super! Turning off the tap while brushing saves gallons of fresh drinking water!", wrongMsg: "❌ Oh no! Leaving water flowing down the drain wastes our limited clean water!", bubbleGood: "Every drop matters! 💧", bubbleBad: "Turn it off, please! 🚰" },
-        { eco: "Using clean jute bags", dirty: "Throwing wrappers on roads", correctMsg: "🎉 Great choice! Natural fiber bags easily return to nature cleanly over time!", wrongMsg: "❌ Oh no! Tossing plastic wrappers on the road blocks drains when it rains!", bubbleGood: "Strong natural bags! 🌾", bubbleBad: "Litter causes floods! 🯏" },
-        { eco: "Planting small shrubs", dirty: "Dumping trash into lakes", correctMsg: "🎉 Brilliant! Growing small shrubs feeds butterflies and helpful honeybees!", wrongMsg: "❌ Oh no! Trash dumped into water blocks sunlight and hurts swimming fish!", bubbleGood: "Feeding butterflies! 🦋", bubbleBad: "Save the fish! 🐟" },
-        { eco: "Turning off the cooling AC", dirty: "Spitting on walk paths", correctMsg: "🎉 Superb! Enjoying open natural fresh air keeps our energy demands down!", wrongMsg: "❌ Oh no! Spitting across common walkways ruins beautiful neighborhood parks!", bubbleGood: "Fresh outdoor air! 🍃", bubbleBad: "Keep paths clean! 🏞️" },
-        { eco: "Caring for garden plants", dirty: "Dumping plastic in gardens", correctMsg: "🎉 Outstanding! Watering garden beds regularly helps beautiful flowers blossom!", wrongMsg: "❌ Oh no! Leaving plastic junk in flowerbeds suffocates the healthy growing soil!", bubbleGood: "Grow, pretty flowers! 🌸", bubbleBad: "Soil can't breathe! 🥀" }
+        { eco: "Planting more trees", dirty: "Cutting down trees", bubbleGood: "Yay for green leaves! 🌲", bubbleBad: "Oh no! Birds lose homes! 😟" },
+        { eco: "Using a covered dustbin", dirty: "Throwing garbage on road", bubbleGood: "Keep germs locked up! 🗑️", bubbleBad: "Yuck! Watch out! 🪰" },
+        { eco: "Riding a bicycle nearby", dirty: "Driving cars everywhere", bubbleGood: "Zooming cleanly! 🚲", bubbleBad: "Too much smoke! 💨" },
+        { eco: "Carrying cloth bags", dirty: "Using plastic bags", bubbleGood: "My reusable bag! 🛍️", bubbleBad: "Plastic lasts forever! 🚫" },
+        { eco: "Switching off lights", dirty: "Leaving lights & TVs on", bubbleGood: "Saving power! 💡", bubbleBad: "Wasting electricity! 📺" },
+        { eco: "Walking to nearby places", dirty: "Spitting in open spaces", bubbleGood: "Healthy footsteps! 🚶", bubbleBad: "Spreads germs! 🦠" },
+        { eco: "Keeping surroundings neat", dirty: "Bursting loud firecrackers", bubbleGood: "Peaceful and tidy! ✨", bubbleBad: "Too loud for pets! 🎆" },
+        { eco: "Saving clean water", dirty: "Leaving water taps running", bubbleGood: "Every drop matters! 💧", bubbleBad: "Turn off the tap! 🚰" },
+        { eco: "Using clean jute bags", dirty: "Throwing wrappers on roads", bubbleGood: "Strong natural bags! 🌾", bubbleBad: "Litter causes floods! 🚫" },
+        { eco: "Planting small shrubs", dirty: "Dumping trash into lakes", bubbleGood: "Feeding butterflies! 🦋", bubbleBad: "Save the fish! 🐟" },
+        { eco: "Turning off cooling AC", dirty: "Spitting on walk paths", bubbleGood: "Fresh outdoor air! 🍃", bubbleBad: "Keep paths clean! 🏞️" },
+        { eco: "Caring for garden plants", dirty: "Dumping plastic in gardens", bubbleGood: "Grow, pretty flowers! 🌸", bubbleBad: "Soil can't breathe! 🥀" }
     ];
 
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
-    }, 4000);
+    }, 3000);
 
     function showInstructions() {
         document.getElementById('titleScreen').style.display = 'none';
@@ -207,9 +191,8 @@
         
         score = 0;
         currentTaskIndex = 0;
-        attemptsLeft = 2;
+        attemptsLeft = 3;
         trackerHistory = [];
-        interactivePaused = false;
         speechBubbleMsg = "";
 
         sndBgm.currentTime = 0;
@@ -230,52 +213,39 @@
     function renderTrackerBar() {
         const bar = document.getElementById('trackerBar');
         bar.innerHTML = "";
-        for(let i=0; i<12; i++) {
+        for(let i=0; i<Math.min(trackerHistory.length, 15); i++) {
             const slot = document.createElement('span');
-            if(trackerHistory[i] === 'win') {
-                slot.innerText = "🌲";
-            } else if(trackerHistory[i] === 'loss') {
-                slot.innerText = "⚠️";
-            } else {
-                slot.innerText = "⚪";
-            }
+            slot.innerText = trackerHistory[i] === 'win' ? "🌲" : "⚠️";
             bar.appendChild(slot);
         }
     }
 
     function initTask() {
-        interactivePaused = false;
-        speechBubbleMsg = "";
-        document.getElementById('lessonOverlay').style.display = "none";
-        
-        document.getElementById('scoreLabel').innerText = `Score: ${score} / 12`;
-        document.getElementById('attemptsLabel').innerText = `Hearts: ${attemptsLeft} Left`;
-
         bird.y = canvas.height / 2 + 30; 
 
         if (currentTaskIndex >= environmentPool.length) {
-            endGameSummary();
-            return;
+            environmentPool = [...tasksDataset].sort(() => Math.random() - 0.5);
+            currentTaskIndex = 0;
         }
 
         let currentData = environmentPool[currentTaskIndex];
         
         activePipe = {
             text: currentData.dirty,
-            x: canvas.width + 50,
-            y: Math.random() > 0.5 ? 0 : (canvas.height - 350),
-            w: 170,
-            h: 240,
-            speed: 1.5
+            x: canvas.width + 100,
+            y: Math.random() > 0.5 ? 20 : (canvas.height - 360),
+            w: 190,
+            h: 220,
+            speed: 2.2
         };
 
         activeCloud = {
             text: currentData.eco,
-            x: canvas.width + 420, 
-            y: 200 + Math.random()*120,
-            w: 185,
+            x: canvas.width + 450, 
+            y: 180 + Math.random()*140,
+            w: 220, // Wider eco-cloud to prevent green text overflow
             h: 75,
-            speed: 1.5
+            speed: 2.2
         };
     }
 
@@ -285,7 +255,6 @@
     const upBtn = document.getElementById('btnUp');
     const downBtn = document.getElementById('btnDown');
 
-    // Robust multi-device event listeners preventing default pinch/zoom/scroll
     ['mousedown', 'touchstart'].forEach(evt => {
         upBtn.addEventListener(evt, (e) => { e.preventDefault(); controlUpActive = true; });
         downBtn.addEventListener(evt, (e) => { e.preventDefault(); controlDownActive = true; });
@@ -296,57 +265,43 @@
         downBtn.addEventListener(evt, (e) => { e.preventDefault(); controlDownActive = false; });
     });
 
-    function triggerInteractiveInteraction(status) {
-        interactivePaused = true;
+    function showSpeech(msg, color) {
+        speechBubbleMsg = msg;
+        speechBubbleColor = color;
+        if (speechTimer) clearTimeout(speechTimer);
+        speechTimer = setTimeout(() => {
+            speechBubbleMsg = "";
+        }, 1200);
+    }
+
+    function triggerInteraction(status) {
         const currentData = environmentPool[currentTaskIndex];
-        const overlay = document.getElementById('lessonOverlay');
-        const txt = document.getElementById('lessonText');
 
         if(status === 'correct') {
             score++;
             trackerHistory.push('win');
-            speechBubbleMsg = currentData.bubbleGood;
-            speechBubbleColor = "#10b981";
+            showSpeech(currentData.bubbleGood, "#10b981");
             sndCorrect.currentTime = 0;
             sndCorrect.play().catch(()=>{});
-            
-            txt.innerHTML = `<span style='color:#10b981; font-size:22px;'>Excellent Choice!</span><br><br>${currentData.correctMsg}`;
-            overlay.style.borderColor = "#10b981";
         } else {
             attemptsLeft--;
             trackerHistory.push('loss');
-            speechBubbleMsg = currentData.bubbleBad;
-            speechBubbleColor = "#ef4444";
+            showSpeech(currentData.bubbleBad, "#ef4444");
             sndWrong.currentTime = 0;
             sndWrong.play().catch(()=>{});
-            
-            txt.innerHTML = `<span style='color:#ef4444; font-size:22px;'>Let's Remember!</span><br><br>${currentData.wrongMsg}`;
-            overlay.style.borderColor = "#ef4444";
+
+            if (attemptsLeft <= 0) {
+                endGameSummary();
+                return;
+            }
         }
 
         renderTrackerBar();
-        document.getElementById('scoreLabel').innerText = `Score: ${score} / 12`;
+        document.getElementById('scoreLabel').innerText = `Score: ${score}`;
         document.getElementById('attemptsLabel').innerText = `Hearts: ${attemptsLeft} Left`;
         
-        setTimeout(() => {
-            if (gameActive) {
-                overlay.style.display = "block";
-            }
-        }, 2000);
-    }
-
-    function closeLesson() {
-        if (attemptsLeft <= 0) {
-            score = 0;
-            currentTaskIndex = 0;
-            attemptsLeft = 2;
-            trackerHistory = [];
-            renderTrackerBar();
-            initTask();
-        } else {
-            currentTaskIndex++;
-            initTask();
-        }
+        currentTaskIndex++;
+        initTask(); // Instantly spawns next task without pausing the game!
     }
 
     function endGameSummary() {
@@ -357,7 +312,7 @@
         
         document.getElementById('uiOverlay').style.display = 'none';
         document.getElementById('controlPanel').style.display = 'none';
-        document.getElementById('finalScore').innerText = `Final Score: ${score} / 12`;
+        document.getElementById('finalScore').innerText = `Final Score: ${score}`;
         document.getElementById('completionScreen').style.display = 'flex';
     }
 
@@ -367,7 +322,7 @@
     }
 
     function update() {
-        if (!gameActive || interactivePaused) return;
+        if (!gameActive) return;
 
         bird.wingAngle += (controlUpActive || controlDownActive) ? 0.3 : bird.wingFlapSpeed;
 
@@ -381,35 +336,36 @@
         if (bird.y + bird.radius > canvas.height - 120) bird.y = canvas.height - 120 - bird.radius;
 
         landscapeClouds.forEach(c => {
-            c.x -= 0.4;
+            c.x -= 0.5;
             if (c.x + c.r < 0) c.x = canvas.width + c.r;
         });
 
         activePipe.x -= activePipe.speed;
         activeCloud.x -= activeCloud.speed;
 
+        // If items scroll past screen without hitting, loop to next task smoothly
         if (activeCloud.x + activeCloud.w < 0 && activePipe.x + activePipe.w < 0) {
-            trackerHistory.push('loss');
             currentTaskIndex++;
-            renderTrackerBar();
             initTask();
             return;
         }
 
+        // Cloud Collision Detection (Correct Habit)
         let cClosestX = Math.max(activeCloud.x, Math.min(bird.x, activeCloud.x + activeCloud.w));
         let cClosestY = Math.max(activeCloud.y, Math.min(bird.y, activeCloud.y + activeCloud.h));
         let cDistX = bird.x - cClosestX;
         let cDistY = bird.y - cClosestY;
         if ((cDistX * cDistX + cDistY * cDistY) < (bird.radius * bird.radius)) {
-            triggerInteractiveInteraction('correct');
+            triggerInteraction('correct');
         }
 
+        // Pillar Collision Detection (Bad Habit)
         let pClosestX = Math.max(activePipe.x, Math.min(bird.x, activePipe.x + activePipe.w));
         let pClosestY = Math.max(activePipe.y, Math.min(bird.y, activePipe.y + activePipe.h));
         let pDistX = bird.x - pClosestX;
         let pDistY = bird.y - pClosestY;
         if ((pDistX * pDistX + pDistY * pDistY) < (bird.radius * bird.radius)) {
-            triggerInteractiveInteraction('wrong');
+            triggerInteraction('wrong');
         }
     }
 
@@ -475,14 +431,14 @@
             ctx.lineWidth = 2;
             
             ctx.beginPath();
-            ctx.roundRect(cx - 50, cy - 65, 175, 34, 10);
+            ctx.roundRect(cx - 55, cy - 70, 190, 36, 10);
             ctx.fill();
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(cx, cy - 31);
-            ctx.lineTo(cx - 8, cy - 18);
-            ctx.lineTo(cx + 8, cy - 31);
+            ctx.moveTo(cx, cy - 34);
+            ctx.lineTo(cx - 8, cy - 20);
+            ctx.lineTo(cx + 8, cy - 34);
             ctx.closePath();
             ctx.fillStyle = speechBubbleColor;
             ctx.fill();
@@ -490,7 +446,7 @@
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 12px sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText(speechBubbleMsg, cx + 37, cy - 44);
+            ctx.fillText(speechBubbleMsg, cx + 40, cy - 48);
         }
         ctx.restore();
     }
@@ -536,6 +492,7 @@
         ctx.arc(450, canvas.height - 20, 220, 0, Math.PI*2);
         ctx.fill();
 
+        // Render Eco Cloud & Wrapped Text
         drawEcoCloud(ctx, activeCloud.x, activeCloud.y, activeCloud.w, activeCloud.h);
         
         ctx.fillStyle = "#065f46";
@@ -544,12 +501,14 @@
         ctx.textBaseline = "middle";
         let words = activeCloud.text.split(" ");
         if(words.length > 2) {
-            ctx.fillText(words.slice(0, 2).join(" "), activeCloud.x + activeCloud.w/2, activeCloud.y + activeCloud.h/3 + 3);
-            ctx.fillText(words.slice(2).join(" "), activeCloud.x + activeCloud.w/2, activeCloud.y + activeCloud.h/1.7 + 5);
+            let mid = Math.ceil(words.length / 2);
+            ctx.fillText(words.slice(0, mid).join(" "), activeCloud.x + activeCloud.w/2, activeCloud.y + activeCloud.h/3 + 2);
+            ctx.fillText(words.slice(mid).join(" "), activeCloud.x + activeCloud.w/2, activeCloud.y + activeCloud.h/1.7 + 4);
         } else {
             ctx.fillText(activeCloud.text, activeCloud.x + activeCloud.w/2, activeCloud.y + activeCloud.h/2);
         }
 
+        // Render Bad Habit Pillar & Wrapped Text
         ctx.save();
         ctx.fillStyle = "#fee2e2";
         ctx.strokeStyle = "#ef4444";
@@ -566,8 +525,9 @@
         let pipeWords = activePipe.text.split(" ");
         let pyCenter = activePipe.y + activePipe.h / 2;
         if(pipeWords.length > 2) {
-            ctx.fillText(pipeWords.slice(0, 2).join(" "), activePipe.x + activePipe.w/2, pyCenter - 10);
-            ctx.fillText(pipeWords.slice(2).join(" "), activePipe.x + activePipe.w/2, pyCenter + 12);
+            let midP = Math.ceil(pipeWords.length / 2);
+            ctx.fillText(pipeWords.slice(0, midP).join(" "), activePipe.x + activePipe.w/2, pyCenter - 10);
+            ctx.fillText(pipeWords.slice(midP).join(" "), activePipe.x + activePipe.w/2, pyCenter + 12);
         } else {
             ctx.fillText(activePipe.text, activePipe.x + activePipe.w/2, pyCenter);
         }
