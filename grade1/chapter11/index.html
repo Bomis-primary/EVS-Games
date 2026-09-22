@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Festival Mystery: Quiz Adventure!</title>
-    <!-- Google Font for Kids -->
+    <!-- Google Font with Fallbacks -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+            font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         html, body {
@@ -86,12 +86,6 @@
             background: #130f40; 
             z-index: 100;
         }
-        #logoScreen img { 
-            max-width: min(65%, 260px); 
-            height: auto; 
-            object-fit: contain; 
-            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); 
-        }
 
         #titleScreen { 
             background: radial-gradient(circle at center, #686de0 0%, #130f40 100%); 
@@ -128,7 +122,7 @@
             color: #130f40; 
             border: none; 
             padding: 16px 42px; 
-            font-size: clamp(20px, 5vw, 26px);
+            font-size: clamp(18px, 4.8vw, 24px);
             font-weight: 800; 
             border-radius: 40px; 
             cursor: pointer;
@@ -158,7 +152,7 @@
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 22px;
             padding: 16px 12px;
-            font-size: clamp(15px, 4vw, 18px);
+            font-size: clamp(14px, 3.8vw, 18px);
             font-weight: 700;
             color: #ffffff;
             cursor: pointer;
@@ -181,7 +175,7 @@
             margin-bottom: 10px;
         }
         .big-bold-text {
-            font-size: clamp(15px, 4vw, 19px); 
+            font-size: clamp(14px, 3.8vw, 18px); 
             font-weight: 700; 
             line-height: 1.5;
             margin-bottom: 14px; 
@@ -201,7 +195,7 @@
             border-radius: 28px; 
             padding: 22px;
             color: #2d3436; 
-            font-size: clamp(15px, 3.8vw, 18px); 
+            font-size: clamp(14px, 3.8vw, 18px); 
             font-weight: 700; 
             line-height: 1.45;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
@@ -216,24 +210,39 @@
             top: 0; 
             left: 0; 
             width: 100%; 
-            padding: 14px 16px;
+            padding: 12px 14px;
             display: flex; 
             justify-content: space-between; 
             align-items: center;
             z-index: 20; 
             color: white; 
-            pointer-events: none; 
+            pointer-events: auto; 
             display: none;
         }
+
         .ui-element {
             background: rgba(255, 255, 255, 0.25); 
             backdrop-filter: blur(8px); 
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: 20px; 
-            font-size: clamp(13px, 3.5vw, 17px); 
+            font-size: clamp(12px, 3.4vw, 16px); 
             font-weight: 800;
             border: 2px solid rgba(255,255,255,0.4); 
             box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+
+        .audio-toggle-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         #completionScreen { 
@@ -251,32 +260,25 @@
 <body>
 
 <div id="gameContainer">
-    <!-- SYSTEM AUDIO BUFFERS -->
-    <div style="display:none;">
-        <audio id="snd-correct" src="assets/correct-answer-sparklesound.mp3" preload="auto"></audio>
-        <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
-        <audio id="snd-clap" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
-        <audio id="snd-fanfare" src="assets/celebratorysong.mp3" preload="auto"></audio>
-    </div>
 
     <!-- LOGO SCREEN -->
     <div id="logoScreen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
-        <h1 id="fallbackLogo" style="display:none; color: var(--pastel-yellow); font-size: 36px; font-weight: 800;">INNOVINE</h1>
+        <h1 id="fallbackLogo" style="color: var(--pastel-yellow); font-size: 38px; font-weight: 800;">INNOVINE</h1>
+        <p style="color: #a1c4fd; margin-top: 8px; font-weight: 600;">Interactive Learning Games</p>
     </div>
 
     <!-- TITLE SCREEN -->
     <div id="titleScreen" class="screen">
         <div class="badge-pill">⭐ 3 Questions • 30 Marks Total ⭐</div>
-        <h1 style="color: var(--pastel-yellow); font-size: clamp(28px, 7.5vw, 40px); margin-bottom: 12px; font-weight: 800; text-shadow: 0 4px 12px rgba(0,0,0,0.4);">FESTIVAL MYSTERY:<br>QUIZ ADVENTURE!</h1>
-        <p style="font-size: clamp(15px, 4.2vw, 19px); color: var(--pastel-green); font-weight: 700; margin-bottom: 25px;">✨ Win 10 Marks For Every Right Answer! ✨</p>
+        <h1 style="color: var(--pastel-yellow); font-size: clamp(26px, 7vw, 38px); margin-bottom: 12px; font-weight: 800; text-shadow: 0 4px 12px rgba(0,0,0,0.4);">FESTIVAL MYSTERY:<br>QUIZ ADVENTURE!</h1>
+        <p style="font-size: clamp(14px, 4vw, 18px); color: var(--pastel-green); font-weight: 700; margin-bottom: 25px;">✨ Win 10 Marks For Every Right Answer! ✨</p>
         <button class="btn" onclick="showFestivalSelect()">Play Now 🚀</button>
     </div>
 
     <!-- FESTIVAL SELECTION SCREEN -->
     <div id="festivalSelectScreen" class="screen">
         <h2 style="color: var(--pastel-yellow); font-size: clamp(22px, 6vw, 30px); margin-bottom: 8px; font-weight: 800;">CHOOSE A FESTIVAL</h2>
-        <p style="font-size: clamp(14px, 3.8vw, 16px); color: #dfe6e9; margin-bottom: 15px; font-weight: 600;">Solve 3 questions & score 30 Marks!</p>
+        <p style="font-size: clamp(13px, 3.6vw, 16px); color: #dfe6e9; margin-bottom: 15px; font-weight: 600;">Solve 3 randomized questions & score 30 Marks!</p>
         <div class="fest-grid">
             <button class="fest-card-btn" style="border-color: #ff7675; background: rgba(255, 118, 117, 0.25);" onclick="selectFestival('DIWALI')">🪔 Diwali</button>
             <button class="fest-card-btn" style="border-color: #74b9ff; background: rgba(116, 185, 255, 0.25);" onclick="selectFestival('HOLI')">🎨 Holi</button>
@@ -303,20 +305,21 @@
     <div id="uiOverlay">
         <div id="scoreLabel" class="ui-element" style="color: var(--pastel-yellow);">Marks: 0/30</div>
         <div id="roundLabel" class="ui-element">Question 1/3</div>
+        <button id="audioBtn" class="audio-toggle-btn" onclick="toggleAudio()">🔊</button>
     </div>
     
     <!-- FACT POPUP -->
     <div id="factPopup">
         <h3 id="popTitle" style="margin-bottom: 8px; color: #ff9f1a; font-size: clamp(18px, 5vw, 22px); font-weight: 800;">🎉 Great Job!</h3>
         <p id="factText" style="margin-bottom: 16px; color: #2d3436; font-weight: 600;"></p>
-        <button id="nextQBtn" class="btn" style="font-size: 16px; padding: 12px 28px; box-shadow: 0 5px 0 #e17055; margin-top: 5px;" onclick="nextQuestion()">Next Question ➔</button>
+        <button id="nextQBtn" class="btn" style="font-size: 16px; padding: 12px 28px; box-shadow: 0 5px 0 #e17055; margin-top: 5px;">Next Question ➔</button>
     </div>
 
     <!-- COMPLETION SCREEN -->
     <div id="completionScreen" class="screen">
-        <h1 style="color: var(--pastel-yellow); font-size: clamp(28px, 7vw, 40px); margin-bottom: 10px; font-weight: 800;">🎉 Quiz Champion! 🎉</h1>
+        <h1 style="color: var(--pastel-yellow); font-size: clamp(26px, 7vw, 40px); margin-bottom: 10px; font-weight: 800;">🎉 Quiz Champion! 🎉</h1>
         <p id="completionFestivalName" style="font-size: clamp(16px, 4.5vw, 21px); margin-bottom: 18px; color: var(--pastel-green); font-weight: 700;"></p>
-        <div class="ui-element" id="finalScore" style="font-size: clamp(22px, 5.5vw, 28px); padding: 16px 36px; color: var(--pastel-yellow); margin-bottom: 22px; border-width:3px;">Final Score: 0/30 Marks</div>
+        <div class="ui-element" id="finalScore" style="font-size: clamp(20px, 5vw, 26px); padding: 16px 32px; color: var(--pastel-yellow); margin-bottom: 22px; border-width:3px;">Final Score: 0/30 Marks</div>
         <button class="btn" onclick="showFestivalSelect()">Play Again 🔄</button>
     </div>
 
@@ -327,7 +330,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Global state variables
+    // Global game state
     let selectedFestivalKey = "DIWALI";
     let activeQuestions = [];
     let currentQuestionIndex = 0;
@@ -338,8 +341,18 @@
     let particles = [];
     let bgBubbles = [];
     let optionCards = [];
+    let soundMuted = false;
 
-    // Initialize decorative canvas background particles
+    // Fisher-Yates Shuffle helper
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Canvas ambient particles
     for (let i = 0; i < 25; i++) {
         bgBubbles.push({
             x: Math.random() * 550,
@@ -350,7 +363,7 @@
         });
     }
 
-    // Safe roundRect polyfill
+    // Canvas roundRect polyfill
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
             if (typeof r === 'undefined') r = 0;
@@ -370,6 +383,7 @@
         };
     }
 
+    // Dismiss splash screen after 2.5s
     let logoDismissed = false;
     function dismissLogo() {
         if (logoDismissed) return;
@@ -379,51 +393,119 @@
         const titleScreen = document.getElementById('titleScreen');
         if (titleScreen) titleScreen.style.display = 'flex';
     }
+    setTimeout(dismissLogo, 2500);
 
-    // Keep logo on screen for 5 seconds
-    setTimeout(dismissLogo, 5000);
-
+    // Dynamic Web Audio Synthesizer (Ensures 100% sound playback without external audio downloads)
     let audioCtx = null;
-    const audioBuffers = {};
+    let bgmOsc = null;
+    let bgmGain = null;
+    let bgmInterval = null;
 
     function initAudioEngine() {
         if (!audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioContextClass) audioCtx = new AudioContextClass();
-        }
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-
-        ['snd-correct', 'snd-wrong', 'snd-clap', 'snd-fanfare'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el && audioCtx && !audioBuffers[id]) {
-                fetch(el.src)
-                    .then(res => res.arrayBuffer())
-                    .then(buf => audioCtx.decodeAudioData(buf))
-                    .then(decoded => { audioBuffers[id] = decoded; })
-                    .catch(() => {});
+            if (AudioContextClass) {
+                audioCtx = new AudioContextClass();
             }
-        });
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        startBGM();
     }
 
-    function safePlayAudio(id, volume = 1.0) {
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        if (audioCtx && audioBuffers[id]) {
-            try {
-                const src = audioCtx.createBufferSource();
-                const gainNode = audioCtx.createGain();
-                src.buffer = audioBuffers[id];
-                gainNode.gain.value = volume;
-                src.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                src.start(0);
-                return;
-            } catch(e) {}
+    function toggleAudio() {
+        soundMuted = !soundMuted;
+        document.getElementById('audioBtn').innerText = soundMuted ? "🔇" : "🔊";
+        if (soundMuted) {
+            if (bgmGain) bgmGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        } else {
+            if (bgmGain) bgmGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
         }
+    }
+
+    function startBGM() {
+        if (!audioCtx || bgmInterval || soundMuted) return;
+        
+        bgmGain = audioCtx.createGain();
+        bgmGain.gain.setValueAtTime(soundMuted ? 0 : 0.04, audioCtx.currentTime);
+        bgmGain.connect(audioCtx.destination);
+
+        const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
+        let noteIdx = 0;
+
+        bgmInterval = setInterval(() => {
+            if (soundMuted || !audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const noteGain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
+                
+                noteGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                
+                osc.connect(noteGain);
+                noteGain.connect(bgmGain);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.45);
+                
+                noteIdx = (noteIdx + 1) % notes.length;
+            } catch(e){}
+        }, 500);
+    }
+
+    function playSynthSound(type) {
+        if (soundMuted || !audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
         try {
-            const snd = document.getElementById(id);
-            if (snd) { snd.currentTime = 0; snd.volume = volume; snd.play().catch(() => {}); }
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(130, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'fanfare') {
+                const chord = [523.25, 659.25, 783.99, 1046.50];
+                chord.forEach((freq, idx) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.type = 'triangle';
+                    subOsc.frequency.setValueAtTime(freq, now + (idx * 0.08));
+                    subGain.gain.setValueAtTime(0.2, now + (idx * 0.08));
+                    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6 + (idx * 0.08));
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.start(now + (idx * 0.08));
+                    subOsc.stop(now + 0.7 + (idx * 0.08));
+                });
+            }
         } catch(e) {}
     }
+
+    // Unlock Audio Context on first touch gesture across iOS/Android
+    window.addEventListener('pointerdown', function unlockAudio() {
+        initAudioEngine();
+        window.removeEventListener('pointerdown', unlockAudio);
+    }, { once: true });
 
     function resize() {
         const dpr = window.devicePixelRatio || 1;
@@ -443,7 +525,6 @@
     // Exactly 3 questions per festival (Total 30 Marks)
     const festivalDatabase = {
         "DIWALI": {
-            themeColor: "#ffeaa7",
             questions: [
                 {
                     q: "What do people light to decorate their homes on Diwali?",
@@ -472,7 +553,6 @@
             ]
         },
         "HOLI": {
-            themeColor: "#ff7675",
             questions: [
                 {
                     q: "What do people splash on each other during Holi?",
@@ -501,7 +581,6 @@
             ]
         },
         "CHRISTMAS": {
-            themeColor: "#55efc4",
             questions: [
                 {
                     q: "On which date is Christmas celebrated every year?",
@@ -530,7 +609,6 @@
             ]
         },
         "EID": {
-            themeColor: "#74b9ff",
             questions: [
                 {
                     q: "Which sweet vermicelli dish is specially made on Eid-ul-Fitr?",
@@ -559,7 +637,6 @@
             ]
         },
         "GURPURAB": {
-            themeColor: "#a29bfe",
             questions: [
                 {
                     q: "What is the free community meal served to everyone at Gurudwaras?",
@@ -588,7 +665,6 @@
             ]
         },
         "INDEPENDENCE DAY": {
-            themeColor: "#fab1a0",
             questions: [
                 {
                     q: "On which date does India celebrate Independence Day?",
@@ -638,9 +714,11 @@
         document.getElementById('instructionScreen').style.display = 'none';
         document.getElementById('uiOverlay').style.display = 'flex';
         
+        // Clone and FULLY RANDOMIZE questions and options every game session
         activeQuestions = JSON.parse(JSON.stringify(festivalDatabase[selectedFestivalKey].questions));
+        shuffleArray(activeQuestions);
         activeQuestions.forEach(q => {
-            q.options.sort(() => Math.random() - 0.5);
+            shuffleArray(q.options);
         });
 
         currentQuestionIndex = 0;
@@ -659,7 +737,6 @@
         document.getElementById('roundLabel').innerText = `Question ${currentQuestionIndex + 1}/3`;
 
         const qData = activeQuestions[currentQuestionIndex];
-
         const isCompactScreen = cWidth < 420 || cHeight < 550;
 
         if (isCompactScreen) {
@@ -723,13 +800,13 @@
         touchCooldown = false;
     }
 
-    // Pointer event for answer options
+    // Pointer event for answer option selection
     window.addEventListener('pointerdown', (e) => {
         if (!gameActive || touchCooldown) return;
 
         const rect = canvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
+        const clickX = (e.clientX - rect.left) * (getCanvasWidth() / rect.width);
+        const clickY = (e.clientY - rect.top) * (getCanvasHeight() / rect.height);
 
         optionCards.forEach(card => {
             if (clickX >= card.x && clickX <= card.x + card.w &&
@@ -739,14 +816,14 @@
                 if (card.correct) {
                     card.state = "correct";
                     totalScore += 10;
-                    safePlayAudio('snd-correct');
+                    playSynthSound('correct');
                     createBurst(card.x + card.w/2, card.y + card.h/2, '#2ed573');
                     document.getElementById('scoreLabel').innerText = `Marks: ${totalScore}/30`;
                     document.getElementById('popTitle').innerText = "🎉 Correct Answer! (+10 Marks)";
                     document.getElementById('popTitle').style.color = "#10ac84";
                 } else {
                     card.state = "wrong";
-                    safePlayAudio('snd-wrong');
+                    playSynthSound('wrong');
                     createBurst(card.x + card.w/2, card.y + card.h/2, '#ff758c');
                     document.getElementById('popTitle').innerText = "💡 Oops! Here's a tip:";
                     document.getElementById('popTitle').style.color = "#ea2027";
@@ -755,7 +832,7 @@
                 setTimeout(() => {
                     document.getElementById('factText').innerText = activeQuestions[currentQuestionIndex].fact;
                     document.getElementById('factPopup').style.display = 'block';
-                }, 450);
+                }, 400);
             }
         });
     });
@@ -774,7 +851,9 @@
         }
     }
 
-    function nextQuestion() {
+    // Fixed single-call handler for Next Question
+    function nextQuestion(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
         currentQuestionIndex++;
         if (currentQuestionIndex < activeQuestions.length) {
             setupQuestion();
@@ -783,37 +862,27 @@
         }
     }
 
-    window.showFestivalSelect = showFestivalSelect;
-    window.selectFestival = selectFestival;
-    window.startGame = startGame;
-    window.nextQuestion = nextQuestion;
-    window.finishGame = finishGame;
-    window.dismissLogo = dismissLogo;
-
-    // Attach click handler
-    document.addEventListener('DOMContentLoaded', () => {
-        const nextBtn = document.getElementById('nextQBtn');
-        if (nextBtn) {
-            nextBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                nextQuestion();
-            });
-        }
-    });
+    // Attach single click event listener on Next Question button
+    document.getElementById('nextQBtn').addEventListener('click', nextQuestion);
 
     function finishGame() {
         gameActive = false;
         document.getElementById('factPopup').style.display = 'none';
         document.getElementById('uiOverlay').style.display = 'none';
-        safePlayAudio('snd-fanfare');
+        playSynthSound('fanfare');
 
         document.getElementById('completionFestivalName').innerText = `Festival: ${selectedFestivalKey}`;
         document.getElementById('finalScore').innerText = `Final Score: ${totalScore}/30 Marks`;
         document.getElementById('completionScreen').style.display = 'flex';
     }
 
+    window.showFestivalSelect = showFestivalSelect;
+    window.selectFestival = selectFestival;
+    window.startGame = startGame;
+    window.nextQuestion = nextQuestion;
+    window.toggleAudio = toggleAudio;
+
     function update() {
-        // Always update ambient bubbles
         bgBubbles.forEach(b => {
             b.y -= b.speedY;
             if (b.y < -10) {
@@ -846,7 +915,7 @@
             ctx.scale(dpr, dpr);
             ctx.clearRect(0, 0, cWidth, cHeight);
 
-            // Render playful background bubbles
+            // Render background bubbles
             bgBubbles.forEach(b => {
                 ctx.save();
                 ctx.fillStyle = `rgba(255, 255, 255, ${b.alpha})`;
@@ -863,11 +932,11 @@
 
             const qData = activeQuestions[currentQuestionIndex];
 
-            // Header Banner
+            // Canvas Header Title Banner (Cleaned up: NO redundant marks/counts here)
             ctx.save();
             ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
             ctx.beginPath();
-            ctx.roundRect(cWidth * 0.06, 52, cWidth * 0.88, 40, 16);
+            ctx.roundRect(cWidth * 0.06, 52, cWidth * 0.88, 38, 16);
             ctx.fill();
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.lineWidth = 2;
@@ -876,31 +945,20 @@
             ctx.fillStyle = '#ffdd59';
             ctx.font = '800 clamp(14px, 3.8vw, 17px) "Fredoka", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(`✨ FESTIVAL: ${selectedFestivalKey} (30 MARKS TOTAL) ✨`, cWidth / 2, 77);
+            ctx.fillText(`✨ ${selectedFestivalKey} FESTIVAL ✨`, cWidth / 2, 76);
             ctx.restore();
 
-            // Question Card
+            // Question Box
             ctx.save();
             const qBoxWidth = cWidth * 0.88;
             const qBoxHeight = Math.min(175, cHeight * 0.28);
             const qBoxX = (cWidth - qBoxWidth) / 2;
-            const qBoxY = 104;
+            const qBoxY = 102;
 
             ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
             ctx.beginPath();
             ctx.roundRect(qBoxX, qBoxY, qBoxWidth, qBoxHeight, 24);
             ctx.fill();
-
-            // Question Card Badge
-            ctx.fillStyle = '#ff758c';
-            ctx.beginPath();
-            ctx.roundRect(qBoxX + 16, qBoxY + 14, 110, 26, 10);
-            ctx.fill();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '800 13px "Fredoka", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText("⭐ 10 MARKS", qBoxX + 71, qBoxY + 31);
 
             // Question Text
             ctx.fillStyle = '#2d3436';
@@ -908,7 +966,7 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
-            wrapText(ctx, qData.q, cWidth / 2, qBoxY + (qBoxHeight / 2) + 10, qBoxWidth - 32, 24);
+            wrapText(ctx, qData.q, cWidth / 2, qBoxY + (qBoxHeight / 2), qBoxWidth - 32, 24);
             ctx.restore();
 
             // Option Cards
