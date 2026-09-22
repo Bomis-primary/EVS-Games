@@ -138,7 +138,7 @@
     let score = 0;
     let attemptsLeft = 3;
     let gameActive = false;
-    let isPausedForFeedback = false; // Controls the 2-second learning pause
+    let isPausedForFeedback = false;
     let speechBubbleMsg = "";
     let speechBubbleColor = "#00b894";
     let speechTimer = null;
@@ -160,19 +160,20 @@
     let activeCloud = null;
     let activePipe = null;
 
+    // Enhanced with clear 1-line explanations for learning feedback
     const tasksDataset = [
-        { eco: "Planting more trees", dirty: "Cutting down trees", bubbleGood: "Yay! Trees clean our air! 🌲", bubbleBad: "Oh no! Birds lose homes! 😟" },
-        { eco: "Using a covered dustbin", dirty: "Throwing garbage on road", bubbleGood: "Keep germs locked up! 🗑️", bubbleBad: "Yuck! Litter causes sickness! 🪰" },
-        { eco: "Riding a bicycle nearby", dirty: "Driving cars everywhere", bubbleGood: "Zooming cleanly & healthy! 🚲", bubbleBad: "Too much smoke in the air! 💨" },
-        { eco: "Carrying cloth bags", dirty: "Using plastic bags", bubbleGood: "Reusable bags protect Earth! 🛍️", bubbleBad: "Plastic stays on Earth forever! 🚫" },
-        { eco: "Switching off lights", dirty: "Leaving lights & TVs on", bubbleGood: "Saving electricity is smart! 💡", bubbleBad: "Wasting power hurts energy! 📺" },
-        { eco: "Walking to nearby places", dirty: "Spitting in open spaces", bubbleGood: "Healthy steps for a green planet! 🚶", bubbleBad: "Spitting spreads harmful germs! 🦠" },
-        { eco: "Keeping surroundings neat", dirty: "Bursting loud firecrackers", bubbleGood: "Peaceful, quiet, and tidy! ✨", bubbleBad: "Too loud and scary for pets! 🎆" },
-        { eco: "Saving clean water", dirty: "Leaving water taps running", bubbleGood: "Every precious drop matters! 💧", bubbleBad: "Always turn off the tap tightly! 🚰" },
-        { eco: "Using clean jute bags", dirty: "Throwing wrappers on roads", bubbleGood: "Natural bags are super strong! 🌾", bubbleBad: "Litter blocks water drains! 🚫" },
-        { eco: "Planting small shrubs", dirty: "Dumping trash into lakes", bubbleGood: "Happy food for butterflies! 🦋", bubbleBad: "Protect the fish in clean water! 🐟" },
-        { eco: "Turning off cooling AC", dirty: "Spitting on walk paths", bubbleGood: "Fresh natural outdoor air! 🍃", bubbleBad: "Keep our walking paths clean! 🏞️" },
-        { eco: "Caring for garden plants", dirty: "Dumping plastic in gardens", bubbleGood: "Grow tall and pretty, flowers! 🌸", bubbleBad: "Plastic stops soil from breathing! 🥀" }
+        { eco: "Planting more trees", dirty: "Cutting down trees", bubbleGood: "Yay! Trees clean our air! 🌲 They provide fresh oxygen.", bubbleBad: "Oh no! Cutting trees destroys animal homes! 😟" },
+        { eco: "Using a covered dustbin", dirty: "Throwing garbage on road", bubbleGood: "Keep germs locked up! 🗑️ It stops diseases from spreading.", bubbleBad: "Yuck! Litter makes our streets dirty and sick! 🪰" },
+        { eco: "Riding a bicycle nearby", dirty: "Driving cars everywhere", bubbleGood: "Zooming cleanly & healthy! 🚲 Zero smoke is best.", bubbleBad: "Too much car smoke pollutes our air! 💨" },
+        { eco: "Carrying cloth bags", dirty: "Using plastic bags", bubbleGood: "Reusable bags protect Earth! 🛍️ Plastic never rots away.", bubbleBad: "Plastic stays on Earth forever and harms nature! 🚫" },
+        { eco: "Switching off lights", dirty: "Leaving lights & TVs on", bubbleGood: "Saving electricity is smart! 💡 Conserves power resources.", bubbleBad: "Wasting power causes unnecessary energy loss! 📺" },
+        { eco: "Walking to nearby places", dirty: "Spitting in open spaces", bubbleGood: "Healthy steps for a green planet! 🚶 Great exercise too.", bubbleBad: "Spitting spreads harmful germs and bacteria! 🦠" },
+        { eco: "Keeping surroundings neat", dirty: "Bursting loud firecrackers", bubbleGood: "Peaceful, quiet, and tidy! ✨ Safe for everyone.", bubbleBad: "Loud noises are very scary for animals! 🎆" },
+        { eco: "Saving clean water", dirty: "Leaving water taps running", bubbleGood: "Every precious drop matters! 💧 Water is life.", bubbleBad: "Always turn off taps tightly to save water! 🚰" },
+        { eco: "Using clean jute bags", dirty: "Throwing wrappers on roads", bubbleGood: "Natural bags are super strong! 🌾 Eco-friendly choice.", bubbleBad: "Litter blocks water drains during rain! 🚫" },
+        { eco: "Planting small shrubs", dirty: "Dumping trash into lakes", bubbleGood: "Happy food for butterflies! 🦋 Flowers help bees.", bubbleBad: "Protect fish by keeping our lakes clean! 🐟" },
+        { eco: "Turning off cooling AC", dirty: "Spitting on walk paths", bubbleGood: "Fresh natural outdoor air! 🍃 Saves heavy electricity.", bubbleBad: "Keep our public walking paths clean and hygienic! 🏞️" },
+        { eco: "Caring for garden plants", dirty: "Dumping plastic in gardens", bubbleGood: "Grow tall and pretty, flowers! 🌸 Plants love care.", bubbleBad: "Plastic stops soil from breathing properly! 🥀" }
     ];
 
     setTimeout(() => {
@@ -272,15 +273,14 @@
         speechBubbleMsg = msg;
         speechBubbleColor = color;
         if (speechTimer) clearTimeout(speechTimer);
-        // Display speech bubble for the duration of the pause (2 seconds)
         speechTimer = setTimeout(() => {
             speechBubbleMsg = "";
         }, 2000);
     }
 
     function triggerInteraction(status) {
-        if (isPausedForFeedback) return; // Prevent double triggers during pause
-        isPausedForFeedback = true; // Freeze game motion for 2 seconds to let kids read/learn
+        if (isPausedForFeedback) return;
+        isPausedForFeedback = true;
 
         const currentData = environmentPool[currentTaskIndex];
 
@@ -309,7 +309,6 @@
         document.getElementById('scoreLabel').innerText = `Score: ${score}`;
         document.getElementById('attemptsLabel').innerText = `❤️ Hearts: ${attemptsLeft} Left`;
         
-        // Pause for 2 seconds before spawning next task so children can learn why it's correct/incorrect
         setTimeout(() => {
             currentTaskIndex++;
             initTask();
@@ -383,7 +382,6 @@
 
     function drawCuteBird(cx, cy, radius) {
         ctx.save();
-        // Body glow/shadow
         ctx.shadowColor = "rgba(0,0,0,0.15)";
         ctx.shadowBlur = 8;
 
@@ -450,29 +448,44 @@
         ctx.stroke();
         ctx.restore();
 
-        // Speech Bubble for learning feedback
+        // Speech Bubble with safe sizing and multi-line wrapping to prevent overflow
         if (speechBubbleMsg !== "") {
             ctx.fillStyle = speechBubbleColor;
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 3;
             
+            let boxWidth = 260;
+            let boxHeight = 64;
+            let boxX = cx - boxWidth / 2;
+            let boxY = cy - 110;
+
             ctx.beginPath();
-            ctx.roundRect(cx - 70, cy - 85, 220, 42, 14);
+            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 14);
             ctx.fill();
             ctx.stroke();
 
+            // Pointer triangle pointing towards the bird
             ctx.beginPath();
-            ctx.moveTo(cx, cy - 43);
-            ctx.lineTo(cx - 10, cy - 25);
-            ctx.lineTo(cx + 10, cy - 43);
+            ctx.moveTo(cx, boxY + boxHeight);
+            ctx.lineTo(cx - 10, boxY + boxHeight + 14);
+            ctx.lineTo(cx + 10, boxY + boxHeight);
             ctx.closePath();
             ctx.fillStyle = speechBubbleColor;
             ctx.fill();
 
             ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 13px 'Comic Sans MS', sans-serif";
+            ctx.font = "bold 12px 'Comic Sans MS', sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText(speechBubbleMsg, cx + 40, cy - 64);
+            ctx.textBaseline = "middle";
+
+            // Multi-line word wrapping inside the dialogue box
+            let words = speechBubbleMsg.split(" ");
+            let mid = Math.ceil(words.length / 2);
+            let line1 = words.slice(0, mid).join(" ");
+            let line2 = words.slice(mid).join(" ");
+
+            ctx.fillText(line1, boxX + boxWidth / 2, boxY + 22);
+            ctx.fillText(line2, boxX + boxWidth / 2, boxY + 42);
         }
         ctx.restore();
     }
