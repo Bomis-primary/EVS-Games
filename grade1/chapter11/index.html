@@ -6,11 +6,16 @@
     <title>Star Burst: Festive Fun!</title>
     <style>
         :root {
-            --bg-dark: #1b0c3a;
-            --accent-gold: #ffc107;
-            --accent-teal: #00e5ff;
-            --accent-pink: #ff4081;
-            --card-bg: #321664;
+            --bg-top: #6c5ce7;
+            --bg-bottom: #a29bfe;
+            --card-bg: rgba(255, 255, 255, 0.22);
+            --card-border: rgba(255, 255, 255, 0.45);
+            --pastel-pink: #ff7675;
+            --pastel-teal: #00cec9;
+            --pastel-yellow: #ffeaa7;
+            --pastel-gold-btn: #fdcb6e;
+            --pastel-purple: #a29bfe;
+            --text-dark: #2d3436;
         }
 
         * {
@@ -27,8 +32,8 @@
             width: 100%;
             height: 100%;
             height: 100dvh;
-            background-color: var(--bg-dark);
-            color: white;
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: #ffffff;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -40,13 +45,22 @@
             position: relative;
             width: 100%;
             height: 100%;
-            max-width: 600px;
-            max-height: 950px;
-            background: radial-gradient(circle at center, #3d1c7a 0%, #15082d 100%);
+            max-width: 550px;
+            max-height: 900px;
+            background: linear-gradient(180deg, #574b90 0%, #303952 100%);
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
+            border-radius: 0;
+        }
+
+        @media (min-width: 550px) and (min-height: 650px) {
+            #gameContainer {
+                border-radius: 28px;
+                height: 94dvh;
+                border: 4px solid rgba(255, 255, 255, 0.3);
+            }
         }
 
         canvas {
@@ -58,141 +72,123 @@
 
         .screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            padding: 24px;
-            text-align: center;
-            color: white;
-            background: rgba(21, 8, 45, 0.95);
-            backdrop-filter: blur(8px);
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; padding: 24px; text-align: center; color: white;
+            background: rgba(48, 57, 82, 0.96); backdrop-filter: blur(10px);
         }
 
-        /* Screen 1: Logo Only */
-        #logoScreen {
-            background-color: #120626;
-            z-index: 100;
-        }
-        #logoScreen img {
-            max-width: min(65%, 280px);
-            height: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 0 15px rgba(255,193,7,0.3));
+        #logoScreen { background: #303952; z-index: 100; }
+        #logoScreen img { 
+            max-width: min(65%, 260px); 
+            height: auto; 
+            object-fit: contain; 
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.25)); 
         }
 
-        /* Screen 2: Title Screen */
-        #titleScreen {
-            background: radial-gradient(circle, #53239a 0%, #120626 100%);
-            z-index: 90;
-            display: none;
+        #titleScreen { 
+            background: radial-gradient(circle at center, #574b90 0%, #303952 100%); 
+            z-index: 90; 
+            display: none; 
         }
 
-        /* Screen 3: Instructions */
-        #instructionScreen {
-            background: rgba(18, 6, 38, 0.98);
-            z-index: 85;
-            display: none;
+        #instructionScreen { 
+            background: rgba(48, 57, 82, 0.98); 
+            z-index: 85; 
+            display: none; 
         }
 
         .btn {
-            background: linear-gradient(180deg, #ffca28 0%, #ff8f00 100%);
-            color: #fff;
-            border: none;
-            padding: 16px 40px;
-            font-size: clamp(20px, 5vw, 26px);
-            font-weight: 900;
-            border-radius: 40px;
+            background: linear-gradient(180deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #2d3436; 
+            border: none; 
+            padding: 14px 38px; 
+            font-size: clamp(18px, 4.8vw, 24px);
+            font-weight: 900; 
+            border-radius: 35px; 
             cursor: pointer;
-            box-shadow: 0 6px 0 #b36200, 0 10px 20px rgba(0,0,0,0.4);
-            text-transform: uppercase;
+            box-shadow: 0 6px 0 #e1b12c, 0 10px 20px rgba(0,0,0,0.25);
+            text-transform: uppercase; 
             letter-spacing: 1px;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
-            margin-top: 25px;
-            text-shadow: 1px 2px 3px rgba(0,0,0,0.4);
+            margin-top: 20px;
         }
-        .btn:active {
-            box-shadow: 0 2px 0 #b36200, 0 4px 10px rgba(0,0,0,0.4);
-            transform: translateY(4px);
+        .btn:active { 
+            box-shadow: 0 2px 0 #e1b12c, 0 4px 10px rgba(0,0,0,0.2); 
+            transform: translateY(4px); 
         }
 
-        /* Large Bold Text styles for instructions */
         .instruction-box {
-            background: rgba(255, 255, 255, 0.06);
-            border: 2px solid rgba(255,255,255,0.15);
-            border-radius: 20px;
-            padding: 20px;
-            max-width: 480px;
-            width: 100%;
+            background: rgba(255, 255, 255, 0.1); 
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 20px; 
+            padding: 20px; 
+            max-width: 440px; 
+            width: 100%; 
             margin-bottom: 10px;
         }
         .big-bold-text {
-            font-size: clamp(16px, 4.2vw, 20px);
-            font-weight: 800;
+            font-size: clamp(15px, 4vw, 19px); 
+            font-weight: 800; 
             line-height: 1.5;
-            margin-bottom: 12px;
-            color: #f1f5f9;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            margin-bottom: 12px; 
+            color: #f5f6fa; 
             text-align: left;
         }
 
         #factPopup {
-            position: absolute;
-            bottom: 12%;
-            left: 5%;
+            position: absolute; 
+            bottom: 10%; 
+            left: 5%; 
             width: 90%;
-            background: linear-gradient(135deg, #fffde7 0%, #fff59d 100%);
-            border: 4px solid var(--accent-gold);
-            border-radius: 24px;
-            padding: 22px;
-            color: #3e2723;
-            font-size: clamp(16px, 4vw, 19px);
-            font-weight: bold;
+            background: #ffffff;
+            border: 4px solid var(--pastel-gold-btn); 
+            border-radius: 24px; 
+            padding: 20px;
+            color: #2d3436; 
+            font-size: clamp(15px, 3.8vw, 18px); 
+            font-weight: bold; 
             line-height: 1.45;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-            z-index: 50;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.35); 
+            z-index: 50; 
             display: none;
-            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             text-align: center;
         }
 
         #uiOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 12px 14px;
+            display: flex; 
+            justify-content: space-between; 
             align-items: center;
-            z-index: 20;
-            color: white;
-            pointer-events: none;
+            z-index: 20; 
+            color: white; 
+            pointer-events: none; 
             display: none;
         }
         .ui-element {
-            background: rgba(18, 6, 38, 0.65);
-            backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.18); 
+            backdrop-filter: blur(6px); 
             padding: 8px 14px;
-            border-radius: 16px;
-            font-size: clamp(13px, 3.2vw, 16px);
+            border-radius: 16px; 
+            font-size: clamp(12px, 3.2vw, 15px); 
             font-weight: 900;
-            border: 1.5px solid rgba(255,255,255,0.2);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 1.5px solid rgba(255,255,255,0.3); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        #completionScreen {
-            background: radial-gradient(circle, #6333bd 0%, #120626 100%);
-            display: none;
-            z-index: 80;
+        #completionScreen { 
+            background: radial-gradient(circle at center, #574b90 0%, #303952 100%); 
+            display: none; 
+            z-index: 80; 
         }
+
         @keyframes popUp { 
-            from { transform: scale(0.7) translateY(30px); opacity: 0; } 
+            from { transform: scale(0.8) translateY(20px); opacity: 0; } 
             to { transform: scale(1) translateY(0); opacity: 1; } 
         }
     </style>
@@ -208,42 +204,48 @@
         <audio id="snd-fanfare" src="assets/celebratorysong.mp3" preload="auto"></audio>
     </div>
 
+    <!-- LOGO SCREEN -->
     <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
+    <!-- TITLE SCREEN -->
     <div id="titleScreen" class="screen">
-        <h1 style="color: var(--accent-gold); font-size: clamp(32px, 8vw, 44px); margin-bottom: 12px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); letter-spacing: 1px;">STAR BURST:<br>FESTIVE FUN!</h1>
-        <p style="font-size: clamp(16px, 4.5vw, 22px); color: var(--accent-teal); font-weight: bold; margin-bottom: 30px; text-shadow: 1px 2px 4px rgba(0,0,0,0.8); padding: 0 10px;">✨ Bounce into India's Magic Celebrations! ✨</p>
-        <button class="btn" onclick="showInstructions()">Play</button>
+        <h1 style="color: var(--pastel-yellow); font-size: clamp(28px, 7.5vw, 40px); margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.3);">STAR BURST:<br>FESTIVE FUN!</h1>
+        <p style="font-size: clamp(15px, 4.2vw, 20px); color: var(--pastel-teal); font-weight: bold; margin-bottom: 25px;">✨ Aim & Pop Festive Answers! ✨</p>
+        <button class="btn" onclick="showInstructions()">Play Now</button>
     </div>
 
+    <!-- INSTRUCTION SCREEN -->
     <div id="instructionScreen" class="screen">
-        <h2 style="color: var(--accent-pink); font-size: clamp(24px, 6vw, 32px); margin-bottom: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">HOW TO PLAY</h2>
+        <h2 style="color: var(--pastel-pink); font-size: clamp(22px, 5.8vw, 30px); margin-bottom: 16px;">HOW TO PLAY</h2>
         <div class="instruction-box">
-            <div class="big-bold-text">1. Look at the <span style="color: var(--accent-gold);">Two Choice Boxes</span> moving above!</div>
-            <div class="big-bold-text">2. Slide trampoline & tap to bounce the star into the <span style="color: var(--accent-teal);">Correct Word</span>!</div>
-            <div class="big-bold-text">3. Collect all 3 words to finish each festival!</div>
+            <div class="big-bold-text">1. Read the <span style="color: var(--pastel-yellow);">Festival Task</span> at the top!</div>
+            <div class="big-bold-text">2. Slide the <span style="color: var(--pastel-teal);">Star Launcher</span> below the right box!</div>
+            <div class="big-bold-text">3. <span style="color: var(--pastel-pink);">TAP</span> to shoot stars into the correct word!</div>
         </div>
-        <button class="btn" style="background: linear-gradient(180deg, #00e676 0%, #00a152 100%); box-shadow: 0 6px 0 #007038;" onclick="startGame()">Got It!</button>
+        <button class="btn" style="background: linear-gradient(180deg, #55efc4 0%, #00b894 100%); color:#fff; box-shadow: 0 6px 0 #00896c;" onclick="startGame()">Got It!</button>
     </div>
 
+    <!-- UI OVERLAY -->
     <div id="uiOverlay">
         <div id="scoreLabel" class="ui-element">Score: 0/18</div>
-        <div id="attemptsLabel" class="ui-element" style="color: #ff5252;">Attempts: 2 Left</div>
-        <div id="roundLabel" class="ui-element" style="color: var(--accent-gold);">Round 1/6</div>
+        <div id="attemptsLabel" class="ui-element" style="color: #ff7675;">Attempts: 2 Left</div>
+        <div id="roundLabel" class="ui-element" style="color: var(--pastel-yellow);">Round 1/6</div>
     </div>
     
+    <!-- FACT POPUP -->
     <div id="factPopup">
-        <h3 style="margin-bottom: 8px; color: #d84315; font-size: clamp(20px, 5vw, 24px);">🎉 Fantastic Job!</h3>
-        <p id="factText" style="margin-bottom: 15px;"></p>
-        <button class="btn" style="font-size: 18px; padding: 10px 28px; box-shadow: 0 4px 0 #b36200; margin-top: 5px;" onclick="nextRound()">Next Round ➔</button>
+        <h3 style="margin-bottom: 8px; color: #e17055; font-size: clamp(18px, 4.8vw, 22px);">🎉 Fantastic Job!</h3>
+        <p id="factText" style="margin-bottom: 15px; color: #2d3436;"></p>
+        <button class="btn" style="font-size: 16px; padding: 10px 26px; box-shadow: 0 4px 0 #e1b12c; margin-top: 5px;" onclick="nextRound()">Next Round ➔</button>
     </div>
 
+    <!-- COMPLETION SCREEN -->
     <div id="completionScreen" class="screen">
-        <h1 style="color: var(--accent-teal); font-size: clamp(34px, 8vw, 44px); margin-bottom: 12px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">Superstar Winner!</h1>
-        <p style="font-size: clamp(18px, 5vw, 24px); margin-bottom: 25px; font-weight: bold;">You completed all festival rounds!</p>
-        <div class="ui-element" id="finalScore" style="font-size: clamp(24px, 6vw, 32px); padding: 16px 36px; background: rgba(255,255,255,0.1); border-color: var(--accent-gold); color: var(--accent-gold); margin-bottom: 20px;">Final Score: 0/18</div>
+        <h1 style="color: var(--pastel-teal); font-size: clamp(30px, 7.5vw, 40px); margin-bottom: 12px;">Superstar Winner!</h1>
+        <p style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 20px; font-weight: bold;">You completed all festival rounds!</p>
+        <div class="ui-element" id="finalScore" style="font-size: clamp(22px, 5.5vw, 28px); padding: 14px 32px; color: var(--pastel-yellow); margin-bottom: 20px;">Final Score: 0/18</div>
         <button class="btn" onclick="restartGame()">Play Again</button>
     </div>
 
@@ -254,20 +256,16 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // WEB AUDIO API MANAGER FOR ZERO-LATENCY AUDIO
+    // FAST AUDIO ENGINE
     let audioCtx = null;
     const audioBuffers = {};
 
     function initAudioEngine() {
         if (!audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioContextClass) {
-                audioCtx = new AudioContextClass();
-            }
+            if (AudioContextClass) audioCtx = new AudioContextClass();
         }
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
         ['snd-correct', 'snd-wrong', 'snd-clap', 'snd-fanfare'].forEach(id => {
             const el = document.getElementById(id);
@@ -282,10 +280,7 @@
     }
 
     function safePlayAudio(id, volume = 1.0) {
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         if (audioCtx && audioBuffers[id]) {
             try {
                 const src = audioCtx.createBufferSource();
@@ -298,99 +293,50 @@
                 return;
             } catch(e) {}
         }
-
         try {
             const snd = document.getElementById(id);
-            if (snd) {
-                snd.currentTime = 0;
-                snd.volume = volume;
-                const p = snd.play();
-                if (p !== undefined) p.catch(() => {});
-            }
+            if (snd) { snd.currentTime = 0; snd.volume = volume; snd.play().catch(() => {}); }
         } catch(e) {}
     }
 
     function resize() {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
     }
     window.addEventListener('resize', resize);
     resize();
 
-    let currentRound = 0;
-    let score = 0;
-    let attemptsLeft = 2;
-    let collectedThisRound = 0;
-    let gameActive = false;
-    let showRoundEnd = false;
-    let waitingForFirstTap = true;
-    let firstTapEverDone = false; 
+    function getCanvasWidth() { return canvas.width / (window.devicePixelRatio || 1); }
+    function getCanvasHeight() { return canvas.height / (window.devicePixelRatio || 1); }
 
-    let star = { x: 0, y: 0, r: 20, vx: 0, vy: 0, color: '#ff4081', glowColor: 'rgba(255, 64, 129, 0.8)' };
-    let trampoline = { x: 0, y: 0, w: 140, h: 18, targetY: 0, currentY: 0, targetX: 0 };
+    let currentRound = 0, score = 0, attemptsLeft = 2, collectedThisRound = 0;
+    let gameActive = false, showRoundEnd = false;
+
+    let cannon = { x: 0, targetX: 0, y: 0, w: 60 };
+    let rocket = { x: 0, y: 0, r: 10, vy: 0, active: false, color: '#ffeaa7' };
     let activePair = []; 
     let particles = [];
-    let trailParticles = [];
     
     let itemPairsPool = [];
     let currentPairIndex = 0;
     let freezeTimer = 0; 
 
     const roundsData = [
-        {
-            name: "HOLI",
-            starColor: "#ff4081", glow: "rgba(255,64,129,0.8)",
-            baseSpeed: 1.0,
-            fact: "Holi is the festival of colours celebrated in March! A delicious sweet called Gujiya is shared with all our guests!",
-            correctItems: ["Gulaal", "Gujiya", "Pichkaris"],
-            wrongItems: ["Langar", "Diyas", "Santa Claus"]
-        },
-        {
-            name: "DIWALI",
-            starColor: "#ffca28", glow: "rgba(255,202,40,0.8)",
-            baseSpeed: 1.1,
-            fact: "On Diwali, we light clay diyas and make colorful floor patterns called rangoli to decorate our lovely homes!",
-            correctItems: ["Rangoli", "Goddess Lakshmi", "Clay Diyas"],
-            wrongItems: ["Sewaiyan", "Tiranga", "Buckets of water"]
-        },
-        {
-            name: "CHRISTMAS",
-            starColor: "#00e676", glow: "rgba(0,230,118,0.8)",
-            baseSpeed: 1.2,
-            fact: "Christmas is celebrated on 25th December as the birthday of Lord Jesus Christ. Children love gifts from Santa!",
-            correctItems: ["25th December", "Bells and Stars", "Jesus Christ"],
-            wrongItems: ["Mosque", "Gulaal", "Guru Nanak Devji"]
-        },
-        {
-            name: "EID",
-            starColor: "#00b0ff", glow: "rgba(0,176,255,0.8)",
-            baseSpeed: 1.3,
-            fact: "On Eid-ul-Fitr, Muslims celebrate the end of fasting by wearing new clothes, greeting each other with 'Eid Mubarak', and preparing sweet sewaiyan!",
-            correctItems: ["Sewaiyan", "Eidi Gifts", "New Clothes"],
-            wrongItems: ["Firecrackers", "Xmas Tree", "Water balloons"]
-        },
-        {
-            name: "GURPURAB",
-            starColor: "#d500f9", glow: "rgba(213,0,249,0.8)",
-            baseSpeed: 1.4,
-            fact: "Gurpurab celebrates the birthdays of the Sikh Gurus! A wonderful free community meal called langar is joyfully served to everyone at gurudwaras!",
-            correctItems: ["Langar Meal", "Guru Nanak", "Golden Temple"],
-            wrongItems: ["Pichkaris", "Santa Claus", "Clay Diyas"]
-        },
-        {
-            name: "INDEPENDENCE DAY",
-            starColor: "#ff6d00", glow: "rgba(255,109,0,0.8)",
-            baseSpeed: 1.5,
-            fact: "India became independent on 15th August 1947! Every year, our Prime Minister proudly hoists the Tiranga flag at the Red Fort!",
-            correctItems: ["15th August", "Tiranga", "Red Fort Speech"],
-            wrongItems: ["Gujiya", "Lord Ganesha", "Santa Claus"]
-        }
+        { name: "HOLI", starColor: "#ff7675", fact: "Holi is the festival of colours celebrated in March! Gujiya is shared with all our guests!", correctItems: ["Gulaal", "Gujiya", "Pichkaris"], wrongItems: ["Langar", "Diyas", "Santa Claus"] },
+        { name: "DIWALI", starColor: "#ffeaa7", fact: "On Diwali, we light clay diyas and make colorful rangolis to decorate our homes!", correctItems: ["Rangoli", "Goddess Lakshmi", "Clay Diyas"], wrongItems: ["Sewaiyan", "Tiranga", "Buckets of water"] },
+        { name: "CHRISTMAS", starColor: "#55efc4", fact: "Christmas is celebrated on 25th December! Children love gifts from Santa!", correctItems: ["25th December", "Bells and Stars", "Jesus Christ"], wrongItems: ["Mosque", "Gulaal", "Guru Nanak Devji"] },
+        { name: "EID", starColor: "#74b9ff", fact: "On Eid-ul-Fitr, Muslims wear new clothes, share Eidi gifts, and prepare sweet sewaiyan!", correctItems: ["Sewaiyan", "Eidi Gifts", "New Clothes"], wrongItems: ["Firecrackers", "Xmas Tree", "Water balloons"] },
+        { name: "GURPURAB", starColor: "#a29bfe", fact: "Gurpurab celebrates the Sikh Gurus! Langar meals are served to everyone at gurudwaras!", correctItems: ["Langar Meal", "Guru Nanak", "Golden Temple"], wrongItems: ["Pichkaris", "Santa Claus", "Clay Diyas"] },
+        { name: "INDEPENDENCE DAY", starColor: "#fab1a0", fact: "India became independent on 15th August 1947! The Tiranga flag is hoisted at Red Fort!", correctItems: ["15th August", "Tiranga", "Red Fort Speech"], wrongItems: ["Gujiya", "Lord Ganesha", "Santa Claus"] }
     ];
 
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
-    }, 5000);
+    }, 4000);
 
     function showInstructions() {
         initAudioEngine();
@@ -402,84 +348,55 @@
         initAudioEngine();
         document.getElementById('instructionScreen').style.display = 'none';
         document.getElementById('uiOverlay').style.display = 'flex';
-        currentRound = 0;
-        score = 0;
-        firstTapEverDone = false; 
+        currentRound = 0; score = 0;
         initRound();
         gameActive = true;
     }
 
     function initRound() {
-        attemptsLeft = 2;
-        collectedThisRound = 0;
-        showRoundEnd = false;
-        waitingForFirstTap = true;
-        currentPairIndex = 0;
-        freezeTimer = 0;
+        attemptsLeft = 2; collectedThisRound = 0; showRoundEnd = false; currentPairIndex = 0; freezeTimer = 0;
+        rocket.active = false;
         
+        const cWidth = getCanvasWidth();
+        const cHeight = getCanvasHeight();
+
         document.getElementById('factPopup').style.display = 'none';
         document.getElementById('scoreLabel').innerText = `Score: ${score}/${roundsData.length * 3}`;
         document.getElementById('attemptsLabel').innerText = `Attempts: ${attemptsLeft} Left`;
-        document.getElementById('attemptsLabel').style.color = "#ff5252";
+        document.getElementById('attemptsLabel').style.color = "#ff7675";
         document.getElementById('roundLabel').innerText = `Round ${currentRound + 1}/${roundsData.length}`;
 
-        const rData = roundsData[currentRound];
-        star.color = rData.starColor;
-        star.glowColor = rData.glow;
-        
-        trampoline.w = Math.min(150, canvas.width * 0.32);
-        trampoline.targetX = (canvas.width - trampoline.w) / 2;
-        trampoline.x = trampoline.targetX;
-        trampoline.targetY = canvas.height - 60;
-        trampoline.currentY = trampoline.targetY;
-
-        star.x = trampoline.x + trampoline.w / 2;
-        star.y = trampoline.targetY - star.r;
-        star.vx = 0;
-        star.vy = 0;
+        cannon.y = cHeight - 65;
+        cannon.targetX = cWidth / 2;
+        cannon.x = cannon.targetX;
 
         itemPairsPool = [];
+        const rData = roundsData[currentRound];
         for (let i = 0; i < 3; i++) {
-            let pair = [
-                { text: rData.correctItems[i], correct: true },
-                { text: rData.wrongItems[i], correct: false }
-            ];
+            let pair = [{ text: rData.correctItems[i], correct: true }, { text: rData.wrongItems[i], correct: false }];
             pair.sort(() => Math.random() - 0.5);
             itemPairsPool.push(pair);
         }
-
         spawnNextPair();
     }
 
     function spawnNextPair() {
-        if (currentPairIndex >= itemPairsPool.length) {
-            finishRound();
-            return;
-        }
-
-        const rData = roundsData[currentRound];
+        const cWidth = getCanvasWidth();
+        if (currentPairIndex >= itemPairsPool.length) { finishRound(); return; }
         const rawPair = itemPairsPool[currentPairIndex];
         activePair = [];
-
-        const boxWidth = Math.min(145, canvas.width * 0.38);
-        const boxHeight = 46;
+        const boxWidth = Math.min(150, cWidth * 0.42);
+        const boxHeight = 50;
 
         rawPair.forEach((item, index) => {
             activePair.push({
-                text: item.text,
-                correct: item.correct,
-                x: index === 0 ? (canvas.width * 0.1) : (canvas.width * 0.52),
-                y: 160, 
-                vx: rData.baseSpeed * (index === 0 ? 1 : -1),
-                w: boxWidth,
-                h: boxHeight,
-                active: true,
-                statusColor: null 
+                text: item.text, correct: item.correct,
+                x: index === 0 ? (cWidth * 0.06) : (cWidth * 0.52),
+                y: 150, w: boxWidth, h: boxHeight, active: true, statusColor: null
             });
         });
     }
 
-    // Pointer Events for Cross-Device Support
     window.addEventListener('pointermove', (e) => {
         const rect = canvas.getBoundingClientRect();
         handleMove(e.clientX - rect.left);
@@ -489,34 +406,30 @@
         initAudioEngine();
         const rect = canvas.getBoundingClientRect();
         handleMove(e.clientX - rect.left);
-        if (waitingForFirstTap && gameActive && !showRoundEnd && freezeTimer <= 0) {
-            launchStar();
+        if (!rocket.active && gameActive && !showRoundEnd && freezeTimer <= 0) {
+            fireRocket();
         }
     });
 
     function handleMove(rootX) {
         if (!gameActive || showRoundEnd) return;
-        trampoline.targetX = rootX - trampoline.w / 2;
-        if (trampoline.targetX < 5) trampoline.targetX = 5;
-        if (trampoline.targetX + trampoline.w > canvas.width - 5) trampoline.targetX = canvas.width - trampoline.w - 5;
+        const cWidth = getCanvasWidth();
+        cannon.targetX = Math.max(30, Math.min(cWidth - 30, rootX));
     }
 
-    function launchStar() {
-        waitingForFirstTap = false;
-        firstTapEverDone = true; 
-        star.vy = -13.5; 
-        trampoline.currentY = trampoline.targetY + 15;
+    function fireRocket() {
+        rocket.x = cannon.x;
+        rocket.y = cannon.y - 12;
+        rocket.vy = -15;
+        rocket.active = true;
+        rocket.color = roundsData[currentRound].starColor;
     }
 
     function createBurst(x, y, color) {
-        for(let i = 0; i < 20; i++) {
+        for (let i = 0; i < 22; i++) {
             particles.push({
-                x: x, y: y,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8,
-                r: Math.random() * 5 + 2,
-                alpha: 1,
-                color: color
+                x: x, y: y, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+                r: Math.random() * 4 + 2, alpha: 1, color: color
             });
         }
     }
@@ -525,13 +438,10 @@
         attemptsLeft--;
         safePlayAudio('snd-wrong');
         document.getElementById('attemptsLabel').innerText = `Attempts: ${attemptsLeft} Left`;
-        
         if (attemptsLeft <= 0) {
             document.getElementById('attemptsLabel').innerText = `Revealing!`;
-            document.getElementById('attemptsLabel').style.color = "var(--accent-teal)";
-            activePair.forEach(item => {
-                if(!item.correct) item.active = false;
-            });
+            document.getElementById('attemptsLabel').style.color = "#00cec9";
+            activePair.forEach(item => { if (!item.correct) item.active = false; });
         }
     }
 
@@ -544,9 +454,8 @@
 
     function nextRound() {
         currentRound++;
-        if (currentRound < roundsData.length) {
-            initRound();
-        } else {
+        if (currentRound < roundsData.length) initRound();
+        else {
             gameActive = false;
             document.getElementById('uiOverlay').style.display = 'none';
             safePlayAudio('snd-fanfare');
@@ -563,143 +472,75 @@
     function update() {
         if (!gameActive) return;
 
-        // Smooth Trampoline movement
-        trampoline.x += (trampoline.targetX - trampoline.x) * 0.25;
-
-        if (waitingForFirstTap) {
-            star.x = trampoline.x + trampoline.w / 2;
-            star.y = trampoline.targetY - star.r - 2;
-        }
+        cannon.x += (cannon.targetX - cannon.x) * 0.3;
 
         if (freezeTimer > 0) {
             freezeTimer--;
             if (freezeTimer <= 0) {
                 let hitCorrect = false;
-                activePair.forEach(item => {
-                    if (item.statusColor === 'green') hitCorrect = true;
-                });
-
-                if (hitCorrect) {
-                    currentPairIndex++;
-                    spawnNextPair();
-                }
-                
-                waitingForFirstTap = true;
-                star.x = trampoline.x + trampoline.w / 2;
-                star.y = trampoline.targetY - star.r - 2;
-                star.vx = 0;
-                star.vy = 0;
+                activePair.forEach(item => { if (item.statusColor === 'green') hitCorrect = true; });
+                if (hitCorrect) { currentPairIndex++; spawnNextPair(); }
             }
             return;
         }
 
-        if (!showRoundEnd && !waitingForFirstTap) {
-            // Star dust trail
-            if (Math.random() < 0.6) {
-                trailParticles.push({
-                    x: star.x, y: star.y,
-                    r: Math.random() * 4 + 1,
-                    alpha: 0.8,
-                    color: star.color
-                });
-            }
+        if (rocket.active) {
+            rocket.y += rocket.vy;
 
-            star.x += star.vx;
-            star.y += star.vy;
-            star.vy += 0.24; // Gravity
+            // Soft star-dust trail
+            particles.push({
+                x: rocket.x + (Math.random()-0.5)*3, y: rocket.y + 8,
+                vx: (Math.random()-0.5)*1.5, vy: Math.random()*2, r: Math.random()*2.5+1,
+                alpha: 0.7, color: '#ffeaa7'
+            });
 
-            // Wall Collisions
-            if (star.x - star.r < 5) { star.x = star.r + 5; star.vx *= -1; }
-            if (star.x + star.r > canvas.width - 5) { star.x = canvas.width - star.r - 5; star.vx *= -1; }
-            if (star.y - star.r < 60) { star.y = 60 + star.r; star.vy *= -0.7; }
+            if (rocket.y < 40) { rocket.active = false; }
 
-            // Trampoline Bounce
-            if (star.vy > 0 && 
-                star.x >= trampoline.x - 10 && 
-                star.x <= trampoline.x + trampoline.w + 10 && 
-                star.y + star.r >= trampoline.currentY - 6 && 
-                star.y - star.r <= trampoline.currentY + trampoline.h) {
-                
-                star.vy = -13.5; 
-                star.vx = ((star.x - (trampoline.x + trampoline.w / 2)) / (trampoline.w / 2)) * 4.5;
-                trampoline.currentY = trampoline.targetY + 12;
-            }
-
-            trampoline.currentY += (trampoline.targetY - trampoline.currentY) * 0.2;
-
-            // Fall below screen reset
-            if (star.y - star.r > canvas.height) {
-                waitingForFirstTap = true;
-                star.x = trampoline.x + trampoline.w / 2;
-                star.y = trampoline.targetY - star.r - 2;
-                star.vx = 0;
-                star.vy = 0;
-            }
-
-            // Choice Box Collision Check
+            // Hit test
             activePair.forEach(item => {
-                if (!item.active || item.statusColor !== null) return;
+                if (!item.active || item.statusColor !== null || !rocket.active) return;
 
-                item.x += item.vx;
-                if (item.x <= 5 || item.x + item.w >= canvas.width - 5) item.vx *= -1;
-
-                let closestX = Math.max(item.x, Math.min(star.x, item.x + item.w));
-                let closestY = Math.max(item.y, Math.min(star.y, item.y + item.h));
-                let distanceX = star.x - closestX;
-                let distanceY = star.y - closestY;
-                let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
-
-                if (distanceSquared < ((star.r + 2) * (star.r + 2))) { 
-                    createBurst(item.x + item.w/2, item.y + item.h/2, item.correct ? '#00e676' : '#ff5252');
+                if (rocket.x >= item.x && rocket.x <= item.x + item.w &&
+                    rocket.y >= item.y && rocket.y <= item.y + item.h) {
                     
+                    rocket.active = false;
+                    createBurst(rocket.x, rocket.y, item.correct ? '#55efc4' : '#ff7675');
+
                     if (item.correct) {
-                        item.statusColor = 'green'; 
-                        score++;
-                        collectedThisRound++;
+                        item.statusColor = 'green'; score++; collectedThisRound++;
                         safePlayAudio('snd-correct');
                         document.getElementById('scoreLabel').innerText = `Score: ${score}/${roundsData.length * 3}`;
-                        freezeTimer = 40; 
+                        freezeTimer = 30;
                     } else {
-                        item.statusColor = 'red'; 
+                        item.statusColor = 'red';
                         handleWrongCollision();
-                        freezeTimer = 40; 
+                        freezeTimer = 30;
                     }
                 }
             });
         }
 
-        // Particle System Updates
         particles.forEach((p, idx) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.alpha -= 0.03;
+            p.x += p.vx; p.y += p.vy; p.alpha -= 0.035;
             if (p.alpha <= 0) particles.splice(idx, 1);
-        });
-
-        trailParticles.forEach((p, idx) => {
-            p.alpha -= 0.04;
-            if (p.alpha <= 0) trailParticles.splice(idx, 1);
         });
     }
 
-    function drawStar(cx, cy, spikes, outerRadius, innerRadius, color, glow) {
+    function drawStar(cx, cy, spikes, outerRadius, innerRadius, color) {
         ctx.save();
-        ctx.shadowBlur = 18;
-        ctx.shadowColor = glow;
         ctx.fillStyle = color;
         ctx.beginPath();
         let rot = Math.PI / 2 * 3;
-        let x = cx, y = cy;
         let step = Math.PI / spikes;
-
+        ctx.moveTo(cx, cy - outerRadius);
         for (let i = 0; i < spikes; i++) {
-            x = cx + Math.cos(rot) * outerRadius;
-            y = cy + Math.sin(rot) * outerRadius;
+            let x = cx + Math.cos(rot) * outerRadius;
+            let y = cy + Math.sin(rot) * outerRadius;
             ctx.lineTo(x, y);
             rot += step;
             x = cx + Math.cos(rot) * innerRadius;
-            y = cy + Math.sin(rot) * innerRadius;
-            ctx.lineTo(x, y);
+            let y2 = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y2);
             rot += step;
         }
         ctx.lineTo(cx, cy - outerRadius);
@@ -709,108 +550,70 @@
     }
 
     function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+        const cWidth = getCanvasWidth();
+        const cHeight = getCanvasHeight();
+        ctx.clearRect(0, 0, cWidth, cHeight);
         if (!gameActive) return;
 
         let wordsLeft = 3 - collectedThisRound;
         let dynamicPrompt = `Find ${wordsLeft} word${wordsLeft > 1 ? 's' : ''} for: ${roundsData[currentRound].name}`;
 
         // Header Prompt Banner
-        ctx.fillStyle = 'rgba(18, 6, 38, 0.65)';
-        ctx.beginPath();
-        ctx.roundRect(canvas.width * 0.05, 65, canvas.width * 0.9, 44, 12);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+        ctx.beginPath(); ctx.roundRect(cWidth * 0.05, 58, cWidth * 0.9, 44, 14); ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 clamp(14px, 3.8vw, 17px) "Comic Sans MS"';
-        ctx.textAlign = 'center';
-        ctx.fillText(dynamicPrompt, canvas.width / 2, 92);
+        ctx.font = '900 clamp(13px, 3.6vw, 16px) "Comic Sans MS"';
+        ctx.textAlign = 'center'; ctx.fillText(dynamicPrompt, cWidth / 2, 85);
 
-        // Tap guide
-        if(waitingForFirstTap && !showRoundEnd && freezeTimer <= 0 && !firstTapEverDone) {
-            ctx.fillStyle = 'rgba(255,255,255,0.9)';
-            ctx.font = '900 clamp(16px, 4.5vw, 20px) "Comic Sans MS"';
-            ctx.fillText("👇 SLIDE & TAP TO BOUNCE! 👇", canvas.width / 2, canvas.height / 2 + 50);
-        }
-
-        // Draw Choice Boxes
+        // Draw Choice Cards
         activePair.forEach(item => {
             if (!item.active) return;
-            
             ctx.save();
-            if (item.statusColor === 'green') {
-                ctx.fillStyle = '#00a152';
-                ctx.strokeStyle = '#00e676';
-            } else if (item.statusColor === 'red') {
-                ctx.fillStyle = '#c62828';
-                ctx.strokeStyle = '#ff5252';
-            } else {
-                ctx.fillStyle = 'rgba(50, 22, 100, 0.9)';
-                ctx.strokeStyle = '#ffc107';
-            }
+            if (item.statusColor === 'green') { ctx.fillStyle = '#00b894'; ctx.strokeStyle = '#55efc4'; }
+            else if (item.statusColor === 'red') { ctx.fillStyle = '#d63031'; ctx.strokeStyle = '#ff7675'; }
+            else { ctx.fillStyle = 'rgba(255, 255, 255, 0.22)'; ctx.strokeStyle = '#ffeaa7'; }
             
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.roundRect(item.x, item.y, item.w, item.h, 12);
-            ctx.fill();
-            ctx.stroke();
+            ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(item.x, item.y, item.w, item.h, 14);
+            ctx.fill(); ctx.stroke();
 
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold clamp(13px, 3.5vw, 16px) system-ui, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(item.text, item.x + item.w / 2, item.y + item.h / 2);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold clamp(13px, 3.5vw, 16px) system-ui, sans-serif';
+            ctx.textBaseline = 'middle'; ctx.fillText(item.text, item.x + item.w / 2, item.y + item.h / 2);
             ctx.restore();
         });
 
-        // Draw Star Trail
-        trailParticles.forEach(p => {
-            ctx.save();
-            ctx.globalAlpha = p.alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        });
-
-        // Draw Trampoline
+        // Draw Friendly Launcher
         ctx.save();
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = 'rgba(255, 193, 7, 0.5)';
-        ctx.fillStyle = 'linear-gradient(180deg, #ffca28 0%, #ff8f00 100%)';
-        ctx.beginPath();
-        ctx.roundRect(trampoline.x, trampoline.currentY, trampoline.w, trampoline.h, 8);
-        ctx.fill();
+        ctx.fillStyle = '#ffeaa7';
+        ctx.beginPath(); ctx.arc(cannon.x, cannon.y + 8, 22, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = '#fdcb6e';
+        ctx.beginPath(); ctx.roundRect(cannon.x - 7, cannon.y - 12, 14, 20, 6); ctx.fill();
         ctx.restore();
 
-        // Draw Particles
-        particles.forEach(p => {
+        // Aiming guideline
+        if (!rocket.active && freezeTimer <= 0 && !showRoundEnd) {
             ctx.save();
-            ctx.globalAlpha = p.alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 234, 167, 0.4)';
+            ctx.setLineDash([5, 5]); ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(cannon.x, cannon.y - 12); ctx.lineTo(cannon.x, 150); ctx.stroke();
+            ctx.restore();
+        }
+
+        // Draw Active Star Rocket
+        if (rocket.active) {
+            drawStar(rocket.x, rocket.y, 5, rocket.r, rocket.r / 2, rocket.color);
+        }
+
+        // Particles
+        particles.forEach(p => {
+            ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
             ctx.restore();
         });
-
-        // Draw Star
-        if (!showRoundEnd && freezeTimer <= 0) {
-            drawStar(star.x, star.y, 5, star.r, star.r / 2, star.color, star.glowColor);
-        }
     }
 
-    function mainLoop() {
-        update();
-        render();
-        requestAnimationFrame(mainLoop);
-    }
-    
+    function mainLoop() { update(); render(); requestAnimationFrame(mainLoop); }
     mainLoop();
 </script>
 </body>
