@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Community Connect: The Matching Game</title>
     <style>
         :root {
@@ -20,23 +20,26 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+            -webkit-touch-callout: none;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', system-ui, sans-serif;
         }
 
         html, body {
             width: 100%;
             height: 100%;
+            height: 100dvh;
             background-color: var(--bg-sky);
             color: var(--text-main);
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
+            touch-action: manipulation;
         }
 
-        /* LOGO SCREEN (FIXED FOR MINIMUM 5 SECONDS) */
+        /* LOGO SCREEN */
         #screen-logo {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: #ffffff;
             z-index: 9999;
@@ -46,16 +49,17 @@
             align-items: center;
             opacity: 1;
             transition: opacity 0.5s ease;
+            padding: 20px;
         }
         #screen-logo img {
-            max-width: 320px;
-            width: 80%;
+            max-width: clamp(200px, 60vw, 320px);
             height: auto;
+            object-fit: contain;
         }
 
         /* TITLE COVER SCREEN */
         #screen-title {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-sky);
             z-index: 995;
@@ -70,10 +74,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
         }
         .game-main-heading {
-            font-size: 36px;
+            font-size: clamp(24px, 6vw, 36px);
             color: #0369a1;
             text-align: center;
             text-shadow: 2px 2px 0px #fff;
@@ -83,8 +87,8 @@
             background-color: var(--accent-orange);
             color: white;
             border: none;
-            padding: 16px 45px;
-            font-size: 26px;
+            padding: 14px 40px;
+            font-size: clamp(20px, 5vw, 26px);
             font-weight: bold;
             border-radius: 20px;
             cursor: pointer;
@@ -95,7 +99,7 @@
 
         /* INSTRUCTIONS SCREEN */
         #screen-instructions {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(224, 242, 254, 0.98);
             z-index: 990;
@@ -107,9 +111,9 @@
         }
         .instruction-card {
             background: white;
-            border: 5px solid var(--sky-blue);
-            border-radius: 28px;
-            padding: 35px 20px;
+            border: 4px solid var(--sky-blue);
+            border-radius: 24px;
+            padding: clamp(20px, 5vw, 35px) 20px;
             max-width: 500px;
             width: 90%;
             text-align: center;
@@ -117,11 +121,11 @@
         }
         .instruction-card h2 {
             color: #0284c7;
-            font-size: 28px;
+            font-size: clamp(22px, 5vw, 28px);
             margin-bottom: 15px;
         }
         .instruction-card p {
-            font-size: 18px;
+            font-size: clamp(15px, 4vw, 18px);
             line-height: 1.5;
             margin-bottom: 25px;
             color: #475569;
@@ -130,8 +134,8 @@
             background-color: var(--success-green);
             color: white;
             border: none;
-            padding: 14px 40px;
-            font-size: 22px;
+            padding: 12px 35px;
+            font-size: clamp(18px, 4.5vw, 22px);
             font-weight: bold;
             border-radius: 16px;
             cursor: pointer;
@@ -140,27 +144,28 @@
 
         /* GAME LAYOUT CONTAINER */
         .game-window-frame {
-            width: 96vw;
-            height: 95vh;
+            width: min(96vw, 900px);
+            height: min(95dvh, 700px);
             background: #ffffff;
-            border: 5px solid #bae6fd;
-            border-radius: 28px;
+            border: 4px solid #bae6fd;
+            border-radius: 20px;
             display: none; 
             flex-direction: column;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0,0,0,0.05);
             z-index: 10;
+            position: relative;
         }
 
         .game-header {
-            height: 14%;
-            min-height: 70px;
+            height: 60px;
             background-color: #f0f9ff;
-            border-bottom: 4px solid #e0f2fe;
+            border-bottom: 3px solid #e0f2fe;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
+            padding: 0 12px;
+            flex-shrink: 0;
         }
         .header-left-group {
             display: flex;
@@ -168,12 +173,12 @@
             gap: 2px;
         }
         .game-title {
-            font-size: 18px;
+            font-size: clamp(14px, 3.5vw, 18px);
             font-weight: bold;
             color: #0369a1;
         }
         .attempt-indicator-top {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: bold;
             color: #b45309;
             background: #fffbeb;
@@ -185,114 +190,134 @@
         .header-right-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         .progress-capsule {
             background: #cbd5e1;
             color: #334155;
-            padding: 5px 10px;
-            border-radius: 15px;
+            padding: 4px 8px;
+            border-radius: 12px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: clamp(11px, 2.8vw, 13px);
         }
         .score-capsule {
             background: var(--sky-blue);
             color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
+            padding: 4px 12px;
+            border-radius: 12px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: clamp(13px, 3.2vw, 16px);
         }
 
         .workspace-split {
             flex: 1;
             display: flex;
-            height: 86%;
+            flex-direction: row;
             overflow: hidden;
             position: relative;
             background-color: #f8fafc;
+            padding-bottom: 90px; /* space for console */
         }
 
         .column-pane-left {
-            flex: 1.1;
+            flex: 1;
             background-color: #ffffff;
-            border-right: 3px dashed #cbd5e1;
+            border-right: 2px dashed #cbd5e1;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px;
-            padding-bottom: 125px;
+            padding: 10px;
         }
 
         .column-pane-right {
-            flex: 1.3;
+            flex: 1.2;
             background-color: var(--bg-sky);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
-            padding-bottom: 125px;
+            gap: 10px;
+            padding: 10px;
         }
 
-        /* SCALED CARDS FOR MOBILE SCREEN */
+        /* RESPONSIVE PORTRAIT STACKING FOR SMALL MOBILE SCREENS */
+        @media (max-width: 480px) and (orientation: portrait) {
+            .workspace-split {
+                flex-direction: column;
+            }
+            .column-pane-left {
+                border-right: none;
+                border-bottom: 2px dashed #cbd5e1;
+                flex: 1;
+            }
+            .column-pane-right {
+                flex: 1.5;
+                gap: 8px;
+            }
+        }
+
+        /* MATCHING CARD */
         .matching-card {
-            width: 90%;
-            max-width: 220px;
-            height: 180px;
+            width: min(100%, 180px);
+            aspect-ratio: 1 / 1;
+            max-height: 160px;
             background: var(--card-bg);
-            border: 4px solid var(--sky-blue);
-            border-radius: 24px;
+            border: 3px solid var(--sky-blue);
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            padding: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
             cursor: grab;
             touch-action: none;
-            z-index: 10;
+            z-index: 100;
+            will-change: transform;
+            transition: transform 0.1s ease;
         }
         .matching-card img {
-            height: 145px;
-            width: 145px;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
             pointer-events: none;
         }
         .matching-card.dragging {
             cursor: grabbing;
-            transform: scale(1.08);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             z-index: 1000;
+            transition: none;
         }
 
-        /* MOBILE TOUCH ANSWER PLATES */
+        /* TARGET DROP BOX */
         .target-drop-box {
             width: 95%;
-            max-width: 240px;
-            height: 75px;
+            max-width: 220px;
+            height: min(28%, 60px);
+            min-height: 44px;
             background: #f8fafc;
-            border: 3px dashed #cbd5e1;
-            border-radius: 18px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 6px 10px;
             text-align: center;
             transition: all 0.2s ease;
+            pointer-events: auto;
         }
         .target-drop-box span {
-            font-size: 18px;
+            font-size: clamp(13px, 3.5vw, 16px);
             font-weight: bold;
             color: #475569;
+            pointer-events: none;
         }
         .target-drop-box.hovered {
             border-color: var(--sky-blue);
             background: #f0f9ff;
-            transform: scale(1.03);
+            transform: scale(1.02);
         }
         .target-drop-box.matched {
-            border: 4px solid var(--success-green);
+            border: 3px solid var(--success-green);
             background: #f0fdf4;
             color: #16a34a;
             animation: matchPop 0.4s ease-out;
@@ -304,40 +329,41 @@
         /* QUESTION CONSOLE */
         .info-panel-row {
             position: absolute;
-            bottom: 12px;
-            left: 2.5%;
-            width: 95%;
+            bottom: 8px;
+            left: 2%;
+            width: 96%;
+            min-height: 70px;
             background: white;
-            border: 3px solid #cbd5e1;
-            border-radius: 18px;
-            padding: 12px 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            z-index: 50;
         }
         .question-container-block {
             flex: 1;
         }
         .question-box-text {
-            font-size: 17px;
+            font-size: clamp(13px, 3.2vw, 15px);
             font-weight: bold;
             color: #334155;
             line-height: 1.3;
         }
         .hint-popup-alert {
-            font-size: 14px;
+            font-size: clamp(11px, 2.8vw, 13px);
             background: #fffbeb;
-            border-left: 4px solid var(--accent-orange);
-            padding: 4px 10px;
+            border-left: 3px solid var(--accent-orange);
+            padding: 3px 8px;
             color: #b45309;
-            border-radius: 5px;
-            margin-top: 5px;
+            border-radius: 4px;
+            margin-top: 4px;
             display: none;
             font-weight: bold;
         }
 
-        /* END SCREEN DISPLAY */
+        /* SUMMARY OVERLAY */
         .summary-pane {
             display: none;
             width: 100%;
@@ -353,8 +379,8 @@
             background: var(--success-green);
             color: white;
             border: none;
-            padding: 14px 40px;
-            font-size: 20px;
+            padding: 12px 35px;
+            font-size: clamp(18px, 4vw, 22px);
             font-weight: bold;
             border-radius: 14px;
             cursor: pointer;
@@ -383,18 +409,18 @@
 
     <!-- SYSTEM AUDIO BUFFERS -->
     <div style="display:none;">
-        <audio id="snd-bg" src="assets/acousticmusic.mp3" loop></audio>
-        <audio id="snd-correct" src="assets/correct.mp3"></audio>
-        <audio id="snd-claps" src="assets/freesound_community-claps-44744.mp3"></audio>
-        <audio id="snd-wrong" src="assets/wrong.mp3"></audio>
+        <audio id="snd-bg" src="assets/acousticmusic.mp3" loop preload="auto"></audio>
+        <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
+        <audio id="snd-claps" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
+        <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     </div>
 
-    <!-- BRAND LOGO DISPLAY (LOCKS VISIBLE FOR AT LEAST 5 SECONDS) -->
+    <!-- BRAND LOGO DISPLAY -->
     <div id="screen-logo">
         <img src="assets/innovine-logo.png" alt="Innovine Logo">
     </div>
 
-    <!-- GAME OVERLAY MAIN TITLE COVER -->
+    <!-- MAIN TITLE COVER -->
     <div id="screen-title">
         <div class="title-wrapper-box">
             <h1 class="game-main-heading">Community Connect: The Matching Game</h1>
@@ -411,7 +437,7 @@
         </div>
     </div>
 
-    <!-- PLAY MAIN ARENA GRID FRAME -->
+    <!-- PLAY MAIN ARENA FRAME -->
     <div class="game-window-frame" id="game-workspace-frame">
         <header class="game-header">
             <div class="header-left-group">
@@ -438,9 +464,9 @@
 
         <!-- STAGE SUMMARY OVERLAY REPORT -->
         <div class="summary-pane" id="summary-report-screen">
-            <h2 style="color: var(--success-green); font-size: 36px; margin-bottom: 8px;">🌟 AWESOME JOB! 🌟</h2>
-            <p style="color: #64748b; font-size: 18px;">You successfully found all matches!</p>
-            <h3 id="final-score-field" style="font-size: 46px; margin: 20px 0; color: #0284c7;">SCORE: 0 / 10</h3>
+            <h2 style="color: var(--success-green); font-size: clamp(28px, 6vw, 36px); margin-bottom: 8px;">🌟 AWESOME JOB! 🌟</h2>
+            <p style="color: #64748b; font-size: clamp(15px, 4vw, 18px);">You successfully found all matches!</p>
+            <h3 id="final-score-field" style="font-size: clamp(32px, 8vw, 46px); margin: 15px 0; color: #0284c7;">SCORE: 0 / 10</h3>
             <button class="btn-replay" onclick="resetAndRestartMission()">PLAY AGAIN</button>
         </div>
     </div>
@@ -464,15 +490,26 @@
         let scoreCounter = 0; 
         let attemptCounter = 2;
 
-        // LOAD BALANCER CHAIN
+        function safePlayAudio(id, volume = 1.0) {
+            try {
+                const snd = document.getElementById(id);
+                if (snd) {
+                    snd.currentTime = 0;
+                    snd.volume = volume;
+                    const p = snd.play();
+                    if (p !== undefined) p.catch(() => {});
+                }
+            } catch(e) {}
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            // Trigger browser asset cache assignment silently in background
+            // Cache images
             scenariosDeck.forEach(asset => {
                 const imgCache = new Image();
                 imgCache.src = asset.leftImg;
             });
 
-            // GUARANTEED MINIMUM 5-SECOND LOGO DISPLAY LOCK TIME
+            // GUARANTEED 5-SECOND LOGO DISPLAY
             setTimeout(() => {
                 const logoEl = document.getElementById('screen-logo');
                 logoEl.style.opacity = '0';
@@ -484,11 +521,7 @@
         });
 
         function transitionToInstructions() {
-            try { 
-                const bgAudio = document.getElementById('snd-bg');
-                bgAudio.volume = 0.3;
-                bgAudio.play(); 
-            } catch(e){}
+            safePlayAudio('snd-bg', 0.3);
             document.getElementById('screen-title').style.display = 'none';
             document.getElementById('screen-instructions').style.display = 'flex';
         }
@@ -525,7 +558,7 @@
             leftPane.innerHTML = "";
             rightPane.innerHTML = "";
 
-            // ONE active question image card left column
+            // Left card
             const card = document.createElement('div');
             card.className = "matching-card";
             card.dataset.id = data.id;
@@ -533,7 +566,7 @@
             setupPointerDragSystem(card);
             leftPane.appendChild(card);
 
-            // Dynamic multiple-choice selector generation (1 Answer + 2 Decoys)
+            // Right answer boxes (1 Answer + 2 Decoys)
             let decoys = scenariosDeck.filter(item => item.id !== data.id).sort(() => Math.random() - 0.5).slice(0, 2);
             let selectionPool = [data, ...decoys].sort(() => Math.random() - 0.5);
 
@@ -548,70 +581,77 @@
 
         function setupPointerDragSystem(el) {
             let startX = 0, startY = 0;
-            let initLeft = 0, initTop = 0;
+            let currentX = 0, currentY = 0;
+            let activeDropBox = null;
 
-            el.addEventListener('pointerdown', (e) => {
-                el.setPointerCapture(e.pointerId);
+            const onPointerDown = (e) => {
                 el.classList.add('dragging');
-
                 startX = e.clientX;
                 startY = e.clientY;
+                currentX = 0;
+                currentY = 0;
 
-                const rect = el.getBoundingClientRect();
-                initLeft = rect.left;
-                initTop = rect.top;
+                window.addEventListener('pointermove', onPointerMove, { passive: false });
+                window.addEventListener('pointerup', onPointerUp);
+                window.addEventListener('pointercancel', onPointerUp);
+            };
 
-                el.style.position = 'fixed';
-                el.style.left = `${initLeft}px`;
-                el.style.top = `${initTop}px`;
-                el.style.width = `${rect.width}px`;
-            });
-
-            el.addEventListener('pointermove', (e) => {
+            const onPointerMove = (e) => {
                 if (!el.classList.contains('dragging')) return;
-                let dx = e.clientX - startX;
-                let dy = e.clientY - startY;
-                el.style.left = `${initLeft + dx}px`;
-                el.style.top = `${initTop + dy}px`;
+                e.preventDefault();
 
-                checkCollisionTargets(e.clientX, e.clientY);
-            });
+                currentX = e.clientX - startX;
+                currentY = e.clientY - startY;
 
-            el.addEventListener('pointerup', (e) => {
+                el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0px) scale(1.05)`;
+
+                // Hit test using elementsFromPoint
+                activeDropBox = null;
+                const elements = document.elementsFromPoint(e.clientX, e.clientY);
+                
+                document.querySelectorAll('.target-drop-box').forEach(box => box.classList.remove('hovered'));
+                
+                for (let target of elements) {
+                    if (target.classList && target.classList.contains('target-drop-box')) {
+                        target.classList.add('hovered');
+                        activeDropBox = target;
+                        break;
+                    }
+                }
+            };
+
+            const onPointerUp = (e) => {
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', onPointerUp);
+                window.removeEventListener('pointercancel', onPointerUp);
+
                 if (!el.classList.contains('dragging')) return;
                 el.classList.remove('dragging');
-                el.releasePointerCapture(e.pointerId);
 
-                const dropBox = checkCollisionTargets(e.clientX, e.clientY);
+                document.querySelectorAll('.target-drop-box').forEach(box => box.classList.remove('hovered'));
+
                 const activeQuestion = playDeck[cursorIdx];
 
-                if(dropBox && dropBox.dataset.id === el.dataset.id && el.dataset.id === activeQuestion.id) {
-                    try { 
-                        document.getElementById('snd-correct').currentTime = 0;
-                        document.getElementById('snd-correct').play(); 
-                        setTimeout(() => {
-                            document.getElementById('snd-claps').currentTime = 0;
-                            document.getElementById('snd-claps').play();
-                        }, 250);
-                    } catch(err){}
+                if (activeDropBox && activeDropBox.dataset.id === el.dataset.id && el.dataset.id === activeQuestion.id) {
+                    // Correct Match
+                    safePlayAudio('snd-correct');
+                    setTimeout(() => safePlayAudio('snd-claps'), 250);
 
                     scoreCounter += 1;
                     document.getElementById('score-counter-text').innerText = `SCORE: ${scoreCounter}`;
 
-                    dropBox.classList.add('matched');
-                    el.remove();
+                    activeDropBox.classList.add('matched');
+                    el.style.visibility = 'hidden';
 
                     setTimeout(() => {
                         cursorIdx++;
                         renderRegistryLevel();
-                    }, 1300);
+                    }, 1200);
                 } else {
-                    try { 
-                        document.getElementById('snd-wrong').currentTime = 0;
-                        document.getElementById('snd-wrong').play(); 
-                    } catch(err){}
-                    
-                    if(dropBox) {
+                    // Wrong Match or Dropped Outside
+                    safePlayAudio('snd-wrong');
+
+                    if (activeDropBox) {
                         attemptCounter--;
                         document.getElementById('label-attempts-top').innerText = `ATTEMPTS LEFT: ${attemptCounter}`;
 
@@ -620,33 +660,21 @@
                         void controlHUD.offsetWidth; 
                         controlHUD.classList.add('shake-element');
 
-                        if(attemptCounter <= 0) {
+                        if (attemptCounter <= 0) {
                             document.getElementById('hint-display-el').style.display = "block";
                         }
                     }
 
-                    el.style.position = 'static';
-                    el.style.left = 'auto';
-                    el.style.top = 'auto';
-                    el.style.width = '90%';
+                    // Reset position smoothly
+                    el.style.transition = 'transform 0.2s ease-out';
+                    el.style.transform = 'translate3d(0px, 0px, 0px)';
+                    setTimeout(() => {
+                        el.style.transition = '';
+                    }, 200);
                 }
-            });
-        }
+            };
 
-        function checkCollisionTargets(mx, my) {
-            let targetedBox = null;
-            const boxes = document.querySelectorAll('.target-drop-box');
-
-            boxes.forEach(box => {
-                const rect = box.getBoundingClientRect();
-                if(mx >= rect.left && mx <= rect.right && my >= rect.top && my <= rect.bottom) {
-                    box.classList.add('hovered');
-                    targetedBox = box;
-                } else {
-                    box.classList.remove('hovered');
-                }
-            });
-            return targetedBox;
+            el.addEventListener('pointerdown', onPointerDown);
         }
 
         function concludeMission() {
