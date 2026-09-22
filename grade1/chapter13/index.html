@@ -2,756 +2,466 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Great Balloon Burst!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Great Train Journey!</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #f0fdf4; font-family: 'Arial Rounded MT Bold', 'Comic Sans MS', sans-serif; }
-        
-        /* Premium Centered Game Container Shell */
-        #gameContainer { 
-            position: relative; 
-            width: 100%; 
-            height: 100%; 
-            max-width: 540px; 
-            max-height: 960px; 
-            margin: 0 auto; 
-            background: linear-gradient(to bottom, #e0f2fe 0%, #f0fdf4 100%); 
-            overflow: hidden; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.12); 
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Neue', cursive;
+            background-color: #87CEEB; /* Sky blue */
+            background-image: radial-gradient(#fff 15%, transparent 16%), radial-gradient(#fff 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        canvas { display: block; width: 100%; height: 100%; }
+
+        header {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container img {
+            height: 50px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 24px;
+            align-items: center;
+        }
+
+        .hearts { color: #ff3366; }
+        .score { color: #333; font-weight: bold; }
         
-        /* Glassmorphism UI Screens */
-        .screen { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 10; 
-            padding: 30px; 
-            text-align: center; 
-            backdrop-filter: blur(8px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        button {
+            font-family: 'Comic Neue', cursive;
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #F57C00;
+            transition: transform 0.1s;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Train Container */
+        .train-track {
+            width: 100%;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px;
+            border-bottom: 10px solid #555;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .train-track::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            width: 100%;
+            height: 10px;
+            background: repeating-linear-gradient(90deg, #8B4513, #8B4513 20px, transparent 20px, transparent 40px);
+        }
+
+        .engine {
+            width: 150px;
+            height: 120px;
+            background-color: #2196F3;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: inset -10px -10px rgba(0,0,0,0.2);
         }
         
-        /* Screen 1: Brand Logo - Pure Premium White */
-        #logoScreen { background-color: #ffffff; z-index: 100; }
-        #logoScreen img { max-width: 65%; max-height: 35%; object-fit: contain; }
-        
-        /* Screen 2: Game Title Splash Menu */
-        #titleScreen { background: radial-gradient(circle, #fef08a 0%, #dbeafe 100%); z-index: 90; display: none; }
-        #titleScreen h1 { 
-            color: #f43f5e; 
-            font-size: 46px; 
-            margin-bottom: 40px; 
-            text-shadow: 4px 4px 0px #ffffff, -1px -1px 0px #ffffff; 
-            line-height: 1.2; 
-            font-weight: 900; 
-            animation: floatTitle 3s ease-in-out infinite;
+        .engine::before {
+            content: '🚂';
+            font-size: 60px;
         }
-        
-        @keyframes floatTitle {
-            0%, 100% { transform: translateY(0px) rotate(-1s); }
-            50% { transform: translateY(-10px) rotate(1deg); }
+
+        .carriage {
+            width: 180px;
+            min-height: 140px;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            box-shadow: inset -5px -5px rgba(0,0,0,0.2);
         }
-        
-        /* Screen 3: Interactive Mission Instructions */
-        #instructionScreen { background: rgba(255, 255, 255, 0.95); z-index: 85; display: none; border: 8px solid #ccfbf1; border-radius: 40px; color: #1e293b; }
-        
-        /* Premium Fancy Rounded 3D Buttons */
-        .btn { 
-            background: linear-gradient(135deg, #ff6b8b 0%, #f43f5e 100%); 
-            color: #fff; 
-            border: 3px solid #be123c; 
-            padding: 18px 48px; 
-            font-size: 24px; 
-            font-weight: 900; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            box-shadow: 0 8px 0px #be123c, 0 15px 20px rgba(244,63,94,0.3); 
-            text-transform: uppercase; 
-            transition: all 0.1s ease; 
-            margin-top: 30px; 
-            letter-spacing: 1px;
+
+        .carriage::after, .engine::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 20px;
+            width: 30px;
+            height: 30px;
+            background-color: #333;
+            border-radius: 50%;
+            box-shadow: 80px 0 0 #333;
         }
-        .btn:active { box-shadow: 0 2px 0px #be123c, 0 5px 10px rgba(244,63,94,0.3); transform: translateY(6px); }
+
+        .carriage-link {
+            width: 10px;
+            height: 5px;
+            background-color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Carriage Colors */
+        .outdoor-car { background-color: #4CAF50; border: 4px solid #388E3C; }
+        .indoor-car { background-color: #9C27B0; border: 4px solid #7B1FA2; }
+        .rules-car { background-color: #FFEB3B; border: 4px solid #FBC02D; }
+
+        .carriage h3 {
+            margin: 0 0 10px 0;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            text-align: center;
+            font-size: 18px;
+        }
+        .rules-car h3 { color: #333; text-shadow: none; }
+
+        .drop-zone {
+            width: 100%;
+            flex-grow: 1;
+            background: rgba(255,255,255,0.4);
+            border: 2px dashed rgba(255,255,255,0.8);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        .drop-zone.drag-over {
+            background: rgba(255,255,255,0.8);
+        }
+
+        /* Items Container */
+        .items-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 30px;
+            max-width: 800px;
+        }
+
+        .draggable-item {
+            background-color: white;
+            border: 3px solid #333;
+            border-radius: 15px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: grab;
+            box-shadow: 0 4px 0 #ccc;
+            user-select: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .draggable-item.hidden {
+            display: none;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            border: 5px solid #FF9800;
+        }
+        .modal-content h2 { margin-top: 0; font-size: 32px; }
         
-        .big-bold-text { font-size: 20px; font-weight: 800; line-height: 1.6; margin-bottom: 18px; color: #334155; }
-        
-        /* HUD Top Dashboard Area Overlay */
-        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 20px 15px; display: flex; flex-direction: column; gap: 8px; z-index: 20; pointer-events: none; display: none; align-items: center; }
-        #targetPrompt { font-size: 26px; font-weight: 900; color: #1d4ed8; text-shadow: 3px 3px 0px #fff; text-align: center; line-height: 1.3; }
-        #progressText { font-size: 18px; font-weight: 900; color: #be185d; background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); padding: 8px 24px; border-radius: 25px; border: 3px solid #f472b6; display: inline-block; box-shadow: 0 6px 12px rgba(219,39,119,0.15); }
-        
-        .hud-row { display: flex; justify-content: space-between; width: 100%; margin-top: 4px; pointer-events: none; }
-        .ui-element { background: rgba(255, 255, 255, 0.95); color: #1e3a8a; padding: 10px 18px; border-radius: 25px; font-size: 16px; font-weight: 900; border: 3px solid #bfdbfe; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        /* Completion Performance Card */
-        #completionScreen { background: radial-gradient(circle, #ffffff 0%, #ccfbf1 100%); display: none; z-index: 80; color: #1e3a8a; }
+        #clueText { font-size: 20px; color: #555; margin-bottom: 20px; }
+
     </style>
 </head>
 <body>
 
-<div id="gameContainer">
-    <div id="logoScreen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo">
-    </div>
+    <!-- Audio Assets Linked to Your Folder Structure -->
+    <audio id="bgMusic" src="assets/cartoonbackgroundmusic.mp3" loop></audio>
+    <audio id="sndCorrect" src="assets/correct.mp3"></audio>
+    <audio id="sndWrong" src="assets/wrong.mp3"></audio>
+    <audio id="sndWin" src="assets/freesound_community-claps-44774.mp3"></audio>
 
-    <div id="titleScreen" class="screen">
-        <h1>THE GREAT<br>BALLOON BURST! 🎈</h1>
-        <button class="btn" onclick="showInstructions()">Play Now ➔</button>
-    </div>
+    <header>
+        <div class="logo-container">
+            <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'">
+        </div>
+        <div class="stats">
+            <div class="score">Score: <span id="scoreDisplay">0</span></div>
+            <div class="hearts" id="heartsDisplay">❤️❤️❤️</div>
+        </div>
+        <div>
+            <button onclick="showClue()">Get a Clue! 💡</button>
+            <button onclick="toggleMusic()" id="musicBtn">🔇 Music</button>
+        </div>
+    </header>
 
-    <div id="instructionScreen" class="screen">
-        <div class="big-bold-text" style="color: #f43f5e; font-size: 36px; margin-bottom: 25px; font-weight: 900;">Let's Play! ✨</div>
-        <div class="big-bold-text" style="font-size: 19px; background: #f0fdf4; padding: 18px; border-radius: 25px; border: 3px dashed #4ade80; color: #166534;">Read the mission mission at the top of the screen!</div>
-        <div class="big-bold-text" style="margin-top: 15px;">📍 Watch your Pin Monster friend slide out to pop the balloons!</div>
-        <div class="big-bold-text" style="color: #ea580c;">🎈 Avoid the wrong trick choices!</div>
-        <button class="btn" style="background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); box-shadow: 0 8px 0px #16a34a; border-color: #16a34a;" onclick="startGame()">Start Game 🚀</button>
-    </div>
+    <div class="train-track">
+        <div class="engine"></div>
+        <div class="carriage-link"></div>
+        
+        <div class="carriage outdoor-car">
+            <h3>Outdoor Games</h3>
+            <div class="drop-zone" data-category="outdoor"></div>
+        </div>
+        <div class="carriage-link"></div>
 
-    <div id="uiOverlay">
-        <div id="targetPrompt">LOADING MISSION...</div>
-        <div id="progressText">Balloons Bursted: 0 / 0</div>
-        <div class="hud-row">
-            <div id="scoreLabel" class="ui-element">Score: 0 / 11</div>
-            <div id="heartsLabel" class="ui-element" style="color: #ef4444; background: #fee2e2; border-color: #fca5a5;">Hearts: ❤️❤️❤️</div>
+        <div class="carriage indoor-car">
+            <h3>Indoor Games</h3>
+            <div class="drop-zone" data-category="indoor"></div>
+        </div>
+        <div class="carriage-link"></div>
+
+        <div class="carriage rules-car">
+            <h3>Fair Play Rules</h3>
+            <div class="drop-zone" data-category="rules"></div>
         </div>
     </div>
-    
-    <div id="completionScreen" class="screen">
-        <h1 id="completionTitle" style="font-size: 40px; margin-bottom: 15px; font-weight: 900;">🎈 BALLOON KING! 👑</h1>
-        <p style="font-size: 22px; margin-bottom: 25px; font-weight: bold; color: #475569;">Fantastic sorting skills!</p>
-        <div class="ui-element" id="finalScore" style="font-size: 30px; padding: 15px 40px; border-color: #34d399; background: white; margin-bottom: 35px; font-weight: 900; color: #065f46;">Final Score: 0/11</div>
-        <button class="btn" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f; box-shadow: 0 8px 0px #d97706; border-color: #d97706;" onclick="restartGame()">Play Again 🔄</button>
+
+    <div class="items-container" id="itemsContainer">
+        <!-- Items generated by JS -->
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-</div>
+    <!-- Clue Modal -->
+    <div class="modal" id="clueModal">
+        <div class="modal-content">
+            <h2>Train Conductor says:</h2>
+            <p id="clueText"></p>
+            <button onclick="closeModal('clueModal')">Got it!</button>
+        </div>
+    </div>
 
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Audio Elements
-    const sndCorrect = new Audio('assets/correct.mp3');
-    const sndWrong = new Audio('assets/wrong.mp3');
-    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
-    const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
-    sndBgm.loop = true;
+    <!-- Game Over Modal -->
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2>Oh no! The train stopped.</h2>
+            <p>You ran out of hearts. Let's try again!</p>
+            <button onclick="location.reload()">Restart Game</button>
+        </div>
+    </div>
 
-    // Fixed Virtual Coordinate Plane System
-    const BASE_WIDTH = 600;
-    const BASE_HEIGHT = 900;
-    let scaleFactor = 1;
+    <!-- Victory Modal -->
+    <div class="modal" id="victoryModal">
+        <div class="modal-content">
+            <h2>Choo Choo! You Did It!</h2>
+            <p>You loaded all the carriages perfectly.</p>
+            <p>Final Score: <span id="finalScoreDisplay"></span></p>
+            <button onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
 
-    function resize() {
-        const container = canvas.parentElement;
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-        scaleFactor = Math.min(canvas.width / BASE_WIDTH, canvas.height / BASE_HEIGHT);
-    }
-    window.addEventListener('resize', resize);
-    resize();
+    <script>
+        // Game State
+        let score = 0;
+        let hearts = 3;
+        let isMusicPlaying = false;
 
-    // Game variables 
-    let score = 0;
-    let hearts = 3;
-    let gameActive = false;
-    let freezeTimerActive = false;
-    let currentLevelIndex = 0; 
-    let activeBalloons = [];
-    let targetCountForLevel = 0;
-    let poppedCountForLevel = 0;
+        const gameItems = [
+            { id: "i1", text: "Football ⚽", category: "outdoor", clue: "You need a big green field to kick this!" },
+            { id: "i2", text: "Chess ♟️", category: "indoor", clue: "A board game with kings and queens played inside." },
+            { id: "i3", text: "No Cheating 🚫", category: "rules", clue: "This is a very important rule to keep games fun and fair." },
+            { id: "i4", text: "Hide & Seek 🌳", category: "outdoor", clue: "You run outside and hide behind trees!" },
+            { id: "i5", text: "Ludo 🎲", category: "indoor", clue: "You roll dice on a board inside your house." },
+            { id: "i6", text: "Wait Your Turn ⏳", category: "rules", clue: "Don't skip the line; this is how we play nicely." },
+            { id: "i7", text: "Cricket 🏏", category: "outdoor", clue: "Hit the ball out of the park!" },
+            { id: "i8", text: "Carrom 🎯", category: "indoor", clue: "Flick the striker on the smooth wooden board." },
+            { id: "i9", text: "Shake Hands 🤝", category: "rules", clue: "Do this at the end of a match to show respect." }
+        ];
 
-    let speechBubble = { x: 0, y: 0, text: "", color: "#10b981", visible: false };
-    
-    // Fancy Custom Pin Mascot Definition
-    let pinMascot = { 
-        homeX: BASE_WIDTH / 2, 
-        homeY: BASE_HEIGHT - 100, 
-        x: BASE_WIDTH / 2, 
-        y: BASE_HEIGHT - 100, 
-        targetX: BASE_WIDTH / 2, 
-        targetY: BASE_HEIGHT - 100, 
-        state: "idle", 
-        rotation: 0,
-        frame: 0,
-        assignedBalloon: null
-    };
-
-    const levelsDataset = [
-        {
-            directive: "Pop the Outdoor Games! ☀️",
-            correctItems: [
-                { text: "Football ⚽", bubble: "Outdoor Game! ⚽" },
-                { text: "Cricket 🏏", bubble: "Outdoor Game! 🏏" },
-                { text: "Tennis 🎾", bubble: "Outdoor Game! 🎾" },
-                { text: "Hide-&-Seek 🏃", bubble: "Outdoor Game! 🏃" }
-            ],
-            wrongItems: [
-                { text: "Chess ♟️", bubble: "No, Chess is Indoor! ♟️" },
-                { text: "Reading 📚", bubble: "No, Reading is Indoor! 📚" },
-                { text: "Knitting 🧶", bubble: "No, Knitting is Indoor! 🧶" },
-                { text: "Origami ✂️", bubble: "No, Origami is Indoor! ✂️" }
-            ]
-        },
-        {
-            directive: "Pop the Cozy Indoor Fun! 🏡",
-            correctItems: [
-                { text: "Chess ♟️", bubble: "Indoor Activity! ♟️" },
-                { text: "Drawing 🎨", bubble: "Indoor Activity! 🎨" },
-                { text: "Reading 📚", bubble: "Indoor Activity! 📚" },
-                { text: "Origami ✂️", bubble: "Indoor Activity! ✂️" }
-            ],
-            wrongItems: [
-                { text: "Football ⚽", bubble: "No, Football is Outdoor! ⚽" },
-                { text: "Cricket 🏏", bubble: "No, Cricket is Outdoor! 🏏" },
-                { text: "Gardening 🌱", bubble: "No, Gardening is Outdoor! 🌱" },
-                { text: "Running 🏃", bubble: "No, Running is Outdoor! 🏃" }
-            ]
-        },
-        {
-            directive: "Pop the Fair Play Rules! 🤝",
-            correctItems: [
-                { text: "Follow Rules 📝", bubble: "Fair Play Rule! 📝" },
-                { text: "Share Toys 🧸", bubble: "Fair Play Rule! 🧸" },
-                { text: "Be Kind 🤝", bubble: "Fair Play Rule! 🤝" }
-            ],
-            wrongItems: [
-                { text: "Pushing ❌", bubble: "No! Pushing is wrong! ❌" },
-                { text: "Shouting 😢", bubble: "No! Shouting is wrong! 😢" },
-                { text: "Cheating 🚫", bubble: "No! Cheating is wrong! 🚫" },
-                { text: "Fighting 🤼", bubble: "No! Fighting is wrong! 🤼" },
-                { text: "Teasing 😜", bubble: "No! Teasing is wrong! 😜" }
-            ]
-        }
-    ];
-
-    setTimeout(() => {
-        document.getElementById('logoScreen').style.display = 'none';
-        document.getElementById('titleScreen').style.display = 'flex';
-    }, 5000);
-
-    function showInstructions() {
-        document.getElementById('titleScreen').style.display = 'none';
-        document.getElementById('instructionScreen').style.display = 'flex';
-        sndBgm.currentTime = 0;
-        sndBgm.play().catch(()=>{});
-    }
-
-    function startGame() {
-        document.getElementById('instructionScreen').style.display = 'none';
-        document.getElementById('uiOverlay').style.display = 'flex';
-        
-        score = 0;
-        hearts = 3;
-        currentLevelIndex = 0;
-        freezeTimerActive = false;
-        speechBubble.visible = false;
-        
-        pinMascot.x = pinMascot.homeX;
-        pinMascot.y = pinMascot.homeY;
-        pinMascot.targetX = pinMascot.homeX;
-        pinMascot.targetY = pinMascot.homeY;
-        pinMascot.state = "idle";
-        pinMascot.rotation = 0;
-
-        initLevelGrid();
-        gameActive = true;
-    }
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    function initLevelGrid() {
-        activeBalloons = [];
-        poppedCountForLevel = 0;
-        const data = levelsDataset[currentLevelIndex];
-        
-        let pool = [];
-        data.correctItems.forEach(item => pool.push({ data: item, isCorrect: true, isBlank: false }));
-        data.wrongItems.forEach(item => pool.push({ data: item, isCorrect: false, isBlank: false }));
-        
-        // MODIFIED: Restrict total items strictly to 9 slots for ultimate clarity and comfort
-        let neededBlanks = 9 - pool.length;
-        if (neededBlanks < 0) {
-            pool = pool.slice(0, 9);
-        } else {
-            for(let i = 0; i < neededBlanks; i++) {
-                pool.push({ data: { text: "", bubble: "Empty Balloon! 🎈" }, isCorrect: false, isBlank: true });
-            }
-        }
-        
-        shuffleArray(pool);
-        targetCountForLevel = pool.filter(p => p.isCorrect).length;
-
-        // Optimized Spatial Layout Configuration (3x3 High Visibility Grid Configuration Matrix)
-        const bRadius = 66; // Substantially larger radius sizes for immediate readability
-        const startX = 110; 
-        const startY = 300; // Deep vertical safety margins
-        const hSpacing = 190;  
-        const rowHeight = 155; 
-
-        // Gorgeous, Highly Differentiated Soft Premium Pastel Palettes
-        const softColors = ["#ffb4b4", "#b3e5fc", "#c8e6c9", "#f3e5f5", "#fff9c4", "#ffe0b2", "#ffcc80", "#e1bee7", "#b2dfdb"];
-        shuffleArray(softColors);
-
-        let index = 0;
-        for (let row = 0; row < 3; row++) {
-            for (let col = 0; col < 3; col++) {
-                if (index >= pool.length) break;
-
-                let bX = startX + (col * hSpacing);
-                let bY = startY + (row * rowHeight);
-
-                activeBalloons.push({
-                    x: bX,
-                    y: bY,
-                    radius: bRadius,
-                    color: softColors[index % softColors.length],
-                    item: pool[index].data,
-                    isCorrect: pool[index].isCorrect,
-                    isBlank: pool[index].isBlank,
-                    isPopped: false,
-                    shakeOffset: 0,
-                    shakeTimer: 0,
-                    bobOffset: Math.random() * 100
-                });
-                index++;
-            }
-        }
-
-        document.getElementById('targetPrompt').innerText = data.directive;
-        updateHUD();
-    }
-
-    function updateHUD() {
-        document.getElementById('scoreLabel').innerText = `Score: ${score} / 11`;
-        document.getElementById('progressText').innerText = `Balloons Bursted: ${poppedCountForLevel} / ${targetCountForLevel}`;
-        let heartStr = "Hearts: ";
-        for(let i=0; i<3; i++) heartStr += (i < hearts) ? "❤️" : "🖤";
-        document.getElementById('heartsLabel').innerText = heartStr;
-    }
-
-    window.addEventListener('mousedown', (e) => { handleCoordinatesTap(e.clientX, e.clientY); });
-    window.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 0) handleCoordinatesTap(e.touches[0].clientX, e.touches[0].clientY);
-    });
-
-    function handleCoordinatesTap(clientX, clientY) {
-        if (!gameActive || freezeTimerActive || pinMascot.state !== "idle") return;
-
-        const rect = canvas.getBoundingClientRect();
-        const currentOffsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
-        const tapX = ((clientX - rect.left) / scaleFactor) - currentOffsetX;
-        const tapY = (clientY - rect.top) / scaleFactor;
-
-        for (let i = 0; i < activeBalloons.length; i++) {
-            let b = activeBalloons[i];
-            if (b.isPopped) continue;
-
-            let dx = tapX - b.x;
-            let dy = tapY - b.y;
-            if (Math.sqrt(dx * dx + dy * dy) < b.radius + 15) { 
-                pinMascot.targetX = b.x;
-                pinMascot.targetY = b.y + 20; 
-                pinMascot.state = "flying";
-                pinMascot.assignedBalloon = b;
-                freezeTimerActive = true; 
-                break;
-            }
-        }
-    }
-
-    function processBalloonInteraction(b) {
-        if(b.isCorrect) {
-            b.isPopped = true;
-            score++;
-            poppedCountForLevel++;
+        // Initialization
+        function initGame() {
+            const container = document.getElementById('itemsContainer');
+            // Shuffle items
+            const shuffled = gameItems.sort(() => Math.random() - 0.5);
             
-            speechBubble.x = b.x;
-            speechBubble.y = b.y;
-            speechBubble.text = b.item.bubble;
-            speechBubble.color = "#10b981";
-            speechBubble.visible = true;
-
-            sndCorrect.currentTime = 0;
-            sndCorrect.play().catch(()=>{});
-        } else {
-            b.shakeTimer = 30;
-            hearts--;
-            
-            speechBubble.x = b.x;
-            speechBubble.y = b.y;
-            speechBubble.text = b.item.bubble;
-            speechBubble.color = "#ef4444";
-            speechBubble.visible = true;
-
-            sndWrong.currentTime = 0;
-            sndWrong.play().catch(()=>{});
-        }
-
-        updateHUD();
-
-        setTimeout(() => {
-            speechBubble.visible = false;
-            pinMascot.targetX = pinMascot.homeX;
-            pinMascot.targetY = pinMascot.homeY;
-            pinMascot.state = "returning";
-        }, 1600);
-    }
-
-    function evaluateProgressionNextStep() {
-        freezeTimerActive = false;
-        
-        if (hearts <= 0) {
-            endGameSummary();
-            return;
-        }
-
-        if (poppedCountForLevel >= targetCountForLevel) {
-            currentLevelIndex++;
-            if (currentLevelIndex < levelsDataset.length) {
-                initLevelGrid();
-            } else {
-                endGameSummary();
-            }
-        }
-    }
-
-    function endGameSummary() {
-        gameActive = false;
-        sndBgm.pause();
-        
-        document.getElementById('uiOverlay').style.display = 'none';
-        document.getElementById('finalScore').innerText = `Final Score: ${score} / 11`;
-        
-        const title = document.getElementById('completionTitle');
-        if (hearts <= 0) {
-            title.innerText = "Try Again! 👍";
-            title.style.color = "#dc2626";
-        } else {
-            title.innerText = "🎈 BALLOON KING! 👑";
-            title.style.color = "#ea580c";
-            sndClap.currentTime = 0;
-            sndClap.play().catch(()=>{});
-        }
-        
-        document.getElementById('completionScreen').style.display = 'flex';
-    }
-
-    function restartGame() {
-        document.getElementById('completionScreen').style.display = 'none';
-        startGame();
-    }
-
-    function update() {
-        if (!gameActive) return;
-
-        pinMascot.frame += 0.06;
-
-        if (pinMascot.state === "flying") {
-            let dx = pinMascot.targetX - pinMascot.x;
-            let dy = pinMascot.targetY - pinMascot.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            
-            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
-
-            if (dist > 15) {
-                pinMascot.x += dx * 0.25;
-                pinMascot.y += dy * 0.25;
-            } else {
-                pinMascot.x = pinMascot.targetX;
-                pinMascot.y = pinMascot.targetY;
-                pinMascot.state = "popping";
-                processBalloonInteraction(pinMascot.assignedBalloon);
-            }
-        } else if (pinMascot.state === "returning") {
-            let dx = pinMascot.targetX - pinMascot.x;
-            let dy = pinMascot.targetY - pinMascot.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            
-            pinMascot.rotation = Math.atan2(dy, dx) + Math.PI/2;
-
-            if (dist > 15) {
-                pinMascot.x += dx * 0.20;
-                pinMascot.y += dy * 0.20;
-            } else {
-                pinMascot.x = pinMascot.homeX;
-                pinMascot.y = pinMascot.homeY;
-                pinMascot.rotation = 0;
-                pinMascot.state = "idle";
-                evaluateProgressionNextStep();
-            }
-        } else if (pinMascot.state === "idle") {
-            pinMascot.rotation = 0;
-            pinMascot.x += (pinMascot.homeX - pinMascot.x) * 0.12;
-            pinMascot.y += (pinMascot.homeY - pinMascot.y) * 0.12;
-        }
-
-        activeBalloons.forEach(b => {
-            if (b.shakeTimer > 0) {
-                b.shakeTimer--;
-                b.shakeOffset = Math.sin(b.shakeTimer * 0.8) * 6;
-            } else {
-                b.shakeOffset = 0;
-            }
-        });
-    }
-
-    // MODIFIED: Fully re-imagined cute monster mascot pin assembly
-    function drawMascotPin(ctx, mx, my, rotation) {
-        ctx.save();
-        ctx.translate(mx, my);
-        ctx.rotate(rotation);
-        
-        let hoverY = (pinMascot.state === "idle") ? Math.sin(pinMascot.frame) * 5 : 0;
-        ctx.translate(0, hoverY);
-        
-        // Soft drop shadow
-        ctx.fillStyle = "rgba(15,23,42,0.12)";
-        ctx.beginPath();
-        ctx.arc(0, 32, 20, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Shiny steel needle body point
-        ctx.strokeStyle = "#475569";
-        ctx.lineWidth = 7;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(0, -10);
-        ctx.lineTo(0, 28);
-        ctx.stroke();
-
-        ctx.strokeStyle = "#e2e8f0";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(2, -10);
-        ctx.lineTo(2, 25);
-        ctx.stroke();
-
-        // Round Jelly Head Container
-        ctx.fillStyle = "#ff477e";
-        ctx.beginPath();
-        ctx.arc(0, -32, 26, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#1e1b4b";
-        ctx.lineWidth = 5;
-        ctx.stroke();
-
-        // Eye whites
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(-8, -34, 8, 0, Math.PI * 2);
-        ctx.arc(8, -34, 8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#1e1b4b";
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-
-        // Big animated pupils looking slightly up
-        ctx.fillStyle = "#0f172a";
-        ctx.beginPath();
-        ctx.arc(-7.5, -36, 4, 0, Math.PI * 2);
-        ctx.arc(7.5, -36, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Cheerful blushing cheeks
-        ctx.fillStyle = "rgba(244,63,94,0.6)";
-        ctx.beginPath();
-        ctx.arc(-15, -24, 4.5, 0, Math.PI * 2);
-        ctx.arc(12, -24, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Happy little mouth line
-        ctx.strokeStyle = "#1e1b4b";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(0, -26, 5, 0, Math.PI);
-        ctx.stroke();
-
-        // Premium glassy sheen shine highlight spot
-        ctx.fillStyle = "rgba(255,255,255,0.45)";
-        ctx.beginPath();
-        ctx.arc(-10, -44, 5, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.restore();
-    }
-
-    // MODIFIED: High-contrast heavy typography formatting script
-    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
-        const words = text.split(' ');
-        let lines = [];
-        let currentLine = words[0];
-
-        for (let i = 1; i < words.length; i++) {
-            let word = words[i];
-            let width = ctx.measureText(currentLine + " " + word).width;
-            if (width < maxWidth) {
-                currentLine += " " + word;
-            } else {
-                lines.push(currentLine);
-                currentLine = word;
-            }
-        }
-        lines.push(currentLine);
-
-        let totalHeight = lines.length * lineHeight;
-        let startY = y - (totalHeight / 2) + (lineHeight / 2);
-        
-        for (let j = 0; j < lines.length; j++) {
-            ctx.strokeText(lines[j], x, startY + (j * lineHeight));
-            ctx.fillText(lines[j], x, startY + (j * lineHeight));
-        }
-    }
-
-    function drawFeedbackBubble(bx, by, text, color) {
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 4;
-        
-        let bW = 250;
-        let bH = 55;
-        let tX = bx - bW / 2;
-        let tY = by - 130;
-
-        if (tX < 15) tX = 15;
-        if (tX + bW > BASE_WIDTH) tX = BASE_WIDTH - bW - 15;
-
-        ctx.beginPath();
-        ctx.roundRect(tX, tY, bW, bH, 18);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(bx, tY + bH);
-        ctx.lineTo(bx - 12, tY + bH + 12);
-        ctx.lineTo(bx + 12, tY + bH);
-        ctx.closePath();
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "900 16px 'Arial'";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text, tX + bW / 2, tY + bH / 2);
-        ctx.restore();
-    }
-
-    function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        if (!gameActive) return;
-
-        ctx.save();
-        
-        let offsetX = (canvas.width - (BASE_WIDTH * scaleFactor)) / 2 / scaleFactor;
-        ctx.scale(scaleFactor, scaleFactor);
-        ctx.translate(offsetX, 0);
-
-        // Sky and grass hills backdrop
-        let parkBg = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
-        parkBg.addColorStop(0, "#bae6fd");
-        parkBg.addColorStop(0.6, "#f0fdf4");
-        parkBg.addColorStop(1, "#bbf7d0");
-        ctx.fillStyle = parkBg;
-        ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-
-        ctx.fillStyle = "#4ade80";
-        ctx.beginPath();
-        ctx.arc(120, BASE_HEIGHT + 160, 280, 0, Math.PI * 2);
-        ctx.arc(BASE_WIDTH - 80, BASE_HEIGHT + 190, 310, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Render Balloons Loop
-        activeBalloons.forEach(b => {
-            if (b.isPopped) return;
-
-            ctx.save();
-            // Subtle premium organic waving floating motion logic
-            let currentBob = Math.sin((pinMascot.frame * 0.4) + b.bobOffset) * 6;
-            ctx.translate(b.x + b.shakeOffset, b.y + currentBob);
-
-            // Shaded string tails
-            ctx.strokeStyle = "rgba(71, 85, 105, 0.35)";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, b.radius);
-            ctx.bezierCurveTo(-5, b.radius+10, 5, b.radius+15, 0, b.radius+25);
-            ctx.stroke();
-
-            // Colored Balloon Frame
-            ctx.fillStyle = b.color;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, b.radius * 0.94, b.radius * 1.06, 0, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.strokeStyle = "#312e81";
-            ctx.lineWidth = 5;
-            ctx.stroke();
-
-            // Soft 3D lighting reflection curve
-            ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-            ctx.beginPath();
-            ctx.ellipse(-b.radius * 0.38, -b.radius * 0.45, b.radius * 0.16, b.radius * 0.26, Math.PI / 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Text Label Composition (Heavily reinforced text contrast metrics)
-            if (!b.isBlank) {
-                // Bright, highly visible deep navy fills with heavy solid broad borders
-                ctx.fillStyle = "#1e1b4b";
-                ctx.strokeStyle = "#ffffff";
-                ctx.lineWidth = 5.5; 
-                ctx.lineJoin = "round";
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'draggable-item';
+                div.draggable = true;
+                div.id = item.id;
+                div.innerText = item.text;
+                div.dataset.category = item.category;
                 
-                // Extra Bold text layout configuration
-                ctx.font = "900 17px 'Arial'"; 
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
+                div.addEventListener('dragstart', dragStart);
+                div.addEventListener('dragend', dragEnd);
                 
-                drawWrappedText(ctx, b.item.text, 0, -2, b.radius * 1.5, 20);
-            } else {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                ctx.font = "bold 28px 'Arial'";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("⭐", 0, -2);
-            }
+                container.appendChild(div);
+            });
 
-            ctx.restore();
-        });
-
-        drawMascotPin(ctx, pinMascot.x, pinMascot.y, pinMascot.rotation);
-
-        if (speechBubble.visible) {
-            drawFeedbackBubble(speechBubble.x, speechBubble.y, speechBubble.text, speechBubble.color);
+            // Setup Drop Zones
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', dragOver);
+                zone.addEventListener('dragleave', dragLeave);
+                zone.addEventListener('drop', drop);
+            });
         }
 
-        ctx.restore();
-    }
+        // Drag & Drop Functions
+        let draggedItem = null;
 
-    function mainLoop() {
-        update();
-        render();
-        requestAnimationFrame(mainLoop);
-    }
-    
-    mainLoop();
-</script>
+        function dragStart(e) {
+            draggedItem = this;
+            setTimeout(() => this.style.opacity = '0.5', 0);
+        }
+
+        function dragEnd() {
+            this.style.opacity = '1';
+            draggedItem = null;
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        }
+
+        function dragLeave() {
+            this.classList.remove('drag-over');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            
+            if (!draggedItem) return;
+
+            const expectedCategory = this.dataset.category;
+            const itemCategory = draggedItem.dataset.category;
+
+            if (expectedCategory === itemCategory) {
+                // Correct Match
+                playSound('sndCorrect');
+                score += 5;
+                document.getElementById('scoreDisplay').innerText = score;
+                
+                // Move item to carriage visually
+                draggedItem.draggable = false;
+                draggedItem.style.fontSize = '14px';
+                draggedItem.style.padding = '5px';
+                this.appendChild(draggedItem);
+                
+                checkWinCondition();
+            } else {
+                // Wrong Match
+                playSound('sndWrong');
+                hearts--;
+                updateHearts();
+                
+                if (hearts <= 0) {
+                    setTimeout(() => {
+                        document.getElementById('gameOverModal').style.display = 'flex';
+                    }, 500);
+                }
+            }
+        }
+
+        function updateHearts() {
+            const heartsDisplay = document.getElementById('heartsDisplay');
+            heartsDisplay.innerText = '❤️'.repeat(hearts) + '🖤'.repeat(3 - hearts);
+        }
+
+        function checkWinCondition() {
+            const remainingItems = document.getElementById('itemsContainer').children.length;
+            if (remainingItems === 0) {
+                setTimeout(() => {
+                    playSound('sndWin');
+                    document.getElementById('finalScoreDisplay').innerText = score;
+                    document.getElementById('victoryModal').style.display = 'flex';
+                }, 500);
+            }
+        }
+
+        // Clue System
+        function showClue() {
+            const container = document.getElementById('itemsContainer');
+            const items = Array.from(container.children);
+            
+            if (items.length > 0) {
+                // Pick a random remaining item
+                const randomItem = items[Math.floor(Math.random() * items.length)];
+                const itemData = gameItems.find(i => i.id === randomItem.id);
+                
+                document.getElementById('clueText').innerText = `Looking for ${itemData.text}? Here's a hint: "${itemData.clue}"`;
+                document.getElementById('clueModal').style.display = 'flex';
+            } else {
+                document.getElementById('clueText').innerText = "All items sorted! Great job!";
+                document.getElementById('clueModal').style.display = 'flex';
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Audio Management
+        function playSound(id) {
+            const sound = document.getElementById(id);
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio play prevented by browser"));
+        }
+
+        function toggleMusic() {
+            const bgMusic = document.getElementById('bgMusic');
+            const musicBtn = document.getElementById('musicBtn');
+            
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicBtn.innerText = '🔇 Music';
+            } else {
+                bgMusic.play().catch(e => console.log("Autoplay blocked"));
+                musicBtn.innerText = '🔊 Music';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+
+        // Start Game
+        window.onload = initGame;
+    </script>
 </body>
 </html>
