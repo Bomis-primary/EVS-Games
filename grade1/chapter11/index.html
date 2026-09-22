@@ -77,7 +77,11 @@
             overflow-y: auto;
         }
 
-        #logoScreen { background: #303952; z-index: 100; }
+        #logoScreen { 
+            background: #303952; 
+            z-index: 100; 
+            cursor: pointer;
+        }
         #logoScreen img { 
             max-width: min(65%, 260px); 
             height: auto; 
@@ -238,8 +242,10 @@
     </div>
 
     <!-- LOGO SCREEN -->
-    <div id="logoScreen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+    <div id="logoScreen" class="screen" onclick="dismissLogo()">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
+        <h1 id="fallbackLogo" style="display:none; color: var(--pastel-yellow); font-size: 32px;">INNOVINE</h1>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 15px;">(Tap to skip)</p>
     </div>
 
     <!-- TITLE SCREEN -->
@@ -299,9 +305,43 @@
 </div>
 
 <script>
+    // CANVAS CONTEXT & COMPATIBILITY POLYFILL FOR ROUNDRECT
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    
+
+    // Safe roundRect polyfill for older iOS/Android browsers
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (typeof r === 'undefined') r = 0;
+            if (typeof r === 'number') r = { tl: r, tr: r, br: r, bl: r };
+            this.beginPath();
+            this.moveTo(x + r.tl, y);
+            this.lineTo(x + w - r.tr, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+            this.lineTo(x + w, y + h - r.br);
+            this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+            this.lineTo(x + r.bl, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+            this.lineTo(x, y + r.tl);
+            this.quadraticCurveTo(x, y, x + r.tl, y);
+            this.closePath();
+            return this;
+        };
+    }
+
+    let logoDismissed = false;
+    function dismissLogo() {
+        if (logoDismissed) return;
+        logoDismissed = true;
+        const logoScreen = document.getElementById('logoScreen');
+        if (logoScreen) logoScreen.style.display = 'none';
+        const titleScreen = document.getElementById('titleScreen');
+        if (titleScreen) titleScreen.style.display = 'flex';
+    }
+
+    // Auto dismiss logo screen after 2.5s
+    setTimeout(dismissLogo, 2500);
+
     let audioCtx = null;
     const audioBuffers = {};
 
@@ -645,11 +685,6 @@
     // Option cards on canvas
     let optionCards = [];
 
-    setTimeout(() => {
-        document.getElementById('logoScreen').style.display = 'none';
-        document.getElementById('titleScreen').style.display = 'flex';
-    }, 3500);
-
     function showFestivalSelect() {
         initAudioEngine();
         document.getElementById('titleScreen').style.display = 'none';
@@ -792,7 +827,7 @@
     });
 
     function createBurst(x, y, color) {
-        particles = []; // Cap particle explosion count for low-spec GPU performance
+        particles = [];
         for (let i = 0; i < 20; i++) {
             particles.push({
                 x: x, y: y,
@@ -841,116 +876,120 @@
     }
 
     function render() {
-        const dpr = window.devicePixelRatio || 1;
-        const cWidth = getCanvasWidth();
-        const cHeight = getCanvasHeight();
+        try {
+            const dpr = window.devicePixelRatio || 1;
+            const cWidth = getCanvasWidth();
+            const cHeight = getCanvasHeight();
 
-        ctx.save();
-        ctx.scale(dpr, dpr);
-        ctx.clearRect(0, 0, cWidth, cHeight);
-
-        if (!gameActive) {
-            ctx.restore();
-            return;
-        }
-
-        const qData = activeQuestions[currentQuestionIndex];
-
-        // Draw Header Banner
-        ctx.save();
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.beginPath();
-        ctx.roundRect(cWidth * 0.06, 52, cWidth * 0.88, 38, 12);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        ctx.fillStyle = '#ffeaa7';
-        ctx.font = '900 clamp(13px, 3.6vw, 16px) "Comic Sans MS"';
-        ctx.textAlign = 'center';
-        ctx.fillText(`✨ FESTIVAL: ${selectedFestivalKey} ✨`, cWidth / 2, 76);
-        ctx.restore();
-
-        // Draw Question Card
-        ctx.save();
-        const qBoxWidth = cWidth * 0.88;
-        const qBoxHeight = Math.min(170, cHeight * 0.28);
-        const qBoxX = (cWidth - qBoxWidth) / 2;
-        const qBoxY = 102;
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-        ctx.beginPath();
-        ctx.roundRect(qBoxX, qBoxY, qBoxWidth, qBoxHeight, 22);
-        ctx.fill();
-
-        // Question Card Badge
-        ctx.fillStyle = '#6c5ce7';
-        ctx.beginPath();
-        ctx.roundRect(qBoxX + 14, qBoxY + 12, 100, 24, 8);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '900 12px "Comic Sans MS"';
-        ctx.textAlign = 'center';
-        ctx.fillText("10 MARKS", qBoxX + 64, qBoxY + 28);
-
-        // Question Text
-        ctx.fillStyle = '#2d3436';
-        ctx.font = 'bold clamp(14px, 3.8vw, 18px) system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        wrapText(ctx, qData.q, cWidth / 2, qBoxY + (qBoxHeight / 2) + 8, qBoxWidth - 28, 22);
-        ctx.restore();
-
-        // Draw Option Cards
-        optionCards.forEach((card, index) => {
             ctx.save();
-            let cardY = card.y;
-            
-            if (cardAnimationProgress < 1) {
-                cardY += (1 - cardAnimationProgress) * 30;
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, cWidth, cHeight);
+
+            if (!gameActive) {
+                ctx.restore();
+                return;
             }
 
-            if (card.state === "correct") {
-                ctx.fillStyle = '#00b894';
-                ctx.strokeStyle = '#55efc4';
-            } else if (card.state === "wrong") {
-                ctx.fillStyle = '#d63031';
-                ctx.strokeStyle = '#ff7675';
-            } else {
-                ctx.fillStyle = index === 0 ? '#ffeaa7' : '#74b9ff';
-                ctx.strokeStyle = '#ffffff';
-            }
+            const qData = activeQuestions[currentQuestionIndex];
 
-            ctx.lineWidth = 3;
+            // Draw Header Banner
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
             ctx.beginPath();
-            ctx.roundRect(card.x, cardY, card.w, card.h, 18);
+            ctx.roundRect(cWidth * 0.06, 52, cWidth * 0.88, 38, 12);
             ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            ctx.fillStyle = card.state === "normal" ? '#2d3436' : '#ffffff';
-            ctx.font = '900 clamp(13px, 3.6vw, 17px) "Comic Sans MS"';
+            ctx.fillStyle = '#ffeaa7';
+            ctx.font = '900 clamp(13px, 3.6vw, 16px) "Comic Sans MS"';
+            ctx.textAlign = 'center';
+            ctx.fillText(`✨ FESTIVAL: ${selectedFestivalKey} ✨`, cWidth / 2, 76);
+            ctx.restore();
+
+            // Draw Question Card
+            ctx.save();
+            const qBoxWidth = cWidth * 0.88;
+            const qBoxHeight = Math.min(170, cHeight * 0.28);
+            const qBoxX = (cWidth - qBoxWidth) / 2;
+            const qBoxY = 102;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.beginPath();
+            ctx.roundRect(qBoxX, qBoxY, qBoxWidth, qBoxHeight, 22);
+            ctx.fill();
+
+            // Question Card Badge
+            ctx.fillStyle = '#6c5ce7';
+            ctx.beginPath();
+            ctx.roundRect(qBoxX + 14, qBoxY + 12, 100, 24, 8);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 12px "Comic Sans MS"';
+            ctx.textAlign = 'center';
+            ctx.fillText("10 MARKS", qBoxX + 64, qBoxY + 28);
+
+            // Question Text
+            ctx.fillStyle = '#2d3436';
+            ctx.font = 'bold clamp(14px, 3.8vw, 18px) system-ui, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-
-            wrapText(ctx, card.text, card.x + card.w / 2, cardY + card.h / 2, card.w - 16, 20);
+            
+            wrapText(ctx, qData.q, cWidth / 2, qBoxY + (qBoxHeight / 2) + 8, qBoxWidth - 28, 22);
             ctx.restore();
-        });
 
-        // Draw Particles
-        particles.forEach(p => {
-            ctx.save();
-            ctx.globalAlpha = p.alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
+            // Draw Option Cards
+            optionCards.forEach((card, index) => {
+                ctx.save();
+                let cardY = card.y;
+                
+                if (cardAnimationProgress < 1) {
+                    cardY += (1 - cardAnimationProgress) * 30;
+                }
+
+                if (card.state === "correct") {
+                    ctx.fillStyle = '#00b894';
+                    ctx.strokeStyle = '#55efc4';
+                } else if (card.state === "wrong") {
+                    ctx.fillStyle = '#d63031';
+                    ctx.strokeStyle = '#ff7675';
+                } else {
+                    ctx.fillStyle = index === 0 ? '#ffeaa7' : '#74b9ff';
+                    ctx.strokeStyle = '#ffffff';
+                }
+
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.roundRect(card.x, cardY, card.w, card.h, 18);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = card.state === "normal" ? '#2d3436' : '#ffffff';
+                ctx.font = '900 clamp(13px, 3.6vw, 17px) "Comic Sans MS"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                wrapText(ctx, card.text, card.x + card.w / 2, cardY + card.h / 2, card.w - 16, 20);
+                ctx.restore();
+            });
+
+            // Draw Particles
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
             ctx.restore();
-        });
-
-        ctx.restore();
+        } catch(err) {
+            // Silently recover if rendering hits a device-specific error
+        }
     }
 
     function wrapText(context, text, x, y, maxWidth, lineHeight) {
