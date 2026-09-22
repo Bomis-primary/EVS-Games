@@ -79,8 +79,7 @@
 
         #logoScreen { 
             background: #303952; 
-            z-index: 100; 
-            cursor: pointer;
+            z-index: 100;
         }
         #logoScreen img { 
             max-width: min(65%, 260px); 
@@ -121,6 +120,7 @@
             letter-spacing: 1px;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
             margin-top: 18px;
+            pointer-events: auto;
         }
         .btn:active { 
             box-shadow: 0 2px 0 #e1b12c, 0 4px 10px rgba(0,0,0,0.2); 
@@ -147,6 +147,7 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transition: transform 0.15s ease, background 0.15s ease;
+            pointer-events: auto;
         }
         .fest-card-btn:active {
             transform: scale(0.96);
@@ -242,10 +243,9 @@
     </div>
 
     <!-- LOGO SCREEN -->
-    <div id="logoScreen" class="screen" onclick="dismissLogo()">
+    <div id="logoScreen" class="screen">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
         <h1 id="fallbackLogo" style="display:none; color: var(--pastel-yellow); font-size: 32px;">INNOVINE</h1>
-        <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 15px;">(Tap to skip)</p>
     </div>
 
     <!-- TITLE SCREEN -->
@@ -290,7 +290,7 @@
     <div id="factPopup">
         <h3 id="popTitle" style="margin-bottom: 8px; color: #e17055; font-size: clamp(16px, 4.5vw, 20px);">🎉 Well Done!</h3>
         <p id="factText" style="margin-bottom: 15px; color: #2d3436;"></p>
-        <button class="btn" style="font-size: 15px; padding: 10px 24px; box-shadow: 0 4px 0 #e1b12c; margin-top: 5px;" onclick="nextQuestion()">Next Question ➔</button>
+        <button id="nextQBtn" class="btn" style="font-size: 15px; padding: 10px 24px; box-shadow: 0 4px 0 #e1b12c; margin-top: 5px;" onclick="nextQuestion()">Next Question ➔</button>
     </div>
 
     <!-- COMPLETION SCREEN -->
@@ -305,11 +305,21 @@
 </div>
 
 <script>
-    // CANVAS CONTEXT & COMPATIBILITY POLYFILL FOR ROUNDRECT
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Safe roundRect polyfill for older iOS/Android browsers
+    // Global state variables initialized prior to resize handlers
+    let selectedFestivalKey = "DIWALI";
+    let activeQuestions = [];
+    let currentQuestionIndex = 0;
+    let totalScore = 0;
+    let gameActive = false;
+    let cardAnimationProgress = 0;
+    let touchCooldown = false;
+    let particles = [];
+    let optionCards = [];
+
+    // Safe roundRect polyfill
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
             if (typeof r === 'undefined') r = 0;
@@ -339,8 +349,8 @@
         if (titleScreen) titleScreen.style.display = 'flex';
     }
 
-    // Auto dismiss logo screen after 2.5s
-    setTimeout(dismissLogo, 2500);
+    // Keep logo on screen for exactly 5 seconds
+    setTimeout(dismissLogo, 5000);
 
     let audioCtx = null;
     const audioBuffers = {};
@@ -399,7 +409,6 @@
     function getCanvasWidth() { return canvas.width / (window.devicePixelRatio || 1); }
     function getCanvasHeight() { return canvas.height / (window.devicePixelRatio || 1); }
 
-    // FESTIVAL DATABASE WITH LEGIT QUESTIONS
     const festivalDatabase = {
         "DIWALI": {
             themeColor: "#ffeaa7",
@@ -673,26 +682,16 @@
         }
     };
 
-    let selectedFestivalKey = "DIWALI";
-    let activeQuestions = [];
-    let currentQuestionIndex = 0;
-    let totalScore = 0;
-    let gameActive = false;
-    let cardAnimationProgress = 0;
-    let touchCooldown = false;
-    let particles = [];
-
-    // Option cards on canvas
-    let optionCards = [];
-
     function showFestivalSelect() {
         initAudioEngine();
         document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('instructionScreen').style.display = 'none';
         document.getElementById('completionScreen').style.display = 'none';
         document.getElementById('festivalSelectScreen').style.display = 'flex';
     }
 
     function selectFestival(key) {
+        initAudioEngine();
         selectedFestivalKey = key;
         document.getElementById('festivalSelectScreen').style.display = 'none';
         document.getElementById('instructionScreen').style.display = 'flex';
@@ -725,7 +724,6 @@
 
         const qData = activeQuestions[currentQuestionIndex];
 
-        // Adaptive Layout: Stack vertically on narrow or short screens
         const isCompactScreen = cWidth < 420 || cHeight < 550;
 
         if (isCompactScreen) {
@@ -789,7 +787,7 @@
         touchCooldown = false;
     }
 
-    // Single Tap / Click Listener with Device Offset Handling
+    // Pointer event for answer options
     window.addEventListener('pointerdown', (e) => {
         if (!gameActive || touchCooldown) return;
 
@@ -849,6 +847,24 @@
         }
     }
 
+    window.showFestivalSelect = showFestivalSelect;
+    window.selectFestival = selectFestival;
+    window.startGame = startGame;
+    window.nextQuestion = nextQuestion;
+    window.finishGame = finishGame;
+    window.dismissLogo = dismissLogo;
+
+    // Attach direct fallback click event listener
+    document.addEventListener('DOMContentLoaded', () => {
+        const nextBtn = document.getElementById('nextQBtn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                nextQuestion();
+            });
+        }
+    });
+
     function finishGame() {
         gameActive = false;
         document.getElementById('factPopup').style.display = 'none';
@@ -892,7 +908,7 @@
 
             const qData = activeQuestions[currentQuestionIndex];
 
-            // Draw Header Banner
+            // Header Banner
             ctx.save();
             ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
             ctx.beginPath();
@@ -908,7 +924,7 @@
             ctx.fillText(`✨ FESTIVAL: ${selectedFestivalKey} ✨`, cWidth / 2, 76);
             ctx.restore();
 
-            // Draw Question Card
+            // Question Card
             ctx.save();
             const qBoxWidth = cWidth * 0.88;
             const qBoxHeight = Math.min(170, cHeight * 0.28);
@@ -940,7 +956,7 @@
             wrapText(ctx, qData.q, cWidth / 2, qBoxY + (qBoxHeight / 2) + 8, qBoxWidth - 28, 22);
             ctx.restore();
 
-            // Draw Option Cards
+            // Option Cards
             optionCards.forEach((card, index) => {
                 ctx.save();
                 let cardY = card.y;
@@ -975,7 +991,7 @@
                 ctx.restore();
             });
 
-            // Draw Particles
+            // Particles
             particles.forEach(p => {
                 ctx.save();
                 ctx.globalAlpha = p.alpha;
@@ -987,9 +1003,7 @@
             });
 
             ctx.restore();
-        } catch(err) {
-            // Silently recover if rendering hits a device-specific error
-        }
+        } catch(err) {}
     }
 
     function wrapText(context, text, x, y, maxWidth, lineHeight) {
