@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Star Burst: Festive Fun!</title>
+    <title>Festival Mystery: Quiz Adventure!</title>
     <style>
         :root {
-            --bg-top: #6c5ce7;
-            --bg-bottom: #a29bfe;
-            --card-bg: rgba(255, 255, 255, 0.22);
-            --card-border: rgba(255, 255, 255, 0.45);
-            --pastel-pink: #ff7675;
-            --pastel-teal: #00cec9;
-            --pastel-yellow: #ffeaa7;
-            --pastel-gold-btn: #fdcb6e;
             --pastel-purple: #a29bfe;
+            --pastel-blue: #74b9ff;
+            --pastel-green: #55efc4;
+            --pastel-pink: #ff7675;
+            --pastel-yellow: #ffeaa7;
+            --pastel-orange: #fab1a0;
+            --card-bg: rgba(255, 255, 255, 0.92);
             --text-dark: #2d3436;
         }
 
@@ -32,13 +30,13 @@
             width: 100%;
             height: 100%;
             height: 100dvh;
-            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            background: linear-gradient(135deg, var(--pastel-blue) 0%, var(--pastel-purple) 100%);
             color: #ffffff;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: none;
+            touch-action: manipulation;
         }
 
         #gameContainer {
@@ -47,7 +45,7 @@
             height: 100%;
             max-width: 550px;
             max-height: 900px;
-            background: linear-gradient(180deg, #574b90 0%, #303952 100%);
+            background: linear-gradient(180deg, #6c5ce7 0%, #303952 100%);
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             display: flex;
@@ -59,7 +57,7 @@
             #gameContainer {
                 border-radius: 28px;
                 height: 94dvh;
-                border: 4px solid rgba(255, 255, 255, 0.3);
+                border: 4px solid rgba(255, 255, 255, 0.4);
             }
         }
 
@@ -87,9 +85,15 @@
         }
 
         #titleScreen { 
-            background: radial-gradient(circle at center, #574b90 0%, #303952 100%); 
+            background: radial-gradient(circle at center, #6c5ce7 0%, #303952 100%); 
             z-index: 90; 
             display: none; 
+        }
+
+        #festivalSelectScreen {
+            background: radial-gradient(circle at center, #574b90 0%, #2f3542 100%);
+            z-index: 88;
+            display: none;
         }
 
         #instructionScreen { 
@@ -111,11 +115,37 @@
             text-transform: uppercase; 
             letter-spacing: 1px;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
-            margin-top: 20px;
+            margin-top: 18px;
         }
         .btn:active { 
             box-shadow: 0 2px 0 #e1b12c, 0 4px 10px rgba(0,0,0,0.2); 
             transform: translateY(4px); 
+        }
+
+        .fest-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            max-width: 420px;
+            margin-top: 15px;
+        }
+
+        .fest-card-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 18px;
+            padding: 14px;
+            font-size: clamp(15px, 4vw, 18px);
+            font-weight: 800;
+            color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .fest-card-btn:active {
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .instruction-box {
@@ -138,11 +168,11 @@
 
         #factPopup {
             position: absolute; 
-            bottom: 10%; 
+            bottom: 8%; 
             left: 5%; 
             width: 90%;
             background: #ffffff;
-            border: 4px solid var(--pastel-gold-btn); 
+            border: 4px solid var(--pastel-yellow); 
             border-radius: 24px; 
             padding: 20px;
             color: #2d3436; 
@@ -171,18 +201,18 @@
             display: none;
         }
         .ui-element {
-            background: rgba(255, 255, 255, 0.18); 
+            background: rgba(255, 255, 255, 0.2); 
             backdrop-filter: blur(6px); 
             padding: 8px 14px;
             border-radius: 16px; 
-            font-size: clamp(12px, 3.2vw, 15px); 
+            font-size: clamp(13px, 3.4vw, 16px); 
             font-weight: 900;
-            border: 1.5px solid rgba(255,255,255,0.3); 
+            border: 1.5px solid rgba(255,255,255,0.35); 
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         #completionScreen { 
-            background: radial-gradient(circle at center, #574b90 0%, #303952 100%); 
+            background: radial-gradient(circle at center, #6c5ce7 0%, #303952 100%); 
             display: none; 
             z-index: 80; 
         }
@@ -211,42 +241,55 @@
 
     <!-- TITLE SCREEN -->
     <div id="titleScreen" class="screen">
-        <h1 style="color: var(--pastel-yellow); font-size: clamp(28px, 7.5vw, 40px); margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.3);">STAR BURST:<br>FESTIVE FUN!</h1>
-        <p style="font-size: clamp(15px, 4.2vw, 20px); color: var(--pastel-teal); font-weight: bold; margin-bottom: 25px;">✨ Aim & Pop Festive Answers! ✨</p>
-        <button class="btn" onclick="showInstructions()">Play Now</button>
+        <h1 style="color: var(--pastel-yellow); font-size: clamp(28px, 7.5vw, 40px); margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.3);">FESTIVAL MYSTERY:<br>QUIZ ADVENTURE!</h1>
+        <p style="font-size: clamp(15px, 4.2vw, 20px); color: var(--pastel-blue); font-weight: bold; margin-bottom: 25px;">✨ Answer & Earn 10 Marks Each! ✨</p>
+        <button class="btn" onclick="showFestivalSelect()">Play Now</button>
+    </div>
+
+    <!-- FESTIVAL SELECTION SCREEN -->
+    <div id="festivalSelectScreen" class="screen">
+        <h2 style="color: var(--pastel-yellow); font-size: clamp(22px, 6vw, 28px); margin-bottom: 8px;">CHOOSE A FESTIVAL</h2>
+        <p style="font-size: clamp(14px, 3.8vw, 16px); color: #dfe6e9; margin-bottom: 12px;">Solve 5 questions about your favorite festival!</p>
+        <div class="fest-grid">
+            <button class="fest-card-btn" style="border-color: #ff7675;" onclick="selectFestival('DIWALI')">🪔 Diwali</button>
+            <button class="fest-card-btn" style="border-color: #74b9ff;" onclick="selectFestival('HOLI')">🎨 Holi</button>
+            <button class="fest-card-btn" style="border-color: #55efc4;" onclick="selectFestival('CHRISTMAS')">🎄 Christmas</button>
+            <button class="fest-card-btn" style="border-color: #ffeaa7;" onclick="selectFestival('EID')">🌙 Eid</button>
+            <button class="fest-card-btn" style="border-color: #a29bfe;" onclick="selectFestival('GURPURAB')">ੴ Gurpurab</button>
+            <button class="fest-card-btn" style="border-color: #fab1a0;" onclick="selectFestival('INDEPENDENCE DAY')">🇮🇳 Independence Day</button>
+        </div>
     </div>
 
     <!-- INSTRUCTION SCREEN -->
     <div id="instructionScreen" class="screen">
         <h2 style="color: var(--pastel-pink); font-size: clamp(22px, 5.8vw, 30px); margin-bottom: 16px;">HOW TO PLAY</h2>
         <div class="instruction-box">
-            <div class="big-bold-text">1. Read the <span style="color: var(--pastel-yellow);">Festival Task</span> at the top!</div>
-            <div class="big-bold-text">2. Slide the <span style="color: var(--pastel-teal);">Star Launcher</span> below the right box!</div>
-            <div class="big-bold-text">3. <span style="color: var(--pastel-pink);">TAP</span> to shoot stars into the correct word!</div>
+            <div class="big-bold-text">1. Read the <span style="color: var(--pastel-yellow);">Question Card</span> at the top carefully!</div>
+            <div class="big-bold-text">2. Look at the <span style="color: var(--pastel-blue);">Two Answer Options</span> below!</div>
+            <div class="big-bold-text">3. <span style="color: var(--pastel-pink);">TAP</span> the correct box to score <span style="color: var(--pastel-yellow);">10 Marks</span>!</div>
         </div>
-        <button class="btn" style="background: linear-gradient(180deg, #55efc4 0%, #00b894 100%); color:#fff; box-shadow: 0 6px 0 #00896c;" onclick="startGame()">Got It!</button>
+        <button class="btn" style="background: linear-gradient(180deg, #55efc4 0%, #00b894 100%); color:#fff; box-shadow: 0 6px 0 #00896c;" onclick="startGame()">Start Quiz!</button>
     </div>
 
     <!-- UI OVERLAY -->
     <div id="uiOverlay">
-        <div id="scoreLabel" class="ui-element">Score: 0/18</div>
-        <div id="attemptsLabel" class="ui-element" style="color: #ff7675;">Attempts: 2 Left</div>
-        <div id="roundLabel" class="ui-element" style="color: var(--pastel-yellow);">Round 1/6</div>
+        <div id="scoreLabel" class="ui-element" style="color: var(--pastel-yellow);">Marks: 0/50</div>
+        <div id="roundLabel" class="ui-element">Question 1/5</div>
     </div>
     
     <!-- FACT POPUP -->
     <div id="factPopup">
-        <h3 style="margin-bottom: 8px; color: #e17055; font-size: clamp(18px, 4.8vw, 22px);">🎉 Fantastic Job!</h3>
+        <h3 id="popTitle" style="margin-bottom: 8px; color: #e17055; font-size: clamp(18px, 4.8vw, 22px);">🎉 Well Done!</h3>
         <p id="factText" style="margin-bottom: 15px; color: #2d3436;"></p>
-        <button class="btn" style="font-size: 16px; padding: 10px 26px; box-shadow: 0 4px 0 #e1b12c; margin-top: 5px;" onclick="nextRound()">Next Round ➔</button>
+        <button class="btn" style="font-size: 16px; padding: 10px 26px; box-shadow: 0 4px 0 #e1b12c; margin-top: 5px;" onclick="nextQuestion()">Next Question ➔</button>
     </div>
 
     <!-- COMPLETION SCREEN -->
     <div id="completionScreen" class="screen">
-        <h1 style="color: var(--pastel-teal); font-size: clamp(30px, 7.5vw, 40px); margin-bottom: 12px;">Superstar Winner!</h1>
-        <p style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 20px; font-weight: bold;">You completed all festival rounds!</p>
-        <div class="ui-element" id="finalScore" style="font-size: clamp(22px, 5.5vw, 28px); padding: 14px 32px; color: var(--pastel-yellow); margin-bottom: 20px;">Final Score: 0/18</div>
-        <button class="btn" onclick="restartGame()">Play Again</button>
+        <h1 style="color: var(--pastel-blue); font-size: clamp(28px, 7vw, 38px); margin-bottom: 10px;">Festival Master!</h1>
+        <p id="completionFestivalName" style="font-size: clamp(16px, 4.5vw, 20px); margin-bottom: 18px; color: var(--pastel-pink); font-weight: bold;"></p>
+        <div class="ui-element" id="finalScore" style="font-size: clamp(22px, 5.5vw, 28px); padding: 14px 32px; color: var(--pastel-yellow); margin-bottom: 20px;">Final Score: 0/50 Marks</div>
+        <button class="btn" onclick="showFestivalSelect()">Play Another Festival</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -256,7 +299,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // FAST AUDIO ENGINE
     let audioCtx = null;
     const audioBuffers = {};
 
@@ -312,35 +354,307 @@
     function getCanvasWidth() { return canvas.width / (window.devicePixelRatio || 1); }
     function getCanvasHeight() { return canvas.height / (window.devicePixelRatio || 1); }
 
-    let currentRound = 0, score = 0, attemptsLeft = 2, collectedThisRound = 0;
-    let gameActive = false, showRoundEnd = false;
+    // FESTIVAL DATABASE WITH LEGIT QUESTIONS
+    const festivalDatabase = {
+        "DIWALI": {
+            themeColor: "#ffeaa7",
+            questions: [
+                {
+                    q: "What do people light to decorate their homes on Diwali?",
+                    options: [
+                        { text: "🪔 Clay Diyas", correct: true },
+                        { text: "🎈 Water Balloons", correct: false }
+                    ],
+                    fact: "Clay diyas are lit on Diwali to bring brightness, joy, and warmth to every home!"
+                },
+                {
+                    q: "Which colorful floor art is made at doorways during Diwali?",
+                    options: [
+                        { text: "🎨 Rangoli Patterns", correct: true },
+                        { text: "🖌️ Wall Graffiti", correct: false }
+                    ],
+                    fact: "Rangoli is made using colored powders or flowers to welcome happiness and prosperity!"
+                },
+                {
+                    q: "Which Goddess is worshipped on the evening of Diwali?",
+                    options: [
+                        { text: "🌸 Goddess Lakshmi", correct: true },
+                        { text: "☀️ Sun God", correct: false }
+                    ],
+                    fact: "Goddess Lakshmi represents wealth, fortune, and good luck in the home!"
+                },
+                {
+                    q: "Diwali is also popularly known as the Festival of ____?",
+                    options: [
+                        { text: "✨ Lights", correct: true },
+                        { text: "❄️ Snow", correct: false }
+                    ],
+                    fact: "It is called the Festival of Lights because it symbolizes light triumphing over darkness!"
+                },
+                {
+                    q: "What delicious treat is shared with family during Diwali?",
+                    options: [
+                        { text: "🍬 Indian Sweets", correct: true },
+                        { text: "🍿 Salted Popcorn", correct: false }
+                    ],
+                    fact: "Sweets like Kaju Katli, Ladoo, and Jalebi are lovingly shared during Diwali!"
+                }
+            ]
+        },
+        "HOLI": {
+            themeColor: "#ff7675",
+            questions: [
+                {
+                    q: "What do people splash on each other during Holi?",
+                    options: [
+                        { text: "🎨 Gulaal & Colors", correct: true },
+                        { text: "🍂 Dried Leaves", correct: false }
+                    ],
+                    fact: "Bright herbal colors called Gulaal are used to fill the air with color and joy!"
+                },
+                {
+                    q: "Which sweet pastry is specially prepared and served during Holi?",
+                    options: [
+                        { text: "🥟 Sweet Gujiya", correct: true },
+                        { text: "🍰 Plum Cake", correct: false }
+                    ],
+                    fact: "Gujiya is a traditional fried sweet dumpling filled with khoya and dry fruits!"
+                },
+                {
+                    q: "Which playful tool is filled with water during Holi celebrations?",
+                    options: [
+                        { text: "🔫 Pichkari", correct: true },
+                        { text: "🏏 Cricket Bat", correct: false }
+                    ],
+                    fact: "Children love filling pichkaris with colored water to spray friends!"
+                },
+                {
+                    q: "In which month is Holi usually celebrated in India?",
+                    options: [
+                        { text: "🌸 March", correct: true },
+                        { text: "❄️ December", correct: false }
+                    ],
+                    fact: "Holi marks the arrival of Spring and takes place in the month of March!"
+                },
+                {
+                    q: "Holi is celebrated as the Festival of ____?",
+                    options: [
+                        { text: "🌈 Colors", correct: true },
+                        { text: "🪁 Kites", correct: false }
+                    ],
+                    fact: "It brings people together regardless of age or background through vibrant colors!"
+                }
+            ]
+        },
+        "CHRISTMAS": {
+            themeColor: "#55efc4",
+            questions: [
+                {
+                    q: "On which date is Christmas celebrated every year?",
+                    options: [
+                        { text: "🎄 25th December", correct: true },
+                        { text: "🌞 15th August", correct: false }
+                    ],
+                    fact: "Christmas celebrates the birth of Lord Jesus Christ on December 25th!"
+                },
+                {
+                    q: "Who brings gifts for children on Christmas Eve?",
+                    options: [
+                        { text: "🎅 Santa Claus", correct: true },
+                        { text: "🧙‍♂️ Friendly Wizard", correct: false }
+                    ],
+                    fact: "Santa Claus travels on a sleigh pulled by reindeer to deliver gifts!"
+                },
+                {
+                    q: "What do people decorate inside their homes for Christmas?",
+                    options: [
+                        { text: "🌲 Christmas Tree", correct: true },
+                        { text: "🪴 Bamboo Plant", correct: false }
+                    ],
+                    fact: "Evergreen trees are decorated with stars, bells, baubles, and fairy lights!"
+                },
+                {
+                    q: "Which star-shaped decoration is placed at the top of the Christmas tree?",
+                    options: [
+                        { text: "⭐ Shining Star", correct: true },
+                        { text: "🌙 Crescent Moon", correct: false }
+                    ],
+                    fact: "The star represents the Bethlehem star that guided people long ago!"
+                },
+                {
+                    q: "What traditional baked dessert is shared during Christmas?",
+                    options: [
+                        { text: "🎂 Christmas Cake", correct: true },
+                        { text: "🍩 Glazed Donuts", correct: false }
+                    ],
+                    fact: "Delicious rich fruit cakes and gingerbread cookies are baked for family and friends!"
+                }
+            ]
+        },
+        "EID": {
+            themeColor: "#74b9ff",
+            questions: [
+                {
+                    q: "Which sweet vermicelli dish is specially made on Eid-ul-Fitr?",
+                    options: [
+                        { text: "🍜 Sweet Sewaiyan", correct: true },
+                        { text: "🥞 Honey Pancakes", correct: false }
+                    ],
+                    fact: "Sewaiyan is cooked in milk with dry fruits and cardamom to celebrate Eid!"
+                },
+                {
+                    q: "What special gift money or present do elders give children on Eid?",
+                    options: [
+                        { text: "🎁 Eidi", correct: true },
+                        { text: "🎫 Bus Ticket", correct: false }
+                    ],
+                    fact: "Eidi is a token of love given by elders to children on Eid!"
+                },
+                {
+                    q: "What greeting do people use to wish each other on Eid?",
+                    options: [
+                        { text: "🌙 Eid Mubarak!", correct: true },
+                        { text: "🎃 Happy Halloween!", correct: false }
+                    ],
+                    fact: "'Eid Mubarak' means 'Blessed Festival' and is shared with hugs and warmth!"
+                },
+                {
+                    q: "Eid-ul-Fitr marks the joyful end of which holy month of fasting?",
+                    options: [
+                        { text: "📖 Ramadan", correct: true },
+                        { text: "🍂 Autumn", correct: false }
+                    ],
+                    fact: "During Ramadan, people practice kindness, reflection, and daily fasting until sunset!"
+                },
+                {
+                    q: "What do people wear to attend morning prayers on Eid?",
+                    options: [
+                        { text: "✨ New Festive Clothes", correct: true },
+                        { text: "⚽ Sports Uniform", correct: false }
+                    ],
+                    fact: "Wearing clean new clothes is a joyful tradition on Eid morning!"
+                }
+            ]
+        },
+        "GURPURAB": {
+            themeColor: "#a29bfe",
+            questions: [
+                {
+                    q: "What is the free community meal served to everyone at Gurudwaras called?",
+                    options: [
+                        { text: "🍲 Langar", correct: true },
+                        { text: "🍿 Snack Box", correct: false }
+                    ],
+                    fact: "Langar is served free to all people regardless of background, showing equality!"
+                },
+                {
+                    q: "Whose birthday is celebrated during Gurpurab?",
+                    options: [
+                        { text: "☬ Sikh Gurus", correct: true },
+                        { text: "👑 Ancient Kings", correct: false }
+                    ],
+                    fact: "Gurpurab honors the lives, teachings, and wisdom of the Sikh Gurus!"
+                },
+                {
+                    q: "Which famous holy shrine is illuminated beautifully during Gurpurab?",
+                    options: [
+                        { text: "🕌 Golden Temple", correct: true },
+                        { text: "🗼 Eiffel Tower", correct: false }
+                    ],
+                    fact: "Sri Harmandir Sahib (Golden Temple) in Amritsar is lit up with thousands of lights!"
+                },
+                {
+                    q: "What is the sacred sweet pudding offered as blessing at Gurudwaras?",
+                    options: [
+                        { text: "🥣 Karah Parshad", correct: true },
+                        { text: "🍧 Fruit Gelato", correct: false }
+                    ],
+                    fact: "Karah Parshad is a delicious warm wheat-and-ghee pudding served to all visitors!"
+                },
+                {
+                    q: "Who was the first Guru and founder of Sikhism celebrated on Gurpurab?",
+                    options: [
+                        { text: "☬ Guru Nanak Dev Ji", correct: true },
+                        { text: "📜 Emperor Akbar", correct: false }
+                    ],
+                    fact: "Guru Nanak Dev Ji taught love, equality, hard work, and sharing with others!"
+                }
+            ]
+        },
+        "INDEPENDENCE DAY": {
+            themeColor: "#fab1a0",
+            questions: [
+                {
+                    q: "On which date does India celebrate Independence Day?",
+                    options: [
+                        { text: "🇮🇳 15th August", correct: true },
+                        { text: "🎆 1st January", correct: false }
+                    ],
+                    fact: "India gained independence on 15th August 1947!"
+                },
+                {
+                    q: "What is the national flag of India affectionately called?",
+                    options: [
+                        { text: "🚩 Tiranga", correct: true },
+                        { text: "⭐ Starlight", correct: false }
+                    ],
+                    fact: "Tiranga means 'Tricolor' as it features Saffron, White, and Green!"
+                },
+                {
+                    q: "Where is the Indian national flag hoisted in New Delhi on 15th August?",
+                    options: [
+                        { text: "🏰 Red Fort", correct: true },
+                        { text: "🏟️ Cricket Stadium", correct: false }
+                    ],
+                    fact: "The Prime Minister hoists the Tiranga at the historic Red Fort in Delhi!"
+                },
+                {
+                    q: "What fun sky activity do children enjoy on Independence Day?",
+                    options: [
+                        { text: "🪁 Kite Flying", correct: true },
+                        { text: "🛸 Drone Racing", correct: false }
+                    ],
+                    fact: "Kites of all colors fill the sky to symbolize freedom and joy!"
+                },
+                {
+                    q: "Which wheel sits at the center of the Indian Tiranga flag?",
+                    options: [
+                        { text: "☸️ Ashoka Chakra", correct: true },
+                        { text: "⚙️ Wooden Gear", correct: false }
+                    ],
+                    fact: "The Ashoka Chakra has 24 spokes representing progress and righteousness!"
+                }
+            ]
+        }
+    };
 
-    let cannon = { x: 0, targetX: 0, y: 0, w: 60 };
-    let rocket = { x: 0, y: 0, r: 10, vy: 0, active: false, color: '#ffeaa7' };
-    let activePair = []; 
+    let selectedFestivalKey = "DIWALI";
+    let activeQuestions = [];
+    let currentQuestionIndex = 0;
+    let totalScore = 0;
+    let gameActive = false;
+    let cardAnimationProgress = 0;
+    let touchCooldown = false;
     let particles = [];
-    
-    let itemPairsPool = [];
-    let currentPairIndex = 0;
-    let freezeTimer = 0; 
 
-    const roundsData = [
-        { name: "HOLI", starColor: "#ff7675", fact: "Holi is the festival of colours celebrated in March! Gujiya is shared with all our guests!", correctItems: ["Gulaal", "Gujiya", "Pichkaris"], wrongItems: ["Langar", "Diyas", "Santa Claus"] },
-        { name: "DIWALI", starColor: "#ffeaa7", fact: "On Diwali, we light clay diyas and make colorful rangolis to decorate our homes!", correctItems: ["Rangoli", "Goddess Lakshmi", "Clay Diyas"], wrongItems: ["Sewaiyan", "Tiranga", "Buckets of water"] },
-        { name: "CHRISTMAS", starColor: "#55efc4", fact: "Christmas is celebrated on 25th December! Children love gifts from Santa!", correctItems: ["25th December", "Bells and Stars", "Jesus Christ"], wrongItems: ["Mosque", "Gulaal", "Guru Nanak Devji"] },
-        { name: "EID", starColor: "#74b9ff", fact: "On Eid-ul-Fitr, Muslims wear new clothes, share Eidi gifts, and prepare sweet sewaiyan!", correctItems: ["Sewaiyan", "Eidi Gifts", "New Clothes"], wrongItems: ["Firecrackers", "Xmas Tree", "Water balloons"] },
-        { name: "GURPURAB", starColor: "#a29bfe", fact: "Gurpurab celebrates the Sikh Gurus! Langar meals are served to everyone at gurudwaras!", correctItems: ["Langar Meal", "Guru Nanak", "Golden Temple"], wrongItems: ["Pichkaris", "Santa Claus", "Clay Diyas"] },
-        { name: "INDEPENDENCE DAY", starColor: "#fab1a0", fact: "India became independent on 15th August 1947! The Tiranga flag is hoisted at Red Fort!", correctItems: ["15th August", "Tiranga", "Red Fort Speech"], wrongItems: ["Gujiya", "Lord Ganesha", "Santa Claus"] }
-    ];
+    // Option cards on canvas
+    let optionCards = [];
 
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
-    }, 4000);
+    }, 3500);
 
-    function showInstructions() {
+    function showFestivalSelect() {
         initAudioEngine();
         document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('festivalSelectScreen').style.display = 'flex';
+    }
+
+    function selectFestival(key) {
+        selectedFestivalKey = key;
+        document.getElementById('festivalSelectScreen').style.display = 'none';
         document.getElementById('instructionScreen').style.display = 'flex';
     }
 
@@ -348,272 +662,284 @@
         initAudioEngine();
         document.getElementById('instructionScreen').style.display = 'none';
         document.getElementById('uiOverlay').style.display = 'flex';
-        currentRound = 0; score = 0;
-        initRound();
+        
+        activeQuestions = JSON.parse(JSON.stringify(festivalDatabase[selectedFestivalKey].questions));
+        // Shuffle options for each question
+        activeQuestions.forEach(q => {
+            q.options.sort(() => Math.random() - 0.5);
+        });
+
+        currentQuestionIndex = 0;
+        totalScore = 0;
         gameActive = true;
+
+        setupQuestion();
     }
 
-    function initRound() {
-        attemptsLeft = 2; collectedThisRound = 0; showRoundEnd = false; currentPairIndex = 0; freezeTimer = 0;
-        rocket.active = false;
-        
+    function setupQuestion() {
         const cWidth = getCanvasWidth();
         const cHeight = getCanvasHeight();
 
         document.getElementById('factPopup').style.display = 'none';
-        document.getElementById('scoreLabel').innerText = `Score: ${score}/${roundsData.length * 3}`;
-        document.getElementById('attemptsLabel').innerText = `Attempts: ${attemptsLeft} Left`;
-        document.getElementById('attemptsLabel').style.color = "#ff7675";
-        document.getElementById('roundLabel').innerText = `Round ${currentRound + 1}/${roundsData.length}`;
+        document.getElementById('scoreLabel').innerText = `Marks: ${totalScore}/50`;
+        document.getElementById('roundLabel').innerText = `Question ${currentQuestionIndex + 1}/5`;
 
-        cannon.y = cHeight - 65;
-        cannon.targetX = cWidth / 2;
-        cannon.x = cannon.targetX;
+        const qData = activeQuestions[currentQuestionIndex];
 
-        itemPairsPool = [];
-        const rData = roundsData[currentRound];
-        for (let i = 0; i < 3; i++) {
-            let pair = [{ text: rData.correctItems[i], correct: true }, { text: rData.wrongItems[i], correct: false }];
-            pair.sort(() => Math.random() - 0.5);
-            itemPairsPool.push(pair);
-        }
-        spawnNextPair();
+        // Card dimensions for two answer options
+        const cardWidth = Math.min(220, cWidth * 0.42);
+        const cardHeight = Math.min(130, cHeight * 0.18);
+        const startY = cHeight * 0.56;
+
+        optionCards = [
+            {
+                text: qData.options[0].text,
+                correct: qData.options[0].correct,
+                x: (cWidth * 0.27) - (cardWidth / 2),
+                y: startY,
+                w: cardWidth,
+                h: cardHeight,
+                color: "#ffeaa7",
+                state: "normal" // "normal", "correct", "wrong"
+            },
+            {
+                text: qData.options[1].text,
+                correct: qData.options[1].correct,
+                x: (cWidth * 0.73) - (cardWidth / 2),
+                y: startY,
+                w: cardWidth,
+                h: cardHeight,
+                color: "#74b9ff",
+                state: "normal"
+            }
+        ];
+
+        cardAnimationProgress = 0;
+        touchCooldown = false;
     }
 
-    function spawnNextPair() {
-        const cWidth = getCanvasWidth();
-        if (currentPairIndex >= itemPairsPool.length) { finishRound(); return; }
-        const rawPair = itemPairsPool[currentPairIndex];
-        activePair = [];
-        const boxWidth = Math.min(150, cWidth * 0.42);
-        const boxHeight = 50;
-
-        rawPair.forEach((item, index) => {
-            activePair.push({
-                text: item.text, correct: item.correct,
-                x: index === 0 ? (cWidth * 0.06) : (cWidth * 0.52),
-                y: 150, w: boxWidth, h: boxHeight, active: true, statusColor: null
-            });
-        });
-    }
-
-    window.addEventListener('pointermove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        handleMove(e.clientX - rect.left);
-    });
-    
+    // Single Tap Listener
     window.addEventListener('pointerdown', (e) => {
-        initAudioEngine();
+        if (!gameActive || touchCooldown) return;
+
         const rect = canvas.getBoundingClientRect();
-        handleMove(e.clientX - rect.left);
-        if (!rocket.active && gameActive && !showRoundEnd && freezeTimer <= 0) {
-            fireRocket();
-        }
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        optionCards.forEach(card => {
+            if (clickX >= card.x && clickX <= card.x + card.w &&
+                clickY >= card.y && clickY <= card.y + card.h && card.state === "normal") {
+                
+                touchCooldown = true;
+                if (card.correct) {
+                    card.state = "correct";
+                    totalScore += 10;
+                    safePlayAudio('snd-correct');
+                    createBurst(card.x + card.w/2, card.y + card.h/2, '#55efc4');
+                    document.getElementById('scoreLabel').innerText = `Marks: ${totalScore}/50`;
+                    document.getElementById('popTitle').innerText = "🎉 Correct Answer! (+10 Marks)";
+                    document.getElementById('popTitle').style.color = "#00b894";
+                } else {
+                    card.state = "wrong";
+                    safePlayAudio('snd-wrong');
+                    createBurst(card.x + card.w/2, card.y + card.h/2, '#ff7675');
+                    document.getElementById('popTitle').innerText = "💡 Oops! Here's a tip:";
+                    document.getElementById('popTitle').style.color = "#d63031";
+                }
+
+                setTimeout(() => {
+                    document.getElementById('factText').innerText = activeQuestions[currentQuestionIndex].fact;
+                    document.getElementById('factPopup').style.display = 'block';
+                }, 500);
+            }
+        });
     });
-
-    function handleMove(rootX) {
-        if (!gameActive || showRoundEnd) return;
-        const cWidth = getCanvasWidth();
-        cannon.targetX = Math.max(30, Math.min(cWidth - 30, rootX));
-    }
-
-    function fireRocket() {
-        rocket.x = cannon.x;
-        rocket.y = cannon.y - 12;
-        rocket.vy = -15;
-        rocket.active = true;
-        rocket.color = roundsData[currentRound].starColor;
-    }
 
     function createBurst(x, y, color) {
-        for (let i = 0; i < 22; i++) {
+        for (let i = 0; i < 25; i++) {
             particles.push({
-                x: x, y: y, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
-                r: Math.random() * 4 + 2, alpha: 1, color: color
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                r: Math.random() * 5 + 2,
+                alpha: 1,
+                color: color
             });
         }
     }
 
-    function handleWrongCollision() {
-        attemptsLeft--;
-        safePlayAudio('snd-wrong');
-        document.getElementById('attemptsLabel').innerText = `Attempts: ${attemptsLeft} Left`;
-        if (attemptsLeft <= 0) {
-            document.getElementById('attemptsLabel').innerText = `Revealing!`;
-            document.getElementById('attemptsLabel').style.color = "#00cec9";
-            activePair.forEach(item => { if (!item.correct) item.active = false; });
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < activeQuestions.length) {
+            setupQuestion();
+        } else {
+            finishGame();
         }
     }
 
-    function finishRound() {
-        showRoundEnd = true;
-        safePlayAudio('snd-clap');
-        document.getElementById('factText').innerText = roundsData[currentRound].fact;
-        document.getElementById('factPopup').style.display = 'block';
-    }
+    function finishGame() {
+        gameActive = false;
+        document.getElementById('factPopup').style.display = 'none';
+        document.getElementById('uiOverlay').style.display = 'none';
+        safePlayAudio('snd-fanfare');
 
-    function nextRound() {
-        currentRound++;
-        if (currentRound < roundsData.length) initRound();
-        else {
-            gameActive = false;
-            document.getElementById('uiOverlay').style.display = 'none';
-            safePlayAudio('snd-fanfare');
-            document.getElementById('finalScore').innerText = `Final Score: ${score}/${roundsData.length * 3}`;
-            document.getElementById('completionScreen').style.display = 'flex';
-        }
-    }
-
-    function restartGame() {
-        document.getElementById('completionScreen').style.display = 'none';
-        startGame();
+        document.getElementById('completionFestivalName').innerText = `Festival: ${selectedFestivalKey}`;
+        document.getElementById('finalScore').innerText = `Final Score: ${totalScore}/50 Marks`;
+        document.getElementById('completionScreen').style.display = 'flex';
     }
 
     function update() {
         if (!gameActive) return;
 
-        cannon.x += (cannon.targetX - cannon.x) * 0.3;
-
-        if (freezeTimer > 0) {
-            freezeTimer--;
-            if (freezeTimer <= 0) {
-                let hitCorrect = false;
-                activePair.forEach(item => { if (item.statusColor === 'green') hitCorrect = true; });
-                if (hitCorrect) { currentPairIndex++; spawnNextPair(); }
-            }
-            return;
-        }
-
-        if (rocket.active) {
-            rocket.y += rocket.vy;
-
-            // Soft star-dust trail
-            particles.push({
-                x: rocket.x + (Math.random()-0.5)*3, y: rocket.y + 8,
-                vx: (Math.random()-0.5)*1.5, vy: Math.random()*2, r: Math.random()*2.5+1,
-                alpha: 0.7, color: '#ffeaa7'
-            });
-
-            if (rocket.y < 40) { rocket.active = false; }
-
-            // Hit test
-            activePair.forEach(item => {
-                if (!item.active || item.statusColor !== null || !rocket.active) return;
-
-                if (rocket.x >= item.x && rocket.x <= item.x + item.w &&
-                    rocket.y >= item.y && rocket.y <= item.y + item.h) {
-                    
-                    rocket.active = false;
-                    createBurst(rocket.x, rocket.y, item.correct ? '#55efc4' : '#ff7675');
-
-                    if (item.correct) {
-                        item.statusColor = 'green'; score++; collectedThisRound++;
-                        safePlayAudio('snd-correct');
-                        document.getElementById('scoreLabel').innerText = `Score: ${score}/${roundsData.length * 3}`;
-                        freezeTimer = 30;
-                    } else {
-                        item.statusColor = 'red';
-                        handleWrongCollision();
-                        freezeTimer = 30;
-                    }
-                }
-            });
+        if (cardAnimationProgress < 1) {
+            cardAnimationProgress += 0.05;
         }
 
         particles.forEach((p, idx) => {
-            p.x += p.vx; p.y += p.vy; p.alpha -= 0.035;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.03;
             if (p.alpha <= 0) particles.splice(idx, 1);
         });
-    }
-
-    function drawStar(cx, cy, spikes, outerRadius, innerRadius, color) {
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        let rot = Math.PI / 2 * 3;
-        let step = Math.PI / spikes;
-        ctx.moveTo(cx, cy - outerRadius);
-        for (let i = 0; i < spikes; i++) {
-            let x = cx + Math.cos(rot) * outerRadius;
-            let y = cy + Math.sin(rot) * outerRadius;
-            ctx.lineTo(x, y);
-            rot += step;
-            x = cx + Math.cos(rot) * innerRadius;
-            let y2 = cy + Math.sin(rot) * innerRadius;
-            ctx.lineTo(x, y2);
-            rot += step;
-        }
-        ctx.lineTo(cx, cy - outerRadius);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
     }
 
     function render() {
         const cWidth = getCanvasWidth();
         const cHeight = getCanvasHeight();
         ctx.clearRect(0, 0, cWidth, cHeight);
+
         if (!gameActive) return;
 
-        let wordsLeft = 3 - collectedThisRound;
-        let dynamicPrompt = `Find ${wordsLeft} word${wordsLeft > 1 ? 's' : ''} for: ${roundsData[currentRound].name}`;
+        const qData = activeQuestions[currentQuestionIndex];
 
-        // Header Prompt Banner
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
-        ctx.beginPath(); ctx.roundRect(cWidth * 0.05, 58, cWidth * 0.9, 44, 14); ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
+        // Draw Header Banner (Festival Name)
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.beginPath();
+        ctx.roundRect(cWidth * 0.06, 60, cWidth * 0.88, 38, 12);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffeaa7';
+        ctx.font = '900 clamp(14px, 3.8vw, 17px) "Comic Sans MS"';
+        ctx.textAlign = 'center';
+        ctx.fillText(`✨ FESTIVAL: ${selectedFestivalKey} ✨`, cWidth / 2, 84);
+        ctx.restore();
+
+        // Draw Question Card
+        ctx.save();
+        const qBoxWidth = cWidth * 0.88;
+        const qBoxHeight = Math.min(180, cHeight * 0.28);
+        const qBoxX = (cWidth - qBoxWidth) / 2;
+        const qBoxY = 115;
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.beginPath();
+        ctx.roundRect(qBoxX, qBoxY, qBoxWidth, qBoxHeight, 22);
+        ctx.fill();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = 'rgba(0,0,0,0.15)';
+
+        // Question Card Badge
+        ctx.fillStyle = '#6c5ce7';
+        ctx.beginPath();
+        ctx.roundRect(qBoxX + 16, qBoxY + 14, 110, 26, 8);
+        ctx.fill();
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 clamp(13px, 3.6vw, 16px) "Comic Sans MS"';
-        ctx.textAlign = 'center'; ctx.fillText(dynamicPrompt, cWidth / 2, 85);
+        ctx.font = '900 13px "Comic Sans MS"';
+        ctx.textAlign = 'center';
+        ctx.fillText("10 MARKS", qBoxX + 71, qBoxY + 31);
 
-        // Draw Choice Cards
-        activePair.forEach(item => {
-            if (!item.active) return;
+        // Question Text (Wrapped)
+        ctx.fillStyle = '#2d3436';
+        ctx.font = 'bold clamp(15px, 4vw, 19px) system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        wrapText(ctx, qData.q, cWidth / 2, qBoxY + (qBoxHeight / 2) + 10, qBoxWidth - 30, 24);
+        ctx.restore();
+
+        // Draw Option Cards
+        optionCards.forEach((card, index) => {
             ctx.save();
-            if (item.statusColor === 'green') { ctx.fillStyle = '#00b894'; ctx.strokeStyle = '#55efc4'; }
-            else if (item.statusColor === 'red') { ctx.fillStyle = '#d63031'; ctx.strokeStyle = '#ff7675'; }
-            else { ctx.fillStyle = 'rgba(255, 255, 255, 0.22)'; ctx.strokeStyle = '#ffeaa7'; }
+            let cardY = card.y;
             
-            ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(item.x, item.y, item.w, item.h, 14);
-            ctx.fill(); ctx.stroke();
+            // Pop-in Animation
+            if (cardAnimationProgress < 1) {
+                cardY += (1 - cardAnimationProgress) * 40;
+            }
 
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold clamp(13px, 3.5vw, 16px) system-ui, sans-serif';
-            ctx.textBaseline = 'middle'; ctx.fillText(item.text, item.x + item.w / 2, item.y + item.h / 2);
+            if (card.state === "correct") {
+                ctx.fillStyle = '#00b894';
+                ctx.strokeStyle = '#55efc4';
+            } else if (card.state === "wrong") {
+                ctx.fillStyle = '#d63031';
+                ctx.strokeStyle = '#ff7675';
+            } else {
+                ctx.fillStyle = index === 0 ? '#ffeaa7' : '#74b9ff';
+                ctx.strokeStyle = '#ffffff';
+            }
+
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.roundRect(card.x, cardY, card.w, card.h, 20);
+            ctx.fill();
+            ctx.stroke();
+
+            // Card Text
+            ctx.fillStyle = card.state === "normal" ? '#2d3436' : '#ffffff';
+            ctx.font = '900 clamp(14px, 3.8vw, 18px) "Comic Sans MS"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            wrapText(ctx, card.text, card.x + card.w / 2, cardY + card.h / 2, card.w - 16, 22);
             ctx.restore();
         });
 
-        // Draw Friendly Launcher
-        ctx.save();
-        ctx.fillStyle = '#ffeaa7';
-        ctx.beginPath(); ctx.arc(cannon.x, cannon.y + 8, 22, Math.PI, 0); ctx.fill();
-        ctx.fillStyle = '#fdcb6e';
-        ctx.beginPath(); ctx.roundRect(cannon.x - 7, cannon.y - 12, 14, 20, 6); ctx.fill();
-        ctx.restore();
-
-        // Aiming guideline
-        if (!rocket.active && freezeTimer <= 0 && !showRoundEnd) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 234, 167, 0.4)';
-            ctx.setLineDash([5, 5]); ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(cannon.x, cannon.y - 12); ctx.lineTo(cannon.x, 150); ctx.stroke();
-            ctx.restore();
-        }
-
-        // Draw Active Star Rocket
-        if (rocket.active) {
-            drawStar(rocket.x, rocket.y, 5, rocket.r, rocket.r / 2, rocket.color);
-        }
-
-        // Particles
+        // Draw Burst Particles
         particles.forEach(p => {
-            ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color;
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         });
     }
 
-    function mainLoop() { update(); render(); requestAnimationFrame(mainLoop); }
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        const lines = [];
+
+        for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = context.measureText(testLine);
+            const testWidth = metrics.width;
+            if (testWidth > maxWidth && n > 0) {
+                lines.push(line);
+                line = words[n] + ' ';
+            } else {
+                line = testLine;
+            }
+        }
+        lines.push(line);
+
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        for (let k = 0; k < lines.length; k++) {
+            context.fillText(lines[k].trim(), x, startY + (k * lineHeight));
+        }
+    }
+
+    function mainLoop() {
+        update();
+        render();
+        requestAnimationFrame(mainLoop);
+    }
     mainLoop();
 </script>
 </body>
