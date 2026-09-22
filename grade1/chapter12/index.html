@@ -2,46 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Flappy Earth Flyer</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #bae1ff; font-family: 'Comic Sans MS', sans-serif; }
-        #gameContainer { position: relative; width: 100%; height: 100%; max-width: 600px; max-height: 900px; margin: 0 auto; background: #bae1ff; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.15); }
-        canvas { display: block; width: 100%; height: 100%; }
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 30px; text-align: center; color: #2c3e50; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #bae1ff; font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; position: fixed; }
         
-        /* Screen 1: Brand Logo - Pure bright white background */
+        #gameContainer { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            max-width: 600px; 
+            max-height: 100vh; 
+            margin: 0 auto; 
+            background: #bae1ff; 
+            overflow: hidden; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.15); 
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+        
+        .screen { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 10; 
+            padding: 20px; 
+            text-align: center; 
+            color: #2c3e50; 
+        }
+        
+        /* Screen 1: Brand Logo */
         #logoScreen { background-color: #ffffff; z-index: 100; }
         #logoScreen img { max-width: 60%; max-height: 40%; object-fit: contain; }
         
         /* Screen 2: Title Menu Screen */
         #titleScreen { background: linear-gradient(to bottom, #70c5ff 0%, #fef3c7 100%); z-index: 90; display: none; }
-        #titleScreen h1 { color: #1e3a8a; font-size: 44px; margin-bottom: 25px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 4px 10px rgba(0,0,0,0.15); line-height: 1.2; font-weight: 900; }
+        #titleScreen h1 { color: #1e3a8a; font-size: clamp(32px, 8vw, 44px); margin-bottom: 25px; text-shadow: 3px 3px 0px #ffffff, -3px -3px 0px #ffffff, 3px -3px 0px #ffffff, -3px 3px 0px #ffffff, 0px 4px 10px rgba(0,0,0,0.15); line-height: 1.2; font-weight: 900; }
         
         /* Screen 3: Instructions Screen */
         #instructionScreen { background: rgba(255, 254, 240, 0.98); z-index: 85; display: none; border: 8px solid #baffc9; border-radius: 20px; }
         
-        .btn { background: #ff8b94; color: #fff; border: none; padding: 16px 40px; font-size: 24px; font-weight: bold; border-radius: 40px; cursor: pointer; box-shadow: 0 8px #d66871; text-transform: uppercase; transition: all 0.1s ease; margin-top: 25px; text-shadow: 1px 1px rgba(0,0,0,0.2); }
+        .btn { background: #ff8b94; color: #fff; border: none; padding: 14px 36px; font-size: clamp(18px, 4vw, 24px); font-weight: bold; border-radius: 40px; cursor: pointer; box-shadow: 0 8px #d66871; text-transform: uppercase; transition: all 0.1s ease; margin-top: 20px; text-shadow: 1px 1px rgba(0,0,0,0.2); -webkit-tap-highlight-color: transparent; }
         .btn:active { box-shadow: 0 2px #d66871; transform: translateY(6px); }
         
-        .big-bold-text { font-size: 24px; font-weight: 900; line-height: 1.4; margin-bottom: 18px; color: #4a4a4a; }
+        .big-bold-text { font-size: clamp(16px, 4vw, 24px); font-weight: 900; line-height: 1.4; margin-bottom: 15px; color: #4a4a4a; }
         
         /* Custom Habit Dashboard HUD */
-        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 20; pointer-events: none; display: none; }
+        #uiOverlay { position: absolute; top: 0; left: 0; width: 100%; padding: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 20; pointer-events: none; display: none; }
         .hud-row { display: flex; justify-content: space-between; width: 100%; align-items: center; }
-        .ui-element { background: rgba(255, 255, 255, 0.92); color: #1e3a8a; padding: 10px 18px; border-radius: 20px; font-size: 18px; font-weight: bold; border: 2px solid #93c5fd; box-shadow: 0 4px rgba(0,0,0,0.05); }
-        #trackerBar { background: rgba(255, 255, 255, 0.85); width: 100%; padding: 8px; border-radius: 12px; display: flex; gap: 6px; justify-content: center; font-size: 20px; border: 1px dashed #93c5fd; }
+        .ui-element { background: rgba(255, 255, 255, 0.92); color: #1e3a8a; padding: 8px 14px; border-radius: 20px; font-size: clamp(14px, 3.5vw, 18px); font-weight: bold; border: 2px solid #93c5fd; box-shadow: 0 4px rgba(0,0,0,0.05); }
+        #trackerBar { background: rgba(255, 255, 255, 0.85); width: 100%; padding: 6px; border-radius: 12px; display: flex; gap: 4px; justify-content: center; font-size: clamp(14px, 3.5vw, 20px); border: 1px dashed #93c5fd; overflow-x: auto; }
         
         /* Lesson Dialogue Overlay Panel */
-        #lessonOverlay { position: absolute; bottom: 130px; left: 5%; width: 90%; background: #ffffff; border: 4px solid #3b82f6; padding: 20px; text-align: center; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: none; z-index: 40; animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #lessonText { font-size: 20px; font-weight: bold; color: #1e293b; margin-bottom: 15px; line-height: 1.4; }
-        .continue-btn { background: #10b981; color: white; border: none; padding: 10px 30px; font-size: 18px; font-weight: bold; border-radius: 25px; cursor: pointer; box-shadow: 0 4px #059669; }
+        #lessonOverlay { position: absolute; bottom: 130px; left: 5%; width: 90%; background: #ffffff; border: 4px solid #3b82f6; padding: 16px; text-align: center; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: none; z-index: 40; animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #lessonText { font-size: clamp(16px, 4vw, 20px); font-weight: bold; color: #1e293b; margin-bottom: 12px; line-height: 1.4; }
+        .continue-btn { background: #10b981; color: white; border: none; padding: 10px 28px; font-size: 18px; font-weight: bold; border-radius: 25px; cursor: pointer; box-shadow: 0 4px #059669; -webkit-tap-highlight-color: transparent; }
         .continue-btn:active { box-shadow: 0 1px #059669; transform: translateY(3px); }
 
         /* Mobile Controller Layout */
         #controlPanel { position: absolute; bottom: 0; left: 0; width: 100%; height: 110px; background: #fef3c7; border-top: 6px solid #f59e0b; display: none; justify-content: space-around; align-items: center; z-index: 30; padding: 0 10px; }
-        .control-btn { width: 44%; height: 75px; border: none; border-radius: 18px; color: white; font-size: 24px; font-weight: bold; font-family: 'Comic Sans MS', sans-serif; cursor: pointer; box-shadow: 0 6px rgba(0,0,0,0.1); text-shadow: 1px 1px rgba(0,0,0,0.2); transition: transform 0.05s ease; }
+        .control-btn { width: 44%; height: 75px; border: none; border-radius: 18px; color: white; font-size: clamp(18px, 5vw, 24px); font-weight: bold; font-family: inherit; cursor: pointer; box-shadow: 0 6px rgba(0,0,0,0.1); text-shadow: 1px 1px rgba(0,0,0,0.2); transition: transform 0.05s ease; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         #btnUp { background: #10b981; color: #fff; border: 3px solid #34d399; box-shadow: 0 6px #059669; }
         #btnDown { background: #ef4444; color: #fff; border: 3px solid #f87171; box-shadow: 0 6px #dc2626; }
         .control-btn:active { transform: translateY(4px); box-shadow: 0 2px rgba(0,0,0,0.1); }
@@ -67,10 +96,10 @@
     </div>
 
     <div id="instructionScreen" class="screen">
-        <div class="big-bold-text" style="color: #1e3a8a; font-size: 28px;">Your Flying Eco-Mission!</div>
-        <div class="big-bold-text" style="font-size: 18px; background: #e0f2fe; padding: 10px; border-radius: 12px;">The game will move slowly so you can read every habit clearly!</div>
-        <div class="big-bold-text" style="font-size: 20px;">☁️ Fly UP into <span style="color: #059669;">Good Habit Clouds</span> to help Earth!</div>
-        <div class="big-bold-text" style="font-size: 20px;">⚠️ Fly DOWN to avoid <span style="color: #dc2626;">Bad Habit Pillars</span>!</div>
+        <div class="big-bold-text" style="color: #1e3a8a; font-size: clamp(20px, 5vw, 28px);">Your Flying Eco-Mission!</div>
+        <div class="big-bold-text" style="font-size: clamp(14px, 3.5vw, 18px); background: #e0f2fe; padding: 10px; border-radius: 12px;">The game will move slowly so you can read every habit clearly!</div>
+        <div class="big-bold-text" style="font-size: clamp(16px, 4vw, 20px);">☁️ Fly UP into <span style="color: #059669;">Good Habit Clouds</span> to help Earth!</div>
+        <div class="big-bold-text" style="font-size: clamp(16px, 4vw, 20px);">⚠️ Fly DOWN to avoid <span style="color: #dc2626;">Bad Habit Pillars</span>!</div>
         <button class="btn" style="background: #10b981; box-shadow: 0 8px #059669;" onclick="startGame()">Fly Now! 🚀</button>
     </div>
 
@@ -93,9 +122,9 @@
     </div>
 
     <div id="completionScreen" class="screen">
-        <h1 style="color: #065f46; font-size: 44px; margin-bottom: 15px; text-shadow: none;">Fantastic Job!</h1>
-        <p style="font-size: 22px; margin-bottom: 25px; font-weight: bold; color: #374151;">You are officially an Earth Protector!</p>
-        <div class="ui-element" id="finalScore" style="font-size: 30px; padding: 18px 36px; border-color: #10b981; background: white; margin-bottom: 25px;">Final Score: 0/12</div>
+        <h1 style="color: #065f46; font-size: clamp(32px, 8vw, 44px); margin-bottom: 15px; text-shadow: none;">Fantastic Job!</h1>
+        <p style="font-size: clamp(18px, 4.5vw, 22px); margin-bottom: 25px; font-weight: bold; color: #374151;">You are officially an Earth Protector!</p>
+        <div class="ui-element" id="finalScore" style="font-size: clamp(20px, 5vw, 30px); padding: 14px 28px; border-color: #10b981; background: white; margin-bottom: 25px;">Final Score: 0/12</div>
         <button class="btn" style="background: #fcd34d; color: #78350f; box-shadow: 0 8px #d97706;" onclick="restartGame()">Play Again 🔄</button>
     </div>
 
@@ -114,10 +143,12 @@
     sndBgm.loop = true;
 
     function resize() {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
     }
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', () => setTimeout(resize, 200));
     resize();
 
     let score = 0;
@@ -128,14 +159,13 @@
     let speechBubbleColor = "#10b981";
     let trackerHistory = [];
     
-    // Bird configuration with explicitly defined flapping cycle properties
     let bird = { 
         x: 100, 
         y: 350, 
         radius: 20, 
         speed: 4.2,
-        wingAngle: 0,       // Tracks the running visual wave degree
-        wingFlapSpeed: 0.15 // Standard visual frame tick speed
+        wingAngle: 0, 
+        wingFlapSpeed: 0.15 
     };
     
     let landscapeClouds = [];
@@ -145,7 +175,6 @@
     let activeCloud = null;
     let activePipe = null;
 
-    // Direct Database Mappings with Child Speech Reactions
     const tasksDataset = [
         { eco: "Planting more trees", dirty: "Cutting down trees", correctMsg: "🎉 Perfect! Planting trees gives animals homes and fills our world with fresh, clean oxygen!", wrongMsg: "❌ Oh no! Cutting down trees takes away clean air and nesting spaces for birds!", bubbleGood: "Yay for green leaves! 🌲", bubbleBad: "Oh no! The poor birds! 😟" },
         { eco: "Using a covered dustbin", dirty: "Throwing garbage on road", correctMsg: "🎉 Awesome! Covered dustbins safely lock away germs, flies, and bad smells!", wrongMsg: "❌ Oh no! Throwing trash on the street attracts flies and spreads nasty sickness!", bubbleGood: "Keep germs locked up! 🗑️", bubbleBad: "Yuck! Watch out! 🪰" },
@@ -164,7 +193,7 @@
     setTimeout(() => {
         document.getElementById('logoScreen').style.display = 'none';
         document.getElementById('titleScreen').style.display = 'flex';
-    }, 5000);
+    }, 4000);
 
     function showInstructions() {
         document.getElementById('titleScreen').style.display = 'none';
@@ -256,15 +285,16 @@
     const upBtn = document.getElementById('btnUp');
     const downBtn = document.getElementById('btnDown');
 
-    upBtn.addEventListener('mousedown', () => { controlUpActive = true; });
-    upBtn.addEventListener('mouseup', () => { controlUpActive = false; });
-    upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); controlUpActive = true; });
-    upBtn.addEventListener('touchend', () => { controlUpActive = false; });
+    // Robust multi-device event listeners preventing default pinch/zoom/scroll
+    ['mousedown', 'touchstart'].forEach(evt => {
+        upBtn.addEventListener(evt, (e) => { e.preventDefault(); controlUpActive = true; });
+        downBtn.addEventListener(evt, (e) => { e.preventDefault(); controlDownActive = true; });
+    });
 
-    downBtn.addEventListener('mousedown', () => { controlDownActive = true; });
-    downBtn.addEventListener('mouseup', () => { controlDownActive = false; });
-    downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); controlDownActive = true; });
-    downBtn.addEventListener('touchend', () => { controlDownActive = false; });
+    ['mouseup', 'touchend', 'touchcancel', 'mouseleave'].forEach(evt => {
+        upBtn.addEventListener(evt, (e) => { e.preventDefault(); controlUpActive = false; });
+        downBtn.addEventListener(evt, (e) => { e.preventDefault(); controlDownActive = false; });
+    });
 
     function triggerInteractiveInteraction(status) {
         interactivePaused = true;
@@ -280,7 +310,7 @@
             sndCorrect.currentTime = 0;
             sndCorrect.play().catch(()=>{});
             
-            txt.innerHTML = `<span style='color:#10b981; font-size:24px;'>Excellent Choice!</span><br><br>${currentData.correctMsg}`;
+            txt.innerHTML = `<span style='color:#10b981; font-size:22px;'>Excellent Choice!</span><br><br>${currentData.correctMsg}`;
             overlay.style.borderColor = "#10b981";
         } else {
             attemptsLeft--;
@@ -290,7 +320,7 @@
             sndWrong.currentTime = 0;
             sndWrong.play().catch(()=>{});
             
-            txt.innerHTML = `<span style='color:#ef4444; font-size:24px;'>Let's Remember!</span><br><br>${currentData.wrongMsg}`;
+            txt.innerHTML = `<span style='color:#ef4444; font-size:22px;'>Let's Remember!</span><br><br>${currentData.wrongMsg}`;
             overlay.style.borderColor = "#ef4444";
         }
 
@@ -298,7 +328,6 @@
         document.getElementById('scoreLabel').innerText = `Score: ${score} / 12`;
         document.getElementById('attemptsLabel').innerText = `Hearts: ${attemptsLeft} Left`;
         
-        // Exactly 2 seconds pause for the speech bubble before sliding in the interactive window
         setTimeout(() => {
             if (gameActive) {
                 overlay.style.display = "block";
@@ -340,7 +369,6 @@
     function update() {
         if (!gameActive || interactivePaused) return;
 
-        // Continuous sinewave wing animation loops smoothly on every frame tick
         bird.wingAngle += (controlUpActive || controlDownActive) ? 0.3 : bird.wingFlapSpeed;
 
         if (controlUpActive) {
@@ -368,7 +396,6 @@
             return;
         }
 
-        // Cloud Core Collide Detection
         let cClosestX = Math.max(activeCloud.x, Math.min(bird.x, activeCloud.x + activeCloud.w));
         let cClosestY = Math.max(activeCloud.y, Math.min(bird.y, activeCloud.y + activeCloud.h));
         let cDistX = bird.x - cClosestX;
@@ -377,7 +404,6 @@
             triggerInteractiveInteraction('correct');
         }
 
-        // Pillar Block Collide Detection
         let pClosestX = Math.max(activePipe.x, Math.min(bird.x, activePipe.x + activePipe.w));
         let pClosestY = Math.max(activePipe.y, Math.min(bird.y, activePipe.y + activePipe.h));
         let pDistX = bird.x - pClosestX;
@@ -389,7 +415,6 @@
 
     function drawClassicBird(cx, cy, radius) {
         ctx.save();
-        // Main round bird body
         ctx.fillStyle = "#ffcc00";
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
@@ -398,7 +423,6 @@
         ctx.strokeStyle = "#1e3a8a";
         ctx.stroke();
 
-        // Big friendly cartoon eye
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
         ctx.arc(cx + 6, cy - 5, 6, 0, Math.PI * 2);
@@ -410,7 +434,6 @@
         ctx.arc(cx + 8, cy - 5, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Beak
         ctx.fillStyle = "#ff6600";
         ctx.beginPath();
         ctx.moveTo(cx + 14, cy - 2);
@@ -420,7 +443,6 @@
         ctx.fill();
         ctx.stroke();
 
-        // Tail feathers
         ctx.fillStyle = "#ffaa00";
         ctx.beginPath();
         ctx.moveTo(cx - 18, cy - 2);
@@ -430,11 +452,8 @@
         ctx.fill();
         ctx.stroke();
 
-        // HIGH VISIBILITY CARTOON WING FLAP: Cycles a deep rotation matrix to flap completely up and down
         ctx.save();
-        ctx.translate(cx - 5, cy + 1); // Anchor wing to middle-back of bird
-        
-        // Map the running wing angle into a clear -45 to +45 degree swing
+        ctx.translate(cx - 5, cy + 1);
         let flapOffset = Math.sin(bird.wingAngle) * 0.8; 
         ctx.rotate(flapOffset);
 
@@ -442,7 +461,6 @@
         ctx.strokeStyle = "#1e3a8a";
         ctx.lineWidth = 3;
         
-        // Draw an elongated wing teardrop that sweeps up and down dramatically
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.bezierCurveTo(-15, -18, 5, -24, 2, 2);
@@ -451,7 +469,6 @@
         ctx.stroke();
         ctx.restore();
 
-        // Dialogue Speech Bubble Render Anchor
         if (speechBubbleMsg !== "") {
             ctx.fillStyle = speechBubbleColor;
             ctx.strokeStyle = "#ffffff";
@@ -471,7 +488,7 @@
             ctx.fill();
 
             ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 12px 'Comic Sans MS'";
+            ctx.font = "bold 12px sans-serif";
             ctx.textAlign = "center";
             ctx.fillText(speechBubbleMsg, cx + 37, cy - 44);
         }
@@ -496,12 +513,11 @@
         ctx.restore();
     }
 
-    render = () => {
+    const render = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (!gameActive) return;
 
-        // Visual Space Canvas Setup
         ctx.fillStyle = "#bae1ff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -520,11 +536,10 @@
         ctx.arc(450, canvas.height - 20, 220, 0, Math.PI*2);
         ctx.fill();
 
-        // Render Active Interactive Cloud Target
         drawEcoCloud(ctx, activeCloud.x, activeCloud.y, activeCloud.w, activeCloud.h);
         
         ctx.fillStyle = "#065f46";
-        ctx.font = "bold 13px 'Comic Sans MS'";
+        ctx.font = "bold 13px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         let words = activeCloud.text.split(" ");
@@ -535,7 +550,6 @@
             ctx.fillText(activeCloud.text, activeCloud.x + activeCloud.w/2, activeCloud.y + activeCloud.h/2);
         }
 
-        // Render Active Obstacle Habit Pillar
         ctx.save();
         ctx.fillStyle = "#fee2e2";
         ctx.strokeStyle = "#ef4444";
@@ -546,7 +560,7 @@
         ctx.stroke();
 
         ctx.fillStyle = "#991b1b";
-        ctx.font = "bold 13px 'Comic Sans MS'";
+        ctx.font = "bold 13px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         let pipeWords = activePipe.text.split(" ");
@@ -559,13 +573,11 @@
         }
         ctx.restore();
 
-        // Baseline Platform Render Layout
         ctx.fillStyle = "#10b981";
         ctx.fillRect(0, canvas.height - 110, canvas.width, 10);
 
-        // Core Player Render Action
         drawClassicBird(bird.x, bird.y, bird.radius);
-    }
+    };
 
     function mainLoop() {
         update();
