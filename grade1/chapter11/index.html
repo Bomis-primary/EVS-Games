@@ -87,6 +87,19 @@
             z-index: 100;
         }
 
+        .logo-img {
+            max-width: 220px;
+            max-height: 120px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         #titleScreen { 
             background: radial-gradient(circle at center, #686de0 0%, #130f40 100%); 
             z-index: 90; 
@@ -261,9 +274,10 @@
 
 <div id="gameContainer">
 
-    <!-- LOGO SCREEN -->
+    <!-- LOGO SCREEN WITH ASSET LOGO IMAGE -->
     <div id="logoScreen" class="screen">
-        <h1 id="fallbackLogo" style="color: var(--pastel-yellow); font-size: 38px; font-weight: 800;">INNOVINE</h1>
+        <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
+        <h1 id="fallbackLogo" style="display:none; color: var(--pastel-yellow); font-size: 38px; font-weight: 800;">INNOVINE</h1>
         <p style="color: #a1c4fd; margin-top: 8px; font-weight: 600;">Interactive Learning Games</p>
     </div>
 
@@ -343,6 +357,38 @@
     let optionCards = [];
     let soundMuted = false;
 
+    // Asset Audio Elements
+    const audioAssets = {
+        correct: new Audio('./assets/correct-answer-sparklesound.mp3'),
+        wrong: new Audio('./assets/wrong.mp3'),
+        claps: new Audio('./assets/freesound_community-claps-44774.mp3'),
+        celebration: new Audio('./assets/celebratorysong.mp3')
+    };
+
+    // Preload & setup audio elements
+    Object.values(audioAssets).forEach(audio => {
+        audio.preload = 'auto';
+    });
+    audioAssets.celebration.loop = true;
+
+    // Play Asset Sound with Fallback
+    function playAssetSound(type) {
+        if (soundMuted) return;
+        try {
+            if (audioAssets[type]) {
+                audioAssets[type].currentTime = 0;
+                audioAssets[type].play().catch(() => {
+                    // Fallback to Web Audio synthesizer if file play is blocked/failed
+                    playSynthSound(type);
+                });
+            } else {
+                playSynthSound(type);
+            }
+        } catch (e) {
+            playSynthSound(type);
+        }
+    }
+
     // Fisher-Yates Shuffle helper
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -395,11 +441,8 @@
     }
     setTimeout(dismissLogo, 2500);
 
-    // Dynamic Web Audio Synthesizer (Ensures 100% sound playback without external audio downloads)
+    // Dynamic Web Audio Synthesizer (Fallback for offline or blocked media)
     let audioCtx = null;
-    let bgmOsc = null;
-    let bgmGain = null;
-    let bgmInterval = null;
 
     function initAudioEngine() {
         if (!audioCtx) {
@@ -411,49 +454,17 @@
         if (audioCtx && audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
-        startBGM();
     }
 
     function toggleAudio() {
         soundMuted = !soundMuted;
         document.getElementById('audioBtn').innerText = soundMuted ? "🔇" : "🔊";
-        if (soundMuted) {
-            if (bgmGain) bgmGain.gain.setValueAtTime(0, audioCtx.currentTime);
-        } else {
-            if (bgmGain) bgmGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        }
-    }
-
-    function startBGM() {
-        if (!audioCtx || bgmInterval || soundMuted) return;
         
-        bgmGain = audioCtx.createGain();
-        bgmGain.gain.setValueAtTime(soundMuted ? 0 : 0.04, audioCtx.currentTime);
-        bgmGain.connect(audioCtx.destination);
-
-        const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
-        let noteIdx = 0;
-
-        bgmInterval = setInterval(() => {
-            if (soundMuted || !audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const noteGain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
-                
-                noteGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-                noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-                
-                osc.connect(noteGain);
-                noteGain.connect(bgmGain);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.45);
-                
-                noteIdx = (noteIdx + 1) % notes.length;
-            } catch(e){}
-        }, 500);
+        if (soundMuted) {
+            audioAssets.celebration.pause();
+        } else if (!document.getElementById('completionScreen').style.display || document.getElementById('completionScreen').style.display === 'flex') {
+            audioAssets.celebration.play().catch(() => {});
+        }
     }
 
     function playSynthSound(type) {
@@ -483,20 +494,6 @@
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
                 osc.start(now);
                 osc.stop(now + 0.35);
-            } else if (type === 'fanfare') {
-                const chord = [523.25, 659.25, 783.99, 1046.50];
-                chord.forEach((freq, idx) => {
-                    const subOsc = audioCtx.createOscillator();
-                    const subGain = audioCtx.createGain();
-                    subOsc.type = 'triangle';
-                    subOsc.frequency.setValueAtTime(freq, now + (idx * 0.08));
-                    subGain.gain.setValueAtTime(0.2, now + (idx * 0.08));
-                    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6 + (idx * 0.08));
-                    subOsc.connect(subGain);
-                    subGain.connect(audioCtx.destination);
-                    subOsc.start(now + (idx * 0.08));
-                    subOsc.stop(now + 0.7 + (idx * 0.08));
-                });
             }
         } catch(e) {}
     }
@@ -696,6 +693,9 @@
 
     function showFestivalSelect() {
         initAudioEngine();
+        audioAssets.celebration.pause();
+        audioAssets.celebration.currentTime = 0;
+        
         document.getElementById('titleScreen').style.display = 'none';
         document.getElementById('instructionScreen').style.display = 'none';
         document.getElementById('completionScreen').style.display = 'none';
@@ -816,14 +816,15 @@
                 if (card.correct) {
                     card.state = "correct";
                     totalScore += 10;
-                    playSynthSound('correct');
+                    playAssetSound('correct');
+                    setTimeout(() => playAssetSound('claps'), 200);
                     createBurst(card.x + card.w/2, card.y + card.h/2, '#2ed573');
                     document.getElementById('scoreLabel').innerText = `Marks: ${totalScore}/30`;
                     document.getElementById('popTitle').innerText = "🎉 Correct Answer! (+10 Marks)";
                     document.getElementById('popTitle').style.color = "#10ac84";
                 } else {
                     card.state = "wrong";
-                    playSynthSound('wrong');
+                    playAssetSound('wrong');
                     createBurst(card.x + card.w/2, card.y + card.h/2, '#ff758c');
                     document.getElementById('popTitle').innerText = "💡 Oops! Here's a tip:";
                     document.getElementById('popTitle').style.color = "#ea2027";
@@ -851,7 +852,7 @@
         }
     }
 
-    // Fixed single-call handler for Next Question
+    // Single-call handler for Next Question
     function nextQuestion(e) {
         if (e && e.stopPropagation) e.stopPropagation();
         currentQuestionIndex++;
@@ -862,14 +863,15 @@
         }
     }
 
-    // Attach single click event listener on Next Question button
     document.getElementById('nextQBtn').addEventListener('click', nextQuestion);
 
     function finishGame() {
         gameActive = false;
         document.getElementById('factPopup').style.display = 'none';
         document.getElementById('uiOverlay').style.display = 'none';
-        playSynthSound('fanfare');
+        
+        playAssetSound('claps');
+        playAssetSound('celebration');
 
         document.getElementById('completionFestivalName').innerText = `Festival: ${selectedFestivalKey}`;
         document.getElementById('finalScore').innerText = `Final Score: ${totalScore}/30 Marks`;
@@ -932,7 +934,7 @@
 
             const qData = activeQuestions[currentQuestionIndex];
 
-            // Canvas Header Title Banner (Cleaned up: NO redundant marks/counts here)
+            // Canvas Header Title Banner
             ctx.save();
             ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
             ctx.beginPath();
