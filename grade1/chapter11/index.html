@@ -161,6 +161,7 @@
         }
 
         .fest-card-btn {
+            position: relative;
             background: rgba(255, 255, 255, 0.12);
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 22px;
@@ -176,6 +177,26 @@
         .fest-card-btn:active {
             transform: scale(0.95);
             background: rgba(255, 255, 255, 0.3);
+        }
+        .fest-card-btn.completed {
+            background: rgba(46, 213, 115, 0.25) !important;
+            border-color: #2ed573 !important;
+        }
+
+        .completed-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #2ed573;
+            color: #ffffff;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
         .instruction-box {
@@ -264,6 +285,25 @@
             z-index: 80; 
         }
 
+        #finalGrandScreen {
+            background: radial-gradient(circle at center, #fd79a8 0%, #2d3436 100%);
+            display: none;
+            z-index: 95;
+            animation: popUp 0.5s ease-out;
+        }
+
+        .trophy-container {
+            font-size: clamp(70px, 18vw, 110px);
+            margin: 10px 0;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+            animation: bounce 1.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-15px) scale(1.08); }
+        }
+
         @keyframes popUp { 
             from { transform: scale(0.8) translateY(20px); opacity: 0; } 
             to { transform: scale(1) translateY(0); opacity: 1; } 
@@ -283,7 +323,7 @@
 
     <!-- TITLE SCREEN -->
     <div id="titleScreen" class="screen">
-        <div class="badge-pill">⭐ 3 Questions • 30 Marks Total ⭐</div>
+        <div class="badge-pill">⭐ 6 Festivals • 180 Marks Grand Total ⭐</div>
         <h1 style="color: var(--pastel-yellow); font-size: clamp(26px, 7vw, 38px); margin-bottom: 12px; font-weight: 800; text-shadow: 0 4px 12px rgba(0,0,0,0.4);">FESTIVAL MYSTERY:<br>QUIZ ADVENTURE!</h1>
         <p style="font-size: clamp(14px, 4vw, 18px); color: var(--pastel-green); font-weight: 700; margin-bottom: 25px;">✨ Win 10 Marks For Every Right Answer! ✨</p>
         <button class="btn" onclick="showFestivalSelect()">Play Now 🚀</button>
@@ -291,15 +331,15 @@
 
     <!-- FESTIVAL SELECTION SCREEN -->
     <div id="festivalSelectScreen" class="screen">
-        <h2 style="color: var(--pastel-yellow); font-size: clamp(22px, 6vw, 30px); margin-bottom: 8px; font-weight: 800;">CHOOSE A FESTIVAL</h2>
-        <p style="font-size: clamp(13px, 3.6vw, 16px); color: #dfe6e9; margin-bottom: 15px; font-weight: 600;">Solve 3 randomized questions & score 30 Marks!</p>
+        <h2 style="color: var(--pastel-yellow); font-size: clamp(22px, 6vw, 30px); margin-bottom: 4px; font-weight: 800;">CHOOSE A FESTIVAL</h2>
+        <p id="progressTrackerText" style="font-size: clamp(13px, 3.6vw, 16px); color: var(--pastel-green); margin-bottom: 12px; font-weight: 700;">Completed: 0 / 6 Festivals</p>
         <div class="fest-grid">
-            <button class="fest-card-btn" style="border-color: #ff7675; background: rgba(255, 118, 117, 0.25);" onclick="selectFestival('DIWALI')">🪔 Diwali</button>
-            <button class="fest-card-btn" style="border-color: #74b9ff; background: rgba(116, 185, 255, 0.25);" onclick="selectFestival('HOLI')">🎨 Holi</button>
-            <button class="fest-card-btn" style="border-color: #55efc4; background: rgba(85, 239, 196, 0.25);" onclick="selectFestival('CHRISTMAS')">🎄 Christmas</button>
-            <button class="fest-card-btn" style="border-color: #ffeaa7; background: rgba(255, 234, 167, 0.25);" onclick="selectFestival('EID')">🌙 Eid</button>
-            <button class="fest-card-btn" style="border-color: #a29bfe; background: rgba(162, 155, 254, 0.25);" onclick="selectFestival('GURPURAB')">ੴ Gurpurab</button>
-            <button class="fest-card-btn" style="border-color: #fab1a0; background: rgba(250, 177, 160, 0.25);" onclick="selectFestival('INDEPENDENCE DAY')">🇮🇳 Independence Day</button>
+            <button id="btn-DIWALI" class="fest-card-btn" style="border-color: #ff7675; background: rgba(255, 118, 117, 0.25);" onclick="selectFestival('DIWALI')">🪔 Diwali</button>
+            <button id="btn-HOLI" class="fest-card-btn" style="border-color: #74b9ff; background: rgba(116, 185, 255, 0.25);" onclick="selectFestival('HOLI')">🎨 Holi</button>
+            <button id="btn-CHRISTMAS" class="fest-card-btn" style="border-color: #55efc4; background: rgba(85, 239, 196, 0.25);" onclick="selectFestival('CHRISTMAS')">🎄 Christmas</button>
+            <button id="btn-EID" class="fest-card-btn" style="border-color: #ffeaa7; background: rgba(255, 234, 167, 0.25);" onclick="selectFestival('EID')">🌙 Eid</button>
+            <button id="btn-GURPURAB" class="fest-card-btn" style="border-color: #a29bfe; background: rgba(162, 155, 254, 0.25);" onclick="selectFestival('GURPURAB')">ੴ Gurpurab</button>
+            <button id="btn-INDEPENDENCE DAY" class="fest-card-btn" style="border-color: #fab1a0; background: rgba(250, 177, 160, 0.25);" onclick="selectFestival('INDEPENDENCE DAY')">🇮🇳 Independence Day</button>
         </div>
     </div>
 
@@ -310,7 +350,7 @@
             <div class="big-bold-text">1. Read the <span style="color: var(--pastel-yellow);">Question Card</span> carefully!</div>
             <div class="big-bold-text">2. Look at the <span style="color: var(--pastel-green);">2 Answer Options</span> below!</div>
             <div class="big-bold-text">3. <span style="color: var(--pastel-pink);">TAP</span> the right option to score <span style="color: var(--pastel-yellow);">10 Marks</span>!</div>
-            <div class="big-bold-text" style="margin-bottom:0; color:#2ed573;">4. Complete all 3 questions to reach <span style="color: var(--pastel-yellow);">30/30 Marks</span>!</div>
+            <div class="big-bold-text" style="margin-bottom:0; color:#2ed573;">4. Finish all 6 festivals to achieve the grand <span style="color: var(--pastel-yellow);">180 Marks Trophy</span>!</div>
         </div>
         <button class="btn" style="background: linear-gradient(180deg, #2ed573 0%, #10ac84 100%); color:#fff; box-shadow: 0 8px 0 #0e8667;" onclick="startGame()">Start Quiz! 🎯</button>
     </div>
@@ -329,12 +369,29 @@
         <button id="nextQBtn" class="btn" style="font-size: 16px; padding: 12px 28px; box-shadow: 0 5px 0 #e17055; margin-top: 5px;">Next Question ➔</button>
     </div>
 
-    <!-- COMPLETION SCREEN -->
+    <!-- SINGLE FESTIVAL COMPLETION SCREEN -->
     <div id="completionScreen" class="screen">
-        <h1 style="color: var(--pastel-yellow); font-size: clamp(26px, 7vw, 40px); margin-bottom: 10px; font-weight: 800;">🎉 Quiz Champion! 🎉</h1>
+        <h1 style="color: var(--pastel-yellow); font-size: clamp(26px, 7vw, 40px); margin-bottom: 10px; font-weight: 800;">🎉 Quiz Completed! 🎉</h1>
         <p id="completionFestivalName" style="font-size: clamp(16px, 4.5vw, 21px); margin-bottom: 18px; color: var(--pastel-green); font-weight: 700;"></p>
-        <div class="ui-element" id="finalScore" style="font-size: clamp(20px, 5vw, 26px); padding: 16px 32px; color: var(--pastel-yellow); margin-bottom: 22px; border-width:3px;">Final Score: 0/30 Marks</div>
-        <button class="btn" onclick="showFestivalSelect()">Play Again 🔄</button>
+        <div class="ui-element" id="finalScore" style="font-size: clamp(20px, 5vw, 26px); padding: 16px 32px; color: var(--pastel-yellow); margin-bottom: 22px; border-width:3px;">Festival Score: 0/30 Marks</div>
+        <button id="continueBtn" class="btn" onclick="showFestivalSelect()">Next Festival ➔</button>
+    </div>
+
+    <!-- GRAND FINAL COMPLETION SCREEN (ALL 6 FESTIVALS FINISHED) -->
+    <div id="finalGrandScreen" class="screen">
+        <h1 style="color: var(--pastel-yellow); font-size: clamp(26px, 7vw, 36px); margin-bottom: 6px; font-weight: 800; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">🎉 GRAND CHAMPION! 🎉</h1>
+        <p style="font-size: clamp(14px, 4vw, 18px); color: #ffffff; font-weight: 700; margin-bottom: 8px;">You completed all 6 festivals!</p>
+        
+        <!-- TROPHY EMOJI -->
+        <div class="trophy-container">🏆</div>
+
+        <!-- TOTAL GAME SCORE: 180 MARKS -->
+        <div class="ui-element" id="grandTotalScoreLabel" style="font-size: clamp(22px, 6vw, 32px); padding: 18px 36px; color: var(--pastel-yellow); margin-bottom: 20px; border-width: 4px; border-color: #ffdd59; background: rgba(0, 0, 0, 0.4);">
+            Total Game Score: 180 / 180 Marks
+        </div>
+
+        <!-- PLAY AGAIN BUTTON -->
+        <button class="btn" style="background: linear-gradient(180deg, #ffdd59 0%, #ff9f1a 100%);" onclick="resetFullGame()">Play Again 🔄</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -344,11 +401,11 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Global game state
+    // Global game state tracking
     let selectedFestivalKey = "DIWALI";
     let activeQuestions = [];
     let currentQuestionIndex = 0;
-    let totalScore = 0;
+    let festivalScore = 0;
     let gameActive = false;
     let cardAnimationProgress = 0;
     let touchCooldown = false;
@@ -356,6 +413,19 @@
     let bgBubbles = [];
     let optionCards = [];
     let soundMuted = false;
+
+    // Track festival scores and progress across all 6 festivals
+    const festivalScores = {
+        "DIWALI": 0,
+        "HOLI": 0,
+        "CHRISTMAS": 0,
+        "EID": 0,
+        "GURPURAB": 0,
+        "INDEPENDENCE DAY": 0
+    };
+
+    const completedFestivals = new Set();
+    const TOTAL_FESTIVALS_COUNT = 6;
 
     // Asset Audio Elements
     const audioAssets = {
@@ -378,7 +448,6 @@
             if (audioAssets[type]) {
                 audioAssets[type].currentTime = 0;
                 audioAssets[type].play().catch(() => {
-                    // Fallback to Web Audio synthesizer if file play is blocked/failed
                     playSynthSound(type);
                 });
             } else {
@@ -387,6 +456,24 @@
         } catch (e) {
             playSynthSound(type);
         }
+    }
+
+    // Play Celebratory Background Music on Final Screen
+    function startCelebratoryBGM() {
+        if (soundMuted) return;
+        try {
+            audioAssets.celebration.currentTime = 0;
+            audioAssets.celebration.play().catch(() => {
+                playSynthSound('correct');
+            });
+        } catch (e) {}
+    }
+
+    function stopCelebratoryBGM() {
+        try {
+            audioAssets.celebration.pause();
+            audioAssets.celebration.currentTime = 0;
+        } catch (e) {}
     }
 
     // Fisher-Yates Shuffle helper
@@ -461,9 +548,9 @@
         document.getElementById('audioBtn').innerText = soundMuted ? "🔇" : "🔊";
         
         if (soundMuted) {
-            audioAssets.celebration.pause();
-        } else if (!document.getElementById('completionScreen').style.display || document.getElementById('completionScreen').style.display === 'flex') {
-            audioAssets.celebration.play().catch(() => {});
+            stopCelebratoryBGM();
+        } else if (document.getElementById('finalGrandScreen').style.display === 'flex') {
+            startCelebratoryBGM();
         }
     }
 
@@ -519,7 +606,6 @@
     function getCanvasWidth() { return canvas.width / (window.devicePixelRatio || 1); }
     function getCanvasHeight() { return canvas.height / (window.devicePixelRatio || 1); }
 
-    // Exactly 3 questions per festival (Total 30 Marks)
     const festivalDatabase = {
         "DIWALI": {
             questions: [
@@ -693,13 +779,38 @@
 
     function showFestivalSelect() {
         initAudioEngine();
-        audioAssets.celebration.pause();
-        audioAssets.celebration.currentTime = 0;
+        stopCelebratoryBGM();
         
         document.getElementById('titleScreen').style.display = 'none';
         document.getElementById('instructionScreen').style.display = 'none';
         document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('finalGrandScreen').style.display = 'none';
         document.getElementById('festivalSelectScreen').style.display = 'flex';
+
+        updateFestivalSelectionUI();
+    }
+
+    function updateFestivalSelectionUI() {
+        document.getElementById('progressTrackerText').innerText = `Completed: ${completedFestivals.size} / ${TOTAL_FESTIVALS_COUNT} Festivals`;
+
+        Object.keys(festivalDatabase).forEach(key => {
+            const btn = document.getElementById(`btn-${key}`);
+            if (btn) {
+                if (completedFestivals.has(key)) {
+                    btn.classList.add('completed');
+                    if (!btn.querySelector('.completed-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'completed-badge';
+                        badge.innerText = '✓';
+                        btn.appendChild(badge);
+                    }
+                } else {
+                    btn.classList.remove('completed');
+                    const badge = btn.querySelector('.completed-badge');
+                    if (badge) badge.remove();
+                }
+            }
+        });
     }
 
     function selectFestival(key) {
@@ -722,7 +833,7 @@
         });
 
         currentQuestionIndex = 0;
-        totalScore = 0;
+        festivalScore = 0;
         gameActive = true;
 
         setupQuestion();
@@ -733,7 +844,7 @@
         const cHeight = getCanvasHeight();
 
         document.getElementById('factPopup').style.display = 'none';
-        document.getElementById('scoreLabel').innerText = `Marks: ${totalScore}/30`;
+        document.getElementById('scoreLabel').innerText = `Marks: ${festivalScore}/30`;
         document.getElementById('roundLabel').innerText = `Question ${currentQuestionIndex + 1}/3`;
 
         const qData = activeQuestions[currentQuestionIndex];
@@ -815,11 +926,11 @@
                 touchCooldown = true;
                 if (card.correct) {
                     card.state = "correct";
-                    totalScore += 10;
+                    festivalScore += 10;
                     playAssetSound('correct');
                     setTimeout(() => playAssetSound('claps'), 200);
                     createBurst(card.x + card.w/2, card.y + card.h/2, '#2ed573');
-                    document.getElementById('scoreLabel').innerText = `Marks: ${totalScore}/30`;
+                    document.getElementById('scoreLabel').innerText = `Marks: ${festivalScore}/30`;
                     document.getElementById('popTitle').innerText = "🎉 Correct Answer! (+10 Marks)";
                     document.getElementById('popTitle').style.color = "#10ac84";
                 } else {
@@ -852,30 +963,62 @@
         }
     }
 
-    // Single-call handler for Next Question
     function nextQuestion(e) {
         if (e && e.stopPropagation) e.stopPropagation();
         currentQuestionIndex++;
         if (currentQuestionIndex < activeQuestions.length) {
             setupQuestion();
         } else {
-            finishGame();
+            finishFestival();
         }
     }
 
     document.getElementById('nextQBtn').addEventListener('click', nextQuestion);
 
-    function finishGame() {
+    function finishFestival() {
         gameActive = false;
         document.getElementById('factPopup').style.display = 'none';
         document.getElementById('uiOverlay').style.display = 'none';
         
-        playAssetSound('claps');
-        playAssetSound('celebration');
+        // Save score for current festival & mark as completed
+        festivalScores[selectedFestivalKey] = festivalScore;
+        completedFestivals.add(selectedFestivalKey);
 
-        document.getElementById('completionFestivalName').innerText = `Festival: ${selectedFestivalKey}`;
-        document.getElementById('finalScore').innerText = `Final Score: ${totalScore}/30 Marks`;
-        document.getElementById('completionScreen').style.display = 'flex';
+        playAssetSound('claps');
+
+        // Check if all 6 festivals have been completed
+        if (completedFestivals.size >= TOTAL_FESTIVALS_COUNT) {
+            showGrandFinalScreen();
+        } else {
+            document.getElementById('completionFestivalName').innerText = `Festival: ${selectedFestivalKey}`;
+            document.getElementById('finalScore').innerText = `Festival Score: ${festivalScore}/30 Marks`;
+            document.getElementById('completionScreen').style.display = 'flex';
+        }
+    }
+
+    // GRAND FINAL SCREEN DISPLAY (180 MARKS TOTAL + TROPHY + CELEBRATORY BGM)
+    function showGrandFinalScreen() {
+        // Calculate Total Score across all 6 festivals (max 180 marks)
+        let grandTotalScore = 0;
+        Object.values(festivalScores).forEach(score => {
+            grandTotalScore += score;
+        });
+
+        document.getElementById('grandTotalScoreLabel').innerText = `Total Game Score: ${grandTotalScore} / 180 Marks`;
+        document.getElementById('finalGrandScreen').style.display = 'flex';
+
+        // Play celebratory background music
+        startCelebratoryBGM();
+    }
+
+    // RESET FULL GAME JOURNEY
+    function resetFullGame() {
+        stopCelebratoryBGM();
+        completedFestivals.clear();
+        Object.keys(festivalScores).forEach(key => {
+            festivalScores[key] = 0;
+        });
+        showFestivalSelect();
     }
 
     window.showFestivalSelect = showFestivalSelect;
@@ -883,6 +1026,7 @@
     window.startGame = startGame;
     window.nextQuestion = nextQuestion;
     window.toggleAudio = toggleAudio;
+    window.resetFullGame = resetFullGame;
 
     function update() {
         bgBubbles.forEach(b => {
