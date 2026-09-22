@@ -363,16 +363,16 @@
             animation: pop 0.25s ease-out;
         }
 
-        /* Responsive Layout Overrides for Mobile & Tablets */
+        /* Responsive Layout Overrides for Mobile & Tablets - Ensures all coaches fit on screen */
         @media (max-width: 768px) {
             .train-container {
-                gap: 6px;
+                gap: 4px;
                 padding: 10px;
-                transform: scale(0.65) translateX(140vw);
+                transform: scale(0.46) translateX(140vw);
                 transform-origin: left bottom;
             }
             .train-container.slide-in {
-                transform: scale(0.65) translateX(0);
+                transform: scale(0.46) translateX(0);
             }
             .title-text { 
                 font-size: 3rem; 
@@ -466,7 +466,7 @@
 
         <!-- Draggable Items Container -->
         <div class="items-area" id="items-container">
-            <!-- Items injected by JS -->
+            <!-- Items injected by JS after train arrives -->
         </div>
     </div>
 
@@ -475,7 +475,7 @@
             <div class="text-6xl mb-4 animate-bounce">🏆</div>
             <h2 class="text-4xl mb-4 font-bold" style="text-shadow: 2px 2px 0 var(--thick-border); color: #32CD32;">Choo Choo! You Did It!</h2>
             <p class="text-2xl mb-3 font-semibold">You loaded all the carriages perfectly.</p>
-            <p class="text-3xl font-bold text-blue-600 mb-8">Final Score: <span id="victory-score">45</span></p>
+            <p class="text-3xl font-bold text-blue-600 mb-8">Final Score: <span id="victory-score">90</span></p>
             <button class="btn-bouncy" style="background-color: #32CD32; border-color: #228B22; box-shadow: 0 8px 0 #228B22, 0 15px 20px rgba(0,0,0,0.3);" onclick="startGame()">Play Again</button>
         </div>
     </div>
@@ -485,7 +485,7 @@
             <div class="text-6xl mb-4 animate-pulse">💔</div>
             <h2 class="text-4xl mb-4 font-bold" style="text-shadow: 2px 2px 0 var(--thick-border); color: #FF4500;">Oh no! The train stopped.</h2>
             <p class="text-2xl mb-3 font-semibold">Keep practicing! You can do better!</p>
-            <p class="text-3xl font-bold text-blue-600 mb-8">Final Score: <span id="fail-score">10</span></p>
+            <p class="text-3xl font-bold text-blue-600 mb-8">Final Score: <span id="fail-score">20</span></p>
             <button class="btn-bouncy" style="background-color: #FF4500; border-color: #8B0000; box-shadow: 0 8px 0 #8B0000, 0 15px 20px rgba(0,0,0,0.3);" onclick="startGame()">Try Again</button>
         </div>
     </div>
@@ -534,15 +534,23 @@
                 zone.innerHTML = '';
             });
 
+            // Clear items container initially so cards don't show before train parks
+            document.getElementById('items-container').innerHTML = '';
+
             const trainTrack = document.getElementById('train-track');
             trainTrack.classList.remove('slide-in');
 
-            renderItems();
             showScreen('screen-game');
 
+            // Slide in the train first
             setTimeout(() => {
                 trainTrack.classList.add('slide-in');
             }, 80);
+
+            // Render cards only AFTER the train has fully arrived at the station (1.2s transition duration)
+            setTimeout(() => {
+                renderItems();
+            }, 1300);
         }
 
         function renderItems() {
@@ -654,7 +662,7 @@
                     activeItem.removeEventListener('pointerdown', handlePointerDown);
                     dropZone.appendChild(activeItem);
                     
-                    score += 5;
+                    score += 10; // Updated scoring to +10
                     itemsPlaced++;
                     
                     const scoreDisplay = document.getElementById('score-display');
