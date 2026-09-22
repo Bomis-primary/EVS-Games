@@ -4,22 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Super Body Quest</title>
+    
+    <!-- Google Fonts for playful, clear typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* CSS Reset for Global Device Consistency */
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #eef7ff; font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif; }
+        /* CSS Reset & Universal Device Consistency */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            user-select: none; 
+            -webkit-user-select: none; 
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        body, html { 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: #eef7ff; 
+            font-family: 'Fredoka', 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif; 
+        }
         
         /* Performance Optimised Layout Shell */
         #gameContainer { 
             width: 100vw; 
             height: 100vh; 
+            height: 100dvh;
             background: linear-gradient(135deg, #eef7ff 0%, #e0f4ff 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 15px;
+            padding: env(safe-area-inset-top, 15px) 15px env(safe-area-inset-bottom, 15px) 15px;
             position: relative;
+            overflow: hidden;
         }
 
         #topHUD {
@@ -29,8 +52,9 @@
             justify-content: space-between;
             color: #4a5568;
             font-size: clamp(16px, 5vw, 22px);
-            font-weight: bold;
+            font-weight: 700;
             padding: 5px 10px;
+            z-index: 10;
         }
 
         /* Center Table Area */
@@ -66,9 +90,9 @@
 
         .card-text {
             color: #2d3748;
-            font-size: clamp(15px, 4.5vw, 21px);
+            font-size: clamp(15px, 4.2vw, 21px);
             line-height: 1.5;
-            font-weight: bold;
+            font-weight: 700;
         }
 
         /* Hand Choices Wrapper */
@@ -79,10 +103,10 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             padding-bottom: env(safe-area-inset-bottom, 15px);
-            perspective: 800px; /* Gives 3D depth to the shuffling spin */
+            perspective: 800px;
         }
 
-        /* Responsive Text-Only Cards with Shuffling Animation Frame support */
+        /* Responsive Choice Cards */
         .choice-card {
             aspect-ratio: 2/3;
             border: 6px solid #ffffff;
@@ -93,7 +117,7 @@
             justify-content: center;
             padding: 8px;
             text-align: center;
-            font-weight: 900;
+            font-weight: 700;
             font-size: clamp(13px, 3.8vw, 18px);
             cursor: pointer;
             box-shadow: 0 6px 16px rgba(165, 180, 200, 0.35);
@@ -105,7 +129,7 @@
 
         /* Shuffling Card Animation Styles */
         .shuffle-spin {
-            animation: cardShuffle 0.5s ease-in-out;
+            animation: cardShuffle 0.4s ease-in-out;
         }
 
         /* Bright Soft Color Palettes */
@@ -139,19 +163,58 @@
             padding: 25px;
             text-align: center;
             font-size: clamp(20px, 6vw, 24px);
-            font-weight: bold;
+            font-weight: 700;
             display: none;
             z-index: 50;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
 
         /* Overlay Screen Structures */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; text-align: center; background: #eef7ff; color: #2d3748; }
-        #logoScreen { background-color: #ffffff; z-index: 200; }
-        #logoScreen img { max-width: 70%; max-height: 40%; object-fit: contain; }
+        .screen { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 100; 
+            padding: 20px; 
+            text-align: center; 
+            background: #eef7ff; 
+            color: #2d3748; 
+        }
         
-        .btn { background: #ff6b8b; color: white; border: none; padding: 16px 50px; font-size: clamp(18px, 5vw, 24px); font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 30px; box-shadow: 0 6px 0 #d94e6d; -webkit-tap-highlight-color: transparent; }
-        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #d94e6d; }
+        #logoScreen { 
+            background-color: #ffffff; 
+            z-index: 200; 
+        }
+        
+        #logoScreen img { 
+            max-width: 70%; 
+            max-height: 40%; 
+            object-fit: contain; 
+        }
+        
+        .btn { 
+            background: #ff6b8b; 
+            color: white; 
+            border: none; 
+            padding: 16px 50px; 
+            font-size: clamp(18px, 5vw, 24px); 
+            font-weight: 700; 
+            border-radius: 30px; 
+            cursor: pointer; 
+            margin-top: 30px; 
+            box-shadow: 0 6px 0 #d94e6d; 
+        }
+        
+        .btn:active { 
+            transform: translateY(4px); 
+            box-shadow: 0 2px 0 #d94e6d; 
+        }
     </style>
 </head>
 <body>
@@ -159,11 +222,12 @@
 <div id="gameContainer">
     <!-- Brand Splash Screen -->
     <div id="logoScreen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
+        <h1 id="fallback-logo" style="display:none; color: #ff6b8b; font-size: 3rem;">Innovine</h1>
     </div>
 
     <!-- Clean Title Screen -->
-    <div id="titleScreen" class="screen">
+    <div id="titleScreen" class="screen" style="display: none;">
         <h1 style="font-size: clamp(38px, 11vw, 54px); color: #ff6b8b; font-weight: 900; line-height: 1.2;">Super Body<br><span style="color: #ffa048;">Quest</span></h1>
         <button class="btn" onclick="startGame()">START ▶</button>
     </div>
@@ -174,7 +238,7 @@
         <span id="txtLives">❤️ ❤️ ❤️</span>
     </div>
 
-    <!-- Central Interactive Discard Pile Frame -->
+    <!-- Central Interactive Card Frame -->
     <div id="tableCenter" style="visibility: hidden;">
         <div class="riddle-card" id="mainDeckCard">
             <div class="card-text" id="riddleDisplayText">Loading Quest Card...</div>
@@ -194,27 +258,33 @@
     <!-- Scoreboards Target Frame -->
     <div id="endScreen" class="screen" style="display: none;">
         <h1 id="endTitle" style="font-size: 36px; color: #ff6b8b;">YOU DID IT!</h1>
-        <div id="finalScore" style="font-size: 24px; margin: 20px 0; font-weight: bold;">FINAL SCORE: 0</div>
+        <div id="finalScore" style="font-size: 24px; margin: 20px 0; font-weight: 700;">FINAL SCORE: 0</div>
         <button class="btn" onclick="location.reload()">PLAY AGAIN 🔄</button>
     </div>
 </div>
 
 <script>
-    // Asset Pipeline Management
-    const sndCorrect = new Audio('assets/correct.mp3');
-    const sndWrong = new Audio('assets/wrong.mp3');
-    const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
-    const sndBgm = new Audio('assets/cartoonbackgroundmusic.mp3');
+    // Safe Audio Pipeline with Error Handlers
+    function loadAudio(src) {
+        const audio = new Audio(src);
+        audio.onerror = () => { console.warn(`Audio asset missing or failed to load: ${src}`); };
+        return audio;
+    }
+
+    const sndCorrect = loadAudio('assets/correct.mp3');
+    const sndWrong = loadAudio('assets/wrong.mp3');
+    const sndClap = loadAudio('assets/freesound_community-claps-44774.mp3');
+    const sndBgm = loadAudio('assets/cartoonbackgroundmusic.mp3');
     sndBgm.loop = true;
 
-    // Local Storage Variable Maps
+    // Game Variables
     let score = 0;
     let lives = 3;
     let currentIdx = 0;
     let acceptInput = true;
     let currentChoices = [];
 
-    // Comprehensive 12 Target System Question Arrays 
+    // Question Database
     const questions = [
         { q: "Thump-thump! I am a muscle inside your chest that pumps blood all the way to your toes. Who am I?", name: "HEART" },
         { q: "I live inside your head and do all your thinking, dreaming, and remembering. Who am I?", name: "BRAIN" },
@@ -230,10 +300,24 @@
         { q: "Bend and snap! I am the magic spot where two bones meet, like your elbow, shoulder, or your knee. What am I?", name: "JOINTS" }
     ];
 
-    // Delayed Splash Navigation
-    setTimeout(() => {
-        document.getElementById('logoScreen').style.display = 'none';
-    }, 5000);
+    // Splash screen timer with immediate fallback visibility
+    let splashTimer = setTimeout(() => {
+        dismissSplash();
+    }, 4000);
+
+    function dismissSplash() {
+        const logoScreen = document.getElementById('logoScreen');
+        if (logoScreen && logoScreen.style.display !== 'none') {
+            logoScreen.style.display = 'none';
+            document.getElementById('titleScreen').style.display = 'flex';
+        }
+    }
+
+    // Allow user tap to bypass splash instantly if desired
+    document.getElementById('logoScreen').addEventListener('click', () => {
+        clearTimeout(splashTimer);
+        dismissSplash();
+    });
 
     function startGame() {
         document.getElementById('titleScreen').style.display = 'none';
@@ -249,7 +333,7 @@
         loadNextQuestion();
 
         sndBgm.currentTime = 0;
-        sndBgm.play().catch(()=>{});
+        sndBgm.play().catch(() => {});
     }
 
     function shuffle(array) {
@@ -263,14 +347,13 @@
         document.getElementById('txtScore').innerText = `⭐ SCORE: ${score}`;
         document.getElementById('txtLives').innerText = "❤️ ".repeat(lives);
 
-        if(currentIdx >= questions.length) {
+        if (currentIdx >= questions.length) {
             endGame(true);
             return;
         }
 
         let currentItem = questions[currentIdx];
         
-        // Element Redraw Initialization Optimization 
         let cardFrame = document.getElementById('mainDeckCard');
         cardFrame.style.animation = 'none';
         cardFrame.offsetHeight; 
@@ -278,9 +361,7 @@
 
         document.getElementById('riddleDisplayText').innerText = currentItem.q;
 
-        // Choice Generator Engine - Shuffles Options Fully Before Presentation
         currentChoices = [currentItem.name];
-        
         let fullNamesList = questions.map(item => item.name);
         let optionsPool = fullNamesList.filter(name => name !== currentItem.name);
         shuffle(optionsPool);
@@ -288,15 +369,11 @@
         currentChoices.push(optionsPool[0], optionsPool[1]);
         shuffle(currentChoices);
 
-        // Map strings straight to targets and fire the card shuffling flip animation
         for (let i = 0; i < 3; i++) {
             let cardElement = document.getElementById(`card${i}`);
-            
-            // Re-trigger the shuffle spin styling safely
             cardElement.classList.remove('shuffle-spin');
             cardElement.offsetHeight; 
             cardElement.classList.add('shuffle-spin');
-            
             cardElement.innerText = currentChoices[i];
         }
 
@@ -304,39 +381,39 @@
     }
 
     function submitAnswer(chosenIndex) {
-        if(!acceptInput) return;
+        if (!acceptInput) return;
         acceptInput = false;
 
         let correctAnswer = questions[currentIdx].name;
         let selectedAnswer = currentChoices[chosenIndex];
         let overlay = document.getElementById('feedbackOverlay');
 
-        if(selectedAnswer === correctAnswer) {
+        if (selectedAnswer === correctAnswer) {
             score += 10;
             document.getElementById('txtScore').innerText = `⭐ SCORE: ${score}`;
             overlay.innerText = "✨ YES! YOU GOT IT! ✨";
             overlay.style.borderColor = "#4ed964";
             sndCorrect.currentTime = 0;
-            sndCorrect.play().catch(()=>{});
+            sndCorrect.play().catch(() => {});
         } else {
             lives--;
             overlay.innerText = `❌ OOPS! THAT IS THE ${correctAnswer}! ❌`;
             overlay.style.borderColor = "#ff6b6b";
             sndWrong.currentTime = 0;
-            sndWrong.play().catch(()=>{});
+            sndWrong.play().catch(() => {});
         }
 
         overlay.style.display = 'block';
 
         setTimeout(() => {
             overlay.style.display = 'none';
-            if(lives <= 0) {
+            if (lives <= 0) {
                 endGame(false);
             } else {
                 currentIdx++;
                 loadNextQuestion();
             }
-        }, 2000);
+        }, 1800);
     }
 
     function endGame(isWin) {
@@ -348,10 +425,10 @@
         const endScreen = document.getElementById('endScreen');
         const title = document.getElementById('endTitle');
         
-        if(isWin) {
+        if (isWin) {
             title.innerText = "🏆 AWESOME WORK! 🏆";
             title.style.color = "#ffa048";
-            sndClap.play().catch(()=>{});
+            sndClap.play().catch(() => {});
         } else {
             title.innerText = "TRY AGAIN! 🌟";
             title.style.color = "#ff6b6b";
