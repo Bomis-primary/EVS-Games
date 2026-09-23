@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#FDFBF7">
     <title>Tile Explorer: House Matcher</title>
+    <!-- CRITICAL FOR PRODUCTION: Replace this CDN script with a compiled static CSS file. 
+         Client-side CSS compilation (browser@4) will severely impact loading times on low-spec devices. -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
@@ -15,10 +18,12 @@
         html, body {
             overflow: hidden;
             height: 100%;
+            width: 100%;
         }
         .chunky-tile {
             box-shadow: 0px 6px 0px #B39DDB;
-            transition: all 0.1s ease;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            will-change: transform;
         }
         .chunky-tile:active {
             transform: translateY(4px);
@@ -29,24 +34,33 @@
         }
         @keyframes swooshOut {
             0% { transform: scale(1); opacity: 1; filter: blur(0px); }
-            30% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0); opacity: 0; filter: blur(4px); }
+            30% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.5); opacity: 0; filter: blur(2px); }
         }
         .animate-swoosh {
-            animation: swooshOut 0.5s forwards ease-in-out;
+            animation: swooshOut 0.4s forwards ease-in-out;
+            pointer-events: none;
+        }
+        /* Prevents layout shift on small height devices */
+        .game-container {
+            max-height: 100vh;
+            overflow-y: auto;
+            padding-bottom: env(safe-area-inset-bottom);
         }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-3 m-0 select-none text-[#4A148C]">
 
-    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
-    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
-    <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="auto"></audio>
+    <!-- Changed preload from 'auto' to 'metadata' to save bandwidth on poor connections -->
+    <audio id="soundCorrect" src="assets/correct.mp3" preload="metadata"></audio>
+    <audio id="soundWrong" src="assets/wrong.mp3" preload="metadata"></audio>
+    <audio id="soundClapping" src="assets/freesound_community-claps-44744.mp3" preload="metadata"></audio>
 
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
+    <div id="splashScreen" onclick="hideSplashScreen()" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500 cursor-pointer">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs md:max-w-sm h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-32 h-32 bg-[#E8EAF6] rounded-full flex items-center justify-center text-[#4A148C] font-black text-4xl border-4 border-[#D1C4E9]\'>IN</div>';">
+        <p class="text-[#B39DDB] mt-4 text-xs font-bold animate-pulse">Tap to skip</p>
     </div>
 
     <div id="titleScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-6 mx-auto chunky-panel">
@@ -72,7 +86,7 @@
         </button>
     </div>
 
-    <div id="gameScreen" class="hidden w-full max-w-sm flex flex-col space-y-4 mx-auto relative h-full justify-center">
+    <div id="gameScreen" class="hidden w-full max-w-sm flex-col space-y-4 mx-auto relative h-full justify-center game-container">
         <div class="bg-[#E8EAF6] rounded-2xl p-3 shadow-sm flex items-center justify-between font-black text-sm border-2 border-[#D1C4E9]">
             <div class="text-[#4A148C]">⭐ SCORE: <span id="hudScore" class="text-lg">0</span></div>
             <div class="bg-white text-[#673AB7] px-3 py-1 rounded-full text-xs border border-[#D1C4E9]">Matches: <span id="hudCleared">0 / 8</span></div>
@@ -80,12 +94,14 @@
 
         <div class="bg-[#D1C4E9]/40 rounded-3xl p-4 shadow-inner border-4 border-[#D1C4E9] aspect-square relative flex items-center justify-center">
             <div id="tileMatrixGrid" class="grid grid-cols-4 gap-3 w-full h-full">
-                </div>
+                <!-- Grid items injected once on load via JS -->
+            </div>
         </div>
 
         <div class="bg-[#E8EAF6] rounded-2xl p-3 border-2 border-[#D1C4E9] shadow-sm">
             <div id="dockTraySlots" class="grid grid-cols-7 gap-1.5 h-12 w-full bg-white/60 rounded-xl p-1.5 border border-[#B39DDB]">
-                </div>
+                <!-- Tray items injected once on load via JS -->
+            </div>
         </div>
 
         <div id="triviaChallengeOverlay" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
@@ -102,7 +118,8 @@
                 </div>
 
                 <div id="triviaOptionsBlock" class="flex flex-col space-y-2.5">
-                    </div>
+                    <!-- Trivia options injected dynamically -->
+                </div>
 
                 <div class="bg-[#E8EAF6] rounded-xl p-2.5 text-center border border-[#D1C4E9] min-h-[44px] flex flex-col items-center justify-center space-y-2">
                     <p id="triviaHintText" class="text-xs font-bold text-[#6A1B9A]"></p>
@@ -159,23 +176,50 @@
         let triviaBatchIdx = 0;
         let currentQuestionSubIdx = 0;
         let currentQuestionWrongAttempts = 0;
+        let splashTimeout;
 
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
         let confettiParticles = [];
+        let confettiAnimationFrame;
 
         window.addEventListener('DOMContentLoaded', () => {
             resizeConfettiCanvas();
-            window.addEventListener('resize', resizeConfettiCanvas);
-            setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
+            window.addEventListener('resize', resizeConfettiCanvas, { passive: true });
+            initPersistentDOM(); // Initialize DOM elements once for performance
+            
+            splashTimeout = setTimeout(hideSplashScreen, 3500); // Reduced from 5s to 3.5s
+        });
+
+        function hideSplashScreen() {
+            clearTimeout(splashTimeout);
+            const splash = document.getElementById('splashScreen');
+            if (splash.style.display !== 'none') {
                 splash.style.opacity = '0';
                 setTimeout(() => {
                     splash.style.display = 'none';
                     document.getElementById('titleScreen').classList.remove('hidden');
                 }, 400);
-            }, 5000);
-        });
+            }
+        }
+
+        // DOM Optimization: Create grid and tray nodes once to prevent expensive reflows
+        function initPersistentDOM() {
+            const gridContainer = document.getElementById('tileMatrixGrid');
+            for (let i = 0; i < 24; i++) {
+                const tileBtn = document.createElement('button');
+                tileBtn.id = `tile-${i}`;
+                tileBtn.onclick = () => handleTileSelectionTap(i);
+                gridContainer.appendChild(tileBtn);
+            }
+
+            const trayContainer = document.getElementById('dockTraySlots');
+            for (let i = 0; i < 7; i++) {
+                const slot = document.createElement('div');
+                slot.id = `tray-slot-${i}`;
+                trayContainer.appendChild(slot);
+            }
+        }
 
         function resizeConfettiCanvas() {
             canvas.width = window.innerWidth;
@@ -185,7 +229,8 @@
         function triggerConfettiBurst() {
             canvas.classList.remove('hidden');
             confettiParticles = [];
-            for (let i = 0; i < 60; i++) {
+            // Reduced particle count from 60 to 40 for low-spec rendering
+            for (let i = 0; i < 40; i++) {
                 confettiParticles.push({
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2,
@@ -196,7 +241,8 @@
                     alpha: 1
                 });
             }
-            requestAnimationFrame(updateConfettiPhysics);
+            if (confettiAnimationFrame) cancelAnimationFrame(confettiAnimationFrame);
+            confettiAnimationFrame = requestAnimationFrame(updateConfettiPhysics);
         }
 
         function updateConfettiPhysics() {
@@ -206,7 +252,7 @@
                 p.x += p.vx;
                 p.y += p.vy;
                 p.vy += 0.2;
-                p.alpha -= 0.015;
+                p.alpha -= 0.02; // Faster fade out for performance
                 if (p.alpha > 0) {
                     alive = true;
                     ctx.save();
@@ -219,7 +265,7 @@
                 }
             });
             if (alive) {
-                requestAnimationFrame(updateConfettiPhysics);
+                confettiAnimationFrame = requestAnimationFrame(updateConfettiPhysics);
             } else {
                 canvas.classList.add('hidden');
             }
@@ -232,7 +278,7 @@
 
         function startGame() {
             document.getElementById('instructionsScreen').style.display = 'none';
-            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('gameScreen').style.display = 'flex';
             score = 0;
             successfulTriosCleared = 0;
             triviaBatchIdx = 0;
@@ -242,7 +288,7 @@
             document.getElementById('hudCleared').innerText = "0 / 8";
             
             renderFreshMatrixPuzzleBoard();
-            renderDockTrayGraphics();
+            updateDockTrayGraphics();
         }
 
         function renderFreshMatrixPuzzleBoard() {
@@ -255,33 +301,32 @@
             updateGridDOMElements();
         }
 
+        // DOM Optimization: Update existing nodes instead of innerHTML trashing
         function updateGridDOMElements() {
-            const container = document.getElementById('tileMatrixGrid');
-            container.innerHTML = "";
-
             matrixTrayList.forEach((item, index) => {
-                const tileBtn = document.createElement('button');
+                const tileBtn = document.getElementById(`tile-${index}`);
+                if (!tileBtn) return;
+                
+                tileBtn.classList.remove('animate-swoosh');
                 if (item === null) {
                     tileBtn.className = "w-full h-full opacity-0 pointer-events-none";
+                    tileBtn.innerText = "";
                 } else {
                     tileBtn.className = `w-full h-full rounded-2xl border-2 border-b-4 flex items-center justify-center text-3xl shadow-sm cursor-pointer chunky-tile ${item.color}`;
                     tileBtn.innerText = item.emoji;
-                    tileBtn.id = `tile-${index}`;
-                    tileBtn.onclick = () => handleTileSelectionTap(index);
                 }
-                container.appendChild(tileBtn);
             });
         }
 
         function handleTileSelectionTap(index) {
-            if (activeDockArray.length >= 7) return; 
+            if (activeDockArray.length >= 7 || matrixTrayList[index] === null) return; 
             
             const targetedItem = matrixTrayList[index];
             const tileNode = document.getElementById(`tile-${index}`);
             
             if (tileNode) {
+                // Modified animation to scale smaller, preventing layout jumps
                 tileNode.classList.add('animate-swoosh');
-                // Swoosh sound trigger completely deleted here
             }
 
             setTimeout(() => {
@@ -289,24 +334,22 @@
                 updateGridDOMElements();
 
                 activeDockArray.push(targetedItem);
-                renderDockTrayGraphics();
+                updateDockTrayGraphics();
 
                 const matchedColorCount = activeDockArray.filter(h => h.name === targetedItem.name).length;
                 
                 if (matchedColorCount === 3) {
                     setTimeout(() => {
                         activeDockArray = activeDockArray.filter(h => h.name !== targetedItem.name);
-                        renderDockTrayGraphics();
+                        updateDockTrayGraphics();
                         
-                        triggerConfettiBurst(); // Visual confetti burst celebration triggers instantly instead
+                        triggerConfettiBurst(); 
                         
                         successfulTriosCleared++;
                         document.getElementById('hudCleared').innerText = `${successfulTriosCleared} / 8`;
 
                         if (successfulTriosCleared % 2 === 0 && successfulTriosCleared > 0) {
-                            setTimeout(() => {
-                                launchTriviaBatchOverlay();
-                            }, 350);
+                            setTimeout(launchTriviaBatchOverlay, 350);
                         } else {
                             checkWinConditionState();
                         }
@@ -317,22 +360,22 @@
                         startGame();
                     }, 400);
                 }
-            }, 450);
+            }, 300); // Reduced delay for more responsive feel
         }
 
-        function renderDockTrayGraphics() {
-            const tray = document.getElementById('dockTraySlots');
-            tray.innerHTML = "";
-
+        // DOM Optimization: Update tray state without recreating elements
+        function updateDockTrayGraphics() {
             for (let i = 0; i < 7; i++) {
-                const slot = document.createElement('div');
-                slot.className = "w-full h-full rounded-lg border border-dashed border-[#B39DDB] bg-white flex items-center justify-center text-base";
-                
+                const slot = document.getElementById(`tray-slot-${i}`);
+                if (!slot) continue;
+
                 if (activeDockArray[i]) {
                     slot.className = `w-full h-full rounded-xl flex items-center justify-center text-xl shadow-sm border ${activeDockArray[i].color}`;
                     slot.innerText = activeDockArray[i].emoji;
+                } else {
+                    slot.className = "w-full h-full rounded-lg border border-dashed border-[#B39DDB] bg-white flex items-center justify-center text-base";
+                    slot.innerText = "";
                 }
-                tray.appendChild(slot);
             }
         }
 
@@ -363,7 +406,7 @@
 
         function renderOptionsUIBlock(activeQuestionData) {
             const block = document.getElementById('triviaOptionsBlock');
-            block.innerHTML = "";
+            block.innerHTML = ""; // Acceptable here as trivia length varies and occurs rarely
 
             activeQuestionData.options.forEach(opt => {
                 const btn = document.createElement('button');
@@ -383,14 +426,12 @@
                 btnElement.classList.remove('border-[#D1C4E9]');
                 btnElement.classList.add('border-green-400', 'bg-green-50');
                 
-                // Plays correct sound only
                 playSound('soundCorrect'); 
                 
                 score += 10;
                 document.getElementById('hudScore').innerText = score;
                 document.getElementById('triviaNextActionBtn').classList.remove('hidden');
             } else {
-                // Plays wrong sound only
                 playSound('soundWrong');
                 currentQuestionWrongAttempts++;
                 btnElement.classList.add('border-red-400', 'bg-red-50');
@@ -432,7 +473,6 @@
         function checkWinConditionState() {
             if (successfulTriosCleared === 8) {
                 setTimeout(() => {
-                    // Clapping triggers ONLY at the final scoreboard view screen
                     playSound('soundClapping');
                     document.getElementById('gameScreen').style.display = 'none';
                     document.getElementById('finalScoreText').innerText = score;
@@ -441,10 +481,11 @@
             }
         }
 
+        // AUDIO OPTIMIZATION: Reset currentTime instead of .load() to prevent network requests and stuttering
         function playSound(id) {
             const el = document.getElementById(id);
             if (el) {
-                el.load(); 
+                el.currentTime = 0; 
                 const playPromise = el.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
