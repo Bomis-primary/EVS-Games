@@ -319,6 +319,7 @@
     let lockControls = false;
     let lastExecutedSwap = null;
     let activeQuizIndex = 0;
+    let swapsThisRound = 0;
 
     // Splash screen timer
     let splashTimer = setTimeout(dismissSplash, 2500);
@@ -361,6 +362,7 @@
 
     function initiateLevelDataLoad() {
         quizLives = 2;
+        swapsThisRound = 0;
         updateHUDView();
         buildCandyBoard();
     }
@@ -441,7 +443,13 @@
         let matchedCoordinates = evaluateBoardMatches();
         if (matchedCoordinates.length > 0) {
             await runFullCascadeLoop(matchedCoordinates);
-            setTimeout(launchQuizRiddleOverlay, 350);
+            swapsThisRound++;
+            if (swapsThisRound >= 2) {
+                swapsThisRound = 0;
+                setTimeout(launchQuizRiddleOverlay, 350);
+            } else {
+                lockControls = false;
+            }
         } else {
             if (recordHistory) {
                 let t2 = boardState[r1][c1];
