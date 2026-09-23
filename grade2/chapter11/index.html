@@ -6,16 +6,17 @@
     <title>Earth Matcher Game</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
         
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         body {
-            font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+            font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
             background: radial-gradient(circle, #5c2c16 0%, #2e1205 100%);
             -webkit-tap-highlight-color: transparent;
             min-height: 100vh;
@@ -28,15 +29,15 @@
             overflow: hidden;
         }
 
-        /* Responsive Dynamic Shell - Auto-fits small screens & viewports */
+        /* Responsive Main Shell */
         .game-main-box {
-            background: #fffbf4;
+            background: #fffdfa;
             border: 4px solid #4a1d08;
             box-shadow: 0 12px 0 #2b0f03, 0 18px 28px rgba(0,0,0,0.5);
             border-radius: 28px;
             width: 100%;
             max-width: 410px;
-            height: min(660px, 92vh);
+            height: min(670px, 92vh);
             max-height: 92dvh;
             display: flex;
             flex-direction: column;
@@ -52,7 +53,7 @@
             box-shadow: inset 0 6px 12px rgba(0,0,0,0.6);
         }
 
-        /* Shake Feedback Keyframes */
+        /* Error Shake Animation */
         .shake-error-animation {
             animation: snapShake 0.4s ease-in-out;
         }
@@ -72,20 +73,49 @@
 
         @keyframes cardPulseGlow {
             0% { transform: scale(1); background-color: #fffbeb; }
-            100% { transform: scale(1.03); background-color: #fef3c7; }
+            100% { transform: scale(1.04); background-color: #fef3c7; }
         }
 
-        /* Tactile Game Interactive Tokens */
+        /* Interactive Tokens */
         .item-text-card {
             background: #ffffff;
             border: 2.5px solid #4a1d08;
             box-shadow: 0 4px 0 #4a1d08;
             cursor: grab;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, opacity 0.15s ease;
             touch-action: none;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
+
         .item-text-card:active {
             cursor: grabbing;
+        }
+
+        /* Drag Overlay Floating Tile */
+        .dragging-floating-tile {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            background: #ffffff;
+            border: 3px solid #f97316;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 4px 0 #ea580c;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #431407;
+            transform: scale(1.08) rotate(-2deg);
+            transition: transform 0.08s ease;
+        }
+
+        /* Target Active Hover Glow */
+        .drop-target-active-hover {
+            border-color: #f97316 !important;
+            background-color: rgba(249, 115, 22, 0.25) !important;
+            transform: scale(1.03);
+            box-shadow: 0 0 16px rgba(249, 115, 22, 0.6);
         }
 
         .button-orange-pop {
@@ -115,7 +145,7 @@
             -webkit-overflow-scrolling: touch;
         }
         .drawer-scrollbar::-webkit-scrollbar {
-            width: 5px;
+            width: 6px;
         }
         .drawer-scrollbar::-webkit-scrollbar-track {
             background: #f1f5f9;
@@ -131,33 +161,31 @@
 
     <canvas id="canvasConfetti" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
+    <!-- Global Floating Drag Layer -->
+    <div id="dragOverlayContainer" class="fixed inset-0 pointer-events-none z-50"></div>
+
     <div class="game-main-box p-3.5">
 
         <!-- Splash Logo View -->
         <div id="innovineLogoView" class="w-full flex flex-col justify-center items-center h-full flex-1 py-4 cursor-pointer">
             <div class="flex flex-col items-center justify-center space-y-3">
-                <svg width="120" height="120" viewBox="0 0 100 100" class="drop-shadow-md">
-                    <circle cx="50" cy="50" r="45" fill="#4a1d08"/>
-                    <circle cx="50" cy="50" r="38" fill="#f97316"/>
-                    <path d="M30 65 L50 30 L70 65 Z" fill="#fffbf4"/>
-                    <circle cx="50" cy="45" r="8" fill="#22c55e"/>
-                </svg>
-                <h2 class="text-2xl font-black text-amber-950 tracking-wider uppercase">INNOVINE</h2>
-                <span class="text-[10px] text-amber-800 font-bold tracking-widest uppercase">Tap to Skip</span>
+                <img id="imgCompanyLogo" src="assets/innovine-logo.png" alt="Innovine Logo" class="h-24 w-auto object-contain drop-shadow-md" onerror="this.onerror=null; this.parentNode.innerHTML=getFallbackLogoSVG();">
+                <h2 class="text-2xl font-black text-amber-950 tracking-wider uppercase mt-2">INNOVINE</h2>
+                <span class="text-[10px] text-amber-800 font-bold tracking-widest uppercase bg-amber-100 px-3 py-1 rounded-full">Tap to Skip</span>
             </div>
         </div>
 
         <!-- Welcome Menu View -->
         <div id="welcomeMenuView" class="hidden w-full flex flex-col justify-between items-center text-center h-full flex-1 py-2">
             <div class="space-y-1 mt-2">
-                <div class="text-5xl">🔍</div>
+                <div class="text-5xl animate-bounce">🔍</div>
                 <h1 class="text-3xl font-black text-amber-950 tracking-tight">EARTH MATCH!</h1>
-                <span class="text-[10px] text-orange-950 font-bold bg-orange-200 px-3 py-0.5 rounded-full inline-block uppercase">Fun Learning Game</span>
+                <span class="text-[10px] text-orange-950 font-bold bg-orange-200 px-3 py-0.5 rounded-full inline-block uppercase">Fun Science Game</span>
             </div>
 
-            <div class="bg-orange-50 border border-orange-200 p-3.5 rounded-xl text-center my-auto">
+            <div class="bg-orange-50 border-2 border-orange-200 p-4 rounded-2xl text-center my-auto shadow-sm">
                 <p class="text-xs font-semibold text-stone-700 leading-relaxed">
-                    Welcome, little detective! Read the story puzzles and drag the matching word cards directly into the brown lab box to test your knowledge!
+                    Welcome, young detective! Read the story puzzles and drag the matching rock or mineral cards directly into the brown lab box! 🌍💎
                 </p>
             </div>
 
@@ -169,13 +197,13 @@
         <!-- Rules View -->
         <div id="gameRulesView" class="hidden w-full flex flex-col justify-between h-full flex-1 py-2">
             <div class="text-center">
-                <h2 class="text-xl font-black text-amber-950">How To Play!</h2>
+                <h2 class="text-xl font-black text-amber-950">How To Play! 📖</h2>
             </div>
             
-            <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs font-semibold text-stone-700 space-y-2.5 my-auto leading-relaxed">
-                <p class="flex items-center"><span class="text-base mr-2">🎯</span> Match all 12 puzzle questions by dragging cards.</p>
-                <p class="flex items-center"><span class="text-base mr-2">🪨</span> You have 3 rocks! Each wrong guess cracks one.</p>
-                <p class="flex items-center"><span class="text-base mr-2">💡</span> Stuck? Make 2 mistakes and the correct answer will glow!</p>
+            <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl text-xs font-semibold text-stone-700 space-y-3 my-auto leading-relaxed shadow-sm">
+                <p class="flex items-center"><span class="text-lg mr-2.5">🎯</span> Match all 12 puzzle questions by dragging cards.</p>
+                <p class="flex items-center"><span class="text-lg mr-2.5">🪨</span> You have 3 rock lives! Each wrong guess cracks one.</p>
+                <p class="flex items-center"><span class="text-lg mr-2.5">💡</span> Stuck? Make 2 mistakes and the correct answer will glow!</p>
             </div>
 
             <button id="btnLaunchEngine" class="w-full button-orange-pop text-white font-bold text-sm py-3 rounded-xl uppercase tracking-wider">
@@ -186,31 +214,33 @@
         <!-- Main Gameplay View -->
         <div id="mainGameplayView" class="hidden w-full h-full flex flex-col justify-between flex-1 space-y-2">
             
+            <!-- Top Dashboard Header -->
             <div class="w-full flex items-center justify-between shrink-0">
-                <div class="bg-stone-100 border border-stone-200 px-2.5 py-1 rounded-lg text-center">
-                    <span class="block text-[7px] font-bold text-stone-400 uppercase tracking-tight">Question</span>
+                <div class="bg-stone-100 border border-stone-300 px-3 py-1 rounded-xl text-center shadow-xs">
+                    <span class="block text-[7px] font-bold text-stone-500 uppercase tracking-tight">Question</span>
                     <span id="txtProgressBadge" class="text-xs font-black text-stone-800 leading-none">1 / 12</span>
                 </div>
 
-                <div class="flex items-center space-x-1 bg-stone-900 px-2.5 py-1.5 rounded-xl shadow-inner text-xs">
+                <div class="flex items-center space-x-1.5 bg-stone-900 px-3 py-1.5 rounded-xl shadow-inner text-xs">
                     <span id="rockLife1" class="transition-opacity duration-200">🪨</span>
                     <span id="rockLife2" class="transition-opacity duration-200">🪨</span>
                     <span id="rockLife3" class="transition-opacity duration-200">🪨</span>
                 </div>
 
-                <div class="bg-amber-950 px-2.5 py-1 rounded-lg text-center min-w-[65px]">
+                <div class="bg-amber-950 px-3 py-1 rounded-xl text-center min-w-[70px] shadow-xs">
                     <span class="block text-[7px] text-orange-400 uppercase font-bold tracking-tight">Score</span>
                     <span id="txtLiveScore" class="text-xs font-black text-orange-300 leading-none">000</span>
                 </div>
             </div>
 
-            <div id="gameplayDropArena" class="cave-box-theme rounded-2xl p-2.5 flex flex-col justify-between items-center h-48 shrink-0 relative transition-all duration-200">
+            <!-- Target Drop Arena -->
+            <div id="gameplayDropArena" class="cave-box-theme rounded-2xl p-3 flex flex-col justify-between items-center h-48 shrink-0 relative transition-all duration-200">
                 
-                <div id="mainDropTargetFrame" class="w-full border-2 border-dashed border-orange-500/40 rounded-xl p-2 flex flex-col items-center justify-center flex-1 text-center">
+                <div id="mainDropTargetFrame" class="w-full border-2 border-dashed border-orange-500/40 rounded-xl p-2.5 flex flex-col items-center justify-center flex-1 text-center transition-all duration-150">
                     <p id="txtScenarioRequestPrompt" class="text-xs font-semibold text-amber-50 leading-snug max-w-[300px] mb-2"></p>
                     
-                    <div id="placedCardSlotAnchor" class="w-36 h-8 border border-amber-900/40 rounded-lg bg-stone-950/30 flex items-center justify-center text-center text-xs font-bold text-orange-300">
-                        <span id="placedSlotPlaceholderLabel" class="text-[9px] text-stone-500 font-normal uppercase tracking-wider">Drag Tile Here</span>
+                    <div id="placedCardSlotAnchor" class="w-40 h-9 border-2 border-amber-800/50 rounded-xl bg-stone-950/40 flex items-center justify-center text-center text-xs font-bold text-orange-300 transition-all duration-200">
+                        <span id="placedSlotPlaceholderLabel" class="text-[9px] text-stone-400 font-medium uppercase tracking-wider">Drag Card Here ✨</span>
                     </div>
                 </div>
 
@@ -219,9 +249,10 @@
                 </button>
             </div>
 
-            <div class="bg-stone-50 border border-stone-200 rounded-xl p-2 flex-1 flex flex-col overflow-hidden">
-                <div class="text-center mb-1 shrink-0">
-                    <span class="text-[8px] font-black text-stone-400 bg-stone-200 px-3 py-0.5 rounded-full uppercase">Scroll & Find Answer Card</span>
+            <!-- Scrollable Cards Tray -->
+            <div class="bg-stone-100 border-2 border-stone-200 rounded-2xl p-2 flex-1 flex flex-col overflow-hidden shadow-inner">
+                <div class="text-center mb-1.5 shrink-0">
+                    <span class="text-[8px] font-black text-stone-500 bg-stone-200/80 px-3 py-0.5 rounded-full uppercase tracking-wider">Scroll & Drag Answer Card</span>
                 </div>
 
                 <div id="trayGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto drawer-scrollbar pr-1 pb-1 flex-1">
@@ -237,7 +268,7 @@
                 <p id="lblFinalFeedback" class="text-xs text-stone-600 font-semibold px-2 leading-relaxed mt-1"></p>
             </div>
 
-            <div class="bg-orange-50 px-5 py-2.5 rounded-xl border border-orange-200 my-2">
+            <div class="bg-orange-50 px-6 py-3 rounded-2xl border-2 border-orange-200 my-2 shadow-xs">
                 <p class="text-[8px] font-black tracking-widest uppercase text-stone-400">Total Score</p>
                 <p class="text-3xl font-black text-orange-600"><span id="lblFinalScore">0</span> / 120</p>
             </div>
@@ -272,7 +303,14 @@
         let blockGameplayInteraction = false;
         let splashTimer = null;
 
-        // Zero-Dependency Web Audio API Synthesizer
+        // Audio Objects linking to the assets folder
+        const audioAssets = {
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3'),
+            victory: new Audio('assets/freesound_community-claps-44774.mp3')
+        };
+
+        // Fallback Web Audio API Synthesizer
         let audioCtx = null;
         function getAudioContext() {
             if (!audioCtx) {
@@ -284,7 +322,18 @@
             return audioCtx;
         }
 
-        function playSynthesizedSound(type) {
+        function triggerSoundEffect(type) {
+            if (audioAssets[type]) {
+                audioAssets[type].currentTime = 0;
+                audioAssets[type].play().catch(() => {
+                    playSynthesizedFallbackSound(type);
+                });
+            } else {
+                playSynthesizedFallbackSound(type);
+            }
+        }
+
+        function playSynthesizedFallbackSound(type) {
             try {
                 const ctx = getAudioContext();
                 const now = ctx.currentTime;
@@ -324,9 +373,16 @@
                         noteOsc.stop(now + idx * 0.08 + 0.2);
                     });
                 }
-            } catch (e) {
-                /* Silent fail fallback for restricted web audio environments */
-            }
+            } catch (e) {}
+        }
+
+        function getFallbackLogoSVG() {
+            return `<svg width="90" height="90" viewBox="0 0 100 100" class="drop-shadow-md">
+                <circle cx="50" cy="50" r="45" fill="#4a1d08"/>
+                <circle cx="50" cy="50" r="38" fill="#f97316"/>
+                <path d="M30 65 L50 30 L70 65 Z" fill="#fffbf4"/>
+                <circle cx="50" cy="45" r="8" fill="#22c55e"/>
+            </svg>`;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -393,8 +449,8 @@
             document.getElementById('txtScenarioRequestPrompt').innerText = currentItem.prompt;
             
             const anchor = document.getElementById('placedCardSlotAnchor');
-            anchor.className = "w-36 h-8 border border-amber-900/40 rounded-lg bg-stone-950/30 flex items-center justify-center text-center text-xs font-bold text-orange-300";
-            anchor.innerHTML = '<span id="placedSlotPlaceholderLabel" class="text-[9px] text-stone-500 font-normal uppercase tracking-wider">Drag Tile Here</span>';
+            anchor.className = "w-40 h-9 border-2 border-amber-800/50 rounded-xl bg-stone-950/40 flex items-center justify-center text-center text-xs font-bold text-orange-300 transition-all duration-200";
+            anchor.innerHTML = '<span id="placedSlotPlaceholderLabel" class="text-[9px] text-stone-400 font-medium uppercase tracking-wider">Drag Card Here ✨</span>';
 
             const tray = document.getElementById('trayGridContainer');
             tray.innerHTML = "";
@@ -408,7 +464,10 @@
                 card.className = "item-text-card h-11 rounded-xl flex items-center justify-center text-center font-bold text-xs text-amber-950 p-2 select-none touch-none";
                 card.innerText = item.label;
                 card.setAttribute('data-answer-label', item.label);
-                card.onpointerdown = triggerSpecimenCardDragPhysics;
+                
+                // Attach Pointer Drag Listener
+                card.onpointerdown = startCardDragController;
+                
                 tray.appendChild(card);
             });
 
@@ -418,9 +477,8 @@
             }
         }
 
-        function evaluateUserDropChoice() {
+        function evaluateUserDropChoice(droppedLabel) {
             const targetAnswerObj = Game_Questions_Data[indexPointer];
-            const droppedLabel = selectedCardRef.getAttribute('data-answer-label');
 
             if (droppedLabel === targetAnswerObj.label) {
                 blockGameplayInteraction = true; 
@@ -428,21 +486,22 @@
                 scoreTracker += 10;
                 refreshDashboardUI();
 
-                playSynthesizedSound('correct');
+                triggerSoundEffect('correct');
 
                 const anchor = document.getElementById('placedCardSlotAnchor');
                 anchor.innerHTML = ""; 
-                anchor.className = "w-36 h-8 rounded-lg flex items-center justify-center text-center font-bold text-xs bg-green-600 text-white border-2 border-green-700 shadow-md";
+                anchor.className = "w-40 h-9 rounded-xl flex items-center justify-center text-center font-bold text-xs bg-green-600 text-white border-2 border-green-700 shadow-md";
                 anchor.innerText = targetAnswerObj.label;
 
-                selectedCardRef.classList.add('hidden');
+                const cardInTray = document.getElementById(`card-node-${droppedLabel}`);
+                if (cardInTray) cardInTray.classList.add('hidden');
 
                 document.getElementById('txtScenarioRequestPrompt').innerText = targetAnswerObj.fact;
                 document.getElementById('btnInlineNextQuestion').classList.remove('hidden');
 
             } else {
                 consecutiveFails++;
-                playSynthesizedSound('wrong');
+                triggerSoundEffect('wrong');
                 
                 const arena = document.getElementById('gameplayDropArena');
                 arena.classList.add('shake-error-animation', 'bg-rose-950/40');
@@ -467,7 +526,7 @@
             if (indexPointer < 12) {
                 renderQuestionTaskState();
             } else {
-                playSynthesizedSound('victory');
+                triggerSoundEffect('victory');
                 launchConfettiBurst();
                 completeGameSession(true);
             }
@@ -494,81 +553,97 @@
             document.getElementById('summaryDashboardView').classList.remove('hidden');
         }
 
-        // --- UNIFIED POINTER TOUCH DRAG ENGINE ---
-        let selectedCardRef = null;
-        let slotInDrawerParentRef = null;
-        let isPointerTrackingActive = false;
+        /* --- PRECISE VIEWPORT OVERLAY DRAG & DROP CONTROLLER --- */
+        let activeDragState = null;
 
-        function triggerSpecimenCardDragPhysics(e) {
-            if (isPointerTrackingActive || selectedCardRef || blockGameplayInteraction) return;
-            isPointerTrackingActive = true;
-            selectedCardRef = e.currentTarget;
-            slotInDrawerParentRef = selectedCardRef.parentNode;
+        function startCardDragController(e) {
+            if (blockGameplayInteraction || activeDragState) return;
 
-            const boxBounds = selectedCardRef.getBoundingClientRect();
-            selectedCardRef.dataset.offsetX = e.clientX - boxBounds.left;
-            selectedCardRef.dataset.offsetY = e.clientY - boxBounds.top;
+            const originalCard = e.currentTarget;
+            const answerLabel = originalCard.getAttribute('data-answer-label');
+            const rect = originalCard.getBoundingClientRect();
+            const overlayContainer = document.getElementById('dragOverlayContainer');
 
-            selectedCardRef.style.position = 'fixed';
-            selectedCardRef.style.zIndex = '100';
-            selectedCardRef.style.width = `${boxBounds.width}px`;
-            selectedCardRef.style.height = `${boxBounds.height}px`;
-            selectedCardRef.style.left = `${boxBounds.left}px`;
-            selectedCardRef.style.top = `${boxBounds.top}px`;
-            selectedCardRef.classList.add('scale-105', 'shadow-xl', 'opacity-90');
+            // Create Visual Floating Clone
+            const floatingTile = document.createElement('div');
+            floatingTile.className = 'dragging-floating-tile';
+            floatingTile.innerText = answerLabel;
+            floatingTile.style.width = `${rect.width}px`;
+            floatingTile.style.height = `${rect.height}px`;
+            
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
 
-            window.addEventListener('pointermove', whileCardIsMoving);
-            window.addEventListener('pointerup', completeCardReleaseAction);
-            window.addEventListener('pointercancel', completeCardReleaseAction);
-            selectedCardRef.setPointerCapture(e.pointerId);
+            floatingTile.style.left = `${e.clientX - offsetX}px`;
+            floatingTile.style.top = `${e.clientY - offsetY}px`;
+
+            overlayContainer.appendChild(floatingTile);
+
+            // Dim original card in scroll container
+            originalCard.style.opacity = '0.25';
+
+            activeDragState = {
+                originalCard,
+                floatingTile,
+                answerLabel,
+                offsetX,
+                offsetY,
+                pointerId: e.pointerId
+            };
+
+            window.addEventListener('pointermove', onPointerMoveDrag);
+            window.addEventListener('pointerup', onPointerUpDrag);
+            window.addEventListener('pointercancel', onPointerUpDrag);
         }
 
-        function whileCardIsMoving(e) {
-            if (!selectedCardRef) return;
-            selectedCardRef.style.left = `${e.clientX - parseFloat(selectedCardRef.dataset.offsetX)}px`;
-            selectedCardRef.style.top = `${e.clientY - parseFloat(selectedCardRef.dataset.offsetY)}px`;
+        function onPointerMoveDrag(e) {
+            if (!activeDragState) return;
+
+            const { floatingTile, offsetX, offsetY } = activeDragState;
+            floatingTile.style.left = `${e.clientX - offsetX}px`;
+            floatingTile.style.top = `${e.clientY - offsetY}px`;
+
+            // Hover collision check on target slot
+            const dropTarget = document.getElementById('mainDropTargetFrame');
+            const dropRect = dropTarget.getBoundingClientRect();
+
+            if (e.clientX >= dropRect.left && e.clientX <= dropRect.right &&
+                e.clientY >= dropRect.top && e.clientY <= dropRect.bottom) {
+                dropTarget.classList.add('drop-target-active-hover');
+            } else {
+                dropTarget.classList.remove('drop-target-active-hover');
+            }
         }
 
-        function completeCardReleaseAction(e) {
-            isPointerTrackingActive = false;
-            if (!selectedCardRef) return;
+        function onPointerUpDrag(e) {
+            if (!activeDragState) return;
 
-            window.removeEventListener('pointermove', whileCardIsMoving);
-            window.removeEventListener('pointerup', completeCardReleaseAction);
-            window.removeEventListener('pointercancel', completeCardReleaseAction);
+            const { originalCard, floatingTile, answerLabel } = activeDragState;
+            const dropTargetFrame = document.getElementById('mainDropTargetFrame');
+            dropTargetFrame.classList.remove('drop-target-active-hover');
 
-            const cardRect = selectedCardRef.getBoundingClientRect();
-            const targetZoneNode = document.getElementById('placedCardSlotAnchor');
-            const targetRect = targetZoneNode.getBoundingClientRect();
+            window.removeEventListener('pointermove', onPointerMoveDrag);
+            window.removeEventListener('pointerup', onPointerUpDrag);
+            window.removeEventListener('pointercancel', onPointerUpDrag);
 
-            const targetCenterX = cardRect.left + (cardRect.width / 2);
-            const targetCenterY = cardRect.top + (cardRect.height / 2);
+            const dropRect = dropTargetFrame.getBoundingClientRect();
+            const isInsideDropZone = (
+                e.clientX >= dropRect.left && e.clientX <= dropRect.right &&
+                e.clientY >= dropRect.top && e.clientY <= dropRect.bottom
+            );
 
-            let hitDetected = false;
-            if (targetCenterX >= targetRect.left && targetCenterX <= targetRect.right &&
-                targetCenterY >= targetRect.top && targetCenterY <= targetRect.bottom) {
-                hitDetected = true;
+            // Remove Floating Tile
+            floatingTile.remove();
+            originalCard.style.opacity = '1';
+
+            if (isInsideDropZone) {
+                evaluateUserDropChoice(answerLabel);
             }
 
-            selectedCardRef.style.position = '';
-            selectedCardRef.style.zIndex = '';
-            selectedCardRef.style.width = '';
-            selectedCardRef.style.height = '';
-            selectedCardRef.style.left = '';
-            selectedCardRef.style.top = '';
-            selectedCardRef.classList.remove('scale-105', 'shadow-xl', 'opacity-90');
-
-            if (slotInDrawerParentRef) {
-                slotInDrawerParentRef.appendChild(selectedCardRef);
-            }
-
-            if (hitDetected) {
-                evaluateUserDropChoice();
-            }
-            selectedCardRef = null;
+            activeDragState = null;
         }
 
-        // Lightweight Confetti Particles
+        /* Confetti Burst Effect */
         const canvas = document.getElementById('canvasConfetti');
         const ctx = canvas.getContext('2d');
         let confArrayList = [];
@@ -579,13 +654,13 @@
             canvas.height = window.innerHeight;
             confArrayList = [];
 
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 35; i++) {
                 confArrayList.push({
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: (Math.random() - 0.5) * 8 - 3,
-                    r: Math.random() * 3 + 2,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10 - 3,
+                    r: Math.random() * 4 + 2,
                     color: `hsl(${Math.random() * 360}, 90%, 60%)`,
                     alpha: 1
                 });
@@ -601,7 +676,7 @@
                 p.x += p.vx;
                 p.y += p.vy;
                 p.vy += 0.2;
-                p.alpha -= 0.025;
+                p.alpha -= 0.02;
 
                 if (p.alpha > 0) {
                     active = true;
