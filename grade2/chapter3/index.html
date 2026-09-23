@@ -9,13 +9,15 @@
         body {
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
             overflow-x: hidden;
         }
         .box-card {
             perspective: 1000px;
+            will-change: transform;
         }
         .box-inner {
-            transition: transform 0.6s;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
         .box-card.flipped .box-inner {
@@ -23,6 +25,7 @@
         }
         .box-front, .box-back {
             backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             position: absolute;
             top: 0;
             left: 0;
@@ -32,7 +35,6 @@
         .box-back {
             transform: rotateY(180deg);
         }
-        /* Reliable High-Contrast Dynamic Stroke-Line Animation Vector Styles */
         .strike-line {
             stroke-dasharray: 200;
             stroke-dashoffset: 200;
@@ -45,53 +47,54 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-b from-[#FFF5F5] via-[#FFF9E6] to-[#E8F5E9] min-h-screen flex flex-col items-center justify-center select-none text-[#333333] p-4 m-0">
+<body class="bg-gradient-to-b from-[#FFF5F5] via-[#FFF9E6] to-[#E8F5E9] min-h-screen min-h-[100dvh] flex flex-col items-center justify-center select-none text-[#333333] p-3 sm:p-4 m-0">
 
-    <audio id="soundCorrect" src="EVS-Games/grade2/chapter3/assets/correct.mp3" preload="auto"></audio>
-    <audio id="soundWrong" src="EVS-Games/grade2/chapter3/assets/wrong.mp3" preload="auto"></audio>
-    <audio id="soundClapping" src="EVS-Games/grade2/chapter3/assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
+    <!-- Asset Files loaded relative to index.html in chapter3 folder (or fallback path) -->
+    <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="soundClapping" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <div id="splashScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 opacity-100">
-        <img src="EVS-Games/grade2/chapter3/assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-[70%] h-auto object-contain">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-[70%] h-auto object-contain">
     </div>
 
-    <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#FFD166] text-center space-y-6 mx-2">
+    <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border-4 border-[#FFD166] text-center space-y-6 mx-2">
         <div class="space-y-3">
-            <span class="text-6xl block animate-bounce">👕✨👚</span>
+            <span class="text-5xl sm:text-6xl block animate-bounce">👕✨👚</span>
             <h1 class="text-3xl md:text-4xl font-black text-[#FF6B6B] leading-tight tracking-wide">The Closet<br>Chronicles!</h1>
-            <p class="text-[#6C7A89] font-bold text-base px-4">Can you choose the perfect clothes for our weather adventures?</p>
+            <p class="text-[#6C7A89] font-bold text-sm sm:text-base px-2">Can you choose the perfect clothes for our weather adventures?</p>
         </div>
-        <button onclick="showInstructions()" class="w-full bg-[#4CAF50] hover:bg-[#43A047] text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#2E7D32]">
+        <button onclick="showInstructions()" class="w-full bg-[#4CAF50] hover:bg-[#43A047] active:bg-[#388E3C] text-white font-bold text-xl sm:text-2xl py-3.5 sm:py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#2E7D32]">
             LET'S GO ➡️
         </button>
     </div>
 
-    <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-6 mx-2">
+    <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-5 mx-2">
         <h2 class="text-2xl font-black text-[#4A90E2]">☀️ How to Play ☀️</h2>
-        <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base space-y-3 text-[#4A4A4A] font-medium">
+        <div class="bg-[#FFF9E6] p-4 sm:p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-sm sm:text-base space-y-3 text-[#4A4A4A] font-medium">
             <p>1. Tap any padlocked 🔒 card on the board grid.</p>
             <p>2. Answer correctly to reveal a hidden secret symbol!</p>
             <p>3. Form exactly one straight matching line of 3 to strike it out!</p>
-            <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
+            <p class="text-xs sm:text-sm bg-[#E8F5E9] p-2.5 sm:p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
         </div>
-        <button onclick="startGame()" class="w-full bg-[#FF6B6B] hover:bg-[#EE5253] text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#C0392B]">
+        <button onclick="startGame()" class="w-full bg-[#FF6B6B] hover:bg-[#EE5253] active:bg-[#E53935] text-white font-bold text-xl sm:text-2xl py-3.5 sm:py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#C0392B]">
             PLAY GAME ▶️
         </button>
     </div>
 
-    <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-5 px-2">
-        <div class="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-base">
-            <div class="text-[#4A90E2]">Progress: <span id="hudProgress" class="bg-[#E3F2FD] text-[#1E88E5] px-3 py-1 rounded-full text-sm border border-[#1E88E5]">0 / 9 Solved</span></div>
-            <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-lg">❤️❤️❤️</div>
+    <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-4 px-2">
+        <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-xs sm:text-base">
+            <div class="text-[#4A90E2]">Progress: <span id="hudProgress" class="bg-[#E3F2FD] text-[#1E88E5] px-2.5 sm:px-3 py-1 rounded-full border border-[#1E88E5]">0 / 9 Solved</span></div>
+            <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-base sm:text-lg">❤️❤️❤️</div>
             <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
         </div>
 
-        <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-sm font-bold text-[#2E7D32] animate-pulse">
+        <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-xs sm:text-sm font-bold text-[#2E7D32] animate-pulse">
             🎉 Tic-Tac-Toe Line Achieved! Match Formed! 🎉
         </div>
 
-        <div class="bg-white rounded-3xl p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
-            <div id="gridContainer" class="grid grid-cols-3 gap-4 w-full h-full relative z-10">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
+            <div id="gridContainer" class="grid grid-cols-3 gap-3 sm:gap-4 w-full h-full relative z-10">
             </div>
 
             <svg id="strikeSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30" style="display: block;" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
@@ -100,32 +103,32 @@
     </div>
 
     <div id="questionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-5 border-4 border-[#4A90E2] flex flex-col space-y-4 max-h-[92vh] overflow-y-auto">
-            <div id="modalBody" class="bg-[#F0F7FF] rounded-2xl p-4 border-2 border-[#BCDFFA] text-center">
-                <p id="questionText" class="text-base md:text-lg font-bold text-[#2C3E50] leading-snug"></p>
+        <div class="bg-white rounded-3xl w-full max-w-sm p-4 sm:p-5 border-4 border-[#4A90E2] flex flex-col space-y-4 max-h-[90dvh] overflow-y-auto">
+            <div id="modalBody" class="bg-[#F0F7FF] rounded-2xl p-3.5 sm:p-4 border-2 border-[#BCDFFA] text-center">
+                <p id="questionText" class="text-sm sm:text-base md:text-lg font-bold text-[#2C3E50] leading-snug"></p>
             </div>
-            <div id="hintContainer" class="hidden bg-[#FFF9E6] border-2 border-dashed border-[#FFD166] rounded-2xl p-3 text-center text-sm text-[#795548] font-semibold">
+            <div id="hintContainer" class="hidden bg-[#FFF9E6] border-2 border-dashed border-[#FFD166] rounded-2xl p-3 text-center text-xs sm:text-sm text-[#795548] font-semibold">
                 💡 <span id="hintText"></span>
             </div>
-            <div id="optionsContainer" class="flex flex-col space-y-3">
+            <div id="optionsContainer" class="flex flex-col space-y-2.5 sm:space-y-3">
             </div>
-            <button id="nextBtn" onclick="submitAndAdvance()" class="hidden w-full bg-[#4CAF50] text-white font-bold text-lg py-3 rounded-xl shadow-md transform active:scale-95 transition-all border-b-4 border-[#2E7D32]">
+            <button id="nextBtn" onclick="submitAndAdvance()" class="hidden w-full bg-[#4CAF50] text-white font-bold text-base sm:text-lg py-3 rounded-xl shadow-md transform active:scale-95 transition-all border-b-4 border-[#2E7D32]">
                 CONFIRM ➡️
             </button>
         </div>
     </div>
 
-    <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
+    <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
         <div class="space-y-2">
-            <span class="text-6xl block">🏆✨🥳</span>
-            <h2 id="endGameStatus" class="text-3xl font-black text-[#4CAF50]">Quest Completed!</h2>
-            <p id="endGameMessage" class="text-lg font-bold text-gray-700">Fantastic Job! You are a Wardrobe Wizard! 🌟</p>
+            <span class="text-5xl sm:text-6xl block">🏆✨🥳</span>
+            <h2 id="endGameStatus" class="text-2xl sm:text-3xl font-black text-[#4CAF50]">Quest Completed!</h2>
+            <p id="endGameMessage" class="text-base sm:text-lg font-bold text-gray-700 px-2">Fantastic Job! You are a Wardrobe Wizard! 🌟</p>
         </div>
         <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
             <p class="text-gray-600 font-bold uppercase text-xs tracking-wider">Your Final Tally</p>
-            <p class="text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> Pts</p>
+            <p class="text-3xl sm:text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> Pts</p>
         </div>
-        <button onclick="restartGame()" class="w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-bold text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#C0392B] transform active:scale-95 transition-all">
+        <button onclick="restartGame()" class="w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-bold text-lg sm:text-xl py-3.5 sm:py-4 rounded-2xl shadow-md border-b-8 border-[#C0392B] transform active:scale-95 transition-all">
             PLAY AGAIN 🔄
         </button>
     </div>
@@ -167,6 +170,26 @@
             { indices: [2, 4, 6], coords: { x1: 95, y1: 5, x2: 5, y2: 95 } }        // Diag 2
         ];
 
+        // Mobile browser Audio Unlock Engine (Required for Safari & Android touch policy)
+        let audioUnlocked = false;
+        function unlockAudioContext() {
+            if (audioUnlocked) return;
+            ['soundCorrect', 'soundWrong', 'soundClapping'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.play().then(() => {
+                        el.pause();
+                        el.currentTime = 0;
+                    }).catch(() => {});
+                }
+            });
+            audioUnlocked = true;
+            document.removeEventListener('touchstart', unlockAudioContext);
+            document.removeEventListener('click', unlockAudioContext);
+        }
+        document.addEventListener('touchstart', unlockAudioContext, { once: true });
+        document.addEventListener('click', unlockAudioContext, { once: true });
+
         window.onload = function() {
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
@@ -175,7 +198,7 @@
                     splash.style.display = 'none';
                     document.getElementById('titleScreen').classList.remove('hidden');
                 }, 500);
-            }, 5000); 
+            }, 3000); // Reduced splash duration for snappy user load
         };
 
         function showInstructions() {
@@ -199,9 +222,7 @@
                 [database[i], database[j]] = [database[j], database[i]];
             }
 
-            // Fixed non-overlapping templates for a true 5-4 split containing exactly 1 win line
             const uniqueWinPatterns = [
-                // 5 Os and 4 Xs templates with exactly 1 win
                 { win: "⭕", map: ["⭕","⭕","⭕","❌","❌","⭕","❌","⭕","❌"] },
                 { win: "⭕", map: ["⭕","❌","❌","⭕","⭕","❌","⭕","❌","⭕"] }, 
                 { win: "⭕", map: ["❌","❌","⭕","❌","⭕","⭕","⭕","⭕","❌"] },
@@ -210,13 +231,10 @@
                 { win: "❌", map: ["⭕","⭕","❌","⭕","❌","❌","❌","❌","⭕"] }
             ];
 
-            // Grab a random layout blueprint matching the desired mechanics configuration
             const chosenBlueprint = uniqueWinPatterns[Math.floor(Math.random() * uniqueWinPatterns.length)];
             hiddenSymbolPool = [...chosenBlueprint.map];
 
-            // Re-verify orientation using mirror transformations to add true dynamic variety
             if (Math.random() > 0.5) {
-                // Mirror rows transformation
                 let row1 = [hiddenSymbolPool[0], hiddenSymbolPool[1], hiddenSymbolPool[2]];
                 let row3 = [hiddenSymbolPool[6], hiddenSymbolPool[7], hiddenSymbolPool[8]];
                 hiddenSymbolPool[0] = row3[0]; hiddenSymbolPool[1] = row3[1]; hiddenSymbolPool[2] = row3[2];
@@ -229,8 +247,8 @@
                 container.innerHTML += `
                     <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer relative z-10">
                         <div class="box-inner w-full h-full relative">
-                            <div class="box-front flex items-center justify-center bg-[#FFF9E6] hover:bg-[#FFEAA7] border-4 border-[#FFD166] rounded-2xl text-3xl shadow-md transition-all">🔒</div>
-                            <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner"></div>
+                            <div class="box-front flex items-center justify-center bg-[#FFF9E6] hover:bg-[#FFEAA7] active:bg-[#FDCB6E] border-4 border-[#FFD166] rounded-2xl text-2xl sm:text-3xl shadow-md transition-all">🔒</div>
+                            <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner"></div>
                         </div>
                     </div>
                 `;
@@ -283,7 +301,7 @@
             container.innerHTML = "";
             qData.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left bg-[#F0F0F0] active:bg-gray-200 text-[#333] font-bold py-3 px-4 rounded-xl border-2 border-gray-300 text-sm md:text-base";
+                btn.className = "w-full text-left bg-[#F0F0F0] active:bg-gray-200 text-[#333] font-bold py-3 px-4 rounded-xl border-2 border-gray-300 text-xs sm:text-sm md:text-base transition-colors";
                 btn.innerText = opt;
                 btn.onclick = () => checkChoice(idx, btn);
                 container.appendChild(btn);
@@ -297,7 +315,7 @@
 
             if (chosenIdx === qData.answer) {
                 playSound('soundCorrect');
-                clickedBtn.className = "w-full text-left bg-[#4CAF50] text-white font-bold py-3 px-4 rounded-xl border-2 border-[#2E7D32] text-sm md:text-base";
+                clickedBtn.className = "w-full text-left bg-[#4CAF50] text-white font-bold py-3 px-4 rounded-xl border-2 border-[#2E7D32] text-xs sm:text-sm md:text-base";
                 
                 const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
                 for (let b of btns) b.disabled = true;
@@ -312,7 +330,7 @@
                 currentAnswersWrong++;
                 updateLivesHUD();
                 
-                clickedBtn.className = "w-full text-left bg-[#FFCDD2] text-[#C62828] font-bold py-3 px-4 rounded-xl border-2 border-[#E53935] opacity-60 line-through text-sm md:text-base";
+                clickedBtn.className = "w-full text-left bg-[#FFCDD2] text-[#C62828] font-bold py-3 px-4 rounded-xl border-2 border-[#E53935] opacity-60 line-through text-xs sm:text-sm md:text-base";
                 clickedBtn.disabled = true;
 
                 if (currentAnswersWrong === 2) {
@@ -341,14 +359,14 @@
 
                 backSign.innerText = awardedSymbol;
                 if (awardedSymbol === "⭕") {
-                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#E3F2FD] border-4 border-[#1E88E5] text-[#1E88E5]";
+                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner bg-[#E3F2FD] border-4 border-[#1E88E5] text-[#1E88E5]";
                 } else {
-                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
+                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
                 }
             } else {
                 boardState[activeIdx] = "🔒";
                 backSign.innerText = "🔒";
-                backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-gray-200 border-4 border-gray-400 text-gray-400";
+                backSign.className = "box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner bg-gray-200 border-4 border-gray-400 text-gray-400";
             }
 
             const cell = document.getElementById(`gridCell${activeIdx}`);
@@ -377,7 +395,6 @@
                 }
             }
 
-            // High priority vector layer renderer injection engine execution
             if (activeLinePattern && !hasLineOccurred) {
                 hasLineOccurred = true; 
                 playSound('soundClapping');
@@ -386,9 +403,9 @@
                 banner.classList.remove('hidden');
 
                 const svg = document.getElementById('strikeSvg');
-                const lineColor = "#1E88E5"; // Bold Blue line over tiles for clear visibility
+                const lineColor = "#1E88E5"; 
                 
-                svg.innerHTML = ""; // Clear execution space
+                svg.innerHTML = ""; 
 
                 const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
                 line.setAttribute("x1", activeLinePattern.coords.x1.toString());
