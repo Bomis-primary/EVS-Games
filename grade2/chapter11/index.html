@@ -140,20 +140,28 @@
             box-shadow: 0 2px 0 #14532d;
         }
 
+        /* Explicit Visible Scrollbar */
         .drawer-scrollbar {
             touch-action: pan-y;
             -webkit-overflow-scrolling: touch;
+            overflow-y: scroll !important;
+            scrollbar-width: thin;
+            scrollbar-color: #f97316 #e2e8f0;
         }
         .drawer-scrollbar::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
+            display: block;
         }
         .drawer-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #e2e8f0;
             border-radius: 10px;
         }
         .drawer-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #f97316;
             border-radius: 10px;
+        }
+        .drawer-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #ea580c;
         }
     </style>
 </head>
@@ -168,9 +176,8 @@
 
         <!-- Splash Logo View -->
         <div id="innovineLogoView" class="w-full flex flex-col justify-center items-center h-full flex-1 py-4 cursor-pointer">
-            <div class="flex flex-col items-center justify-center space-y-3">
-                <img id="imgCompanyLogo" src="assets/innovine-logo.png" alt="Innovine Logo" class="h-24 w-auto object-contain drop-shadow-md" onerror="this.onerror=null; this.parentNode.innerHTML=getFallbackLogoSVG();">
-                <h2 class="text-2xl font-black text-amber-950 tracking-wider uppercase mt-2">INNOVINE</h2>
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <img id="imgCompanyLogo" src="assets/innovine-logo.png" alt="Innovine Logo" class="h-28 w-auto object-contain drop-shadow-md" onerror="this.onerror=null; this.parentNode.innerHTML=getFallbackLogoSVG();">
                 <span class="text-[10px] text-amber-800 font-bold tracking-widest uppercase bg-amber-100 px-3 py-1 rounded-full">Tap to Skip</span>
             </div>
         </div>
@@ -249,13 +256,13 @@
                 </button>
             </div>
 
-            <!-- Scrollable Cards Tray -->
+            <!-- Scrollable Cards Tray with Visible Side Scrollbar -->
             <div class="bg-stone-100 border-2 border-stone-200 rounded-2xl p-2 flex-1 flex flex-col overflow-hidden shadow-inner">
                 <div class="text-center mb-1.5 shrink-0">
                     <span class="text-[8px] font-black text-stone-500 bg-stone-200/80 px-3 py-0.5 rounded-full uppercase tracking-wider">Scroll & Drag Answer Card</span>
                 </div>
 
-                <div id="trayGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto drawer-scrollbar pr-1 pb-1 flex-1">
+                <div id="trayGridContainer" class="grid grid-cols-2 gap-2 drawer-scrollbar pr-2 pb-1 flex-1">
                 </div>
             </div>
         </div>
@@ -447,6 +454,7 @@
             refreshDashboardUI();
             
             document.getElementById('txtScenarioRequestPrompt').innerText = currentItem.prompt;
+            document.getElementById('btnInlineNextQuestion').classList.add('hidden');
             
             const anchor = document.getElementById('placedCardSlotAnchor');
             anchor.className = "w-40 h-9 border-2 border-amber-800/50 rounded-xl bg-stone-950/40 flex items-center justify-center text-center text-xs font-bold text-orange-300 transition-all duration-200";
@@ -497,7 +505,18 @@
                 if (cardInTray) cardInTray.classList.add('hidden');
 
                 document.getElementById('txtScenarioRequestPrompt').innerText = targetAnswerObj.fact;
-                document.getElementById('btnInlineNextQuestion').classList.remove('hidden');
+
+                // If this is the last question, do NOT show the Next Question button bar.
+                // Auto transition smoothly to the victory summary after reading the fact.
+                const isLastQuestion = (indexPointer === Game_Questions_Data.length - 1);
+                if (isLastQuestion) {
+                    document.getElementById('btnInlineNextQuestion').classList.add('hidden');
+                    setTimeout(() => {
+                        progressNextGameplayStep();
+                    }, 1800);
+                } else {
+                    document.getElementById('btnInlineNextQuestion').classList.remove('hidden');
+                }
 
             } else {
                 consecutiveFails++;
@@ -523,7 +542,7 @@
 
         function progressNextGameplayStep() {
             indexPointer++;
-            if (indexPointer < 12) {
+            if (indexPointer < Game_Questions_Data.length) {
                 renderQuestionTaskState();
             } else {
                 triggerSoundEffect('victory');
