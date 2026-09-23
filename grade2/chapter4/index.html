@@ -41,14 +41,10 @@
             animation: swooshOut 0.4s forwards ease-in-out;
             pointer-events: none;
         }
-        /* Prevents scrolling and forces fit to screen height */
+        /* Prevents layout shift on small height devices */
         .game-container {
-            height: 100%;
             max-height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            overflow-y: auto;
             padding-bottom: env(safe-area-inset-bottom);
         }
     </style>
@@ -62,16 +58,14 @@
 
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <!-- SCREEN 1: Innovine Logo Splash Screen -->
     <div id="splashScreen" onclick="hideSplashScreen()" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500 cursor-pointer">
         <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs md:max-w-sm h-auto object-contain max-h-[70vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-32 h-32 bg-[#E8EAF6] rounded-full flex items-center justify-center text-[#4A148C] font-black text-4xl border-4 border-[#D1C4E9]\'>IN</div>';">
         <p class="text-[#B39DDB] mt-4 text-xs font-bold animate-pulse">Tap to skip</p>
     </div>
 
-    <!-- SCREEN 2: Title Screen with Start Button -->
     <div id="titleScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-6 mx-auto chunky-panel">
         <div class="space-y-3">
-            <img src="image_4e1e19.png" alt="Gameplay Preview" class="w-full h-auto max-h-[30vh] object-contain mx-auto rounded-xl border-4 border-[#B39DDB] shadow-md block" onerror="this.style.display='none'">
+            <span class="text-6xl block">❤️✨💙</span>
             <h1 class="text-3xl font-black text-[#4A148C] tracking-wide leading-tight">Tile Explorer:<br>House Matcher</h1>
             <p class="text-[#6A1B9A] font-bold text-sm px-2">Match the beautiful hearts to unlock fun stories about homes and builders!</p>
         </div>
@@ -80,7 +74,6 @@
         </button>
     </div>
 
-    <!-- SCREEN 3: Rules & Instructions Screen with Play Button -->
     <div id="instructionsScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-5 mx-auto chunky-panel">
         <h2 class="text-2xl font-black text-[#4A148C]">⭐ How to Play ⭐</h2>
         <div class="bg-white/80 p-5 rounded-2xl text-left text-sm space-y-3 font-bold text-[#6A1B9A] border-2 border-dashed border-[#B39DDB]">
@@ -93,21 +86,20 @@
         </button>
     </div>
 
-    <!-- SCREEN 4: Game Play Screen -->
-    <div id="gameScreen" class="hidden w-full max-w-sm flex-col space-y-2 mx-auto relative h-full justify-between items-center game-container py-2">
-        <div class="w-full bg-[#E8EAF6] rounded-2xl p-3 shadow-sm flex items-center justify-between font-black text-sm border-2 border-[#D1C4E9]">
+    <div id="gameScreen" class="hidden w-full max-w-sm flex-col space-y-4 mx-auto relative h-full justify-center game-container">
+        <div class="bg-[#E8EAF6] rounded-2xl p-3 shadow-sm flex items-center justify-between font-black text-sm border-2 border-[#D1C4E9]">
             <div class="text-[#4A148C]">⭐ SCORE: <span id="hudScore" class="text-lg">0</span></div>
             <div class="bg-white text-[#673AB7] px-3 py-1 rounded-full text-xs border border-[#D1C4E9]">Matches: <span id="hudCleared">0 / 8</span></div>
         </div>
 
-        <div class="w-full bg-[#D1C4E9]/40 rounded-3xl p-3 shadow-inner border-4 border-[#D1C4E9] aspect-square relative flex items-center justify-center max-w-[340px]">
-            <div id="tileMatrixGrid" class="grid grid-cols-4 gap-2.5 w-full h-full">
+        <div class="bg-[#D1C4E9]/40 rounded-3xl p-4 shadow-inner border-4 border-[#D1C4E9] aspect-square relative flex items-center justify-center">
+            <div id="tileMatrixGrid" class="grid grid-cols-4 gap-3 w-full h-full">
                 <!-- Grid items injected once on load via JS -->
             </div>
         </div>
 
-        <div class="w-full bg-[#E8EAF6] rounded-2xl p-2.5 border-2 border-[#D1C4E9] shadow-sm">
-            <div id="dockTraySlots" class="grid grid-cols-7 gap-1 h-11 w-full bg-white/60 rounded-xl p-1 border border-[#B39DDB]">
+        <div class="bg-[#E8EAF6] rounded-2xl p-3 border-2 border-[#D1C4E9] shadow-sm">
+            <div id="dockTraySlots" class="grid grid-cols-7 gap-1.5 h-12 w-full bg-white/60 rounded-xl p-1.5 border border-[#B39DDB]">
                 <!-- Tray items injected once on load via JS -->
             </div>
         </div>
@@ -139,12 +131,11 @@
         </div>
     </div>
 
-    <!-- SCREEN 5: End Screen (Dynamic High Score vs Low Score Feedback) -->
     <div id="scoreScreen" class="hidden w-full max-w-sm bg-[#E8EAF6] rounded-3xl p-6 shadow-xl border-4 border-[#D1C4E9] text-center space-y-5 mx-auto chunky-panel">
         <div class="space-y-2">
-            <span id="scoreEmoji" class="text-6xl block animate-bounce">👑👑👑</span>
-            <h2 id="scoreTitle" class="text-2xl font-black text-[#4A148C]">Official Home Designer!</h2>
-            <p id="scoreDesc" class="text-xs text-[#6A1B9A] font-bold px-2">Every worker has their tools and every family has a warm roof! Amazing job!</p>
+            <span class="text-6xl block animate-bounce">👑👑👑</span>
+            <h2 class="text-2xl font-black text-[#4A148C]">Official Home Designer!</h2>
+            <p class="text-xs text-[#6A1B9A] font-bold px-2">Every worker has their tools and every family has a warm roof! Amazing job!</p>
         </div>
         <div class="bg-white p-4 rounded-2xl border-4 border-[#B39DDB] max-w-[180px] mx-auto shadow-inner">
             <p class="text-xs font-black text-[#673AB7] uppercase tracking-wider mb-1">Final Score</p>
@@ -197,7 +188,7 @@
             window.addEventListener('resize', resizeConfettiCanvas, { passive: true });
             initPersistentDOM(); // Initialize DOM elements once for performance
             
-            splashTimeout = setTimeout(hideSplashScreen, 3500);
+            splashTimeout = setTimeout(hideSplashScreen, 3500); // Reduced from 5s to 3.5s
         });
 
         function hideSplashScreen() {
@@ -238,6 +229,7 @@
         function triggerConfettiBurst() {
             canvas.classList.remove('hidden');
             confettiParticles = [];
+            // Reduced particle count from 60 to 40 for low-spec rendering
             for (let i = 0; i < 40; i++) {
                 confettiParticles.push({
                     x: window.innerWidth / 2,
@@ -260,7 +252,7 @@
                 p.x += p.vx;
                 p.y += p.vy;
                 p.vy += 0.2;
-                p.alpha -= 0.02;
+                p.alpha -= 0.02; // Faster fade out for performance
                 if (p.alpha > 0) {
                     alive = true;
                     ctx.save();
@@ -333,6 +325,7 @@
             const tileNode = document.getElementById(`tile-${index}`);
             
             if (tileNode) {
+                // Modified animation to scale smaller, preventing layout jumps
                 tileNode.classList.add('animate-swoosh');
             }
 
@@ -367,7 +360,7 @@
                         startGame();
                     }, 400);
                 }
-            }, 300);
+            }, 300); // Reduced delay for more responsive feel
         }
 
         // DOM Optimization: Update tray state without recreating elements
@@ -413,7 +406,7 @@
 
         function renderOptionsUIBlock(activeQuestionData) {
             const block = document.getElementById('triviaOptionsBlock');
-            block.innerHTML = ""; 
+            block.innerHTML = ""; // Acceptable here as trivia length varies and occurs rarely
 
             activeQuestionData.options.forEach(opt => {
                 const btn = document.createElement('button');
@@ -483,22 +476,6 @@
                     playSound('soundClapping');
                     document.getElementById('gameScreen').style.display = 'none';
                     document.getElementById('finalScoreText').innerText = score;
-
-                    const scoreEmoji = document.getElementById('scoreEmoji');
-                    const scoreTitle = document.getElementById('scoreTitle');
-                    const scoreDesc = document.getElementById('scoreDesc');
-
-                    // Dynamic feedback based on score performance (Passing threshold: 60 / 120 points)
-                    if (score >= 60) {
-                        scoreEmoji.innerText = "👑👑👑";
-                        scoreTitle.innerText = "Official Home Designer!";
-                        scoreDesc.innerText = "Every worker has their tools and every family has a warm roof! Amazing job!";
-                    } else {
-                        scoreEmoji.innerText = "🌱💪";
-                        scoreTitle.innerText = "You Can Do Better!";
-                        scoreDesc.innerText = "Good effort! Practice makes perfect. Try again to build an even better score!";
-                    }
-
                     document.getElementById('scoreScreen').classList.remove('hidden');
                 }, 400);
             }
