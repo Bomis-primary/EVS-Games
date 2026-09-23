@@ -2,57 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Shadow Match Quest</title>
     <style>
         :root {
-            --bg-space: #0f172a;
-            --panel-bg: #1e293b;
+            --bg-app: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.92);
+            --panel-border: rgba(255, 255, 255, 0.12);
+            
             --tile-front: #ffffff;
             --tile-back: #f1f5f9;
             --tile-base: #cbd5e1;
             --tile-text: #334155;
+            
+            --accent-pink: #f472b6;
+            --accent-purple: #c084fc;
             --neon-blue: #38bdf8;
             --neon-green: #4ade80;
-            --neon-rose: #f43f5e;
+            --neon-rose: #fb7185;
             --gold: #fbbf24;
             --text-light: #f8fafc;
+            --text-sub: #94a3b8;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Fredoka', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         body {
-            background-color: var(--bg-space);
+            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 100%);
             color: var(--text-light);
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 12px;
+            padding: 10px;
         }
 
+        /* MOBILE APP CONTAINER SHELL */
         .app-shell {
             width: 100%;
-            max-width: 900px;
+            max-width: 500px;
             height: 100%;
-            max-height: 650px;
+            max-height: 840px;
             background: var(--panel-bg);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            border: 2px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 20px 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            border: 2px solid var(--panel-border);
             display: none;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
+            overflow: hidden;
         }
 
         .splash-gate {
@@ -61,15 +73,22 @@
             background: #090d16;
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             transition: opacity 0.4s ease;
         }
 
         .splash-logo {
-            max-width: 280px;
+            max-width: 260px;
             width: 65%;
             height: auto;
+            animation: pulseLogo 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.6)); }
         }
 
         .flow-screen {
@@ -80,132 +99,174 @@
             justify-content: center;
             align-items: center;
             padding: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .app-badge {
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(192, 132, 252, 0.2));
+            border: 1px solid var(--accent-pink);
+            color: var(--accent-pink);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .game-title {
-            font-size: clamp(26px, 5vw, 38px);
-            font-weight: 800;
-            color: var(--neon-blue);
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-            line-height: 1.2;
+            font-size: clamp(28px, 6vw, 36px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #38bdf8, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            line-height: 1.15;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .big-emoji-hero {
-            font-size: clamp(48px, 10vw, 72px);
-            margin-bottom: 15px;
+            font-size: clamp(54px, 12vw, 76px);
+            margin-bottom: 12px;
+            animation: floatEmoji 3s infinite ease-in-out;
+        }
+
+        @keyframes floatEmoji {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(4deg); }
         }
 
         .info-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 18px;
-            font-size: clamp(14px, 2.5vw, 16px);
-            line-height: 1.4;
+            font-size: clamp(13px, 3.2vw, 15px);
+            line-height: 1.5;
             color: #cbd5e1;
             margin-bottom: 20px;
             text-align: left;
             width: 100%;
-            max-width: 500px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card p {
+            font-weight: 700;
+            color: var(--neon-blue);
+            margin-bottom: 8px;
         }
 
         .info-card ul {
             margin-left: 20px;
-            margin-top: 8px;
         }
 
         .info-card li {
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .action-btn {
-            background: linear-gradient(135deg, var(--neon-blue), #0284c7);
+            background: linear-gradient(135deg, #f472b6 0%, #c084fc 100%);
             color: #ffffff;
             border: none;
-            padding: 12px 30px;
+            padding: 14px 32px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 800;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-            width: 80%;
-            max-width: 250px;
-            transition: transform 0.2s;
+            box-shadow: 0 6px 20px rgba(244, 114, 182, 0.4);
+            width: 85%;
+            max-width: 280px;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            letter-spacing: 0.5px;
+            outline: none;
         }
 
         .action-btn:active {
-            transform: scale(0.96);
+            transform: scale(0.94);
+            box-shadow: 0 2px 10px rgba(244, 114, 182, 0.3);
         }
 
+        /* HEADER HUD */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid rgba(255,255,255,0.06);
-            padding-bottom: 10px;
-            height: 45px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 8px 16px;
+            height: 52px;
+            margin-bottom: 10px;
         }
 
         .hud-item {
-            font-size: clamp(13px, 3vw, 16px);
-            font-weight: bold;
+            font-size: clamp(13px, 3.2vw, 15px);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .hearts-rack {
-            color: var(--neon-rose);
+            font-size: 16px;
             letter-spacing: 2px;
         }
 
-        /* SOFT AESTHETIC MAHJONG ARENA FIELD */
+        /* MAHJONG BOARD CONTAINER */
         .mahjong-arena-container {
             flex: 1;
             position: relative;
-            margin: 15px auto;
+            margin: 10px auto;
             width: 100%;
-            max-width: 560px;
+            max-width: 440px;
             min-height: 0;
+            touch-action: manipulation;
         }
 
-        /* SOFT ROUNDED 2.5D MAHJONG TILE DESIGN */
+        /* CUTE 3D TILE DESIGN */
         .tile-unit {
             position: absolute;
-            background: linear-gradient(135deg, var(--tile-front) 0%, #f8fafc 100%);
+            background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
             color: var(--tile-text);
-            border-radius: 12px;
+            border-radius: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: clamp(28px, 6vh, 40px);
+            font-size: clamp(26px, 6vh, 38px);
             cursor: pointer;
             
-            /* Enhanced Soft Layered 3D Shadow Base */
             box-shadow: 
-                -1px 1px 1px rgba(255,255,255,0.8) inset,
-                2px 2px 0px var(--tile-back), 
-                4px 4px 0px var(--tile-back),
-                5px 5px 0px var(--tile-base),
-                6px 6px 0px var(--tile-base),
-                8px 8px 16px rgba(15, 23, 42, 0.35);
+                0 1px 0 rgba(255,255,255,1) inset,
+                0 -2px 0 rgba(0,0,0,0.05) inset,
+                2px 2px 0px #cbd5e1, 
+                4px 4px 0px #94a3b8,
+                6px 6px 12px rgba(15, 23, 42, 0.35);
                 
-            border: 1px solid rgba(255,255,255,0.9);
-            transition: transform 0.1s ease, filter 0.2s, opacity 0.3s;
-            width: 17%;
+            border: 2px solid #ffffff;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s, opacity 0.3s;
+            width: 19%;
             height: 22%;
         }
 
-        .tile-unit:hover {
-            filter: brightness(1.03);
+        .tile-unit:active {
+            transform: scale(0.95);
         }
 
         .tile-unit.chosen {
             background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%) !important;
-            transform: translate(3px, 3px) !important;
+            border-color: var(--neon-blue) !important;
+            transform: translate(2px, 2px) scale(1.05) !important;
             box-shadow: 
-                1px 1px 1px rgba(255,255,255,0.5) inset,
-                1px 1px 0px var(--tile-back),
-                2px 2px 0px var(--tile-base),
-                3px 3px 8px rgba(0,0,0,0.2) !important;
+                0 0 15px rgba(56, 189, 248, 0.6),
+                1px 1px 0px #38bdf8,
+                2px 2px 0px #0284c7 !important;
         }
 
         .tile-unit.hidden-match {
@@ -214,44 +275,62 @@
             opacity: 0;
         }
 
-        /* QUIZ OVERLAY SYSTEM */
+        /* QUIZ OVERLAY MODAL */
         .quiz-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 5000;
             display: none;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 16px;
+            animation: fadeIn 0.2s ease-out;
         }
 
         .quiz-modal {
-            background: var(--panel-bg);
+            background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
             border: 2px solid var(--neon-blue);
-            border-radius: 20px;
+            border-radius: 28px;
             width: 100%;
-            max-width: 500px;
-            padding: 20px;
+            max-width: 440px;
+            padding: 22px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 20px rgba(56, 189, 248, 0.2);
+            position: relative;
         }
 
         .quiz-heading {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--neon-blue);
             letter-spacing: 1.5px;
-            font-weight: 700;
-            margin-bottom: 8px;
+            font-weight: 800;
+            margin-bottom: 10px;
             text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
         }
 
         .question-box {
-            font-size: clamp(15px, 3.8vw, 19px);
-            font-weight: 600;
+            font-size: clamp(15px, 3.8vw, 18px);
+            font-weight: 700;
             line-height: 1.4;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
+            color: var(--text-light);
         }
 
         .options-box {
@@ -261,44 +340,79 @@
         }
 
         .opt-row {
-            background: rgba(255,255,255,0.04);
-            border: 1.5px solid rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
             color: var(--text-light);
-            padding: 14px;
-            border-radius: 10px;
+            padding: 14px 18px;
+            border-radius: 16px;
             cursor: pointer;
-            font-size: clamp(13px, 3vw, 15px);
-            font-weight: 600;
-            transition: background 0.2s;
+            font-size: clamp(14px, 3.2vw, 15px);
+            font-weight: 700;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .opt-row:active {
+            transform: scale(0.98);
+        }
+
+        /* GLOW & HINT STATES */
+        .opt-row.hint-pulse {
+            animation: hintGlowPulse 1.2s infinite ease-in-out;
+            border-color: var(--gold) !important;
+            background: rgba(251, 191, 36, 0.2) !important;
+            color: #fef08a !important;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5) !important;
+        }
+
+        @keyframes hintGlowPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(251, 191, 36, 0.8); }
         }
 
         .opt-row.right-glow {
             background: rgba(74, 222, 128, 0.2) !important;
             border-color: var(--neon-green) !important;
-            color: #bbf7d0;
+            color: #bbf7d0 !important;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.4) !important;
         }
 
         .opt-row.wrong-glow {
-            background: rgba(244, 63, 94, 0.2) !important;
+            background: rgba(251, 113, 133, 0.2) !important;
             border-color: var(--neon-rose) !important;
-            color: #fecdd3;
+            color: #fecdd3 !important;
+            box-shadow: 0 0 15px rgba(251, 113, 133, 0.4) !important;
+            animation: shakeError 0.3s ease-in-out;
         }
 
-        /* CUSTOM KEYBOARD AND BONUS ANSWER INPUT */
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* CUSTOM KEYBOARD & BONUS INPUT AREA */
         .bonus-input-area {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             margin: 15px 0;
         }
 
         .bonus-letter-box {
-            width: 36px;
-            height: 40px;
+            width: 34px;
+            height: 42px;
             border-bottom: 3px solid var(--neon-blue);
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px 8px 0 0;
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-transform: uppercase;
             color: var(--gold);
         }
@@ -311,45 +425,65 @@
         }
 
         .key-btn {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: white;
             padding: 10px 0;
             font-size: 14px;
-            font-weight: bold;
-            border-radius: 6px;
+            font-weight: 800;
+            border-radius: 10px;
             cursor: pointer;
             text-transform: uppercase;
+            transition: all 0.2s;
         }
 
         .key-btn:active {
             background: var(--neon-blue);
+            transform: scale(0.92);
+        }
+
+        .key-btn.key-hint-pulse {
+            animation: keyPulse 1s infinite alternate;
+            background: rgba(251, 191, 36, 0.3) !important;
+            border-color: var(--gold) !important;
+            color: #fef08a !important;
+        }
+
+        @keyframes keyPulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px var(--gold); }
+            100% { transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
         }
 
         .hint-btn {
-            background: none;
+            background: rgba(251, 191, 36, 0.1);
             border: 1.5px solid var(--gold);
             color: var(--gold);
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: bold;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 800;
             border-radius: 20px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 12px;
             align-self: center;
+            transition: all 0.2s;
+        }
+
+        .hint-btn:active {
+            transform: scale(0.95);
         }
 
         .explain-panel {
             display: none;
-            background: rgba(56, 189, 248, 0.05);
+            background: rgba(56, 189, 248, 0.08);
             border-left: 3px solid var(--neon-blue);
-            padding: 12px;
-            border-radius: 8px;
+            padding: 12px 14px;
+            border-radius: 12px;
             font-size: 13px;
-            line-height: 1.4;
+            line-height: 1.45;
             color: #e2e8f0;
-            margin-top: 10px;
+            margin-top: 12px;
             white-space: pre-line;
+            animation: fadeIn 0.2s ease-out;
         }
 
         #confetti-canvas {
@@ -360,31 +494,34 @@
             display: none;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div id="splash" class="splash-gate">
         <img src="assets/innovine-logo.png" alt="Logo" class="splash-logo" onerror="this.style.display='none'; document.getElementById('backup-logo').style.display='block';">
-        <div id="backup-logo" style="display:none; color: var(--neon-blue); font-size:28px; font-weight:800; letter-spacing:4px;">INNOVINE</div>
+        <div id="backup-logo" style="display:none; color: var(--neon-blue); font-size:28px; font-weight:900; letter-spacing:4px;">INNOVINE</div>
     </div>
 
     <div class="app-shell" id="app-wrapper">
 
         <div id="screen-title" class="flow-screen">
+            <div class="app-badge">✨ Match & Learn Quest</div>
             <div class="big-emoji-hero">🔦</div>
             <h1 class="game-title">SHADOW MATCH<br>QUEST</h1>
-            <p style="color: #94a3b8; margin-bottom: 20px; font-size: 14px;">A soft & aesthetic tile puzzle game!</p>
+            <p style="color: var(--text-sub); margin-bottom: 24px; font-size: 14px; font-weight: 500;">A cute & aesthetic tile puzzle game!</p>
             <button class="action-btn" onclick="game.showInstructions()">START GAME 🚀</button>
         </div>
 
         <div id="screen-instructions" class="flow-screen" style="display: none;">
-            <h2 class="game-title" style="font-size: 24px;">HOW TO PLAY</h2>
+            <div class="app-badge">💡 Game Rules</div>
+            <h2 class="game-title" style="font-size: 26px;">HOW TO PLAY</h2>
             <div class="info-card">
                 <p>Follow these simple rules:</p>
                 <ul>
-                    <li>Match matching soft blocks on the board to clear them.</li>
-                    <li>Every 3 matches launches a quick set of 3 quiz questions!</li>
-                    <li>Clear the full board to reveal the secret **Direction Keyboard Bonus**!</li>
+                    <li>Match identical cute blocks on the board to clear them.</li>
+                    <li>Every 3 matches triggers a quick set of 3 fun quiz questions.</li>
+                    <li>Clear the full board to unlock the secret Direction Keyboard Bonus!</li>
                 </ul>
             </div>
             <button class="action-btn" onclick="game.beginPlayfield()">PLAY NOW 🎉</button>
@@ -392,8 +529,12 @@
 
         <div id="screen-playfield" style="display: none; height: 100%; flex-direction: column; justify-content: space-between;">
             <header>
-                <div class="hud-item" style="color: var(--neon-blue);">Matches: <span id="match-counter">0 / 3</span></div>
-                <div class="hud-item" style="color: var(--gold);">Score: <span id="score-label">0</span></div>
+                <div class="hud-item" style="color: var(--neon-blue);">
+                    <span>🧩</span> <span id="match-counter">0 / 3</span>
+                </div>
+                <div class="hud-item" style="color: var(--gold);">
+                    <span>⭐</span> <span id="score-label">0</span>
+                </div>
                 <div class="hud-item hearts-rack" id="hearts-box">❤️❤️❤️</div>
             </header>
 
@@ -402,15 +543,15 @@
 
         <div id="screen-gameover" class="flow-screen" style="display: none;">
             <div class="big-emoji-hero">👾</div>
-            <h2 class="game-title" style="color: var(--neon-rose);">GAME OVER</h2>
-            <p style="margin-bottom: 20px; color: #cbd5e1;" id="gameover-msg"></p>
+            <h2 class="game-title" style="background: linear-gradient(135deg, #fb7185, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GAME OVER</h2>
+            <p style="margin-bottom: 24px; color: #cbd5e1; font-weight: 500;" id="gameover-msg"></p>
             <button class="action-btn" onclick="window.location.reload()">TRY AGAIN 🔄</button>
         </div>
 
         <div id="screen-victory" class="flow-screen" style="display: none;">
             <div class="big-emoji-hero">🏆</div>
-            <h2 class="game-title" style="color: var(--neon-green);">VICTORY!</h2>
-            <p style="margin-bottom: 20px; color: #cbd5e1; font-size: 16px;">Amazing! You completed the full matching board and solved the layout mystery!</p>
+            <h2 class="game-title" style="background: linear-gradient(135deg, #4ade80, #2dd4bf); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">VICTORY!</h2>
+            <p style="margin-bottom: 24px; color: #cbd5e1; font-size: 15px; font-weight: 500;">Amazing! You completed the full matching board and solved the layout mystery!</p>
             <button class="action-btn" onclick="window.location.reload()">PLAY AGAIN 🔄</button>
         </div>
 
@@ -418,7 +559,10 @@
 
     <div class="quiz-overlay" id="quiz-panel">
         <div class="quiz-modal">
-            <div class="quiz-heading" id="quiz-lvl-heading">Question Alert</div>
+            <div class="quiz-heading">
+                <span id="quiz-lvl-heading">Question Alert</span>
+                <span class="timer-badge" id="hint-status-badge">💡 Hint in 5s</span>
+            </div>
             <div class="question-box" id="q-text-node"></div>
             
             <div class="options-box" id="opts-wrapper-node"></div>
@@ -431,8 +575,8 @@
 
             <div class="explain-panel" id="explain-box-node"></div>
 
-            <div style="text-align: center; display: none; margin-top: 12px;" id="quiz-nav-hub">
-                <button class="action-btn" style="width: 100%; font-size: 14px; padding: 12px;" id="quiz-continue-btn" onclick="game.nextQuizOrDismiss()">CONTINUE ➡️</button>
+            <div style="text-align: center; display: none; margin-top: 14px;" id="quiz-nav-hub">
+                <button class="action-btn" style="width: 100%; font-size: 15px; padding: 12px;" id="quiz-continue-btn" onclick="game.nextQuizOrDismiss()">CONTINUE ➡️</button>
             </div>
         </div>
     </div>
@@ -440,22 +584,29 @@
     <canvas id="confetti-canvas"></canvas>
 
     <script>
-        const POOL_DATA = [
-            /* Quiz 1 Questions */
+        const RAW_POOL_DATA = [
+            /* Quiz Questions Pool */
             { q: "Shadows can only be made when there is a clear path of running ________.", opts: ["Wind", "Water", "Light"], ans: "Light", exp: "Light is needed to make shadows!\nWithout light, everything stays dark." },
             { q: "A dark shadow is made when a solid object completely ________ the light rays.", opts: ["Bends", "Passes", "Blocks"], ans: "Blocks", exp: "When an object blocks light, it stops the rays.\nThis casts a dark shape directly behind it." },
             { q: "An object's shadow is always made on the ________ side of the light source.", opts: ["Same", "Sky", "Opposite"], ans: "Opposite", exp: "Shadows fall on the opposite side of the light.\nIf light hits your left, your shadow falls on your right!" },
-            /* Quiz 2 Questions */
             { q: "Light passes completely through glass windows because glass is ________.", opts: ["Opaque", "Dark", "Transparent"], ans: "Transparent", exp: "Transparent glass allows light to go straight through.\nBecause it does not block light, it leaves no dark shadow." },
             { q: "A solid brick or book forms a dark shadow because it is ________.", opts: ["Transparent", "Clear", "Opaque"], ans: "Opaque", exp: "Opaque things are thick and solid.\nThey do not let any light pass through them." },
             { q: "The size and length of shadows change because the position of the ________ moves.", opts: ["Tree", "Mountain", "Sun"], ans: "Sun", exp: "The sun travels across the sky all day.\nAs the sun moves, our shadows move and turn too." },
-            /* Quiz 3 Questions */
             { q: "In the early morning and late evening, shadows are always very ________.", opts: ["Short", "Invisible", "Long"], ans: "Long", exp: "When the sun sits low down in the morning, it casts long beams.\nThis stretches your shadow across the ground." },
             { q: "At noon midday, when the sun is straight above us, shadows are at their ________.", opts: ["Longest", "Colorful", "Shortest"], ans: "Shortest", exp: "At noon, the sun shines straight down from above your head.\nThis makes your shadow tiny right under your feet." },
             { q: "Making hand shapes inside a bright flashlight beam builds shadow ________ on the wall.", opts: ["Puppets", "Paintings", "Balloons"], ans: "Puppets", exp: "Your hands block the flashlight beam cleanly.\nThis creates funny animal shapes and shapes on the wall." }
         ];
 
-        // 9 ITEMS SPECIFIED BY USER - FORMING 18 TILES
+        function shuffleArray(arr) {
+            const array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 9 ITEMS FORMING 18 TILES
         const EMOJI_DECK = ["📘", "🪵", "🧱", "🪟", "👻", "🔦", "☀️", "🕯️", "📦"];
 
         const FIXED_LAYOUT = [
@@ -478,6 +629,7 @@
                 
                 this.questionIndex = 0;
                 this.quizTargetLimit = 0; 
+                this.shuffledPool = [];
                 
                 this.activeSelection = null;
                 this.blockBoardInput = false;
@@ -486,6 +638,9 @@
                 
                 this.bonusCurrentIndex = 0;
                 this.bonusAnswerWord = "OPPOSITE";
+
+                this.inactivityTimer = null;
+                this.currentCorrectAns = "";
 
                 this.confettiParticles = [];
                 this.confettiTimer = null;
@@ -496,6 +651,7 @@
             }
 
             init() {
+                this.shuffledPool = shuffleArray(RAW_POOL_DATA);
                 setTimeout(() => {
                     const gate = document.getElementById('splash');
                     gate.style.opacity = '0';
@@ -503,7 +659,7 @@
                         gate.style.display = 'none';
                         document.getElementById('app-wrapper').style.display = 'flex';
                     }, 400);
-                }, 5000);
+                }, 4000);
             }
 
             showInstructions() {
@@ -528,7 +684,7 @@
                     deckList.push(emoji);
                     deckList.push(emoji);
                 });
-                deckList.sort(() => Math.random() - 0.5);
+                deckList = shuffleArray(deckList);
 
                 FIXED_LAYOUT.forEach((pos, idx) => {
                     const tileObj = {
@@ -549,8 +705,8 @@
                     div.id = `tile-unit-${tile.id}`;
                     div.innerText = tile.value;
                     
-                    div.style.left = `${tile.c * 17 + 8}%`;
-                    div.style.top = `${tile.r * 21 + 6}%`;
+                    div.style.left = `${tile.c * 18 + 7}%`;
+                    div.style.top = `${tile.r * 20 + 5}%`;
                     div.style.zIndex = tile.z * 10;
                     div.style.transform = `translate(${-tile.z * 2}px, ${-tile.z * 2}px)`;
 
@@ -596,7 +752,7 @@
 
                             if (this.tileMatchesCount > 0 && this.tileMatchesCount % 3 === 0) {
                                 this.quizTargetLimit = this.questionIndex + 3; 
-                                setTimeout(() => this.serveActiveQuestion(), 1000);
+                                setTimeout(() => this.serveActiveQuestion(), 800);
                             }
                         }, 400);
                         this.activeSelection = null;
@@ -605,24 +761,66 @@
                             first.element.classList.remove('chosen');
                             second.element.classList.remove('chosen');
                             this.blockBoardInput = false;
-                        }, 500);
+                        }, 400);
                         this.activeSelection = null;
                     }
+                }
+            }
+
+            clearInactivityTimer() {
+                if (this.inactivityTimer) {
+                    clearTimeout(this.inactivityTimer);
+                    this.inactivityTimer = null;
+                }
+            }
+
+            startInactivityTimer() {
+                this.clearInactivityTimer();
+                const badge = document.getElementById('hint-status-badge');
+                if (badge) badge.innerText = "💡 Hint in 5s";
+
+                this.inactivityTimer = setTimeout(() => {
+                    this.applyInactivityHint();
+                }, 5000);
+            }
+
+            applyInactivityHint() {
+                const badge = document.getElementById('hint-status-badge');
+                if (badge) badge.innerText = "✨ Hint Active!";
+
+                if (this.questionIndex < 9) {
+                    // Quiz questions hint: Pulse glow the option containing the correct answer
+                    const wrapper = document.getElementById('opts-wrapper-node');
+                    const options = wrapper.querySelectorAll('.opt-row');
+                    options.forEach(opt => {
+                        if (opt.dataset.value === this.currentCorrectAns) {
+                            opt.classList.add('hint-pulse');
+                        }
+                    });
+                } else {
+                    // Bonus level hint: Pulse glow the key needed next
+                    const targetLetter = this.bonusAnswerWord[this.bonusCurrentIndex];
+                    const keys = document.querySelectorAll('.key-btn');
+                    keys.forEach(k => {
+                        if (k.innerText === targetLetter) {
+                            k.classList.add('key-hint-pulse');
+                        }
+                    });
                 }
             }
 
             serveActiveQuestion() {
                 this.blockQuizInput = false;
                 
-                // If all 9 matching deck pairs are cleared, execute Direction Bonus Keyboard Question!
                 if (this.questionIndex === 9) {
                     this.serveBonusDirectionQuestion();
                     return;
                 }
 
-                const data = POOL_DATA[this.questionIndex];
+                const data = this.shuffledPool[this.questionIndex];
+                this.currentCorrectAns = data.ans;
                 
-                document.getElementById('quiz-lvl-heading').innerText = `Question: Round ${this.questionIndex + 1} / 9`;
+                document.getElementById('quiz-lvl-heading').innerText = `Question ${this.questionIndex + 1} / 9`;
                 document.getElementById('q-text-node').innerText = data.q;
                 document.getElementById('explain-box-node').style.display = 'none';
                 document.getElementById('quiz-nav-hub').style.display = 'none';
@@ -632,19 +830,29 @@
                 wrapper.innerHTML = '';
                 wrapper.style.display = 'flex';
 
-                data.opts.forEach(optionText => {
+                // Randomise option order
+                const shuffledOpts = shuffleArray(data.opts);
+
+                shuffledOpts.forEach(optionText => {
                     const div = document.createElement('div');
                     div.className = 'opt-row';
-                    div.innerText = optionText;
+                    div.dataset.value = optionText;
+                    div.innerHTML = `<span>${optionText}</span> <span>✨</span>`;
                     div.onclick = () => this.verifyAnswer(div, optionText, data.ans, data.exp);
                     wrapper.appendChild(div);
                 });
 
                 document.getElementById('quiz-panel').style.display = 'flex';
+                this.startInactivityTimer();
             }
 
             verifyAnswer(selectedDiv, chosenText, correctText, explanationText) {
                 if (this.blockQuizInput) return;
+                this.clearInactivityTimer();
+
+                const wrapper = document.getElementById('opts-wrapper-node');
+                const options = wrapper.querySelectorAll('.opt-row');
+                options.forEach(opt => opt.classList.remove('hint-pulse'));
 
                 if (chosenText === correctText) {
                     this.blockQuizInput = true;
@@ -659,10 +867,22 @@
 
                     document.getElementById('quiz-nav-hub').style.display = 'block';
                 } else {
+                    // WRONG ANSWER
                     selectedDiv.classList.add('wrong-glow');
                     this.lives--;
                     this.refreshHeartsHUD();
                     try { this.audioFail.play().catch(()=>{}); } catch(e){}
+
+                    // WRONG ANSWER HINT: Automatically glow correct answer & reveal explanation hint!
+                    options.forEach(opt => {
+                        if (opt.dataset.value === correctText) {
+                            opt.classList.add('right-glow');
+                        }
+                    });
+
+                    const expNode = document.getElementById('explain-box-node');
+                    expNode.innerText = "💡 HINT / REASON:\n" + explanationText;
+                    expNode.style.display = 'block';
 
                     if (this.lives <= 0) {
                         this.blockQuizInput = true;
@@ -671,16 +891,20 @@
                             document.getElementById('screen-playfield').style.display = 'none';
                             document.getElementById('gameover-msg').innerText = `You scored ${this.score} points before running out of turns!`;
                             document.getElementById('screen-gameover').style.display = 'flex';
-                        }, 1000);
+                        }, 1200);
                         return;
                     }
+
+                    this.blockQuizInput = true;
+                    document.getElementById('quiz-nav-hub').style.display = 'block';
                 }
             }
 
             serveBonusDirectionQuestion() {
                 this.bonusCurrentIndex = 0;
+                this.currentCorrectAns = "";
                 document.getElementById('quiz-lvl-heading').innerText = "🗺️ GRAND BONUS LEVEL";
-                document.getElementById('q-text-node').innerText = "Complete the Direction Rule:\nIf a light hits an object from the East, the shadow is always cast on the ________ side.";
+                document.getElementById('q-text-node').innerText = "Complete the Direction Rule:\nIf light hits an object from the East, the shadow is always cast on the ________ side.";
                 
                 document.getElementById('opts-wrapper-node').style.display = 'none';
                 document.getElementById('explain-box-node').style.display = 'none';
@@ -698,21 +922,26 @@
 
                 const kbContainer = document.getElementById('keyboard-grid-node');
                 kbContainer.innerHTML = '';
-                const keysList = ["A", "B", "E", "I", "O", "P", "S", "T", "U", "W", "R", "N", "L", "H"];
+                const keysList = shuffleArray(["A", "B", "E", "I", "O", "P", "S", "T", "U", "W", "R", "N", "L", "H"]);
                 
                 keysList.forEach(key => {
                     const btn = document.createElement('button');
                     btn.className = 'key-btn';
                     btn.innerText = key;
-                    btn.onclick = () => this.handleBonusKeyPress(key);
+                    btn.onclick = () => this.handleBonusKeyPress(btn, key);
                     kbContainer.appendChild(btn);
                 });
 
                 document.getElementById('bonus-keyboard-area').style.display = 'flex';
                 document.getElementById('quiz-panel').style.display = 'flex';
+                this.startInactivityTimer();
             }
 
-            handleBonusKeyPress(letter) {
+            handleBonusKeyPress(btnElement, letter) {
+                this.clearInactivityTimer();
+                const keys = document.querySelectorAll('.key-btn');
+                keys.forEach(k => k.classList.remove('key-hint-pulse'));
+
                 const targetLetter = this.bonusAnswerWord[this.bonusCurrentIndex];
                 
                 if (letter === targetLetter) {
@@ -729,27 +958,49 @@
                         expNode.innerText = "Fantastic! Shadows always form on the opposite side of the incoming light source!";
                         expNode.style.display = 'block';
                         document.getElementById('quiz-nav-hub').style.display = 'block';
+                    } else {
+                        this.startInactivityTimer();
                     }
                 } else {
                     this.lives--;
                     this.refreshHeartsHUD();
                     try { this.audioFail.play().catch(()=>{}); } catch(e){}
+
+                    // Highlight the correct key as a hint when user picks wrong key
+                    keys.forEach(k => {
+                        if (k.innerText === targetLetter) {
+                            k.classList.add('key-hint-pulse');
+                        }
+                    });
+
                     if (this.lives <= 0) {
                         document.getElementById('quiz-panel').style.display = 'none';
                         document.getElementById('screen-playfield').style.display = 'none';
                         document.getElementById('gameover-msg').innerText = "Game over on the final direction challenge!";
                         document.getElementById('screen-gameover').style.display = 'flex';
+                    } else {
+                        this.startInactivityTimer();
                     }
                 }
             }
 
             revealBonusHint() {
+                this.clearInactivityTimer();
                 const expNode = document.getElementById('explain-box-node');
-                expNode.innerText = "💡 HINT: It starts with 'O'. If light comes from the left, the shadow goes to the far right side, which is the ________ side!";
+                expNode.innerText = "💡 HINT: It starts with 'O'. If light comes from the left, the shadow goes to the far right side, which is the OPPOSITE side!";
                 expNode.style.display = 'block';
+
+                const targetLetter = this.bonusAnswerWord[this.bonusCurrentIndex];
+                const keys = document.querySelectorAll('.key-btn');
+                keys.forEach(k => {
+                    if (k.innerText === targetLetter) {
+                        k.classList.add('key-hint-pulse');
+                    }
+                });
             }
 
             nextQuizOrDismiss() {
+                this.clearInactivityTimer();
                 this.questionIndex++;
                 
                 if (this.questionIndex < this.quizTargetLimit && this.questionIndex < 9) {
@@ -785,7 +1036,7 @@
                 canvas.height = window.innerHeight;
 
                 this.confettiParticles = [];
-                const colorPalette = ['#38bdf8', '#4ade80', '#f43f5e', '#fbbf24', '#a855f7'];
+                const colorPalette = ['#38bdf8', '#4ade80', '#f472b6', '#fbbf24', '#c084fc'];
 
                 for (let i = 0; i < 60; i++) {
                     this.confettiParticles.push({
