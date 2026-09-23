@@ -4,506 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Closet Chronicles!</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        :root {
-            --bg-top: #FFF5F5;
-            --bg-mid: #FFF9E6;
-            --bg-bot: #E8F5E9;
-            --primary-blue: #4A90E2;
-            --primary-blue-dark: #1E88E5;
-            --primary-green: #4CAF50;
-            --primary-green-dark: #2E7D32;
-            --primary-red: #FF6B6B;
-            --primary-red-dark: #C0392B;
-            --primary-yellow: #FFD166;
-            --text-dark: #2C3E50;
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
-
         body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', -apple-system, sans-serif;
-            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 50%, var(--bg-bot) 100%);
-            min-height: 100vh;
-            min-height: 100dvh;
-            margin: 0;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-dark);
-            overflow-x: hidden;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
-
-        /* Screen containers */
-        .card-container {
-            width: 100%;
-            max-width: 430px;
-            background: #ffffff;
-            border-radius: 28px;
-            padding: 20px;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-            border: 4px solid var(--primary-yellow);
-            text-align: center;
-            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* Animations */
-        @keyframes popIn {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes bounceShort {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        /* 3D Flip Card System */
         .box-card {
-            perspective: 800px;
-            aspect-ratio: 1 / 1;
-            width: 100%;
+            perspective: 1000px;
         }
-
         .box-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transition: transform 0.6s;
             transform-style: preserve-3d;
-            border-radius: 18px;
         }
-
         .box-card.flipped .box-inner {
             transform: rotateY(180deg);
         }
-
         .box-front, .box-back {
             backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 900;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
         }
-
-        .box-front {
-            background: #FFF9E6;
-            border: 3.5px solid var(--primary-yellow);
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-
-        .box-front:hover {
-            background: #FFEAA7;
-            transform: scale(1.03);
-        }
-
         .box-back {
             transform: rotateY(180deg);
         }
-
-        /* Stroke-Line Vector Animation */
+        /* Reliable High-Contrast Dynamic Stroke-Line Animation Vector Styles */
         .strike-line {
             stroke-dasharray: 200;
             stroke-dashoffset: 200;
             animation: drawLine 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-
         @keyframes drawLine {
-            to { stroke-dashoffset: 0; }
+            to {
+                stroke-dashoffset: 0;
+            }
         }
-
-        /* UI Buttons */
-        .btn-action {
-            width: 100%;
-            font-weight: 800;
-            font-size: 1.25rem;
-            padding: 14px 20px;
-            border-radius: 18px;
-            color: #ffffff;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-action:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
-        }
-
-        .btn-green {
-            background: var(--primary-green);
-            border-bottom: 6px solid var(--primary-green-dark);
-        }
-
-        .btn-red {
-            background: var(--primary-red);
-            border-bottom: 6px solid var(--primary-red-dark);
-        }
-
-        .btn-blue {
-            background: var(--primary-blue);
-            border-bottom: 6px solid var(--primary-blue-dark);
-        }
-
-        /* Option buttons in Modal */
-        .option-btn {
-            width: 100%;
-            text-align: left;
-            background: #F0F4F8;
-            color: var(--text-dark);
-            font-weight: 700;
-            font-size: 0.95rem;
-            padding: 12px 16px;
-            border-radius: 14px;
-            border: 2px solid #D1DDE8;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            outline: none;
-        }
-
-        .option-btn:active {
-            background: #E1E8F0;
-        }
-
-        .option-btn.correct {
-            background: #E8F5E9 !important;
-            border-color: var(--primary-green) !important;
-            color: var(--primary-green-dark) !important;
-            font-weight: 800;
-        }
-
-        .option-btn.wrong {
-            background: #FFEBEE !important;
-            border-color: var(--primary-red) !important;
-            color: var(--primary-red-dark) !important;
-            text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        /* Top HUD Styling */
-        .hud-bar {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 10px 14px;
-            border: 2px solid var(--primary-blue);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: 800;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 12px;
-        }
-
-        /* Canvas Overlay for Confetti */
-        #confettiCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="bg-gradient-to-b from-[#FFF5F5] via-[#FFF9E6] to-[#E8F5E9] min-h-screen flex flex-col items-center justify-center select-none text-[#333333] p-4 m-0">
 
-    <canvas id="confettiCanvas"></canvas>
+    <audio id="soundCorrect" src="EVS-Games/grade2/chapter3/assets/correct.mp3" preload="auto"></audio>
+    <audio id="soundWrong" src="EVS-Games/grade2/chapter3/assets/wrong.mp3" preload="auto"></audio>
+    <audio id="soundClapping" src="EVS-Games/grade2/chapter3/assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
-    <!-- Splash Screen -->
-    <div id="splashScreen" style="position: fixed; inset: 0; background: #ffffff; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; padding: 20px;">
-        <div style="text-align: center; animation: pulseGlow 2s infinite ease-in-out;">
-            <svg width="120" height="120" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="45" fill="#4A90E2"/>
-                <path d="M30 65 L50 35 L70 65 Z" fill="#FFD166"/>
-                <circle cx="50" cy="35" r="8" fill="#FF6B6B"/>
-                <path d="M35 45 C40 38, 60 38, 65 45" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
-            </svg>
-            <h1 style="font-size: 2.2rem; margin-top: 15px; color: var(--primary-blue); font-weight: 900;">INNOVINE</h1>
-            <p style="color: #888; font-weight: 700; font-size: 0.9rem; margin-top: 5px;">Learning Adventures</p>
-        </div>
+    <div id="splashScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 opacity-100">
+        <img src="EVS-Games/grade2/chapter3/assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-[70%] h-auto object-contain">
     </div>
 
-    <!-- Title Screen -->
-    <div id="titleScreen" class="card-container hidden">
-        <div style="margin-bottom: 20px;">
-            <span style="font-size: 4rem; display: block; animation: bounceShort 1.5s infinite;">👕✨👚</span>
-            <h1 style="font-size: 2.2rem; font-weight: 900; color: var(--primary-red); margin: 8px 0; leading-tight: 1.1;">The Closet<br>Chronicles!</h1>
-            <p style="color: #6C7A89; font-weight: 700; font-size: 0.95rem; padding: 0 10px;">Can you choose the perfect clothes for our weather adventures?</p>
+    <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#FFD166] text-center space-y-6 mx-2">
+        <div class="space-y-3">
+            <span class="text-6xl block animate-bounce">👕✨👚</span>
+            <h1 class="text-3xl md:text-4xl font-black text-[#FF6B6B] leading-tight tracking-wide">The Closet<br>Chronicles!</h1>
+            <p class="text-[#6C7A89] font-bold text-base px-4">Can you choose the perfect clothes for our weather adventures?</p>
         </div>
-
-        <!-- Audio Sound Toggle -->
-        <div style="display: flex; justify-content: center; margin-bottom: 15px;">
-            <button onclick="toggleAudio()" id="btnSoundToggle" style="background: #F0F4F8; border: 2px solid #D1DDE8; border-radius: 20px; padding: 6px 14px; font-weight: 800; font-size: 0.85rem; cursor: pointer; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
-                <span id="soundIcon">🔊</span> <span id="soundText">Sound: ON</span>
-            </button>
-        </div>
-
-        <button onclick="showInstructions()" class="btn-action btn-green">
+        <button onclick="showInstructions()" class="w-full bg-[#4CAF50] hover:bg-[#43A047] text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#2E7D32]">
             LET'S GO ➡️
         </button>
     </div>
 
-    <!-- Instructions Screen -->
-    <div id="instructionsScreen" class="card-container hidden" style="border-color: var(--primary-blue);">
-        <h2 style="font-size: 1.6rem; font-weight: 900; color: var(--primary-blue); margin-top: 0;">☀️ How to Play ☀️</h2>
-        <div style="background: var(--bg-mid); padding: 16px; border-radius: 18px; border: 2px dashed var(--primary-yellow); text-align: left; font-size: 0.9rem; space-y: 10px; color: #4A4A4A; font-weight: 600; margin-bottom: 20px;">
-            <p style="margin: 6px 0;">1. Tap any padlocked 🔒 card on the board grid.</p>
-            <p style="margin: 6px 0;">2. Answer correctly to reveal a hidden secret symbol!</p>
-            <p style="margin: 6px 0;">3. Form exactly one straight matching line of 3 to strike it out!</p>
-            <div style="background: #E8F5E9; padding: 10px; border-radius: 12px; color: var(--primary-green-dark); font-weight: 800; text-align: center; margin-top: 10px; font-size: 0.85rem;">
-                ⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!
-            </div>
+    <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-6 mx-2">
+        <h2 class="text-2xl font-black text-[#4A90E2]">☀️ How to Play ☀️</h2>
+        <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base space-y-3 text-[#4A4A4A] font-medium">
+            <p>1. Tap any padlocked 🔒 card on the board grid.</p>
+            <p>2. Answer correctly to reveal a hidden secret symbol!</p>
+            <p>3. Form exactly one straight matching line of 3 to strike it out!</p>
+            <p class="text-sm bg-[#E8F5E9] p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
         </div>
-        <button onclick="startGame()" class="btn-action btn-red">
+        <button onclick="startGame()" class="w-full bg-[#FF6B6B] hover:bg-[#EE5253] text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#C0392B]">
             PLAY GAME ▶️
         </button>
     </div>
 
-    <!-- Game Screen -->
-    <div id="gameScreen" class="hidden" style="width: 100%; max-width: 430px; display: flex; flex-direction: column;">
-        <!-- HUD -->
-        <div class="hud-bar">
-            <div style="color: var(--primary-blue-dark);">Progress: <span id="hudProgress" style="background: #E3F2FD; color: #1E88E5; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; border: 1px solid #1E88E5;">0 / 9</span></div>
-            <div id="hudLives" style="font-size: 1.1rem; letter-spacing: 2px;">❤️❤️❤️</div>
-            <div style="color: var(--primary-green-dark);">🏆 Score: <span id="hudScore">0</span></div>
+    <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-5 px-2">
+        <div class="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-base">
+            <div class="text-[#4A90E2]">Progress: <span id="hudProgress" class="bg-[#E3F2FD] text-[#1E88E5] px-3 py-1 rounded-full text-sm border border-[#1E88E5]">0 / 9 Solved</span></div>
+            <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-lg">❤️❤️❤️</div>
+            <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
         </div>
 
-        <!-- Interactive Mascot Feedback Header -->
-        <div style="background: #ffffff; border-radius: 20px; padding: 8px 14px; border: 2px solid var(--primary-yellow); margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
-            <div id="mascotAvatar" style="font-size: 2.2rem; transition: transform 0.3s;" class="animate-bounce">🐶</div>
-            <div style="text-align: left;">
-                <div id="mascotName" style="font-weight: 900; font-size: 0.85rem; color: var(--primary-blue);">Barnaby the Weather Dog</div>
-                <div id="mascotSpeech" style="font-size: 0.8rem; font-weight: 700; color: #666;">"Tap a card to help me choose my outfit!"</div>
-            </div>
-        </div>
-
-        <!-- Line Match Notification -->
-        <div id="lineNotification" class="hidden" style="background: #E8F5E9; border: 2px solid var(--primary-green); border-radius: 14px; padding: 8px; text-align: center; font-size: 0.85rem; font-weight: 800; color: var(--primary-green-dark); margin-bottom: 10px; animation: pulseGlow 1s infinite;">
+        <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-sm font-bold text-[#2E7D32] animate-pulse">
             🎉 Tic-Tac-Toe Line Achieved! Match Formed! 🎉
         </div>
 
-        <!-- Grid Container -->
-        <div style="background: #ffffff; border-radius: 28px; padding: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.1); border: 4px solid var(--primary-blue); position: relative; width: 100%; aspect-ratio: 1 / 1;">
-            <div id="gridContainer" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; height: 100%; relative; z-index: 10;">
-                <!-- Cards dynamically injected -->
+        <div class="bg-white rounded-3xl p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
+            <div id="gridContainer" class="grid grid-cols-3 gap-4 w-full h-full relative z-10">
             </div>
 
-            <svg id="strikeSvg" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; display: block;" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <svg id="strikeSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30" style="display: block;" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
         </div>
-
-        <div style="text-align: center; font-size: 0.75rem; color: #777; font-weight: 800; margin-top: 10px;">Tap any locked card above to open a weather story!</div>
+        <div class="text-center text-xs text-gray-500 font-bold tracking-wide">Tap any locked card above to open a weather story!</div>
     </div>
 
-    <!-- Question Modal -->
-    <div id="questionModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px;">
-        <div class="card-container" style="border-color: var(--primary-blue); max-height: 92vh; overflow-y: auto; text-align: left; padding: 18px;">
-            
-            <div id="modalBody" style="background: #F0F7FF; border-radius: 16px; padding: 14px; border: 2px solid #BCDFFA; margin-bottom: 12px;">
-                <p id="questionText" style="font-size: 1rem; font-weight: 800; color: var(--text-dark); margin: 0; line-height: 1.35;"></p>
+    <div id="questionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 border-4 border-[#4A90E2] flex flex-col space-y-4 max-h-[92vh] overflow-y-auto">
+            <div id="modalBody" class="bg-[#F0F7FF] rounded-2xl p-4 border-2 border-[#BCDFFA] text-center">
+                <p id="questionText" class="text-base md:text-lg font-bold text-[#2C3E50] leading-snug"></p>
             </div>
-
-            <div id="hintContainer" class="hidden" style="background: #FFF9E6; border: 2px dashed var(--primary-yellow); border-radius: 14px; padding: 10px; text-align: center; font-size: 0.85rem; color: #795548; font-weight: 700; margin-bottom: 12px;">
+            <div id="hintContainer" class="hidden bg-[#FFF9E6] border-2 border-dashed border-[#FFD166] rounded-2xl p-3 text-center text-sm text-[#795548] font-semibold">
                 💡 <span id="hintText"></span>
             </div>
-
-            <div id="optionsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
-                <!-- Options injected dynamically -->
+            <div id="optionsContainer" class="flex flex-col space-y-3">
             </div>
-
-            <button id="nextBtn" onclick="submitAndAdvance()" class="btn-action btn-green hidden">
+            <button id="nextBtn" onclick="submitAndAdvance()" class="hidden w-full bg-[#4CAF50] text-white font-bold text-lg py-3 rounded-xl shadow-md transform active:scale-95 transition-all border-b-4 border-[#2E7D32]">
                 CONFIRM ➡️
             </button>
         </div>
     </div>
 
-    <!-- Score / Game Over Screen -->
-    <div id="scoreScreen" class="card-container hidden" style="border-color: var(--primary-green);">
-        <div style="margin-bottom: 16px;">
-            <span style="font-size: 4rem; display: block; animation: bounceShort 1.5s infinite;">🏆✨🥳</span>
-            <h2 id="endGameStatus" style="font-size: 1.8rem; font-weight: 900; color: var(--primary-green); margin: 6px 0;">Quest Completed!</h2>
-            <p id="endGameMessage" style="font-size: 0.95rem; font-weight: 700; color: #555;">Fantastic Job! You are a Wardrobe Wizard! 🌟</p>
+    <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
+        <div class="space-y-2">
+            <span class="text-6xl block">🏆✨🥳</span>
+            <h2 id="endGameStatus" class="text-3xl font-black text-[#4CAF50]">Quest Completed!</h2>
+            <p id="endGameMessage" class="text-lg font-bold text-gray-700">Fantastic Job! You are a Wardrobe Wizard! 🌟</p>
         </div>
-
-        <div style="background: #E8F5E9; padding: 14px; border-radius: 18px; border: 2px solid var(--primary-green); max-width: 240px; margin: 0 auto 20px auto;">
-            <p style="color: #666; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; margin: 0; letter-spacing: 1px;">Your Final Tally</p>
-            <p style="font-size: 2.4rem; font-weight: 900; color: var(--primary-green-dark); margin: 4px 0 0 0;"><span id="finalScore">0</span> Pts</p>
+        <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto">
+            <p class="text-gray-600 font-bold uppercase text-xs tracking-wider">Your Final Tally</p>
+            <p class="text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> Pts</p>
         </div>
-
-        <button onclick="restartGame()" class="btn-action btn-red">
+        <button onclick="restartGame()" class="w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-bold text-xl py-4 rounded-2xl shadow-md border-b-8 border-[#C0392B] transform active:scale-95 transition-all">
             PLAY AGAIN 🔄
         </button>
     </div>
 
     <script>
-        /* Database */
         const originalDatabase = [
             { question: "Farmer Tom is in a field of fluffy white plants. Which plant is he picking to make light summer shirts?", options: ["Coir", "Cotton", "Bamboo"], answer: 1, hint: "This soft white plant is spun into thin thread for cool clothing." },
-            { question: "Princess Mia wants a shiny, beautiful dress for a party. Which little insect gives us this smooth thread?", options: ["Spider", "Silkworm", "Ant"], answer: 1, hint: "This tiny caterpillar eats green leaves and makes a silky cocoon." },
-            { question: "Juhi is wearing a warm sweater on a cold day. Which material is the sweater most likely made from?", options: ["Wool", "Feathers", "Straw"], answer: 0, hint: "We use this cosy animal hair to knit warm winter jumpers." },
+            { question: "Mia wants a shiny, beautiful dress for a party. Which little insect gives us this smooth thread?", options: ["Spider", "Silkworm", "Ant"], answer: 1, hint: "This tiny caterpillar eats green leaves and makes a silky cocoon." },
+            { question: "Sam is wearing a warm sweater on a cold day. Which material is the sweater most likely made from?", options: ["Wool", "Feathers", "Straw"], answer: 0, hint: "We use this cosy animal hair to knit warm winter jumpers." },
             { question: "Ben is playing outside in the hot, bright sunshine. What should he wear to stay cool and fresh?", options: ["Thick coat", "Cotton shirt", "Warm scarf"], answer: 1, hint: "Thin cotton clothes let the summer breeze pass through easily." },
-            { question: "Lily is visiting a snowy mountain. The winter wind is freezing! What must she wear to keep warm?", options: ["Thin vest", "Silk dress", "Woollen coat"], answer: 2, hint: "Thick woollen coats trap your body heat to keep out the cold." },
-            { question: "It's raining heavily. What should Daisy wear over her clothes to stay dry?", options: ["Silk sari", "Raincoat", "Linen robe"], answer: 1, hint: "We need a waterproof jacket that does not soak up the rainwater." },
+            { question: "Amy is visiting a snowy mountain. The winter wind is freezing! What must she wear to keep warm?", options: ["Thin vest", "Silk dress", "Woollen coat"], answer: 2, hint: "Thick woollen coats trap your body heat to keep out the cold." },
+            { question: "It's raining heavily. What should Ann wear over her clothes to stay dry?", options: ["Silk sari", "Raincoat", "Linen robe"], answer: 1, hint: "We need a waterproof jacket that does not soak up the rainwater." },
             { question: "A brave firefighter is rushing to help put out a fire. Why do they wear a heavy, special uniform?", options: ["To look funny", "To stay safe", "To go shopping"], answer: 1, hint: "Special uniforms protect workers from fire, heat, or accidents." },
             { question: "You walk into a busy hospital and spot the doctor straight away. What helped you find them?", options: ["Bright trainers", "White uniform", "Magician hat"], answer: 1, hint: "Special uniforms help us recognise community helpers instantly." },
             { question: "After laundry day, your clean clothes are piled on your bed. What is the best way to look after them?", options: ["Fold them neatly", "Throw them down", "Hide them away"], answer: 0, hint: "Folding your clothes neatly keeps them smooth, tidy, and clean." }
         ];
 
-        /* Audio Synthesizer (Zero external file dependency) */
-        let audioMuted = false;
-        let audioCtx = null;
-
-        function initAudioContext() {
-            if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioCtx = new AudioContextClass();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-
-        function toggleAudio() {
-            audioMuted = !audioMuted;
-            document.getElementById('soundIcon').innerText = audioMuted ? "🔇" : "🔊";
-            document.getElementById('soundText').innerText = audioMuted ? "Sound: OFF" : "Sound: ON";
-        }
-
-        function playSound(type) {
-            if (audioMuted) return;
-            initAudioContext();
-            if (!audioCtx) return;
-
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            if (type === 'correct') {
-                // Happy high double chime
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-                osc.start(now);
-                osc.stop(now + 0.45);
-            } else if (type === 'wrong') {
-                // Low buzz
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, now);
-                osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            } else if (type === 'click') {
-                // Soft tap
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(400, now);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-                osc.start(now);
-                osc.stop(now + 0.08);
-            } else if (type === 'fanfare') {
-                // Victory Arpeggio
-                const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((freq, idx) => {
-                    const subOsc = audioCtx.createOscillator();
-                    const subGain = audioCtx.createGain();
-                    subOsc.connect(subGain);
-                    subGain.connect(audioCtx.destination);
-                    subOsc.type = 'sine';
-                    subOsc.frequency.setValueAtTime(freq, now + idx * 0.12);
-                    subGain.gain.setValueAtTime(0.25, now + idx * 0.12);
-                    subGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.3);
-                    subOsc.start(now + idx * 0.12);
-                    subOsc.stop(now + idx * 0.12 + 0.3);
-                });
-            }
-        }
-
-        /* Canvas Particle Confetti System */
-        let confettiParticles = [];
-        const canvas = document.getElementById('confettiCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function triggerConfetti() {
-            for (let i = 0; i < 60; i++) {
-                confettiParticles.push({
-                    x: canvas.width / 2,
-                    y: canvas.height / 2,
-                    vx: (Math.random() - 0.5) * 12,
-                    vy: (Math.random() - 0.7) * 14,
-                    color: ['#FF6B6B', '#4CAF50', '#4A90E2', '#FFD166', '#9B59B6'][Math.floor(Math.random() * 5)],
-                    size: Math.random() * 8 + 4,
-                    life: 1
-                });
-            }
-        }
-
-        function renderConfetti() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            confettiParticles.forEach((p, idx) => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.4; // gravity
-                p.life -= 0.015;
-
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = Math.max(0, p.life);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-
-                if (p.life <= 0) confettiParticles.splice(idx, 1);
-            });
-            ctx.globalAlpha = 1;
-            requestAnimationFrame(renderConfetti);
-        }
-        renderConfetti();
-
-        /* State Variables */
         let database = [];
         let solvedCount = 0;
         let score = 0;
@@ -516,6 +155,7 @@
         let hiddenSymbolPool = Array(9).fill(null); 
         let hasLineOccurred = false; 
 
+        // Precise Grid Coordinate Matrices mapped to grid container proportions
         const winPatterns = [
             { indices: [0, 1, 2], coords: { x1: 5, y1: 16.6, x2: 95, y2: 16.6 } },  // Row 1
             { indices: [3, 4, 5], coords: { x1: 5, y1: 50, x2: 95, y2: 50 } },      // Row 2
@@ -523,27 +163,35 @@
             { indices: [0, 3, 6], coords: { x1: 16.6, y1: 5, x2: 16.6, y2: 95 } },  // Col 1
             { indices: [1, 4, 7], coords: { x1: 50, y1: 5, x2: 50, y2: 95 } },      // Col 2
             { indices: [2, 5, 8], coords: { x1: 83.3, y1: 5, x2: 83.3, y2: 95 } },  // Col 3
-            { indices: [0, 4, 8], coords: { x1: 5, y1: 5, x2: 95, y2: 95 } },        // Diag 1
-            { indices: [2, 4, 6], coords: { x1: 95, y1: 5, x2: 5, y2: 95 } }         // Diag 2
+            { indices: [0, 4, 8], coords: { x1: 5, y1: 5, x2: 95, y2: 95 } },       // Diag 1
+            { indices: [2, 4, 6], coords: { x1: 95, y1: 5, x2: 5, y2: 95 } }        // Diag 2
         ];
 
         window.onload = function() {
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
-                splash.style.opacity = '0';
+                splash.classList.replace('opacity-100', 'opacity-0');
                 setTimeout(() => {
                     splash.style.display = 'none';
                     document.getElementById('titleScreen').classList.remove('hidden');
                 }, 500);
-            }, 1500); 
+            }, 5000); 
         };
 
         function showInstructions() {
-            playSound('click');
-            document.getElementById('titleScreen').classList.add('hidden');
+            document.getElementById('titleScreen').style.display = 'none';
             document.getElementById('instructionsScreen').classList.remove('hidden');
         }
 
+        function playSound(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.currentTime = 0;
+                el.play().catch(()=>{});
+            }
+        }
+
+        // ANTI-FORK ENGINE: Assures exactly 1 winning line exists while retaining 5-4 distribution
         function buildAndShuffleBoard() {
             database = [...originalDatabase];
             for (let i = database.length - 1; i > 0; i--) {
@@ -551,7 +199,9 @@
                 [database[i], database[j]] = [database[j], database[i]];
             }
 
+            // Fixed non-overlapping templates for a true 5-4 split containing exactly 1 win line
             const uniqueWinPatterns = [
+                // 5 Os and 4 Xs templates with exactly 1 win
                 { win: "⭕", map: ["⭕","⭕","⭕","❌","❌","⭕","❌","⭕","❌"] },
                 { win: "⭕", map: ["⭕","❌","❌","⭕","⭕","❌","⭕","❌","⭕"] }, 
                 { win: "⭕", map: ["❌","❌","⭕","❌","⭕","⭕","⭕","⭕","❌"] },
@@ -560,10 +210,13 @@
                 { win: "❌", map: ["⭕","⭕","❌","⭕","❌","❌","❌","❌","⭕"] }
             ];
 
+            // Grab a random layout blueprint matching the desired mechanics configuration
             const chosenBlueprint = uniqueWinPatterns[Math.floor(Math.random() * uniqueWinPatterns.length)];
             hiddenSymbolPool = [...chosenBlueprint.map];
 
+            // Re-verify orientation using mirror transformations to add true dynamic variety
             if (Math.random() > 0.5) {
+                // Mirror rows transformation
                 let row1 = [hiddenSymbolPool[0], hiddenSymbolPool[1], hiddenSymbolPool[2]];
                 let row3 = [hiddenSymbolPool[6], hiddenSymbolPool[7], hiddenSymbolPool[8]];
                 hiddenSymbolPool[0] = row3[0]; hiddenSymbolPool[1] = row3[1]; hiddenSymbolPool[2] = row3[2];
@@ -574,10 +227,10 @@
             container.innerHTML = "";
             for(let i=0; i<9; i++) {
                 container.innerHTML += `
-                    <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card cursor-pointer">
-                        <div class="box-inner">
-                            <div class="box-front">🔒</div>
-                            <div id="boxBackSign${i}" class="box-back"></div>
+                    <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer relative z-10">
+                        <div class="box-inner w-full h-full relative">
+                            <div class="box-front flex items-center justify-center bg-[#FFF9E6] hover:bg-[#FFEAA7] border-4 border-[#FFD166] rounded-2xl text-3xl shadow-md transition-all">🔒</div>
+                            <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner"></div>
                         </div>
                     </div>
                 `;
@@ -585,8 +238,7 @@
         }
 
         function startGame() {
-            playSound('click');
-            document.getElementById('instructionsScreen').classList.add('hidden');
+            document.getElementById('instructionsScreen').style.display = 'none';
             document.getElementById('gameScreen').classList.remove('hidden');
             resetBoard();
         }
@@ -600,13 +252,12 @@
             document.getElementById('hudScore').innerText = score;
             document.getElementById('lineNotification').classList.add('hidden');
             document.getElementById('strikeSvg').innerHTML = ""; 
-            updateMascot("🐶", "Barnaby the Weather Dog", '"Tap a card to help me choose my outfit!"');
             updateProgressHUD();
             updateLivesHUD();
         }
 
         function updateProgressHUD() {
-            document.getElementById('hudProgress').innerText = `${solvedCount} / 9`;
+            document.getElementById('hudProgress').innerText = `${solvedCount} / 9 Solved`;
         }
 
         function updateLivesHUD() {
@@ -615,14 +266,7 @@
             document.getElementById('hudLives').innerText = hearts || "💔";
         }
 
-        function updateMascot(avatar, name, speech) {
-            document.getElementById('mascotAvatar').innerText = avatar;
-            document.getElementById('mascotName').innerText = name;
-            document.getElementById('mascotSpeech').innerText = speech;
-        }
-
         function openQuestion(gridIndex) {
-            playSound('click');
             activeIdx = gridIndex;
             lives = 3; 
             currentAnswersWrong = 0;
@@ -639,7 +283,7 @@
             container.innerHTML = "";
             qData.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.className = "option-btn";
+                btn.className = "w-full text-left bg-[#F0F0F0] active:bg-gray-200 text-[#333] font-bold py-3 px-4 rounded-xl border-2 border-gray-300 text-sm md:text-base";
                 btn.innerText = opt;
                 btn.onclick = () => checkChoice(idx, btn);
                 container.appendChild(btn);
@@ -652,8 +296,8 @@
             let qData = database[activeIdx];
 
             if (chosenIdx === qData.answer) {
-                playSound('correct');
-                clickedBtn.classList.add('correct');
+                playSound('soundCorrect');
+                clickedBtn.className = "w-full text-left bg-[#4CAF50] text-white font-bold py-3 px-4 rounded-xl border-2 border-[#2E7D32] text-sm md:text-base";
                 
                 const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
                 for (let b of btns) b.disabled = true;
@@ -662,36 +306,31 @@
                 questionSuccess = true;
                 document.getElementById('hudScore').innerText = score;
                 document.getElementById('nextBtn').classList.remove('hidden');
-                
-                updateMascot("🌟", "Awesome Choice!", '"That\'s spot on! What a perfect fit!"');
             } else {
-                playSound('wrong');
+                playSound('soundWrong');
                 lives--;
                 currentAnswersWrong++;
                 updateLivesHUD();
                 
-                clickedBtn.classList.add('wrong');
+                clickedBtn.className = "w-full text-left bg-[#FFCDD2] text-[#C62828] font-bold py-3 px-4 rounded-xl border-2 border-[#E53935] opacity-60 line-through text-sm md:text-base";
                 clickedBtn.disabled = true;
 
                 if (currentAnswersWrong === 2) {
                     document.getElementById('hintText').innerText = qData.hint;
                     document.getElementById('hintContainer').classList.remove('hidden');
-                    updateMascot("🤔", "Need a Clue?", '"Here\'s a little hint to help us out!"');
                 } else if (lives <= 0) {
                     const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
                     for (let b of btns) b.disabled = true;
                     
-                    score = Math.max(0, score - 10);
+                    score -= 10;
                     questionSuccess = false;
                     document.getElementById('hudScore').innerText = score;
                     document.getElementById('nextBtn').classList.remove('hidden');
-                    updateMascot("🌧️", "Oops!", '"Let\'s keep trying on the next card!"');
                 }
             }
         }
 
         function submitAndAdvance() {
-            playSound('click');
             document.getElementById('questionModal').classList.add('hidden');
             const backSign = document.getElementById(`boxBackSign${activeIdx}`);
             
@@ -702,20 +341,14 @@
 
                 backSign.innerText = awardedSymbol;
                 if (awardedSymbol === "⭕") {
-                    backSign.style.background = "#E3F2FD";
-                    backSign.style.border = "3.5px solid #1E88E5";
-                    backSign.style.color = "#1E88E5";
+                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#E3F2FD] border-4 border-[#1E88E5] text-[#1E88E5]";
                 } else {
-                    backSign.style.background = "#FCE4EC";
-                    backSign.style.border = "3.5px solid #D81B60";
-                    backSign.style.color = "#D81B60";
+                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
                 }
             } else {
                 boardState[activeIdx] = "🔒";
                 backSign.innerText = "🔒";
-                backSign.style.background = "#EEEEEE";
-                backSign.style.border = "3.5px solid #AAAAAA";
-                backSign.style.color = "#888888";
+                backSign.className = "box-back flex items-center justify-center rounded-2xl text-4xl font-black shadow-inner bg-gray-200 border-4 border-gray-400 text-gray-400";
             }
 
             const cell = document.getElementById(`gridCell${activeIdx}`);
@@ -744,18 +377,18 @@
                 }
             }
 
+            // High priority vector layer renderer injection engine execution
             if (activeLinePattern && !hasLineOccurred) {
                 hasLineOccurred = true; 
-                playSound('fanfare');
-                triggerConfetti();
+                playSound('soundClapping');
                 
                 const banner = document.getElementById('lineNotification');
                 banner.classList.remove('hidden');
 
                 const svg = document.getElementById('strikeSvg');
-                const lineColor = (symbol === "⭕") ? "#1E88E5" : "#D81B60"; 
+                const lineColor = "#1E88E5"; // Bold Blue line over tiles for clear visibility
                 
-                svg.innerHTML = ""; 
+                svg.innerHTML = ""; // Clear execution space
 
                 const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
                 line.setAttribute("x1", activeLinePattern.coords.x1.toString());
@@ -763,13 +396,11 @@
                 line.setAttribute("x2", activeLinePattern.coords.x2.toString());
                 line.setAttribute("y2", activeLinePattern.coords.y2.toString());
                 line.setAttribute("stroke", lineColor);
-                line.setAttribute("stroke-width", "6");
+                line.setAttribute("stroke-width", "8");
                 line.setAttribute("stroke-linecap", "round");
                 line.setAttribute("class", "strike-line");
                 
                 svg.appendChild(line);
-
-                updateMascot("🎉", "TIC-TAC-TOE!", '"Woohoo! We matched three in a row!"');
 
                 setTimeout(() => {
                     banner.classList.add('hidden');
@@ -790,9 +421,8 @@
         }
 
         function endGameScenario() {
-            playSound('fanfare');
-            triggerConfetti();
-            document.getElementById('gameScreen').classList.add('hidden');
+            playSound('soundClapping');
+            document.getElementById('gameScreen').style.display = 'none';
             
             const finalTally = document.getElementById('finalScore');
             const finalTitle = document.getElementById('endGameStatus');
@@ -805,16 +435,15 @@
                 finalMsg.innerText = `Sensational! Exactly one matching sequence line was struck across your grid elements! ✨`;
             } else {
                 finalTitle.innerText = "What a Close Match! 🤝";
-                finalMsg.innerText = "The board is full! You are officially a weather closet expert! Try another shuffle! 🌟";
+                finalMsg.innerText = "The board is full! No lines were left open. You are officially a weather closet expert! Try another shuffle! 🌟";
             }
 
             document.getElementById('scoreScreen').classList.remove('hidden');
         }
 
         function restartGame() {
-            playSound('click');
             document.getElementById('scoreScreen').classList.add('hidden');
-            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('gameScreen').style.display = 'flex';
             resetBoard();
         }
     </script>
