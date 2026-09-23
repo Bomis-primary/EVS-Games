@@ -4,20 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Closet Chronicles!</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'title': ['"Baloo 2"', 'cursive'],
+                        'body': ['"Nunito"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'pushable': '0 6px 0 rgba(0, 0, 0, 0.2)',
+                        'pushable-active': '0 2px 0 rgba(0, 0, 0, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
         body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
             overflow-x: hidden;
+            background-color: #F0F9FF;
+            background-image: radial-gradient(#E0F2FE 20%, transparent 20%), radial-gradient(#E0F2FE 20%, transparent 20%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
         }
         .box-card {
             perspective: 1000px;
             will-change: transform;
         }
         .box-inner {
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             transform-style: preserve-3d;
         }
         .box-card.flipped .box-inner {
@@ -35,118 +58,145 @@
         .box-back {
             transform: rotateY(180deg);
         }
-        .strike-line {
-            stroke-dasharray: 300;
-            stroke-dashoffset: 300;
-            animation: drawLine 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.35));
+        .btn-pushable {
+            transition: all 0.1s;
         }
-        @keyframes drawLine {
-            to {
-                stroke-dashoffset: 0;
-            }
+        .btn-pushable:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .sticker-bounce {
+            animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
-<body class="bg-gradient-to-b from-[#FFF5F5] via-[#FFF9E6] to-[#E8F5E9] min-h-screen min-h-[100dvh] flex flex-col items-center justify-center select-none text-[#333333] p-3 sm:p-4 m-0">
+<body class="font-body min-h-screen min-h-[100dvh] flex flex-col items-center justify-center select-none text-[#333333] p-3 sm:p-4 m-0">
 
-    <!-- Asset Files -->
+    <!-- Asset Files[cite: 7] -->
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="soundWrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="soundClapping" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <!-- Splash Screen -->
-    <div id="splashScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 opacity-100">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-[70%] h-auto object-contain">
+    <div id="splashScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-100">
+        <!-- Using Innovine logo as per asset path[cite: 7] -->
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-72 max-w-[80%] h-auto object-contain animate-pulse">
     </div>
 
     <!-- Title Screen -->
-    <div id="titleScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border-4 border-[#FFD166] text-center space-y-6 mx-2">
-        <div class="space-y-3">
-            <span class="text-5xl sm:text-6xl block animate-bounce">👕✨👚</span>
-            <h1 class="text-3xl md:text-4xl font-black text-[#FF6B6B] leading-tight tracking-wide">The Closet<br>Chronicles!</h1>
-            <p class="text-[#6C7A89] font-bold text-sm sm:text-base px-2">Can you choose the perfect clothes for our weather adventures?</p>
+    <div id="titleScreen" class="hidden w-full max-w-md bg-white/90 backdrop-blur-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl border-4 border-[#FFD166] text-center space-y-8 mx-2 relative overflow-hidden">
+        <div class="absolute -top-6 -right-6 text-6xl opacity-20 transform rotate-12">👕</div>
+        <div class="absolute -bottom-6 -left-6 text-6xl opacity-20 transform -rotate-12">👗</div>
+        
+        <div class="space-y-4 relative z-10">
+            <span class="text-6xl sm:text-7xl block animate-bounce drop-shadow-md">✨🧺✨</span>
+            <h1 class="text-4xl md:text-5xl font-title font-black text-[#FF6B6B] leading-tight tracking-wide drop-shadow-sm">The Closet<br>Chronicles!</h1>
+            <p class="text-[#6C7A89] font-bold text-base sm:text-lg px-2">Complete your magical sticker book by dressing up for the weather!</p>
         </div>
-        <button onclick="showInstructions()" class="w-full bg-[#4CAF50] hover:bg-[#43A047] active:bg-[#388E3C] text-white font-bold text-xl sm:text-2xl py-3.5 sm:py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#2E7D32]">
-            LET'S GO ➡️
+        
+        <button onclick="showInstructions()" class="btn-pushable w-full bg-[#4CAF50] hover:bg-[#43A047] text-white font-title font-black text-2xl sm:text-3xl py-4 rounded-2xl shadow-pushable border-2 border-[#2E7D32] relative z-10">
+            START 🚀
         </button>
     </div>
 
     <!-- Instructions Screen -->
-    <div id="instructionsScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-5 mx-2">
-        <h2 class="text-2xl font-black text-[#4A90E2]">☀️ How to Play ☀️</h2>
-        <div class="bg-[#FFF9E6] p-4 sm:p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-sm sm:text-base space-y-3 text-[#4A4A4A] font-medium">
-            <p>1. Tap any padlocked 🔒 card on the board grid.</p>
-            <p>2. Answer correctly to reveal a hidden secret symbol!</p>
-            <p>3. Form exactly one straight matching line of 3 to strike it out!</p>
-            <p class="text-xs sm:text-sm bg-[#E8F5E9] p-2.5 sm:p-3 rounded-xl text-[#2E7D32] font-bold text-center">⭐ Correct Answer = +10 Points!<br>❌ Incorrect After Hint = -10 Points!</p>
+    <div id="instructionsScreen" class="hidden w-full max-w-md bg-white/90 backdrop-blur-sm rounded-[2rem] p-6 shadow-2xl border-4 border-[#4A90E2] text-center space-y-6 mx-2">
+        <h2 class="text-3xl font-title font-black text-[#4A90E2] flex items-center justify-center gap-2">
+            <span>📖</span> How to Play
+        </h2>
+        
+        <div class="bg-[#FFF9E6] p-5 rounded-2xl border-2 border-dashed border-[#FFD166] text-left text-base sm:text-lg space-y-4 text-[#4A4A4A] font-bold">
+            <p class="flex items-start gap-3"><span class="text-2xl">🎁</span> <span>Tap a mystery box to open a question.</span></p>
+            <p class="flex items-start gap-3"><span class="text-2xl">✨</span> <span>Answer correctly to collect a magical wardrobe sticker!</span></p>
+            <p class="flex items-start gap-3"><span class="text-2xl">🏆</span> <span>Collect all 9 stickers to fill your book and win!</span></p>
+            
+            <div class="bg-[#E8F5E9] p-3 rounded-xl border border-[#A5D6A7] text-[#2E7D32] text-sm text-center mt-4">
+                You have 3 ❤️ tries for each mystery box!
+            </div>
         </div>
-        <button onclick="startGame()" class="w-full bg-[#FF6B6B] hover:bg-[#EE5253] active:bg-[#E53935] text-white font-bold text-xl sm:text-2xl py-3.5 sm:py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-8 border-[#C0392B]">
-            PLAY GAME ▶️
+        
+        <button onclick="startGame()" class="btn-pushable w-full bg-[#FF6B6B] hover:bg-[#EE5253] text-white font-title font-black text-2xl py-4 rounded-2xl shadow-pushable border-2 border-[#C0392B]">
+            PLAY NOW ▶️
         </button>
     </div>
 
     <!-- Game Screen -->
     <div id="gameScreen" class="hidden w-full max-w-md flex flex-col space-y-4 px-2">
-        <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-lg border-2 border-[#4A90E2] flex items-center justify-between font-bold text-xs sm:text-base">
-            <div class="text-[#4A90E2]">Progress: <span id="hudProgress" class="bg-[#E3F2FD] text-[#1E88E5] px-2.5 sm:px-3 py-1 rounded-full border border-[#1E88E5]">0 / 9 Solved</span></div>
-            <div id="hudLives" class="text-[#FF6B6B] tracking-widest text-base sm:text-lg">❤️❤️❤️</div>
-            <div class="text-[#4CAF50]">🏆 Score: <span id="hudScore">0</span></div>
-        </div>
-
-        <div id="lineNotification" class="hidden bg-[#E8F5E9] border-2 border-[#4CAF50] rounded-xl p-2 text-center text-xs sm:text-sm font-bold text-[#2E7D32] animate-pulse">
-            🎉 Tic-Tac-Toe Line Achieved! Match Formed! 🎉
-        </div>
-
-        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
-            <div id="gridContainer" class="grid grid-cols-3 gap-3 sm:gap-4 w-full h-full relative z-10">
+        <!-- HUD -->
+        <div class="bg-white rounded-[1.5rem] p-4 shadow-lg border-4 border-[#4A90E2] flex flex-col gap-3 font-bold">
+            <div class="flex items-center justify-between">
+                <div class="text-[#4A90E2] font-title text-xl flex items-center gap-2">
+                    <span>📖 Book:</span> 
+                    <span id="hudProgress" class="bg-[#E3F2FD] text-[#1E88E5] px-3 py-1 rounded-full border-2 border-[#90CAF9]">0/9</span>
+                </div>
+                <div class="text-[#4CAF50] font-title text-xl">🏆 <span id="hudScore">0</span></div>
             </div>
-
-            <svg id="strikeSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30" style="display: block;" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div id="progressBar" class="bg-gradient-to-r from-[#FFD166] to-[#FF6B6B] h-3 rounded-full transition-all duration-500 w-0"></div>
+            </div>
         </div>
-        <div class="text-center text-xs text-gray-500 font-bold tracking-wide">Tap any locked card above to open a weather story!</div>
+
+        <!-- 3x3 Grid -->
+        <div class="bg-white rounded-[2rem] p-5 shadow-2xl border-4 border-[#4A90E2] relative w-full aspect-square">
+            <div id="gridContainer" class="grid grid-cols-3 gap-3 sm:gap-4 w-full h-full relative z-10">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+        <div class="text-center text-sm text-gray-500 font-bold bg-white/70 px-4 py-2 rounded-full inline-block mx-auto shadow-sm">
+            Tap a mystery box to find a sticker! 👆
+        </div>
     </div>
 
     <!-- Enhanced Question Modal -->
-    <div id="questionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md p-5 border-4 border-[#FF6B6B] shadow-2xl flex flex-col space-y-4 max-h-[90dvh] overflow-y-auto">
+    <div id="questionModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] w-full max-w-md p-6 border-4 border-[#FF6B6B] shadow-2xl flex flex-col space-y-5 max-h-[90dvh] overflow-y-auto">
             
-            <div class="flex items-center justify-between border-b-2 border-gray-100 pb-2">
-                <span class="bg-[#FFE082] text-[#E65100] text-xs sm:text-sm font-black px-3 py-1 rounded-full shadow-sm">
-                    🌤️ Weather & Wardrobe Challenge
+            <div class="flex items-center justify-between pb-2">
+                <span class="bg-[#FFE082] text-[#E65100] text-sm font-black px-4 py-1.5 rounded-full shadow-sm">
+                    ❓ Question Time
                 </span>
-                <span class="text-xs font-bold text-gray-400">Card Question</span>
+                <div id="modalLives" class="text-xl sm:text-2xl tracking-widest bg-gray-100 px-3 py-1 rounded-full">❤️❤️❤️</div>
             </div>
 
-            <div id="modalBody" class="bg-gradient-to-br from-[#FFF9C4] to-[#FFF176] rounded-2xl p-4 border-2 border-[#FBC02D] text-center shadow-inner">
-                <p id="questionText" class="text-base sm:text-lg font-black text-[#37474F] leading-snug"></p>
+            <div class="bg-gradient-to-br from-[#E3F2FD] to-[#BBDEFB] rounded-2xl p-5 border-2 border-[#90CAF9] text-center shadow-inner">
+                <p id="questionText" class="text-lg sm:text-xl font-title font-black text-[#1565C0] leading-snug"></p>
             </div>
 
-            <div id="hintContainer" class="hidden bg-[#E3F2FD] border-2 border-dashed border-[#42A5F5] rounded-2xl p-3 text-center text-xs sm:text-sm text-[#1565C0] font-bold animate-bounce">
+            <div id="hintContainer" class="hidden bg-[#FFF9C4] border-2 border-dashed border-[#FBC02D] rounded-2xl p-3 text-center text-sm text-[#F57F17] font-bold animate-pulse">
                 💡 <span id="hintText"></span>
             </div>
 
-            <div id="optionsContainer" class="flex flex-col space-y-2.5">
+            <div id="optionsContainer" class="flex flex-col space-y-3">
             </div>
 
-            <button id="nextBtn" onclick="submitAndAdvance()" class="hidden w-full bg-[#4CAF50] hover:bg-[#43A047] text-white font-black text-base sm:text-lg py-3 rounded-2xl shadow-lg transform active:scale-95 transition-all border-b-4 border-[#2E7D32]">
-                CONTINUE ➡️
+            <button id="nextBtn" onclick="submitAndAdvance()" class="hidden btn-pushable w-full bg-[#4CAF50] text-white font-title font-black text-2xl py-4 rounded-2xl shadow-pushable border-2 border-[#2E7D32]">
+                COLLECT STICKER 🎁
             </button>
         </div>
     </div>
 
     <!-- Score Screen (Dynamic Feedback based on score) -->
-    <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
-        <div class="space-y-2">
-            <span id="endGameIcon" class="text-5xl sm:text-6xl block">🏆✨🥳</span>
-            <h2 id="endGameStatus" class="text-2xl sm:text-3xl font-black text-[#4CAF50]">Quest Completed!</h2>
-            <p id="endGameMessage" class="text-base sm:text-lg font-bold text-gray-700 px-2">Fantastic Job!</p>
+    <div id="scoreScreen" class="hidden w-full max-w-md bg-white rounded-[2rem] p-8 shadow-2xl border-4 border-[#4CAF50] text-center space-y-6 mx-2">
+        <div class="space-y-3">
+            <span id="endGameIcon" class="text-7xl block sticker-bounce">🏆</span>
+            <h2 id="endGameStatus" class="text-3xl sm:text-4xl font-title font-black text-[#4CAF50]">Book Complete!</h2>
+            <p id="endGameMessage" class="text-lg font-bold text-gray-700 px-2">You collected all the stickers!</p>
         </div>
-        <div class="bg-[#E8F5E9] p-4 rounded-2xl border-2 border-[#4CAF50] max-w-xs mx-auto shadow-inner">
-            <p class="text-gray-600 font-bold uppercase text-xs tracking-wider">Your Final Tally</p>
-            <p class="text-3xl sm:text-4xl font-black text-[#2E7D32] mt-1"><span id="finalScore">0</span> Pts</p>
+        
+        <div class="bg-gradient-to-br from-[#E8F5E9] to-[#C8E6C9] p-6 rounded-2xl border-2 border-[#4CAF50] mx-auto shadow-inner">
+            <p class="text-gray-600 font-black uppercase text-sm tracking-wider">Final Score</p>
+            <p class="text-5xl font-title font-black text-[#2E7D32] mt-2"><span id="finalScore">0</span></p>
         </div>
-        <button onclick="restartGame()" class="w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-black text-lg sm:text-xl py-3.5 sm:py-4 rounded-2xl shadow-lg border-b-8 border-[#C0392B] transform active:scale-95 transition-all">
+        
+        <button onclick="restartGame()" class="btn-pushable w-full bg-[#FF6B6B] hover:bg-[#FF4747] text-white font-title font-black text-2xl py-4 rounded-2xl shadow-pushable border-2 border-[#C0392B]">
             PLAY AGAIN 🔄
         </button>
     </div>
@@ -164,7 +214,11 @@
             { question: "After laundry day, your clean clothes are piled on your bed. What is the best way to look after them?", options: ["Fold them neatly", "Throw them down", "Hide them away"], answer: 0, hint: "Folding your clothes neatly keeps them smooth, tidy, and clean." }
         ];
 
+        // Wardrobe Stickers Pool
+        const wardrobeStickers = ['👕', '👗', '🧢', '🧣', '🧤', '🧥', '🧦', '👟', '🌂'];
+
         let database = [];
+        let hiddenStickers = [];
         let solvedCount = 0;
         let score = 0;
         let lives = 3;
@@ -172,22 +226,7 @@
         let currentAnswersWrong = 0;
         let questionSuccess = false;
 
-        let boardState = Array(9).fill(null);
-        let hiddenSymbolPool = Array(9).fill(null); 
-        let hasLineOccurred = false; 
-
-        const winPatterns = [
-            { indices: [0, 1, 2], coords: { x1: 5, y1: 16.6, x2: 95, y2: 16.6 } },  // Row 1
-            { indices: [3, 4, 5], coords: { x1: 5, y1: 50, x2: 95, y2: 50 } },      // Row 2
-            { indices: [6, 7, 8], coords: { x1: 5, y1: 83.3, x2: 95, y2: 83.3 } },  // Row 3
-            { indices: [0, 3, 6], coords: { x1: 16.6, y1: 5, x2: 16.6, y2: 95 } },  // Col 1
-            { indices: [1, 4, 7], coords: { x1: 50, y1: 5, x2: 50, y2: 95 } },      // Col 2
-            { indices: [2, 5, 8], coords: { x1: 83.3, y1: 5, x2: 83.3, y2: 95 } },  // Col 3
-            { indices: [0, 4, 8], coords: { x1: 5, y1: 5, x2: 95, y2: 95 } },       // Diag 1
-            { indices: [2, 4, 6], coords: { x1: 95, y1: 5, x2: 5, y2: 95 } }        // Diag 2
-        ];
-
-        // Muted Audio Priming Engine: Unlocks audio on first user touch without producing audible sound
+        // Muted Audio Priming Engine
         let audioUnlocked = false;
         function unlockAudioContext() {
             if (audioUnlocked) return;
@@ -214,6 +253,7 @@
         document.addEventListener('touchstart', unlockAudioContext, { once: true });
         document.addEventListener('click', unlockAudioContext, { once: true });
 
+        // Initialize App (Splash screen exactly 5 seconds)
         window.onload = function() {
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
@@ -221,8 +261,8 @@
                 setTimeout(() => {
                     splash.style.display = 'none';
                     document.getElementById('titleScreen').classList.remove('hidden');
-                }, 500);
-            }, 2500);
+                }, 1000); // 1s fade out duration
+            }, 5000); // 5 seconds wait
         };
 
         function showInstructions() {
@@ -239,40 +279,43 @@
             }
         }
 
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FFD166', '#FF6B6B', '#4CAF50', '#4A90E2']
+            });
+        }
+
         function buildAndShuffleBoard() {
+            // Shuffle database
             database = [...originalDatabase];
             for (let i = database.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [database[i], database[j]] = [database[j], database[i]];
             }
 
-            const uniqueWinPatterns = [
-                { win: "⭕", map: ["⭕","⭕","⭕","❌","❌","⭕","❌","⭕","❌"] },
-                { win: "⭕", map: ["⭕","❌","❌","⭕","⭕","❌","⭕","❌","⭕"] }, 
-                { win: "⭕", map: ["❌","❌","⭕","❌","⭕","⭕","⭕","⭕","❌"] },
-                { win: "❌", map: ["❌","❌","❌","⭕","⭕","❌","⭕","❌","⭕"] },
-                { win: "❌", map: ["❌","⭕","⭕","❌","❌","⭕","❌","⭕","❌"] },
-                { win: "❌", map: ["⭕","⭕","❌","⭕","❌","❌","❌","❌","⭕"] }
-            ];
-
-            const chosenBlueprint = uniqueWinPatterns[Math.floor(Math.random() * uniqueWinPatterns.length)];
-            hiddenSymbolPool = [...chosenBlueprint.map];
-
-            if (Math.random() > 0.5) {
-                let row1 = [hiddenSymbolPool[0], hiddenSymbolPool[1], hiddenSymbolPool[2]];
-                let row3 = [hiddenSymbolPool[6], hiddenSymbolPool[7], hiddenSymbolPool[8]];
-                hiddenSymbolPool[0] = row3[0]; hiddenSymbolPool[1] = row3[1]; hiddenSymbolPool[2] = row3[2];
-                hiddenSymbolPool[6] = row1[0]; hiddenSymbolPool[7] = row1[1]; hiddenSymbolPool[8] = row1[2];
+            // Shuffle Stickers
+            hiddenStickers = [...wardrobeStickers];
+            for (let i = hiddenStickers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [hiddenStickers[i], hiddenStickers[j]] = [hiddenStickers[j], hiddenStickers[i]];
             }
 
             const container = document.getElementById('gridContainer');
             container.innerHTML = "";
             for(let i=0; i<9; i++) {
                 container.innerHTML += `
-                    <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer relative z-10">
+                    <div id="gridCell${i}" onclick="openQuestion(${i})" class="box-card w-full h-full cursor-pointer relative z-10 group">
                         <div class="box-inner w-full h-full relative">
-                            <div class="box-front flex items-center justify-center bg-[#FFF9E6] hover:bg-[#FFEAA7] active:bg-[#FDCB6E] border-4 border-[#FFD166] rounded-2xl text-2xl sm:text-3xl shadow-md transition-all">🔒</div>
-                            <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner"></div>
+                            <!-- Box Front (Mystery Box) -->
+                            <div class="box-front flex flex-col items-center justify-center bg-gradient-to-b from-[#FFF5F5] to-[#FFEAA7] border-4 border-[#FFD166] rounded-2xl shadow-md transition-transform group-active:scale-95">
+                                <span class="text-4xl drop-shadow-md">🎁</span>
+                            </div>
+                            <!-- Box Back (Sticker Reveal) -->
+                            <div id="boxBackSign${i}" class="box-back flex items-center justify-center rounded-2xl text-5xl bg-gradient-to-br from-[#E3F2FD] to-[#E8F5E9] border-4 border-[#4CAF50] shadow-inner">
+                            </div>
                         </div>
                     </div>
                 `;
@@ -289,23 +332,22 @@
             buildAndShuffleBoard();
             solvedCount = 0;
             score = 0;
-            boardState.fill(null);
-            hasLineOccurred = false;
             document.getElementById('hudScore').innerText = score;
-            document.getElementById('lineNotification').classList.add('hidden');
-            document.getElementById('strikeSvg').innerHTML = ""; 
             updateProgressHUD();
-            updateLivesHUD();
         }
 
         function updateProgressHUD() {
-            document.getElementById('hudProgress').innerText = `${solvedCount} / 9 Solved`;
+            document.getElementById('hudProgress').innerText = `${solvedCount}/9`;
+            const percentage = (solvedCount / 9) * 100;
+            document.getElementById('progressBar').style.width = `${percentage}%`;
         }
 
         function updateLivesHUD() {
             let hearts = "";
             for(let i=0; i<lives; i++) { hearts += "❤️"; }
-            document.getElementById('hudLives').innerText = hearts || "💔";
+            let broken = "";
+            for(let i=lives; i<3; i++) { broken += "🖤"; }
+            document.getElementById('modalLives').innerText = hearts + broken;
         }
 
         function openQuestion(gridIndex) {
@@ -319,14 +361,18 @@
 
             document.getElementById('questionText').innerText = qData.question;
             document.getElementById('hintContainer').classList.add('hidden');
-            document.getElementById('nextBtn').classList.add('hidden');
+            
+            const nxtBtn = document.getElementById('nextBtn');
+            nxtBtn.classList.add('hidden');
+            nxtBtn.innerText = "COLLECT STICKER 🎁";
+            nxtBtn.className = "hidden btn-pushable w-full bg-[#4CAF50] text-white font-title font-black text-2xl py-4 rounded-2xl shadow-pushable border-2 border-[#2E7D32]";
 
             const container = document.getElementById('optionsContainer');
             container.innerHTML = "";
             qData.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left bg-[#F8F9FA] hover:bg-[#E8F0FE] active:bg-[#D2E3FC] text-[#202124] font-bold py-3.5 px-4 rounded-xl border-2 border-[#DADCE0] text-sm sm:text-base transition-all shadow-sm flex items-center space-x-2";
-                btn.innerHTML = `<span class="w-6 h-6 flex items-center justify-center rounded-full bg-[#E8EAED] text-xs font-black text-[#5F6368]">${String.fromCharCode(65 + idx)}</span><span>${opt}</span>`;
+                btn.className = "w-full text-left bg-white hover:bg-[#F8F9FA] text-[#202124] font-bold py-4 px-5 rounded-xl border-2 border-[#E0E0E0] text-base sm:text-lg shadow-sm transition-all flex items-center space-x-4 btn-pushable";
+                btn.innerHTML = `<span class="w-8 h-8 flex items-center justify-center rounded-full bg-[#F1F3F4] text-sm font-black text-[#5F6368] border border-gray-200">${String.fromCharCode(65 + idx)}</span><span class="flex-1">${opt}</span>`;
                 btn.onclick = () => checkChoice(idx, btn);
                 container.appendChild(btn);
             });
@@ -339,14 +385,23 @@
 
             if (chosenIdx === qData.answer) {
                 playSound('soundCorrect');
-                clickedBtn.className = "w-full text-left bg-[#4CAF50] text-white font-bold py-3.5 px-4 rounded-xl border-2 border-[#2E7D32] text-sm sm:text-base shadow-md flex items-center space-x-2";
-                clickedBtn.innerHTML = `<span class="w-6 h-6 flex items-center justify-center rounded-full bg-[#2E7D32] text-xs font-black text-white">✓</span><span>${clickedBtn.innerText.substring(2)}</span>`;
+                triggerConfetti();
+                
+                clickedBtn.className = "w-full text-left bg-[#4CAF50] text-white font-bold py-4 px-5 rounded-xl border-2 border-[#2E7D32] text-base sm:text-lg shadow-md flex items-center space-x-4";
+                clickedBtn.innerHTML = `<span class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-sm font-black text-[#2E7D32]">✓</span><span class="flex-1">${clickedBtn.innerText.substring(2)}</span>`;
                 
                 const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
                 for (let b of btns) b.disabled = true;
 
-                score += 10;
+                // Points based on attempts
+                let pointsEarned = 0;
+                if(currentAnswersWrong === 0) pointsEarned = 10;
+                else if(currentAnswersWrong === 1) pointsEarned = 5;
+                else pointsEarned = 2;
+
+                score += pointsEarned;
                 questionSuccess = true;
+                
                 document.getElementById('hudScore').innerText = score;
                 document.getElementById('nextBtn').classList.remove('hidden');
             } else {
@@ -355,7 +410,7 @@
                 currentAnswersWrong++;
                 updateLivesHUD();
                 
-                clickedBtn.className = "w-full text-left bg-[#FFCDD2] text-[#C62828] font-bold py-3.5 px-4 rounded-xl border-2 border-[#E53935] opacity-70 line-through text-sm sm:text-base flex items-center space-x-2";
+                clickedBtn.className = "w-full text-left bg-[#FFCDD2] text-[#C62828] font-bold py-4 px-5 rounded-xl border-2 border-[#E53935] opacity-70 line-through text-base sm:text-lg flex items-center space-x-4";
                 clickedBtn.disabled = true;
 
                 if (currentAnswersWrong === 2) {
@@ -365,104 +420,44 @@
                     const btns = document.getElementById('optionsContainer').getElementsByTagName('button');
                     for (let b of btns) b.disabled = true;
                     
-                    score -= 10;
                     questionSuccess = false;
-                    document.getElementById('hudScore').innerText = score;
-                    document.getElementById('nextBtn').classList.remove('hidden');
+                    const nxtBtn = document.getElementById('nextBtn');
+                    nxtBtn.innerText = "CLOSE BOX 📦";
+                    nxtBtn.className = "btn-pushable w-full bg-[#9E9E9E] text-white font-title font-black text-2xl py-4 rounded-2xl shadow-pushable border-2 border-[#757575]";
+                    nxtBtn.classList.remove('hidden');
                 }
             }
         }
 
         function submitAndAdvance() {
             document.getElementById('questionModal').classList.add('hidden');
-            const backSign = document.getElementById(`boxBackSign${activeIdx}`);
             
-            let awardedSymbol = "🔒";
             if (questionSuccess) {
-                awardedSymbol = hiddenSymbolPool[activeIdx];
-                boardState[activeIdx] = awardedSymbol;
+                const awardedSticker = hiddenStickers[activeIdx];
+                const backSign = document.getElementById(`boxBackSign${activeIdx}`);
+                backSign.innerHTML = `<span class="sticker-bounce inline-block">${awardedSticker}</span>`;
+                
+                const cell = document.getElementById(`gridCell${activeIdx}`);
+                cell.classList.add('flipped');
+                cell.style.pointerEvents = 'none';
 
-                backSign.innerText = awardedSymbol;
-                if (awardedSymbol === "⭕") {
-                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner bg-[#E3F2FD] border-4 border-[#1E88E5] text-[#1E88E5]";
-                } else {
-                    backSign.className = "box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner bg-[#FCE4EC] border-4 border-[#D81B60] text-[#D81B60]";
+                solvedCount++;
+                updateProgressHUD();
+
+                if (solvedCount >= 9) {
+                    setTimeout(() => {
+                        endGameScenario();
+                    }, 1000);
                 }
             } else {
-                boardState[activeIdx] = "🔒";
-                backSign.innerText = "🔒";
-                backSign.className = "box-back flex items-center justify-center rounded-2xl text-3xl sm:text-4xl font-black shadow-inner bg-gray-200 border-4 border-gray-400 text-gray-400";
-            }
-
-            const cell = document.getElementById(`gridCell${activeIdx}`);
-            cell.classList.add('flipped');
-            cell.style.pointerEvents = 'none';
-
-            solvedCount++;
-            updateProgressHUD();
-
-            if (questionSuccess) {
-                checkAndProcessLineCompletions(awardedSymbol);
-            } else {
-                checkEndGameTransitions();
-            }
-        }
-
-        function checkAndProcessLineCompletions(symbol) {
-            let activeLinePattern = null;
-
-            for (let pattern of winPatterns) {
-                if (boardState[pattern.indices[0]] === symbol &&
-                    boardState[pattern.indices[1]] === symbol &&
-                    boardState[pattern.indices[2]] === symbol) {
-                    activeLinePattern = pattern;
-                    break; 
-                }
-            }
-
-            if (activeLinePattern && !hasLineOccurred) {
-                hasLineOccurred = true; 
-                playSound('soundClapping');
-                
-                const banner = document.getElementById('lineNotification');
-                banner.classList.remove('hidden');
-
-                const svg = document.getElementById('strikeSvg');
-                const lineColor = (symbol === "⭕") ? "#1E88E5" : "#D81B60"; 
-                
-                svg.innerHTML = ""; 
-
-                const line = document.createElementNS("http://www.w3.org/2002/svg", "line");
-                line.setAttribute("x1", activeLinePattern.coords.x1.toString());
-                line.setAttribute("y1", activeLinePattern.coords.y1.toString());
-                line.setAttribute("x2", activeLinePattern.coords.x2.toString());
-                line.setAttribute("y2", activeLinePattern.coords.y2.toString());
-                line.setAttribute("stroke", lineColor);
-                line.setAttribute("stroke-width", "10");
-                line.setAttribute("stroke-linecap", "round");
-                line.setAttribute("class", "strike-line");
-                
-                svg.appendChild(line);
-
-                setTimeout(() => {
-                    banner.classList.add('hidden');
-                    checkEndGameTransitions();
-                }, 2200);
-            } else {
-                checkEndGameTransitions();
-            }
-        }
-
-        function checkEndGameTransitions() {
-            if (solvedCount >= 9) {
-                setTimeout(() => {
-                    endGameScenario();
-                }, 600);
+                // Return to main board so they can try a different box.
+                // Box remains locked (unflipped)
             }
         }
 
         function endGameScenario() {
             playSound('soundClapping');
+            triggerConfetti();
             document.getElementById('gameScreen').style.display = 'none';
             
             const finalTally = document.getElementById('finalScore');
@@ -472,16 +467,22 @@
             
             finalTally.innerText = score;
 
-            if (score >= 50) {
-                endIcon.innerText = "🏆✨🥳";
-                finalTitle.innerText = "Fantastic Job! 🏆";
-                finalTitle.className = "text-2xl sm:text-3xl font-black text-[#4CAF50]";
-                finalMsg.innerText = `Outstanding! You scored ${score} points! You are officially a Wardrobe Wizard! 🌟`;
+            // Max score is 90 (9 questions * 10 points)
+            if (score >= 70) {
+                endIcon.innerText = "🏆";
+                finalTitle.innerText = "Master Stylist! ✨";
+                finalTitle.className = "text-3xl sm:text-4xl font-title font-black text-[#4CAF50]";
+                finalMsg.innerText = "Amazing job! Your sticker book is absolutely perfect!";
+            } else if (score >= 40) {
+                endIcon.innerText = "🌟";
+                finalTitle.innerText = "Great Job! 👍";
+                finalTitle.className = "text-3xl sm:text-4xl font-title font-black text-[#F57C00]";
+                finalMsg.innerText = "You collected all the stickers! Play again to beat your high score!";
             } else {
-                endIcon.innerText = "💪🌱👕";
-                finalTitle.innerText = "You Can Do Better! 👍";
-                finalTitle.className = "text-2xl sm:text-3xl font-black text-[#E65100]";
-                finalMsg.innerText = `You scored ${score} points. Don't give up! Practice makes perfect. Try again to become a closet master! 🚀`;
+                endIcon.innerText = "💪";
+                finalTitle.innerText = "Good Try! 🌱";
+                finalTitle.className = "text-3xl sm:text-4xl font-title font-black text-[#1E88E5]";
+                finalMsg.innerText = "You found all the clothes! Keep practicing to become a wardrobe wizard!";
             }
 
             document.getElementById('scoreScreen').classList.remove('hidden');
