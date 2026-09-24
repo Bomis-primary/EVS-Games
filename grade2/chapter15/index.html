@@ -2,12 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Festival Brick Adventure</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=VT323&display=swap');
         
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -26,7 +40,7 @@
         /* Hand-held console body casing optimized for desktop/mobile fluid aspect ratios */
         .console-case {
             background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
-            box-shadow: 0 16px 0 #ca8a04, 0 20px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 12px 0 #ca8a04, 0 16px 25px rgba(0, 0, 0, 0.5);
             border: 4px solid #fef08a;
         }
 
@@ -34,7 +48,7 @@
         .lcd-screen {
             background-color: #172554;
             box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.8), 0 2px 2px rgba(255, 255, 255, 0.1);
-            border: 6px solid #1e3a8a;
+            border: 5px solid #1e3a8a;
         }
 
         /* Grid spots when empty */
@@ -55,27 +69,28 @@
         /* Tactile retro buttons */
         .retro-pad-btn {
             background: linear-gradient(to bottom, #dc2626 0%, #b91c1c 100%);
-            box-shadow: 0 5px 0 #991b1b, 0 6px 8px rgba(0,0,0,0.4);
-            transition: all 0.05s ease;
+            box-shadow: 0 4px 0 #991b1b, 0 5px 6px rgba(0,0,0,0.4);
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
         }
         .retro-pad-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #991b1b, 0 3px 4px rgba(0,0,0,0.4);
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #991b1b, 0 2px 3px rgba(0,0,0,0.4);
         }
 
         .rotate-action-btn {
             background: linear-gradient(to bottom, #2563eb 0%, #1d4ed8 100%);
-            box-shadow: 0 6px 0 #1e40af, 0 8px 10px rgba(0,0,0,0.4);
+            box-shadow: 0 5px 0 #1e40af, 0 6px 8px rgba(0,0,0,0.4);
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
         }
         .rotate-action-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #1e40af, 0 3px 4px rgba(0,0,0,0.4);
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #1e40af, 0 2px 3px rgba(0,0,0,0.4);
         }
 
         /* 12-second hint pulsing glow animation */
         @keyframes softGlowHint {
-            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 12px #f59e0b; transform: scale(1); }
-            50% { border-color: #fbbf24; box-shadow: 0 0 28px #fbbf24; transform: scale(1.03); background-color: #fef3c7; color: #b45309; }
+            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 10px #f59e0b; transform: scale(1); }
+            50% { border-color: #fbbf24; box-shadow: 0 0 22px #fbbf24; transform: scale(1.02); background-color: #fef3c7; color: #b45309; }
         }
         .correct-answer-glow {
             animation: softGlowHint 1s infinite ease-in-out !important;
@@ -88,9 +103,19 @@
         .animate-scale {
             animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+
+        @keyframes toastFade {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+        }
+        .animate-toast {
+            animation: toastFade 2.2s ease forwards;
+        }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-3 m-0 select-none min-h-screen">
+<body class="flex flex-col items-center justify-center p-2 sm:p-4 select-none min-h-screen">
 
     <audio id="soundBg" src="assets/playfulsong.mp3" loop preload="auto"></audio>
     <audio id="soundCorrect" src="assets/correct.mp3" preload="auto"></audio>
@@ -99,119 +124,135 @@
 
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
+    <!-- Floating Toast Notification -->
+    <div id="toastNotification" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-full shadow-2xl border-2 border-amber-200 hidden text-sm child-font text-center whitespace-nowrap"></div>
+
+    <!-- Splash Screen -->
     <div id="splashScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50 p-6 transition-opacity duration-500">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[65vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-28 h-28 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-5xl shadow-md animate-pulse\'>✨</div>';">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="w-full max-w-xs h-auto object-contain max-h-[60vh]" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-28 h-28 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-5xl shadow-md animate-pulse\'>✨</div>';">
     </div>
 
-    <div class="w-full max-w-md flex flex-col items-center relative justify-center px-1">
+    <div class="w-full max-w-sm sm:max-w-md flex flex-col items-center relative justify-center px-1">
         
-        <div id="titleView" class="hidden w-full bg-white border-4 border-amber-400 rounded-[36px] p-8 text-center space-y-6 z-30 animate-scale shadow-xl">
-            <div class="space-y-3">
-                <div class="text-7xl animate-bounce">🏮</div>
-                <h1 class="text-4xl font-black text-amber-600 tracking-wide leading-tight">Festival Adventure!</h1>
-                <p class="text-sm text-slate-400 uppercase font-black tracking-widest child-font">Festivals in India</p>
+        <!-- Title Screen -->
+        <div id="titleView" class="hidden w-full bg-white border-4 border-amber-400 rounded-[32px] p-6 sm:p-8 text-center space-y-5 z-30 animate-scale shadow-xl">
+            <div class="space-y-2">
+                <div class="text-6xl sm:text-7xl animate-bounce">🏮</div>
+                <h1 class="text-3xl sm:text-4xl font-black text-amber-600 tracking-wide leading-tight">Festival Adventure!</h1>
+                <p class="text-xs sm:text-sm text-slate-400 uppercase font-black tracking-widest child-font">Festivals in India</p>
             </div>
-            <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200 text-base font-semibold text-slate-600 leading-relaxed child-font">
+            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-sm sm:text-base font-semibold text-slate-600 leading-relaxed child-font">
                 Learn about amazing Indian festivals while stacking falling colorful bricks! 🧱✨
             </div>
-            <button onclick="showInstructionScreen()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-black py-4.5 rounded-2xl shadow-md uppercase tracking-wider text-xl transition-transform active:scale-95 child-font cursor-pointer">
+            <button onclick="showInstructionScreen()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-black py-4 rounded-2xl shadow-md uppercase tracking-wider text-lg sm:text-xl transition-transform active:scale-95 child-font cursor-pointer">
                 START GAME 🚀
             </button>
         </div>
 
-        <div id="instructionsView" class="hidden w-full bg-white border-4 border-blue-400 rounded-[36px] p-8 text-center space-y-6 z-30 animate-scale shadow-xl">
-            <h2 class="text-3xl font-black text-blue-600 tracking-wide">How to Play 🎒</h2>
+        <!-- Instructions Screen -->
+        <div id="instructionsView" class="hidden w-full bg-white border-4 border-blue-400 rounded-[32px] p-6 sm:p-8 text-center space-y-5 z-30 animate-scale shadow-xl">
+            <h2 class="text-2xl sm:text-3xl font-black text-blue-600 tracking-wide">How to Play 🎒</h2>
             
-            <div class="bg-slate-50 rounded-2xl p-5 text-left space-y-4 border border-slate-200 text-sm font-bold text-slate-600 leading-relaxed child-font">
+            <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 text-left space-y-3 sm:space-y-4 border border-slate-200 text-xs sm:text-sm font-bold text-slate-600 leading-relaxed child-font">
                 <div class="flex items-start space-x-3">
-                    <span class="text-xl">🧱</span>
-                    <span>Move and turn falling color blocks using the control buttons or keyboard arrows!</span>
+                    <span class="text-lg sm:text-xl">🧱</span>
+                    <span>Move & rotate falling color blocks using buttons or keyboard arrows!</span>
                 </div>
                 <div class="flex items-start space-x-3">
-                    <span class="text-xl">🔒</span>
-                    <span>Every time <b>3 bricks lock safely</b> in place, a fun festival question will pop up!</span>
+                    <span class="text-lg sm:text-xl">❓</span>
+                    <span>Every time <b>3 bricks land</b>, <b>2 fun festival questions</b> pop up!</span>
                 </div>
                 <div class="flex items-start space-x-3">
-                    <span class="text-xl">❤️</span>
-                    <span>You have <b>3 lives</b>. Answer carefully to beat the high score challenge!</span>
+                    <span class="text-lg sm:text-xl">🧹</span>
+                    <span>If bricks fill the board, space clears automatically so you keep playing!</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="text-lg sm:text-xl">❤️</span>
+                    <span>You have <b>3 lives</b> for questions. Answer carefully to complete all 12 quests!</span>
                 </div>
             </div>
 
-            <button onclick="launchCoreGameplay()" class="w-full bg-gradient-to-r from-emerald-500 to-green-500 text-white font-black py-4.5 rounded-2xl shadow-md uppercase tracking-wider text-xl transition-transform active:scale-95 child-font cursor-pointer">
+            <button onclick="launchCoreGameplay()" class="w-full bg-gradient-to-r from-emerald-500 to-green-500 text-white font-black py-4 rounded-2xl shadow-md uppercase tracking-wider text-lg sm:text-xl transition-transform active:scale-95 child-font cursor-pointer">
                 PLAY NOW! ▶️
             </button>
         </div>
 
-        <div id="scoreView" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[36px] p-8 text-center space-y-6 z-30 animate-scale shadow-xl">
+        <!-- Score / Victory Screen -->
+        <div id="scoreView" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[32px] p-6 sm:p-8 text-center space-y-5 z-30 animate-scale shadow-xl">
             <div class="space-y-2">
-                <span id="victoryEmojiBox" class="text-7xl block animate-bounce">👑</span>
-                <h2 id="victoryStatusTitle" class="text-3xl font-black text-emerald-600">Wonderful Job!</h2>
-                <p id="victoryStatusDesc" class="text-sm text-slate-500 font-bold px-1 leading-relaxed child-font">You know so much about the beautiful festivals celebrated across India! 🌟</p>
+                <span id="victoryEmojiBox" class="text-6xl sm:text-7xl block animate-bounce">👑</span>
+                <h2 id="victoryStatusTitle" class="text-2xl sm:text-3xl font-black text-emerald-600">Wonderful Job!</h2>
+                <p id="victoryStatusDesc" class="text-xs sm:text-sm text-slate-500 font-bold px-1 leading-relaxed child-font">You know so much about the beautiful festivals celebrated across India! 🌟</p>
             </div>
-            <div class="bg-amber-50 py-4 px-6 rounded-2xl border border-amber-200 inline-block">
+            <div class="bg-amber-50 py-3 px-6 rounded-2xl border border-amber-200 inline-block">
                 <p class="text-xs font-black uppercase text-amber-600 tracking-wider child-font">Final Score</p>
-                <p class="text-4xl font-black text-amber-500 child-font" id="finalScoreLabelField">0</p>
+                <p class="text-3xl sm:text-4xl font-black text-amber-500 child-font" id="finalScoreLabelField">0</p>
             </div>
-            <button onclick="restartWholeGameLoop()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl uppercase tracking-wider text-lg transition-transform active:scale-95 shadow-md child-font cursor-pointer">
+            <button onclick="restartWholeGameLoop()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3.5 rounded-xl uppercase tracking-wider text-base sm:text-lg transition-transform active:scale-95 shadow-md child-font cursor-pointer">
                 PLAY AGAIN 🔄
             </button>
         </div>
 
-        <div id="consoleShellCasing" class="hidden w-full console-case rounded-[36px] p-5 flex flex-col space-y-4 relative animate-scale z-10">
+        <!-- Main Game Console -->
+        <div id="consoleShellCasing" class="hidden w-full console-case rounded-[32px] p-4 sm:p-5 flex flex-col space-y-3 relative animate-scale z-10">
             
             <div class="text-center">
-                <h1 class="retro-font text-3xl font-black italic tracking-widest text-blue-900 drop-shadow-sm uppercase">BRICK ADVENTURE</h1>
-                <div class="text-xs font-extrabold text-yellow-900 tracking-widest -mt-0.5 opacity-80 child-font">FESTIVALS IN INDIA</div>
+                <h1 class="retro-font text-2xl sm:text-3xl font-black italic tracking-widest text-blue-900 drop-shadow-sm uppercase">BRICK ADVENTURE</h1>
+                <div class="text-[10px] sm:text-xs font-extrabold text-yellow-900 tracking-widest -mt-0.5 opacity-80 child-font">FESTIVALS IN INDIA</div>
             </div>
 
-            <div class="lcd-screen rounded-2xl p-3 flex justify-between space-x-3 relative">
+            <!-- LCD Screen Container -->
+            <div class="lcd-screen rounded-2xl p-2.5 sm:p-3 flex justify-between space-x-2.5 relative">
                 
-                <div id="matrixContainer" class="grid grid-cols-10 gap-[1px] w-[170px] h-[330px] bg-[#020617] p-[1px] border-2 border-blue-950">
-                    </div>
+                <!-- Brick Matrix Grid -->
+                <div id="matrixContainer" class="grid grid-cols-10 gap-[1px] w-[150px] sm:w-[170px] h-[300px] sm:h-[330px] bg-[#020617] p-[1px] border-2 border-blue-950">
+                </div>
 
-                <div class="flex-1 flex flex-col justify-between items-center text-slate-200 retro-font py-2">
+                <!-- Console HUD Side Panel -->
+                <div class="flex-1 flex flex-col justify-between items-center text-slate-200 retro-font py-1">
                     
-                    <div class="text-center w-full bg-blue-950/40 border border-blue-900 py-1.5 rounded-lg">
-                        <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400 child-font">SCORE</div>
-                        <div id="scoreLabelDisplay" class="text-2xl font-black tracking-wider text-yellow-400">000</div>
+                    <div class="text-center w-full bg-blue-950/40 border border-blue-900 py-1 rounded-lg">
+                        <div class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-400 child-font">SCORE</div>
+                        <div id="scoreLabelDisplay" class="text-xl sm:text-2xl font-black tracking-wider text-yellow-400">000</div>
                     </div>
 
                     <div class="text-center w-full">
-                        <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-0.5 child-font">LIVES</div>
-                        <div id="heartsContainerBox" class="flex items-center justify-center space-x-0.5 text-base">
+                        <div class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-0.5 child-font">LIVES</div>
+                        <div id="heartsContainerBox" class="flex items-center justify-center space-x-0.5 text-sm sm:text-base">
                             ❤️❤️❤️
                         </div>
                     </div>
 
                     <div class="text-center">
-                        <div class="text-xs font-extrabold uppercase tracking-wider mb-1 text-slate-400 child-font">NEXT</div>
-                        <div id="previewContainer" class="grid grid-cols-4 gap-[1px] w-[44px] h-[44px] bg-[#020617] p-[1px] border border-blue-950">
-                            </div>
+                        <div class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider mb-1 text-slate-400 child-font">NEXT</div>
+                        <div id="previewContainer" class="grid grid-cols-4 gap-[1px] w-[40px] h-[40px] bg-[#020617] p-[1px] border border-blue-950">
+                        </div>
                     </div>
 
-                    <div class="text-center py-1.5 bg-blue-950/80 rounded-lg border border-blue-800 w-full px-1">
-                        <div class="text-[10px] font-black text-slate-400 leading-none child-font">QUEST</div>
-                        <div id="questProgressLabel" class="text-base font-black text-cyan-400 mt-0.5">0 / 12</div>
+                    <div class="text-center py-1 bg-blue-950/80 rounded-lg border border-blue-800 w-full px-1">
+                        <div class="text-[9px] font-black text-slate-400 leading-none child-font">QUEST</div>
+                        <div id="questProgressLabel" class="text-sm sm:text-base font-black text-cyan-400 mt-0.5">0 / 12</div>
                     </div>
                 </div>
 
-                <div id="questionModalOverlay" class="hidden absolute inset-0 bg-blue-950/95 z-40 rounded-xl flex flex-col justify-between p-4 animate-scale">
+                <!-- Trivia Question Popup Overlay -->
+                <div id="questionModalOverlay" class="hidden absolute inset-0 bg-blue-950/95 z-40 rounded-xl flex flex-col justify-between p-3.5 animate-scale">
                     
                     <div class="text-center">
-                        <span id="modalCategoryBadge" class="bg-amber-500 text-white px-4 py-1 rounded-full text-xs font-black tracking-widest uppercase child-font">DIWALI CHALLENGE</span>
+                        <span id="modalCategoryBadge" class="bg-amber-500 text-white px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-black tracking-widest uppercase child-font">DIWALI CHALLENGE</span>
                     </div>
 
-                    <div class="text-center flex-1 flex items-center justify-center py-2">
-                        <h2 id="questionDisplayLabel" class="text-sm font-bold text-white leading-relaxed px-1 child-font">
+                    <div class="text-center flex-1 flex items-center justify-center py-1">
+                        <h2 id="questionDisplayLabel" class="text-xs sm:text-sm font-bold text-white leading-relaxed px-1 child-font">
                             Look! Rohan is lighting tiny clay lamps around his house. He is eating sweet laddoos with his family. What festival is this?
                         </h2>
                     </div>
 
-                    <div id="answersGridSlot" class="flex flex-col space-y-2.5 w-full">
-                        </div>
+                    <div id="answersGridSlot" class="flex flex-col space-y-2 w-full">
+                    </div>
 
-                    <div class="text-center pt-2.5 border-t border-blue-900 mt-2">
-                        <p id="helperAlertLabel" class="text-xs font-bold text-slate-400 leading-normal min-h-[28px] flex items-center justify-center px-1 child-font">
+                    <div class="text-center pt-2 border-t border-blue-900 mt-1">
+                        <p id="helperAlertLabel" class="text-[11px] font-bold text-slate-400 leading-normal min-h-[24px] flex items-center justify-center px-1 child-font">
                             Tap the best choice!
                         </p>
                     </div>
@@ -219,35 +260,39 @@
 
             </div>
 
+            <!-- Tactile Retro Controls Section -->
             <div class="flex flex-col space-y-2 pt-1">
                 <div class="flex justify-between items-center px-2">
                     
-                    <div class="relative w-26 h-26 flex items-center justify-center">
-                        <div class="w-8 h-8 bg-yellow-700/20 rounded"></div>
+                    <!-- Directional D-Pad -->
+                    <div class="relative w-24 sm:w-26 h-24 sm:h-26 flex items-center justify-center">
+                        <div class="w-7 h-7 bg-yellow-700/20 rounded"></div>
                         
-                        <button onclick="handleButtonInput('up')" class="absolute top-0 w-9 h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-sm">▲</button>
-                        <button onclick="handleButtonInput('left')" class="absolute left-0 w-9 h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-sm">◀</button>
-                        <button onclick="handleButtonInput('right')" class="absolute right-0 w-9 h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-sm">▶</button>
-                        <button onclick="handleButtonInput('down')" class="absolute bottom-0 w-9 h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-sm">▼</button>
+                        <button onclick="handleButtonInput('up')" class="absolute top-0 w-8 sm:w-9 h-8 sm:h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs sm:text-sm cursor-pointer">▲</button>
+                        <button onclick="handleButtonInput('left')" class="absolute left-0 w-8 sm:w-9 h-8 sm:h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs sm:text-sm cursor-pointer">◀</button>
+                        <button onclick="handleButtonInput('right')" class="absolute right-0 w-8 sm:w-9 h-8 sm:h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs sm:text-sm cursor-pointer">▶</button>
+                        <button onclick="handleButtonInput('down')" class="absolute bottom-0 w-8 sm:w-9 h-8 sm:h-9 retro-pad-btn rounded-xl flex items-center justify-center text-white font-black text-xs sm:text-sm cursor-pointer">▼</button>
                     </div>
 
-                    <div class="flex flex-col items-center space-y-1.5 mr-3">
-                        <button onclick="handleButtonInput('rotate')" class="w-16 h-16 rotate-action-btn rounded-full flex items-center justify-center text-white font-black text-xl border-t-2 border-blue-300 active:scale-95 transition-transform shadow-md">
+                    <!-- Rotate Action Button -->
+                    <div class="flex flex-col items-center space-y-1 mr-2 sm:mr-3">
+                        <button onclick="handleButtonInput('rotate')" class="w-14 sm:w-16 h-14 sm:h-16 rotate-action-btn rounded-full flex items-center justify-center text-white font-black text-lg sm:text-xl border-t-2 border-blue-300 active:scale-95 transition-transform shadow-md cursor-pointer">
                             ↻
                         </button>
-                        <span class="retro-font text-xs font-black tracking-wider text-blue-900 uppercase">ROTATE</span>
+                        <span class="retro-font text-[10px] sm:text-xs font-black tracking-wider text-blue-900 uppercase">ROTATE</span>
                     </div>
 
                 </div>
 
-                <div class="flex justify-center space-x-12 pt-2">
+                <!-- Pause & Bricks-Only Reset Buttons -->
+                <div class="flex justify-center space-x-10 sm:space-x-12 pt-1">
                     <div class="flex flex-col items-center space-y-0.5">
-                        <button onclick="togglePauseState()" class="w-7 h-7 bg-zinc-700 rounded-full border-b-2 border-zinc-900 active:border-b-0 active:translate-y-[2px] transition-all shadow cursor-pointer"></button>
-                        <span class="retro-font text-xs font-black text-yellow-900 tracking-wider">PAUSE</span>
+                        <button onclick="togglePauseState()" class="w-6 sm:w-7 h-6 sm:h-7 bg-zinc-700 rounded-full border-b-2 border-zinc-900 active:border-b-0 active:translate-y-[2px] transition-all shadow cursor-pointer"></button>
+                        <span class="retro-font text-[10px] sm:text-xs font-black text-yellow-900 tracking-wider">PAUSE</span>
                     </div>
                     <div class="flex flex-col items-center space-y-0.5">
-                        <button onclick="restartWholeGameLoop()" class="w-7 h-7 bg-zinc-700 rounded-full border-b-2 border-zinc-900 active:border-b-0 active:translate-y-[2px] transition-all shadow cursor-pointer"></button>
-                        <span class="retro-font text-xs font-black text-yellow-900 tracking-wider">RESET</span>
+                        <button onclick="resetBricksBoardOnly()" class="w-6 sm:w-7 h-6 sm:h-7 bg-zinc-700 rounded-full border-b-2 border-zinc-900 active:border-b-0 active:translate-y-[2px] transition-all shadow cursor-pointer"></button>
+                        <span class="retro-font text-[10px] sm:text-xs font-black text-yellow-900 tracking-wider">RESET</span>
                     </div>
                 </div>
             </div>
@@ -260,7 +305,7 @@
         const GRID_COLUMNS = 10;
         const GRID_ROWS = 20;
 
-        // VERIFIED SIMPLIFIED UK SYSTEM TRIVIA BANNER DICTIONARY
+        // VERIFIED TRIVIA QUESTION DATABASE
         const chapter15QuizDatabase = [
             { tag: "DIWALI", q: "Look! Rohan is lighting tiny clay lamps around his house. He is eating sweet laddoos with his family. What festival is this?", options: ["Diwali", "Christmas", "Holi"], ans: "Diwali" },
             { tag: "HOLI", q: "Lily is playing with bright pink, red, and yellow powders. She splashes her friends with a water gun! What festival of colors is this?", options: ["Eid", "Holi", "Onam"], ans: "Holi" },
@@ -276,7 +321,7 @@
             { tag: "HORNBILL FESTIVAL", q: "Tenzing goes to Nagaland. He sees tribal dancers wearing beautiful feathers and playing big drums at a festival named after a special forest bird. What is it called?", options: ["The Peacock Festival", "The Hornbill Festival", "The Parrot Festival"], ans: "The Hornbill Festival" }
         ];
 
-        // LOGIC REPLICATORS STATE FIELD CHIPS
+        // ENGINE & STATE TRACKERS
         let internalStaticPlayField = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLUMNS).fill(0));
         let activeTickIntervalLoop = null;
         let isGameCurrentlyRunning = false;
@@ -286,6 +331,7 @@
         let userHeartsRemaining = 3;
         let answeredQuestionsCounter = 0;
         let bricksDroppedPlacementTracker = 0; 
+        let batchQuestionsRemaining = 0; // Tracks questions to ask per batch (2 questions)
         
         let activeGlowHintTimerNode = null;
 
@@ -305,7 +351,7 @@
         let visualGridCacheCells = [];
         let visualPreviewCacheCells = [];
 
-        // CONFETTI RENDER CHANNELS CONFIG
+        // CONFETTI SYSTEM
         const canvas = document.getElementById('confettiCanvas');
         const ctx = canvas.getContext('2d');
         let confettiParticles = [];
@@ -315,7 +361,7 @@
             window.addEventListener('resize', syncCanvasWindowDimensions);
             assembleHTMLGridBoards();
 
-            // FIXED SPLASH SCREEN AUTO TIMEOUT BOUND (5 SECONDS EXACTLY)
+            // FIXED SPLASH SCREEN AUTO TIMEOUT (5 SECONDS)
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 splash.style.opacity = '0';
@@ -325,7 +371,7 @@
                 }, 500);
             }, 5000);
 
-            // DESKTOP KEYBOARD OVERLAY ACCESSIBILITY HANDLERS
+            // KEYBOARD ACCESSIBILITY HANDLERS
             window.addEventListener('keydown', (e) => {
                 if (!isGameCurrentlyRunning || isEngineOverState || !document.getElementById('questionModalOverlay').classList.contains('hidden')) return;
                 
@@ -342,6 +388,18 @@
             canvas.height = window.innerHeight;
         }
 
+        function showTemporaryToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            toast.innerText = msg;
+            toast.classList.remove('hidden', 'animate-toast');
+            // Trigger reflow for animation restart
+            void toast.offsetWidth;
+            toast.classList.add('animate-toast');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2200);
+        }
+
         function triggerConfettiBurst() {
             canvas.classList.remove('hidden');
             confettiParticles = [];
@@ -349,8 +407,8 @@
                 confettiParticles.push({
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 15,
-                    vy: (Math.random() - 0.5) * 15 - 5,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 14 - 4,
                     size: Math.random() * 5 + 4,
                     color: `hsl(${Math.random() * 360}, 95%, 65%)`,
                     alpha: 1
@@ -420,7 +478,7 @@
             }
         }
 
-        // FULLY REVISED FIXED RESET METHOD ENGINE
+        // FULL RESTART (Used on initialization and Play Again button)
         function restartWholeGameLoop() {
             if (activeTickIntervalLoop) clearInterval(activeTickIntervalLoop);
             if (activeGlowHintTimerNode) clearTimeout(activeGlowHintTimerNode);
@@ -430,6 +488,7 @@
             userHeartsRemaining = 3;
             answeredQuestionsCounter = 0;
             bricksDroppedPlacementTracker = 0;
+            batchQuestionsRemaining = 0;
             isEngineOverState = false;
             isGameCurrentlyRunning = false;
 
@@ -447,6 +506,28 @@
             resumeEngineTicker();
         }
 
+        // RESET ONLY BRICKS GRID (Conserves Score, Questions Progress, and Lives)
+        function resetBricksBoardOnly() {
+            if (isEngineOverState) return;
+
+            // Check if question overlay is active
+            const modal = document.getElementById('questionModalOverlay');
+            if (!modal.classList.contains('hidden')) {
+                showTemporaryToast("Reset disabled during questions to protect score! 🎯");
+                return;
+            }
+
+            // Reset matrix space & brick tracker only
+            internalStaticPlayField = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLUMNS).fill(0));
+            bricksDroppedPlacementTracker = 0;
+            
+            upcomingQueuedPiece = calculateRandomPieceBlueprint();
+            cycleNextSpawnPiece();
+            repaintDeviceLCDViewports();
+            
+            showTemporaryToast("Bricks Grid Reset! 🧱");
+        }
+
         function resumeEngineTicker() {
             isGameCurrentlyRunning = true;
             if (activeTickIntervalLoop) clearInterval(activeTickIntervalLoop);
@@ -456,12 +537,14 @@
         }
 
         function togglePauseState() {
-            if (isEngineOverState) return;
+            if (isEngineOverState || !document.getElementById('questionModalOverlay').classList.contains('hidden')) return;
             if (isGameCurrentlyRunning) {
                 isGameCurrentlyRunning = false;
                 clearInterval(activeTickIntervalLoop);
+                showTemporaryToast("PAUSED ⏸️");
             } else {
                 resumeEngineTicker();
+                showTemporaryToast("RESUMED ▶️");
             }
         }
 
@@ -495,11 +578,17 @@
             currentActivePiece = upcomingQueuedPiece;
             upcomingQueuedPiece = calculateRandomPieceBlueprint();
 
+            // ENHANCEMENT: IF SPACE IS FILLED (Grid full), instead of game ending, clear grid and launch 2 questions!
             if (detectMatrixCollisions(currentActivePiece.shape, currentActivePiece.r, currentActivePiece.c)) {
-                isEngineOverState = true;
-                isGameCurrentlyRunning = false;
+                internalStaticPlayField = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLUMNS).fill(0));
+                bricksDroppedPlacementTracker = 0;
                 clearInterval(activeTickIntervalLoop);
-                triggerEndGameFinishedView(false);
+                
+                showTemporaryToast("Space Filled! Board Cleared! 🧹");
+                
+                batchQuestionsRemaining = 2; // Ask 2 questions
+                triggerTriviaQuestionPopupModal();
+                return;
             }
 
             repaintPreviewBoxViewport();
@@ -576,9 +665,11 @@
                 
                 bricksDroppedPlacementTracker++;
                 
+                // ENHANCEMENT: After 3 bricks landed, trigger 2 questions in sequence
                 if (bricksDroppedPlacementTracker >= 3) {
                     bricksDroppedPlacementTracker = 0; 
                     clearInterval(activeTickIntervalLoop);
+                    batchQuestionsRemaining = 2; // Set batch size to 2 questions
                     triggerTriviaQuestionPopupModal();
                 } else {
                     cycleNextSpawnPiece();
@@ -607,6 +698,8 @@
                     internalStaticPlayField.splice(r, 1);
                     internalStaticPlayField.unshift(Array(GRID_COLUMNS).fill(0));
                     r++;
+                    accumulatedScorePoints += 5; // Bonus points for row clear
+                    updateScoreDisplays();
                 }
             }
         }
@@ -620,14 +713,14 @@
             document.getElementById('modalCategoryBadge').innerText = `${dataObj.tag} CHALLENGE`;
             document.getElementById('questionDisplayLabel').innerText = dataObj.q;
             document.getElementById('helperAlertLabel').innerText = "Tap the best choice above! 🌟";
-            document.getElementById('helperAlertLabel').className = "text-xs font-bold text-slate-400 text-center child-font";
+            document.getElementById('helperAlertLabel').className = "text-[11px] font-bold text-slate-400 text-center child-font";
 
             const slot = document.getElementById('answersGridSlot');
             slot.innerHTML = "";
 
             dataObj.options.forEach(opt => {
                 const b = document.createElement('button');
-                b.className = "w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 text-left rounded-xl border-2 border-slate-700 text-sm active:scale-[0.99] transition-all cursor-pointer trivia-item-btn child-font";
+                b.className = "w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-3.5 text-left rounded-xl border-2 border-slate-700 text-xs sm:text-sm active:scale-[0.99] transition-all cursor-pointer trivia-item-btn child-font";
                 b.innerText = opt;
                 if(opt === dataObj.ans) {
                     b.setAttribute('data-target-truth', 'true');
@@ -644,7 +737,7 @@
                 if (targetTrueBtn) {
                     targetTrueBtn.classList.add('correct-answer-glow');
                     document.getElementById('helperAlertLabel').innerText = "✨ Need help? Tap the glowing golden button!";
-                    document.getElementById('helperAlertLabel').className = "text-xs font-black text-amber-400 text-center child-font animate-pulse";
+                    document.getElementById('helperAlertLabel').className = "text-[11px] font-black text-amber-400 text-center child-font animate-pulse";
                 }
             }, 12000);
         }
@@ -655,33 +748,37 @@
 
             if (selectedOption === dataObj.ans) {
                 itemsList.forEach(btn => btn.disabled = true);
-                clickedButtonNode.className = "w-full bg-emerald-600 text-white font-black py-3 px-4 text-center rounded-xl text-sm shadow border-2 border-emerald-400 child-font";
+                clickedButtonNode.className = "w-full bg-emerald-600 text-white font-black py-2.5 px-3.5 text-center rounded-xl text-xs sm:text-sm shadow border-2 border-emerald-400 child-font";
                 
                 triggerAudioPipelineTrack('soundCorrect');
                 triggerConfettiBurst();
 
-                // EARNS PRECISELY +10 POINTS ON CORRECT ANSWER
+                // +10 Points on Correct Answer
                 accumulatedScorePoints += 10;
                 answeredQuestionsCounter++;
+                batchQuestionsRemaining--;
                 updateScoreDisplays();
 
                 document.getElementById('helperAlertLabel').innerText = "🎉 Super! That is the correct answer!";
-                document.getElementById('helperAlertLabel').className = "text-xs font-black text-emerald-400 text-center child-font";
+                document.getElementById('helperAlertLabel').className = "text-[11px] font-black text-emerald-400 text-center child-font";
 
                 setTimeout(() => {
                     document.getElementById('questionModalOverlay').classList.add('hidden');
                     
                     if (answeredQuestionsCounter >= 12) {
                         triggerEndGameFinishedView(true);
+                    } else if (batchQuestionsRemaining > 0) {
+                        // ENHANCEMENT: Ask the 2nd question in the batch
+                        triggerTriviaQuestionPopupModal();
                     } else {
                         cycleNextSpawnPiece();
                         resumeEngineTicker();
                     }
-                }, 2200);
+                }, 2000);
 
             } else {
                 triggerAudioPipelineTrack('soundWrong');
-                clickedButtonNode.className = "w-full bg-rose-950/40 text-rose-400 line-through font-bold py-3 px-4 text-center rounded-xl text-sm border-2 border-rose-900 opacity-60 cursor-not-allowed child-font";
+                clickedButtonNode.className = "w-full bg-rose-950/40 text-rose-400 line-through font-bold py-2.5 px-3.5 text-center rounded-xl text-xs sm:text-sm border-2 border-rose-900 opacity-60 cursor-not-allowed child-font";
                 clickedButtonNode.disabled = true;
 
                 userHeartsRemaining--;
@@ -690,7 +787,7 @@
                 if (userHeartsRemaining <= 0) {
                     itemsList.forEach(btn => btn.disabled = true);
                     document.getElementById('helperAlertLabel').innerText = `Ouch! The correct answer was: ${dataObj.ans}`;
-                    document.getElementById('helperAlertLabel').className = "text-xs font-bold text-rose-400 text-center child-font";
+                    document.getElementById('helperAlertLabel').className = "text-[11px] font-bold text-rose-400 text-center child-font";
                     
                     setTimeout(() => {
                         document.getElementById('questionModalOverlay').classList.add('hidden');
@@ -698,7 +795,7 @@
                     }, 2200);
                 } else {
                     document.getElementById('helperAlertLabel').innerText = "❌ Try another choice!";
-                    document.getElementById('helperAlertLabel').className = "text-xs font-bold text-rose-400 text-center child-font";
+                    document.getElementById('helperAlertLabel').className = "text-[11px] font-bold text-rose-400 text-center child-font";
                     
                     activeGlowHintTimerNode = setTimeout(() => {
                         const targetTrueBtn = document.querySelector('.trivia-item-btn[data-target-truth="true"]');
