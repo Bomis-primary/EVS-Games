@@ -579,6 +579,8 @@
                 { ids: [2, 4, 6], label: "Diagonal 2" }
             ];
 
+            const initialCount = triggeredLinesSet.size;
+
             // Re-evaluate all lines to see which are strictly complete
             lines.forEach((line, index) => {
                 if (activeGridData[line.ids[0]]?.marked && 
@@ -589,19 +591,23 @@
             });
 
             const completedLinesCount = triggeredLinesSet.size;
+            const newLinesCompleted = completedLinesCount - initialCount;
             let showBanner = false;
 
-            // Round 1: First complete line = Bingo
-            if (completedLinesCount >= 1 && !round1Achieved) {
-                round1Achieved = true;
-                triggerBingoBanner("ROUND 1 BINGO!", "First Line Complete!");
-                showBanner = true;
-            } 
-            // Round 2: Two complete lines = Bingo
-            else if (completedLinesCount >= 2 && !round2Achieved) {
-                round2Achieved = true;
-                triggerBingoBanner("ROUND 2 BINGO!", "Two Lines Complete!");
-                showBanner = true;
+            // Only trigger bingo banners if at least one NEW line was completed on this turn
+            if (newLinesCompleted > 0) {
+                // Round 1: First complete line = Bingo
+                if (completedLinesCount >= 1 && !round1Achieved) {
+                    round1Achieved = true;
+                    triggerBingoBanner("ROUND 1 BINGO!", "First Line Complete!");
+                    showBanner = true;
+                } 
+                // Round 2: Two complete lines = Bingo
+                else if (completedLinesCount >= 2 && !round2Achieved) {
+                    round2Achieved = true;
+                    triggerBingoBanner("ROUND 2 BINGO!", "Two Lines Complete!");
+                    showBanner = true;
+                }
             }
 
             return showBanner;
