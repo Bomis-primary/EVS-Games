@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>The Harmony Wheel</title>
     <style>
         :root {
@@ -25,65 +25,88 @@
             --txt-buddhism: #0369a1;
             --seg-zoroastrianism: #ffe4e6;
             --txt-zoroastrianism: #e11d48;
+
+            --radius-outer: clamp(16px, 4vw, 36px);
+            --transition-smooth: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', system-ui, sans-serif;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', system-ui, -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
 
-        body {
-            background: var(--bg-gradient);
-            width: 100vw;
-            height: 100vh;
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
             overflow: hidden;
+            background: var(--bg-gradient);
+        }
+
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 12px;
+            padding: clamp(6px, 2vw, 16px);
+            padding-top: max(clamp(6px, 2vw, 16px), env(safe-area-inset-top));
+            padding-bottom: max(clamp(6px, 2vw, 16px), env(safe-area-inset-bottom));
+            padding-left: max(clamp(6px, 2vw, 16px), env(safe-area-inset-left));
+            padding-right: max(clamp(6px, 2vw, 16px), env(safe-area-inset-right));
         }
 
         .game-mainframe-board {
             width: 100%;
             max-width: 960px;
             height: 100%;
-            max-height: 660px;
+            max-height: 680px;
             background: var(--panel-bg);
-            border: 6px solid var(--border-primary);
-            border-radius: 36px;
-            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.3);
+            border: clamp(3px, 1vw, 6px) solid var(--border-primary);
+            border-radius: var(--radius-outer);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 24px;
+            padding: clamp(12px, 3vw, 24px);
         }
 
+        /* SPLASH GATEWAY */
         .splash-gate {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #ffffff;
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             opacity: 1;
             transition: opacity 0.4s ease-out;
+            padding: 20px;
         }
 
         .splash-logo {
             max-width: 320px;
-            width: 75%;
+            width: 70%;
             height: auto;
             object-fit: contain;
         }
 
+        .fallback-logo-text {
+            font-size: clamp(28px, 6vw, 42px);
+            font-weight: 900;
+            color: #ff007f;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        /* FLOW SCREENS */
         .flow-screen {
             width: 100%;
             height: 100%;
@@ -92,71 +115,91 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 4px;
         }
 
         .kids-hero-title {
-            font-size: 42px;
+            font-size: clamp(24px, 5vw, 42px);
             font-weight: 900;
             color: #70003c;
-            line-height: 1.2;
-            margin-bottom: 24px;
+            line-height: 1.25;
+            margin-bottom: clamp(12px, 3vh, 24px);
             text-shadow: 2px 2px 0px #ffec00;
         }
 
         .kids-body-text {
-            font-size: 20px;
+            font-size: clamp(14px, 3vw, 19px);
             color: #334155;
-            line-height: 1.6;
-            margin-bottom: 30px;
+            line-height: 1.5;
+            margin-bottom: clamp(16px, 3vh, 28px);
             max-width: 650px;
             text-align: left;
+            width: 100%;
         }
 
         .kids-body-text li {
-            margin-bottom: 12px;
+            margin-bottom: clamp(6px, 1.5vh, 12px);
             list-style-position: inside;
         }
 
+        /* BUTTONS WITH TOUCH OPTIMIZATION */
         .play-action-btn {
             background: linear-gradient(135deg, #ff007f 0%, #ff5e00 100%);
             color: #ffffff;
-            border: 4px solid #ffffff;
-            padding: 16px 44px;
-            font-size: 24px;
+            border: 3px solid #ffffff;
+            padding: clamp(10px, 2.5vw, 16px) clamp(24px, 5vw, 44px);
+            font-size: clamp(16px, 3.5vw, 22px);
             font-weight: 900;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.35);
+            box-shadow: 0 6px 16px rgba(255, 0, 127, 0.35);
             text-transform: uppercase;
-            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: var(--transition-smooth);
+            touch-action: manipulation;
+            flex-shrink: 0;
         }
 
         .play-action-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 25px rgba(255, 0, 127, 0.45);
+            transform: scale(1.04);
+            box-shadow: 0 10px 22px rgba(255, 0, 127, 0.45);
         }
 
-        .play-action-btn:active { transform: scale(0.96); }
+        .play-action-btn:active { 
+            transform: scale(0.96); 
+        }
 
+        .play-action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* HUD ROW */
         .hud-canopy-row {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: clamp(8px, 2vh, 16px);
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .hud-pill-badge {
             background: #ff7300;
             color: #ffffff;
-            font-size: 22px;
+            font-size: clamp(12px, 2.8vw, 18px);
             font-weight: 900;
-            padding: 10px 24px;
+            padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
             border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
             border: 2px solid #ffffff;
+            white-space: nowrap;
         }
 
+        /* WHEEL ZONE */
         .wheel-workspace-zone {
             flex: 1;
             display: flex;
@@ -170,26 +213,27 @@
 
         .wheel-outer-rim {
             position: relative;
-            width: clamp(280px, 50vh, 440px);
-            height: clamp(280px, 50vh, 440px);
+            width: clamp(210px, 42vh, 380px);
+            height: clamp(210px, 42vh, 380px);
             background: #ffffff;
             border-radius: 50%;
-            padding: 8px;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.15);
-            border: 6px solid #ffec00;
+            padding: 6px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+            border: clamp(4px, 1vw, 6px) solid #ffec00;
+            flex-shrink: 0;
         }
 
         .wheel-pointer-needle {
             position: absolute;
-            top: -14px;
+            top: -12px;
             left: 50%;
             transform: translateX(-50%);
             width: 0; height: 0;
-            border-left: 16px solid transparent;
-            border-right: 16px solid transparent;
-            border-top: 32px solid #ff0055;
+            border-left: clamp(12px, 2.5vw, 16px) solid transparent;
+            border-right: clamp(12px, 2.5vw, 16px) solid transparent;
+            border-top: clamp(24px, 4vw, 32px) solid #ff0055;
             z-index: 50;
-            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 3px 4px rgba(0,0,0,0.2));
         }
 
         canvas#wheel-canvas-node {
@@ -197,93 +241,109 @@
             height: 100%;
             border-radius: 50%;
             transition: transform 4.8s cubic-bezier(0.25, 1, 0.35, 1);
+            will-change: transform;
         }
 
         .wheel-center-cap {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 64px; height: 64px;
+            width: clamp(44px, 10vw, 60px);
+            height: clamp(44px, 10vw, 60px);
             background: #ffffff;
-            border: 4px solid #ff7300;
+            border: 3px solid #ff7300;
             border-radius: 50%;
             z-index: 45;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 28px;
+            font-size: clamp(20px, 4vw, 28px);
         }
 
         .spin-btn-layout-pad {
-            margin-top: 20px;
+            margin-top: clamp(10px, 2vh, 20px);
+            flex-shrink: 0;
         }
 
+        /* MODAL OVERLAY */
         .question-card-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(6px);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 500;
             display: none;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: clamp(10px, 3vw, 20px);
         }
 
         .question-box-modal {
             background: #ffffff;
-            border-radius: 28px;
+            border-radius: clamp(16px, 4vw, 28px);
             width: 100%;
-            max-width: 600px;
-            padding: 30px;
-            box-shadow: 0 25px 55px rgba(0,0,0,0.3);
+            max-width: 580px;
+            max-height: 92vh;
+            max-height: 92dvh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: clamp(16px, 4vw, 28px);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.3);
             text-align: center;
-            border: 6px solid var(--modal-accent-color, #ff007f);
+            border: clamp(4px, 1vw, 6px) solid var(--modal-accent-color, #ff007f);
+            display: flex;
+            flex-direction: column;
         }
 
         .question-meta-header {
-            font-size: 20px;
+            font-size: clamp(14px, 3vw, 18px);
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 16px;
+            letter-spacing: 1.2px;
+            margin-bottom: clamp(8px, 1.8vh, 14px);
             color: var(--modal-accent-color, #ff007f);
         }
 
         .question-text-arena {
-            font-size: 24px;
+            font-size: clamp(15px, 3.5vw, 22px);
             font-weight: 800;
             color: var(--text-dark);
-            line-height: 1.5;
-            margin-bottom: 24px;
+            line-height: 1.45;
+            margin-bottom: clamp(14px, 2.5vh, 22px);
             white-space: pre-line;
         }
 
         .dual-options-wrapper {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: clamp(8px, 1.8vh, 12px);
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: clamp(12px, 2vh, 18px);
         }
 
         .option-soft-row {
             background: #fff9fb;
             border: 3px solid #ffd3e3;
-            padding: 16px 24px;
-            border-radius: 20px;
-            font-size: 22px;
+            padding: clamp(10px, 2.2vw, 14px) clamp(14px, 3vw, 20px);
+            border-radius: 16px;
+            font-size: clamp(15px, 3.2vw, 20px);
             font-weight: 800;
             color: var(--text-dark);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: var(--transition-smooth);
+            touch-action: manipulation;
         }
 
         .option-soft-row:hover {
             background: #fff0f5;
             border-color: #ff9ec7;
             transform: translateY(-2px);
+        }
+
+        .option-soft-row:active {
+            transform: scale(0.98);
         }
 
         .option-soft-row.state-correct {
@@ -303,18 +363,18 @@
             background: #fef9c3;
             border: 2px dashed #fef08a;
             color: #713f12;
-            padding: 14px;
-            border-radius: 16px;
-            font-size: 18px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: clamp(13px, 2.8vw, 16px);
             font-weight: 700;
-            margin-top: 14px;
+            margin-top: 10px;
             text-align: left;
         }
 
         .hearts-box {
             color: #ef4444;
-            font-size: 26px;
-            letter-spacing: 3px;
+            font-size: clamp(18px, 4vw, 24px);
+            letter-spacing: 2px;
         }
 
         #celebrate-canvas-layer {
@@ -331,7 +391,8 @@
     <div class="game-mainframe-board">
 
         <div id="screen-splash" class="splash-gate">
-            <img src="assets/innovine-logo.png" alt="Innovine Solutions" class="splash-logo" onerror="this.parentNode.style.opacity='0'; setTimeout(()=>this.parentNode.style.display='none', 400); document.getElementById('screen-title').style.display='flex';">
+            <img src="assets/innovine-logo.png" alt="Innovine Solutions" class="splash-logo" onerror="this.style.display='none'; document.getElementById('fallback-logo-text').style.display='block';">
+            <div id="fallback-logo-text" class="fallback-logo-text" style="display: none;">INNOVINE</div>
         </div>
 
         <div id="screen-title" class="flow-screen">
@@ -340,7 +401,7 @@
         </div>
 
         <div id="screen-instructions" class="flow-screen">
-            <h1 class="kids-hero-title" style="font-size: 36px; color: #c90062;">How to Play! 🎉</h1>
+            <h1 class="kids-hero-title" style="color: #c90062;">How to Play! 🎉</h1>
             <ul class="kids-body-text">
                 <li>🎡 Spin the colorful giant wheel to choose a mystery religion.</li>
                 <li>📖 Read the friendly story question card carefully.</li>
@@ -378,8 +439,8 @@
                         <div class="option-soft-row" id="option-btn-1" onclick="gameEngine.submitAnswerIndex(1)">Option B</div>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #e2e8f0; padding-top:14px;">
-                        <div class="hud-pill-badge" style="font-size:16px; padding:6px 14px;" id="modal-attempts-badge">Attempts Left: 3</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #e2e8f0; padding-top:10px; margin-top: auto;">
+                        <div class="hud-pill-badge" style="padding:4px 10px;" id="modal-attempts-badge">Attempts Left: 3</div>
                         <div class="hearts-box" id="modal-hearts-rack">❤️❤️❤️</div>
                     </div>
                     
@@ -389,9 +450,9 @@
         </div>
 
         <div id="screen-victory" class="flow-screen">
-            <div style="font-size: 72px; margin-bottom: 12px;">🏆</div>
+            <div style="font-size: clamp(48px, 10vh, 72px); margin-bottom: 8px;">🏆</div>
             <h1 class="kids-hero-title" style="color: #16a34a; text-shadow: none;">Grand Champion!</h1>
-            <p class="kids-body-text" style="text-align:center; font-size:22px; margin-bottom:30px;" id="victory-score-label">
+            <p class="kids-body-text" style="text-align:center; margin-bottom:20px;" id="victory-score-label">
                 Wonderful job! You finished all 11 challenges perfectly!
             </p>
             <button class="play-action-btn" onclick="window.location.reload()">Play Again 🔄</button>
@@ -494,6 +555,7 @@
                 this.wheelSegmentsSequence = ["hinduism", "islam", "christianity", "sikhism", "jainism", "buddhism", "zoroastrianism"];
                 this.activeQuestionData = null;
 
+                // Audio Assets - Web Audio Safe Loaders
                 this.audioBg = new Audio("assets/cheerfulmusic.mp3");
                 this.audioBg.loop = true;
                 this.audioCorrect = new Audio("assets/correct.mp3");
@@ -507,16 +569,26 @@
             }
 
             initSplashScreenGate() {
-                setTimeout(() => {
+                // Guaranteed safety timeout for slow networks/missing images
+                const exitSplash = () => {
                     const splashScreen = document.getElementById('screen-splash');
-                    if (splashScreen) {
+                    if (splashScreen && splashScreen.style.opacity !== '0') {
                         splashScreen.style.opacity = '0';
                         setTimeout(() => {
                             splashScreen.style.display = 'none';
                             document.getElementById('screen-title').style.display = 'flex';
                         }, 400);
                     }
-                }, 4000);
+                };
+
+                setTimeout(exitSplash, 2200);
+
+                // Handle dynamic canvas redraw on viewport resize
+                window.addEventListener('resize', () => {
+                    if (document.getElementById('screen-playfield').style.display === 'flex') {
+                        this.drawWheelGraphicsLayout();
+                    }
+                });
             }
 
             transitionToInstructions() {
@@ -545,14 +617,20 @@
             drawWheelGraphicsLayout() {
                 const canvas = document.getElementById('wheel-canvas-node');
                 const ctx = canvas.getContext('2d');
-                const size = 500; 
-                canvas.width = size;
-                canvas.height = size;
+                
+                // Crisp rendering across DPI device pixel ratios
+                const dpr = window.devicePixelRatio || 1;
+                const rect = canvas.getBoundingClientRect();
+                const size = Math.max(rect.width || 300, 280);
+
+                canvas.width = size * dpr;
+                canvas.height = size * dpr;
+                ctx.scale(dpr, dpr);
 
                 const segmentsCount = this.wheelSegmentsSequence.length;
                 const radiansPerArc = (2 * Math.PI) / segmentsCount;
                 const centerCoord = size / 2;
-                const wheelRadius = centerCoord - 15;
+                const wheelRadius = centerCoord - 6;
 
                 ctx.clearRect(0, 0, size, size);
 
@@ -573,19 +651,18 @@
                     ctx.fill();
 
                     ctx.strokeStyle = "#ffffff";
-                    ctx.lineWidth = 5;
+                    ctx.lineWidth = 4;
                     ctx.stroke();
 
-                    // FIXED ALIGNMENT: Drawing text horizontally right-side up relative to its spoke slice vector path
+                    // Responsive text placement vector calculation
                     ctx.save();
                     ctx.translate(centerCoord, centerCoord);
                     
                     const midAngle = baseArcStartAngle + radiansPerArc / 2;
                     ctx.rotate(midAngle);
                     
-                    ctx.translate(wheelRadius - 75, 0);
+                    ctx.translate(wheelRadius * 0.62, 0);
                     
-                    // Automatically counter-rotates text if it hits bottom half zones so words never display flipped upside down
                     if (midAngle > 0 && midAngle < Math.PI) {
                         ctx.rotate(Math.PI);
                     }
@@ -599,8 +676,8 @@
                         ctx.fillStyle = metaData.txtColor;
                     }
 
-                    // Boosted label thickness and font clarity sizing scale
-                    ctx.font = "900 17px 'Comic Sans MS', sans-serif";
+                    const responsiveFontSize = Math.max(11, Math.min(16, size / 22));
+                    ctx.font = `900 ${responsiveFontSize}px 'Comic Sans MS', sans-serif`;
                     ctx.fillText(metaData.label, 0, 0);
                     ctx.restore();
                 });
@@ -608,7 +685,7 @@
                 ctx.beginPath();
                 ctx.arc(centerCoord, centerCoord, wheelRadius, 0, 2 * Math.PI);
                 ctx.strokeStyle = "#ff7300";
-                ctx.lineWidth = 6;
+                ctx.lineWidth = 5;
                 ctx.stroke();
             }
 
@@ -628,7 +705,7 @@
                 const targetSliceCenterDegrees = (segmentIndex * degreesPerSlice) + (degreesPerSlice / 2);
                 const absoluteTargetRotationValue = 360 - targetSliceCenterDegrees;
 
-                const fullRotationSpinsCount = 6; 
+                const fullRotationSpinsCount = 5; 
                 this.currentWheelRotationDegrees += (fullRotationSpinsCount * 360) + 
                     (absoluteTargetRotationValue - (this.currentWheelRotationDegrees % 360));
 
@@ -682,8 +759,8 @@
                     optionBtn.classList.add('state-correct');
                     
                     this.score += 10;
-                    try { this.audioCorrect.play().catch(()=>{}); } catch(e){}
-                    try { this.audioClapping.play().catch(()=>{}); } catch(e){}
+                    try { this.audioCorrect.currentTime = 0; this.audioCorrect.play().catch(()=>{}); } catch(e){}
+                    try { this.audioClapping.currentTime = 0; this.audioClapping.play().catch(()=>{}); } catch(e){}
                     this.burstConfettiExplosion();
 
                     const targetCategory = this.activeQuestionData.religion;
@@ -699,14 +776,14 @@
                         document.getElementById('question-modal-layer').style.display = "none";
                         this.drawWheelGraphicsLayout();
                         this.advanceGameTurnFlow();
-                    }, 1800);
+                    }, 1600);
 
                 } else {
                     this.wrongAttemptsUsed++;
                     optionBtn.classList.add('state-incorrect');
                     optionBtn.style.pointerEvents = "none";
                     
-                    try { this.audioWrong.play().catch(()=>{}); } catch(e){}
+                    try { this.audioWrong.currentTime = 0; this.audioWrong.play().catch(()=>{}); } catch(e){}
                     this.updateAttemptsModalHUD();
 
                     const hintBox = document.getElementById('modal-hint-box');
@@ -720,7 +797,7 @@
                         setTimeout(() => {
                             document.getElementById('question-modal-layer').style.display = "none";
                             this.advanceGameTurnFlow();
-                        }, 2200);
+                        }, 2000);
                     }
                 }
             }
@@ -748,14 +825,15 @@
                 this.confettiParticles = [];
                 const colorPalette = ['#38bdf8', '#4ade80', '#fbbf24', '#f43f5e', '#c084fc'];
 
-                for (let i = 0; i < 40; i++) {
+                // Particle count tailored for smooth 60fps on low-spec GPUs
+                for (let i = 0; i < 35; i++) {
                     this.confettiParticles.push({
                         x: canvas.width / 2,
                         y: canvas.height * 0.5,
                         r: Math.random() * 3 + 2,
                         color: colorPalette[Math.floor(Math.random() * colorPalette.length)],
-                        vx: (Math.random() - 0.5) * 12,
-                        vy: (Math.random() - 0.7) * 14,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.7) * 12,
                         alpha: 1
                     });
                 }
@@ -804,7 +882,7 @@
 
                 const spawnLoop = () => {
                     if (document.getElementById('screen-victory').style.display === 'none') return;
-                    for (let i = 0; i < 4; i++) {
+                    for (let i = 0; i < 3; i++) {
                         this.confettiParticles.push({
                             x: Math.random() * canvas.width,
                             y: -10,
@@ -815,7 +893,7 @@
                             alpha: 1
                         });
                     }
-                    setTimeout(spawnLoop, 300);
+                    setTimeout(spawnLoop, 350);
                 };
                 spawnLoop();
 
