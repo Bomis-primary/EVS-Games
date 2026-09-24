@@ -2,27 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wildlife Safari Adventure</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wildlife Safari Adventure 🐾</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght=500;600;700;900&family=Plus+Jakarta+Sans:wght=700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@600;700&display=swap');
         
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at center, #fffee7 0%, #fcd34d 100%);
+        :root {
+            --board-max-size: min(88vw, 480px, 60vh);
         }
-        h1, h2, h3, button { font-family: 'Fredoka', cursive; }
-        
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: radial-gradient(circle at top center, #fffef0 0%, #fef3c7 50%, #fde68a 100%);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, button, .font-cute { 
+            font-family: 'Fredoka', cursive; 
+        }
+
+        /* Board Container Optimization */
         .board-wrapper {
-            width: 100%;
-            max-width: 520px;
+            width: var(--board-max-size);
+            height: var(--board-max-size);
             margin: 0 auto;
-            background: #1e3a1e;
-            border: 6px solid #064e3b;
-            border-radius: 20px;
-            padding: 6px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            background: #2dd4bf;
+            border: 5px solid #0f766e;
+            border-radius: 24px;
+            padding: 5px;
+            box-shadow: 0 12px 28px -6px rgba(15, 118, 110, 0.35), inset 0 2px 4px rgba(255,255,255,0.6);
         }
 
         .board-grid {
@@ -31,7 +41,7 @@
             grid-template-rows: repeat(10, 1fr);
             gap: 2px;
             width: 100%;
-            aspect-ratio: 1 / 1;
+            height: 100%;
         }
 
         .board-cell {
@@ -39,125 +49,176 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 4px;
-            font-weight: 900;
-            font-size: 11px;
-            border-radius: 4px;
-            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
+            padding: 2px 3px;
+            font-weight: 700;
+            font-size: clamp(8px, 1.8vw, 11px);
+            border-radius: 6px;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+            transition: transform 0.15s ease;
         }
 
-        #questionModal {
-            z-index: 100 !important;
+        /* Soft Cute Aesthetic Tile Palette */
+        .t-pastel-pink { background-color: #ffe4e6; color: #9f1239; }
+        .t-pastel-yellow { background-color: #fef9c3; color: #854d0e; }
+        .t-pastel-blue { background-color: #e0f2fe; color: #0369a1; }
+        .t-pastel-green { background-color: #dcfce7; color: #15803d; }
+        .t-pastel-purple { background-color: #f3e8ff; color: #6b21a8; }
+
+        .cell-ladder {
+            background-color: #ccfbf1 !important;
+            border: 2px solid #14b8a6 !important;
+            color: #0f766e !important;
+        }
+
+        .cell-snake {
+            background-color: #ffe4e6 !important;
+            border: 2px solid #f43f5e !important;
+            color: #be123c !important;
         }
 
         #playerToken {
             position: absolute;
-            bottom: 4px;
-            right: 4px;
-            width: 22px;
-            height: 22px;
-            background-color: #ffffff;
-            border: 3px solid #7c3aed;
+            bottom: 2px;
+            right: 2px;
+            width: clamp(16px, 4vw, 24px);
+            height: clamp(16px, 4vw, 24px);
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border: 2.5px solid #8b5cf6;
             border-radius: 9999px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            z-index: 10;
-            transition: all 0.2s ease-in-out;
+            font-size: clamp(10px, 2.2vw, 14px);
+            box-shadow: 0 3px 8px rgba(139, 92, 246, 0.4);
+            z-index: 20;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cuteFloat 2s infinite ease-in-out;
         }
 
-        .t-red { background-color: #ef4444; color: #ffffff; }
-        .t-yellow { background-color: #facc15; color: #1e293b; }
-        .t-blue { background-color: #3b82f6; color: #ffffff; }
-        .t-green { background-color: #10b981; color: #ffffff; }
-        .t-orange { background-color: #f97316; color: #ffffff; }
+        @keyframes cuteFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
 
         @keyframes microVibrate {
             0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(-4px, 0); }
-            75% { transform: translate(4px, 0); }
+            20% { transform: translate(-5px, 0); }
+            40% { transform: translate(5px, 0); }
+            60% { transform: translate(-3px, 0); }
+            80% { transform: translate(3px, 0); }
         }
-        .vibrate-err { animation: microVibrate 0.2s ease-in-out 2; }
+        .vibrate-err { animation: microVibrate 0.35s ease-in-out; }
+
+        @keyframes diceBounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.15) rotate(-10deg); }
+            75% { transform: scale(1.15) rotate(10deg); }
+        }
+        .rolling-dice-anim { animation: diceBounce 0.25s infinite ease-in-out; }
+
+        /* Custom Scrollbar for cute UI */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fef3c7; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 10px; }
+
+        /* Responsive height fixes for mobile landscape and small phones */
+        @media (max-height: 650px) {
+            .board-wrapper {
+                width: min(70vw, 320px, 48vh);
+                height: min(70vw, 320px, 48vh);
+            }
+            .py-padding-sm { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-3 select-none overflow-x-hidden">
+<body class="min-h-screen flex flex-col items-center justify-between p-2 sm:p-4 select-none overflow-x-hidden">
 
-    <div id="brandIntroScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[200] transition-opacity duration-700 ease-out">
-        <div class="text-center space-y-6 max-w-xs">
-            <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-full h-auto object-contain mx-auto px-4">
-            <div class="flex items-center justify-center gap-2 pt-4">
-                <div class="w-6 h-6 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                <span class="text-xs font-black tracking-widest text-slate-400 uppercase">Loading Experience...</span>
+    <!-- Brand Intro Overlay -->
+    <div id="brandIntroScreen" class="fixed inset-0 bg-amber-50 flex flex-col items-center justify-center z-[200] transition-opacity duration-500 ease-out p-4">
+        <div class="text-center space-y-5 max-w-xs bg-white/80 backdrop-blur border-4 border-amber-200 p-6 rounded-3xl shadow-xl">
+            <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="w-56 max-w-full h-auto object-contain mx-auto">
+            <div class="flex items-center justify-center gap-2.5 pt-2">
+                <div class="w-6 h-6 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-xs font-bold tracking-wider text-teal-700 uppercase">Loading Safari...</span>
             </div>
+            <button onclick="skipIntroNow()" class="text-[11px] font-bold text-amber-600 underline hover:text-amber-800 cursor-pointer pt-1">
+                Tap to Skip ⏩
+            </button>
         </div>
     </div>
 
-    <div id="screenTitle" class="fixed inset-0 bg-gradient-to-br from-green-600 via-amber-400 to-emerald-700 flex flex-col items-center justify-center p-4 z-50 text-center">
-        <div class="space-y-6 max-w-md w-full bg-white border-8 border-amber-500 p-6 sm:p-8 rounded-[36px] shadow-2xl">
-            <div class="space-y-2">
-                <h1 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">WILDLIFE SAFARI</h1>
+    <!-- Main Welcome Screen -->
+    <div id="screenTitle" class="fixed inset-0 bg-gradient-to-br from-emerald-400 via-teal-300 to-amber-200 flex flex-col items-center justify-center p-4 z-50 text-center">
+        <div class="space-y-5 max-w-md w-full bg-white/95 border-4 border-emerald-400 p-6 sm:p-8 rounded-[36px] shadow-2xl backdrop-blur-sm">
+            <div class="space-y-1">
+                <div class="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full mb-1">🌿 Eco Learning Game</div>
+                <h1 class="text-3xl sm:text-4xl font-black text-emerald-800 tracking-tight">WILDLIFE SAFARI</h1>
+                <p class="text-xs font-bold text-teal-600">Explore Nature & Master Animal Habits!</p>
             </div>
             
-            <p class="text-sm font-bold text-slate-600 leading-relaxed">
-                Roll the action dice, answer food habit stories correctly, and race your explorer token to Tile 100!
+            <p class="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed bg-emerald-50/80 p-3.5 rounded-2xl border border-emerald-100">
+                🎲 Roll the dice, solve fun animal food stories, climb helpful ladders, and dodge snake hazards to reach Tile 100!
             </p>
             
-            <div id="resumeStateBox" class="hidden bg-emerald-50 border-4 border-dashed border-emerald-300 rounded-2xl p-4 text-left space-y-2">
-                <p class="text-xs font-black text-emerald-800 text-center">🔄 Found Unfinished Safari Session</p>
-                <div class="flex justify-around text-xs font-bold text-slate-600">
+            <div id="resumeStateBox" class="hidden bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl p-3 text-left space-y-2">
+                <p class="text-xs font-black text-amber-800 text-center flex items-center justify-center gap-1">
+                    <span>✨</span> Saved Safari Progress Found!
+                </p>
+                <div class="flex justify-around text-xs font-bold text-slate-700 bg-white/80 py-1.5 rounded-xl border border-amber-200">
                     <span id="savedTileLbl">Tile: 1</span>
                     <span id="savedScoreLbl">Score: 0</span>
                     <span id="savedLivesLbl">Lives: ❤️❤️❤️</span>
                 </div>
-                <button onclick="loadSavedGameSession()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black py-2.5 rounded-xl shadow cursor-pointer uppercase">
-                    Continue Previous Tour 🚀
+                <button onclick="loadSavedGameSession()" class="w-full bg-teal-500 hover:bg-teal-600 text-white text-xs font-black py-2.5 rounded-xl shadow-md active:scale-95 transition-all cursor-pointer uppercase tracking-wider">
+                    Continue Saved Tour 🚀
                 </button>
             </div>
 
-            <button onclick="advanceToInstructionsPanel()" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xl sm:text-2xl font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-transform cursor-pointer border-b-8 border-red-700">
-                PLAY NEW GAME 🎲
+            <button onclick="advanceToInstructionsPanel()" class="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white text-lg font-black py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all cursor-pointer border-b-4 border-amber-700 flex items-center justify-center gap-2">
+                <span>START NEW GAME</span>
+                <span>🎲</span>
             </button>
         </div>
     </div>
 
-    <div id="screenInstructions" class="hidden fixed inset-0 bg-gradient-to-br from-emerald-800 via-green-600 to-teal-900 flex flex-col items-center justify-center p-4 z-50 text-center">
-        <div class="space-y-5 max-w-md w-full bg-white border-8 border-emerald-500 p-6 rounded-[36px] shadow-2xl text-left">
+    <!-- Safari Instructions Screen -->
+    <div id="screenInstructions" class="hidden fixed inset-0 bg-gradient-to-br from-teal-500 via-emerald-400 to-amber-200 flex flex-col items-center justify-center p-4 z-50 text-center">
+        <div class="space-y-4 max-w-md w-full bg-white/95 border-4 border-teal-400 p-5 sm:p-6 rounded-[32px] shadow-2xl text-left backdrop-blur-sm">
             <div class="text-center">
-                <span class="text-xs font-black tracking-widest text-orange-700 bg-orange-100 px-4 py-1 rounded-full uppercase">SAFARI MANUAL</span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">HOW TO PLAY</h2>
+                <span class="text-[11px] font-black tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full uppercase">SAFARI GUIDEBOOK 📖</span>
+                <h2 class="text-2xl font-black text-slate-800 mt-1.5">HOW TO PLAY</h2>
             </div>
             
-            <div class="space-y-3 text-slate-700 font-medium text-xs sm:text-sm leading-relaxed max-h-[260px] overflow-y-auto pr-1">
-                <div class="flex gap-2.5">
-                    <span class="text-base">🎲</span>
-                    <p><strong class="text-slate-900">Roll Dice:</strong> Press the orange ROLL button to spin your parameters and step across the wildlife grid tiles.</p>
+            <div class="space-y-2.5 text-slate-700 font-medium text-xs sm:text-sm leading-relaxed max-h-[240px] overflow-y-auto pr-1">
+                <div class="flex items-start gap-2.5 bg-teal-50/80 p-2.5 rounded-xl border border-teal-100">
+                    <span class="text-lg leading-none">🎲</span>
+                    <p><strong class="text-teal-900">Roll Dice:</strong> Tap the orange ROLL button to spin the dice and move across the wildlife board.</p>
                 </div>
-                <div class="flex gap-2.5">
-                    <span class="text-base">⭐</span>
-                    <p><strong class="text-slate-900">Solve Food Habit Stories:</strong> Every landing spot brings a short nature prompt. Answer correctly to secure your place!</p>
+                <div class="flex items-start gap-2.5 bg-amber-50/80 p-2.5 rounded-xl border border-amber-100">
+                    <span class="text-lg leading-none">⭐</span>
+                    <p><strong class="text-amber-900">Food Habit Trivia:</strong> Answer fun nature prompts on each cell to secure your spot!</p>
                 </div>
-                <div class="flex gap-2.5">
-                    <span class="text-base">🪜</span>
-                    <p><strong class="text-slate-900">Climb Ladders:</strong> Correctly identifying positive ecosystems launches your token high up the shortcuts.</p>
+                <div class="flex items-start gap-2.5 bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-100">
+                    <span class="text-lg leading-none">🪜</span>
+                    <p><strong class="text-emerald-900">Climb Ladders:</strong> Correctly identifying healthy ecosystems launches you up shortcuts!</p>
                 </div>
-                <div class="flex gap-2.5">
-                    <span class="text-base">🐍</span>
-                    <p><strong class="text-slate-900">Dodge Hazards:</strong> Answering incorrectly in dangerous zones causes your token to slide backward down the board paths.</p>
+                <div class="flex items-start gap-2.5 bg-rose-50/80 p-2.5 rounded-xl border border-rose-100">
+                    <span class="text-lg leading-none">🐍</span>
+                    <p><strong class="text-rose-900">Dodge Hazards:</strong> Wrong answers in snake hazard zones cause your token to slide back down.</p>
                 </div>
-                <div class="flex gap-2.5">
-                    <span class="text-base">❤️</span>
-                    <p><strong class="text-slate-900">Keep Track of Health:</strong> You get 3 life tracking hearts. Losing all of them ends the safari tour early!</p>
+                <div class="flex items-start gap-2.5 bg-purple-50/80 p-2.5 rounded-xl border border-purple-100">
+                    <span class="text-lg leading-none">❤️</span>
+                    <p><strong class="text-purple-900">Safari Lives:</strong> You have 3 heart lives. Keep them safe to finish the tour!</p>
                 </div>
             </div>
 
-            <button onclick="launchBrandNewSafariSession()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white text-lg font-black py-3.5 rounded-xl shadow-xl active:scale-95 transition-transform cursor-pointer border-b-4 border-emerald-800 uppercase text-center">
-                START TOUR 🚀
+            <button onclick="launchBrandNewSafariSession()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-base font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all cursor-pointer border-b-4 border-teal-800 uppercase text-center flex items-center justify-center gap-2">
+                <span>LET'S START TOUR</span> <span>🚀</span>
             </button>
         </div>
     </div>
 
+    <!-- Hidden Audio Elements (Paths Kept Intact) -->
     <div class="hidden">
         <audio id="audioBg" src="./assets/snakegamesound.mp3" loop></audio>
         <audio id="audioCorrect" src="./assets/correct.mp3"></audio>
@@ -165,69 +226,79 @@
         <audio id="audioClaps" src="./assets/freesound_community-claps-44774.mp3"></audio>
     </div>
 
-    <div id="diceFlashOverlay" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-        <div class="bg-white border-8 border-orange-500 rounded-[32px] p-6 max-w-xs w-full text-center space-y-3 transform scale-105 shadow-2xl">
-            <span class="text-xs font-black text-slate-400 tracking-widest uppercase block">SAFARI DICE ROLLED</span>
-            <div id="diceFlashValue" class="text-8xl font-black text-orange-600 my-1">⚀</div>
-            <div id="diceFlashNum" class="text-2xl font-black text-slate-900 uppercase">NUMBER 1</div>
+    <!-- Dice Roll Flash Overlay -->
+    <div id="diceFlashOverlay" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center z-50 p-4">
+        <div class="bg-white border-4 border-amber-400 rounded-3xl p-6 max-w-xs w-full text-center space-y-2 transform scale-100 shadow-2xl animate-bounce">
+            <span class="text-xs font-black text-amber-700 tracking-wider uppercase block">🎲 SAFARI DICE ROLLED</span>
+            <div id="diceFlashValue" class="text-7xl font-black text-amber-500 my-1 font-cute">⚀</div>
+            <div id="diceFlashNum" class="text-xl font-black text-slate-800 uppercase font-cute">NUMBER 1</div>
         </div>
     </div>
 
-    <div id="questionModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div id="modalCardBody" class="bg-white border-8 border-blue-600 rounded-[32px] w-full max-w-md p-6 shadow-2xl space-y-4">
+    <!-- Question Modal Overlay -->
+    <div id="questionModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50">
+        <div id="modalCardBody" class="bg-white border-4 border-teal-400 rounded-3xl w-full max-w-md p-4 sm:p-6 shadow-2xl space-y-3.5 max-h-[92vh] overflow-y-auto">
             <div class="text-center space-y-2">
-                <span id="modalBadge" class="text-xs font-black uppercase tracking-wider px-4 py-1 rounded-full block mx-auto w-max bg-blue-100 text-blue-800">⭐ QUIZ CHALLENGE</span>
-                <h3 id="modalQuestionText" class="text-base sm:text-lg font-black text-slate-950 leading-snug px-1 pt-2"></h3>
+                <span id="modalBadge" class="text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full inline-block bg-teal-100 text-teal-800">⭐ QUIZ CHALLENGE</span>
+                <h3 id="modalQuestionText" class="text-sm sm:text-base font-bold text-slate-800 leading-snug px-1 pt-1"></h3>
             </div>
             
-            <div id="modalOptionsGrid" class="grid grid-cols-1 gap-2.5"></div>
-            <div id="modalHintDrawer" class="hidden bg-amber-50 border-2 border-amber-300 rounded-xl p-3 text-center text-xs font-bold text-slate-700"></div>
+            <div id="modalOptionsGrid" class="grid grid-cols-1 gap-2"></div>
+            <div id="modalHintDrawer" class="hidden bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 text-center text-xs font-bold text-slate-700 leading-relaxed"></div>
         </div>
     </div>
 
-    <div id="screenGameOver" class="hidden fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50 text-center">
-        <div class="space-y-5 max-w-sm w-full bg-white border-8 border-yellow-400 p-6 rounded-[32px] shadow-2xl flex flex-col items-center text-slate-900">
-            <h2 id="gameOverTitle" class="text-3xl font-black text-red-500">Safari Complete!</h2>
+    <!-- Game Over Screen -->
+    <div id="screenGameOver" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-50 text-center">
+        <div class="space-y-4 max-w-sm w-full bg-white border-4 border-amber-400 p-6 rounded-3xl shadow-2xl flex flex-col items-center text-slate-800">
+            <h2 id="gameOverTitle" class="text-2xl sm:text-3xl font-black text-amber-600">Safari Complete!</h2>
             <p id="gameOverDesc" class="text-xs font-bold text-slate-600 leading-relaxed"></p>
             
-            <div class="bg-amber-50 border-4 border-dashed border-amber-200 rounded-xl p-3 w-full">
-                <span class="text-[10px] font-black text-slate-400 block mb-0.5 uppercase tracking-wider">Final Score</span>
-                <span id="finalScoreDisplay" class="text-3xl font-black text-emerald-600">0</span> <span class="text-slate-800 text-lg font-black">Points</span>
+            <div class="bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl p-3 w-full">
+                <span class="text-[10px] font-black text-amber-700 block mb-0.5 uppercase tracking-wider">Final Safari Score</span>
+                <span id="finalScoreDisplay" class="text-3xl font-black text-emerald-600 font-cute">0</span> <span class="text-slate-700 text-base font-bold">Points</span>
             </div>
 
-            <button onclick="triggerFullGameReset()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-black py-3.5 rounded-xl shadow-lg cursor-pointer transition-transform border-b-4 border-emerald-800">
-                START FRESH GAME
+            <button onclick="triggerFullGameReset()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-base font-black py-3 rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 border-b-4 border-emerald-700 uppercase">
+                PLAY AGAIN 🔄
             </button>
         </div>
     </div>
 
-    <div class="w-full max-w-lg bg-white border-4 border-slate-950 rounded-xl p-2.5 shadow-sm flex justify-between items-center gap-2">
-        <div class="flex items-center gap-2">
-            <h2 class="text-sm sm:text-base font-black text-emerald-700 tracking-tight uppercase">🐾 ECO SAFARI</h2>
+    <!-- Top Dashboard Header -->
+    <div class="w-full max-w-md bg-white/90 backdrop-blur-sm border-3 border-teal-500 rounded-2xl p-2.5 shadow-md flex justify-between items-center gap-2 mb-1">
+        <div class="flex items-center gap-1.5">
+            <span class="text-lg">🐾</span>
+            <h2 class="text-xs sm:text-sm font-black text-teal-800 tracking-tight uppercase">ECO SAFARI</h2>
         </div>
-        <div class="flex items-center gap-1.5 text-xs font-black">
-            <span id="heartsHealthField" class="bg-rose-50 px-2 py-1 rounded-md text-sm">❤️❤️❤️</span>
-            <span class="bg-slate-950 text-white px-2 py-1 rounded-md">Tile: <span id="lblTile" class="text-amber-400">1</span></span>
-            <span class="bg-slate-950 text-white px-2 py-1 rounded-md">Points: <span id="lblScore" class="text-emerald-400">0</span></span>
+        <div class="flex items-center gap-1.5 text-xs font-bold">
+            <button onclick="toggleAudioMute()" id="btnMuteToggle" class="bg-amber-100 hover:bg-amber-200 text-amber-800 p-1.5 rounded-lg border border-amber-300 text-xs cursor-pointer">
+                🔊
+            </button>
+            <span id="heartsHealthField" class="bg-rose-100 px-2 py-1 rounded-xl text-rose-600 border border-rose-200 text-xs">❤️❤️❤️</span>
+            <span class="bg-teal-700 text-white px-2 py-1 rounded-xl text-[11px]">Tile: <span id="lblTile" class="text-amber-300 font-bold">1</span></span>
+            <span class="bg-emerald-700 text-white px-2 py-1 rounded-xl text-[11px]">Pts: <span id="lblScore" class="text-amber-300 font-bold">0</span></span>
         </div>
     </div>
 
-    <div class="w-full shrink-0 my-auto py-1">
+    <!-- Board Area -->
+    <div class="w-full flex-1 flex items-center justify-center my-auto py-1">
         <div class="board-wrapper">
             <div id="boardGrid" class="board-grid"></div>
         </div>
     </div>
 
-    <div class="w-full max-w-lg bg-white border-4 border-slate-950 rounded-xl p-2.5 shadow-sm flex items-center justify-between gap-3">
-        <div id="statusAlertField" class="text-[11px] font-bold text-slate-500 max-w-[240px] sm:max-w-xs leading-tight">
-            Roll the tracking dice to launch your wildlife movement parameters!
+    <!-- Bottom Controls Footer -->
+    <div class="w-full max-w-md bg-white/90 backdrop-blur-sm border-3 border-teal-500 rounded-2xl p-2.5 shadow-md flex items-center justify-between gap-2 mt-1">
+        <div id="statusAlertField" class="text-[11px] font-bold text-teal-900 max-w-[190px] sm:max-w-[220px] leading-tight">
+            Roll the dice to launch your safari exploration! 🎲
         </div>
         
-        <div class="flex items-center gap-2 shrink-0">
-            <button onclick="triggerFullGameReset()" class="bg-slate-100 hover:bg-red-50 text-red-500 text-xs font-black px-2.5 py-2 rounded-lg border border-slate-200 cursor-pointer">RESET</button>
-            <div id="diceDisplay" class="w-9 h-9 bg-purple-600 text-white font-black text-lg rounded-lg flex items-center justify-center shadow-inner">⚀</div>
-            <button id="btnRoll" onclick="executeDiceRollSequence()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-black px-4 py-2.5 rounded-lg shadow active:scale-95 transition-transform cursor-pointer uppercase border-b-4 border-orange-700">
-                ROLL 🎲
+        <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="triggerFullGameReset()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold px-2 py-2 rounded-xl border border-rose-200 cursor-pointer">RESET</button>
+            <div id="diceDisplay" class="w-9 h-9 bg-gradient-to-br from-amber-400 to-orange-500 text-white font-black text-xl rounded-xl flex items-center justify-center shadow-inner font-cute border border-amber-300">⚀</div>
+            <button id="btnRoll" onclick="executeDiceRollSequence()" class="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white text-xs font-black px-3.5 py-2.5 rounded-xl shadow-md active:scale-95 transition-all cursor-pointer uppercase border-b-3 border-amber-700 flex items-center gap-1">
+                <span>ROLL</span> <span>🎲</span>
             </button>
         </div>
     </div>
@@ -250,8 +321,6 @@
             { id: 13, q: "Sunny sees a beautiful butterfly sitting perfectly still on a bright red flower. The butterfly unrolls a long, thin, hollow tube from its mouth to drink sweet juice from the flower just like a straw! This tube is called a...", a: ["Proboscis", "Canine tooth"], c: "Proboscis", h: "A proboscis is a hollow drinking tube structure built onto insect feeding paths." },
             { id: 14, q: "In a quiet garden, a green grasshopper eats a leaf, a frog jumps up and eats the grasshopper, and then a slithering snake eats the frog! This connected line of eating is called a...", a: ["Food Chain", "Life Circle"], c: "Food Chain", h: "A food chain maps the precise tracking of caloric transfers across wild habitats." },
             { id: 15, q: "Imagine if all the green plants in a big park vanished! Soon, the grasshoppers would have no food, then the frogs would have no food, and then the snakes would have no food too. Why does this happen?", a: ["Because all animals depend on plants directly or indirectly", "Because plants are eaten by scavengers"], c: "Because all animals depend on plants directly or indirectly", h: "Every wild creature connects to green plants because only flora builds standard energy layers." },
-            
-            // NEW EXCLUSIVE STOCK BACKUP RESERVOIR TRIVIA ELEMENTS
             { id: 16, q: "An owl is hunting at night for small mice and frogs in the dark forest. Since it only eats other animals, an owl is categorized as a...", a: ["Carnivorous Animal", "Herbivorous Animal"], c: "Carnivorous Animal", h: "Carnivorous birds and creatures rely entirely on hunting active prey to survive." },
             { id: 17, q: "Riya noticed a bear in a nature show eating sweet berries from bushes, but later it caught a fish from the river for its meal! This makes the bear an...", a: ["Omnivorous Animal", "Herbivorous Animal"], c: "Omnivorous Animal", h: "Omnivores have versatile diets that allow them to consume both plants and animal proteins." },
             { id: 18, q: "Deer and rabbits have sharp front incisors to clip twigs, followed by wide, flat molars in the back. What kind of food are these flat back teeth designed for?", a: ["Chewing and grinding tough plants", "Tearing the flesh of prey"], c: "Chewing and grinding tough plants", h: "Flat, broad back teeth act like grinding stones to crush rigid plant fibers and leaves safely." },
@@ -273,30 +342,53 @@
             62: { target: 82, type: "ladder", msg: "Perfect food chain sequence flow! Shortcut up! 🪜" },
             71: { target: 92, type: "ladder", msg: "Protected scavenger refuge site! Shortcut up! 🪜" },
             
-            21: { target: 3,  type: "snake",  msg: "Encountered wild wildfire zones! Slipped back... 🐍" },
-            33: { target: 8,  type: "snake",  msg: "Encountered wildlife poaching hazards! Slipped down... 🐍" },
-            52: { target: 13, type: "snake",  msg: "Destructive habitat land clearing! Slipped down... 🐍" },
-            77: { target: 44, type: "snake",  msg: "Illegal forest lumber logging zone! Slipped down... 🐍" },
-            97: { target: 65, type: "snake",  msg: "Severe animal extinction risk window! Slipped down... 🐍" }
+            21: { target: 3,  type: "snake",  msg: "Encountered wildfire zones! Slipped back... 🐍" },
+            33: { target: 8,  type: "snake",  msg: "Encountered poaching hazards! Slipped down... 🐍" },
+            52: { target: 13, type: "snake",  msg: "Destructive land clearing! Slipped down... 🐍" },
+            77: { target: 44, type: "snake",  msg: "Illegal forest logging zone! Slipped down... 🐍" },
+            97: { target: 65, type: "snake",  msg: "Severe animal extinction risk! Slipped down... 🐍" }
         };
 
         let playerPosition = 1;
         let totalScoreCount = 0;
         let totalRemainingLives = 3;
         let isDiceLocked = false;
+        let isAudioMuted = false;
         let randomizedQuestionsQueue = [];
         let answeredQuestionsRegistry = [];
+        let introTimer = null;
 
         window.onload = function() {
-            setTimeout(() => {
-                const introScreen = document.getElementById('brandIntroScreen');
+            introTimer = setTimeout(() => {
+                skipIntroNow();
+            }, 3000);
+        };
+
+        function skipIntroNow() {
+            if (introTimer) clearTimeout(introTimer);
+            const introScreen = document.getElementById('brandIntroScreen');
+            if (introScreen) {
                 introScreen.style.opacity = '0';
                 setTimeout(() => {
                     introScreen.remove();
                     evaluateSavedLocalState();
-                }, 700);
-            }, 5000);
-        };
+                }, 500);
+            }
+        }
+
+        function toggleAudioMute() {
+            isAudioMuted = !isAudioMuted;
+            const bgAudio = document.getElementById('audioBg');
+            const muteBtn = document.getElementById('btnMuteToggle');
+            
+            if (isAudioMuted) {
+                bgAudio.pause();
+                muteBtn.innerText = "🔇";
+            } else {
+                bgAudio.play().catch(() => {});
+                muteBtn.innerText = "🔊";
+            }
+        }
 
         function evaluateSavedLocalState() {
             if (localStorage.getItem('ecoSafari_v5_tile')) {
@@ -324,8 +416,8 @@
             syncDashboardStatsUI();
             attachTokenToCurrentTile();
             
-            document.getElementById('audioBg').play().catch(() => {});
-            logStatus("Safari restored! Roll to advance.");
+            if (!isAudioMuted) document.getElementById('audioBg').play().catch(() => {});
+            logStatus("Safari tour restored! Tap ROLL to continue.");
         }
 
         function launchBrandNewSafariSession() {
@@ -344,14 +436,14 @@
             syncDashboardStatsUI();
             attachTokenToCurrentTile();
 
-            document.getElementById('audioBg').play().catch(() => {});
-            logStatus("New safari started! Roll the purple dice to begin.");
+            if (!isAudioMuted) document.getElementById('audioBg').play().catch(() => {});
+            logStatus("New safari started! Roll the dice to begin.");
         }
 
         function generateBoardGridTiles() {
             const grid = document.getElementById('boardGrid');
             grid.innerHTML = '';
-            const layoutColors = ['t-red', 't-yellow', 't-blue', 't-green', 't-orange'];
+            const layoutColors = ['t-pastel-pink', 't-pastel-yellow', 't-pastel-blue', 't-pastel-green', 't-pastel-purple'];
             
             for (let r = 9; r >= 0; r--) {
                 let sequentialRow = [];
@@ -366,21 +458,21 @@
                     
                     if (shortcutPortalsMap[id]) {
                         if (shortcutPortalsMap[id].type === "ladder") {
-                            colorStyle = "bg-emerald-50 border-2 border-emerald-500 text-emerald-950 font-black";
+                            colorStyle = "cell-ladder";
                             layoutIcon = "🪜";
                         } else {
-                            colorStyle = "bg-rose-50 border-2 border-rose-500 text-rose-950 font-black";
+                            colorStyle = "cell-snake";
                             layoutIcon = "🐍";
                         }
                     } else if (id === 100) {
-                        colorStyle = "bg-gradient-to-tr from-yellow-400 to-orange-500 text-slate-950 border-2 border-yellow-300 animate-pulse";
+                        colorStyle = "bg-gradient-to-tr from-amber-300 to-yellow-400 text-slate-900 border-2 border-amber-400 font-black animate-pulse";
                         layoutIcon = "🏆";
                     }
 
                     grid.innerHTML += `
                         <div id="cell-${id}" class="board-cell ${colorStyle}">
-                            <span>${id}</span>
-                            <span class="text-xs self-end font-normal opacity-90">${layoutIcon}</span>
+                            <span class="leading-none">${id}</span>
+                            <span class="text-[10px] self-end font-normal opacity-90 leading-none">${layoutIcon}</span>
                         </div>
                     `;
                 });
@@ -390,7 +482,7 @@
         function syncDashboardStatsUI() {
             document.getElementById('lblTile').innerText = playerPosition;
             document.getElementById('lblScore').innerText = totalScoreCount;
-            document.getElementById('heartsHealthField').innerText = "❤️".repeat(totalRemainingLives);
+            document.getElementById('heartsHealthField').innerText = "❤️".repeat(Math.max(0, totalRemainingLives));
         }
 
         function attachTokenToCurrentTile() {
@@ -413,6 +505,9 @@
             const rollValue = Math.floor(Math.random() * 6) + 1;
             const glyphs = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
             
+            const diceDisplay = document.getElementById('diceDisplay');
+            diceDisplay.classList.add('rolling-dice-anim');
+
             document.getElementById('diceFlashValue').innerText = glyphs[rollValue - 1];
             document.getElementById('diceFlashNum').innerText = "NUMBER " + rollValue;
             const flashOverlay = document.getElementById('diceFlashOverlay');
@@ -420,7 +515,8 @@
 
             setTimeout(() => {
                 flashOverlay.classList.add('hidden');
-                document.getElementById('diceDisplay').innerText = glyphs[rollValue - 1];
+                diceDisplay.classList.remove('rolling-dice-anim');
+                diceDisplay.innerText = glyphs[rollValue - 1];
                 
                 let currentTick = 0;
                 let stepIntervalLoop = setInterval(() => {
@@ -433,10 +529,10 @@
                         clearInterval(stepIntervalLoop);
                         setTimeout(() => {
                             processDestinationLandingActions();
-                        }, 300);
+                        }, 250);
                     }
-                }, 250); 
-            }, 1200); 
+                }, 220); 
+            }, 800); 
         }
 
         function pullNextUniqueTriviaItem() {
@@ -474,14 +570,14 @@
             if (targetPortal) {
                 if (targetPortal.type === "ladder") {
                     elementBadge.innerText = "🪜 LADDER SHORTCUT STORY";
-                    elementBadge.className = "text-xs font-black uppercase tracking-wider px-4 py-1 rounded-full bg-emerald-600 text-white";
+                    elementBadge.className = "text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-emerald-500 text-white shadow-sm";
                 } else {
-                    elementBadge.innerText = "🐍 SNAKE ZONE HAZARD STORY";
-                    elementBadge.className = "text-xs font-black uppercase tracking-wider px-4 py-1 rounded-full bg-rose-600 text-white";
+                    elementBadge.innerText = "🐍 SNAKE HAZARD STORY";
+                    elementBadge.className = "text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-rose-500 text-white shadow-sm";
                 }
             } else {
                 elementBadge.innerText = "⭐ WILDLIFE STEPPING TILE";
-                elementBadge.className = "text-xs font-black uppercase tracking-wider px-4 py-1 rounded-full bg-blue-600 text-white";
+                elementBadge.className = "text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-teal-500 text-white shadow-sm";
             }
 
             document.getElementById('modalQuestionText').innerText = questionData.q;
@@ -493,7 +589,7 @@
             buttonsArray.forEach(choice => {
                 gridContainer.innerHTML += `
                     <button onclick="evaluateUserChoiceAnswer(${questionData.id}, '${choice.replace(/'/g, "\\'")}', '${questionData.c.replace(/'/g, "\\'")}', '${questionData.h.replace(/'/g, "\\'")}')"
-                        class="w-full p-3.5 border-4 border-slate-200 bg-slate-50 hover:bg-amber-100 hover:border-amber-400 rounded-xl text-sm font-black transition-all cursor-pointer text-slate-800 text-left">
+                        class="w-full p-3 border-2 border-teal-200 bg-teal-50/50 hover:bg-amber-100 hover:border-amber-400 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer text-slate-800 text-left shadow-sm">
                         ${choice}
                     </button>
                 `;
@@ -505,7 +601,7 @@
             const activePortal = shortcutPortalsMap[playerPosition];
 
             if (matchesPerfectly) {
-                document.getElementById('audioCorrect').play().catch(() => {});
+                if (!isAudioMuted) document.getElementById('audioCorrect').play().catch(() => {});
                 
                 totalScoreCount += 20; 
                 
@@ -519,7 +615,7 @@
                     playerPosition = activePortal.target;
                     logStatus(`🪜 Excellent! ${activePortal.msg} Climbed directly to tile ${playerPosition}`);
                 } else {
-                    logStatus("✨ Correct answer! Your explorer coin remains safe.");
+                    logStatus("✨ Correct answer! Your safari explorer remains safe.");
                 }
 
                 writeCurrentStateToStorage();
@@ -528,11 +624,12 @@
                     attachTokenToCurrentTile();
                     syncDashboardStatsUI();
                     isDiceLocked = false;
-                }, 800);
+                }, 700);
             } else {
-                document.getElementById('audioWrong').play().catch(() => {});
-                document.getElementById('modalCardBody').classList.add('vibrate-err');
-                setTimeout(() => document.getElementById('modalCardBody').classList.remove('vibrate-err'), 400);
+                if (!isAudioMuted) document.getElementById('audioWrong').play().catch(() => {});
+                const card = document.getElementById('modalCardBody');
+                card.classList.add('vibrate-err');
+                setTimeout(() => card.classList.remove('vibrate-err'), 400);
 
                 totalRemainingLives--;
                 syncDashboardStatsUI();
@@ -541,7 +638,7 @@
                     playerPosition = activePortal.target;
                     logStatus(`🐍 Wrong answer! ${activePortal.msg} Slid down to tile ${playerPosition}`);
                 } else {
-                    logStatus("❌ Incorrect answer! Read the field guide hint box to learn.");
+                    logStatus("❌ Oops! Read the field guide hint to learn.");
                 }
 
                 document.getElementById('modalHintDrawer').innerText = "📖 FIELD GUIDE FACT: " + referenceHint;
@@ -553,7 +650,7 @@
                     setTimeout(() => {
                         document.getElementById('questionModal').classList.add('hidden');
                         triggerSafariEndingSequence(false);
-                    }, 3000);
+                    }, 2800);
                     return;
                 }
 
@@ -561,7 +658,7 @@
                     document.getElementById('questionModal').classList.add('hidden');
                     attachTokenToCurrentTile();
                     isDiceLocked = false;
-                }, 3200);
+                }, 3000);
             }
         }
 
@@ -583,9 +680,9 @@
             document.getElementById('finalScoreDisplay').innerText = totalScoreCount;
 
             if (userWonGame) {
-                document.getElementById('audioClaps').play().catch(() => {});
+                if (!isAudioMuted) document.getElementById('audioClaps').play().catch(() => {});
                 document.getElementById('gameOverTitle').innerText = "🏆 SAFARI CHAMPION!";
-                document.getElementById('gameOverDesc').innerText = "Fantastic job! You traversed across all 100 tiles safely while mastering your animal habitat facts!";
+                document.getElementById('gameOverDesc').innerText = "Fantastic job! You traversed across all 100 tiles safely while mastering your animal food habit facts!";
                 
                 let operationalTimer = Date.now() + (2.5 * 1000);
                 (function blast() {
@@ -594,8 +691,8 @@
                     if (Date.now() < operationalTimer) requestAnimationFrame(blast);
                 }());
             } else {
-                document.getElementById('gameOverTitle').innerText = "💔 MISSION OVER";
-                document.getElementById('gameOverDesc').innerText = "Your health tracking hearts expired. Restart a clean run to clear your nature facts!";
+                document.getElementById('gameOverTitle').innerText = "💔 SAFARI ENDED";
+                document.getElementById('gameOverDesc').innerText = "Your health tracking hearts ran out. Restart a fresh run to clear all nature facts!";
             }
             localStorage.clear();
         }
