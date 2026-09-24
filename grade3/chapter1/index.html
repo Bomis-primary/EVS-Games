@@ -35,14 +35,6 @@
             transform: scale(0.95);
         }
 
-        @keyframes softGlow {
-            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 12px #f59e0b; transform: scale(1); }
-            50% { border-color: #fbbf24; box-shadow: 0 0 24px #fbbf24; transform: scale(1.02); background-color: #fef3c7; }
-        }
-        .hint-glow-effect {
-            animation: softGlow 1s infinite ease-in-out !important;
-        }
-
         @keyframes scaleIn {
             0% { transform: scale(0.95); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
@@ -109,7 +101,7 @@
                 </div>
                 <div class="flex items-start space-x-3">
                     <span class="text-xl">💡</span>
-                    <span>Completing any 2x2 grid quadrant opens a **2-Question Quiz**. Each right answer gives **+20 points**!</span>
+                    <span>Completing any 2x2 grid quadrant opens a <b>4-Question Quiz</b>. Each right answer gives <b>+20 points</b>!</span>
                 </div>
                 <div class="flex items-start space-x-3">
                     <span class="text-xl">❤️</span>
@@ -144,7 +136,7 @@
             </div>
 
             <div id="sudokuGridContainer" class="w-full grid grid-cols-2 gap-2 p-1.5 bg-emerald-800 rounded-2xl border-2 border-emerald-900">
-                </div>
+            </div>
 
             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-2">
                 <p id="dockStatusLine" class="text-xs font-bold text-slate-500">1. Tap an empty grid square above first</p>
@@ -170,21 +162,25 @@
             </div>
 
             <div id="quizOverlay" class="hidden absolute inset-0 bg-emerald-950 rounded-[28px] z-40 p-5 flex flex-col justify-between animate-pop">
-                <div class="text-center">
-                    <span id="quizBadge" class="bg-amber-500 text-white font-black px-4 py-1 rounded-full text-xs tracking-wider uppercase">✨ QUEST CHECKPOINT</span>
+                <div class="flex justify-between items-center w-full">
+                    <span id="quizBadge" class="bg-amber-500 text-white font-black px-3 py-1 rounded-full text-xs tracking-wider uppercase">✨ QUEST CHECKPOINT</span>
+                    <button id="sideHintBtn" onclick="toggleQuizHint()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-3 py-1 rounded-full text-xs flex items-center space-x-1 active:scale-95 transition-all cursor-pointer shadow-md">
+                        <span>💡</span>
+                        <span>Hint</span>
+                    </button>
                 </div>
 
-                <div class="text-center flex-1 flex items-center justify-center px-1 my-3">
+                <div class="text-center flex-1 flex items-center justify-center px-1 my-2">
                     <h2 id="quizQuestionText" class="text-xl font-bold text-white leading-snug">
                         Question loading...
                     </h2>
                 </div>
 
                 <div id="explanationBox" class="hidden bg-amber-50 border-2 border-amber-300 p-3 rounded-xl text-sm font-semibold text-amber-900 leading-relaxed mb-3 text-left animate-pop">
-                    </div>
+                </div>
 
                 <div id="quizOptionsContainer" class="flex flex-col space-y-3 w-full">
-                    </div>
+                </div>
 
                 <div class="text-center pt-3 mt-2 border-t border-emerald-900">
                     <p id="quizFooterHint" class="text-sm font-bold text-emerald-300 min-h-[24px] flex items-center justify-center">
@@ -245,22 +241,36 @@
         };
 
         const scienceQuizQuestions = [
-            { id: 1, q: "Tom has a puppy and a teddy bear. The puppy grows bigger every month, but the teddy bear stays the same size. Why?", choices: ["Toys cannot grow because they are non-living.", "The puppy is non-living.", "The teddy bear needs more food."], ans: "Toys cannot grow because they are non-living.", explanation: "Living things grow and change over time using energy. Non-living things, like toys, always stay the same size!" },
-            { id: 2, q: "Lily touches a plant, and its leaves close up quickly. When she touches her wooden desk, nothing happens. Why?", choices: ["Only plants can move.", "Living things can feel things around them.", "The desk is asleep."], ans: "Living things can feel things around them.", explanation: "Living things sense and react to things around them (like touch or light). Non-living things cannot feel anything at all." },
-            { id: 3, q: "A car moves down the road and a bird flies in the sky. What is the difference in how they move?", choices: ["The bird moves on its own because it is alive.", "The car moves on its own.", "The bird needs fuel to fly."], ans: "The bird moves on its own because it is alive.", explanation: "A car needs a driver and fuel to force it to move. Living things like birds move all by themselves to find food or safety!" },
-            { id: 4, q: "Sunflowers turn their large heads to face the sun during the day. What does this tell us about plants?", choices: ["Plants show movement.", "Plants are non-living things.", "Plants do not need light."], ans: "Plants show movement.", explanation: "Even though plants are fixed securely in the soil, their parts can still move by turning towards warm sunlight!" },
-            { id: 5, q: "If you put a green plant inside a dark cupboard with no air, it will die. Which gas does a plant need from the air to make its food?", choices: ["Oxygen", "Carbon dioxide", "Water"], ans: "Carbon dioxide", explanation: "Plants make their own food! They take in a special gas called carbon dioxide from the air to stay healthy and alive." },
-            { id: 6, q: "Humans use their lungs to breathe air. Plants do not have lungs. How do they take in air through their leaves?", choices: ["Through small noses.", "Through gills like a fish.", "Through tiny holes called stomata."], ans: "Through tiny holes called stomata.", explanation: "Look closely at a leaf! It has microscopic, hidden mouth-like holes called stomata to breathe in gases from the air." },
-            { id: 7, q: "An oak tree lives for many years, but a small fly only lives for a few weeks. What do we call this fixed time a living thing stays alive?", choices: ["A lifespan", "Reproduction", "A game"], ans: "A lifespan", explanation: "Every living thing stays alive for a certain amount of time before it gets old and dies. This cycle is its lifespan." },
-            { id: 8, q: "Sam finds a smooth stone, a white cloud, and a plastic toy spade. Which one is a natural non-living thing?", choices: ["The plastic toy spade", "The white cloud", "The toy spade and the stone"], ans: "The white cloud", explanation: "Natural non-living things are found freely in nature and not made by humans. Plastic objects are man-made!" },
-            { id: 9, q: "A bird lays eggs and a dog has puppies. Why can a toy doll never have any babies?", choices: ["The doll is too small.", "Non-living things cannot reproduce.", "Dolls only lay eggs."], ans: "Non-living things cannot reproduce.", explanation: "Making babies or laying eggs is called reproduction. Only living things can make new young ones of their own kind!" }
+            // Quadrant Set A
+            { id: 1, q: "Tom has a puppy and a teddy bear. The puppy grows bigger every month, but the teddy bear stays the same size. Why?", choices: ["Toys cannot grow because they are non-living.", "The puppy is non-living.", "The teddy bear needs more food."], ans: "Toys cannot grow because they are non-living.", explanation: "Living things grow and change over time, but non-living objects always stay the same size." },
+            { id: 2, q: "A plant needs sunlight, water, and air to make its own food. Which gas does it take from the air?", choices: ["Oxygen", "Carbon dioxide", "Water vapor"], ans: "Carbon dioxide", explanation: "Green leaves absorb carbon dioxide from the air to make food during the day." },
+            { id: 3, q: "What will happen to a green potted plant if you lock it inside a dark box without water for two weeks?", choices: ["It will grow faster.", "It will wither and die.", "It will turn into a toy."], ans: "It will wither and die.", explanation: "Living plants need sunlight and water to stay alive." },
+            { id: 4, q: "Why do animals need to eat food, while a wooden table does not need any food?", choices: ["Food gives energy to living things to grow and move.", "Tables eat when no one is watching.", "Tables only drink water."], ans: "Food gives energy to living things to grow and move.", explanation: "Living bodies require food for energy, while non-living things do not need energy." },
+
+            // Quadrant Set B
+            { id: 5, q: "A bird flies in the sky to catch a worm, while a car moves on the road. What is the main difference in how they move?", choices: ["The bird moves on its own because it is alive.", "The car moves on its own.", "The bird needs fuel to fly."], ans: "The bird moves on its own because it is alive.", explanation: "Living things can move by themselves, but cars need fuel and a driver." },
+            { id: 6, q: "Sunflowers turn their flowers to face the sun during the day. What does this tell us about plants?", choices: ["Plants show movement.", "Plants are non-living.", "Plants do not like light."], ans: "Plants show movement.", explanation: "Even though plants are fixed in soil, their parts can move towards light." },
+            { id: 7, q: "Humans use lungs to breathe air. How do green plants take in air through their leaves?", choices: ["Through small noses", "Through tiny holes called stomata", "Through roots"], ans: "Through tiny holes called stomata", explanation: "Leaves have microscopic openings called stomata to breathe gases." },
+            { id: 8, q: "A fish absorbs oxygen underwater using special body parts. What are these called?", choices: ["Gills", "Lungs", "Fins"], ans: "Gills", explanation: "Fish use gills to take in oxygen dissolved in water." },
+
+            // Quadrant Set C
+            { id: 9, q: "Lily touches a plant and its leaves close up. When she touches her wooden desk, nothing happens. Why?", choices: ["Only plants can move.", "Living things can feel changes around them.", "The desk is asleep."], ans: "Living things can feel changes around them.", explanation: "Living things sense and react to touch or temperature." },
+            { id: 10, q: "A bird lays eggs to hatch chicks. Why can a plastic toy duck never lay eggs?", choices: ["The toy is too small.", "Non-living things cannot reproduce.", "Toys prefer to stay indoors."], ans: "Non-living things cannot reproduce.", explanation: "Reproduction means making young ones of your own kind, which only living things can do." },
+            { id: 11, q: "When winter comes, some animals grow thick fur or sleep in warm caves. Why?", choices: ["Living things respond to changes in weather and environment.", "Animals like playing hide and seek.", "Non-living things feel cold."], ans: "Living things respond to changes in weather and environment.", explanation: "Living organisms react to environmental shifts like hot or cold weather." },
+            { id: 12, q: "A cow gives birth to a calf, and a cat gives birth to kittens. What is this process called?", choices: ["Reproduction", "Digestion", "Breathing"], ans: "Reproduction", explanation: "Producing offspring of the same kind is called reproduction." },
+
+            // Quadrant Set D
+            { id: 13, q: "An oak tree lives for many years, but a housefly lives for only a few weeks. What is this total living time called?", choices: ["A lifespan", "Reproduction", "A game"], ans: "A lifespan", explanation: "Every living thing stays alive for a specific period known as its lifespan." },
+            { id: 14, q: "Which of these is a natural non-living thing found in nature?", choices: ["A plastic toy spade", "A cloud in the sky", "A glass jar"], ans: "A cloud in the sky", explanation: "Natural non-living things occur naturally and are not made by humans." },
+            { id: 15, q: "Which of these is a man-made non-living thing?", choices: ["A river", "A bicycle", "A mountain"], ans: "A bicycle", explanation: "Man-made objects are built or manufactured by people." },
+            { id: 16, q: "A train moves fast using fuel and engine power. Is a train a living thing?", choices: ["Yes, because it moves fast.", "No, it cannot move on its own, grow, or reproduce.", "Yes, because it drinks water."], ans: "No, it cannot move on its own, grow, or reproduce.", explanation: "Machines need fuel and human control, and they cannot grow or produce young ones." }
         ];
 
         const bonusQuestion = {
-            q: "👑 BONUS QUEST: Which of these things goes through excretion (throwing away unwanted waste from its body)?",
-            choices: ["A living horse running in a field", "A computer monitor screen", "A piece of natural white chalk"],
-            ans: "A living horse running in a field",
-            explanation: "Excretion means removing unwanted waste from the body. Only living things produce and remove waste items!"
+            q: "👑 BONUS QUEST: Which of these undergoes excretion by throwing away waste from its body?",
+            choices: ["A horse running in a field", "A computer monitor", "A piece of chalk"],
+            ans: "A horse running in a field",
+            explanation: "Excretion is the process of getting rid of body waste, which only living organisms do."
         };
 
         const sudokuPuzzleSolution = [
@@ -289,7 +299,7 @@
         let completedQuadrantsMask = [false, false, false, false]; 
 
         let questionAttemptCounter = 0; 
-        let hintTimerNode = null;
+        let currentQuizDataObj = null;
 
         const canvas = document.getElementById('confettiLayer');
         const ctx = canvas.getContext('2d');
@@ -308,7 +318,6 @@
                 });
             }
 
-            // 5-SECOND SPLASH SCREEN TIMER LOGIC
             setTimeout(() => {
                 const splash = document.getElementById('innovineSplash');
                 splash.classList.add('opacity-0');
@@ -376,8 +385,6 @@
         }
 
         function resetWholeGame() {
-            if (hintTimerNode) clearTimeout(hintTimerNode);
-            
             scoreCounter = 0;
             healthHearts = 3;
             selectedRowIndex = null;
@@ -547,7 +554,7 @@
             });
 
             if (freshlyCompletedCount > 0) {
-                for(let k = 0; k < 2; k++) {
+                for(let k = 0; k < 4; k++) {
                     if (shuffledQuestionsPool.length > 0) {
                         activeQuizQueue.push(shuffledQuestionsPool.shift());
                     }
@@ -572,10 +579,11 @@
         }
 
         function loadQuizModalUI(dataObj) {
-            if (hintTimerNode) clearTimeout(hintTimerNode);
-            
+            currentQuizDataObj = dataObj;
             questionAttemptCounter = 1; 
+            
             document.getElementById('explanationBox').classList.add('hidden');
+            document.getElementById('explanationBox').innerHTML = `💡 <b>Hint:</b> ${dataObj.explanation}`;
             document.getElementById('quizBadge').innerText = isBonusPhase ? "👑 FINAL BONUS QUEST!" : "✨ QUEST CHECKPOINT";
 
             document.getElementById('quizQuestionText').innerText = dataObj.q;
@@ -599,19 +607,18 @@
             });
 
             document.getElementById('quizOverlay').classList.remove('hidden');
+        }
 
-            hintTimerNode = setTimeout(() => {
-                const rightChoiceBtn = document.querySelector('.quiz-item-node[data-is-correct-truth="true"]');
-                if (rightChoiceBtn) {
-                    rightChoiceBtn.classList.add('hint-glow-effect');
-                    document.getElementById('quizFooterHint').innerText = "✨ Need help? Tap the golden glowing choice!";
-                    document.getElementById('quizFooterHint').className = "text-sm font-black text-amber-400 text-center animate-pulse min-h-[24px] flex items-center justify-center";
-                }
-            }, 12000);
+        function toggleQuizHint() {
+            const explanationBox = document.getElementById('explanationBox');
+            if (explanationBox.classList.contains('hidden')) {
+                explanationBox.classList.remove('hidden');
+            } else {
+                explanationBox.classList.add('hidden');
+            }
         }
 
         function verifyQuizSubmission(chosenText, selectedButtonNode, dataObj) {
-            if (hintTimerNode) clearTimeout(hintTimerNode);
             const allOptionNodes = document.querySelectorAll('.quiz-item-node');
 
             if (chosenText === dataObj.ans) {
@@ -643,17 +650,10 @@
                     selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-md border border-rose-900 opacity-60 cursor-not-allowed child-font";
                     selectedButtonNode.disabled = true;
 
-                    const explanationBox = document.getElementById('explanationBox');
-                    explanationBox.innerHTML = `💡 <b>Hint:</b> ${dataObj.explanation}`;
-                    explanationBox.classList.remove('hidden');
+                    document.getElementById('explanationBox').classList.remove('hidden');
 
-                    document.getElementById('quizFooterHint').innerText = "Attempt 2 of 2 • Use the hint box above!";
+                    document.getElementById('quizFooterHint').innerText = "Attempt 2 of 2 • Check the hint box above!";
                     document.getElementById('quizFooterHint').className = "text-sm font-black text-amber-400 text-center min-h-[24px] flex items-center justify-center";
-
-                    hintTimerNode = setTimeout(() => {
-                        const rightChoiceBtn = document.querySelector('.quiz-item-node[data-is-correct-truth="true"]');
-                        if (rightChoiceBtn) rightChoiceBtn.classList.add('hint-glow-effect');
-                    }, 12000);
 
                 } else {
                     selectedButtonNode.className = "w-full bg-rose-950/40 text-rose-300 line-through font-medium py-3 px-4 text-center rounded-xl text-md border border-rose-900 opacity-60 cursor-not-allowed child-font";
@@ -698,8 +698,6 @@
         }
 
         function exitGameWorkflow(isSuccessOutcome) {
-            if (hintTimerNode) clearTimeout(hintTimerNode);
-            
             document.getElementById('gameplayView').classList.add('hidden');
             document.getElementById('quizOverlay').classList.add('hidden');
             document.getElementById('endScoreValue').innerText = scoreCounter;
@@ -718,7 +716,6 @@
             }
         }
 
-        /* 💾 SAVE & RESUME LOGIC UTILITIES */
         function saveCurrentGameSession() {
             const saveData = {
                 board: currentActiveBoardState,
