@@ -2,57 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Plant Parts Bingo Challenge!</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
         
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #ffedd5 0%, #fef08a 50%, #dcfce7 100%);
+        * {
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #ffedd5 0%, #fef08a 50%, #dcfce7 100%);
             touch-action: manipulation;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow-x: hidden;
+        }
+
+        html {
+            height: -webkit-fill-available;
         }
         
         h1, h2, h3, button, .font-fun {
-            font-family: 'Fredoka', cursive;
+            font-family: 'Fredoka', cursive, sans-serif;
         }
 
         .bingo-card-cell {
             aspect-ratio: 1 / 1;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+            transition: transform 0.15s ease-out, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            -webkit-hyphens: auto;
+            hyphens: auto;
+            line-height: 1.15;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.25rem;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        .bingo-card-cell:active {
+        .bingo-card-cell:active:not(:disabled) {
             transform: scale(0.92);
         }
 
         @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3); }
-            50% { transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.6); }
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+            50% { transform: scale(1.015); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.45); }
         }
         .caller-attention-box {
             animation: pulseGlow 2.5s infinite ease-in-out;
         }
 
         @keyframes hintFlash {
-            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; background-color: #fef3c7; transform: scale(1); }
-            50% { border-color: #ef4444; box-shadow: 0 0 25px #ef4444; background-color: #fee2e2; transform: scale(1.05); }
+            0%, 100% { border-color: #f59e0b; box-shadow: 0 0 6px #f59e0b; background-color: #fef3c7; transform: scale(1); }
+            50% { border-color: #ef4444; box-shadow: 0 0 18px #ef4444; background-color: #fee2e2; transform: scale(1.03); }
         }
         .glowing-hint {
             animation: hintFlash 1s infinite ease-in-out !important;
-            border-width: 5px !important;
+            border-width: 4px !important;
             z-index: 20;
         }
 
         @keyframes bannerPop {
             0% { transform: scale(0.6) rotate(-4deg); opacity: 0; }
-            70% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+            70% { transform: scale(1.05) rotate(2deg); opacity: 1; }
             100% { transform: scale(1) rotate(0deg); opacity: 1; }
         }
         .animate-banner {
-            animation: bannerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+            animation: bannerPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
         }
 
         .color-variant-0 { border-color: #38bdf8; color: #0369a1; }
@@ -60,131 +84,150 @@
         .color-variant-2 { border-color: #fbbf24; color: #b45309; }
         .color-variant-3 { border-color: #c084fc; color: #6b21a8; }
         .color-variant-4 { border-color: #4ade80; color: #15803d; }
+
+        /* Hardware acceleration helper */
+        .hw-accel {
+            transform: translateZ(0);
+            will-change: transform, opacity;
+        }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-3 min-h-screen select-none relative">
+<body class="flex flex-col items-center justify-center p-2 sm:p-4 min-h-screen select-none relative">
 
-    <div id="splashLayer" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center text-center p-6 transition-all duration-500">
-        <div class="space-y-4 flex flex-col items-center">
-            <img src="../../assets/innovine-logo.png" alt="Innovine Logo" class="w-64 max-w-xs object-contain" onerror="this.src='assets/innovine-logo.png'"/>
+    <!-- Splash Screen -->
+    <div id="splashLayer" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center text-center p-6 transition-opacity duration-500 hw-accel">
+        <div class="space-y-4 flex flex-col items-center max-w-xs">
+            <img src="../../assets/innovine-logo.png" alt="Innovine Logo" class="w-56 sm:w-64 max-w-full object-contain" onerror="this.onerror=null; this.src='assets/innovine-logo.png';"/>
             <div class="w-12 h-1.5 bg-amber-400 rounded-full animate-bounce mt-4"></div>
+            <p class="text-xs font-bold text-slate-400 font-fun uppercase tracking-wider">Loading Game...</p>
         </div>
     </div>
 
-    <audio id="sndCorrect" src="../../assets/correct.mp3" preload="auto" onerror="this.src='assets/correct.mp3'"></audio>
-    <audio id="sndWrong" src="../../assets/wrong.mp3" preload="auto" onerror="this.src='assets/wrong.mp3'"></audio>
-    <audio id="sndClaps" src="../../assets/freesound_community-claps-44774.mp3" preload="auto" onerror="this.src='assets/freesound_community-claps-44774.mp3'"></audio>
+    <!-- Audio Elements with Primary & Secondary Paths -->
+    <audio id="sndCorrect" src="../../assets/correct.mp3" preload="auto" onerror="this.onerror=null; this.src='assets/correct.mp3'"></audio>
+    <audio id="sndWrong" src="../../assets/wrong.mp3" preload="auto" onerror="this.onerror=null; this.src='assets/wrong.mp3'"></audio>
+    <audio id="sndClaps" src="../../assets/freesound_community-claps-44774.mp3" preload="auto" onerror="this.onerror=null; this.src='assets/freesound_community-claps-44774.mp3'"></audio>
 
+    <!-- Confetti Canvas -->
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <div id="mainViewport" class="w-full max-w-md hidden flex flex-col items-center justify-center">
+    <!-- Main Viewport -->
+    <div id="mainViewport" class="w-full max-w-md hidden flex flex-col items-center justify-center my-auto">
 
-        <div id="screenWelcome" class="w-full bg-white border-4 border-amber-400 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
+        <!-- Welcome View -->
+        <div id="screenWelcome" class="w-full bg-white border-4 border-amber-400 rounded-[32px] sm:rounded-[40px] p-5 sm:p-8 text-center space-y-5 sm:space-y-6 shadow-2xl animate-banner">
             <div class="space-y-2">
-                <div class="text-7xl animate-bounce">🌱</div>
-                <h1 class="text-4xl font-black text-emerald-600 tracking-wide">Plant Parts Bingo</h1>
-                <p class="text-sm bg-orange-100 text-orange-700 px-4 py-1 rounded-full inline-block font-black">Challenge Puzzle!</p>
+                <div class="text-6xl sm:text-7xl animate-bounce">🌱</div>
+                <h1 class="text-3xl sm:text-4xl font-black text-emerald-600 tracking-wide leading-tight">Plant Parts Bingo</h1>
+                <p class="text-xs sm:text-sm bg-orange-100 text-orange-700 px-4 py-1 rounded-full inline-block font-black">Challenge Puzzle!</p>
             </div>
 
-            <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-amber-900 text-base font-bold font-fun leading-relaxed">
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-amber-900 text-sm sm:text-base font-bold font-fun leading-relaxed">
                 Can you match the words to the plant riddles? Let's find out!
             </div>
 
-            <button onclick="changeScreenView('screenWelcome', 'screenRules')" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black py-4 rounded-2xl text-2xl shadow-lg active:scale-95 transition-transform cursor-pointer tracking-wider">
+            <button onclick="changeScreenView('screenWelcome', 'screenRules')" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:from-emerald-700 active:to-teal-700 text-white font-black py-3.5 sm:py-4 rounded-2xl text-xl sm:text-2xl shadow-lg active:scale-95 transition-transform cursor-pointer tracking-wider font-fun">
                 START GAME 🚀
             </button>
         </div>
 
-        <div id="screenRules" class="hidden w-full bg-white border-4 border-sky-400 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
-            <h2 class="text-3xl font-black text-sky-600">How to Play! 🎯</h2>
+        <!-- Rules View -->
+        <div id="screenRules" class="hidden w-full bg-white border-4 border-sky-400 rounded-[32px] sm:rounded-[40px] p-5 sm:p-8 text-center space-y-5 sm:space-y-6 shadow-2xl animate-banner">
+            <h2 class="text-2xl sm:text-3xl font-black text-sky-600">How to Play! 🎯</h2>
 
-            <div class="text-left space-y-4 text-base font-bold text-slate-700 font-fun">
+            <div class="text-left space-y-3 sm:space-y-4 text-sm sm:text-base font-bold text-slate-700 font-fun">
                 <div class="flex items-center space-x-3 bg-amber-50 p-3 rounded-xl border-2 border-amber-200">
-                    <span class="text-3xl">📢</span>
+                    <span class="text-2xl sm:text-3xl shrink-0">📢</span>
                     <span>Read the riddle inside the top yellow box carefully!</span>
                 </div>
                 <div class="flex items-center space-x-3 bg-sky-50 p-3 rounded-xl border-2 border-sky-200">
-                    <span class="text-3xl">🔤</span>
+                    <span class="text-2xl sm:text-3xl shrink-0">🔤</span>
                     <span>Tap the word button that correctly answers the question.</span>
                 </div>
                 <div class="flex items-center space-x-3 bg-rose-50 p-3 rounded-xl border-2 border-rose-200">
-                    <span class="text-3xl">❤️</span>
-                    <span>Watch out! You have 3 lives to make a straight line.</span>
+                    <span class="text-2xl sm:text-3xl shrink-0">❤️</span>
+                    <span>Watch out! You have 3 lives to complete the game.</span>
                 </div>
             </div>
 
-            <button onclick="launchIllustratedEngine()" class="w-full bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-black py-4 rounded-2xl text-2xl shadow-lg active:scale-95 transition-transform cursor-pointer tracking-wider">
+            <button onclick="launchIllustratedEngine()" class="w-full bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 active:from-sky-700 active:to-indigo-700 text-white font-black py-3.5 sm:py-4 rounded-2xl text-xl sm:text-2xl shadow-lg active:scale-95 transition-transform cursor-pointer tracking-wider font-fun">
                 PLAY NOW ▶️
             </button>
         </div>
 
-        <div id="screenGameplay" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[40px] p-4 flex flex-col space-y-4 shadow-2xl relative">
+        <!-- Gameplay View -->
+        <div id="screenGameplay" class="hidden w-full bg-white border-4 border-emerald-500 rounded-[32px] sm:rounded-[40px] p-3.5 sm:p-4 flex flex-col space-y-3 sm:space-y-4 shadow-2xl relative">
             
-            <div class="flex justify-between items-center bg-gradient-to-r from-emerald-500 to-teal-500 p-3 rounded-2xl text-white shadow-inner">
+            <!-- HUD -->
+            <div class="flex justify-between items-center bg-gradient-to-r from-emerald-500 to-teal-500 p-2.5 sm:p-3 rounded-2xl text-white shadow-inner">
                 <div>
-                    <span class="text-[10px] block font-black uppercase opacity-90 tracking-widest">SCORE</span>
-                    <span id="scoreTracker" class="text-xl font-black">0</span>
+                    <span class="text-[9px] sm:text-[10px] block font-black uppercase opacity-90 tracking-widest">SCORE</span>
+                    <span id="scoreTracker" class="text-lg sm:text-xl font-black">0</span>
                 </div>
                 <div class="flex flex-col items-center">
-                    <span class="text-[10px] block font-black uppercase opacity-90 tracking-widest mb-0.5">LIVES</span>
-                    <div id="heartsContainer" class="flex space-x-1 text-lg">
+                    <span class="text-[9px] sm:text-[10px] block font-black uppercase opacity-90 tracking-widest mb-0.5">LIVES</span>
+                    <div id="heartsContainer" class="flex space-x-1 text-base sm:text-lg">
                         ❤️❤️❤️
                     </div>
                 </div>
             </div>
 
-            <div class="w-full bg-amber-100 border-4 border-amber-400 rounded-2xl p-4 text-center shadow-md caller-attention-box">
-                <div class="text-[11px] font-black text-amber-700 tracking-wider uppercase mb-1">🤔 Riddle Question:</div>
-                <p id="clueTextDisplay" class="text-base font-black text-amber-950 leading-snug min-h-[56px] flex items-center justify-center font-fun">
+            <!-- Riddle Caller Box -->
+            <div class="w-full bg-amber-100 border-4 border-amber-400 rounded-2xl p-3 sm:p-4 text-center shadow-md caller-attention-box">
+                <div class="text-[10px] sm:text-[11px] font-black text-amber-800 tracking-wider uppercase mb-1">🤔 Riddle Question:</div>
+                <p id="clueTextDisplay" class="text-xs sm:text-sm md:text-base font-black text-amber-950 leading-snug min-h-[52px] sm:min-h-[56px] flex items-center justify-center font-fun px-1">
                     Loading puzzle text...
                 </p>
             </div>
 
+            <!-- Grid Container & Line Banner Overlay -->
             <div class="relative">
-                <div id="bingoGridDeck" class="grid grid-cols-3 gap-3 p-3 bg-slate-50 border-4 border-slate-200 rounded-2xl shadow-inner">
-                    </div>
+                <div id="bingoGridDeck" class="grid grid-cols-3 gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-50 border-4 border-slate-200 rounded-2xl shadow-inner">
+                </div>
 
-                <div id="bingoLineBanner" class="hidden absolute inset-0 bg-slate-900/40 rounded-2xl flex items-center justify-center p-4 z-30">
-                    <div class="bg-gradient-to-b from-yellow-300 to-amber-500 border-4 border-white rounded-3xl p-6 text-center shadow-2xl w-full max-w-[280px] animate-banner">
-                        <div class="text-5xl mb-2 animate-bounce">🎉🏆</div>
+                <div id="bingoLineBanner" class="hidden absolute inset-0 bg-slate-900/50 backdrop-blur-xs rounded-2xl flex items-center justify-center p-3 z-30">
+                    <div class="bg-gradient-to-b from-yellow-300 to-amber-500 border-4 border-white rounded-3xl p-5 sm:p-6 text-center shadow-2xl w-full max-w-[280px] animate-banner">
+                        <div class="text-4xl sm:text-5xl mb-1 sm:mb-2 animate-bounce">🎉🏆</div>
                         <h3 class="text-2xl font-black text-amber-950 uppercase tracking-tight">BINGO!</h3>
-                        <p class="text-xs font-bold text-amber-900 bg-white/60 px-3 py-1 rounded-full inline-block mt-1 font-fun">Line Match Complete!</p>
-                        <div class="text-sm font-black text-white mt-3 uppercase tracking-wider animate-pulse">Resuming Game...</div>
+                        <p class="text-xs font-bold text-amber-900 bg-white/70 px-3 py-1 rounded-full inline-block mt-1 font-fun">Line Match Complete!</p>
+                        <div class="text-xs sm:text-sm font-black text-white mt-3 uppercase tracking-wider animate-pulse">Resuming Game...</div>
                     </div>
                 </div>
             </div>
 
-            <p id="systemActionLabel" class="text-center text-xs font-black text-slate-400 py-1 min-h-[20px] font-fun uppercase tracking-wide">
+            <p id="systemActionLabel" class="text-center text-xs font-black text-slate-400 py-0.5 min-h-[22px] font-fun uppercase tracking-wide flex items-center justify-center">
                 Tap the matching plant part name!
             </p>
 
         </div>
 
-        <div id="screenGameOver" class="hidden w-full bg-white border-4 border-rose-500 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
+        <!-- Game Over View -->
+        <div id="screenGameOver" class="hidden w-full bg-white border-4 border-rose-500 rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 text-center space-y-5 sm:space-y-6 shadow-2xl animate-banner">
             <div class="space-y-2">
-                <div class="text-7xl">💔</div>
-                <h2 class="text-3xl font-black text-rose-600 tracking-wide uppercase">Out of Lives!</h2>
-                <p class="text-sm bg-rose-100 text-rose-800 px-4 py-1.5 rounded-full inline-block font-black">Don't worry, you can try again!</p>
+                <div class="text-6xl sm:text-7xl">💔</div>
+                <h2 class="text-2xl sm:text-3xl font-black text-rose-600 tracking-wide uppercase">Out of Lives!</h2>
+                <p class="text-xs sm:text-sm bg-rose-100 text-rose-800 px-4 py-1.5 rounded-full inline-block font-black">Don't worry, you can try again!</p>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-transform cursor-pointer">
+            <button onclick="restartGameSession()" class="w-full bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 active:from-rose-700 active:to-orange-700 text-white font-black py-3.5 sm:py-4 rounded-2xl text-lg sm:text-xl shadow-lg active:scale-95 transition-transform cursor-pointer font-fun">
                 TRY AGAIN 🔄
             </button>
         </div>
 
-        <div id="screenVictory" class="hidden w-full bg-white border-4 border-teal-500 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
+        <!-- Victory View -->
+        <div id="screenVictory" class="hidden w-full bg-white border-4 border-teal-500 rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 text-center space-y-5 sm:space-y-6 shadow-2xl animate-banner">
             <div class="space-y-2">
-                <div class="text-7xl animate-bounce">🏆🎉</div>
-                <h2 class="text-3xl font-black text-teal-600 tracking-wide uppercase">Super Clear!</h2>
-                <p class="text-sm bg-teal-100 text-teal-800 px-4 py-1.5 rounded-full inline-block font-black">You matched all items perfectly!</p>
+                <div class="text-6xl sm:text-7xl animate-bounce">🏆🎉</div>
+                <h2 class="text-2xl sm:text-3xl font-black text-teal-600 tracking-wide uppercase">Super Clear!</h2>
+                <p class="text-xs sm:text-sm bg-teal-100 text-teal-800 px-4 py-1.5 rounded-full inline-block font-black">You matched all items perfectly!</p>
             </div>
 
-            <div class="bg-amber-50 border-2 border-amber-300 p-5 rounded-2xl space-y-2">
+            <div class="bg-amber-50 border-2 border-amber-300 p-4 sm:p-5 rounded-2xl space-y-1">
                 <p class="text-slate-500 text-xs font-black uppercase tracking-wider">Final Star Points</p>
-                <div class="text-5xl font-black text-emerald-600"><span id="finalScoreText">0</span></div>
+                <div class="text-4xl sm:text-5xl font-black text-emerald-600"><span id="finalScoreText">0</span></div>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black py-4 rounded-2xl text-xl shadow-lg active:scale-95 transition-transform cursor-pointer">
+            <button onclick="restartGameSession()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:from-emerald-700 active:to-teal-700 text-white font-black py-3.5 sm:py-4 rounded-2xl text-lg sm:text-xl shadow-lg active:scale-95 transition-transform cursor-pointer font-fun">
                 PLAY A NEW ROUND 🔄
             </button>
         </div>
@@ -192,6 +235,7 @@
     </div>
 
     <script>
+        // Master Catalog
         const gameCatalog = [
             { term: "Tap Root", clue: "I am a thick, strong main root that grows straight down deep into the soil. I also have tiny side roots." },
             { term: "Fibrous Root", clue: "We are a big, bushy bunch of thin, hair-like roots! We all grow out together from the bottom of the stem." },
@@ -212,55 +256,128 @@
         let incorrectAttemptsOnCurrentQuestion = 0;
         let triggeredLinesSet = new Set();
         let isHaltedForBanner = false;
+        let audioUnlocked = false;
 
         const canvasElement = document.getElementById('confettiCanvas');
         const canvasCtx = canvasElement.getContext('2d');
         let particlesArray = [];
+        let animFrameId = null;
 
+        // Shuffle utility
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Initialize viewport and pre-setup
         window.addEventListener('DOMContentLoaded', () => {
-            canvasElement.width = window.innerWidth;
-            canvasElement.height = window.innerHeight;
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
             
+            // Unlock audio context on first touch/click
+            const unlockAudio = () => {
+                if (!audioUnlocked) {
+                    ['sndCorrect', 'sndWrong', 'sndClaps'].forEach(id => {
+                        const audio = document.getElementById(id);
+                        if (audio) {
+                            audio.play().then(() => {
+                                audio.pause();
+                                audio.currentTime = 0;
+                            }).catch(() => {});
+                        }
+                    });
+                    audioUnlocked = true;
+                }
+            };
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+            document.addEventListener('click', unlockAudio, { once: true });
+
+            // Hide Splash
             setTimeout(() => {
                 const splash = document.getElementById('splashLayer');
-                splash.classList.add('opacity-0');
-                setTimeout(() => { 
-                    splash.classList.add('hidden'); 
-                    document.getElementById('mainViewport').classList.remove('hidden'); 
-                }, 500);
-            }, 5000);
+                if (splash) {
+                    splash.classList.add('opacity-0');
+                    setTimeout(() => { 
+                        splash.classList.add('hidden'); 
+                        document.getElementById('mainViewport').classList.remove('hidden'); 
+                    }, 500);
+                }
+            }, 2500);
         });
 
+        function resizeCanvas() {
+            if (canvasElement) {
+                canvasElement.width = window.innerWidth;
+                canvasElement.height = window.innerHeight;
+            }
+        }
+
         function playAudioEffect(id) {
-            const el = document.getElementById(id);
-            if (el) { el.load(); el.play().catch(e => console.log(e)); }
+            try {
+                const el = document.getElementById(id);
+                if (el) { 
+                    el.currentTime = 0; 
+                    const playPromise = el.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                            // Fallback silent failure if audio blocked by browser policy
+                        });
+                    }
+                }
+            } catch (e) {
+                console.log("Audio playback error:", e);
+            }
         }
 
         function triggerConfettiBurst() {
             canvasElement.classList.remove('hidden');
             particlesArray = [];
-            for (let i = 0; i < 40; i++) {
+            const particleCount = window.innerWidth < 640 ? 30 : 50;
+            for (let i = 0; i < particleCount; i++) {
                 particlesArray.push({
-                    x: window.innerWidth / 2, y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 16, vy: (Math.random() - 0.5) * 16 - 3,
-                    r: Math.random() * 5 + 4, color: `hsl(${Math.random() * 360}, 95%, 65%)`, alpha: 1
+                    x: window.innerWidth / 2, 
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 14, 
+                    vy: (Math.random() - 0.5) * 14 - 3,
+                    r: Math.random() * 4 + 3, 
+                    color: `hsl(${Math.random() * 360}, 95%, 65%)`, 
+                    alpha: 1
                 });
             }
-            requestAnimationFrame(renderConfettiFrame);
+            if (!animFrameId) {
+                animFrameId = requestAnimationFrame(renderConfettiFrame);
+            }
         }
 
         function renderConfettiFrame() {
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             let active = false;
             particlesArray.forEach(p => {
-                p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.alpha -= 0.02;
+                p.x += p.vx; 
+                p.y += p.vy; 
+                p.vy += 0.22; 
+                p.alpha -= 0.02;
                 if (p.alpha > 0) {
-                    active = true; canvasCtx.save(); canvasCtx.globalAlpha = p.alpha;
-                    canvasCtx.fillStyle = p.color; canvasCtx.beginPath(); canvasCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2); canvasCtx.fill(); canvasCtx.restore();
+                    active = true; 
+                    canvasCtx.save(); 
+                    canvasCtx.globalAlpha = p.alpha;
+                    canvasCtx.fillStyle = p.color; 
+                    canvasCtx.beginPath(); 
+                    canvasCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2); 
+                    canvasCtx.fill(); 
+                    canvasCtx.restore();
                 }
             });
-            if (active) requestAnimationFrame(renderConfettiFrame);
-            else canvasElement.classList.add('hidden');
+            if (active) {
+                animFrameId = requestAnimationFrame(renderConfettiFrame);
+            } else {
+                canvasElement.classList.add('hidden');
+                animFrameId = null;
+            }
         }
 
         function changeScreenView(hideId, showId) {
@@ -271,36 +388,52 @@
         function updateHeartsDisplay() {
             const container = document.getElementById('heartsContainer');
             container.innerHTML = '';
-            for(let i=0; i<3; i++) {
+            for (let i = 0; i < 3; i++) {
                 container.innerHTML += (i < livesLeft) ? '❤️' : '🖤';
             }
+        }
+
+        function restartGameSession() {
+            document.getElementById('screenGameOver').classList.add('hidden');
+            document.getElementById('screenVictory').classList.add('hidden');
+            document.getElementById('screenGameplay').classList.add('hidden');
+            launchIllustratedEngine();
         }
 
         function launchIllustratedEngine() {
             changeScreenView('screenRules', 'screenGameplay');
             
-            runningScore = 0; currentSequenceIndex = 0; livesLeft = 3; incorrectAttemptsOnCurrentQuestion = 0;
+            runningScore = 0; 
+            currentSequenceIndex = 0; 
+            livesLeft = 3; 
+            incorrectAttemptsOnCurrentQuestion = 0;
             triggeredLinesSet.clear();
             isHaltedForBanner = false;
+
             document.getElementById('scoreTracker').innerText = runningScore;
             document.getElementById('bingoLineBanner').classList.add('hidden');
             updateHeartsDisplay();
 
-            activeGridData = [...gameCatalog];
-            for (let i = activeGridData.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [activeGridData[i], activeGridData[j]] = [activeGridData[j], activeGridData[i]];
-            }
-            activeGridData = activeGridData.map((item, idx) => ({ ...item, marked: false, colorId: idx % 5 }));
+            // Randomize grid board layout and caller sequence freshly every game start
+            const shuffledCatalog = shuffleArray(gameCatalog);
+            
+            activeGridData = shuffledCatalog.map((item, idx) => ({
+                ...item,
+                marked: false,
+                colorId: idx % 5
+            }));
 
-            callerSequence = [...gameCatalog];
-            for (let i = callerSequence.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [callerSequence[i], callerSequence[j]] = [callerSequence[j], callerSequence[i]];
-            }
+            callerSequence = shuffleArray(gameCatalog);
 
             renderVisualBingoBoard();
             presentCurrentDescriptionCall();
+        }
+
+        function getDynamicFontSizeClass(term) {
+            const len = term.length;
+            if (len > 12) return "text-[10px] sm:text-xs leading-tight font-extrabold";
+            if (len > 9) return "text-[11px] sm:text-xs leading-tight font-extrabold";
+            return "text-xs sm:text-sm leading-tight font-extrabold";
         }
 
         function renderVisualBingoBoard() {
@@ -311,21 +444,27 @@
 
             activeGridData.forEach((cellData, index) => {
                 const containerButton = document.createElement('button');
+                const fontClass = getDynamicFontSizeClass(cellData.term);
                 
-                let styleClasses = `bingo-card-cell w-full bg-white border-4 rounded-3xl p-2 flex items-center justify-center text-center shadow-md text-sm font-black tracking-tight cursor-pointer font-fun transition-all color-variant-${cellData.colorId}`;
+                let styleClasses = `bingo-card-cell w-full bg-white border-3 sm:border-4 rounded-2xl sm:rounded-3xl shadow-md cursor-pointer font-fun color-variant-${cellData.colorId} ${fontClass}`;
                 
                 if (cellData.marked) {
-                    styleClasses = "bingo-card-cell w-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-4 border-emerald-300 rounded-3xl p-2 flex flex-col items-center justify-center text-center shadow-inner text-sm font-black transform scale-95 cursor-not-allowed";
+                    styleClasses = `bingo-card-cell w-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-3 sm:border-4 border-emerald-300 rounded-2xl sm:rounded-3xl shadow-inner font-fun scale-[0.96] cursor-not-allowed ${fontClass}`;
                 } else if (incorrectAttemptsOnCurrentQuestion >= 2 && cellData.term === currentTargetTerm) {
-                    styleClasses = "bingo-card-cell w-full text-sm font-black tracking-tight rounded-3xl p-2 flex items-center justify-center text-center cursor-pointer font-fun glowing-hint";
+                    styleClasses = `bingo-card-cell w-full rounded-2xl sm:rounded-3xl cursor-pointer font-fun glowing-hint ${fontClass}`;
                 }
 
                 containerButton.className = styleClasses;
                 
                 if (cellData.marked) {
-                    containerButton.innerHTML = `<div><div class="text-xs uppercase opacity-80 tracking-wider">Done</div><div class="text-xs truncate">${cellData.term}</div></div>`;
+                    containerButton.innerHTML = `
+                        <span class="text-[9px] uppercase tracking-wider opacity-90 font-black mb-0.5 text-emerald-100 flex items-center space-x-1">
+                            <span>✓</span><span>DONE</span>
+                        </span>
+                        <span class="w-full break-words px-0.5">${cellData.term}</span>
+                    `;
                 } else {
-                    containerButton.innerText = cellData.term;
+                    containerButton.innerHTML = `<span class="w-full break-words px-0.5">${cellData.term}</span>`;
                 }
                 
                 containerButton.onclick = () => validateCardSelection(index);
@@ -340,7 +479,9 @@
                 setTimeout(() => {
                     changeScreenView('screenGameplay', 'screenVictory');
                     document.getElementById('finalScoreText').innerText = runningScore;
-                }, 1000);
+                    playAudioEffect('sndClaps');
+                    triggerConfettiBurst();
+                }, 800);
             }
         }
 
@@ -350,7 +491,7 @@
             const selectedCell = activeGridData[clickedIndex];
             const activeCallTarget = callerSequence[currentSequenceIndex];
 
-            if (selectedCell.marked) return;
+            if (!selectedCell || selectedCell.marked) return;
 
             if (selectedCell.term === activeCallTarget.term) {
                 playAudioEffect('sndCorrect');
@@ -361,7 +502,7 @@
                 document.getElementById('scoreTracker').innerText = runningScore;
 
                 document.getElementById('systemActionLabel').innerText = `✨ Right! That is ${selectedCell.term}!`;
-                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-emerald-600 animate-pulse font-fun uppercase tracking-wide";
+                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-emerald-600 animate-pulse font-fun uppercase tracking-wide flex items-center justify-center";
 
                 incorrectAttemptsOnCurrentQuestion = 0; 
                 renderVisualBingoBoard();
@@ -371,14 +512,15 @@
 
                 currentSequenceIndex++;
                 
-                // Adjust delay to wait nicely if a line banner is showing
-                let nextActionDelay = lineCreated ? 3200 : 1600;
+                let nextActionDelay = lineCreated ? 2800 : 1400;
 
                 setTimeout(() => {
-                    document.getElementById('systemActionLabel').innerText = "Tap the matching plant part name!";
-                    document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-slate-400 py-1 font-fun uppercase tracking-wide";
-                    presentCurrentDescriptionCall();
-                    renderVisualBingoBoard(); 
+                    if (livesLeft > 0) {
+                        document.getElementById('systemActionLabel').innerText = "Tap the matching plant part name!";
+                        document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-slate-400 py-0.5 font-fun uppercase tracking-wide flex items-center justify-center";
+                        presentCurrentDescriptionCall();
+                        renderVisualBingoBoard(); 
+                    }
                 }, nextActionDelay);
             } else {
                 playAudioEffect('sndWrong');
@@ -390,12 +532,12 @@
                 if (livesLeft <= 0) {
                     setTimeout(() => {
                         changeScreenView('screenGameplay', 'screenGameOver');
-                    }, 1000);
+                    }, 600);
                     return;
                 }
 
                 document.getElementById('systemActionLabel').innerText = "❌ Try another word card below!";
-                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-rose-500 animate-bounce font-fun uppercase tracking-wide";
+                document.getElementById('systemActionLabel').className = "text-center text-xs font-black text-rose-500 animate-bounce font-fun uppercase tracking-wide flex items-center justify-center";
                 
                 renderVisualBingoBoard();
             }
@@ -422,26 +564,23 @@
                         triggeredLinesSet.add(i);
                         foundNewLine = true;
                         
-                        // Stop layout inputs momentarily
                         isHaltedForBanner = true;
                         
                         playAudioEffect('sndClaps');
                         triggerConfettiBurst();
                         
-                        // Show congratulations overlay banner
                         const banner = document.getElementById('bingoLineBanner');
                         banner.classList.remove('hidden');
                         
                         document.getElementById('systemActionLabel').innerText = "🎉 BINGO LINE COMPLETE! 🎉";
-                        document.getElementById('systemActionLabel').className = "text-center text-sm font-black text-amber-500 animate-bounce font-fun tracking-wide";
+                        document.getElementById('systemActionLabel').className = "text-center text-xs sm:text-sm font-black text-amber-500 animate-bounce font-fun tracking-wide flex items-center justify-center";
 
-                        // Auto resume loop after 2.5 seconds
                         setTimeout(() => {
                             banner.classList.add('hidden');
                             isHaltedForBanner = false;
-                        }, 2500);
+                        }, 2200);
 
-                        break; // Trigger one line celebration banner at a time
+                        break; 
                     }
                 }
             }
