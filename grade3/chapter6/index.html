@@ -2,43 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Avian Cloud Quest Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- Modern Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --primary: #0284c7;
+            --primary-light: #38bdf8;
+            --accent: #f59e0b;
+            --accent-hover: #d97706;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #111827;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
+            background-color: var(--bg-dark);
+            font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Fully Responsive Arcade Viewport Wrapper */
+        /* Responsive Arcade Viewport Cabinet */
         .arcade-container {
             width: 100%;
             max-width: 440px;
             height: 100%;
-            max-height: 820px;
+            max-height: 860px;
             position: relative;
             overflow: hidden;
             background-color: #70c5ce;
             display: flex;
             flex-direction: column;
-            justify-between: space-between;
+            justify-content: space-between;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
         }
 
-        @media (min-height: 821px) {
+        @media (min-height: 700px) and (min-width: 450px) {
             .arcade-container {
-                height: 96vh;
-                border: 6px solid #000000;
-                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-                border-radius: 16px;
+                height: 94vh;
+                border: 5px solid #1e293b;
+                border-radius: 24px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             }
         }
 
@@ -48,97 +72,146 @@
             height: 100%;
         }
 
-        .pixel-card {
-            border: 4px solid #000000;
-            box-shadow: 6px 6px 0px #000000;
-            border-radius: 12px;
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 3px solid #1e293b;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
         }
-        
+
         .pixel-btn {
-            border: 4px solid #000000;
-            box-shadow: 0px 5px 0px #000000;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
-            transition: transform 0.05s, box-shadow 0.05s;
-            border-radius: 12px;
+            border: 3px solid #0f172a;
+            box-shadow: 0px 5px 0px #0f172a;
+            text-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+            transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s;
+            border-radius: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
         }
+
         .pixel-btn:active {
             transform: translateY(4px);
-            box-shadow: 0px 1px 0px #000000;
+            box-shadow: 0px 1px 0px #0f172a;
         }
+
+        /* Utility classes */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+
+        /* Animations */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .pulse { animation: pulse-subtle 2s infinite ease-in-out; }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .floating { animation: float-slow 3s infinite ease-in-out; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen w-screen bg-[#0f172a]">
+<body>
 
+    <!-- Audio Elements -->
     <audio id="sndCorrect" src="./assets/correct.mp3" preload="auto"></audio>
     <audio id="sndWrong" src="./assets/wrong.mp3" preload="auto"></audio>
     <audio id="sndClaps" src="./assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <div class="arcade-container">
         
-        <div class="relative w-full flex-grow overflow-hidden bg-[#70c5ce]">
-            <canvas id="gameCanvas" width="440" height="640"></canvas>
+        <!-- Game Canvas Wrapper -->
+        <div class="relative w-full flex-grow overflow-hidden style="flex: 1; position: relative;">
+            <canvas id="gameCanvas"></canvas>
 
-            <div id="screenSplash" class="absolute inset-0 bg-white flex items-center justify-center p-6 z-50 transition-opacity duration-500">
-                <img src="./assets/innovine-logo.png" alt="Innovine Logo" class="max-w-xs max-h-[70%] w-auto h-auto object-contain object-center">
+            <!-- Splash Screen -->
+            <div id="screenSplash" style="position: absolute; inset: 0; background-color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 50; transition: opacity 0.6s ease;">
+                <img src="./assets/innovine-logo.png" alt="Innovine Logo" style="max-width: 80%; max-height: 60%; width: auto; height: auto; object-fit: contain;" onerror="this.style.display='none'; document.getElementById('splashFallback').style.display='block';">
+                <div id="splashFallback" style="display:none; font-family:'Outfit'; font-size:32px; font-weight:900; color:#0284c7;">INNOVINE</div>
             </div>
 
-            <div id="screenTitle" class="hidden absolute inset-0 bg-black/20 flex flex-col items-center justify-center p-5 z-20">
-                <div class="bg-[#fcf8f2] pixel-card p-6 w-full text-center space-y-6">
-                    <h1 class="text-3xl font-black text-slate-800 leading-tight uppercase tracking-wide">
-                        AVIAN<br><span class="text-sky-500 text-4xl block mt-1 font-extrabold">CLOUD QUEST</span>
+            <!-- Title Screen -->
+            <div id="screenTitle" class="hidden" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 20;">
+                <div class="glass-card floating" style="padding: 28px 20px; width: 100%; text-align: center;">
+                    <div style="font-size: 14px; font-weight: 800; color: #0284c7; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Science Quest Series</div>
+                    <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; color: #0f172a; margin: 0; line-height: 1.1; text-transform: uppercase;">
+                        AVIAN<br><span style="color: #0284c7; font-size: 38px;">CLOUD QUEST</span>
                     </h1>
-                    <button onclick="showInstructions()" class="w-full bg-amber-500 hover:bg-amber-400 text-white text-xl font-black py-4 pixel-btn cursor-pointer uppercase">
+                    <p style="color: #64748b; font-size: 14px; font-weight: 600; margin: 12px 0 24px 0;">Navigate clouds & master bird adaptations!</p>
+                    <button onclick="showInstructions()" class="pixel-btn pulse" style="width: 100%; background: var(--accent); color: white; font-size: 20px; padding: 16px 0; cursor: pointer; text-transform: uppercase;">
                         START QUEST ✨
                     </button>
                 </div>
             </div>
 
-            <div id="screenInstructions" class="hidden absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-5 z-20">
-                <div class="bg-white pixel-card p-6 w-full space-y-5">
-                    <h2 class="text-2xl font-black text-center text-emerald-600 uppercase tracking-tight">MISSION MANUAL 🚀</h2>
-                    <div class="space-y-4 text-base font-bold text-slate-700 leading-normal">
-                        <p class="flex items-start gap-2"><span>■</span> Use screen buttons <span class="text-sky-500 font-extrabold">▲ UP</span> / <span class="text-sky-500 font-extrabold">▼ DOWN</span> to fly.</p>
-                        <p class="flex items-start gap-2"><span>■</span> Avoid crashing into the solid brown column systems.</p>
-                        <p class="flex items-start gap-2"><span>■</span> Intercept flying cloud modules to trigger quiz points (+10 marks).</p>
+            <!-- Instructions Screen -->
+            <div id="screenInstructions" class="hidden" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 20;">
+                <div class="glass-card" style="padding: 24px; width: 100%;">
+                    <h2 style="font-family: 'Outfit'; font-size: 24px; font-weight: 900; text-align: center; color: #059669; margin: 0 0 16px 0; text-transform: uppercase;">MISSION MANUAL 🚀</h2>
+                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; font-weight: 600; color: #334155; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: #e0f2fe; color: #0284c7; padding: 6px 10px; border-radius: 8px; font-size: 18px;">▲▼</span>
+                            <span>Use screen buttons or <b>Arrow Keys</b> to glide up & down.</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: #fef3c7; color: #d97706; padding: 6px 10px; border-radius: 8px; font-size: 18px;">🪵</span>
+                            <span>Avoid crashing into solid obstacle columns.</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: #dcfce7; color: #16a34a; padding: 6px 10px; border-radius: 8px; font-size: 18px;">☁️</span>
+                            <span>Intercept floating modules to answer science questions (+10 pts).</span>
+                        </div>
                     </div>
-                    <button onclick="startGameEngine()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-xl font-black py-4 pixel-btn cursor-pointer uppercase">
+                    <button onclick="startGameEngine()" class="pixel-btn" style="width: 100%; background: #10b981; color: white; font-size: 20px; padding: 16px 0; cursor: pointer; text-transform: uppercase;">
                         LET'S FLY 🎈
                     </button>
                 </div>
             </div>
 
-            <div id="modalQuiz" class="hidden absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-40">
-                <div id="modalCard" class="bg-white border-4 border-black p-6 w-full text-center space-y-5 rounded-2xl shadow-2xl">
-                    <div class="inline-block px-4 py-1.5 bg-sky-100 border-2 border-black text-sky-700 font-black text-sm uppercase rounded-full" id="modalCloudTerm">
+            <!-- Quiz Modal -->
+            <div id="modalQuiz" class="hidden" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 40;">
+                <div id="modalCard" class="glass-card" style="padding: 20px; width: 100%; text-align: center;">
+                    <div id="modalCloudTerm" style="display: inline-block; padding: 6px 16px; background: #e0f2fe; border: 2px solid #0284c7; color: #0369a1; font-weight: 800; font-size: 14px; text-transform: uppercase; border-radius: 20px; margin-bottom: 12px;">
                         ☁️ MODULE
                     </div>
-                    <p id="modalPrompt" class="text-lg text-slate-800 font-black leading-snug"></p>
-                    <div id="modalChoices" class="flex flex-col gap-3 pt-1"></div>
+                    <p id="modalPrompt" style="font-size: 17px; color: #0f172a; font-weight: 700; line-height: 1.35; margin: 0 0 16px 0;"></p>
+                    <div id="modalChoices" style="display: flex; flex-direction: column; gap: 10px;"></div>
                 </div>
             </div>
 
-            <div id="screenGameOver" class="hidden absolute inset-0 bg-black/50 flex flex-col items-center justify-center p-5 z-30">
-                <div class="bg-white pixel-card p-6 w-full text-center space-y-5">
-                    <h2 class="text-3xl font-black text-sky-600 uppercase">QUEST COMPLETED 🎉</h2>
-                    <p class="text-slate-500 text-sm font-bold leading-normal">Fabulous flight! All science tasks processed.</p>
+            <!-- Game Over Screen -->
+            <div id="screenGameOver" class="hidden" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 30;">
+                <div class="glass-card" style="padding: 28px 20px; width: 100%; text-align: center;">
+                    <h2 style="font-family: 'Outfit'; font-size: 28px; font-weight: 900; color: #0284c7; margin: 0 0 8px 0; text-transform: uppercase;">QUEST COMPLETED 🎉</h2>
+                    <p style="color: #64748b; font-size: 14px; font-weight: 600; margin: 0 0 20px 0;">Fabulous flight! All science tasks processed.</p>
                     
-                    <div class="bg-slate-50 border-2 border-black p-4 rounded-xl">
-                        <span class="text-xs font-bold text-slate-400 block uppercase mb-1">TOTAL SCORE MARKS</span>
-                        <span id="txtFinalScore" class="text-4xl font-black text-emerald-600">0</span>
+                    <div style="background: #f8fafc; border: 2px solid #cbd5e1; padding: 16px; border-radius: 16px; margin-bottom: 24px;">
+                        <span style="font-size: 12px; font-weight: 800; color: #94a3b8; display: block; text-transform: uppercase; letter-spacing: 1px;">FINAL SCORE MARKS</span>
+                        <span id="txtFinalScore" style="font-family: 'Outfit'; font-size: 46px; font-weight: 900; color: #10b981;">0</span>
                     </div>
 
-                    <button onclick="restartQuest()" class="w-full bg-amber-500 hover:bg-amber-400 text-white text-xl font-black py-4 pixel-btn uppercase">
+                    <button onclick="restartQuest()" class="pixel-btn" style="width: 100%; background: var(--accent); color: white; font-size: 20px; padding: 16px 0; cursor: pointer; text-transform: uppercase;">
                         PLAY AGAIN 🔄
                     </button>
                 </div>
             </div>
         </div>
 
-        <div id="controlsDeck" class="hidden bg-amber-950 border-t-4 border-black p-3.5 gap-4 items-center justify-center z-30">
-            <button id="btnMoveUp" class="pixel-btn bg-sky-500 hover:bg-sky-400 text-white text-base font-black py-4 flex-1 cursor-pointer select-none tracking-tight">
+        <!-- Touch Controls Deck -->
+        <div id="controlsDeck" class="hidden" style="background: #1e293b; border-top: 4px solid #0f172a; padding: 12px 16px; gap: 12px; align-items: center; justify-content: center; z-index: 30;">
+            <button id="btnMoveUp" class="pixel-btn" style="background: #0284c7; color: white; font-size: 16px; padding: 14px 0; flex: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;">
                 ▲ GLIDE UP
             </button>
-            <button id="btnMoveDown" class="pixel-btn bg-sky-500 hover:bg-sky-400 text-white text-base font-black py-4 flex-1 cursor-pointer select-none tracking-tight">
+            <button id="btnMoveDown" class="pixel-btn" style="background: #0284c7; color: white; font-size: 16px; padding: 14px 0; flex: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;">
                 ▼ GLIDE DOWN
             </button>
         </div>
@@ -146,9 +219,11 @@
     </div>
 
     <script>
+        // High Performance Canvas & Game State Engine
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        let dpr = window.devicePixelRatio || 1;
         let state = "SPLASH";
         let score = 0;
         let lives = 3;
@@ -157,6 +232,9 @@
         let pipeArray = [];
         let cloudArray = [];
         let confettiArray = [];
+        let particleArray = [];
+        let bgClouds = [];
+        
         let screenFlashTick = 0;
         let freezeFrameTimer = 0;
         
@@ -171,10 +249,11 @@
             x: 75,
             y: 240,
             width: 38,
-            height: 26,
-            speed: 3.5
+            height: 28,
+            speed: 3.8,
+            angle: 0
         };
-        const gameScrollSpeed = 1.4; // Soft pace for students
+        const gameScrollSpeed = 1.6;
 
         const questionBank = [
             { term: "Upstroke", prompt: "Identify the correct wing movement profile:", choices: ["Wings move upward and forward", "Wings move downward and backward"], answer: "Wings move upward and forward" },
@@ -190,22 +269,64 @@
             { term: "Hollow Bones", prompt: "How do specialized internal bone grids aid flight?", choices: ["Decreasing total body weight parameters", "Adding rigid structural weight ballasts"], answer: "Decreasing total body weight parameters" }
         ];
 
+        // Web Audio Synth Fallback (Guarantees sound on strict mobile devices)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playAudioSynth(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch(e) {}
+        }
+
+        function safePlaySound(id, synthType) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.currentTime = 0;
+                let promise = el.play();
+                if (promise !== undefined) {
+                    promise.catch(() => playAudioSynth(synthType));
+                }
+            } else {
+                playAudioSynth(synthType);
+            }
+        }
+
         window.onload = function() {
             setupInputControls();
-            
             window.addEventListener('resize', autoResizeCanvasViewport);
             autoResizeCanvasViewport();
+            initBackgroundClouds();
 
-            // SCREEN 1: Plain Background Splash Screen displaying for 5 seconds
+            // Splash Screen timer (5 seconds)
             setTimeout(() => {
                 const splash = document.getElementById('screenSplash');
-                if(splash) {
-                    splash.classList.add('opacity-0');
+                if (splash) {
+                    splash.style.opacity = '0';
                     setTimeout(() => {
-                        splash.remove();
+                        splash.style.display = 'none';
                         document.getElementById('screenTitle').classList.remove('hidden');
                         state = "TITLE";
-                    }, 500);
+                    }, 600);
                 }
             }, 5000);
 
@@ -214,31 +335,56 @@
 
         function autoResizeCanvasViewport() {
             const containerRect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = containerRect.width || 440;
-            canvas.height = containerRect.height || 640;
+            dpr = window.devicePixelRatio || 1;
+            canvas.width = containerRect.width * dpr;
+            canvas.height = containerRect.height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+
+        function initBackgroundClouds() {
+            bgClouds = [];
+            for (let i = 0; i < 5; i++) {
+                bgClouds.push({
+                    x: Math.random() * 440,
+                    y: Math.random() * 250 + 20,
+                    scale: Math.random() * 0.5 + 0.5,
+                    speed: Math.random() * 0.4 + 0.2
+                });
+            }
         }
 
         function setupInputControls() {
             const btnUp = document.getElementById('btnMoveUp');
             const btnDown = document.getElementById('btnMoveDown');
 
-            btnUp.addEventListener('mousedown', () => { if((state === "PLAYING" || state === "CONFETTI") && !freezeFrameTimer) inputUpActive = true; });
-            btnUp.addEventListener('mouseup', () => inputUpActive = false);
-            btnUp.addEventListener('mouseleave', () => inputUpActive = false);
-            btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); if((state === "PLAYING" || state === "CONFETTI") && !freezeFrameTimer) inputUpActive = true; }, { passive: false });
-            btnUp.addEventListener('touchend', (e) => { e.preventDefault(); inputUpActive = false; }, { passive: false });
+            const bindPress = (el, isUp) => {
+                const start = (e) => {
+                    e.preventDefault();
+                    if ((state === "PLAYING" || state === "CONFETTI") && !freezeFrameTimer) {
+                        if (isUp) inputUpActive = true; else inputDownActive = true;
+                    }
+                };
+                const end = (e) => {
+                    e.preventDefault();
+                    if (isUp) inputUpActive = false; else inputDownActive = false;
+                };
 
-            btnDown.addEventListener('mousedown', () => { if((state === "PLAYING" || state === "CONFETTI") && !freezeFrameTimer) inputDownActive = true; });
-            btnDown.addEventListener('mouseup', () => inputDownActive = false);
-            btnDown.addEventListener('mouseleave', () => inputDownActive = false);
-            btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); if((state === "PLAYING" || state === "CONFETTI") && !freezeFrameTimer) inputDownActive = true; }, { passive: false });
-            btnDown.addEventListener('touchend', (e) => { e.preventDefault(); inputDownActive = false; }, { passive: false });
+                el.addEventListener('mousedown', start);
+                el.addEventListener('mouseup', end);
+                el.addEventListener('mouseleave', end);
+                el.addEventListener('touchstart', start, { passive: false });
+                el.addEventListener('touchend', end, { passive: false });
+            };
+
+            bindPress(btnUp, true);
+            bindPress(btnDown, false);
 
             window.addEventListener('keydown', (e) => {
                 if ((state !== "PLAYING" && state !== "CONFETTI") || freezeFrameTimer) return;
                 if (e.key === "ArrowUp" || e.key === "w" || e.key === " ") inputUpActive = true;
                 if (e.key === "ArrowDown" || e.key === "s") inputDownActive = true;
             });
+
             window.addEventListener('keyup', (e) => {
                 if (e.key === "ArrowUp" || e.key === "w" || e.key === " ") inputUpActive = false;
                 if (e.key === "ArrowDown" || e.key === "s") inputDownActive = false;
@@ -260,7 +406,7 @@
                 deck.classList.add('hidden');
                 deck.classList.remove('flex');
             }
-            autoResizeCanvasViewport();
+            setTimeout(autoResizeCanvasViewport, 50);
         }
 
         function startGameEngine() {
@@ -271,8 +417,10 @@
             pipeArray = [];
             cloudArray = [];
             confettiArray = [];
+            particleArray = [];
             freezeFrameTimer = 0;
             avatarBird.y = 240;
+            avatarBird.angle = 0;
             generateNextCloud();
             state = "PLAYING";
             updateControlsDeckVisibility();
@@ -283,104 +431,129 @@
                 concludeQuestEngine();
                 return;
             }
-            cloudArray = []; // Wipe arrays clean to secure precise indexing paths
-            cloudArray.push({
-                x: canvas.width + 60,
-                y: Math.floor(Math.random() * 150) + 160,
+            const viewWidth = canvas.width / dpr;
+            cloudArray = [{
+                x: viewWidth + 40,
+                y: Math.floor(Math.random() * 140) + 160,
                 width: 140,
                 height: 54,
                 data: questionBank[activeIndex]
-            });
+            }];
         }
 
         function spawnConfettiShower() {
             const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ff7849'];
-            for (let i = 0; i < 75; i++) {
+            const viewWidth = canvas.width / dpr;
+            const viewHeight = canvas.height / dpr;
+            for (let i = 0; i < 70; i++) {
                 confettiArray.push({
-                    x: canvas.width / 2 + (Math.random() * 50 - 25),
-                    y: canvas.height / 3 + (Math.random() * 50 - 25),
-                    size: Math.random() * 8 + 5,
+                    x: viewWidth / 2 + (Math.random() * 40 - 20),
+                    y: viewHeight / 3 + (Math.random() * 40 - 20),
+                    size: Math.random() * 8 + 4,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    vx: (Math.random() * 7 - 3.5),
+                    vx: (Math.random() * 8 - 4),
                     vy: (Math.random() * -6 - 3),
                     rotation: Math.random() * 360,
-                    rotationSpeed: Math.random() * 5 - 2.5
+                    rotationSpeed: Math.random() * 6 - 3
                 });
             }
         }
 
-        function drawOriginalPixelBird(ctx, birdX, birdY) {
-            ctx.save();
-            ctx.translate(birdX, birdY);
+        function spawnCloudPopParticles(cx, cy) {
+            for(let i=0; i<18; i++) {
+                particleArray.push({
+                    x: cx,
+                    y: cy,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    size: Math.random() * 6 + 3,
+                    color: '#e0f2fe',
+                    life: 25
+                });
+            }
+        }
 
+        // Draw Stylized Canvas Bird with Pitch Angle & Wing Animation
+        function drawEnhancedBird(ctx, birdX, birdY) {
+            ctx.save();
+            ctx.translate(birdX + avatarBird.width/2, birdY + avatarBird.height/2);
+            ctx.rotate(avatarBird.angle * Math.PI / 180);
+
+            // Bird Body Base (Retro Pixel Sharpness with Modern Shading)
             ctx.fillStyle = "#000000";
-            ctx.fillRect(2, 0, 32, 26);
-            ctx.fillRect(0, 4, 38, 18);
+            ctx.fillRect(-17, -12, 32, 24);
+            ctx.fillRect(-19, -8, 36, 16);
 
             ctx.fillStyle = "#fcd34d";
-            ctx.fillRect(4, 2, 28, 22);
-            ctx.fillRect(2, 6, 34, 14);
+            ctx.fillRect(-15, -10, 28, 20);
 
             ctx.fillStyle = "#f59e0b";
-            ctx.fillRect(4, 18, 24, 6);
-            ctx.fillRect(22, 14, 8, 4);
+            ctx.fillRect(-15, 4, 24, 6);
 
+            // Eye
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(20, 4, 12, 10);
+            ctx.fillRect(1, -8, 11, 10);
             ctx.fillStyle = "#000000";
-            ctx.fillRect(26, 6, 4, 6);
+            ctx.fillRect(7, -6, 4, 6);
 
+            // Beak
             ctx.fillStyle = "#ef4444";
-            ctx.fillRect(24, 12, 14, 8);
+            ctx.fillRect(7, 2, 13, 8);
             ctx.fillStyle = "#f97316";
-            ctx.fillRect(26, 14, 10, 4);
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(24, 15, 14, 2);
+            ctx.fillRect(9, 4, 9, 4);
 
-            let flapFactor = (Math.sin(animationTick * 0.25) > 0 || freezeFrameTimer > 0) ? 0 : 4;
+            // Animated Wing
+            let flapFactor = (Math.sin(animationTick * 0.28) > 0 || freezeFrameTimer > 0) ? 0 : 5;
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(4, 10 + flapFactor, 10, 6);
-            ctx.fillStyle = "#d1d5db";
-            ctx.fillRect(4, 13 + flapFactor, 10, 3);
-            ctx.fillStyle = "#000000";
-            ctx.strokeRect(4, 10 + flapFactor, 10, 6);
+            ctx.fillRect(-13, -2 + flapFactor, 10, 7);
+            ctx.fillStyle = "#cbd5e1";
+            ctx.fillRect(-13, 2 + flapFactor, 10, 3);
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-13, -2 + flapFactor, 10, 7);
 
             ctx.restore();
         }
 
         function drawThickBrownPipe(ctx, pipe) {
+            const viewHeight = canvas.height / dpr;
             ctx.save();
-            let colorDarkBorder = "#3e2723";
-            let colorMainBrown = "#795548";
-            let colorLightGlint = "#a1887f";
-            let colorShadowTrim = "#5d4037";
+            let colorDarkBorder = "#27160c";
+            let colorMainBrown = "#7c2d12";
+            let colorLightGlint = "#b45309";
+            let colorShadowTrim = "#451a03";
 
+            // Top Pipe Body
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, 0, 10, pipe.topHeight);
             ctx.fillStyle = colorShadowTrim;
-            ctx.fillRect(pipe.x + pipe.width - 14, 0, 8, pipe.topHeight);
+            ctx.fillRect(pipe.x + pipe.width - 12, 0, 8, pipe.topHeight);
 
+            // Top Pipe Cap
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3.5;
             ctx.strokeStyle = colorDarkBorder;
             ctx.strokeRect(pipe.x, -10, pipe.width, pipe.topHeight + 10);
             ctx.strokeRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
 
-            let bottomHeight = canvas.height - pipe.bottomY;
+            // Bottom Pipe Body
+            let bottomHeight = viewHeight - pipe.bottomY;
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight);
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, pipe.bottomY, 10, bottomHeight);
             ctx.fillStyle = colorShadowTrim;
-            ctx.fillRect(pipe.x + pipe.width - 14, pipe.bottomY, 8, bottomHeight);
+            ctx.fillRect(pipe.x + pipe.width - 12, pipe.bottomY, 8, bottomHeight);
 
+            // Bottom Pipe Cap
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
             ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight + 10);
             ctx.strokeRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
+
             ctx.restore();
         }
 
@@ -391,39 +564,68 @@
             if (delta < targetFpsInterval) return;
             lastEngineFrameTime = timestamp - (delta % targetFpsInterval);
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const viewWidth = canvas.width / dpr;
+            const viewHeight = canvas.height / dpr;
+
+            ctx.clearRect(0, 0, viewWidth, viewHeight);
             if (freezeFrameTimer === 0) animationTick++;
 
-            ctx.fillStyle = "#70c5ce";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Dynamic Gradient Sky Background
+            let skyGradient = ctx.createLinearGradient(0, 0, 0, viewHeight);
+            skyGradient.addColorStop(0, '#38bdf8');
+            skyGradient.addColorStop(0.7, '#70c5ce');
+            skyGradient.addColorStop(1, '#bae6fd');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, viewWidth, viewHeight);
+
+            // Background Parallax Clouds
+            ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+            bgClouds.forEach(bgc => {
+                if (state === "PLAYING" || state === "CONFETTI") bgc.x -= bgc.speed;
+                if (bgc.x < -100) bgc.x = viewWidth + 50;
+                ctx.beginPath();
+                ctx.arc(bgc.x, bgc.y, 25 * bgc.scale, 0, Math.PI * 2);
+                ctx.arc(bgc.x + 20 * bgc.scale, bgc.y - 10 * bgc.scale, 20 * bgc.scale, 0, Math.PI * 2);
+                ctx.arc(bgc.x + 40 * bgc.scale, bgc.y, 25 * bgc.scale, 0, Math.PI * 2);
+                ctx.fill();
+            });
 
             let standardPlay = (state === "PLAYING" || state === "CONFETTI");
 
+            // Physics & Player Movement
             if (standardPlay && freezeFrameTimer === 0) {
-                if (inputUpActive) avatarBird.y -= avatarBird.speed;
-                if (inputDownActive) avatarBird.y += avatarBird.speed;
-
-                if (avatarBird.y < 2) avatarBird.y = 2;
-                if (avatarBird.y > canvas.height - 35 - avatarBird.height) {
-                    avatarBird.y = canvas.height - 35 - avatarBird.height;
+                if (inputUpActive) {
+                    avatarBird.y -= avatarBird.speed;
+                    avatarBird.angle = Math.max(-22, avatarBird.angle - 3.5);
+                } else if (inputDownActive) {
+                    avatarBird.y += avatarBird.speed;
+                    avatarBird.angle = Math.min(22, avatarBird.angle + 3.5);
+                } else {
+                    avatarBird.angle *= 0.88; // Return to flat
                 }
 
-                if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < canvas.width - 240) {
-                    let clearanceGap = 165;
-                    let minimumAllowedH = 60;
-                    let maximumAllowedH = canvas.height - clearanceGap - 120;
+                if (avatarBird.y < 2) avatarBird.y = 2;
+                if (avatarBird.y > viewHeight - 32 - avatarBird.height) {
+                    avatarBird.y = viewHeight - 32 - avatarBird.height;
+                }
+
+                // Pipe Spawning
+                if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < viewWidth - 230) {
+                    let clearanceGap = 160;
+                    let minimumAllowedH = 50;
+                    let maximumAllowedH = viewHeight - clearanceGap - 110;
                     let calculatedTopHeight = Math.floor(Math.random() * (maximumAllowedH - minimumAllowedH)) + minimumAllowedH;
 
                     pipeArray.push({
-                        x: canvas.width,
+                        x: viewWidth,
                         topHeight: calculatedTopHeight,
                         bottomY: calculatedTopHeight + clearanceGap,
-                        width: 74
+                        width: 72
                     });
                 }
             }
 
-            // Pipe rendering loop
+            // Render Pipes & Hit Testing
             pipeArray.forEach((pipe, i) => {
                 if (standardPlay && freezeFrameTimer === 0) pipe.x -= gameScrollSpeed;
                 drawThickBrownPipe(ctx, pipe);
@@ -432,14 +634,14 @@
                 let hitBottom = (avatarBird.x + 4 < pipe.x + pipe.width && avatarBird.x + avatarBird.width - 4 > pipe.x && avatarBird.y + avatarBird.height - 4 > pipe.bottomY);
 
                 if (standardPlay && (hitTop || hitBottom) && freezeFrameTimer === 0) {
-                    document.getElementById('sndWrong').play().catch(()=>{});
+                    safePlaySound('sndWrong', 'wrong');
                     lives--;
                     screenFlashTick = 12;
-                    freezeFrameTimer = 50; // Freeze bird instantly at position of crash
+                    freezeFrameTimer = 45;
                     inputUpActive = false;
                     inputDownActive = false;
                 }
-                if (pipe.x + pipe.width < 0) pipeArray.splice(i, 1);
+                if (pipe.x + pipe.width < -10) pipeArray.splice(i, 1);
             });
 
             if (freezeFrameTimer > 0) {
@@ -454,21 +656,23 @@
                 }
             }
 
-            // Cloud logic loop
+            // Render Quiz Module Cloud
             cloudArray.forEach((cloud, idx) => {
                 if (standardPlay && freezeFrameTimer === 0) cloud.x -= gameScrollSpeed;
 
                 ctx.save();
+                // Fluffy Cloud Vector Drawing
                 ctx.fillStyle = "#ffffff";
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = "#0284c7";
+                ctx.lineWidth = 3;
+                
                 ctx.beginPath();
-                ctx.roundRect(cloud.x, cloud.y, cloud.width, cloud.height, 12);
+                ctx.roundRect(cloud.x, cloud.y, cloud.width, cloud.height, 16);
                 ctx.fill();
                 ctx.stroke();
 
-                ctx.fillStyle = "#1e3a8a";
-                ctx.font = "bold 13px 'Comic Sans MS', sans-serif";
+                ctx.fillStyle = "#0369a1";
+                ctx.font = "bold 13px 'Fredoka', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText(cloud.data.term, cloud.x + (cloud.width / 2), cloud.y + (cloud.height / 2));
@@ -480,16 +684,29 @@
                                   avatarBird.y < cloud.y + cloud.height);
 
                 if (state === "PLAYING" && touchCloud && freezeFrameTimer === 0) {
+                    spawnCloudPopParticles(cloud.x + cloud.width/2, cloud.y + cloud.height/2);
                     launchVocabularyModal(cloud.data);
                 }
 
-                if (cloud.x + cloud.width < 0) {
+                if (cloud.x + cloud.width < -20) {
                     cloudArray.splice(idx, 1);
                     generateNextCloud();
                 }
             });
 
-            // Confetti render calculations
+            // Particles Rendering
+            particleArray.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                if (p.life <= 0) particleArray.splice(idx, 1);
+            });
+
+            // Confetti Physics
             confettiArray.forEach((p, idx) => {
                 p.x += p.vx;
                 p.y += p.vy;
@@ -503,44 +720,49 @@
                 ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
                 ctx.restore();
 
-                if (p.y > canvas.height) confettiArray.splice(idx, 1);
+                if (p.y > viewHeight) confettiArray.splice(idx, 1);
             });
 
-            // Once the confetti elements vanish completely, proceed seamlessly to the next cloud item
             if (state === "CONFETTI" && confettiArray.length === 0) {
                 state = "PLAYING";
                 generateNextCloud();
             }
 
-            drawOriginalPixelBird(ctx, avatarBird.x, avatarBird.y);
+            // Draw Avatar Bird
+            drawEnhancedBird(ctx, avatarBird.x, avatarBird.y);
 
-            ctx.fillStyle = "#558b2f";
-            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(0, canvas.height - 30, canvas.width, 4);
+            // Ground Grass Floor
+            ctx.fillStyle = "#15803d";
+            ctx.fillRect(0, viewHeight - 28, viewWidth, 28);
+            ctx.fillStyle = "#4ade80";
+            ctx.fillRect(0, viewHeight - 28, viewWidth, 4);
 
+            // Damage Screen Flash
             if (screenFlashTick > 0) {
                 ctx.fillStyle = `rgba(239, 68, 68, ${screenFlashTick / 12 * 0.45})`;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(0, 0, viewWidth, viewHeight);
                 screenFlashTick--;
             }
 
+            // In-Game Modern HUD
             if (standardPlay || state === "MODAL") {
                 ctx.save();
                 ctx.fillStyle = "#ffffff";
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 5;
-                ctx.font = "bold 24px 'Comic Sans MS', sans-serif";
-                ctx.textAlign = "left";
+                ctx.strokeStyle = "#0f172a";
+                ctx.lineWidth = 4;
+                ctx.font = "900 22px 'Outfit', sans-serif";
+                
+                // Score
                 ctx.strokeText(`SCORE: ${score}`, 16, 36);
                 ctx.fillText(`SCORE: ${score}`, 16, 36);
 
+                // Lives Hearts
                 let lifeHearts = "";
-                for(let h = 0; h < lives; h++) lifeHearts += "❤️";
+                for (let h = 0; h < lives; h++) lifeHearts += "❤️";
                 ctx.textAlign = "right";
-                ctx.font = "20px 'Arial', sans-serif";
-                ctx.strokeText(lifeHearts, canvas.width - 16, 34);
-                ctx.fillText(lifeHearts, canvas.width - 16, 34);
+                ctx.font = "18px 'Arial', sans-serif";
+                ctx.strokeText(lifeHearts, viewWidth - 16, 34);
+                ctx.fillText(lifeHearts, viewWidth - 16, 34);
                 ctx.restore();
             }
         }
@@ -548,10 +770,7 @@
         function launchVocabularyModal(data) {
             state = "MODAL";
             updateControlsDeckVisibility();
-            
-            // CRITICAL STEP: Immediately wipe out the cloud array here so it vanishes completely 
-            // from behind the modal banner while the user answers the question.
-            cloudArray = [];
+            cloudArray = []; // Wipe cloud from background canvas during modal
 
             document.getElementById('modalCloudTerm').innerText = `☁️ MOVEMENT: ${data.term}`;
             document.getElementById('modalPrompt').innerText = data.prompt;
@@ -560,9 +779,11 @@
             btnBox.innerHTML = '';
 
             data.choices.forEach(option => {
+                const escapedOpt = option.replace(/'/g, "\\'");
+                const escapedAns = data.answer.replace(/'/g, "\\'");
                 btnBox.innerHTML += `
-                    <button onclick="evaluateResponse('${option.replace(/'/g, "\\'")}', '${data.answer.replace(/'/g, "\\")}')"
-                        class="w-full text-left p-4 bg-slate-50 border-2 border-black font-bold text-base text-slate-800 active:bg-sky-100 cursor-pointer rounded-xl transition-all shadow-sm">
+                    <button onclick="evaluateResponse('${escapedOpt}', '${escapedAns}')"
+                        class="pixel-btn" style="width: 100%; text-align: left; padding: 14px 16px; background: #ffffff; color: #0f172a; font-size: 15px; font-weight: 700; cursor: pointer;">
                         ■ ${option}
                     </button>
                 `;
@@ -573,28 +794,26 @@
 
         function evaluateResponse(chosen, realCorrectAnswer) {
             if (chosen === realCorrectAnswer) {
-                document.getElementById('sndCorrect').play().catch(()=>{});
+                safePlaySound('sndCorrect', 'correct');
                 score += 10;
-                activeIndex++; // Safely advance index tracking forwards
+                activeIndex++;
                 
                 document.getElementById('modalQuiz').classList.add('hidden');
-                
-                // Transition directly into the confetti burst cycle
                 state = "CONFETTI";
                 updateControlsDeckVisibility();
                 spawnConfettiShower();
             } else {
-                document.getElementById('sndWrong').play().catch(()=>{});
+                safePlaySound('sndWrong', 'wrong');
                 let el = document.getElementById('modalCard');
-                el.classList.add('animate-bounce');
-                setTimeout(() => el.classList.remove('animate-bounce'), 450);
+                el.style.transform = 'scale(0.96)';
+                setTimeout(() => el.style.transform = 'scale(1)', 150);
             }
         }
 
         function concludeQuestEngine() {
             state = "GAMEOVER";
             updateControlsDeckVisibility();
-            document.getElementById('sndClaps').play().catch(()=>{});
+            safePlaySound('sndClaps', 'correct');
             document.getElementById('txtFinalScore').innerText = score;
             document.getElementById('modalQuiz').classList.add('hidden');
             document.getElementById('screenGameOver').classList.remove('hidden');
