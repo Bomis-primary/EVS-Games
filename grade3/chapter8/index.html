@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Ultimate Interactive Measurement Lab</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,31 +24,51 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            background-color: #090d16;
         }
 
         body {
             font-family: 'Fredoka', sans-serif;
-            background-color: #090d16;
             color: var(--text-light);
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px 0;
+            padding: 10px;
         }
 
         #game-container {
             width: 100%;
             max-width: 600px;
-            min-height: 780px;
-            height: auto;
+            height: 100vh;
+            max-height: 820px;
             background: linear-gradient(135deg, #0f172a, #1e1b4b, #2e1065);
             position: relative;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border-radius: 32px;
+            border-radius: 28px;
             border: 4px solid rgba(255, 255, 255, 0.12);
-            padding: 20px;
-            overflow-y: auto; 
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+            #game-container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
         }
 
         .screen {
@@ -57,8 +77,9 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            min-height: 700px;
+            min-height: 100%;
             text-align: center;
+            padding: 10px 0;
         }
 
         .screen.active {
@@ -69,9 +90,9 @@
         #splash-screen img { max-width: 70%; max-height: 45%; object-fit: contain; margin-bottom: 20px; }
 
         h1 {
-            font-size: 2.4rem;
+            font-size: clamp(1.8rem, 5vw, 2.4rem);
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             text-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
             line-height: 1.2;
         }
@@ -80,14 +101,15 @@
             background: var(--neon-mint);
             color: white;
             border: none;
-            padding: 16px 44px;
-            font-size: 1.35rem;
+            padding: 14px 40px;
+            font-size: clamp(1.1rem, 3.5vw, 1.35rem);
             font-weight: 700;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 6px 0 #047857;
-            transition: transform 0.1s;
+            transition: transform 0.1s, box-shadow 0.1s;
             margin-top: 15px;
+            touch-action: manipulation;
         }
 
         .cute-btn:active {
@@ -100,18 +122,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px;
+            padding: 10px 12px;
             background: rgba(15, 23, 42, 0.85);
             border-radius: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .hud-pill {
-            font-size: 0.95rem;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
             font-weight: 700;
             background: rgba(255, 255, 255, 0.12);
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 12px;
             color: #ffffff;
         }
@@ -120,26 +142,26 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 12px;
         }
 
         .problem-bubble {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 18px;
+            padding: 14px 16px;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             font-weight: 600;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         #lab-sandbox-arena {
             width: 100%;
-            height: 220px;
+            height: 180px;
             background: rgba(10, 15, 30, 0.6);
             border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+            border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -153,10 +175,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
         .tape-display {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--electric-tangerine);
             background: rgba(0,0,0,0.3);
@@ -184,8 +206,8 @@
 
         /* VOLUME POURING SIMULATOR */
         .beaker-frame {
-            width: 70px;
-            height: 150px;
+            width: 65px;
+            height: 130px;
             border: 4px solid #94a3b8;
             border-top: none;
             border-radius: 0 0 16px 16px;
@@ -204,21 +226,22 @@
         }
         .pour-btn {
             position: absolute;
-            right: 25px;
+            right: 20px;
             background: var(--cyber-blue);
             border: none;
             color: white;
-            padding: 14px;
+            padding: 12px;
             border-radius: 50%;
             font-weight: 700;
             font-family: 'Fredoka', sans-serif;
             cursor: pointer;
             box-shadow: 0 4px 0 #0369a1;
+            touch-action: manipulation;
         }
 
         /* WEIGHT BALANCE SCALE */
         .balance-base {
-            width: 200px;
+            width: 180px;
             height: 8px;
             background: #475569;
             position: relative;
@@ -228,16 +251,16 @@
         }
         .balance-pillar {
             width: 10px;
-            height: 70px;
+            height: 60px;
             background: #64748b;
             position: absolute;
-            bottom: -70px;
+            bottom: -60px;
             left: calc(50% - 5px);
             z-index: -1;
         }
         .pan-left, .pan-right {
-            width: 50px;
-            height: 35px;
+            width: 45px;
+            height: 32px;
             background: rgba(255, 255, 255, 0.1);
             border: 3px solid #64748b;
             border-radius: 0 0 50% 50%;
@@ -254,25 +277,25 @@
         .thermo-layout-box {
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
             width: 80%;
             justify-content: center;
         }
         .thermo-tube {
-            width: 24px;
-            height: 140px;
+            width: 22px;
+            height: 120px;
             background: rgba(255,255,255,0.05);
             border: 3px solid #cbd5e1;
             border-radius: 15px;
             position: relative;
         }
         .thermo-bulb {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background: var(--coral-pink);
             border-radius: 50%;
             position: absolute;
-            bottom: -22px;
+            bottom: -20px;
             left: -8px;
             border: 3px solid #cbd5e1;
             z-index: 2;
@@ -290,8 +313,8 @@
 
         /* CLOCK DIAL SIMULATOR */
         .clock-body {
-            width: 130px;
-            height: 130px;
+            width: 110px;
+            height: 110px;
             border: 5px solid #a855f7;
             border-radius: 50%;
             background: #ffffff;
@@ -310,7 +333,7 @@
         }
         .clock-hand-hour {
             width: 4px;
-            height: 35px;
+            height: 30px;
             background: #1e1b4b;
             position: absolute;
             bottom: 50%;
@@ -321,7 +344,7 @@
         }
         .clock-hand-minute {
             width: 3px;
-            height: 50px;
+            height: 42px;
             background: var(--coral-pink);
             position: absolute;
             bottom: 50%;
@@ -334,36 +357,38 @@
         #options-wrapper-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
         }
 
         .action-choice-btn {
             background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
             border: 1.5px solid rgba(255, 255, 255, 0.15);
-            border-radius: 18px;
-            padding: 16px 20px;
+            border-radius: 16px;
+            padding: 12px 16px;
             color: white;
             font-family: 'Fredoka', sans-serif;
-            font-size: 1.15rem;
+            font-size: clamp(0.95rem, 2.8vw, 1.1rem);
             font-weight: 600;
             cursor: pointer;
             text-align: left;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             transition: all 0.2s ease;
+            touch-action: manipulation;
         }
 
         .action-choice-btn .badge-icon {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             background: rgba(255,255,255,0.1);
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 12px;
+            border-radius: 10px;
+            flex-shrink: 0;
         }
 
         .action-choice-btn.success-glow {
@@ -374,9 +399,91 @@
         .action-choice-btn.fail-glow {
             background: #991b1b !important;
             border-color: var(--coral-pink) !important;
+            opacity: 0.7;
         }
 
-        #end-screen p { font-size: 1.3rem; text-align: center; margin-bottom: 32px; color: #cbd5e1; line-height: 1.6; }
+        /* 10-Second Glowing Option Animation */
+        .action-choice-btn.glow-option {
+            animation: glowPulse 1.2s infinite alternate;
+            border-color: #fde047 !important;
+            font-weight: 700;
+        }
+
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 6px #fde047, inset 0 0 6px #fde047;
+                background: rgba(253, 224, 71, 0.2);
+            }
+            100% {
+                box-shadow: 0 0 20px #f59e0b, inset 0 0 10px #fde047;
+                background: rgba(253, 224, 71, 0.4);
+            }
+        }
+
+        /* Hint Box System */
+        .hint-card {
+            background: rgba(245, 158, 11, 0.15);
+            border: 2px dashed #f59e0b;
+            border-radius: 14px;
+            padding: 12px;
+            color: #fef08a;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            text-align: left;
+            margin-top: 6px;
+            line-height: 1.4;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Explanation Box System */
+        .explanation-card {
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid #10b981;
+            border-radius: 16px;
+            padding: 14px;
+            color: #a7f3d0;
+            font-size: clamp(0.9rem, 2.7vw, 1rem);
+            text-align: center;
+            margin-top: 8px;
+            line-height: 1.4;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .explanation-title {
+            color: #34d399;
+            font-size: clamp(1.05rem, 3vw, 1.2rem);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .next-btn-small {
+            background: var(--neon-mint);
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 0 #047857;
+            transition: transform 0.1s;
+            touch-action: manipulation;
+        }
+
+        .next-btn-small:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #047857;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #end-screen p { font-size: 1.2rem; text-align: center; margin-bottom: 24px; color: #cbd5e1; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -386,7 +493,7 @@
         <!-- SCREEN 1: Branding Preloader Logo -->
         <div id="splash-screen" class="screen active">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('alt-logo-text').style.display='block';">
-            <h2 id="alt-logo-text" style="color: #1e1b4b; display:none; font-size: 3rem; font-weight:700;">INNOVINE<br><span style="font-size:1.5rem; font-weight:400; color:#475569;">SOLUTIONS</span></h2>
+            <h2 id="alt-logo-text" style="color: #1e1b4b; display:none; font-size: 2.5rem; font-weight:700;">INNOVINE<br><span style="font-size:1.3rem; font-weight:400; color:#475569;">SOLUTIONS</span></h2>
         </div>
 
         <!-- SCREEN 2: Main Menu -->
@@ -397,12 +504,12 @@
 
         <!-- SCREEN 3: Simple Grade 3 Instructions -->
         <div id="instructions-screen" class="screen">
-            <div style="background: rgba(255,255,255,0.06); padding: 24px; border-radius: 24px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.12);">
-                <p style="font-size: 1.4rem; color: var(--electric-tangerine); margin-bottom: 12px; font-weight: 700; text-align:center;">How to Play 🎮</p>
-                <p style="font-size: 1.15rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 12px; text-align:center;">
-                    Welcome! You will solve fun puzzles about length, weight, liquid capacity, temperature, and time.
+            <div style="background: rgba(255,255,255,0.06); padding: 20px; border-radius: 20px; margin-bottom: 16px; text-align: left; border: 1px solid rgba(255,255,255,0.12);">
+                <p style="font-size: 1.3rem; color: var(--electric-tangerine); margin-bottom: 10px; font-weight: 700; text-align:center;">How to Play 🎮</p>
+                <p style="font-size: 1.05rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 10px; text-align:center;">
+                    Welcome! Solve measurement puzzles about length, weight, capacity, temperature, and time.
                 </p>
-                <p style="font-size: 1.15rem; line-height: 1.6; color: #fde047; font-weight:600; text-align:center;">
+                <p style="font-size: 1.05rem; line-height: 1.5; color: #fde047; font-weight:600; text-align:center;">
                     ⭐ Earn +20 marks for every correct answer!
                 </p>
             </div>
@@ -425,6 +532,18 @@
 
                 <!-- Multiple choice buttons -->
                 <div id="options-wrapper-grid"></div>
+
+                <!-- Hint Box System -->
+                <div class="hint-card" id="hint-box">
+                    💡 <strong>Hint:</strong> <span id="hint-text"></span>
+                </div>
+
+                <!-- Explanation Box System -->
+                <div class="explanation-card" id="explanation-box">
+                    <div class="explanation-title">🎉 Correct! +20 Marks!</div>
+                    <div id="explanation-text">Explanation content...</div>
+                    <button class="next-btn-small" onclick="advanceToNextPuzzle()">Next Puzzle ➡️</button>
+                </div>
             </div>
         </div>
 
@@ -437,7 +556,7 @@
 
     </div>
 
-    <!-- AUDIO CONNECTIONS -->
+    <!-- AUDIO CONNECTIONS (Untouched Asset Paths) -->
     <audio id="sound-bg" src="assets/acousticmusic.mp3" loop preload="auto"></audio>
     <audio id="sound-correct" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="sound-wrong" src="assets/wrong.mp3" preload="auto"></audio>
@@ -448,77 +567,107 @@
             {
                 labMode: "Length", mechanic: "length", badge: "📏",
                 problem: "Which unit would you use to measure how short an eraser is?",
-                choices: ["Centimetres (cm)", "Metres (m)", "Kilometres (km)"], answer: "Centimetres (cm)"
+                choices: ["Centimetres (cm)", "Metres (m)", "Kilometres (km)"], answer: "Centimetres (cm)",
+                hint: "Think about small objects you can measure with a standard hand ruler!",
+                explanation: "Centimetres (cm) are ideal for measuring small everyday items like erasers, pencils, and paperclips."
             },
             {
                 labMode: "Length", mechanic: "length", badge: "🚌",
                 problem: "What is the best unit to measure the length of a long school bus?",
-                choices: ["Metres (m)", "Centimetres (cm)", "Grams (g)"], answer: "Metres (m)"
+                choices: ["Metres (m)", "Centimetres (cm)", "Grams (g)"], answer: "Metres (m)",
+                hint: "School buses are much longer than a ruler! Think of larger distance units used for rooms and vehicles.",
+                explanation: "Metres (m) are used to measure medium-to-large objects like rooms, buses, and trees."
             },
             {
                 labMode: "Length", mechanic: "length", badge: "🌍",
                 problem: "Which unit tracks the huge distance between two far away cities?",
-                choices: ["Kilometres (km)", "Centimetres (cm)", "Litres (L)"], answer: "Kilometres (km)"
+                choices: ["Kilometres (km)", "Centimetres (cm)", "Litres (L)"], answer: "Kilometres (km)",
+                hint: "When traveling on highways between distant cities, road signs show this long distance unit!",
+                explanation: "Kilometres (km) are used to measure long distances across cities, roads, and geographical journeys."
             },
             {
                 labMode: "Capacity", mechanic: "capacity", badge: "🧪",
                 problem: "What unit would you use to measure a tiny sip of juice inside a spoon?",
-                choices: ["Millilitres (mL)", "Litres (L)", "Kilograms (kg)"], answer: "Millilitres (mL)"
+                choices: ["Millilitres (mL)", "Litres (L)", "Kilograms (kg)"], answer: "Millilitres (mL)",
+                hint: "Spoons hold tiny amounts of liquid, much smaller than a full milk carton!",
+                explanation: "Millilitres (mL) measure small liquid capacities like spoons, raindrops, or medicine cups."
             },
             {
                 labMode: "Capacity", mechanic: "capacity", badge: "🪣",
                 problem: "What unit is best to measure a huge bucket filled with water?",
-                choices: ["Litres (L)", "Millilitres (mL)", "Metres (m)"], answer: "Litres (L)"
+                choices: ["Litres (L)", "Millilitres (mL)", "Metres (m)"], answer: "Litres (L)",
+                hint: "A bucket holds a large volume of liquid, similar to large water bottles and buckets!",
+                explanation: "Litres (L) are used for measuring large amounts of liquid capacity like buckets, tanks, and soda bottles."
             },
             {
                 labMode: "Capacity", mechanic: "capacity", badge: "🥛",
                 problem: "How many Millilitres (mL) do you need to make exactly 1 full Litre (L)?",
-                choices: ["1,000 mL", "100 mL", "10 mL"], answer: "1,000 mL"
+                choices: ["1,000 mL", "100 mL", "10 mL"], answer: "1,000 mL",
+                hint: "The prefix 'milli-' means one-thousandth! Think in thousands.",
+                explanation: "1 Litre (L) equals exactly 1,000 Millilitres (mL)."
             },
             {
                 labMode: "Weight", mechanic: "weight", badge: "🪙",
                 problem: "What unit should you use to measure how light a plastic coin is?",
-                choices: ["Grams (g)", "Kilograms (kg)", "Millilitres (mL)"], answer: "Grams (g)"
+                choices: ["Grams (g)", "Kilograms (kg)", "Millilitres (mL)"], answer: "Grams (g)",
+                hint: "Coins, feathers, and paper clips are super light!",
+                explanation: "Grams (g) are used to weigh small, lightweight objects like coins, feathers, and leaves."
             },
             {
                 labMode: "Weight", mechanic: "weight", badge: "🍉",
                 problem: "Which unit would you use to weigh a huge, heavy watermelon?",
-                choices: ["Kilograms (kg)", "Grams (g)", "Centimetres (cm)"], answer: "Kilograms (kg)"
+                choices: ["Kilograms (kg)", "Grams (g)", "Centimetres (cm)"], answer: "Kilograms (kg)",
+                hint: "Heavy fruits, school bags, and humans are measured in this heavier weight unit!",
+                explanation: "Kilograms (kg) are used to weigh heavy items such as watermelons, bags of rice, and people."
             },
             {
                 labMode: "Weight", mechanic: "weight", badge: "⚖️",
                 problem: "How many Grams (g) are needed to weigh exactly 1 Kilogram (kg)?",
-                choices: ["1,000 grams", "500 grams", "100 grams"], answer: "1,000 grams"
+                choices: ["1,000 grams", "500 grams", "100 grams"], answer: "1,000 grams",
+                hint: "'Kilo' stands for 1,000 in metric measurements!",
+                explanation: "1 Kilogram (kg) equals exactly 1,000 Grams (g)."
             },
             {
                 labMode: "Temperature", mechanic: "temperature", badge: "🌡️",
                 problem: "What handy tool do we use to see how hot or cold something is?",
-                choices: ["Thermometer", "Weighing Scale", "Ruler"], answer: "Thermometer"
+                choices: ["Thermometer", "Weighing Scale", "Ruler"], answer: "Thermometer",
+                hint: "Doctors and meteorologists use this gauge with liquid mercury inside to check heat levels!",
+                explanation: "A thermometer is an instrument used to measure temperature in degrees Celsius (°C)."
             },
             {
                 labMode: "Temperature", mechanic: "temperature", badge: "🔥",
                 problem: "What temperature does water show when it is boiling hot?",
-                choices: ["100°C", "0°C", "50°C"], answer: "100°C"
+                choices: ["100°C", "0°C", "50°C"], answer: "100°C",
+                hint: "It is the maximum standard temperature on a water boiling scale!",
+                explanation: "Water boils at 100°C under standard atmospheric pressure."
             },
             {
                 labMode: "Temperature", mechanic: "temperature", badge: "🧊",
                 problem: "At what cold temperature does water turn into solid ice?",
-                choices: ["0°C", "20°C", "100°C"], answer: "0°C"
+                choices: ["0°C", "20°C", "100°C"], answer: "0°C",
+                hint: "Freezing point is at the very bottom of the liquid water temperature scale!",
+                explanation: "Water freezes and turns into solid ice at 0°C."
             },
             {
                 labMode: "Time", mechanic: "time", badge: "⏰",
                 problem: "How many minutes must pass by to make 1 whole hour?",
-                choices: ["60 minutes", "12 hours", "30 minutes"], answer: "60 minutes"
+                choices: ["60 minutes", "12 hours", "30 minutes"], answer: "60 minutes",
+                hint: "Look at a full revolution of the minute hand around a clock dial!",
+                explanation: "There are 60 minutes in 1 hour."
             },
             {
                 labMode: "Time", mechanic: "time", badge: "⏱️",
                 problem: "How many seconds must pass by to make 1 whole minute?",
-                choices: ["60 seconds", "100 seconds", "10 seconds"], answer: "60 seconds"
+                choices: ["60 seconds", "100 seconds", "10 seconds"], answer: "60 seconds",
+                hint: "The second hand ticks 60 times for every 1 minute on the clock!",
+                explanation: "There are 60 seconds in 1 minute."
             },
             {
                 labMode: "Time", mechanic: "time", badge: "⚡",
                 problem: "Which of these is the shortest, fastest unit of time?",
-                choices: ["Seconds", "Minutes", "Hours"], answer: "Seconds"
+                choices: ["Seconds", "Minutes", "Hours"], answer: "Seconds",
+                hint: "Think about quick ticks or heartbeats—faster than minutes or hours!",
+                explanation: "A second is a smaller unit of time than a minute or an hour."
             }
         ];
 
@@ -527,6 +676,7 @@
         let runningScore = 0;
         let interactiveLock = false;
         let fluidIntervalTimer = null;
+        let tenSecGlowTimer = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { goToScreen('menu-screen'); }, 2500);
@@ -560,13 +710,18 @@
 
         function renderActiveLabRound() {
             interactiveLock = false;
-            if(fluidIntervalTimer) clearInterval(fluidIntervalTimer);
+            if (fluidIntervalTimer) clearInterval(fluidIntervalTimer);
+            if (tenSecGlowTimer) clearTimeout(tenSecGlowTimer);
 
             const activeDataObj = randomizedActiveQueue[executionIndex];
             
             document.getElementById('discipline-pill').innerText = activeDataObj.labMode;
             document.getElementById('round-pill').innerText = `Puzzles: ${executionIndex + 1}/15`;
             document.getElementById('problem-text').innerText = activeDataObj.problem;
+
+            // Reset Hint & Explanation Boxes
+            document.getElementById('hint-box').style.display = 'none';
+            document.getElementById('explanation-box').style.display = 'none';
 
             injectSandboxMechanic(activeDataObj.mechanic);
 
@@ -584,6 +739,16 @@
                 choiceBtn.onclick = () => evaluateUserSelection(choiceBtn, textChoice, activeDataObj.answer);
                 optionsContainer.appendChild(choiceBtn);
             });
+
+            // Start 10-Second Timer to Glow Correct Answer
+            tenSecGlowTimer = setTimeout(() => {
+                const buttons = optionsContainer.querySelectorAll('.action-choice-btn');
+                buttons.forEach(btn => {
+                    if (btn.innerText.includes(activeDataObj.answer)) {
+                        btn.classList.add('glow-option');
+                    }
+                });
+            }, 10000);
         }
 
         function injectSandboxMechanic(type) {
@@ -648,6 +813,7 @@
         function startPourLiquid() {
             if(interactiveLock) return;
             const fluidNode = document.getElementById('liquid-pour');
+            if (!fluidNode) return;
             let currentPctHeight = parseFloat(fluidNode.style.height) || 15;
             
             fluidIntervalTimer = setInterval(() => {
@@ -661,36 +827,49 @@
 
         function evaluateUserSelection(buttonElement, clickedText, clearCorrectAnswer) {
             if (interactiveLock) return;
-            interactiveLock = true;
-            clearInterval(fluidIntervalTimer);
 
-            triggerSandboxVisualResolution(clickedText === clearCorrectAnswer);
+            const activeDataObj = randomizedActiveQueue[executionIndex];
 
             if (clickedText === clearCorrectAnswer) {
+                interactiveLock = true;
+                if (tenSecGlowTimer) clearTimeout(tenSecGlowTimer);
+                if (fluidIntervalTimer) clearInterval(fluidIntervalTimer);
+
                 playAudioTrack('sound-correct');
                 buttonElement.classList.add('success-glow');
                 runningScore += 20;
                 updateInterfaceHud();
+
+                // Disable all choice buttons
+                const buttons = document.querySelectorAll('.action-choice-btn');
+                buttons.forEach(btn => btn.disabled = true);
+
+                // Hide Hint Box and Show Explanation
+                document.getElementById('hint-box').style.display = 'none';
+                document.getElementById('explanation-text').innerText = activeDataObj.explanation;
+                document.getElementById('explanation-box').style.display = 'block';
+
+                triggerSandboxVisualResolution(true);
             } else {
                 playAudioTrack('sound-wrong');
                 buttonElement.classList.add('fail-glow');
-                
-                const children = document.getElementById('options-wrapper-grid').children;
-                for(let child of children) {
-                    if(child.innerText.includes(clearCorrectAnswer)) {
-                        child.classList.add('success-glow');
-                    }
-                }
-            }
+                buttonElement.disabled = true;
 
-            setTimeout(() => {
-                executionIndex++;
-                if (executionIndex < randomizedActiveQueue.length) {
-                    renderActiveLabRound();
-                } else {
-                    displayFinalReportCard();
-                }
-            }, 1800);
+                // Show Hint System
+                document.getElementById('hint-text').innerText = activeDataObj.hint;
+                document.getElementById('hint-box').style.display = 'block';
+
+                triggerSandboxVisualResolution(false);
+            }
+        }
+
+        function advanceToNextPuzzle() {
+            executionIndex++;
+            if (executionIndex < randomizedActiveQueue.length) {
+                renderActiveLabRound();
+            } else {
+                displayFinalReportCard();
+            }
         }
 
         function triggerSandboxVisualResolution(isCorrect) {
@@ -727,6 +906,7 @@
         }
 
         function displayFinalReportCard() {
+            if (tenSecGlowTimer) clearTimeout(tenSecGlowTimer);
             const title = document.getElementById('end-title');
             const msg = document.getElementById('end-msg');
             
