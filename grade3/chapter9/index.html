@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Candy EVS Crush Quest</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,12 +11,14 @@
     <style>
         :root {
             --candy-pink: #ff4a85;
+            --candy-pink-dark: #e0326c;
             --candy-purple: #9b5de5;
             --candy-blue: #00bbf9;
             --candy-yellow: #fee440;
-            --candy-orange: #f15bb5;
             --cream-bg: #fff5eb;
             --dark-berry: #4a0e2e;
+            --glass-bg: rgba(255, 255, 255, 0.88);
+            --card-radius: 28px;
         }
 
         * {
@@ -26,36 +28,60 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #ff9a9e;
         }
 
         body {
             font-family: 'Fredoka', sans-serif;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            background: radial-gradient(circle at 50% 30%, #fecfef 0%, #ff9a9e 100%);
             color: var(--dark-berry);
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
-            overflow: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
+        /* GAME CONTAINER */
         #game-container {
             width: 100%;
-            max-width: 540px; 
-            height: 760px;    
-            background: rgba(255, 255, 255, 0.85);
-            border: 8px solid #ffffff;
-            border-radius: 32px;
-            box-shadow: 0 16px 40px rgba(74, 14, 46, 0.25);
-            backdrop-filter: blur(10px);
+            max-width: 480px; 
+            height: 100%;
+            max-height: 860px; 
+            background: var(--glass-bg);
+            border: 6px solid #ffffff;
+            border-radius: var(--card-radius);
+            box-shadow: 0 20px 50px rgba(74, 14, 46, 0.22), inset 0 0 15px rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
         }
 
-        /* SPLASH GATE */
+        /* SCREEN OVERLAYS COMMON STYLES */
+        .overlay-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            background: linear-gradient(180deg, #ffffff 0%, #ffeef4 100%);
+        }
+
+        /* SPLASH SCREEN */
         #splash-screen {
             position: absolute;
             inset: 0;
@@ -65,65 +91,94 @@
             justify-content: center;
             align-items: center;
             opacity: 1;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.5s ease, visibility 0.5s;
         }
         #splash-screen img {
             max-width: 220px;
-            width: 60%;
+            width: 65%;
             height: auto;
+            animation: pulseLogo 2s infinite ease-in-out;
         }
 
-        /* TITLE SCREEN */
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* TITLE & INSTRUCTIONS */
         #title-screen, #instruction-screen {
-            position: absolute;
-            inset: 0;
-            z-index: 90;
-            display: none; 
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
-            text-align: center;
-            background: linear-gradient(180deg, #fffcf9 0%, #ffeef4 100%);
+            display: none;
         }
 
         .game-title-banner {
-            font-size: 3.5rem; 
+            font-size: clamp(2.2rem, 8vw, 3.2rem); 
             font-weight: 700;
             background: linear-gradient(45deg, var(--candy-pink), var(--candy-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 2px 2px 0px rgba(255,255,255,0.8);
-            line-height: 1.1;
-            margin-bottom: 24px;
+            text-shadow: 0 4px 10px rgba(255, 74, 133, 0.2);
+            line-height: 1.15;
+            margin-bottom: 20px;
         }
 
+        .candy-hero-icon {
+            font-size: clamp(4rem, 12vw, 5.5rem);
+            margin-bottom: 24px;
+            animation: floatIcon 3s ease-in-out infinite;
+            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12));
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* BUTTONS */
         .sweet-btn {
             background: linear-gradient(180deg, #ff7fa7 0%, var(--candy-pink) 100%);
             border: 3px solid #ffffff;
-            border-radius: 25px;
+            border-radius: 50px;
             color: white;
             font-family: 'Fredoka', sans-serif;
             font-weight: 700;
-            font-size: 1.5rem;
-            padding: 12px 42px;
+            font-size: clamp(1.2rem, 5vw, 1.4rem);
+            padding: 14px 44px;
             cursor: pointer;
-            box-shadow: 0 6px 14px rgba(255, 74, 133, 0.4);
-            transition: transform 0.1s;
+            box-shadow: 0 8px 20px rgba(255, 74, 133, 0.35), inset 0 2px 0 rgba(255,255,255,0.5);
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s;
+            outline: none;
         }
-        .sweet-btn:active { transform: scale(0.96); }
+        .sweet-btn:active { 
+            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(255, 74, 133, 0.3);
+        }
 
         /* HUD METRICS DASHBOARD */
         #hud-dashboard {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
-            background: rgba(255, 255, 255, 0.6);
-            border-bottom: 3px dashed #ffd3e2;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.75);
+            border-bottom: 2px dashed #ffd3e2;
+            z-index: 10;
         }
-        .hud-item { font-weight: 700; font-size: 1.25rem; }
-        .hearts-counter { color: var(--candy-pink); font-size: 1.5rem; }
+        .hud-badge {
+            background: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1.5px solid #ffe3ec;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hearts-counter { 
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+        }
 
         /* MAIN PUZZLE ZONE */
         #puzzle-arena-wrapper {
@@ -132,61 +187,84 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 12px;
             position: relative;
+            gap: 12px;
         }
 
         #match-combo-bar {
-            background: white;
-            padding: 8px 20px;
+            background: #ffffff;
+            padding: 8px 18px;
             border-radius: 20px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
             border: 2px solid #ffe3ec;
+            text-align: center;
         }
 
         #candy-grid-board {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             grid-template-rows: repeat(6, 1fr);
-            gap: 8px;
+            gap: 6px;
             width: 100%;
-            max-width: 440px; 
+            max-width: 400px; 
             aspect-ratio: 1 / 1;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.6);
             border: 4px solid #ffffff;
-            border-radius: 24px;
-            padding: 12px;
-            box-shadow: inset 0 4px 12px rgba(0,0,0,0.05);
+            border-radius: 22px;
+            padding: 8px;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.03);
         }
 
         .grid-tile-item {
-            background: rgba(255,255,255,0.4);
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, rgba(255,255,255,0.5) 60%, rgba(255,245,235,0.8) 100%);
+            border: 2px solid rgba(255,255,255,0.8);
             border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2.6rem; 
+            font-size: clamp(1.8rem, 6.5vw, 2.5rem); 
             cursor: pointer;
-            transition: transform 0.15s, background-color 0.15s;
+            transition: transform 0.15s ease, background-color 0.15s, box-shadow 0.15s;
             position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.04), inset 0 -3px 0 rgba(0,0,0,0.06);
+            will-change: transform;
         }
-        .grid-tile-item:active { transform: scale(0.9); }
+        .grid-tile-item:active { 
+            transform: scale(0.88); 
+        }
         .grid-tile-item.item-highlighted {
             background: #ffffff;
-            box-shadow: 0 0 16px var(--candy-purple);
-            transform: scale(1.05);
+            box-shadow: 0 0 0 3px var(--candy-purple), 0 0 15px rgba(155, 93, 229, 0.5);
+            transform: scale(1.06);
             z-index: 5;
+            animation: pulseHighlight 1s infinite alternate;
         }
 
-        /* EVS POPUP ENGINE OVERLAY */
+        @keyframes pulseHighlight {
+            from { transform: scale(1.02); }
+            to { transform: scale(1.08); }
+        }
+
+        .tile-pop {
+            animation: matchPop 0.35s ease-out forwards;
+        }
+
+        @keyframes matchPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3) rotate(10deg); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* EVS QUIZ OVERLAY */
         #quiz-gateway-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(74, 14, 46, 0.6);
-            backdrop-filter: blur(6px);
+            background: rgba(74, 14, 46, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 110;
             display: none;
             justify-content: center;
@@ -198,97 +276,128 @@
             background: #ffffff;
             border-radius: 24px;
             width: 100%;
-            max-width: 420px;
-            padding: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 410px;
+            padding: 22px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
             text-align: center;
-            animation: popCard 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popCard 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid #ffe3ec;
+        }
+
+        #quiz-badge-step {
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            color: var(--candy-purple); 
+            background: #f3e8ff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 12px;
         }
 
         #quiz-question-header {
-            font-size: 1.3rem;
+            font-size: clamp(1.1rem, 4vw, 1.25rem);
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.35;
             color: var(--dark-berry);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .quiz-options-vertical-stack {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
-            margin-bottom: 12px;
         }
 
         .quiz-choice-row-btn {
             background: #fff5eb;
             border: 2px solid #ffdcd0;
-            border-radius: 14px;
-            padding: 14px;
+            border-radius: 16px;
+            padding: 12px 16px;
             font-family: 'Fredoka', sans-serif;
             font-weight: 600;
-            font-size: 1.15rem;
+            font-size: clamp(1rem, 3.8vw, 1.1rem);
             color: var(--dark-berry);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+            outline: none;
+            text-align: center;
         }
-        .quiz-choice-row-btn:hover { background: #ffeadd; }
-        .quiz-choice-row-btn.correct-glow { background: #2ec4b6 !important; color: white !important; border-color: #1f9489 !important; }
-        .quiz-choice-row-btn.wrong-glow { background: #e71d36 !important; color: white !important; border-color: #b21224 !important; }
+        .quiz-choice-row-btn:active { 
+            transform: scale(0.97); 
+        }
+        .quiz-choice-row-btn.correct-glow { 
+            background: #2ec4b6 !important; 
+            color: white !important; 
+            border-color: #1f9489 !important; 
+            box-shadow: 0 4px 12px rgba(46, 196, 182, 0.4);
+        }
+        .quiz-choice-row-btn.wrong-glow { 
+            background: #e71d36 !important; 
+            color: white !important; 
+            border-color: #b21224 !important; 
+            box-shadow: 0 4px 12px rgba(231, 29, 54, 0.3);
+            opacity: 0.7;
+        }
 
         #quiz-inline-hint-panel {
             background: #fffbe6;
             border: 2px dashed #ffe58f;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 1.05rem;
-            color: #b78103;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            color: #8c6200;
             margin-top: 14px;
             display: none;
+            line-height: 1.3;
         }
 
-        /* DIAGNOSTIC SCORE REPORT SHEET */
+        /* SCORE REPORT SHEET */
         #diagnostic-score-screen {
-            position: absolute;
-            inset: 0;
-            background: #ffffff;
-            z-index: 120;
             display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
-            text-align: center;
         }
 
         .report-summary-card {
             width: 100%;
             background: #fffcf9;
-            border: 3px dashed #ffd3e2;
+            border: 2.5px dashed #ffd3e2;
             border-radius: 20px;
-            padding: 20px;
-            margin: 20px 0;
+            padding: 18px;
+            margin: 18px 0 24px 0;
         }
         .report-metric-line {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px dashed #eee;
             font-weight: 600;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
+        }
+        .report-metric-line:last-child {
+            border-bottom: none;
         }
 
         @keyframes popCard {
-            from { transform: scale(0.8); opacity: 0; }
+            from { transform: scale(0.85); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
 
-        @media (max-height: 740px), (max-width: 540px) {
-            #game-container { height: 100vh; border-radius: 0; border-width: 0; }
-            .game-title-banner { font-size: 2.6rem; }
-            #candy-grid-board { max-width: 340px; gap: 6px; padding: 8px; }
-            .grid-tile-item { font-size: 2rem; border-radius: 10px; }
+        /* RESPONSIVE MEDIA QUERIES FOR SMALL/LANDSCAPE SCREENS */
+        @media (max-height: 670px) {
+            #game-container { border-radius: 0; border-width: 0; }
+            .game-title-banner { font-size: 2.2rem; margin-bottom: 10px; }
+            .candy-hero-icon { font-size: 3.5rem; margin-bottom: 14px; }
+            #hud-dashboard { padding: 10px 14px; }
+            #candy-grid-board { max-width: 310px; gap: 4px; padding: 6px; }
+            .grid-tile-item { font-size: 1.6rem; border-radius: 10px; }
+            #puzzle-arena-wrapper { padding: 6px; gap: 6px; }
+            #match-combo-bar { padding: 6px 14px; font-size: 0.9rem; }
+        }
+
+        @media (max-width: 360px) {
+            #candy-grid-board { max-width: 280px; }
+            .grid-tile-item { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -302,36 +411,37 @@
         </div>
 
         <!-- INTERFACE STAGE 2: TITLE SCREEN -->
-        <div id="title-screen">
+        <div id="title-screen" class="overlay-screen">
             <h1 class="game-title-banner">Candy EVS<br>Crush Quest</h1>
-            <div style="font-size: 5.5rem; margin-bottom: 30px;">🍬</div>
+            <div class="candy-hero-icon">🍬</div>
             <button class="sweet-btn" onclick="goToInstructions()">PLAY</button>
         </div>
 
         <!-- INTERFACE STAGE 3: BLUEPRINT BRIEFING -->
-        <div id="instruction-screen">
-            <h2 style="margin-bottom: 14px; font-weight: 700; font-size: 1.8rem;">How To Play</h2>
-            <p style="font-size: 1.25rem; line-height: 1.4; color: #6a4459; margin-bottom: 28px; padding: 0 10px;">
-                Swap colourful candy pieces to line up 3 matching items. Every 3 successful matches triggers a batch of 3 EVS challenge questions!
+        <div id="instruction-screen" class="overlay-screen">
+            <h2 style="margin-bottom: 12px; font-weight: 700; font-size: 1.6rem; color: var(--dark-berry);">How To Play</h2>
+            <p style="font-size: 1.15rem; line-height: 1.45; color: #6a4459; margin-bottom: 24px; padding: 0 10px;">
+                Swap colourful candies to match 3 in a row! <br><br>
+                Every <strong>3 matches</strong> triggers <strong>EVS fun questions</strong> to test your science power! 🌟
             </p>
             <button class="sweet-btn" onclick="bootstrapEnginePlay()">START</button>
         </div>
 
         <!-- INTERFACE STAGE 4: MATCH-3 MATRIX AND HUD ENGINE -->
         <div id="hud-dashboard">
-            <div class="hud-item">Score: <span id="runtime-score-label" style="color: var(--candy-pink);">0</span></div>
-            <div class="hud-item hearts-counter" id="vital-hearts-tray">❤️ ❤️ ❤️</div>
+            <div class="hud-badge">Score: <span id="runtime-score-label" style="color: var(--candy-pink-dark);">0</span></div>
+            <div class="hud-badge hearts-counter" id="vital-hearts-tray">❤️ ❤️ ❤️</div>
         </div>
 
         <div id="puzzle-arena-wrapper">
-            <div id="match-combo-bar">Matches until next question: <span id="matches-countdown" style="color:var(--candy-pink);">3</span></div>
+            <div id="match-combo-bar">Matches to EVS Quiz: <span id="matches-countdown" style="color:var(--candy-pink-dark);">3</span></div>
             <div id="candy-grid-board"></div>
         </div>
 
         <!-- POPUP INTERACTIVE QUIZ ENGINE CARD -->
         <div id="quiz-gateway-overlay">
             <div class="quiz-parchment-container">
-                <div style="font-size: 1rem; font-weight:700; color:var(--candy-purple); margin-bottom:6px;" id="quiz-badge-step">EVS CHALLENGE</div>
+                <div id="quiz-badge-step">EVS CHALLENGE</div>
                 <div id="quiz-question-header">Question text template context?</div>
                 <div class="quiz-options-vertical-stack" id="quiz-options-holder"></div>
                 <div id="quiz-inline-hint-panel">💡 <strong>Hint:</strong> <span id="hint-text-string"></span></div>
@@ -339,13 +449,13 @@
         </div>
 
         <!-- INTERFACE STAGE 5: SUMMARY REPORT CARD -->
-        <div id="diagnostic-score-screen">
+        <div id="diagnostic-score-screen" class="overlay-screen">
             <h2 style="font-size: 2.2rem; color: var(--dark-berry);">Quest Complete!</h2>
             <div id="game-end-emoji" style="font-size: 4.5rem; margin: 10px 0;">🏆</div>
             
             <div class="report-summary-card">
                 <div class="report-metric-line"><span>Questions Answered:</span> <span id="rep-answered">0 / 12</span></div>
-                <div class="report-metric-line"><span>Final Sweet Score:</span> <span id="rep-score" style="color: var(--candy-pink); font-weight:700;">0</span></div>
+                <div class="report-metric-line"><span>Final Sweet Score:</span> <span id="rep-score" style="color: var(--candy-pink-dark); font-weight:700;">0</span></div>
             </div>
             <button class="sweet-btn" onclick="location.reload()">Play Again</button>
         </div>
@@ -358,19 +468,80 @@
     <audio id="snd-cheer" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <script>
+        /* Grade 3 Simplified EVS Questions */
         const textbookQAData = [
-            { q: "A student puts a solid wooden block in front of a torch. No light can pass through it at all. What kind of object is this?", choices: ["Opaque", "Transparent", "Translucent"], answer: "Opaque", hint: "This object blocks all light and makes a dark shadow behind it." },
-            { q: "You look through a piece of frosted butter paper. Some light gets through, but you cannot see things clearly on the other side. What is this object?", choices: ["Translucent", "Transparent", "Opaque"], answer: "Translucent", hint: "This object lets only some light pass through, so things look blurry." },
-            { q: "A clean glass window lets all light pass through it perfectly so you can see outside clearly. What is this object?", choices: ["Transparent", "Translucent", "Opaque"], answer: "Transparent", hint: "Think of clean water or clear glass that you can see through perfectly." },
-            { q: "When an opaque object blocks straight lines of light from a torch, what does it make on the wall behind it?", choices: ["A dark shadow", "A bright light", "A reflection"], answer: "A dark shadow", hint: "When light is blocked, it leaves a dark shape on the wall." },
-            { q: "During a solar eclipse, the daytime suddenly turns dark. Which body comes directly in the middle to block the light from the Sun?", choices: ["The Moon", "The Earth", "A Star"], answer: "The Moon", hint: "The Moon moves between the Sun and the Earth to hide the Sun." },
-            { q: "During a lunar eclipse, the Moon goes dark because a shadow falls on it. Which big body is in the middle blocking the Sun's light?", choices: ["The Earth", "The Moon", "A Rocket"], answer: "The Earth", hint: "Our home planet, Earth, stands between the Sun and the Moon." },
-            { q: "A student plucks a tight rubber band. It moves back and forth very fast and makes a sound. What is this fast movement called?", choices: ["A vibration", "A push", "A pull"], answer: "A vibration", hint: "All sounds are made when an object moves back and forth very quickly." },
-            { q: "A big drill machine makes a very loud, harsh and unpleasant sound that hurts our ears. What do we call this?", choices: ["Noise", "Music", "A quiet sound"], answer: "Noise", hint: "Loud, unpleasant sounds that do not have a nice tune are called noise." },
-            { q: "A child plays a soft, beautiful tune on a flute. It feels very nice and comfortable to hear. What do we call this?", choices: ["Music", "Noise", "A loud sound"], answer: "Music", hint: "Sounds that have a nice pattern and are pleasant to hear are music." },
-            { q: "A boy kicks a football across the floor to move it away from him. What kind of force is a kick?", choices: ["A push", "A pull", "A twist"], answer: "A push", hint: "When you move an object away from you, you are giving it a push." },
-            { q: "A girl opens a drawer by tugging the handle towards herself. What kind of force is she using?", choices: ["A pull", "A push", "A lift"], answer: "A pull", hint: "When you move an object closer to you, you are giving it a pull." },
-            { q: "A student presses down hard on a soft ball of playdough and flattens it. What did the force do to the playdough?", choices: ["Changed its shape", "Changed its weight", "Made it disappear"], answer: "Changed its shape", hint: "Pressing or squashing something changes how it looks on the outside." }
+            { 
+                q: "A wooden block stops all light from passing through it. What kind of object is it?", 
+                choices: ["Opaque", "Transparent", "Translucent"], 
+                answer: "Opaque", 
+                hint: "It stops light completely and casts a dark shadow!" 
+            },
+            { 
+                q: "Butter paper lets some light pass through, but things look blurry. What is it?", 
+                choices: ["Translucent", "Transparent", "Opaque"], 
+                answer: "Translucent", 
+                hint: "Only a little bit of light gets through!" 
+            },
+            { 
+                q: "Clear glass lets all light pass through so you see clearly. What is it?", 
+                choices: ["Transparent", "Translucent", "Opaque"], 
+                answer: "Transparent", 
+                hint: "You can see right through it!" 
+            },
+            { 
+                q: "When an object blocks light from a torch, what forms on the wall behind it?", 
+                choices: ["A dark shadow", "A bright light", "A rainbow"], 
+                answer: "A dark shadow", 
+                hint: "It makes a dark shape where light cannot reach." 
+            },
+            { 
+                q: "During a solar eclipse, what comes between the Sun and the Earth to block sunlight?", 
+                choices: ["The Moon", "A Star", "A Cloud"], 
+                answer: "The Moon", 
+                hint: "Our Earth's moon blocks the Sun!" 
+            },
+            { 
+                q: "During a lunar eclipse, what stands between the Sun and the Moon?", 
+                choices: ["The Earth", "A Rocket", "The Sun"], 
+                answer: "The Earth", 
+                hint: "Our home planet casts its shadow on the Moon!" 
+            },
+            { 
+                q: "Plucking a guitar string makes it move back and forth very fast. What is this motion?", 
+                choices: ["A vibration", "A push", "A spin"], 
+                answer: "A vibration", 
+                hint: "Fast back-and-forth movement makes sound!" 
+            },
+            { 
+                q: "A loud, harsh sound that hurts our ears is called...", 
+                choices: ["Noise", "Music", "A song"], 
+                answer: "Noise", 
+                hint: "It is loud, unpleasant, and lacks a nice tune." 
+            },
+            { 
+                q: "A sweet, pleasant tune played on a flute is called...", 
+                choices: ["Music", "Noise", "An echo"], 
+                answer: "Music", 
+                hint: "It feels nice and relaxing to listen to!" 
+            },
+            { 
+                q: "When you kick a football to move it away from you, what force are you applying?", 
+                choices: ["A push", "A pull", "A twist"], 
+                answer: "A push", 
+                hint: "Pushing moves things away from you!" 
+            },
+            { 
+                q: "When you open a drawer by tugging it towards yourself, what force are you using?", 
+                choices: ["A pull", "A push", "A lift"], 
+                answer: "A pull", 
+                hint: "Pulling brings things closer to you!" 
+            },
+            { 
+                q: "Squishing a soft clay ball with your hands changes its...", 
+                choices: ["Shape", "Weight", "Color"], 
+                answer: "Shape", 
+                hint: "Pressing or squeezing changes how it looks on the outside!" 
+            }
         ];
 
         const candyPalette = ['🍬', '🍭', '🍩', '🍫', '🧁', '🍪'];
@@ -387,21 +558,38 @@
         let quizWrongAttemptCounter = 0;
         let questionsAnsweredInBatch = 0; 
 
-        // Logo displays for 5s[cite: 1]
+        // Logo displays for 5s
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             const titleScreen = document.getElementById('title-screen');
             titleScreen.style.display = 'flex'; 
             splash.style.opacity = '0';
-            setTimeout(() => { splash.style.display = 'none'; }, 400); 
+            setTimeout(() => { 
+                splash.style.display = 'none'; 
+            }, 500); 
         }, 5000);
 
+        function unlockAudio() {
+            // Unlocks web audio contexts on mobile browser user interaction
+            ['snd-correct', 'snd-wrong', 'snd-cheer'].forEach(id => {
+                const audio = document.getElementById(id);
+                if (audio) {
+                    audio.play().then(() => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }).catch(() => {});
+                }
+            });
+        }
+
         function goToInstructions() {
+            unlockAudio();
             document.getElementById('title-screen').style.display = 'none';
             document.getElementById('instruction-screen').style.display = 'flex';
         }
 
         function bootstrapEnginePlay() {
+            unlockAudio();
             document.getElementById('instruction-screen').style.display = 'none';
             shuffleUtility(textbookQAData); 
             generateCandyBoard();
@@ -468,6 +656,7 @@
             boardStateArray[idx1] = boardStateArray[idx2];
             boardStateArray[idx2] = temp;
             updateBoardUI();
+            
             setTimeout(() => {
                 let matchesFound = searchAllBoardMatches();
                 if (matchesFound.length > 0) {
@@ -479,12 +668,15 @@
                     updateBoardUI();
                     interactiveLock = false;
                 }
-            }, 250);
+            }, 220);
         }
 
         function updateBoardUI() {
             for (let i = 0; i < boardStateArray.length; i++) {
-                document.getElementById(`tile-${i}`).innerText = boardStateArray[i];
+                const tileElem = document.getElementById(`tile-${i}`);
+                if (tileElem) {
+                    tileElem.innerText = boardStateArray[i];
+                }
             }
         }
 
@@ -512,22 +704,40 @@
         function processBoardMatches(indicesArray) {
             successfulMatchesCount++;
             document.getElementById('matches-countdown').innerText = Math.max(0, 3 - (successfulMatchesCount % 3));
-            indicesArray.forEach(idx => { document.getElementById(`tile-${idx}`).innerText = '✨'; });
-            document.getElementById('snd-correct').play().catch(()=>{});
+            
+            indicesArray.forEach(idx => { 
+                const tile = document.getElementById(`tile-${idx}`);
+                if (tile) {
+                    tile.innerText = '✨'; 
+                    tile.classList.add('tile-pop');
+                }
+            });
+            
+            playSound('snd-correct');
+
             setTimeout(() => {
+                indicesArray.forEach(idx => {
+                    const tile = document.getElementById(`tile-${idx}`);
+                    if (tile) tile.classList.remove('tile-pop');
+                });
+
                 for (let c = 0; c < matrixCols; c++) {
                     let colValues = [];
                     for (let r = 0; r < matrixRows; r++) {
                         let base = r * matrixCols + c;
                         if (!indicesArray.includes(base)) { colValues.push(boardStateArray[base]); }
                     }
-                    while (colValues.length < matrixRows) { colValues.unshift(candyPalette[Math.floor(Math.random() * candyPalette.length)]); }
-                    for (let r = 0; r < matrixRows; r++) { boardStateArray[r * matrixCols + c] = colValues[r]; }
+                    while (colValues.length < matrixRows) { 
+                        colValues.unshift(candyPalette[Math.floor(Math.random() * candyPalette.length)]); 
+                    }
+                    for (let r = 0; r < matrixRows; r++) { 
+                        boardStateArray[r * matrixCols + c] = colValues[r]; 
+                    }
                 }
                 updateBoardUI();
                 let chainMatches = searchAllBoardMatches();
                 if (chainMatches.length > 0) {
-                    setTimeout(() => { processBoardMatches(chainMatches); }, 300);
+                    setTimeout(() => { processBoardMatches(chainMatches); }, 280);
                 } else {
                     interactiveLock = false;
                     if (successfulMatchesCount > 0 && successfulMatchesCount % 3 === 0) {
@@ -535,7 +745,7 @@
                         triggerEVSQuestionGateway();
                     }
                 }
-            }, 400);
+            }, 350);
         }
 
         function triggerEVSQuestionGateway() {
@@ -546,12 +756,14 @@
             quizWrongAttemptCounter = 0;
             document.getElementById('quiz-inline-hint-panel').style.display = 'none';
             const currentQA = textbookQAData[quizIndexTracker];
-            document.getElementById('quiz-badge-step').innerText = `EVS CHALLENGE: ${quizIndexTracker + 1} / 12`;
+            document.getElementById('quiz-badge-step').innerText = `EVS QUESTION ${quizIndexTracker + 1} / 12`;
             document.getElementById('quiz-question-header').innerText = currentQA.q;
             const holder = document.getElementById('quiz-options-holder');
             holder.innerHTML = '';
+            
             let scrambledChoices = [...currentQA.choices];
             shuffleUtility(scrambledChoices); 
+            
             scrambledChoices.forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'quiz-choice-row-btn';
@@ -565,7 +777,7 @@
         function verifyQuizSubmission(btnElement, selectedText, qaObject) {
             if (selectedText === qaObject.answer) {
                 btnElement.classList.add('correct-glow');
-                document.getElementById('snd-correct').play().catch(()=>{});
+                playSound('snd-correct');
                 runningScore += 20;
                 document.getElementById('runtime-score-label').innerText = runningScore;
                 quizIndexTracker++;
@@ -579,12 +791,12 @@
                     } else {
                         document.getElementById('quiz-gateway-overlay').style.display = 'none';
                     }
-                }, 1000);
+                }, 900);
             } else {
                 quizWrongAttemptCounter++;
                 btnElement.disabled = true;
                 btnElement.classList.add('wrong-glow');
-                document.getElementById('snd-wrong').play().catch(()=>{});
+                playSound('snd-wrong');
                 if (quizWrongAttemptCounter === 1) {
                     document.getElementById('hint-text-string').innerText = qaObject.hint;
                     document.getElementById('quiz-inline-hint-panel').style.display = 'block';
@@ -595,7 +807,7 @@
                     setTimeout(() => {
                         document.getElementById('quiz-gateway-overlay').style.display = 'none';
                         concludeMatchGameSession();
-                    }, 1200);
+                    }, 1000);
                 }
             }
         }
@@ -610,10 +822,22 @@
 
         function concludeMatchGameSession() {
             document.getElementById('diagnostic-score-screen').style.display = 'flex';
-            document.getElementById('snd-cheer').play().catch(()=>{});
-            if(vitalHearts <= 0) { document.getElementById('game-end-emoji').innerText = '❌'; }
+            playSound('snd-cheer');
+            if (vitalHearts <= 0) { 
+                document.getElementById('game-end-emoji').innerText = '💔'; 
+            } else {
+                document.getElementById('game-end-emoji').innerText = '🏆';
+            }
             document.getElementById('rep-answered').innerText = `${quizIndexTracker} / 12`;
             document.getElementById('rep-score').innerText = `${runningScore} Points`;
+        }
+
+        function playSound(id) {
+            const sound = document.getElementById(id);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
         }
 
         function shuffleUtility(array) {
