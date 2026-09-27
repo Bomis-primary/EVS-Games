@@ -7,9 +7,9 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body {
-            background-color: #050714;
+            background-color: #030511;
             color: #ffffff;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
@@ -22,13 +22,27 @@
             width: 100%;
             height: 100%;
             max-width: 500px;
-            max-height: 850px;
+            max-height: 880px;
             position: relative;
-            background: radial-gradient(circle at center, #0b112c 0%, #03040c 100%);
+            background: radial-gradient(circle at 50% 30%, #0c1738 0%, #030511 100%);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
+            border: 1px solid rgba(0, 255, 204, 0.15);
+        }
+
+        /* Subtle animated background grid layer */
+        #game-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 1;
         }
 
         .screen {
@@ -49,156 +63,257 @@
             z-index: 100;
         }
         .logo-img { 
-            width: 240px; 
+            width: 220px; 
             height: auto; 
             animation: pulse 2.5s infinite ease-in-out; 
+            filter: drop-shadow(0 0 15px rgba(0, 255, 204, 0.4));
         }
-        
-        #title-screen { background: #03040c; }
-        #instruction-screen { background: #03040c; }
-        #end-screen { background: #03040c; }
 
-        .game-title { font-size: 2.5rem; color: #00ffcc; text-shadow: 0 0 15px rgba(0, 255, 204, 0.5); margin-bottom: 16px; font-weight: 800; }
+        #title-screen, #instruction-screen, #end-screen { background: rgba(3, 5, 17, 0.95); }
+
+        .game-title { 
+            font-size: 2.3rem; 
+            color: #00ffcc; 
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.6); 
+            margin-bottom: 8px; 
+            font-weight: 800; 
+            letter-spacing: 1.5px;
+        }
+
+        .subtitle {
+            margin-bottom: 30px;
+            color: #38bdf8;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
         
         .btn {
-            background: linear-gradient(135deg, #00ffcc 0%, #00a3ff 100%);
-            border: none; padding: 16px 40px; font-size: 1.3rem; color: #03040c;
-            font-weight: bold; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3); transition: transform 0.1s;
+            background: linear-gradient(135deg, #00ffcc 0%, #0099ff 100%);
+            border: none; padding: 14px 36px; font-size: 1.2rem; color: #030511;
+            font-weight: 800; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.4); 
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+            touch-action: manipulation;
         }
-        .btn:active { transform: scale(0.95); }
+        .btn:active { transform: scale(0.95); box-shadow: 0 2px 10px rgba(0, 255, 204, 0.2); }
 
         .instructions-card {
-            background: rgba(255, 255, 255, 0.04); border: 2px solid #00a3ff;
+            background: rgba(15, 23, 42, 0.7); 
+            border: 1px solid rgba(0, 163, 255, 0.4);
+            backdrop-filter: blur(10px);
             border-radius: 16px; padding: 20px; width: 100%;
-            margin-bottom: 24px; font-size: 1rem; line-height: 1.5;
+            margin-bottom: 24px; font-size: 0.95rem; line-height: 1.6;
+            text-align: left;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .instructions-card li { margin-bottom: 12px; color: #e2e8f0; }
+        .instructions-card li { margin-bottom: 12px; color: #e2e8f0; list-style: none; display: flex; align-items: center; gap: 10px; }
 
-        #game-screen { display: none; flex-direction: column; height: 100%; position: relative; background: transparent; }
+        #game-screen { display: none; flex-direction: column; height: 100%; position: relative; background: transparent; z-index: 5; }
         #game-screen.active-screen { display: flex; }
 
         #hud {
-            height: 50px; width: 100%; display: flex; justify-content: space-between; 
-            align-items: center; padding: 0 16px; background: rgba(3, 4, 12, 0.85); z-index: 5;
+            height: 52px; width: 100%; display: flex; justify-content: space-between; 
+            align-items: center; padding: 0 16px; background: rgba(3, 5, 17, 0.85); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08); z-index: 5;
+            backdrop-filter: blur(8px);
         }
+        .hud-badge {
+            background: rgba(0, 255, 204, 0.08);
+            border: 1px solid rgba(0, 255, 204, 0.25);
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #00ffcc; font-weight: bold; font-family: monospace; font-size: 1rem;
+        }
+
         #mission-text {
-            background: rgba(0, 163, 255, 0.15); border: 1px solid #00a3ff;
-            padding: 10px; margin: 8px 16px; border-radius: 8px; text-align: center;
-            font-size: 0.95rem; color: #00ffcc; z-index: 5; font-weight: 600; min-height: 54px;
-            display: flex; align-items: center; justify-content: center;
+            background: rgba(15, 23, 42, 0.8); 
+            border: 1px solid rgba(0, 163, 255, 0.4);
+            padding: 10px 14px; margin: 10px 14px 4px 14px; border-radius: 12px; text-align: center;
+            font-size: 0.9rem; color: #f1f5f9; z-index: 5; font-weight: 600; min-height: 60px;
+            display: flex; align-items: center; justify-content: center; line-height: 1.35;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+        }
+
+        #hint-banner {
+            margin: 0 14px;
+            font-size: 0.8rem;
+            color: #ffd700;
+            text-align: center;
+            min-height: 20px;
+            font-weight: bold;
+            z-index: 5;
+            transition: opacity 0.3s ease;
         }
 
         #playfield { 
             flex: 1; position: relative; width: 100%; overflow: hidden; 
-            border-bottom: 2px solid rgba(255,255,255,0.1); pointer-events: none;
+            border-bottom: 1px solid rgba(255,255,255,0.08); pointer-events: none;
         }
         
         .target-box {
-            position: absolute; background: rgba(15, 23, 42, 0.95);
-            border: 2px solid #334155; border-radius: 6px; padding: 8px 2px;
-            color: #f1f5f9; font-weight: bold; font-size: 0.75rem; text-align: center;
-            pointer-events: auto; cursor: pointer; width: 95px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            position: absolute; 
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.3); 
+            border-radius: 8px; padding: 8px 4px;
+            color: #f8fafc; font-weight: bold; font-size: 0.75rem; text-align: center;
+            pointer-events: auto; cursor: pointer; width: 88px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(4px);
         }
+
         .hint-glow {
             border-color: #ffd700 !important;
-            box-shadow: 0 0 15px #ffd700 !important;
-            animation: glowPulse 0.8s infinite alternate;
+            box-shadow: 0 0 18px rgba(255, 215, 0, 0.8) !important;
+            animation: glowPulse 0.7s infinite alternate ease-in-out;
+            color: #fff !important;
         }
 
         #player-ship {
-            position: absolute; bottom: 15px; width: 50px; height: 40px;
-            background: #38bdf8; border-radius: 50% 50% 10% 10%;
-            z-index: 4; box-shadow: 0 0 15px #38bdf8; transition: left 0.08s ease-out;
+            position: absolute; bottom: 15px; width: 48px; height: 38px;
+            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            border-radius: 50% 50% 15% 15%;
+            z-index: 4; 
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.8); 
+            transition: left 0.05s linear;
         }
         #player-ship::before, #player-ship::after {
-            content: ''; position: absolute; top: 15px; width: 12px; height: 12px; background: #60a5fa;
+            content: ''; position: absolute; top: 14px; width: 10px; height: 12px; background: #0284c7;
         }
-        #player-ship::before { left: -9px; border-radius: 4px 0 0 4px; }
-        #player-ship::after { right: -9px; border-radius: 0 4px 4px 0; }
+        #player-ship::before { left: -8px; border-radius: 4px 0 0 4px; }
+        #player-ship::after { right: -8px; border-radius: 0 4px 4px 0; }
+        #player-ship::contain {
+            position: absolute; top: 4px; left: 19px; width: 10px; height: 10px;
+            background: #e0f2fe; border-radius: 50%;
+        }
 
         .laser {
-            position: absolute; width: 4px; height: 12px; background: #f43f5e;
-            border-radius: 2px; box-shadow: 0 0 8px #f43f5e;
+            position: absolute; width: 4px; height: 16px; 
+            background: linear-gradient(180deg, #ff0055 0%, #ff5500 100%);
+            border-radius: 2px; box-shadow: 0 0 10px #ff0055, 0 0 4px #fff;
         }
 
-        /* High-performance confetti rendering layer overlay */
+        /* Overlay Explanation Modal */
+        #explanation-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 5, 17, 0.88);
+            backdrop-filter: blur(8px);
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        #explanation-card {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(11, 17, 38, 0.95) 100%);
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        #explanation-title {
+            color: #00ffcc; font-size: 1.4rem; font-weight: 800; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        #explanation-body {
+            color: #e2e8f0; font-size: 1rem; line-height: 1.5; margin-bottom: 20px;
+        }
+
+        /* Canvas Overlay */
         #confetti-canvas {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            z-index: 20;
+            z-index: 25;
         }
 
         #controls-deck {
-            height: 140px; width: 100%; background: #090d22;
+            height: 130px; width: 100%; background: rgba(9, 13, 34, 0.95);
             display: flex; align-items: center; justify-content: space-around;
-            padding: 10px 16px; border-top: 3px solid #1e293b; z-index: 8;
+            padding: 10px 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); z-index: 8;
+            backdrop-filter: blur(10px);
         }
         .control-arrow {
-            width: 75px; height: 75px; background: rgba(255,255,255,0.06);
-            border: 2px solid #475569; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 2rem;
-            color: #94a3b8; cursor: pointer; touch-action: manipulation;
+            width: 70px; height: 70px; background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(148, 163, 184, 0.3); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 1.8rem;
+            color: #38bdf8; cursor: pointer; touch-action: manipulation;
+            transition: all 0.1s ease;
         }
-        .control-arrow:active { background: #00a3ff; color: #fff; border-color: #00a3ff; }
+        .control-arrow:active { background: #00a3ff; color: #fff; border-color: #00a3ff; transform: scale(0.92); }
         
         #fire-button {
-            width: 140px; height: 75px; 
+            width: 130px; height: 70px; 
             background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-            border: 2px solid #f87171; border-radius: 12px; color: white;
-            font-size: 1.3rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.4);
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+            border: 2px solid #f87171; border-radius: 16px; color: white;
+            font-size: 1.2rem; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
             cursor: pointer; display: flex; align-items: center; justify-content: center;
-            touch-action: manipulation;
+            touch-action: manipulation; letter-spacing: 1px;
+            transition: all 0.1s ease;
         }
-        #fire-button:active { transform: scale(0.95); background: #b91c1c; }
+        #fire-button:active { transform: scale(0.93); background: #b91c1c; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2); }
 
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.03); opacity: 1; } }
-        @keyframes glowPulse { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
+        @keyframes glowPulse { 0% { transform: scale(1); } 100% { transform: scale(1.06); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div id="game-container">
         
-        <!-- Splash Screen Only -->
+        <!-- Splash Screen -->
         <div id="splash-screen" class="screen active-screen">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
         </div>
 
+        <!-- Title Screen -->
         <div id="title-screen" class="screen">
             <h1 class="game-title">ORBIT DEFENDER</h1>
-            <p style="margin-bottom: 40px; color: #94a3b8; letter-spacing: 1px;">EVS Space Mission</p>
+            <p class="subtitle">EVS Space Mission</p>
             <button class="btn" onclick="showScreen('instruction-screen')">PLAY GAME</button>
         </div>
 
+        <!-- Instruction Screen -->
         <div id="instruction-screen" class="screen">
-            <h2 class="game-title" style="font-size: 2rem;">How to Play 🚀</h2>
+            <h2 class="game-title" style="font-size: 1.8rem;">How to Play 🚀</h2>
             <div class="instructions-card">
-                <ul style="list-style: none; padding:0;">
-                    <li>⬅️ ➡️ <b>Move Ship:</b> Tap or hold the bottom arrow buttons to line up underneath a box!</li>
-                    <li>🔥 <b>Blast Target:</b> Tap the big red <b>BLAST</b> button to fire a laser beam!</li>
-                    <li>❤️ <b>Watch Out:</b> Don't hit wrong answers! You have 3 lives!</li>
+                <ul>
+                    <li><span>⬅️ ➡️</span> <b>Move Ship:</b> Tap or hold bottom arrows to position under a target!</li>
+                    <li><span>🔥</span> <b>Blast Target:</b> Tap the red <b>BLAST</b> button to fire lasers!</li>
+                    <li><span>💡</span> <b>Hint System:</b> Take care! Misses trigger golden answer hints!</li>
+                    <li><span>📖</span> <b>Learn:</b> Discover key facts after every target destroyed!</li>
                 </ul>
             </div>
             <button class="btn" onclick="startGame()">START MISSION</button>
         </div>
 
+        <!-- Main Game Screen -->
         <div id="game-screen" class="screen" style="padding:0; background:transparent;">
-            <!-- Confetti Layer Attached to Active Field -->
             <canvas id="confetti-canvas"></canvas>
 
             <div id="hud">
-                <div id="score-display" style="color: #00ffcc; font-weight: bold; font-family: monospace; font-size:1.1rem;">SCORE: 00</div>
-                <div id="lives-display" style="font-size: 1.2rem;">❤️❤️❤️</div>
+                <div id="score-display" class="hud-badge">SCORE: 00</div>
+                <div id="lives-display" style="font-size: 1.2rem; letter-spacing: 2px;">❤️❤️❤️</div>
             </div>
+            
             <div id="mission-text">Loading Space Coordinates...</div>
+            <div id="hint-banner"></div>
             
             <div id="playfield">
-                <div id="player-ship"></div>
+                <div id="player-ship"><div id="player-ship-cockpit"></div></div>
             </div>
 
             <div id="controls-deck">
@@ -206,12 +321,22 @@
                 <div id="fire-button">BLAST</div>
                 <div class="control-arrow" id="right-arrow">▶</div>
             </div>
+
+            <!-- Interactive Fact Explanation Overlay Modal -->
+            <div id="explanation-modal">
+                <div id="explanation-card">
+                    <div id="explanation-title">🎯 TARGET DESTROYED!</div>
+                    <div id="explanation-body">Explanation details will be displayed here...</div>
+                    <button class="btn" style="padding: 10px 28px; font-size: 1rem;" onclick="closeExplanation()">NEXT MISSION ➔</button>
+                </div>
+            </div>
         </div>
 
+        <!-- End Screen -->
         <div id="end-screen" class="screen">
             <h1 id="end-title" class="game-title">MISSION OVER</h1>
-            <h2 id="end-score" style="font-size: 1.8rem; margin-bottom: 20px; color:#00a3ff;">Final Score: 0</h2>
-            <div id="feedback-text" class="instructions-card" style="border-color: #00ffcc; color: #fff;"></div>
+            <h2 id="end-score" style="font-size: 1.6rem; margin-bottom: 16px; color:#38bdf8;">Final Score: 0</h2>
+            <div id="feedback-text" class="instructions-card" style="border-color: #00ffcc; color: #fff; text-align: center;"></div>
             <button class="btn" onclick="resetGame()">PLAY AGAIN</button>
         </div>
 
@@ -232,18 +357,78 @@
     }
 
     const missions = [
-        { text: "Earth is spinning like a top! What do we call this movement that brings us day and night?", correct: "Rotation", answers: ["Rotation", "Revolution", "Orbiting", "Gravity"] },
-        { text: "If we split the whole Earth into pieces, how much of it is covered by dry land?", correct: "29% Land", answers: ["29% Land", "71% Land", "50% Land", "90% Land"] },
-        { text: "Look closely at the mountains! What do you call the low, beautiful land nestled between them?", correct: "Valley", answers: ["Valley", "Plateau", "Plain", "Desert"] },
-        { text: "Mission alert! Can you find the absolute smallest continent on our planet?", correct: "Australia", answers: ["Australia", "Asia", "Africa", "Europe"] },
-        { text: "Earth isn't too hot or too cold! How far is it from our golden star, the Sun?", correct: "150M km", answers: ["150M km", "50M km", "300M km", "100M km"] },
-        { text: "Take a deep breath! What is the protective blanket of air around the Earth called?", correct: "Atmosphere", answers: ["Atmosphere", "Ozone Layer", "Lithosphere", "Hydrosphere"] },
-        { text: "Earth is taking a long, 1-year trip around the Sun! What is this big circle journey called?", correct: "Revolution", answers: ["Revolution", "Rotation", "Spinning", "Axis Tilt"] },
-        { text: "Spot the giant! Which mega continent is the largest home to millions of people?", correct: "Asia", answers: ["Asia", "Africa", "Europe", "Antarctica"] },
-        { text: "Time to explore! What is a flat, easy-to-carry drawing of our huge world called?", correct: "A Map", answers: ["A Map", "A Globe", "An Atlas", "A Sketch"] },
-        { text: "Lost at sea! Which magical tool has a magnetic needle that always points straight North?", correct: "Compass", answers: ["Compass", "Satellite", "Atlas", "Scale"] },
-        { text: "Let's visit India! Which massive, sandy desert is located right here in our home country?", correct: "Thar Desert", answers: ["Thar Desert", "Sahara", "Gobi", "Atacama"] },
-        { text: "Sailing South-East into the Bay of Bengal! Which gorgeous group of islands belongs to India?", correct: "Andaman Is.", answers: ["Andaman Is.", "Lakshadweep", "Maldives", "Sri Lanka"] }
+        { 
+            text: "Earth is spinning like a top! What do we call this movement that brings us day and night?", 
+            correct: "Rotation", 
+            answers: ["Rotation", "Revolution", "Orbiting", "Gravity"],
+            explanation: "Earth rotates on its axis once every 24 hours. The side facing the Sun experiences day, while the side facing away experiences night!"
+        },
+        { 
+            text: "If we split the whole Earth into pieces, how much of it is covered by dry land?", 
+            correct: "29% Land", 
+            answers: ["29% Land", "71% Land", "50% Land", "90% Land"],
+            explanation: "About 71% of Earth's surface is covered by oceans and seas, leaving approximately 29% as land continents and islands!"
+        },
+        { 
+            text: "Look closely at the mountains! What do you call the low, beautiful land nestled between them?", 
+            correct: "Valley", 
+            answers: ["Valley", "Plateau", "Plain", "Desert"],
+            explanation: "A valley is a low area between hills or mountains, often carved by rivers over thousands of years."
+        },
+        { 
+            text: "Mission alert! Can you find the absolute smallest continent on our planet?", 
+            correct: "Australia", 
+            answers: ["Australia", "Asia", "Africa", "Europe"],
+            explanation: "Australia is the smallest continent by land area and is also uniquely an island nation."
+        },
+        { 
+            text: "Earth isn't too hot or too cold! How far is it from our golden star, the Sun?", 
+            correct: "150M km", 
+            answers: ["150M km", "50M km", "300M km", "100M km"],
+            explanation: "Earth orbits the Sun at an average distance of about 150 million kilometers (93 million miles), making life possible!"
+        },
+        { 
+            text: "Take a deep breath! What is the protective blanket of air around the Earth called?", 
+            correct: "Atmosphere", 
+            answers: ["Atmosphere", "Ozone Layer", "Lithosphere", "Hydrosphere"],
+            explanation: "The Atmosphere is the layer of protective gases surrounding Earth, shielding us from space debris and solar radiation."
+        },
+        { 
+            text: "Earth is taking a long, 1-year trip around the Sun! What is this big circle journey called?", 
+            correct: "Revolution", 
+            answers: ["Revolution", "Rotation", "Spinning", "Axis Tilt"],
+            explanation: "Revolution is Earth's full orbit around the Sun, which takes 365.25 days and causes our changing seasons!"
+        },
+        { 
+            text: "Spot the giant! Which mega continent is the largest home to millions of people?", 
+            correct: "Asia", 
+            answers: ["Asia", "Africa", "Europe", "Antarctica"],
+            explanation: "Asia is the largest continent in both area and population, covering around 30% of Earth's total land area."
+        },
+        { 
+            text: "Time to explore! What is a flat, easy-to-carry drawing of our huge world called?", 
+            correct: "A Map", 
+            answers: ["A Map", "A Globe", "An Atlas", "A Sketch"],
+            explanation: "A map is a two-dimensional flat representation of an area or the entire world, unlike a spherical globe."
+        },
+        { 
+            text: "Lost at sea! Which magical tool has a magnetic needle that always points straight North?", 
+            correct: "Compass", 
+            answers: ["Compass", "Satellite", "Atlas", "Scale"],
+            explanation: "A magnetic compass contains a needle that aligns with Earth's magnetic poles to consistently point North."
+        },
+        { 
+            text: "Let's visit India! Which massive, sandy desert is located right here in our home country?", 
+            correct: "Thar Desert", 
+            answers: ["Thar Desert", "Sahara", "Gobi", "Atacama"],
+            explanation: "The Thar Desert (Great Indian Desert) covers over 200,000 square kilometers across northwestern India."
+        },
+        { 
+            text: "Sailing South-East into the Bay of Bengal! Which gorgeous group of islands belongs to India?", 
+            correct: "Andaman Is.", 
+            answers: ["Andaman Is.", "Lakshadweep", "Maldives", "Sri Lanka"],
+            explanation: "The Andaman and Nicobar Islands are located in the Bay of Bengal, forming a union territory of India."
+        }
     ];
 
     let currentIdx = 0;
@@ -258,7 +443,7 @@
     const ship = document.getElementById('player-ship');
     let shipX = 0;
 
-    // Confetti Engine Components
+    // Confetti Engine
     const canvas = document.getElementById('confetti-canvas');
     const ctx = canvas.getContext('2d');
     let confettiParticles = [];
@@ -271,11 +456,11 @@
     }
 
     function spawnConfettiExplosion() {
-        const particleCount = 70;
+        const particleCount = 60;
         for (let i = 0; i < particleCount; i++) {
             confettiParticles.push({
                 x: canvas.width / 2,
-                y: canvas.height / 3, // Explosion centered around answer impact zone
+                y: canvas.height / 3,
                 size: Math.random() * 6 + 4,
                 color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
                 velocityX: (Math.random() - 0.5) * 10,
@@ -295,10 +480,10 @@
             
             p.x += p.velocityX;
             p.y += p.velocityY;
-            p.velocityY += 0.25; // Simulated gravity acceleration
-            p.velocityX *= 0.98; // Air resistance dampening
+            p.velocityY += 0.25;
+            p.velocityX *= 0.98;
             p.rotation += p.rotationSpeed;
-            p.opacity -= 0.015;  // Smooth visual fade-out
+            p.opacity -= 0.015;
 
             if (p.opacity <= 0 || p.y > canvas.height) {
                 confettiParticles.splice(i, 1);
@@ -356,6 +541,7 @@
         targetObjects = [];
         laserObjects = [];
         wrongAttemptsThisQuestion = 0;
+        document.getElementById('hint-banner').innerText = "";
 
         if (currentIdx >= missions.length) {
             endGame(true);
@@ -371,7 +557,7 @@
         const boxWidth = 84; 
         
         const totalFreeSpace = fieldWidth - (boxWidth * 4);
-        const horizontalGap = totalFreeSpace / 5;
+        const horizontalGap = Math.max( totalFreeSpace / 5, 4);
 
         shuffled.forEach((text, i) => {
             const box = document.createElement('div');
@@ -402,6 +588,7 @@
     }
 
     function fireLaser() {
+        if(!gameActive) return;
         const laser = document.createElement('div');
         laser.className = 'laser';
         const lx = shipX + (ship.clientWidth / 2) - 2;
@@ -410,17 +597,22 @@
         laser.style.top = ly + 'px';
         playfield.appendChild(laser);
 
-        laserObjects.push({ element: laser, x: lx, y: ly, width: 4, height: 12 });
+        laserObjects.push({ element: laser, x: lx, y: ly, width: 4, height: 16 });
     }
 
     function handleCollision(target, tIdx) {
         if (target.isCorrect) {
             playSound('correct');
-            spawnConfettiExplosion(); // Trigger the confetti effect instantly
+            spawnConfettiExplosion();
             score += 20;
-            currentIdx++;
             updateHUD();
-            loadMission();
+            
+            // Show detailed explanation
+            gameActive = false;
+            showExplanation(missions[currentIdx].explanation);
+            
+            target.element.remove();
+            targetObjects.splice(tIdx, 1);
         } else {
             playSound('wrong');
             lives--;
@@ -435,63 +627,75 @@
                 return;
             }
 
-            if (wrongAttemptsThisQuestion >= 1) {
-                targetObjects.forEach(t => {
-                    if (t.isCorrect) t.element.classList.add('hint-glow');
-                });
-            }
+            // Hint System triggered on wrong answer
+            document.getElementById('hint-banner').innerText = "💡 HINT: Golden target highlighted below!";
+            targetObjects.forEach(t => {
+                if (t.isCorrect) t.element.classList.add('hint-glow');
+            });
         }
     }
 
-    function gameLoop() {
-        if (!gameActive) return;
+    function showExplanation(text) {
+        const modal = document.getElementById('explanation-modal');
+        document.getElementById('explanation-body').innerText = text;
+        modal.style.display = 'flex';
+    }
 
-        // Drive Confetti Rendering Calculations Independent of Active Play Engine Stops
+    function closeExplanation() {
+        document.getElementById('explanation-modal').style.display = 'none';
+        currentIdx++;
+        gameActive = true;
+        loadMission();
+    }
+
+    function gameLoop() {
         updateAndRenderConfetti();
 
-        if (holdingLeft && shipX > 5) {
-            shipX -= 7;
-            ship.style.left = shipX + 'px';
-        }
-        if (holdingRight && shipX < (playfield.clientWidth - ship.clientWidth - 5)) {
-            shipX += 7;
-            ship.style.left = shipX + 'px';
-        }
+        if (gameActive) {
+            if (holdingLeft && shipX > 5) {
+                shipX -= 7;
+                ship.style.left = shipX + 'px';
+            }
+            if (holdingRight && shipX < (playfield.clientWidth - ship.clientWidth - 5)) {
+                shipX += 7;
+                ship.style.left = shipX + 'px';
+            }
 
-        for (let l = laserObjects.length - 1; l >= 0; l--) {
-            let laser = laserObjects[l];
-            laser.y -= 12;
-            laser.element.style.top = laser.y + 'px';
+            for (let l = laserObjects.length - 1; l >= 0; l--) {
+                let laser = laserObjects[l];
+                laser.y -= 12;
+                laser.element.style.top = laser.y + 'px';
 
-            if (laser.y < 0) {
-                laser.element.remove();
-                laserObjects.splice(l, 1);
-                continue;
+                if (laser.y < 0) {
+                    laser.element.remove();
+                    laserObjects.splice(l, 1);
+                    continue;
+                }
+
+                for (let t = targetObjects.length - 1; t >= 0; t--) {
+                    let target = targetObjects[t];
+                    if (laser.x < target.x + target.width &&
+                        laser.x + laser.width > target.x &&
+                        laser.y < target.y + target.height &&
+                        laser.y + laser.height > target.y) {
+                        
+                        laser.element.remove();
+                        laserObjects.splice(l, 1);
+                        handleCollision(target, t);
+                        break;
+                    }
+                }
             }
 
             for (let t = targetObjects.length - 1; t >= 0; t--) {
                 let target = targetObjects[t];
-                if (laser.x < target.x + target.width &&
-                    laser.x + laser.width > target.x &&
-                    laser.y < target.y + target.height &&
-                    laser.y + laser.height > target.y) {
-                    
-                    laser.element.remove();
-                    laserObjects.splice(l, 1);
-                    handleCollision(target, t);
-                    break;
-                }
-            }
-        }
-
-        for (let t = targetObjects.length - 1; t >= 0; t--) {
-            let target = targetObjects[t];
-            target.y += target.speed;
-            target.element.style.top = target.y + 'px';
-
-            if (target.y > playfield.clientHeight - 55) {
-                target.y = target.startY; 
+                target.y += target.speed;
                 target.element.style.top = target.y + 'px';
+
+                if (target.y > playfield.clientHeight - 55) {
+                    target.y = target.startY; 
+                    target.element.style.top = target.y + 'px';
+                }
             }
         }
 
@@ -511,10 +715,10 @@
         if (isWin) {
             playSound('win');
             document.getElementById('end-title').innerText = "MISSION COMPLETED! 🌟";
-            document.getElementById('feedback-text').innerText = "🏆 Incredible job, Space Captain! You successfully answered all questions and saved the planet!";
+            document.getElementById('feedback-text').innerText = "🏆 Outstanding work, Space Captain! You successfully answered all questions and saved the planet!";
         } else {
             document.getElementById('end-title').innerText = "GAME OVER";
-            document.getElementById('feedback-text').innerText = "👍 Nice try! Let's complete another orbit around the sun and practice our core facts!";
+            document.getElementById('feedback-text').innerText = "👍 Nice try! Let's orbit again and practice key facts to beat your score!";
         }
     }
 
@@ -527,10 +731,20 @@
     const rightBtn = document.getElementById('right-arrow');
     const fireBtn = document.getElementById('fire-button');
 
-    leftBtn.addEventListener('pointerdown', (e) => { holdingLeft = true; e.preventDefault(); });
-    window.addEventListener('pointerup', () => { holdingLeft = false; holdingRight = false; });
-    rightBtn.addEventListener('pointerdown', (e) => { holdingRight = true; e.preventDefault(); });
-    fireBtn.addEventListener('pointerdown', (e) => { if (gameActive) fireLaser(); e.preventDefault(); });
+    const startLeft = (e) => { holdingLeft = true; e.preventDefault(); };
+    const stopLeft = (e) => { holdingLeft = false; e.preventDefault(); };
+    const startRight = (e) => { holdingRight = true; e.preventDefault(); };
+    const stopRight = (e) => { holdingRight = false; e.preventDefault(); };
+
+    leftBtn.addEventListener('pointerdown', startLeft);
+    leftBtn.addEventListener('pointerup', stopLeft);
+    leftBtn.addEventListener('pointerleave', stopLeft);
+
+    rightBtn.addEventListener('pointerdown', startRight);
+    rightBtn.addEventListener('pointerup', stopRight);
+    rightBtn.addEventListener('pointerleave', stopRight);
+
+    fireBtn.addEventListener('pointerdown', (e) => { fireLaser(); e.preventDefault(); });
 
     window.addEventListener('keydown', (e) => {
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') holdingLeft = true;
