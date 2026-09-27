@@ -155,7 +155,6 @@
             <!-- Title Screen -->
             <div id="screenTitle" class="hidden" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 20;">
                 <div class="glass-card floating" style="padding: 24px 18px; width: 100%; text-align: center;">
-                    <div style="font-size: 13px; font-weight: 800; color: #0284c7; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avian Quest Series</div>
                     <h1 style="font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 900; color: #0f172a; margin: 0; line-height: 1.1; text-transform: uppercase;">
                         AVIAN<br><span style="color: #0284c7; font-size: 36px;">CLOUD QUEST</span>
                     </h1>
@@ -588,11 +587,20 @@
                 return;
             }
             const viewWidth = canvas.width / dpr;
+            const viewHeight = canvas.height / dpr;
+
+            // Spawn cloud positioned safely in the open gap between column pairs
+            let spawnX = viewWidth + 96;
+            if (pipeArray.length > 0) {
+                let lastPipe = pipeArray[pipeArray.length - 1];
+                spawnX = lastPipe.x + 96;
+            }
+
             cloudArray = [{
-                x: viewWidth + 40,
-                y: Math.floor(Math.random() * 140) + 160,
-                width: 140,
-                height: 50,
+                x: spawnX,
+                y: Math.min(220, Math.max(120, Math.floor(viewHeight / 2) - 23)),
+                width: 120,
+                height: 46,
                 data: questionBank[activeIndex]
             }];
         }
@@ -676,6 +684,7 @@
             let colorLightGlint = "#b45309";
             let colorShadowTrim = "#451a03";
 
+            // Top Pipe Column
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
             ctx.fillStyle = colorLightGlint;
@@ -683,6 +692,7 @@
             ctx.fillStyle = colorShadowTrim;
             ctx.fillRect(pipe.x + pipe.width - 12, 0, 8, pipe.topHeight);
 
+            // Top Pipe Cap
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
             ctx.lineWidth = 3;
@@ -690,14 +700,16 @@
             ctx.strokeRect(pipe.x, -10, pipe.width, pipe.topHeight + 10);
             ctx.strokeRect(pipe.x - 4, pipe.topHeight - 24, pipe.width + 8, 24);
 
+            // Bottom Pipe Column
             let bottomHeight = viewHeight - pipe.bottomY;
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight);
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, pipe.bottomY, 10, bottomHeight);
             ctx.fillStyle = colorShadowTrim;
-            ctx.fillRect(pipe.x + pipe.width - 12, 0, 8, bottomHeight);
+            ctx.fillRect(pipe.x + pipe.width - 12, pipe.bottomY, 8, bottomHeight);
 
+            // Bottom Pipe Cap
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
             ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, bottomHeight + 10);
@@ -754,10 +766,10 @@
                 }
 
                 // Pipe Spawning
-                if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < viewWidth - 220) {
+                if (pipeArray.length === 0 || pipeArray[pipeArray.length - 1].x < viewWidth - 240) {
                     let clearanceGap = 160;
                     let minimumAllowedH = 50;
-                    let maximumAllowedH = viewHeight - clearanceGap - 100;
+                    let maximumAllowedH = Math.max(minimumAllowedH + 20, viewHeight - clearanceGap - 80);
                     let calculatedTopHeight = Math.floor(Math.random() * (maximumAllowedH - minimumAllowedH)) + minimumAllowedH;
 
                     pipeArray.push({
@@ -769,7 +781,7 @@
                 }
             }
 
-            // Pipe Iteration (Backwards to prevent array mutation leaks)
+            // Pipe Iteration
             for (let i = pipeArray.length - 1; i >= 0; i--) {
                 let pipe = pipeArray[i];
                 if (standardPlay && freezeFrameTimer === 0) pipe.x -= gameScrollSpeed;
@@ -803,7 +815,7 @@
                 }
             }
 
-            // Cloud Iteration (Backwards safely)
+            // Cloud Iteration
             for (let i = cloudArray.length - 1; i >= 0; i--) {
                 let cloud = cloudArray[i];
                 if (standardPlay && freezeFrameTimer === 0) cloud.x -= gameScrollSpeed;
@@ -846,7 +858,7 @@
                 }
             }
 
-            // Particle Updates (Backwards)
+            // Particle Updates
             for (let i = particleArray.length - 1; i >= 0; i--) {
                 let p = particleArray[i];
                 p.x += p.vx;
@@ -859,7 +871,7 @@
                 if (p.life <= 0) particleArray.splice(i, 1);
             }
 
-            // Confetti Updates (Backwards)
+            // Confetti Updates
             for (let i = confettiArray.length - 1; i >= 0; i--) {
                 let p = confettiArray[i];
                 p.x += p.vx;
@@ -951,7 +963,7 @@
             // Reset Explanation Box
             document.getElementById('modalExplanationBox').classList.add('hidden');
 
-            // Shuffle choices so answer is NOT always Option A!
+            // Shuffle choices so answer is NOT always Option A
             let shuffledChoices = [...data.choices];
             shuffledChoices.sort(() => Math.random() - 0.5);
 
