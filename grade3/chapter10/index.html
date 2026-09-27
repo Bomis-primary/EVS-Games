@@ -265,7 +265,7 @@
             text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
         }
 
-        /* Perfectly align placed planet inside slot */
+        /* Position planet inside slot */
         .slot .planet-container {
             position: absolute !important;
             top: 50% !important;
@@ -313,14 +313,14 @@
             align-items: center; 
             cursor: grab; 
             flex-shrink: 0; 
-            touch-action: none; /* Prevents touch drag from scrolling body */
+            touch-action: none; 
             transition: transform 0.15s ease;
         }
         .planet-container.dragging {
             cursor: grabbing;
             opacity: 0.85;
             z-index: 1000 !important;
-            pointer-events: none; /* Allows elementFromPoint to see slots underneath */
+            pointer-events: none; 
         }
         
         .planet { 
@@ -408,15 +408,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .quiz-progress { 
-            font-size: 0.85rem; 
-            color: #ffcc00; 
-            font-weight: bold; 
-            margin-bottom: 8px; 
-            text-transform: uppercase; 
-            letter-spacing: 1.2px; 
-        }
-
         .quiz-question { 
             font-size: clamp(1.05rem, 2vw, 1.25rem); 
             font-weight: bold; 
@@ -436,6 +427,35 @@
             display: none; 
             line-height: 1.4;
         }
+
+        .quiz-explanation {
+            background: rgba(40, 167, 69, 0.15);
+            border-left: 4px solid #28a745;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 0.95rem;
+            color: #d4edda;
+            line-height: 1.45;
+            display: none;
+        }
+
+        .quiz-next-btn {
+            margin-top: 16px;
+            width: 100%;
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .quiz-next-btn:active { transform: scale(0.98); }
         
         .options-list { display: flex; flex-direction: column; gap: 10px; }
 
@@ -540,10 +560,11 @@
     <!-- 4. Quiz Overlay Modal -->
     <div id="quiz-overlay" class="hidden">
         <div class="quiz-card">
-            <div class="quiz-progress" id="quiz-title">Planet Quiz</div>
             <div class="quiz-question" id="quiz-text">Question loading...</div>
             <div class="quiz-clue" id="quiz-clue-box">💡 <b>Hint:</b> Try reading the choices again carefully!</div>
             <div class="options-list" id="quiz-options"></div>
+            <div class="quiz-explanation" id="quiz-explanation-box"></div>
+            <button class="quiz-next-btn" id="quiz-next-btn" onclick="handleNextQuestion()">Continue ➔</button>
         </div>
     </div>
 
@@ -559,36 +580,132 @@
     <script>
         const planetData = {
             mercury: { name: 'Mercury', class: 'p-mercury', questions: [
-                { q: "Which planet is closest to the Sun?", a: ["Mercury", "Earth", "Mars"], c: 0, clue: "It's the very first planet right next to the hot Sun!" },
-                { q: "Is Mercury a big planet or a small planet?", a: ["Smallest", "Biggest", "Middle-sized"], c: 0, clue: "Think tiny! It's smaller than all other planets." }
+                { 
+                    q: "Which planet is closest to the Sun?", 
+                    a: ["Mercury", "Earth", "Mars"], 
+                    c: 0, 
+                    clue: "It's the very first planet right next to the hot Sun!",
+                    explanation: "Mercury is the innermost planet in our Solar System, orbiting closest to the Sun at an average distance of about 58 million kilometers."
+                },
+                { 
+                    q: "Is Mercury a big planet or a small planet?", 
+                    a: ["Smallest", "Biggest", "Middle-sized"], 
+                    c: 0, 
+                    clue: "Think tiny! It's smaller than all other planets.",
+                    explanation: "Mercury is the smallest planet in the Solar System—it is only slightly larger than Earth's Moon."
+                }
             ]},
             venus: { name: 'Venus', class: 'p-venus', questions: [
-                { q: "Which planet is the hottest in our solar system?", a: ["Mercury", "Venus", "Jupiter"], c: 1, clue: "Even though it's second, its thick clouds trap heat like an oven!" },
-                { q: "Venus shines so brightly that it looks like a...?", a: ["Star", "Comet", "Black Hole"], c: 0, clue: "People often call it the Morning or Evening Star!" }
+                { 
+                    q: "Which planet is the hottest in our solar system?", 
+                    a: ["Mercury", "Venus", "Jupiter"], 
+                    c: 1, 
+                    clue: "Even though it's second, its thick clouds trap heat like an oven!",
+                    explanation: "Venus has an intense runaway greenhouse effect with thick carbon dioxide clouds, trapping heat to reach temperatures around 465°C."
+                },
+                { 
+                    q: "Venus shines so brightly that it looks like a...?", 
+                    a: ["Star", "Comet", "Black Hole"], 
+                    c: 0, 
+                    clue: "People often call it the Morning or Evening Star!",
+                    explanation: "Because its reflective cloud cover bounces sunlight so effectively, Venus shines brighter than any star, often called the 'Morning Star' or 'Evening Star'."
+                }
             ]},
             earth: { name: 'Earth', class: 'p-earth', questions: [
-                { q: "Why is Earth called the 'Blue Planet'?", a: ["Because of ice", "Because it is covered in water", "Because of trees"], c: 1, clue: "Look at a globe! Oceans cover most of our world." },
-                { q: "How many moons does Earth have?", a: ["1 Moon", "2 Moons", "0 Moons"], c: 0, clue: "Look up at night! We only see one glowing shape." }
+                { 
+                    q: "Why is Earth called the 'Blue Planet'?", 
+                    a: ["Because of ice", "Because it is covered in water", "Because of trees"], 
+                    c: 1, 
+                    clue: "Look at a globe! Oceans cover most of our world.",
+                    explanation: "Liquid water covers over 70% of Earth's surface, giving our world a distinct vivid blue color from outer space."
+                },
+                { 
+                    q: "How many moons does Earth have?", 
+                    a: ["1 Moon", "2 Moons", "0 Moons"], 
+                    c: 0, 
+                    clue: "Look up at night! We only see one glowing shape.",
+                    explanation: "Earth has exactly one natural satellite, simply known as the Moon."
+                }
             ]},
             mars: { name: 'Mars', class: 'p-mars', questions: [
-                { q: "What is Mars' famous nickname?", a: ["The Cold Planet", "The Red Planet", "The Ringed Planet"], c: 1, clue: "Its rusty red ground gives it a fiery bright color!" },
-                { q: "Mars has the biggest volcano in the solar system. What is it?", a: ["Olympus Mons", "Mount Everest", "Vesuvius"], c: 0, clue: "It starts with an 'O' and sounds like a mountain for gods!" }
+                { 
+                    q: "What is Mars' famous nickname?", 
+                    a: ["The Cold Planet", "The Red Planet", "The Ringed Planet"], 
+                    c: 1, 
+                    clue: "Its rusty red ground gives it a fiery bright color!",
+                    explanation: "Mars is known as the Red Planet because iron oxide (rust) covering its surface rocks gives it a reddish glow."
+                },
+                { 
+                    q: "Mars has the biggest volcano in the solar system. What is it?", 
+                    a: ["Olympus Mons", "Mount Everest", "Vesuvius"], 
+                    c: 0, 
+                    clue: "It starts with an 'O' and sounds like a mountain for gods!",
+                    explanation: "Olympus Mons is a massive shield volcano on Mars nearly three times taller than Mount Everest."
+                }
             ]},
             jupiter: { name: 'Jupiter', class: 'p-jupiter', questions: [
-                { q: "Which planet is the largest of all?", a: ["Saturn", "Earth", "Jupiter"], c: 2, clue: "It's the giant king planet of our solar neighborhood!" },
-                { q: "What is the Giant Red Spot seen on Jupiter?", a: ["A huge storm", "A massive desert", "An ocean"], c: 0, clue: "It is a wild, windy swirl that has been spinning for hundreds of years!" }
+                { 
+                    q: "Which planet is the largest of all?", 
+                    a: ["Saturn", "Earth", "Jupiter"], 
+                    c: 2, 
+                    clue: "It's the giant king planet of our solar neighborhood!",
+                    explanation: "Jupiter is the largest planet in our solar system—more than 1,300 Earths could fit inside it!"
+                },
+                { 
+                    q: "What is the Giant Red Spot seen on Jupiter?", 
+                    a: ["A huge storm", "A massive desert", "An ocean"], 
+                    c: 0, 
+                    clue: "It is a wild, windy swirl that has been spinning for hundreds of years!",
+                    explanation: "The Giant Red Spot is an enormous high-pressure storm system larger than Earth that has been active for centuries."
+                }
             ]},
             saturn: { name: 'Saturn', class: 'p-saturn', questions: [
-                { q: "What beautiful feature makes Saturn easy to recognize?", a: ["Its bright green color", "Its big icy rings", "Its square shape"], c: 1, clue: "It loops all the way around the middle of the planet!" },
-                { q: "What are Saturn's rings mostly made of?", a: ["Rock and Ice chunks", "Gas and Fire", "Gold dust"], c: 0, clue: "Brrr! Shiny frozen water mixed with mountain stones." }
+                { 
+                    q: "What beautiful feature makes Saturn easy to recognize?", 
+                    a: ["Its bright green color", "Its big icy rings", "Its square shape"], 
+                    c: 1, 
+                    clue: "It loops all the way around the middle of the planet!",
+                    explanation: "Saturn is world-famous for its stunning and extensive ring system made of ice and rock particles."
+                },
+                { 
+                    q: "What are Saturn's rings mostly made of?", 
+                    a: ["Rock and Ice chunks", "Gas and Fire", "Gold dust"], 
+                    c: 0, 
+                    clue: "Brrr! Shiny frozen water mixed with mountain stones.",
+                    explanation: "Saturn's rings consist mainly of billions of individual ice crystals, coated with dust and rock material."
+                }
             ]},
             uranus: { name: 'Uranus', class: 'p-uranus', questions: [
-                { q: "What makes Uranus unique in how it orbits the Sun?", a: ["It spins backwards", "It spins on its side", "It moves in zig-zags"], c: 1, clue: "It looks like a ball rolling directly on its track line!" },
-                { q: "What color does Uranus appear?", a: ["Bright red", "Pale blue-green", "Deep black"], c: 1, clue: "Special gases turn this cold planet a pretty sky-ocean mix." }
+                { 
+                    q: "What makes Uranus unique in how it orbits the Sun?", 
+                    a: ["It spins backwards", "It spins on its side", "It moves in zig-zags"], 
+                    c: 1, 
+                    clue: "It looks like a ball rolling directly on its track line!",
+                    explanation: "Uranus has an extreme axial tilt of nearly 98 degrees, causing it to rotate almost entirely on its side."
+                },
+                { 
+                    q: "What color does Uranus appear?", 
+                    a: ["Bright red", "Pale blue-green", "Deep black"], 
+                    c: 1, 
+                    clue: "Special gases turn this cold planet a pretty sky-ocean mix.",
+                    explanation: "Methane gas in Uranus' atmosphere absorbs red wavelengths of light and reflects a pale blue-green cyan hue."
+                }
             ]},
             neptune: { name: 'Neptune', class: 'p-neptune', questions: [
-                { q: "Which planet is the farthest away from the Sun?", a: ["Neptune", "Uranus", "Mars"], c: 0, clue: "It's the very last planet on the outer edge!" },
-                { q: "Neptune is a very cold world known as an...", a: ["Ice Giant", "Acid Ocean", "Iron Ball"], c: 0, clue: "It's made of frozen water and gas, making it a giant ice block!" }
+                { 
+                    q: "Which planet is the farthest away from the Sun?", 
+                    a: ["Neptune", "Uranus", "Mars"], 
+                    c: 0, 
+                    clue: "It's the very last planet on the outer edge!",
+                    explanation: "Neptune is the eighth and outermost planet from the Sun, orbiting about 4.5 billion kilometers away."
+                },
+                { 
+                    q: "Neptune is a very cold world known as an...", 
+                    a: ["Ice Giant", "Acid Ocean", "Iron Ball"], 
+                    c: 0, 
+                    clue: "It's made of frozen water and gas, making it a giant ice block!",
+                    explanation: "Neptune is classified as an Ice Giant because much of its interior mass is composed of dense icy fluids of water, ammonia, and methane."
+                }
             ]}
         };
 
@@ -596,6 +713,7 @@
         let lives = 3;
         let activePlanetKey = null;
         let quizQueue = [];
+        let currentQuiz = null;
         let totalPlaced = 0;
         let wrongAttemptsMap = {};
         let quizAttempts = 0;
@@ -690,7 +808,7 @@
             });
         }
 
-        /* --- UNIFIED POINTER DRAG ENGINE (DESKTOP + MOBILE TOUCH) --- */
+        /* --- UNIFIED POINTER DRAG ENGINE --- */
         let draggedItem = null;
         let dragOffset = { x: 0, y: 0 };
         let originalParent = null;
@@ -727,7 +845,6 @@
             document.addEventListener('pointerup', (e) => {
                 if (!draggedItem) return;
 
-                // Find element below pointer coordinates
                 const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
                 const targetSlot = dropTarget ? dropTarget.closest('.slot') : null;
 
@@ -750,7 +867,7 @@
 
         function resetDraggedItem(item) {
             item.classList.remove('dragging');
-            item.style.cssText = ''; // Resets inline styles cleanly
+            item.style.cssText = ''; 
             if (originalParent) {
                 originalParent.appendChild(item);
             }
@@ -767,7 +884,6 @@
                 playSFX('snd-correct');
                 targetSlot.classList.add('correct-drop');
                 
-                // Clear drag styles and lock into orbit slot
                 draggedContainer.classList.remove('dragging');
                 draggedContainer.classList.add('placed');
                 draggedContainer.style.cssText = '';
@@ -775,7 +891,8 @@
 
                 totalPlaced++;
                 activePlanetKey = planetKey;
-                quizQueue = [...planetData[planetKey].questions];
+                // Randomise question order only
+                quizQueue = [...planetData[planetKey].questions].sort(() => Math.random() - 0.5);
                 setTimeout(triggerNextQuizQuestion, 400);
             } else {
                 playSFX('snd-wrong');
@@ -810,15 +927,19 @@
         function triggerNextQuizQuestion() {
             if (quizQueue.length > 0) {
                 quizAttempts = 0;
-                const currentQuiz = quizQueue.shift();
+                currentQuiz = quizQueue.shift();
+                
                 const overlay = document.getElementById('quiz-overlay');
-                const title = document.getElementById('quiz-title');
                 const text = document.getElementById('quiz-text');
                 const clueBox = document.getElementById('quiz-clue-box');
                 const optionsBox = document.getElementById('quiz-options');
+                const expBox = document.getElementById('quiz-explanation-box');
+                const nextBtn = document.getElementById('quiz-next-btn');
 
                 clueBox.style.display = 'none'; 
-                title.innerText = planetData[activePlanetKey].name + " Exploration Quiz";
+                expBox.style.display = 'none';
+                nextBtn.style.display = 'none';
+
                 text.innerText = currentQuiz.q;
                 optionsBox.innerHTML = '';
 
@@ -834,8 +955,26 @@
                             playSFX('snd-correct');
                             score += 20;
                             document.getElementById('score-val').innerText = score;
-                            overlay.classList.add('hidden');
-                            setTimeout(triggerNextQuizQuestion, 250);
+
+                            // Disable all option buttons
+                            const allBtns = optionsBox.querySelectorAll('.option-btn');
+                            allBtns.forEach(b => {
+                                b.style.pointerEvents = 'none';
+                                b.style.opacity = '0.5';
+                            });
+
+                            // Highlight correct choice
+                            btn.style.opacity = '1';
+                            btn.style.background = '#28a745';
+                            btn.style.borderColor = '#28a745';
+                            btn.style.color = '#ffffff';
+
+                            clueBox.style.display = 'none';
+
+                            // Show explanation & continue button
+                            expBox.innerHTML = '📖 <b>Explanation:</b> ' + currentQuiz.explanation;
+                            expBox.style.display = 'block';
+                            nextBtn.style.display = 'block';
                         } else {
                             playSFX('snd-wrong');
                             quizAttempts++;
@@ -854,6 +993,12 @@
             } else if (totalPlaced === 8) {
                 endGame(true);
             }
+        }
+
+        function handleNextQuestion() {
+            const overlay = document.getElementById('quiz-overlay');
+            overlay.classList.add('hidden');
+            setTimeout(triggerNextQuizQuestion, 250);
         }
 
         function endGame(isWin) {
