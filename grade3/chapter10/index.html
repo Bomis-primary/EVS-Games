@@ -5,23 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Galaxy Game - Solar System Explorer</title>
     <style>
-        /* --- RESET & MOBILE OPTIMIZATIONS --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-        
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: #050510; 
-            color: white; 
-            overflow: hidden; 
-            height: 100vh; 
-            height: -webkit-fill-available; /* Fixed mobile viewport sizing bug */
-            position: relative; 
+        /* --- CSS RESET & MOBILE OPTIMIZATIONS --- */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            user-select: none; 
+            -webkit-user-select: none; 
+            -webkit-touch-callout: none; 
         }
         
-        html { height: -webkit-fill-available; }
+        html, body { 
+            width: 100%;
+            height: 100%;
+            height: -webkit-fill-available;
+            overflow: hidden; 
+            background: #03030c; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            color: #ffffff; 
+            position: relative; 
+        }
 
-        /* Lightweight Performance Background Pack */
-        .star-bg { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; opacity: 0.4; pointer-events: none; }
+        /* --- BACKGROUND COSMIC ANIMATION --- */
+        #stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            background: radial-gradient(ellipse at bottom, #101432 0%, #03030c 100%);
+        }
+
+        .star-bg { 
+            position: absolute; 
+            width: 2px; 
+            height: 2px; 
+            background: #ffffff; 
+            border-radius: 50%; 
+            opacity: 0.5; 
+            animation: pulseStar linear infinite alternate;
+        }
+
+        @keyframes pulseStar {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            100% { opacity: 0.9; transform: scale(1.3); }
+        }
 
         /* --- SCREEN ARCHITECTURE --- */
         .screen { 
@@ -30,64 +61,211 @@
             width: 100%; height: 100%; 
             display: flex; flex-direction: column; 
             align-items: center; justify-content: center; 
-            background: radial-gradient(circle at center, #121232 0%, #030308 100%); 
-            z-index: 10; 
+            background: radial-gradient(circle at center, rgba(18, 18, 50, 0.95) 0%, rgba(3, 3, 12, 0.98) 100%); 
+            z-index: 100; 
             padding: 20px; 
             text-align: center; 
-            overflow-y: auto; /* Fallback for small screens on forms */
+            overflow-y: auto; 
+            transition: opacity 0.4s ease, visibility 0.4s ease;
         }
-        .hidden { display: none !important; }
+
+        .hidden { 
+            display: none !important; 
+            opacity: 0;
+            pointer-events: none;
+        }
         
-        h1 { font-size: calc(1.8rem + 1.5vw); color: #ffcc00; text-shadow: 0 0 15px rgba(255,204,0,0.5); margin-bottom: 15px; font-weight: 800; }
-        p { font-size: calc(1rem + 0.3vw); max-width: 600px; line-height: 1.5; margin-bottom: 25px; color: #b8b8ff; }
+        h1 { 
+            font-size: clamp(1.8rem, 4vw, 2.8rem); 
+            color: #ffcc00; 
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.6); 
+            margin-bottom: 15px; 
+            font-weight: 800; 
+            letter-spacing: 1px;
+        }
+
+        p { 
+            font-size: clamp(0.95rem, 2vw, 1.15rem); 
+            max-width: 580px; 
+            line-height: 1.6; 
+            margin-bottom: 25px; 
+            color: #c4c4ff; 
+        }
         
-        .rules-list { text-align: left; max-width: 500px; margin-bottom: 25px; font-size: calc(0.95rem + 0.2vw); background: rgba(255,255,255,0.04); padding: 20px 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
-        .rules-list li { margin-bottom: 12px; list-style-type: '🌟 '; padding-left: 5px; }
+        .rules-list { 
+            text-align: left; 
+            max-width: 480px; 
+            width: 100%;
+            margin-bottom: 25px; 
+            font-size: clamp(0.9rem, 1.8vw, 1.05rem); 
+            background: rgba(255, 255, 255, 0.05); 
+            padding: 20px 25px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+        }
+        .rules-list li { 
+            margin-bottom: 12px; 
+            list-style-type: '🌟 '; 
+            padding-left: 5px; 
+            line-height: 1.4;
+        }
         
-        button { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; border: none; padding: 14px 35px; font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(40,167,69,0.3); -webkit-tap-highlight-color: transparent; }
-        button:hover { transform: scale(1.03); }
+        .btn-primary { 
+            background: linear-gradient(135deg, #28a745, #1e7e34); 
+            color: #ffffff; 
+            border: none; 
+            padding: 14px 38px; 
+            font-size: clamp(1.05rem, 2vw, 1.25rem); 
+            font-weight: bold; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s; 
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4); 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .btn-primary:active { transform: scale(0.96); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6); }
         
-        /* --- RESPONSIVE HUD --- */
-        #hud { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 5; font-size: calc(0.9rem + 0.5vw); font-weight: bold; pointer-events: none; }
-        #score-display, #hearts-display { background: rgba(5,5,20,0.75); padding: 6px 14px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); pointer-events: auto; }
+        /* --- HUD (HEADS-UP DISPLAY) --- */
+        #hud { 
+            position: absolute; 
+            top: 12px; 
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 0 16px; 
+            z-index: 50; 
+            font-size: clamp(0.85rem, 2vw, 1.1rem); 
+            font-weight: bold; 
+            pointer-events: none; 
+        }
+
+        .hud-card {
+            background: rgba(10, 10, 30, 0.75); 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            pointer-events: auto; 
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         #score-display { color: #ffcc00; }
         #hearts-display { color: #ff4757; letter-spacing: 2px; }
 
-        /* --- GAME ENGINE BOARD --- */
-        #game-canvas { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-        
-        /* Optimized Static Orbit System */
-        .orbits-layer { position: absolute; top: 0; left: 0; width: 100%; height: 62%; pointer-events: none; z-index: 1; overflow: hidden; }
-        .orbit-line { position: absolute; top: 40%; left: 30px; border: 1px dashed rgba(255, 255, 255, 0.06); border-radius: 50%; transform: translateY(-50%); }
+        .audio-btn {
+            background: rgba(10, 10, 30, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            pointer-events: auto;
+            font-size: 1rem;
+        }
 
-        /* Flexible Slots Board Row */
+        /* --- MAIN GAME CANVAS --- */
+        #game-canvas { 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            position: relative; 
+            z-index: 10;
+        }
+        
+        .orbits-layer { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 60%; 
+            pointer-events: none; 
+            z-index: 1; 
+            overflow: hidden; 
+        }
+
+        /* --- SLOTS CONTAINER (TOP BOARD) --- */
         .slots-container { 
             display: flex; 
             justify-content: flex-start; 
             align-items: center; 
             position: relative; 
-            margin-top: 10vh; 
+            margin-top: clamp(60px, 12vh, 90px); 
             width: 100%; 
-            padding: 10px 20px; 
-            gap: max(10px, 1.2vw); 
+            padding: 15px 20px; 
+            gap: clamp(12px, 2.2vw, 24px); 
             z-index: 2; 
-            overflow-x: auto; /* Graceful scrolling for narrow viewports */
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            scrollbar-width: none; 
         }
         .slots-container::-webkit-scrollbar { display: none; }
         
-        .slot-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: clamp(65px, 7.5vw, 90px); min-height: 130px; position: relative; }
-        .slot { width: clamp(60px, 7vw, 85px); height: clamp(60px, 7vw, 85px); border: 2px dashed rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; background: rgba(5,5,15,0.5); transition: all 0.2s ease; }
-        
-        /* Hint System Animation & Correction State Styles */
-        .slot.hint-glow { border-color: #ffcc00; box-shadow: 0 0 15px #ffcc00; animation: pulseHint 1.5s infinite ease-in-out; }
-        @keyframes pulseHint { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-        .slot.correct-drop { border-style: solid; border-color: #28a745; background: rgba(40,167,69,0.1); }
-        
-        .sun-static { width: clamp(70px, 8.5vw, 105px); height: clamp(70px, 8.5vw, 105px); background: radial-gradient(circle, #ffea00 20%, #ff6a00 100%); border-radius: 50%; box-shadow: 0 0 25px rgba(255,106,0,0.5); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #300; font-size: calc(0.7rem + 0.3vw); letter-spacing: 1px; flex-shrink: 0; }
+        .slot-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            flex-shrink: 0; 
+            width: clamp(65px, 9vw, 95px); 
+            min-height: 130px; 
+            position: relative; 
+        }
 
-        /* FIXED: Absolute layout drop overrides to center planet graphic perfectly in slot frame */
+        .slot { 
+            width: clamp(60px, 8.5vw, 90px); 
+            height: clamp(60px, 8.5vw, 90px); 
+            border: 2px dashed rgba(255, 255, 255, 0.25); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            background: rgba(5, 5, 20, 0.4); 
+            transition: border-color 0.3s, background 0.3s, box-shadow 0.3s; 
+        }
+
+        .slot.hint-glow { 
+            border-color: #ffcc00; 
+            box-shadow: 0 0 18px #ffcc00; 
+            animation: pulseHint 1.4s infinite ease-in-out; 
+        }
+
+        @keyframes pulseHint { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.06); } 
+        }
+
+        .slot.correct-drop { 
+            border-style: solid; 
+            border-color: #28a745; 
+            background: rgba(40, 167, 69, 0.15); 
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .sun-static { 
+            width: clamp(75px, 10vw, 110px); 
+            height: clamp(75px, 10vw, 110px); 
+            background: radial-gradient(circle, #fff7a1 10%, #ffea00 30%, #ff5500 100%); 
+            border-radius: 50%; 
+            box-shadow: 0 0 35px rgba(255, 120, 0, 0.7); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 900; 
+            color: #400000; 
+            font-size: clamp(0.75rem, 1.2vw, 0.95rem); 
+            letter-spacing: 1px; 
+            flex-shrink: 0; 
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+        }
+
+        /* Perfectly align placed planet inside slot */
         .slot .planet-container {
             position: absolute !important;
             top: 50% !important;
@@ -99,111 +277,249 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-        .slot .movable-label {
-            position: absolute;
-            top: calc(100% + 8px);
-            white-space: nowrap;
-            margin-top: 0;
+            margin: 0 !important;
+            touch-action: auto !important;
         }
 
-        /* --- DECK BAR CONTAINER (BOTTOM) --- */
+        .slot .movable-label {
+            position: absolute;
+            top: calc(100% + 6px);
+            white-space: nowrap;
+        }
+
+        /* --- PLANET DECK (BOTTOM DOCK) --- */
         .deck-container { 
             display: flex; 
-            justify-content: center; 
+            justify-content: flex-start; 
             align-items: center; 
             width: 100%; 
-            background: linear-gradient(transparent, rgba(10,10,30,0.9)); 
-            padding: 20px; 
-            gap: max(12px, 1.5vw); 
-            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-            border-top: 1px solid rgba(255,255,255,0.06); 
-            z-index: 3; 
-            min-height: 120px;
+            background: linear-gradient(to top, rgba(5, 5, 18, 0.95), rgba(5, 5, 18, 0.6)); 
+            padding: 16px 20px; 
+            gap: clamp(12px, 2vw, 20px); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1); 
+            z-index: 10; 
+            min-height: 125px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
         .deck-container::-webkit-scrollbar { display: none; }
         
-        /* Target Planet Structures */
-        .planet-container { display: flex; flex-direction: column; align-items: center; cursor: grab; flex-shrink: 0; -webkit-user-drag: element; }
-        .planet-container:active { cursor: grabbing; }
+        .planet-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            cursor: grab; 
+            flex-shrink: 0; 
+            touch-action: none; /* Prevents touch drag from scrolling body */
+            transition: transform 0.15s ease;
+        }
+        .planet-container.dragging {
+            cursor: grabbing;
+            opacity: 0.85;
+            z-index: 1000 !important;
+            pointer-events: none; /* Allows elementFromPoint to see slots underneath */
+        }
         
-        .planet { width: clamp(50px, 6vw, 75px); height: clamp(50px, 6vw, 75px); border-radius: 50%; position: relative; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.6), 0 3px 8px rgba(0,0,0,0.4); }
-        .movable-label { margin-top: 8px; font-size: calc(0.65rem + 0.2vw); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #ffcc00; text-align: center; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,254,200,0.15); pointer-events: none; }
+        .planet { 
+            width: clamp(52px, 7vw, 76px); 
+            height: clamp(52px, 7vw, 76px); 
+            border-radius: 50%; 
+            position: relative; 
+            box-shadow: inset -6px -6px 12px rgba(0,0,0,0.7), 0 4px 10px rgba(0,0,0,0.5); 
+        }
+        
+        .movable-label { 
+            margin-top: 6px; 
+            font-size: clamp(0.65rem, 1vw, 0.8rem); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            color: #ffcc00; 
+            text-align: center; 
+            background: rgba(0, 0, 0, 0.65); 
+            padding: 2px 8px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255, 204, 0, 0.25); 
+            pointer-events: none; 
+            white-space: nowrap;
+        }
         
         /* Shaders */
-        .p-mercury { background: radial-gradient(circle at 30% 30%, #cfcfcf, #4a4a4a); }
+        .p-mercury { background: radial-gradient(circle at 30% 30%, #e0e0e0, #4a4a4a); }
         .p-venus   { background: radial-gradient(circle at 30% 30%, #ffdf9e, #855410); }
         .p-earth   { background: radial-gradient(circle at 30% 30%, #5dade2, #1b4f72); }
         .p-mars    { background: radial-gradient(circle at 30% 30%, #e74c3c, #641e16); }
         .p-jupiter { background: radial-gradient(circle at 30% 30%, #f5cba7, #6e2c00); }
         .p-saturn  { background: radial-gradient(circle at 30% 30%, #f9e79f, #7d6608); }
-        .p-saturn::after { content: ''; position: absolute; width: 140%; height: 20%; border: 3px solid rgba(249,231,159,0.4); border-radius: 50%; transform: rotate(-12deg); left: -20%; top: 38%; }
+        .p-saturn::after { 
+            content: ''; position: absolute; 
+            width: 140%; height: 26%; 
+            border: 3px solid rgba(249, 231, 159, 0.65); 
+            border-radius: 50%; 
+            transform: rotate(-14deg); 
+            left: -20%; top: 37%; 
+            box-shadow: 0 0 8px rgba(249, 231, 159, 0.3);
+        }
         .p-uranus  { background: radial-gradient(circle at 30% 30%, #a3e4d7, #2471a3); }
+        .p-uranus::after {
+            content: ''; position: absolute;
+            width: 120%; height: 20%;
+            border: 2px solid rgba(163, 228, 215, 0.5);
+            border-radius: 50%;
+            transform: rotate(75deg);
+            left: -10%; top: 40%;
+        }
         .p-neptune { background: radial-gradient(circle at 30% 30%, #58d68d, #1f3a52); }
 
         /* --- QUIZ SYSTEM OVERLAY --- */
-        #quiz-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4, 4, 12, 0.85); display: flex; align-items: center; justify-content: center; z-index: 20; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); padding: 15px; }
-        .quiz-card { background: #151530; border: 2px solid #ffcc00; padding: max(20px, 3vh); border-radius: 20px; max-width: 500px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: left; max-height: 90vh; overflow-y: auto; }
-        .quiz-progress { font-size: 0.9rem; color: #ffcc00; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .quiz-question { font-size: calc(1.1rem + 0.3vw); font-weight: bold; margin-bottom: 15px; line-height: 1.4; color: #ffffff; }
-        .quiz-clue { background: rgba(255,204,0,0.08); border-left: 3px solid #ffcc00; padding: 10px 12px; border-radius: 4px; margin-bottom: 15px; font-size: 0.95rem; color: #ffe680; display: none; }
+        #quiz-overlay { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(3, 3, 12, 0.85); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 100; 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px); 
+            padding: 16px; 
+        }
+
+        .quiz-card { 
+            background: #12122c; 
+            border: 2px solid #ffcc00; 
+            padding: clamp(20px, 3vh, 32px); 
+            border-radius: 24px; 
+            max-width: 480px; 
+            width: 100%; 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 20px rgba(255, 204, 0, 0.2); 
+            text-align: left; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .quiz-progress { 
+            font-size: 0.85rem; 
+            color: #ffcc00; 
+            font-weight: bold; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            letter-spacing: 1.2px; 
+        }
+
+        .quiz-question { 
+            font-size: clamp(1.05rem, 2vw, 1.25rem); 
+            font-weight: bold; 
+            margin-bottom: 16px; 
+            line-height: 1.45; 
+            color: #ffffff; 
+        }
+
+        .quiz-clue { 
+            background: rgba(255, 204, 0, 0.1); 
+            border-left: 4px solid #ffcc00; 
+            padding: 10px 14px; 
+            border-radius: 6px; 
+            margin-bottom: 16px; 
+            font-size: 0.92rem; 
+            color: #ffe680; 
+            display: none; 
+            line-height: 1.4;
+        }
         
         .options-list { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 12px 16px; border-radius: 10px; color: white; text-align: left; font-size: 1.05rem; cursor: pointer; transition: background 0.2s; font-weight: 500; }
-        .option-btn:hover { background: rgba(255,204,0,0.12); border-color: #ffcc00; }
+
+        .option-btn { 
+            background: rgba(255, 255, 255, 0.06); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            padding: 12px 18px; 
+            border-radius: 12px; 
+            color: white; 
+            text-align: left; 
+            font-size: clamp(0.95rem, 1.5vw, 1.05rem); 
+            cursor: pointer; 
+            transition: background 0.2s, border-color 0.2s, transform 0.1s; 
+            font-weight: 500; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .option-btn:hover { 
+            background: rgba(255, 204, 0, 0.15); 
+            border-color: #ffcc00; 
+        }
+        .option-btn:active { transform: scale(0.98); }
         
-        .star-rating { font-size: 3rem; color: #ffcc00; margin: 15px 0; letter-spacing: 5px; }
-        .score-box { background: rgba(255,204,0,0.08); padding: 15px 40px; border-radius: 15px; font-size: 1.8rem; font-weight: bold; color: #ffcc00; margin-bottom: 20px; border: 1px solid rgba(255,204,0,0.2); }
+        /* END SCREEN REWARDS */
+        .star-rating { font-size: clamp(2.5rem, 6vw, 3.5rem); color: #ffcc00; margin: 15px 0; letter-spacing: 6px; }
+        .score-box { 
+            background: rgba(255, 204, 0, 0.1); 
+            padding: 12px 32px; 
+            border-radius: 16px; 
+            font-size: clamp(1.4rem, 3vw, 1.8rem); 
+            font-weight: bold; 
+            color: #ffcc00; 
+            margin-bottom: 20px; 
+            border: 1px solid rgba(255, 204, 0, 0.3); 
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Audio Targets -->
+    <!-- Audio Elements -->
     <audio id="bg-music" src="assets/cheerfulmusic.mp3" loop prefetch="auto"></audio>
     <audio id="snd-correct" src="assets/correct.mp3" prefetch="auto"></audio>
     <audio id="snd-wrong" src="assets/wrong.mp3" prefetch="auto"></audio>
     <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" prefetch="auto"></audio>
 
-    <!-- Vector Field Star Layer -->
+    <!-- Starfield Dynamic Canvas -->
     <div id="stars-container"></div>
 
-    <!-- Active Score Header HUD -->
+    <!-- HUD Header -->
     <div id="hud" class="hidden">
-        <div id="score-display">SCORE: <span id="score-val">0</span></div>
-        <div id="hearts-display">❤️❤️❤️</div>
+        <div id="score-display" class="hud-card">SCORE: <span id="score-val">0</span></div>
+        <div id="hearts-display" class="hud-card">❤️❤️❤️</div>
+        <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()">🔊</button>
     </div>
 
-    <!-- 5-Second Clean Logo Splash Screen -->
+    <!-- Splash Screen -->
     <div id="splash-screen" class="screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" style="max-width: min(260px, 60vw); animation: pulseHint 2s infinite ease-in-out;">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" style="max-width: min(240px, 55vw); animation: pulseHint 2s infinite ease-in-out;">
     </div>
 
     <!-- 1. Start Panel -->
     <div id="start-screen" class="screen hidden">
         <h1>🚀 Space Explorer!</h1>
         <p>Ready to build your very own Solar System and test your space knowledge?</p>
-        <button onclick="playMusic(); showInstructions();">Let's Go! 🎮</button>
+        <button class="btn-primary" onclick="playMusic(); showInstructions();">Let's Go! 🎮</button>
     </div>
 
-    <!-- 2. Interactive Guide Board -->
+    <!-- 2. Interactive Instructions Screen -->
     <div id="instructions-screen" class="screen hidden">
         <h1>How to Play 🌟</h1>
         <ul class="rules-list">
-            <li>Read the golden name card attached directly under each planet.</li>
-            <li>Drag the planet up and drop it onto its correct empty orbit spot.</li>
-            <li>Answer 2 fun space questions to score <b>+20 points</b> each!</li>
-            <li>Be careful! Mixing up paths costs 1 heart life.</li>
+            <li>Read the golden name card under each planet.</li>
+            <li>Drag each planet and drop it onto its orbit position.</li>
+            <li>Answer 2 fun space questions per planet to score <b>+20 points</b> each!</li>
+            <li>Be careful! Mixing up orbit paths costs 1 heart life.</li>
         </ul>
-        <button onclick="startGame();">Start Mission 👩‍🚀</button>
+        <button class="btn-primary" onclick="startGame();">Start Mission 👩‍🚀</button>
     </div>
 
-    <!-- 3. Dynamic Field Assembly Canvas -->
+    <!-- 3. Dynamic Orbit Assembly Game Board -->
     <div id="game-canvas">
         <div class="orbits-layer" id="orbits-container"></div>
 
-        <div class="slots-container">
+        <div class="slots-container" id="slots-container">
             <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
                 <div class="sun-static">SUN ☀️</div>
             </div>
@@ -221,7 +537,7 @@
         <div class="deck-container" id="planet-deck"></div>
     </div>
 
-    <!-- 4. Overlay Modal Quiz Structure -->
+    <!-- 4. Quiz Overlay Modal -->
     <div id="quiz-overlay" class="hidden">
         <div class="quiz-card">
             <div class="quiz-progress" id="quiz-title">Planet Quiz</div>
@@ -231,47 +547,47 @@
         </div>
     </div>
 
-    <!-- 5. Complete Score Terminal Screen -->
+    <!-- 5. Mission Complete Terminal -->
     <div id="end-screen" class="screen hidden">
         <h1 id="end-title">Mission Complete!</h1>
         <div class="star-rating" id="star-display">⭐⭐⭐</div>
         <div class="score-box">Final Score: <span id="final-score-val">0</span></div>
         <p id="feedback-text">Amazing job, Space Cadet!</p>
-        <button onclick="location.reload();">Play Again 🔄</button>
+        <button class="btn-primary" onclick="location.reload();">Play Again 🔄</button>
     </div>
 
     <script>
         const planetData = {
-            mercury: { name: 'Mercury', class: 'p-mercury', radius: 150, questions: [
-                { q: "Which planet is the closest to the Sun?", a: ["Mercury", "Earth", "Mars"], c: 0, clue: "It's the very first planet right next to the hot Sun!" },
-                { q: "Is Mercury a big planet or small planet?", a: ["Smallest", "Biggest", "Middle-sized"], c: 0, clue: "Think tiny! It's smaller than all other planets." }
+            mercury: { name: 'Mercury', class: 'p-mercury', questions: [
+                { q: "Which planet is closest to the Sun?", a: ["Mercury", "Earth", "Mars"], c: 0, clue: "It's the very first planet right next to the hot Sun!" },
+                { q: "Is Mercury a big planet or a small planet?", a: ["Smallest", "Biggest", "Middle-sized"], c: 0, clue: "Think tiny! It's smaller than all other planets." }
             ]},
-            venus: { name: 'Venus', class: 'p-venus', radius: 210, questions: [
-                { q: "Which planet is the hottest one in our solar system?", a: ["Mercury", "Venus", "Jupiter"], c: 1, clue: "Even though it's second, its thick clouds trap heat like an oven!" },
+            venus: { name: 'Venus', class: 'p-venus', questions: [
+                { q: "Which planet is the hottest in our solar system?", a: ["Mercury", "Venus", "Jupiter"], c: 1, clue: "Even though it's second, its thick clouds trap heat like an oven!" },
                 { q: "Venus shines so brightly that it looks like a...?", a: ["Star", "Comet", "Black Hole"], c: 0, clue: "People often call it the Morning or Evening Star!" }
             ]},
-            earth: { name: 'Earth', class: 'p-earth', radius: 270, questions: [
+            earth: { name: 'Earth', class: 'p-earth', questions: [
                 { q: "Why is Earth called the 'Blue Planet'?", a: ["Because of ice", "Because it is covered in water", "Because of trees"], c: 1, clue: "Look at a globe! Oceans cover most of our world." },
                 { q: "How many moons does Earth have?", a: ["1 Moon", "2 Moons", "0 Moons"], c: 0, clue: "Look up at night! We only see one glowing shape." }
             ]},
-            mars: { name: 'Mars', class: 'p-mars', radius: 330, questions: [
+            mars: { name: 'Mars', class: 'p-mars', questions: [
                 { q: "What is Mars' famous nickname?", a: ["The Cold Planet", "The Red Planet", "The Ringed Planet"], c: 1, clue: "Its rusty red ground gives it a fiery bright color!" },
                 { q: "Mars has the biggest volcano in the solar system. What is it?", a: ["Olympus Mons", "Mount Everest", "Vesuvius"], c: 0, clue: "It starts with an 'O' and sounds like a mountain for gods!" }
             ]},
-            jupiter: { name: 'Jupiter', class: 'p-jupiter', radius: 400, questions: [
-                { q: "Which planet is the largest one of all?", a: ["Saturn", "Earth", "Jupiter"], c: 2, clue: "It's the giant king planet of our solar neighborhood!" },
+            jupiter: { name: 'Jupiter', class: 'p-jupiter', questions: [
+                { q: "Which planet is the largest of all?", a: ["Saturn", "Earth", "Jupiter"], c: 2, clue: "It's the giant king planet of our solar neighborhood!" },
                 { q: "What is the Giant Red Spot seen on Jupiter?", a: ["A huge storm", "A massive desert", "An ocean"], c: 0, clue: "It is a wild, windy swirl that has been spinning for hundreds of years!" }
             ]},
-            saturn: { name: 'Saturn', class: 'p-saturn', radius: 480, questions: [
+            saturn: { name: 'Saturn', class: 'p-saturn', questions: [
                 { q: "What beautiful feature makes Saturn easy to recognize?", a: ["Its bright green color", "Its big icy rings", "Its square shape"], c: 1, clue: "It loops all the way around the middle of the planet!" },
                 { q: "What are Saturn's rings mostly made of?", a: ["Rock and Ice chunks", "Gas and Fire", "Gold dust"], c: 0, clue: "Brrr! Shiny frozen water mixed with mountain stones." }
             ]},
-            uranus: { name: 'Uranus', class: 'p-uranus', radius: 560, questions: [
-                { q: "What makes Uranus unique in how it rolls around the sun?", a: ["It spins backwards", "It spins on its side", "It moves in zig-zags"], c: 1, clue: "It looks like a ball rolling directly on its track line!" },
-                { q: "What color does Uranus look like?", a: ["Bright red", "Pale blue-green", "Deep black"], c: 1, clue: "Special gases turn this cold planet a pretty sky-ocean mix." }
+            uranus: { name: 'Uranus', class: 'p-uranus', questions: [
+                { q: "What makes Uranus unique in how it orbits the Sun?", a: ["It spins backwards", "It spins on its side", "It moves in zig-zags"], c: 1, clue: "It looks like a ball rolling directly on its track line!" },
+                { q: "What color does Uranus appear?", a: ["Bright red", "Pale blue-green", "Deep black"], c: 1, clue: "Special gases turn this cold planet a pretty sky-ocean mix." }
             ]},
-            neptune: { name: 'Neptune', class: 'p-neptune', radius: 640, questions: [
-                { q: "Which planet is the farthest away From the Sun?", a: ["Neptune", "Uranus", "Mars"], c: 0, clue: "It's the very last planet on the outer edge!" },
+            neptune: { name: 'Neptune', class: 'p-neptune', questions: [
+                { q: "Which planet is the farthest away from the Sun?", a: ["Neptune", "Uranus", "Mars"], c: 0, clue: "It's the very last planet on the outer edge!" },
                 { q: "Neptune is a very cold world known as an...", a: ["Ice Giant", "Acid Ocean", "Iron Ball"], c: 0, clue: "It's made of frozen water and gas, making it a giant ice block!" }
             ]}
         };
@@ -283,54 +599,57 @@
         let totalPlaced = 0;
         let wrongAttemptsMap = {};
         let quizAttempts = 0;
+        let isMuted = false;
 
-        // Optimized Global Runtime Splash Hook
+        // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 const startScreen = document.getElementById('start-screen');
                 if (splash) splash.classList.add('hidden');
                 if (startScreen) startScreen.classList.remove('hidden');
-            }, 5000);
+            }, 3500);
             
             buildStars();
-            buildOrbits();
         });
 
+        function toggleAudio() {
+            isMuted = !isMuted;
+            const bgMusic = document.getElementById('bg-music');
+            bgMusic.muted = isMuted;
+            document.getElementById('audio-toggle').innerText = isMuted ? "🔇" : "🔊";
+        }
+
         function playMusic() {
+            if (isMuted) return;
             const music = document.getElementById('bg-music');
-            music.volume = 0.15;
-            music.play().catch(() => console.log("Audio pipeline buffered"));
+            music.volume = 0.2;
+            music.play().catch(() => console.log("Audio waiting for interaction"));
+        }
+
+        function playSFX(id) {
+            if (isMuted) return;
+            const sfx = document.getElementById(id);
+            if (sfx) {
+                sfx.currentTime = 0;
+                sfx.play().catch(() => {});
+            }
         }
 
         function buildStars() {
             const bg = document.getElementById('stars-container');
             const fragment = document.createDocumentFragment();
-            const count = window.innerWidth < 600 ? 30 : 60; // Lightweight asset fallback
+            const count = window.innerWidth < 600 ? 35 : 75;
             for (let i = 0; i < count; i++) {
                 let star = document.createElement('div');
                 star.className = 'star-bg';
                 star.style.left = (Math.random() * 100) + 'vw';
                 star.style.top = (Math.random() * 100) + 'vh';
+                star.style.animationDuration = (1.5 + Math.random() * 3) + 's';
+                star.style.animationDelay = (Math.random() * 2) + 's';
                 fragment.appendChild(star);
             }
             bg.appendChild(fragment);
-        }
-
-        function buildOrbits() {
-            const container = document.getElementById('orbits-container');
-            const fragment = document.createDocumentFragment();
-            Object.keys(planetData).forEach(key => {
-                let orbit = document.createElement('div');
-                orbit.className = 'orbit-line';
-                let d = planetData[key].radius * 2;
-                orbit.style.width = d + 'px';
-                orbit.style.height = d + 'px';
-                orbit.style.left = (65 - planetData[key].radius) + 'px';
-                orbit.style.top = '40%';
-                fragment.appendChild(orbit);
-            });
-            container.appendChild(fragment);
         }
 
         function showInstructions() {
@@ -342,11 +661,12 @@
             document.getElementById('instructions-screen').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
             buildDeck();
-            initDragAndDrop();
+            setupUnifiedPointerDrag();
         }
 
         function buildDeck() {
             const deck = document.getElementById('planet-deck');
+            deck.innerHTML = '';
             const keys = Object.keys(planetData);
             keys.sort(() => Math.random() - 0.5);
 
@@ -354,7 +674,6 @@
                 const container = document.createElement('div');
                 container.className = 'planet-container';
                 container.id = 'draggable-' + key;
-                container.setAttribute('draggable', 'true');
                 container.setAttribute('data-planet', key);
 
                 const pDiv = document.createElement('div');
@@ -371,75 +690,73 @@
             });
         }
 
-        function initDragAndDrop() {
-            const containers = document.querySelectorAll('.planet-container');
-            const slots = document.querySelectorAll('.slot');
+        /* --- UNIFIED POINTER DRAG ENGINE (DESKTOP + MOBILE TOUCH) --- */
+        let draggedItem = null;
+        let dragOffset = { x: 0, y: 0 };
+        let originalParent = null;
 
-            containers.forEach(c => {
-                // Unified Desktop Drag Handling
-                c.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', e.currentTarget.id);
-                });
+        function setupUnifiedPointerDrag() {
+            const deck = document.getElementById('planet-deck');
 
-                // Performance-focused Touch Lifeline for Older Android / iOS Frameworks
-                c.addEventListener('touchstart', handleTouchStart, {passive: false});
-                c.addEventListener('touchmove', handleTouchMove, {passive: false});
-                c.addEventListener('touchend', handleTouchEnd, {passive: false});
+            deck.addEventListener('pointerdown', (e) => {
+                const targetContainer = e.target.closest('.planet-container');
+                if (!targetContainer || targetContainer.classList.contains('placed')) return;
+
+                draggedItem = targetContainer;
+                originalParent = draggedItem.parentElement;
+
+                const rect = draggedItem.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+
+                draggedItem.classList.add('dragging');
+                draggedItem.style.position = 'fixed';
+                draggedItem.style.width = rect.width + 'px';
+                draggedItem.style.height = rect.height + 'px';
+                moveAt(e.clientX, e.clientY);
+
+                document.body.appendChild(draggedItem);
             });
 
-            slots.forEach(slot => {
-                slot.addEventListener('dragover', (e) => e.preventDefault());
-                slot.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    const id = e.dataTransfer.setData ? e.dataTransfer.getData('text/plain') : e.id;
-                    handleDropResolution(document.getElementById(id), slot);
-                });
+            document.addEventListener('pointermove', (e) => {
+                if (!draggedItem) return;
+                e.preventDefault();
+                moveAt(e.clientX, e.clientY);
+            });
+
+            document.addEventListener('pointerup', (e) => {
+                if (!draggedItem) return;
+
+                // Find element below pointer coordinates
+                const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+                const targetSlot = dropTarget ? dropTarget.closest('.slot') : null;
+
+                const activeRef = draggedItem;
+                draggedItem = null;
+
+                if (targetSlot) {
+                    handleDropResolution(activeRef, targetSlot);
+                } else {
+                    resetDraggedItem(activeRef);
+                }
             });
         }
 
-        /* --- CROSS-DEVICE COMPATIBLE TOUCH ENGINE --- */
-        let touchElement = null;
-        function handleTouchStart(e) {
-            if(this.getAttribute('draggable') === 'false') return;
-            touchElement = this;
-            this.style.position = 'fixed';
-            this.style.zIndex = '1000';
-            moveTouchElement(e.touches[0].clientX, e.touches[0].clientY);
+        function moveAt(pageX, pageY) {
+            if (!draggedItem) return;
+            draggedItem.style.left = (pageX - dragOffset.x) + 'px';
+            draggedItem.style.top = (pageY - dragOffset.y) + 'px';
         }
 
-        function handleTouchMove(e) {
-            if(!touchElement) return;
-            e.preventDefault(); // Inhibits background elastic bounce scrolling
-            moveTouchElement(e.touches[0].clientX, e.touches[0].clientY);
-        }
-
-        function moveTouchElement(clientX, clientY) {
-            touchElement.style.left = (clientX - touchElement.offsetWidth / 2) + 'px';
-            touchElement.style.top = (clientY - touchElement.offsetHeight / 2) + 'px';
-        }
-
-        function handleTouchEnd(e) {
-            if(!touchElement) return;
-            touchElement.style.position = '';
-            touchElement.style.zIndex = '';
-            touchElement.style.left = '';
-            touchElement.style.top = '';
-
-            const change = e.changedTouches[0];
-            const dropTarget = document.elementFromPoint(change.clientX, change.clientY);
-            const targetSlot = dropTarget ? dropTarget.closest('.slot') : null;
-
-            const activeRef = touchElement;
-            touchElement = null;
-
-            if(targetSlot) {
-                handleDropResolution(activeRef, targetSlot);
+        function resetDraggedItem(item) {
+            item.classList.remove('dragging');
+            item.style.cssText = ''; // Resets inline styles cleanly
+            if (originalParent) {
+                originalParent.appendChild(item);
             }
         }
 
         function handleDropResolution(draggedContainer, targetSlot) {
-            if (!draggedContainer || !targetSlot) return;
-            
             const wrapper = targetSlot.closest('.slot-wrapper');
             const planetKey = draggedContainer.getAttribute('data-planet');
             const targetKey = wrapper.getAttribute('data-planet');
@@ -447,17 +764,22 @@
             removeHints();
 
             if (planetKey === targetKey) {
-                document.getElementById('snd-correct').play().catch(()=>{});
+                playSFX('snd-correct');
                 targetSlot.classList.add('correct-drop');
-                targetSlot.appendChild(draggedContainer);
-                draggedContainer.setAttribute('draggable', 'false');
                 
+                // Clear drag styles and lock into orbit slot
+                draggedContainer.classList.remove('dragging');
+                draggedContainer.classList.add('placed');
+                draggedContainer.style.cssText = '';
+                targetSlot.appendChild(draggedContainer);
+
                 totalPlaced++;
                 activePlanetKey = planetKey;
                 quizQueue = [...planetData[planetKey].questions];
-                setTimeout(triggerNextQuizQuestion, 500);
+                setTimeout(triggerNextQuizQuestion, 400);
             } else {
-                document.getElementById('snd-wrong').play().catch(()=>{});
+                playSFX('snd-wrong');
+                resetDraggedItem(draggedContainer);
                 wrongAttemptsMap[planetKey]++;
                 processDamage();
                 
@@ -475,7 +797,7 @@
         function processDamage() {
             lives--;
             let heartStr = "";
-            for(let i = 0; i < 3; i++) {
+            for (let i = 0; i < 3; i++) {
                 heartStr += (i < lives) ? "❤️" : "🖤";
             }
             document.getElementById('hearts-display').innerText = heartStr;
@@ -509,19 +831,19 @@
                     btn.innerText = mappedObj.text;
                     btn.onclick = () => {
                         if (mappedObj.originalIndex === currentQuiz.c) {
-                            document.getElementById('snd-correct').play().catch(()=>{});
+                            playSFX('snd-correct');
                             score += 20;
                             document.getElementById('score-val').innerText = score;
                             overlay.classList.add('hidden');
                             setTimeout(triggerNextQuizQuestion, 250);
                         } else {
-                            document.getElementById('snd-wrong').play().catch(()=>{});
+                            playSFX('snd-wrong');
                             quizAttempts++;
-                            if(quizAttempts >= 1) {
+                            if (quizAttempts >= 1) {
                                 clueBox.innerHTML = '💡 <b>Hint:</b> ' + currentQuiz.clue;
                                 clueBox.style.display = 'block';
                             }
-                            btn.style.opacity = "0.3";
+                            btn.style.opacity = "0.35";
                             btn.style.pointerEvents = "none";
                         }
                     };
@@ -553,17 +875,17 @@
                 stars.innerText = "⭐";
                 fbText.innerText = "Don't give up! The solar system is huge. Try again to map the space routes!";
             } else {
-                document.getElementById('snd-claps').play().catch(()=>{});
+                playSFX('snd-claps');
                 title.innerText = "System Restored! 🏆";
                 if (score >= 320) {
                     stars.innerText = "⭐⭐⭐";
-                    fbText.innerText = "Outstanding Space Commander! You got a perfect score and know everything about the stars!";
+                    fbText.innerText = "Outstanding Space Commander! You scored a perfect result and mastered the solar system!";
                 } else if (score >= 200) {
                     stars.innerText = "⭐⭐";
                     fbText.innerText = "Great work! You aligned all orbits beautifully and answered space questions like a pro.";
                 } else {
                     stars.innerText = "⭐";
-                    fbText.innerText = "Well done! You organized the whole solar system successfully.";
+                    fbText.innerText = "Well done! You successfully restored all planets to their orbits.";
                 }
             }
         }
