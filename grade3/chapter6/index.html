@@ -155,11 +155,11 @@
             <!-- Title Screen -->
             <div id="screenTitle" class="hidden" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 20;">
                 <div class="glass-card floating" style="padding: 24px 18px; width: 100%; text-align: center;">
-                    <div style="font-size: 13px; font-weight: 800; color: #0284c7; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Science Quest Series</div>
+                    <div style="font-size: 13px; font-weight: 800; color: #0284c7; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avian Quest Series</div>
                     <h1 style="font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 900; color: #0f172a; margin: 0; line-height: 1.1; text-transform: uppercase;">
                         AVIAN<br><span style="color: #0284c7; font-size: 36px;">CLOUD QUEST</span>
                     </h1>
-                    <p style="color: #64748b; font-size: 13px; font-weight: 600; margin: 10px 0 20px 0;">Navigate clouds & master bird adaptations!</p>
+                    <p style="color: #64748b; font-size: 13px; font-weight: 600; margin: 10px 0 20px 0;">Navigate clouds & discover bird secrets!</p>
                     <button onclick="showInstructions()" class="pixel-btn pulse" style="width: 100%; background: var(--accent); color: white; font-size: 18px; padding: 14px 0; cursor: pointer; text-transform: uppercase;">
                         START QUEST ✨
                     </button>
@@ -181,7 +181,7 @@
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="background: #dcfce7; color: #16a34a; padding: 4px 8px; border-radius: 8px; font-size: 16px;">☁️</span>
-                            <span>Catch the floating modules and answer the EVS questions.</span>
+                            <span>Intercept floating clouds to answer bird questions.</span>
                         </div>
                     </div>
                     <button onclick="startGameEngine()" class="pixel-btn" style="width: 100%; background: #10b981; color: white; font-size: 18px; padding: 14px 0; cursor: pointer; text-transform: uppercase;">
@@ -196,8 +196,26 @@
                     <div id="modalCloudTerm" style="display: inline-block; padding: 4px 14px; background: #e0f2fe; border: 2px solid #0284c7; color: #0369a1; font-weight: 800; font-size: 13px; text-transform: uppercase; border-radius: 18px; margin-bottom: 10px;">
                         ☁️ MODULE
                     </div>
-                    <p id="modalPrompt" style="font-size: 16px; color: #0f172a; font-weight: 700; line-height: 1.3; margin: 0 0 14px 0;"></p>
+                    <p id="modalPrompt" style="font-size: 16px; color: #0f172a; font-weight: 700; line-height: 1.3; margin: 0 0 10px 0;"></p>
+                    
+                    <!-- Hint Button & Box -->
+                    <button id="btnShowHint" onclick="toggleHintDisplay()" class="pixel-btn" style="background: #fef3c7; color: #d97706; font-size: 12px; padding: 6px 12px; cursor: pointer; margin-bottom: 12px;">
+                        💡 NEED A HINT?
+                    </button>
+                    <div id="modalHintBox" class="hidden" style="background: #fffbeb; border: 2px dashed #f59e0b; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: #b45309; font-weight: 600; margin-bottom: 12px;">
+                    </div>
+
+                    <!-- Choices Area -->
                     <div id="modalChoices" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+                    <!-- 2-Line Explanation Card (shown on correct answer) -->
+                    <div id="modalExplanationBox" class="hidden" style="background: #ecfdf5; border: 2px solid #10b981; padding: 12px; border-radius: 12px; margin-top: 10px; text-align: left;">
+                        <div style="font-weight: 900; color: #047857; font-size: 14px; margin-bottom: 4px;">🌟 GREAT JOB!</div>
+                        <div id="txtExplanationBody" style="font-size: 13px; color: #064e3b; font-weight: 600; line-height: 1.4;"></div>
+                        <button onclick="advanceQuestion()" class="pixel-btn" style="width: 100%; background: #10b981; color: white; font-size: 15px; padding: 10px 0; margin-top: 10px; cursor: pointer;">
+                            CONTINUE ➔
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -205,7 +223,7 @@
             <div id="screenGameOver" class="hidden" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 30;">
                 <div class="glass-card" style="padding: 24px 18px; width: 100%; text-align: center;">
                     <h2 style="font-family: 'Outfit'; font-size: 26px; font-weight: 900; color: #0284c7; margin: 0 0 6px 0; text-transform: uppercase;">QUEST COMPLETED 🎉</h2>
-                    <p style="color: #64748b; font-size: 13px; font-weight: 600; margin: 0 0 16px 0;">Fabulous flight! All science tasks processed.</p>
+                    <p style="color: #64748b; font-size: 13px; font-weight: 600; margin: 0 0 16px 0;">Fabulous flight! All bird quest challenges completed!</p>
                     
                     <div style="background: #f8fafc; border: 2px solid #cbd5e1; padding: 12px; border-radius: 14px; margin-bottom: 20px;">
                         <span style="font-size: 11px; font-weight: 800; color: #94a3b8; display: block; text-transform: uppercase; letter-spacing: 1px;">FINAL SCORE MARKS</span>
@@ -265,18 +283,136 @@
         };
         const gameScrollSpeed = 1.6;
 
+        // Simplified Grade 3 Question Bank (16 Questions - 10 Marks Each)
         const questionBank = [
-            { term: "Upstroke", prompt: "Identify the correct wing movement profile:", choices: ["Wings move upward and forward", "Wings move downward and backward"], answer: "Wings move upward and forward" },
-            { term: "Downstroke", prompt: "Identify the correct wing movement profile:", choices: ["Wings move downward and backward", "Wings move upward and forward"], answer: "Wings move downward and backward" },
-            { term: "Down Feathers", prompt: "What is the primary function of these soft feathers?", choices: ["Keeps the bird's body warm", "Helps lift and steer flight paths"], answer: "Keeps the bird's body warm" },
-            { term: "Flight Feathers", prompt: "What is the function of large wing/tail feathers?", choices: ["Provides lifting power and steering control", "Insulates body temperature"], answer: "Provides lifting power and steering control" },
-            { term: "Chisel Beak", prompt: "Feeding adaptation seen commonly in Woodpeckers:", choices: ["Drilling into bark for insect extraction", "Sucking liquid flower nectar stores"], answer: "Drilling into bark for insect extraction" },
-            { term: "Hooked Beak", prompt: "Feeding structure optimization for Birds of Prey:", choices: ["Tearing flesh apart cleanly", "Cracking open heavy nut shells"], answer: "Tearing flesh apart cleanly" },
-            { term: "Webbed Feet", prompt: "Locomotion benefit provided to Ducks:", choices: ["Acting as functional paddles for swimming", "Climbing up steep vertical bark lines"], answer: "Acting as functional paddles for swimming" },
-            { term: "Tailorbird", prompt: "Nesting configuration trait typical of this species:", choices: ["Stitching leaves together with silk paths", "Weaving hanging bottle structures"], answer: "Stitching leaves together with silk paths" },
-            { term: "Weaver Bird", prompt: "Nesting pattern architecture observed here:", choices: ["Weaving hanging bottle nests out of grass strips", "Creating basic open cup structures on twigs"], answer: "Weaving hanging bottle nests out of grass strips" },
-            { term: "Talons", prompt: "Description of structural mechanics for claws:", choices: ["Sharp, curved grasp tools for handling prey", "Flat, wide toes ideal for mud wading"], answer: "Sharp, curved grasp tools for handling prey" },
-            { term: "Hollow Bones", prompt: "How do specialized internal bone grids aid flight?", choices: ["Decreasing total body weight parameters", "Adding rigid structural weight ballasts"], answer: "Decreasing total body weight parameters" }
+            { 
+                term: "Upstroke", 
+                prompt: "How do wings move during upstroke?", 
+                choices: ["Up and back", "Down and hard"], 
+                answer: "Up and back",
+                hint: "Upstroke means moving UP towards the sky!",
+                explanation: "During upstroke, the bird lifts its wings up and back to prepare for the next flap.<br>This gets the wings ready to push against the air again!" 
+            },
+            { 
+                term: "Downstroke", 
+                prompt: "What happens during downstroke?", 
+                choices: ["Wings push down to lift the bird", "Wings stay completely still"], 
+                answer: "Wings push down to lift the bird",
+                hint: "Downstroke pushes air DOWN to lift the bird UP.",
+                explanation: "The downstroke gives the bird power to push against the air.<br>This strong downward flap lifts the bird high into the sky!" 
+            },
+            { 
+                term: "Down Feathers", 
+                prompt: "What do soft down feathers do?", 
+                choices: ["Keep the bird warm", "Help the bird swim underwater"], 
+                answer: "Keep the bird warm",
+                hint: "Think of a warm and fluffy winter jacket!",
+                explanation: "Down feathers are fluffy feathers grown right next to the bird's skin.<br>They trap body heat to keep the bird cozy on cold days!" 
+            },
+            { 
+                term: "Flight Feathers", 
+                prompt: "Where are flight feathers found?", 
+                choices: ["On wings and tail", "On feet and beak"], 
+                answer: "On wings and tail",
+                hint: "Look at the body parts that steer the bird in the sky!",
+                explanation: "Flight feathers are strong and flat on the wings and tail.<br>They help the bird catch the air and steer easily while flying!" 
+            },
+            { 
+                term: "Chisel Beak", 
+                prompt: "Why does a Woodpecker have a sharp chisel beak?", 
+                choices: ["To peck holes in tree bark for bugs", "To catch fish in deep water"], 
+                answer: "To peck holes in tree bark for bugs",
+                hint: "A chisel is a tool used for cutting hard wood!",
+                explanation: "Woodpeckers use their hard, pointed beak like a chisel tool.<br>It lets them tap into tree trunks to find tasty insects inside!" 
+            },
+            { 
+                term: "Hooked Beak", 
+                prompt: "Why do Owls and Eagles have hooked beaks?", 
+                choices: ["To tear food easily", "To drink flower nectar"], 
+                answer: "To tear food easily",
+                hint: "Hooks are curved and sharp for holding food!",
+                explanation: "A curved, hooked beak is strong and very sharp.<br>It helps meat-eating birds hold and tear their food easily!" 
+            },
+            { 
+                term: "Webbed Feet", 
+                prompt: "How do webbed feet help Ducks?", 
+                choices: ["They work like paddles for swimming", "They help them run super fast"], 
+                answer: "They work like paddles for swimming",
+                hint: "Think of swim fins on your feet!",
+                explanation: "Skin between the toes spreads out wide like a paddle.<br>This pushes water backward so ducks can swim smoothly!" 
+            },
+            { 
+                term: "Tailorbird", 
+                prompt: "How does a Tailorbird make its nest?", 
+                choices: ["By sewing leaves together with plant fiber", "By digging holes in the dirt"], 
+                answer: "By sewing leaves together with plant fiber",
+                hint: "A tailor sews clothes together!",
+                explanation: "Tailorbirds use their sharp beak just like a needle.<br>They stitch big leaves together using plant threads to build a safe home!" 
+            },
+            { 
+                term: "Weaver Bird", 
+                prompt: "How does a Weaver Bird build its home?", 
+                choices: ["By weaving grass into a hanging nest", "By building a house out of mud bricks"], 
+                answer: "By weaving grass into a hanging nest",
+                hint: "Weaving means looping grass strips together!",
+                explanation: "Weaver birds tie knots and weave long grass strips together.<br>They make strong, hanging bottle-shaped nests!" 
+            },
+            { 
+                term: "Talons", 
+                prompt: "What are talons?", 
+                choices: ["Sharp, curved claws", "Soft, flat toes"], 
+                answer: "Sharp, curved claws",
+                hint: "Hunters use them to catch food!",
+                explanation: "Talons are strong, sharp claws on birds of prey.<br>They help birds grab and hold onto food tightly while flying!" 
+            },
+            { 
+                term: "Hollow Bones", 
+                prompt: "Why do birds have hollow bones?", 
+                choices: ["To make their bodies light for flying", "To store drinking water"], 
+                answer: "To make their bodies light for flying",
+                hint: "Lighter things float and fly much easier!",
+                explanation: "Bird bones have tiny air spaces inside instead of being solid.<br>Lightweight skeletons make it much easier to stay up in the sky!" 
+            },
+            { 
+                term: "Crushing Beak", 
+                prompt: "Why do Sparrows have short, thick beaks?", 
+                choices: ["To crack open hard seeds", "To scoop fish from the ocean"], 
+                answer: "To crack open hard seeds",
+                hint: "Short, strong beaks act like nutcrackers!",
+                explanation: "Short cone-shaped beaks are extra strong.<br>They allow birds like sparrows to crack open tough seed shells easily!" 
+            },
+            { 
+                term: "Streamlined Body", 
+                prompt: "How does a bird's smooth body shape help it fly?", 
+                choices: ["It cuts smoothly through the air", "It makes the bird look bigger"], 
+                answer: "It cuts smoothly through the air",
+                hint: "Think of a fast rocket or airplane shape!",
+                explanation: "A smooth, oval body shape creates very little air resistance.<br>It allows birds to glide quickly through the sky!" 
+            },
+            { 
+                term: "Migration", 
+                prompt: "Why do some birds fly long distances to warmer places in winter?", 
+                choices: ["To find warmth and food", "To play with other animals"], 
+                answer: "To find warmth and food",
+                hint: "Think about travelling away from extreme cold winter weather!",
+                explanation: "Migration is the long journey birds make each year.<br>They fly to warmer places where food is easy to find in winter!" 
+            },
+            { 
+                term: "Perching Feet", 
+                prompt: "How do birds sleep on branches without falling?", 
+                choices: ["Their toes automatically lock onto the branch", "They glue their feet to wood"], 
+                answer: "Their toes automatically lock onto the branch",
+                hint: "Their feet lock tight when they bend their legs!",
+                explanation: "Special tendons in their legs tighten automatically when they sit down.<br>This locks their toes firmly around the branch while they sleep!" 
+            },
+            { 
+                term: "Caring for Chicks", 
+                prompt: "How do parent birds take care of their young chicks in the nest?", 
+                choices: ["By feeding them and keeping them warm", "By teaching them to build houses"], 
+                answer: "By feeding them and keeping them warm",
+                hint: "Baby birds cannot fly or find food on their own yet!",
+                explanation: "Parent birds keep their babies warm inside the cozy nest.<br>They fly back and forth bringing food until the chicks grow strong!" 
+            }
         ];
 
         // Web Audio Synth Fallback
@@ -462,7 +598,7 @@
         }
 
         function spawnConfettiShower() {
-            confettiArray = []; // Wipe previous remaining particles
+            confettiArray = [];
             const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7'];
             const viewWidth = canvas.width / dpr;
             const viewHeight = canvas.height / dpr;
@@ -560,7 +696,7 @@
             ctx.fillStyle = colorLightGlint;
             ctx.fillRect(pipe.x + 6, pipe.bottomY, 10, bottomHeight);
             ctx.fillStyle = colorShadowTrim;
-            ctx.fillRect(pipe.x + pipe.width - 12, pipe.bottomY, 8, bottomHeight);
+            ctx.fillRect(pipe.x + pipe.width - 12, 0, 8, bottomHeight);
 
             ctx.fillStyle = colorMainBrown;
             ctx.fillRect(pipe.x - 4, pipe.bottomY, pipe.width + 8, 24);
@@ -785,19 +921,45 @@
             }
         }
 
+        let currentActiveCloudData = null;
+
+        function toggleHintDisplay() {
+            const hintBox = document.getElementById('modalHintBox');
+            if (hintBox.classList.contains('hidden')) {
+                hintBox.classList.remove('hidden');
+            } else {
+                hintBox.classList.add('hidden');
+            }
+        }
+
         function launchVocabularyModal(data) {
             state = "MODAL";
             clearInputs();
             updateControlsDeckVisibility();
             cloudArray = [];
+            currentActiveCloudData = data;
 
             document.getElementById('modalCloudTerm').innerText = `☁️ MODULE: ${data.term}`;
             document.getElementById('modalPrompt').innerText = data.prompt;
             
+            // Setup Hint
+            const hintBox = document.getElementById('modalHintBox');
+            hintBox.innerText = data.hint;
+            hintBox.classList.add('hidden');
+            document.getElementById('btnShowHint').classList.remove('hidden');
+
+            // Reset Explanation Box
+            document.getElementById('modalExplanationBox').classList.add('hidden');
+
+            // Shuffle choices so answer is NOT always Option A!
+            let shuffledChoices = [...data.choices];
+            shuffledChoices.sort(() => Math.random() - 0.5);
+
             const btnBox = document.getElementById('modalChoices');
+            btnBox.classList.remove('hidden');
             
             let htmlBuffer = "";
-            data.choices.forEach(option => {
+            shuffledChoices.forEach(option => {
                 const escapedOpt = option.replace(/'/g, "\\'");
                 const escapedAns = data.answer.replace(/'/g, "\\'");
                 htmlBuffer += `
@@ -815,19 +977,31 @@
         function evaluateResponse(chosen, realCorrectAnswer) {
             if (chosen === realCorrectAnswer) {
                 safePlaySound('sndCorrect', 'correct');
-                score += 10;
-                activeIndex++;
                 
-                document.getElementById('modalQuiz').classList.add('hidden');
-                state = "CONFETTI";
-                updateControlsDeckVisibility();
-                spawnConfettiShower();
+                // Hide choice buttons and hint UI
+                document.getElementById('modalChoices').classList.add('hidden');
+                document.getElementById('btnShowHint').classList.add('hidden');
+                document.getElementById('modalHintBox').classList.add('hidden');
+
+                // Display 2-Line Explanation
+                document.getElementById('txtExplanationBody').innerHTML = currentActiveCloudData.explanation;
+                document.getElementById('modalExplanationBox').classList.remove('hidden');
             } else {
                 safePlaySound('sndWrong', 'wrong');
                 let el = document.getElementById('modalCard');
                 el.style.transform = 'scale(0.96)';
                 setTimeout(() => el.style.transform = 'scale(1)', 150);
             }
+        }
+
+        function advanceQuestion() {
+            score += 10;
+            activeIndex++;
+            
+            document.getElementById('modalQuiz').classList.add('hidden');
+            state = "CONFETTI";
+            updateControlsDeckVisibility();
+            spawnConfettiShower();
         }
 
         function concludeQuestEngine() {
