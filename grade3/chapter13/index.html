@@ -5,37 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Transport Express - Grade 3 EVS</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@600;700&display=swap');
+
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
             margin: 0;
             padding: 0;
         }
+
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #E8F5E9;
-            font-family: 'Comic Sans MS', 'Fredoka One', sans-serif;
-            color: #333;
+            background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+            font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+            color: #2D3748;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
         #game-container {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             max-width: 1024px;
-            max-height: 600px;
-            background: #B3E5FC; /* Sky pastel */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-height: 680px;
+            background: #E0F2FE;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border-radius: 24px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
+            border: 6px solid #FFF;
         }
+
         .screen {
             position: absolute;
             top: 0;
@@ -46,97 +54,219 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
             z-index: 10;
+            opacity: 0;
+            transition: opacity 0.35s ease-in-out, transform 0.35s ease-in-out;
+            transform: scale(0.97);
         }
-        .active-screen { display: flex; }
+
+        .screen.active-screen {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Decorative background elements for screens */
+        .cloud-bg {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50px;
+            z-index: 1;
+            animation: floatSlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatSlow {
+            0% { transform: translateY(0px) translateX(0px); }
+            100% { transform: translateY(-12px) translateX(10px); }
+        }
 
         /* Splash Screen */
-        #splash-screen { background-color: #ffffff; z-index: 100; }
-        #splash-screen img { max-width: 50%; max-height: 50%; object-fit: contain; }
+        #splash-screen {
+            background: #FFFFFF;
+            z-index: 100;
+        }
+        #splash-screen img {
+            max-width: 220px;
+            max-height: 220px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.08));
+            animation: pulseLogo 2s infinite alternate;
+        }
+        @keyframes pulseLogo {
+            0% { transform: scale(0.98); }
+            100% { transform: scale(1.05); }
+        }
 
-        /* Title Menu */
-        #menu-screen { background: linear-gradient(135deg, #FFF9C4 0%, #FFECB3 100%); }
-        
-        /* Instructions */
-        #instruction-screen { background: linear-gradient(135deg, #E1BEE7 0%, #F8BBD0 100%); }
+        /* Menu & Instructions */
+        #menu-screen {
+            background: linear-gradient(135deg, #FEF08A 0%, #FDE047 50%, #FACC15 100%);
+        }
+
+        #instruction-screen {
+            background: linear-gradient(135deg, #E9D5FF 0%, #F472B6 100%);
+        }
 
         h1 {
-            font-size: 2.2rem;
-            color: #283593;
-            text-shadow: 2px 2px 0px #FFF;
+            font-size: 2.8rem;
+            color: #1E3A8A;
+            text-shadow: 3px 3px 0px #FFFFFF, 0 6px 12px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            font-weight: 700;
+            z-index: 2;
+            letter-spacing: 0.5px;
         }
+
         .instruction-box {
-            font-size: 1.2rem;
-            line-height: 1.5;
-            color: #4A148C;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 20px;
-            border-radius: 20px;
-            border: 3px dashed #BA68C8;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: #4C1D95;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 24px 30px;
+            border-radius: 28px;
+            border: 4px dashed #C084FC;
             max-width: 85%;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+            z-index: 2;
         }
 
         .btn {
-            padding: 12px 40px;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #fff;
-            background-color: #FF8F00;
-            border: 4px solid #fff;
-            border-radius: 40px;
+            position: relative;
+            padding: 14px 46px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            background: linear-gradient(180deg, #FB923C 0%, #EA580C 100%);
+            border: 4px solid #FFFFFF;
+            border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 0px #CF7100;
-            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 8px 0px #C2410C, 0 12px 20px rgba(0,0,0,0.15);
+            transition: all 0.15s ease;
+            z-index: 2;
+            letter-spacing: 1px;
+            outline: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0px #C2410C, 0 15px 25px rgba(0,0,0,0.2);
+            background: linear-gradient(180deg, #FDBA74 0%, #EA580C 100%);
         }
         .btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0px #CF7100;
+            transform: translateY(5px);
+            box-shadow: 0 3px 0px #C2410C, 0 5px 10px rgba(0,0,0,0.15);
         }
 
-        /* Active Gameplay Frame Layout */
-        #game-screen { padding: 0; justify-content: flex-start; }
+        /* Active Gameplay UI Layout */
+        #game-screen {
+            padding: 0;
+            justify-content: flex-start;
+            background: transparent;
+        }
+
         #ui-bar {
             width: 100%;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.7);
+            height: 56px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            z-index: 15;
+            padding: 0 24px;
+            z-index: 20;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
-        .ui-item { font-size: 1.1rem; font-weight: bold; color: #37474F; }
-        .lives-display { color: #E91E63; font-size: 1.3rem; letter-spacing: 2px; }
+
+        .ui-badge {
+            background: #FFFFFF;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #334155;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 2px solid #E2E8F0;
+        }
+
+        .lives-display {
+            color: #E11D48;
+            font-size: 1.25rem;
+            letter-spacing: 3px;
+        }
 
         #station-board {
-            width: 90%;
+            width: 92%;
+            max-width: 880px;
             background: #FFFFFF;
-            border: 4px solid #4FC3F7;
-            border-radius: 15px;
-            margin-top: 10px;
-            padding: 12px 20px;
-            min-height: 80px;
+            border: 4px solid #38BDF8;
+            border-radius: 22px;
+            margin-top: 12px;
+            padding: 14px 22px;
+            min-height: 88px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
-            z-index: 15;
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.12);
+            z-index: 20;
+            position: relative;
         }
-        #question-text { font-size: 1.15rem; color: #01579B; font-weight: bold; line-height: 1.4; }
+
+        #question-text {
+            font-size: 1.2rem;
+            color: #0369A1;
+            font-weight: 700;
+            line-height: 1.45;
+            text-align: center;
+        }
+
+        .hint-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        #hint-btn {
+            background: #FEF08A;
+            border: 2px solid #EAB308;
+            color: #854D0E;
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #hint-btn:hover {
+            background: #FE08A;
+            transform: scale(1.05);
+        }
+
         #hint-text {
             display: none;
-            margin-top: 8px;
-            font-size: 1rem;
-            color: #2E7D32;
-            background: #E8F5E9;
-            padding: 6px 12px;
-            border-radius: 10px;
-            border: 2px dashed #81C784;
+            font-size: 0.95rem;
+            color: #15803D;
+            background: #DCFCE7;
+            padding: 6px 14px;
+            border-radius: 12px;
+            border: 2px dashed #4ADE80;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         #canvas-container {
@@ -145,6 +275,7 @@
             position: relative;
             z-index: 11;
         }
+
         canvas {
             width: 100%;
             height: 100%;
@@ -159,21 +290,70 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             z-index: 200;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+
+        #end-overlay.active-overlay {
+            display: flex;
+            opacity: 1;
+        }
+
         .score-card {
-            background: #E8F5E9;
-            border: 5px solid #81C784;
-            border-radius: 30px;
-            padding: 30px 50px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            background: #FFFFFF;
+            border: 6px solid #4ADE80;
+            border-radius: 36px;
+            padding: 36px 48px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(0.9);
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-        .score-card h2 { font-size: 2.2rem; color: #2E7D32; margin-bottom: 10px; }
-        .score-card p { font-size: 1.6rem; margin-bottom: 25px; color: #37474F; }
+
+        @keyframes popUp {
+            to { transform: scale(1); }
+        }
+
+        .star-rating {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .score-card h2 {
+            font-size: 2.4rem;
+            color: #15803D;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .score-card p {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        /* Mobile specific tweaking */
+        @media (max-width: 640px) {
+            h1 { font-size: 2rem; }
+            .instruction-box { font-size: 1.05rem; padding: 16px; }
+            .btn { font-size: 1.25rem; padding: 10px 32px; }
+            #station-board { padding: 10px 14px; min-height: 76px; }
+            #question-text { font-size: 1rem; }
+            .ui-badge { font-size: 0.95rem; padding: 4px 10px; }
+            .score-card { padding: 24px 28px; width: 90%; }
+            .score-card h2 { font-size: 1.8rem; }
+            .score-card p { font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
@@ -181,37 +361,43 @@
 <div id="game-container">
     <!-- Screen 1: Splash Screen -->
     <div id="splash-screen" class="screen active-screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%234FC3F7\'/><text x=\'50%\' y=\'55%\' font-size=\'24\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\'>INNOVINE</text></svg>'">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'220\' viewBox=\'0 0 200 200\'><rect width=\'100%\' height=\'100%\' rx=\'40\' fill=\'%2338BDF8\'/><text x=\'50%\' y=\'52%\' font-size=\'26\' font-weight=\'bold\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\'>INNOVINE</text></svg>'">
     </div>
 
     <!-- Screen 2: Title Menu Screen -->
     <div id="menu-screen" class="screen">
+        <div class="cloud-bg" style="width: 140px; height: 50px; top: 10%; left: 10%;"></div>
+        <div class="cloud-bg" style="width: 200px; height: 70px; top: 20%; right: 12%;"></div>
         <h1>🚂 Transport Express!</h1>
-        <button class="btn" id="start-btn">START</button>
+        <p style="font-size: 1.2rem; color: #1E40AF; margin-bottom: 25px; font-weight: 600;">Grade 3 Environmental Studies</p>
+        <button class="btn" id="start-btn">START GAME</button>
     </div>
 
-    <!-- Screen 3: Simplified Instructions Screen -->
+    <!-- Screen 3: Instructions Screen -->
     <div id="instruction-screen" class="screen">
         <h1>How To Play</h1>
         <div class="instruction-box">
-            Read the riddle on the Station Board at the top! 📜<br><br>
-            A friendly train will roll in towards the left carrying answer choices.<br><br>
-            <b>Tap the correct train car</b> to score points! 🌟
+            📜 <b>Read the riddle</b> on the Station Board at the top.<br><br>
+            🚂 A friendly train will roll in carrying answer choices on its cars.<br><br>
+            👇 <b>Tap the correct train car</b> to load points & keep moving!
         </div>
-        <button class="btn" id="play-btn">PLAY</button>
+        <button class="btn" id="play-btn">LET'S PLAY!</button>
     </div>
 
     <!-- Screen 4: Active Game Frame -->
     <div id="game-screen" class="screen">
         <div id="ui-bar">
-            <div class="ui-item" id="score-display">Score: 0</div>
-            <div class="ui-item" id="progress-display">Question: 1/12</div>
-            <div class="ui-item lives-display" id="lives-display">❤️❤️❤️</div>
+            <div class="ui-badge" id="score-display">⭐ Score: 0</div>
+            <div class="ui-badge" id="progress-display">📋 Question: 1/12</div>
+            <div class="ui-badge lives-display" id="lives-display">❤️❤️❤️</div>
         </div>
 
         <div id="station-board">
-            <div id="question-text">Loading question riddle...</div>
-            <div id="hint-text">💡 Idea: Hint message goes here!</div>
+            <div id="question-text">Loading riddle...</div>
+            <div class="hint-container">
+                <button id="hint-btn">💡 Need a Hint?</button>
+                <div id="hint-text">Idea: Hint goes here!</div>
+            </div>
         </div>
 
         <div id="canvas-container">
@@ -221,8 +407,9 @@
         <!-- End Score Overlay -->
         <div id="end-overlay">
             <div class="score-card">
+                <div class="star-rating" id="star-rating">⭐⭐⭐</div>
                 <h2 id="end-title">Wonderful Job! 🎉</h2>
-                <p id="end-score-text">Your Score: 0/12</p>
+                <p id="end-score-text">Your Score: 0 / 120</p>
                 <button class="btn" id="restart-btn">PLAY AGAIN</button>
             </div>
         </div>
@@ -230,7 +417,9 @@
 </div>
 
 <script>
+    // Audio Systems & Safe Autoplay Unlock
     let sndCorrect, sndWrong, sndClap;
+    let audioUnlocked = false;
 
     function initAudio() {
         try {
@@ -238,83 +427,125 @@
             sndWrong = new Audio('assets/wrong.mp3');
             sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
         } catch(e) {
-            console.log("Audio systems initialized with passive fallbacks:", e);
+            console.log("Audio initialized with passive fallback:", e);
         }
+    }
+
+    function unlockAudio() {
+        if (audioUnlocked) return;
+        [sndCorrect, sndWrong, sndClap].forEach(snd => {
+            if (snd) {
+                snd.play().then(() => {
+                    snd.pause();
+                    snd.currentTime = 0;
+                }).catch(() => {});
+            }
+        });
+        audioUnlocked = true;
     }
 
     function playSound(audioObj) {
         if (audioObj) {
-            audioObj.currentTime = 0;
-            audioObj.play().catch(() => {});
+            try {
+                audioObj.currentTime = 0;
+                audioObj.play().catch(() => {});
+            } catch(e) {}
         }
     }
 
+    // Question Bank (12 Grade 3 EVS Transport Questions)
     const questionBank = [
-        { q: "Vehicles like cars, bicycles, and tractors move only on roads or soil. Which category do they belong to?", a: "Land Transport", options: ["Land Transport", "Water Transport", "Air Transport", "Space Transport"], hint: "Think about where these wheels roll! They stay firmly on the ground." },
-        { q: "I am a vehicle, but I am not very wide. I have an engine and two wheels, and you must sit on top of me. Who am I?", a: "Motorbike", options: ["Motorbike", "Auto Rickshaw", "Tractor", "Bus"], hint: "Look for a fast vehicle that has exactly two wheels just like a bicycle!" },
-        { q: "Ships, boats, ferries, and steamers are some of the different means used to travel across which medium?", a: "Water Transport", options: ["Water Transport", "Land Transport", "Air Transport", "Rail Transport"], hint: "These vehicles are built to float safely across deep rivers and wide oceans!" },
-        { q: "What is the swiftest (fastest) and most expensive mode of transport that takes you high up through the clouds?", a: "Air Transport", options: ["Air Transport", "Land Transport", "Water Transport", "Rail Transport"], hint: "This mode of transport requires a special place called an airport to take off!" },
-        { q: "I am a special kind of transport used in emergencies to fly, hover in one spot, and help rescue people at sea. Who am I?", a: "Helicopter", options: ["Helicopter", "Aeroplane", "Submarine", "Cruise Ship"], hint: "Unlike an aeroplane, this aircraft has giant spinning blades directly on top!" },
+        { q: "Vehicles like cars, bicycles, and tractors move only on roads or soil. Which category do they belong to?", a: "Land Transport", options: ["Land Transport", "Water Transport", "Air Transport", "Space Transport"], hint: "They stay firmly on the ground with their rolling wheels!" },
+        { q: "I am a vehicle, but I am not very wide. I have an engine and two wheels, and you must sit on top of me. Who am I?", a: "Motorbike", options: ["Motorbike", "Auto Rickshaw", "Tractor", "Bus"], hint: "Look for a fast vehicle that has exactly two wheels!" },
+        { q: "Ships, boats, ferries, and steamers are some of the different means used to travel across which medium?", a: "Water Transport", options: ["Water Transport", "Land Transport", "Air Transport", "Rail Transport"], hint: "These vehicles float safely across rivers and wide oceans!" },
+        { q: "What is the swiftest (fastest) and most expensive mode of transport that takes you high up through the clouds?", a: "Air Transport", options: ["Air Transport", "Land Transport", "Water Transport", "Rail Transport"], hint: "This mode of transport takes off from an airport!" },
+        { q: "I am a special kind of transport used in emergencies to fly, hover in one spot, and help rescue people at sea. Who am I?", a: "Helicopter", options: ["Helicopter", "Aeroplane", "Submarine", "Cruise Ship"], hint: "This aircraft has giant spinning blades directly on top!" },
         { q: "In villages and towns, we see some vehicles without engines pulled by humans, such as fruit carts or what 3-wheeled vehicle?", a: "Cycle Rickshaw", options: ["Cycle Rickshaw", "Auto Rickshaw", "Metro Train", "Motorbike"], hint: "It requires human leg power to pedal three wheels over short distances." },
-        { q: "Which type of train is used specifically to carry heavy raw products like minerals, coal, and metals in big wagons?", a: "Goods Train", options: ["Goods Train", "Passenger Train", "Monorail", "Metro Rail"], hint: "This train does not carry human passengers; it transports heavy materials!" },
-        { q: "Which city is famous for launching the very first modern monorail project in India to ease traffic congestion?", a: "Mumbai", options: ["Mumbai", "Delhi", "Kolkata", "Jaipur"], hint: "This huge city runs along the western coast of India and has popular local trains." },
-        { q: "What do we call the massive, sturdy ships that are used to transport bulky and heavy cargo across seas and oceans?", a: "Cargo Ships", options: ["Cargo Ships", "Cruise Ships", "Yachts", "Hovercrafts"], hint: "These large vessels are loaded at sea ports with the help of giant cranes!" },
-        { q: "Which unique water vehicle is special because it can actually float and slide both over water surfaces and on thin cushions of air over land?", a: "Hovercraft", options: ["Hovercraft", "Submarine", "Tanker", "Ferry"], hint: "It uses a powerful fan system underneath its body to skim gracefully just above flat spaces." },
-        { q: "In dry desert regions where wheels easily sink into sand, which animal is known as the 'ship of the desert'?", a: "Camel", options: ["Camel", "Yak", "Pony", "Elephant"], hint: "This animal has padded feet and can go without drinking water for many days!" },
-        { q: "Think back to history! In the year 1853, the very first railway line in India was built to connect which two locations?", a: "Mumbai to Thane", options: ["Mumbai to Thane", "Kolkata to Delhi", "Jaipur to Mumbai", "Thane to Pune"], hint: "The track connected the main seaside city of Maharashtra to its nearby neighboring city." }
+        { q: "Which type of train is used specifically to carry heavy raw products like minerals, coal, and metals in big wagons?", a: "Goods Train", options: ["Goods Train", "Passenger Train", "Monorail", "Metro Rail"], hint: "This train does not carry passengers; it transports heavy materials!" },
+        { q: "Which city is famous for launching the very first modern monorail project in India to ease traffic congestion?", a: "Mumbai", options: ["Mumbai", "Delhi", "Kolkata", "Jaipur"], hint: "This huge coastal city in Maharashtra is famous for its local trains!" },
+        { q: "What do we call the massive, sturdy ships that are used to transport bulky and heavy cargo across seas and oceans?", a: "Cargo Ships", options: ["Cargo Ships", "Cruise Ships", "Yachts", "Hovercrafts"], hint: "These large vessels are loaded at sea ports with heavy cranes!" },
+        { q: "Which unique water vehicle is special because it can actually float and slide both over water surfaces and on thin cushions of air over land?", a: "Hovercraft", options: ["Hovercraft", "Submarine", "Tanker", "Ferry"], hint: "It uses powerful fans underneath to skim gracefully over surfaces." },
+        { q: "In dry desert regions where wheels easily sink into sand, which animal is known as the 'ship of the desert'?", a: "Camel", options: ["Camel", "Yak", "Pony", "Elephant"], hint: "This animal has padded feet and can travel long days without drinking water!" },
+        { q: "Think back to history! In the year 1853, the very first railway line in India was built to connect which two locations?", a: "Mumbai to Thane", options: ["Mumbai to Thane", "Kolkata to Delhi", "Jaipur to Mumbai", "Thane to Pune"], hint: "It connected Maharashtra's main seaside city to its neighboring town!" }
     ];
 
     let randomizedQuestions = [];
     let currentQuestionIdx = 0;
     let score = 0;
     let lives = 3;
-    let wrongAttemptsOnCurrentQuestion = 0;
+    let wrongAttempts = 0;
 
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     let animationId;
 
-    // Train Physics & Positioning States
-    let trainX = 1200; 
+    // Train Physics & Render Scale States
+    let trainX = 1200;
     let trainY = 120;
-    const trainSpeed = 2.2; // Smooth, manageable speed for Grade 3 kids
+    let targetWaitX = 0;
+    const trainSpeed = 3.2;
     let trainCars = [];
     let trainState = 'entering'; // entering, waiting, exiting, gone
-    let targetWaitX = 0;
-    let glowOpacity = 0;
-    let glowDirection = 1;
+    let scaleFactor = 1;
+    let hoverCarIndex = -1;
 
-    let particles = [];
-    let showConfetti = false;
+    // Background Decorative Clouds
+    let bgClouds = [
+        { x: 50, y: 30, speed: 0.3, size: 35 },
+        { x: 300, y: 15, speed: 0.2, size: 45 },
+        { x: 650, y: 40, speed: 0.4, size: 30 }
+    ];
+
+    // Particle Systems (Confetti & Steam)
+    let confettiParticles = [];
+    let steamParticles = [];
+    let floatingTexts = [];
 
     window.addEventListener('DOMContentLoaded', () => {
         initAudio();
         showScreen('splash-screen');
-        setTimeout(() => { showScreen('menu-screen'); }, 3000);
+        setTimeout(() => { showScreen('menu-screen'); }, 2600);
     });
+
+    document.body.addEventListener('pointerdown', unlockAudio, { once: true });
 
     document.getElementById('start-btn').addEventListener('click', () => { showScreen('instruction-screen'); });
     document.getElementById('play-btn').addEventListener('click', () => { showScreen('game-screen'); initGame(); });
     document.getElementById('restart-btn').addEventListener('click', () => { initGame(); });
 
+    document.getElementById('hint-btn').addEventListener('click', () => {
+        revealHint();
+    });
+
     window.addEventListener('resize', resizeCanvas);
 
     function resizeCanvas() {
         if (document.getElementById('game-screen').classList.contains('active-screen')) {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            // Recalculate horizontal landing coordinate dynamically to center the entire train length
-            // Total train width = 125 (engine) + (4 cars * 120) + (4 couplers * 15) = ~665px
-            targetWaitX = Math.max((canvas.width - 665) / 2, 20);
-            trainY = canvas.height * 0.45; // Dynamically binds the tracks to height scale ratios
+            const container = canvas.parentElement;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
+            
+            ctx.resetTransform();
+            ctx.scale(dpr, dpr);
+
+            // Calculate adaptive scaling factor for train sizing across mobile & desktop
+            const viewWidth = container.clientWidth;
+            scaleFactor = Math.min(1, Math.max(0.6, viewWidth / 780));
+            
+            // Total train length = Engine + 4 Cars + Couplers
+            const totalTrainWidth = (130 + (4 * 125) + 35) * scaleFactor;
+            targetWaitX = Math.max((viewWidth - totalTrainWidth) / 2, 15);
+            trainY = container.clientHeight * 0.48;
         }
     }
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         let target = document.getElementById(id);
-        if(target) target.classList.add('active-screen');
-        if(id === 'game-screen') resizeCanvas();
+        if (target) target.classList.add('active-screen');
+        if (id === 'game-screen') resizeCanvas();
     }
 
     function shuffle(array) {
@@ -326,7 +557,9 @@
     }
 
     function initGame() {
+        document.getElementById('end-overlay').classList.remove('active-overlay');
         document.getElementById('end-overlay').style.display = 'none';
+
         randomizedQuestions = JSON.parse(JSON.stringify(questionBank));
         shuffle(randomizedQuestions);
         randomizedQuestions.forEach(q => shuffle(q.options));
@@ -334,9 +567,10 @@
         currentQuestionIdx = 0;
         score = 0;
         lives = 3;
-        showConfetti = false;
-        particles = [];
-        
+        confettiParticles = [];
+        steamParticles = [];
+        floatingTexts = [];
+
         resizeCanvas();
         updateUI();
         loadQuestion();
@@ -346,140 +580,300 @@
     }
 
     function updateUI() {
-        document.getElementById('score-display').innerText = `Score: ${score * 10}`;
-        document.getElementById('progress-display').innerText = `Question: ${currentQuestionIdx + 1}/${randomizedQuestions.length}`;
+        document.getElementById('score-display').innerText = `⭐ Score: ${score * 10}`;
+        document.getElementById('progress-display').innerText = `📋 Question: ${currentQuestionIdx + 1}/${randomizedQuestions.length}`;
         document.getElementById('lives-display').innerText = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
     }
 
     function loadQuestion() {
-        wrongAttemptsOnCurrentQuestion = 0;
+        wrongAttempts = 0;
         document.getElementById('hint-text').style.display = 'none';
-        
+        document.getElementById('hint-btn').style.display = 'flex';
+
         let currentQ = randomizedQuestions[currentQuestionIdx];
         document.getElementById('question-text').innerText = currentQ.q;
 
-        // Start out past the right boundary of the container viewport
-        trainX = canvas.width + 50;
+        const containerWidth = canvas.parentElement.clientWidth;
+        trainX = containerWidth + 60;
         trainState = 'entering';
         trainCars = [];
 
-        // Engine is on the left edge (localX: 0). Cars trail behind it to the right.
+        const colors = [
+            { bg: '#FF9AA2', border: '#E57373' },
+            { bg: '#81C784', border: '#4CAF50' },
+            { bg: '#64B5F6', border: '#2196F3' },
+            { bg: '#FFB74D', border: '#FB8C00' }
+        ];
+
         currentQ.options.forEach((opt, index) => {
             trainCars.push({
                 label: opt,
                 isCorrect: (opt === currentQ.a),
-                localX: 140 + (index * 135), // Positioned behind the front-facing engine
-                width: 120,
-                height: 70,
-                color: ['#FFCDD2', '#C8E6C9', '#BBDEFB', '#FFE0B2'][index]
+                localX: (140 + (index * 130)) * scaleFactor,
+                width: 120 * scaleFactor,
+                height: 72 * scaleFactor,
+                color: colors[index % colors.length].bg,
+                borderColor: colors[index % colors.length].border,
+                shakeOffset: 0
             });
         });
     }
 
+    function revealHint() {
+        let hintElement = document.getElementById('hint-text');
+        hintElement.innerText = "💡 Hint: " + randomizedQuestions[currentQuestionIdx].hint;
+        hintElement.style.display = 'block';
+        document.getElementById('hint-btn').style.display = 'none';
+    }
+
+    // Main Canvas Render Loop
     function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawEnvironment();
-        updateAndDrawTrain();
-        if (showConfetti) handleConfetti();
+        const viewWidth = canvas.parentElement.clientWidth;
+        const viewHeight = canvas.parentElement.clientHeight;
+
+        ctx.clearRect(0, 0, viewWidth, viewHeight);
+
+        drawEnvironment(viewWidth, viewHeight);
+        updateAndDrawTrain(viewWidth);
+        updateAndDrawParticles();
+
         animationId = requestAnimationFrame(gameLoop);
     }
 
-    function drawEnvironment() {
-        // Safe relative backdrop positioning 
-        let groundY = trainY + 70;
-        ctx.fillStyle = '#C8E6C9';
-        ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+    function drawEnvironment(width, height) {
+        // Sky Gradient
+        let skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+        skyGrad.addColorStop(0, '#BAE6FD');
+        skyGrad.addColorStop(1, '#E0F2FE');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, width, height);
 
-        // Tracks
-        ctx.fillStyle = '#78909C';
-        ctx.fillRect(0, groundY, canvas.width, 8);
-        ctx.fillStyle = '#8D6E63';
-        for (let i = 0; i < canvas.width; i += 30) {
-            ctx.fillRect(i, groundY + 8, 12, 6);
+        // Moving background clouds
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        bgClouds.forEach(c => {
+            c.x -= c.speed;
+            if (c.x < -100) c.x = width + 50;
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, c.size, 0, Math.PI * 2);
+            ctx.arc(c.x + c.size * 0.6, c.y - c.size * 0.3, c.size * 0.75, 0, Math.PI * 2);
+            ctx.arc(c.x + c.size * 1.2, c.y, c.size * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Rolling Hills Ground
+        let groundY = trainY + (72 * scaleFactor);
+        ctx.fillStyle = '#86EFAC';
+        ctx.beginPath();
+        ctx.moveTo(0, groundY + 10);
+        ctx.quadraticCurveTo(width * 0.25, groundY - 20, width * 0.5, groundY + 10);
+        ctx.quadraticCurveTo(width * 0.75, groundY + 30, width, groundY + 5);
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.fill();
+
+        // Darker Base Ground
+        ctx.fillStyle = '#4ADE80';
+        ctx.fillRect(0, groundY + 18, width, height - groundY);
+
+        // Railway Tracks
+        ctx.fillStyle = '#94A3B8';
+        ctx.fillRect(0, groundY + 10, width, 6);
+        ctx.fillRect(0, groundY + 22, width, 6);
+
+        ctx.fillStyle = '#78350F';
+        for (let x = 0; x < width; x += 28) {
+            ctx.fillRect(x, groundY + 8, 10, 20);
         }
     }
 
-    function updateAndDrawTrain() {
-        glowOpacity += 0.04 * glowDirection;
-        if (glowOpacity > 1 || glowOpacity < 0) glowDirection *= -1;
-
-        // Move Leftward
+    function updateAndDrawTrain(viewWidth) {
+        // Train Movement Logic
         if (trainState === 'entering') {
-            trainX -= trainSpeed;
+            trainX -= trainSpeed * (scaleFactor + 0.2);
             if (trainX <= targetWaitX) {
                 trainX = targetWaitX;
                 trainState = 'waiting';
             }
+            // Emit Chimney Steam Puffs
+            if (Math.random() < 0.4) {
+                steamParticles.push({
+                    x: trainX + (25 * scaleFactor),
+                    y: trainY - (20 * scaleFactor),
+                    vx: -1.5,
+                    vy: -1 - Math.random(),
+                    radius: (8 + Math.random() * 6) * scaleFactor,
+                    alpha: 0.7
+                });
+            }
         } else if (trainState === 'exiting') {
-            trainX -= trainSpeed * 3; // Clear off to the left quickly once answered
-            if (trainX < -700) {
+            trainX -= trainSpeed * 3;
+            if (Math.random() < 0.8) {
+                steamParticles.push({
+                    x: trainX + (25 * scaleFactor),
+                    y: trainY - (20 * scaleFactor),
+                    vx: -2,
+                    vy: -1.5,
+                    radius: (10 + Math.random() * 8) * scaleFactor,
+                    alpha: 0.8
+                });
+            }
+            if (trainX < -800 * scaleFactor) {
                 trainState = 'gone';
                 proceedNext();
             }
         }
 
-        // 1. Draw Trailer Cars (linked behind the engine)
-        trainCars.forEach(car => {
-            let cx = trainX + car.localX;
+        // 1. Draw Trailer Cars (linked behind engine)
+        trainCars.forEach((car, index) => {
+            let cx = trainX + car.localX + car.shakeOffset;
             let cy = trainY;
 
-            if (wrongAttemptsOnCurrentQuestion > 0 && car.isCorrect) {
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = `rgba(255, 193, 7, ${0.4 + glowOpacity * 0.6})`;
-                ctx.strokeStyle = '#FFC107';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(cx - 2, cy - 2, car.width + 4, car.height + 4);
-                ctx.shadowBlur = 0;
+            // Highlight outline on Hover or when Hint opened
+            if (index === hoverCarIndex && trainState === 'waiting') {
+                ctx.strokeStyle = '#38BDF8';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(cx - 3, cy - 3, car.width + 6, car.height + 6);
             }
 
-            // Car Body
+            if (wrongAttempts > 0 && car.isCorrect) {
+                ctx.strokeStyle = '#FACC15';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(cx - 3, cy - 3, car.width + 6, car.height + 6);
+            }
+
+            // Car Main Body (Rounded Box)
             ctx.fillStyle = car.color;
-            ctx.fillRect(cx, cy, car.width, car.height);
-            ctx.strokeStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.roundRect(cx, cy, car.width, car.height, 12 * scaleFactor);
+            ctx.fill();
+            ctx.strokeStyle = car.borderColor;
             ctx.lineWidth = 3;
-            ctx.strokeRect(cx, cy, car.width, car.height);
+            ctx.stroke();
 
-            // Coupler connecting links to the car ahead of it
-            ctx.fillStyle = '#546E7A';
-            ctx.fillRect(cx - 15, cy + 50, 15, 6);
+            // Coupler Link
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(cx - (15 * scaleFactor), cy + (48 * scaleFactor), 15 * scaleFactor, 6 * scaleFactor);
 
-            // Wheels
-            ctx.fillStyle = '#37474F';
-            ctx.beginPath(); ctx.arc(cx + 25, cy + 70, 12, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx + car.width - 25, cy + 70, 12, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#CFD8DC';
-            ctx.beginPath(); ctx.arc(cx + 25, cy + 70, 5, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx + car.width - 25, cy + 70, 5, 0, Math.PI * 2); ctx.fill();
+            // Car Wheels
+            const wheelRadius = 11 * scaleFactor;
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.arc(cx + (24 * scaleFactor), cy + car.height + (4 * scaleFactor), wheelRadius, 0, Math.PI * 2);
+            ctx.arc(cx + car.width - (24 * scaleFactor), cy + car.height + (4 * scaleFactor), wheelRadius, 0, Math.PI * 2);
+            ctx.fill();
 
-            // Card Text Labels
-            ctx.fillStyle = '#37474F';
-            ctx.font = 'bold 13px "Comic Sans MS"';
+            ctx.fillStyle = '#CBD5E1';
+            ctx.beginPath();
+            ctx.arc(cx + (24 * scaleFactor), cy + car.height + (4 * scaleFactor), wheelRadius * 0.4, 0, Math.PI * 2);
+            ctx.arc(cx + car.width - (24 * scaleFactor), cy + car.height + (4 * scaleFactor), wheelRadius * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Label Text Inside Car
+            ctx.fillStyle = '#1E293B';
+            ctx.font = `bold ${Math.max(11, 13 * scaleFactor)}px "Fredoka", sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            wrapText(ctx, car.label, cx + car.width / 2, cy + car.height / 2, car.width - 10, 16);
+            wrapText(ctx, car.label, cx + car.width / 2, cy + car.height / 2, car.width - (10 * scaleFactor), 15 * scaleFactor);
         });
 
-        // 2. Draw Locomotive Engine (Leads on the left side, facing left)
+        // 2. Draw Kawaii Engine (Leading on the left)
         let ex = trainX;
-        let ey = trainY - 15;
-        
-        ctx.fillStyle = '#4FC3F7'; // Pastel Blue Body
-        ctx.fillRect(ex, ey + 15, 125, 70);
-        
-        // Cabin window on the right side of the engine block
-        ctx.fillRect(ex + 45, ey, 50, 30); 
-        ctx.fillStyle = '#E0F7FA';
-        ctx.fillRect(ex + 55, ey + 5, 30, 20);
-        
-        // Smokestack placed on the left leading nose block
-        ctx.fillStyle = '#37474F';
-        ctx.fillRect(ex + 15, ey - 5, 15, 25);
-        
-        // Wheels
-        ctx.fillStyle = '#263238';
-        ctx.beginPath(); ctx.arc(ex + 25, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ex + 62, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ex + 100, ey + 85, 15, 0, Math.PI * 2); ctx.fill();
+        let ey = trainY - (12 * scaleFactor);
+        let ew = 120 * scaleFactor;
+        let eh = 75 * scaleFactor;
+
+        // Engine Main Cabin
+        ctx.fillStyle = '#38BDF8';
+        ctx.beginPath();
+        ctx.roundRect(ex, ey, ew, eh, 14 * scaleFactor);
+        ctx.fill();
+        ctx.strokeStyle = '#0284C7';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Cabin Window
+        ctx.fillStyle = '#E0F2FE';
+        ctx.beginPath();
+        ctx.roundRect(ex + (50 * scaleFactor), ey + (10 * scaleFactor), 35 * scaleFactor, 26 * scaleFactor, 6 * scaleFactor);
+        ctx.fill();
+
+        // Cute Locomotive Face Eyes
+        ctx.fillStyle = '#0F172A';
+        ctx.beginPath();
+        ctx.arc(ex + (22 * scaleFactor), ey + (25 * scaleFactor), 4 * scaleFactor, 0, Math.PI * 2);
+        ctx.arc(ex + (36 * scaleFactor), ey + (25 * scaleFactor), 4 * scaleFactor, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cute Smile
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(ex + (29 * scaleFactor), ey + (28 * scaleFactor), 5 * scaleFactor, 0, Math.PI);
+        ctx.stroke();
+
+        // Smokestack Chimney
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(ex + (18 * scaleFactor), ey - (14 * scaleFactor), 14 * scaleFactor, 16 * scaleFactor);
+
+        // Engine Wheels
+        const eWheelRadius = 14 * scaleFactor;
+        ctx.fillStyle = '#1E293B';
+        [24, 60, 96].forEach(pos => {
+            ctx.beginPath();
+            ctx.arc(ex + (pos * scaleFactor), ey + eh + (2 * scaleFactor), eWheelRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#94A3B8';
+            ctx.beginPath();
+            ctx.arc(ex + (pos * scaleFactor), ey + eh + (2 * scaleFactor), eWheelRadius * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#1E293B';
+        });
+    }
+
+    function updateAndDrawParticles() {
+        // Draw Steam Puffs
+        steamParticles.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.015;
+            p.radius += 0.2;
+
+            ctx.fillStyle = `rgba(241, 245, 249, ${Math.max(0, p.alpha)})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        steamParticles = steamParticles.filter(p => p.alpha > 0);
+
+        // Draw Confetti Explosions
+        confettiParticles.forEach((p) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.25; // Gravity
+            p.rotation += p.vRot;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+        });
+        confettiParticles = confettiParticles.filter(p => p.y < canvas.parentElement.clientHeight + 20);
+
+        // Draw Floating Text Popups (+10 / Oops!)
+        floatingTexts.forEach(ft => {
+            ft.y += ft.vy;
+            ft.alpha -= 0.02;
+
+            ctx.fillStyle = ft.color;
+            ctx.globalAlpha = Math.max(0, ft.alpha);
+            ctx.font = 'bold 22px "Fredoka", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.globalAlpha = 1.0;
+        });
+        floatingTexts = floatingTexts.filter(ft => ft.alpha > 0);
     }
 
     function wrapText(context, text, x, y, maxWidth, lineHeight) {
@@ -491,13 +885,13 @@
             let testLine = line + words[n] + ' ';
             let metrics = context.measureText(testLine);
             if (metrics.width > maxWidth && n > 0) {
-                lines.push(line);
+                lines.push(line.trim());
                 line = words[n] + ' ';
             } else {
                 line = testLine;
             }
         }
-        lines.push(line);
+        lines.push(line.trim());
 
         let startY = y - ((lines.length - 1) * lineHeight) / 2;
         for (let k = 0; k < lines.length; k++) {
@@ -505,16 +899,25 @@
         }
     }
 
-    // Touch & Multi-Device Adaptive Input Mapping
-    canvas.addEventListener('click', handleInteraction);
-    canvas.addEventListener('touchstart', function(e) {
-        if(e.touches.length > 0) {
-            handleInteraction(e.touches[0]);
-            e.preventDefault();
-        }
-    }, { passive: false });
+    // Interactive Input Listener (Mouse + Touch)
+    canvas.addEventListener('pointermove', (e) => {
+        if (trainState !== 'waiting') return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
 
-    function handleInteraction(e) {
+        hoverCarIndex = -1;
+        trainCars.forEach((car, index) => {
+            let cx = trainX + car.localX;
+            let cy = trainY;
+            if (mouseX >= cx && mouseX <= cx + car.width && mouseY >= cy && mouseY <= cy + car.height) {
+                hoverCarIndex = index;
+            }
+        });
+        canvas.style.cursor = (hoverCarIndex !== -1) ? 'pointer' : 'default';
+    });
+
+    canvas.addEventListener('pointerdown', (e) => {
         if (trainState !== 'waiting') return;
 
         const rect = canvas.getBoundingClientRect();
@@ -526,57 +929,70 @@
             let cy = trainY;
 
             if (clickX >= cx && clickX <= cx + car.width && clickY >= cy && clickY <= cy + car.height) {
-                evaluateChoice(car);
+                evaluateChoice(car, cx + car.width / 2, cy);
             }
         });
-    }
+    });
 
-    function evaluateChoice(car) {
+    function evaluateChoice(car, popX, popY) {
         if (car.isCorrect) {
             score++;
             playSound(sndCorrect);
-            triggerConfettiCelebration();
+            triggerConfetti(popX, popY);
+
+            floatingTexts.push({
+                text: '+10 ⭐',
+                x: popX,
+                y: popY,
+                vy: -2,
+                alpha: 1.0,
+                color: '#16A34A'
+            });
+
             trainState = 'exiting';
         } else {
             lives--;
-            wrongAttemptsOnCurrentQuestion++;
+            wrongAttempts++;
             updateUI();
             playSound(sndWrong);
+
+            // Car Shake Feedback
+            car.shakeOffset = 10;
+            setTimeout(() => { car.shakeOffset = -10; }, 60);
+            setTimeout(() => { car.shakeOffset = 5; }, 120);
+            setTimeout(() => { car.shakeOffset = 0; }, 180);
+
+            floatingTexts.push({
+                text: 'Oops! ❌',
+                x: popX,
+                y: popY,
+                vy: -1.5,
+                alpha: 1.0,
+                color: '#DC2626'
+            });
 
             if (lives <= 0) {
                 endGame(false);
             } else {
-                let hintElement = document.getElementById('hint-text');
-                hintElement.innerText = "💡 Idea: " + randomizedQuestions[currentQuestionIdx].hint;
-                hintElement.style.display = 'block';
+                revealHint();
             }
         }
     }
 
-    function triggerConfettiCelebration() {
-        particles = [];
-        for (let i = 0; i < 60; i++) {
-            particles.push({
-                x: canvas.width / 2,
-                y: canvas.height / 2,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.7) * 10,
-                size: Math.random() * 6 + 4,
-                color: ['#FF8A80', '#FFD54F', '#81C784', '#4FC3F7', '#BA68C8'][Math.floor(Math.random() * 5)]
+    function triggerConfetti(x, y) {
+        const colors = ['#FF8A80', '#FFD54F', '#81C784', '#4FC3F7', '#BA68C8'];
+        for (let i = 0; i < 45; i++) {
+            confettiParticles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.7) * 12,
+                size: Math.random() * 8 + 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                rotation: Math.random() * Math.PI,
+                vRot: (Math.random() - 0.5) * 0.2
             });
         }
-        showConfetti = true;
-        setTimeout(() => { showConfetti = false; }, 1500);
-    }
-
-    function handleConfetti() {
-        particles.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.2;
-            ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, p.size, p.size);
-        });
     }
 
     function proceedNext() {
@@ -591,18 +1007,31 @@
 
     function endGame(completedAll) {
         if (animationId) cancelAnimationFrame(animationId);
-        
+
         let titleNode = document.getElementById('end-title');
         let scoreNode = document.getElementById('end-score-text');
-        
-        if (completedAll && score >= 8) {
-            titleNode.innerText = "Fantastic Work! 🏆";
+        let starNode = document.getElementById('star-rating');
+
+        const totalPossible = randomizedQuestions.length * 10;
+        const finalScore = score * 10;
+
+        if (finalScore >= 100) {
+            titleNode.innerText = "Superstar Conductor! 🏆";
+            starNode.innerText = "⭐⭐⭐";
+        } else if (finalScore >= 60) {
+            titleNode.innerText = "Great Job! 🎉";
+            starNode.innerText = "⭐⭐";
         } else {
-            titleNode.innerText = "Good Try! 👍";
+            titleNode.innerText = "Good Effort! 👍";
+            starNode.innerText = "⭐";
         }
 
-        scoreNode.innerText = `Your Score: ${score * 10} / ${randomizedQuestions.length * 10}`;
-        document.getElementById('end-overlay').style.display = 'flex';
+        scoreNode.innerText = `Your Score: ${finalScore} / ${totalPossible}`;
+
+        const endOverlay = document.getElementById('end-overlay');
+        endOverlay.style.display = 'flex';
+        setTimeout(() => endOverlay.classList.add('active-overlay'), 10);
+
         playSound(sndClap);
     }
 </script>
