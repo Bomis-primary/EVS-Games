@@ -211,6 +211,44 @@
             height: 100%;
         }
 
+        /* MOVE CONTROLS OVERLAY */
+        #move-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        .btn-move {
+            pointer-events: auto;
+            width: 68px;
+            height: 68px;
+            background: linear-gradient(180deg, #ff9f1c 0%, #e67e22 100%);
+            border: 4px solid #ffffff;
+            border-radius: 50%;
+            color: #ffffff;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #b35900, 0 10px 15px rgba(0,0,0,0.25);
+            transition: transform 0.05s ease, background 0.1s ease;
+            outline: none;
+            touch-action: manipulation;
+        }
+
+        .btn-move:active, .btn-move.active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #b35900, 0 4px 8px rgba(0,0,0,0.2);
+            background: linear-gradient(180deg, #e67e22 0%, #d35400 100%);
+        }
+
         /* QUIZ OVERLAY */
         #quiz-overlay {
             position: absolute;
@@ -420,8 +458,8 @@
                     <span>Swipe across ropes with finger/mouse to cut them!</span>
                 </div>
                 <div class="info-card-item">
-                    <span class="info-icon">🍬</span>
-                    <span>Feed the candy! Mike uses mouth suction to pull close drops in!</span>
+                    <span class="info-icon">◀ ▶</span>
+                    <span>Use bottom Arrow Buttons (or Keyboard) to move Mike!</span>
                 </div>
                 <div class="info-card-item">
                     <span class="info-icon">🧠</span>
@@ -440,6 +478,12 @@
         <!-- CANVAS AREA -->
         <div id="canvas-container">
             <canvas id="physicsCanvas"></canvas>
+            
+            <!-- ARROW CONTROLS FOR MIKE -->
+            <div id="move-controls">
+                <button class="btn-move" id="btn-left" aria-label="Move Left">◀</button>
+                <button class="btn-move" id="btn-right" aria-label="Move Right">▶</button>
+            </div>
         </div>
 
         <!-- QUIZ / EXPLANATION OVERLAY -->
@@ -574,6 +618,11 @@
         let firstAttemptWrong = false;
         let isGameRunning = false;
 
+        // Character Movement Controls State
+        let moveLeft = false;
+        let moveRight = false;
+        const mikeMoveSpeed = 7.5;
+
         // Canvas & Physics Variables
         const canvas = document.getElementById('physicsCanvas');
         const ctx = canvas.getContext('2d');
@@ -602,6 +651,7 @@
                 document.getElementById('menu-screen').classList.remove('hidden');
             }, 5000); // 5s tracking
             resizeCanvas();
+            setupMovementListeners();
         });
 
         window.addEventListener('resize', resizeCanvas);
@@ -618,13 +668,62 @@
             const cssWidth = container.clientWidth;
             const cssHeight = container.clientHeight;
 
-            mike.x = cssWidth / 2;
             mike.y = cssHeight - 90;
             
+            // Keep Mike within bounds if resized
+            mike.x = Math.max(mike.radius + 10, Math.min(cssWidth - mike.radius - 10, mike.x || cssWidth / 2));
+
             if(!bubble.isFree) {
                 bubble.x = cssWidth / 2;
                 bubble.y = 190;
             }
+        }
+
+        function setupMovementListeners() {
+            const btnLeft = document.getElementById('btn-left');
+            const btnRight = document.getElementById('btn-right');
+
+            // Button Touch / Mouse Events
+            const startLeft = (e) => { e.preventDefault(); e.stopPropagation(); moveLeft = true; btnLeft.classList.add('active'); };
+            const stopLeft = (e) => { e.preventDefault(); moveLeft = false; btnLeft.classList.remove('active'); };
+
+            const startRight = (e) => { e.preventDefault(); e.stopPropagation(); moveRight = true; btnRight.classList.add('active'); };
+            const stopRight = (e) => { e.preventDefault(); moveRight = false; btnRight.classList.remove('active'); };
+
+            btnLeft.addEventListener('pointerdown', startLeft);
+            btnLeft.addEventListener('pointerup', stopLeft);
+            btnLeft.addEventListener('pointerleave', stopLeft);
+            btnLeft.addEventListener('touchstart', startLeft, {passive: false});
+            btnLeft.addEventListener('touchend', stopLeft, {passive: false});
+
+            btnRight.addEventListener('pointerdown', startRight);
+            btnRight.addEventListener('pointerup', stopRight);
+            btnRight.addEventListener('pointerleave', stopRight);
+            btnRight.addEventListener('touchstart', startRight, {passive: false});
+            btnRight.addEventListener('touchend', stopRight, {passive: false});
+
+            // Keyboard Arrow Key listeners
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    moveLeft = true;
+                    btnLeft.classList.add('active');
+                }
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    moveRight = true;
+                    btnRight.classList.add('active');
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    moveLeft = false;
+                    btnLeft.classList.remove('active');
+                }
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    moveRight = false;
+                    btnRight.classList.remove('active');
+                }
+            });
         }
 
         function goToInstructions() {
@@ -654,6 +753,9 @@
         function setupLevelPhysics() {
             const container = document.getElementById('canvas-container');
             const cssWidth = container ? container.clientWidth : 360;
+
+            // Start Mike centered for each level attempt
+            mike.x = cssWidth / 2;
 
             bubble.x = cssWidth / 2;
             bubble.y = 180;
@@ -695,6 +797,18 @@
             const cssHeight = container.clientHeight;
 
             ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+            // --- UPDATE MIKE'S POSITION VIA ARROW CONTROLS ---
+            if (moveLeft) {
+                mike.x -= mikeMoveSpeed;
+            }
+            if (moveRight) {
+                mike.x += mikeMoveSpeed;
+            }
+            // Clamp Mike within playable canvas bounds
+            const margin = mike.radius + 12;
+            if (mike.x < margin) mike.x = margin;
+            if (mike.x > cssWidth - margin) mike.x = cssWidth - margin;
 
             // Draw Background Grid/Pattern
             ctx.strokeStyle = "rgba(92, 58, 33, 0.08)";
@@ -757,7 +871,8 @@
 
             // Mike Distance Detection & Vacuum Suction
             let distanceToMike = Math.hypot(bubble.x - mike.x, bubble.y - mike.y);
-            mike.mouthOpen = (distanceToMike < 170);
+            const suctionRange = 210;
+            mike.mouthOpen = (distanceToMike < suctionRange);
 
             // Active Suction Pull towards Mike's mouth
             if (mike.mouthOpen) {
@@ -765,16 +880,16 @@
                 let dy = (mike.y + 10) - bubble.y;
                 let dist = Math.hypot(dx, dy);
                 
-                if (dist > 0 && dist < 170) {
-                    let pullForce = (1 - dist / 170) * 0.8;
+                if (dist > 0 && dist < suctionRange) {
+                    let pullForce = (1 - dist / suctionRange) * 1.2;
                     bubble.vx += (dx / dist) * pullForce;
                     bubble.vy += (dy / dist) * pullForce;
                 }
 
                 // Visual Vacuum Air Currents
                 ctx.save();
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+                ctx.lineWidth = 2.5;
                 ctx.setLineDash([6, 6]);
                 ctx.beginPath();
                 ctx.moveTo(bubble.x, bubble.y);
@@ -911,7 +1026,7 @@
                 setupLevelPhysics();
             } 
             // Mike Has Eaten Candy
-            else if (distanceToMike < 40) {
+            else if (distanceToMike < 55) {
                 spawnParticles(mike.x, mike.y + 10, "#ff5722", 20);
                 spawnParticles(mike.x, mike.y + 10, "#ffdd59", 15);
                 
