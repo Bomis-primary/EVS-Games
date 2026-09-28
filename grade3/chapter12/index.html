@@ -2,37 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Stone Age Adventure: Early Humans</title>
     <style>
+        :root {
+            --bg-dark: #1e1005;
+            --stone-border: #8c532b;
+            --amber-gold: #ff9f43;
+            --amber-dark: #d35400;
+            --emerald-green: #10ac84;
+            --crimson-red: #ee5253;
+            --cave-yellow: #feca57;
+            --text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+        }
+
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
             margin: 0;
             padding: 0;
+            touch-action: manipulation;
         }
-        body, html {
+
+        html, body {
             width: 100%;
             height: 100%;
+            height: 100dvh;
             overflow: hidden;
-            background-color: #2c1a04;
-            font-family: 'Fredoka One', 'Comic Sans MS', cursive, sans-serif;
+            background-color: var(--bg-dark);
+            font-family: 'Fredoka One', 'Comic Sans MS', system-ui, -apple-system, sans-serif;
             color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
         #game-container {
             position: relative;
             width: 100%;
             height: 100%;
-            max-width: 500px;
-            max-height: 850px;
-            margin: 0 auto;
-            background: linear-gradient(180deg, #5c3a21 0%, #2c1a04 100%);
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            max-width: 480px;
+            max-height: 900px;
+            background: radial-gradient(circle at center, #4a2818 0%, #1d0f07 100%);
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            border: 2px solid #3a1e0e;
         }
+
         .screen {
             position: absolute;
             top: 0;
@@ -42,70 +62,97 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            justify-content: space-between;
+            padding: 24px 16px;
             text-align: center;
             z-index: 10;
         }
+
         .active-screen { display: flex; }
 
         /* Splash Screen */
         #splash-screen {
             background-color: #ffffff;
             z-index: 100;
+            justify-content: center;
+            cursor: pointer;
         }
+
         #splash-screen img {
-            max-width: 70%;
+            max-width: 75%;
             max-height: 50%;
             object-fit: contain;
             animation: pulse 2s infinite ease-in-out;
         }
+
         /* Menu & Instructions */
-        #menu-screen { background: linear-gradient(135deg, #ff9f43 0%, #ee5253 100%); }
-        #instruction-screen { background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); }
+        #menu-screen {
+            background: linear-gradient(160deg, #ff9f43 0%, #e67e22 40%, #ee5253 100%);
+            justify-content: center;
+            gap: 25px;
+        }
+
+        #instruction-screen {
+            background: linear-gradient(160deg, #1dd1a1 0%, #10ac84 50%, #10897b 100%);
+            justify-content: center;
+            gap: 20px;
+        }
         
         h1 {
-            font-size: 2.2rem;
+            font-size: clamp(1.8rem, 6vw, 2.4rem);
             color: #fff;
-            text-shadow: 3px 3px 0px #574b90;
-            margin-bottom: 30px;
-            line-height: 1.2;
+            text-shadow: var(--text-shadow);
+            line-height: 1.25;
+            letter-spacing: 0.5px;
         }
+
+        .instruction-card {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 20px;
+            padding: 20px 15px;
+            width: 100%;
+            backdrop-filter: blur(4px);
+        }
+
         p.instruction-text {
-            font-size: 1.3rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 15px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            font-size: clamp(1.05rem, 3.8vw, 1.25rem);
+            line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
+
         .btn {
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            font-weight: bold;
+            padding: 14px 36px;
+            font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+            font-weight: 900;
             color: #fff;
-            background-color: #ff9f43;
-            border: 4px solid #fff;
+            background: linear-gradient(180deg, #f39c12 0%, var(--amber-dark) 100%);
+            border: 3px solid #fff;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 0px #d35400;
-            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 6px 0px #8e3e00, 0 10px 15px rgba(0,0,0,0.4);
+            transition: transform 0.08s ease, box-shadow 0.08s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            display: inline-block;
         }
+
         .btn:active {
             transform: translateY(4px);
-            box-shadow: 0 2px 0px #d35400;
+            box-shadow: 0 2px 0px #8e3e00, 0 4px 8px rgba(0,0,0,0.4);
         }
-        /* Game Screen */
+
+        /* Game Screen Layout */
         #game-screen {
             display: none;
             position: relative;
             flex: 1;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: space-between;
             padding: 10px;
             background: transparent;
         }
+
         #game-screen.active-screen { display: flex; }
 
         #ui-bar {
@@ -113,58 +160,74 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 5px 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            margin-bottom: 5px;
+            padding: 8px 12px;
+            background: rgba(20, 10, 5, 0.75);
+            border: 2px solid var(--stone-border);
+            border-radius: 15px;
+            margin-bottom: 8px;
+            backdrop-filter: blur(4px);
         }
+
         .ui-item {
-            font-size: 1.1rem;
+            font-size: clamp(0.95rem, 3.5vw, 1.15rem);
             font-weight: bold;
-            background: #ff9f43;
-            padding: 5px 12px;
+            background: linear-gradient(180deg, #ff9f43 0%, #d35400 100%);
+            padding: 6px 14px;
             border-radius: 20px;
             border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
         }
+
         #canvas-wrapper {
             position: relative;
             flex: 1;
             width: 100%;
-            background: #111;
-            border: 4px solid #ff9f43;
-            border-radius: 10px;
+            min-height: 0;
+            background: rgba(10, 5, 2, 0.85);
+            border: 4px solid var(--amber-gold);
+            border-radius: 14px;
             overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
         }
+
         canvas {
             display: block;
             width: 100%;
             height: 100%;
         }
-        /* Mobile controls layout */
+
+        /* Controls Layout */
         #controls-bar {
             width: 100%;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: center;
-            padding: 10px 0;
-            background: rgba(0,0,0,0.2);
+            padding: 10px 0 4px 0;
+            gap: 8px;
         }
+
         .control-btn {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            background-color: #574b90;
+            flex: 1;
+            max-width: 75px;
+            height: 58px;
+            border-radius: 16px;
+            border: 2.5px solid #fff;
+            background: linear-gradient(180deg, #6c5ce7 0%, #4834d4 100%);
             color: #fff;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 0 #2c254e;
+            box-shadow: 0 4px 0 #1e1558, 0 6px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            touch-action: manipulation;
         }
+
         .control-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #2c254e;
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #1e1558;
+            background: linear-gradient(180deg, #4834d4 0%, #301e9e 100%);
         }
 
         /* Quiz Panel Overlay Layout */
@@ -175,92 +238,112 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(44, 26, 4, 0.95);
+            background: rgba(20, 10, 2, 0.94);
             z-index: 50;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
+            backdrop-filter: blur(6px);
         }
+
         #quiz-header-bar {
             width: 100%;
+            max-width: 420px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
+
         #quiz-progress {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             color: #fff;
-            background: #ee5253;
-            padding: 5px 15px;
-            border-radius: 15px;
+            background: var(--crimson-red);
+            padding: 6px 14px;
+            border-radius: 20px;
             border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
         }
+
         #quiz-lives {
-            font-size: 1.4rem;
-            letter-spacing: 3px;
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
         }
+
         #quiz-box {
             width: 100%;
+            max-width: 420px;
             background: #ffeaa7;
-            border: 5px solid #ffb8b8;
+            border: 4px solid var(--amber-gold);
             border-radius: 20px;
-            padding: 20px;
+            padding: 18px 14px;
             color: #2c1a04;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transition: background-color 0.3s ease, color 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
         }
+
         #question-text {
-            font-size: 1.3rem;
+            font-size: clamp(1.1rem, 3.8vw, 1.25rem);
             margin-bottom: 12px;
-            font-weight: bold;
+            font-weight: 800;
             line-height: 1.4;
             text-align: center;
         }
+
         #quiz-hint-text {
             display: none;
-            font-size: 1.05rem;
+            font-size: 0.98rem;
             color: #fff;
-            background: #574b90;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            background: #4834d4;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             text-align: center;
             font-style: italic;
             border: 2px dashed #ffeaa7;
             animation: popIn 0.3s ease;
+            line-height: 1.35;
         }
+
         .option-btn {
             width: 100%;
-            padding: 14px;
-            margin-bottom: 12px;
-            font-size: 1.1rem;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            font-size: clamp(0.95rem, 3.4vw, 1.05rem);
             font-weight: bold;
             color: #2c1a04;
             background: #fff;
-            border: 3px solid #ff9f43;
-            border-radius: 12px;
+            border: 2.5px solid var(--amber-gold);
+            border-radius: 14px;
             cursor: pointer;
             text-align: left;
-            transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 3px 0 #e67e22;
+            transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
         }
+
         .option-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #e67e22;
             background: #ffeaa7;
         }
+
         .option-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.45;
             cursor: not-allowed;
+            box-shadow: none;
         }
         
-        /* Auto Hint Glow Effect Style */
         .option-btn.correct-glow {
-            border-color: #feca57 !important;
-            box-shadow: 0 0 15px #feca57, inset 0 0 10px #feca57 !important;
+            border-color: #f1c40f !important;
+            box-shadow: 0 0 15px #f1c40f, inset 0 0 8px #f1c40f !important;
             background: #fffdf0 !important;
-            animation: gentlePulse 1.5s infinite ease-in-out;
+            animation: gentlePulse 1.4s infinite ease-in-out;
         }
 
         /* End Game Overlays */
@@ -271,44 +354,52 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(10, 5, 2, 0.9);
             z-index: 60;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 25px;
+            padding: 20px;
+            backdrop-filter: blur(6px);
         }
+
         .end-banner {
             width: 100%;
+            max-width: 400px;
             background: #fff;
-            border-radius: 25px;
-            padding: 30px 20px;
+            border-radius: 24px;
+            padding: 28px 20px;
             color: #2c1a04;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.8);
             text-align: center;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
         .end-banner h2 {
-            font-size: 2.2rem;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 0px #ffeaa7;
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 0px #ffeaa7;
         }
+
         .end-banner p {
-            font-size: 1.3rem;
+            font-size: clamp(1.05rem, 3.8vw, 1.2rem);
             line-height: 1.5;
-            margin-bottom: 25px;
+            margin-bottom: 22px;
             font-weight: bold;
+            white-space: pre-line;
         }
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.04); }
             100% { transform: scale(1); }
         }
+
         @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
+            from { transform: scale(0.82); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
+
         @keyframes gentlePulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.02); }
@@ -320,8 +411,8 @@
 
 <div id="game-container">
     <!-- Screen 1: Innovine Splash Logo Screen -->
-    <div id="splash-screen" class="screen active-screen">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%23ff9f43\'/><text x=\'50%\' y=\'55%\' font-size=\'24\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\'>INNOVINE</text></svg>'">
+    <div id="splash-screen" class="screen active-screen" onclick="skipSplash()">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'220\'><rect width=\'100%\' height=\'100%\' rx=\'30\' fill=\'%23ff9f43\'/><text x=\'50%\' y=\'55%\' font-size=\'26\' font-weight=\'bold\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\'>INNOVINE</text></svg>'">
     </div>
 
     <!-- Screen 2: Title Menu Screen -->
@@ -330,13 +421,15 @@
         <button class="btn" id="start-btn">START</button>
     </div>
 
-    <!-- Screen 3: Simplified Instructions Screen -->
+    <!-- Screen 3: Instructions Screen -->
     <div id="instruction-screen" class="screen">
         <h1>How To Play</h1>
-        <p class="instruction-text">
-            Move the falling colorful gems left or right!<br><br>
-            Match <b>3 gems of the same color</b> to clear them and unlock secret stories about how early humans lived!
-        </p>
+        <div class="instruction-card">
+            <p class="instruction-text">
+                Move the falling colorful gems left or right!<br><br>
+                Match <b>3 or more gems of the same color</b> to clear them and unlock secret stories about how early humans lived!
+            </p>
+        </div>
         <button class="btn" id="play-btn">PLAY</button>
     </div>
 
@@ -353,9 +446,10 @@
 
         <!-- Touch Controls Layout -->
         <div id="controls-bar">
-            <button class="control-btn" id="left-btn">◀</button>
-            <button class="control-btn" id="swap-btn">🔄</button>
-            <button class="control-btn" id="right-btn">▶</button>
+            <button class="control-btn" id="left-btn" aria-label="Move Left">◀</button>
+            <button class="control-btn" id="swap-btn" aria-label="Rotate / Swap">🔄</button>
+            <button class="control-btn" id="down-btn" aria-label="Soft Drop">🔽</button>
+            <button class="control-btn" id="right-btn" aria-label="Move Right">▶</button>
         </div>
 
         <!-- Quiz Panel overlay framework -->
@@ -388,13 +482,29 @@
 </div>
 
 <script>
+    // Audio Context & Fallback Handling
+    let audioUnlocked = false;
     const sndCorrect = new Audio('assets/correct.mp3');
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
 
+    function unlockAudio() {
+        if (audioUnlocked) return;
+        [sndCorrect, sndWrong, sndClap].forEach(snd => {
+            snd.play().then(() => {
+                snd.pause();
+                snd.currentTime = 0;
+            }).catch(() => {});
+        });
+        audioUnlocked = true;
+    }
+
     function playSound(sound) {
-        sound.currentTime = 0;
-        sound.play().catch(e => console.log("Audio waiting for user context"));
+        unlockAudio();
+        try {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio waiting for user context"));
+        } catch(e) {}
     }
 
     const baseQuestions = [
@@ -403,7 +513,7 @@
         { q: "Time to eat! You found wild berries and a fish. There are no stoves or microwaves. How do you eat them?", a: "You eat them raw!", hint: "Before humans learned to master fire, food could not be boiled, baked, or cooked at all!", options: ["You eat them raw!", "You bake them into a pizza.", "You fry them in a pan with butter.", "You microwave them."] },
         { q: "You want to dig up roots to eat, but your hands are not strong enough. What do you look for on the ground to help you?", a: "Sharp stones, animal bones, and horns!", hint: "Nature provides solid, pointy objects lying around long before metal factories existed!", options: ["Sharp stones, animal bones, and horns!", "Metal nails and a screwdriver.", "Colorful plastic toys.", "Pieces of broken glass."] },
         { q: "SPARK! You rub two special stones together very fast. What amazing thing jumps out?", a: "Bright sparks that start a fire!", hint: "Striking hard rocks like flint creating friction releases a sudden flash of light and high heat!", options: ["Bright sparks that start a fire!", "A magic genie.", "Bubbly cold water.", "Rainbow smoke."] },
-        { q: "A scary wild animal is walking toward your cave! What can you light up to scare it away?", a: "A bright, hot fire!", options: ["A bright, hot fire!", "A big flashlight.", "A neon sign.", "Twinkling fairy lights."] },
+        { q: "A scary wild animal is walking toward your cave! What can you light up to scare it away?", a: "A bright, hot fire!", hint: "Wild animals are terrified of heat, bright flames, and smoke at night!", options: ["A bright, hot fire!", "A big flashlight.", "A neon sign.", "Twinkling fairy lights."] },
         { q: "You dropped some seeds in the dirt last week. Now, tiny green plants are growing there! What does this teach you?", a: "Seeds grow into new plants for food!", hint: "When seeds stay moist in natural soil, they sprout and transform over time!", options: ["Seeds grow into new plants for food!", "Seeds turn into gold coins.", "Plants fall down from the sky.", "Ants hide secret treasures there."] },
         { q: "You tie a sharp stone to a strong wooden stick. What useful tool did you just make?", a: "A strong stone axe!", hint: "Combining wood handles with a wedge shape creates an efficient chopping item!", options: ["A strong stone axe!", "An electric chainsaw.", "Kitchen scissors.", "A magic wand."] },
         { q: "A furry animal walks up to you and wags its tail. It wants to guard your cave. What is your new pet?", a: "A friendly dog!", hint: "This animal is known as humanity's ancient loyal companion, closely linked to wild wolves!", options: ["A friendly dog!", "A roaring tiger.", "A giant elephant.", "A wild mountain lion."] },
@@ -416,7 +526,6 @@
     let currentQuestionIndex = 0;
     let questionsAnsweredTotal = 0;
     let quizLives = 3;
-    let questionsRemainingInCurrentBatch = 0;
 
     function shuffleArray(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
@@ -440,8 +549,11 @@
     const ROWS = 11;
     let grid = [];
     let cellSize = 0;
+    let offsetX = 0;
+    let offsetY = 0;
     
     const COLORS = ['#ee5253', '#341f97', '#10ac84', '#feca57']; 
+    const GEM_ICONS = ['🔥', '💧', '🍃', '⭐'];
     
     let currentPiece = null; 
     let gameScore = 0;
@@ -449,27 +561,39 @@
     let isPausedForQuiz = false;
     let showConfetti = false;
     let confettiParticles = [];
+    let particles = [];
     
-    let dropInterval = 1600; 
+    let dropInterval = 1400; 
     let lastTime = 0;
+    let splashTimer = null;
+
+    let dpr = 1;
+
+    function skipSplash() {
+        if (splashTimer) clearTimeout(splashTimer);
+        showScreen('menu-screen');
+    }
 
     window.addEventListener('load', () => {
-        setTimeout(() => {
+        splashTimer = setTimeout(() => {
             showScreen('menu-screen');
-        }, 5000);
+        }, 3000);
     });
 
-    document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('start-btn').addEventListener('click', (e) => {
+        unlockAudio();
         showScreen('instruction-screen');
     });
 
-    document.getElementById('play-btn').addEventListener('click', () => {
+    document.getElementById('play-btn').addEventListener('click', (e) => {
+        unlockAudio();
         showScreen('game-screen');
         resizeCanvas();
         initGame();
     });
 
-    document.getElementById('restart-btn').addEventListener('click', () => {
+    document.getElementById('restart-btn').addEventListener('click', (e) => {
+        unlockAudio();
         document.getElementById('end-overlay').style.display = 'none';
         initGame();
     });
@@ -481,11 +605,23 @@
 
     function resizeCanvas() {
         const wrapper = document.getElementById('canvas-wrapper');
-        canvas.width = wrapper.clientWidth;
-        canvas.height = wrapper.clientHeight;
-        cellSize = Math.min(canvas.width / COLS, canvas.height / ROWS);
+        if (!wrapper) return;
+
+        dpr = window.devicePixelRatio || 1;
+        const rect = wrapper.getBoundingClientRect();
+
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+
+        ctx.scale(dpr, dpr);
+
+        cellSize = Math.floor(Math.min(rect.width / COLS, rect.height / ROWS));
+        offsetX = Math.floor((rect.width - (COLS * cellSize)) / 2);
+        offsetY = Math.floor((rect.height - (ROWS * cellSize)) / 2);
     }
+
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 200));
 
     function initGame() {
         grid = Array(ROWS).fill().map(() => Array(COLS).fill(null));
@@ -495,6 +631,7 @@
         isPausedForQuiz = false;
         showConfetti = false;
         confettiParticles = [];
+        particles = [];
         document.getElementById('score-display').innerText = "Score: " + gameScore;
         initQuestions();
         updateProgressUI();
@@ -540,21 +677,23 @@
     }
 
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        let offsetX = (canvas.width - (COLS * cellSize)) / 2;
-        let offsetY = (canvas.height - (ROWS * cellSize)) / 2;
+        const rect = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
 
+        // Draw Board Background Grid
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
                 ctx.strokeStyle = '#3d2711';
+                ctx.lineWidth = 1;
                 ctx.strokeRect(offsetX + c * cellSize, offsetY + r * cellSize, cellSize, cellSize);
+                
                 if (grid[r][c]) {
                     drawGem(offsetX + c * cellSize, offsetY + r * cellSize, grid[r][c]);
                 }
             }
         }
 
+        // Draw Active Falling Piece
         if (currentPiece && !isPausedForQuiz && !isGameOver) {
             for (let i = 0; i < 3; i++) {
                 let py = currentPiece.y + i;
@@ -563,6 +702,9 @@
                 }
             }
         }
+
+        // Draw visual particles
+        updateAndDrawParticles();
     }
 
     function drawGem(x, y, color) {
@@ -570,29 +712,78 @@
         let cx = x + cellSize / 2;
         let cy = y + cellSize / 2;
 
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-        
-        ctx.beginPath();
-        ctx.arc(cx - radius/3, cy - radius/3, radius/4, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fill();
+        let grad = ctx.createRadialGradient(cx - radius/3, cy - radius/3, radius/6, cx, cy, radius);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.3, color);
+        grad.addColorStop(1, '#111');
 
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        ctx.strokeStyle = '#fff';
+        ctx.fillStyle = grad;
+        ctx.fill();
+        
+        // Highlight stroke
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
         ctx.lineWidth = 2;
         ctx.stroke();
+
+        // Colorblind / Prehistoric Symbol Glyph Overlay
+        let colorIdx = COLORS.indexOf(color);
+        if (colorIdx !== -1) {
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.font = `${Math.floor(cellSize * 0.45)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(GEM_ICONS[colorIdx], cx, cy + 1);
+        }
+    }
+
+    function addExplosion(x, y, color) {
+        for (let i = 0; i < 8; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                radius: Math.random() * 4 + 2,
+                color: color,
+                alpha: 1,
+                life: 25
+            });
+        }
+    }
+
+    function updateAndDrawParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 1 / p.life;
+
+            if (p.alpha <= 0) {
+                particles.splice(i, 1);
+                continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+            ctx.restore();
+        }
     }
 
     function createConfetti() {
         confettiParticles = [];
-        for (let i = 0; i < 100; i++) {
+        const rect = canvas.getBoundingClientRect();
+        for (let i = 0; i < 90; i++) {
             confettiParticles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * -canvas.height,
+                x: Math.random() * rect.width,
+                y: Math.random() * -rect.height,
                 size: Math.random() * 6 + 4,
                 color: ['#ff9f43', '#ee5253', '#1dd1a1', '#feca57', '#54a0ff', '#9b59b6'][Math.floor(Math.random() * 6)],
                 speedY: Math.random() * 3 + 2,
@@ -603,12 +794,13 @@
     }
 
     function updateAndDrawConfetti() {
+        const rect = canvas.getBoundingClientRect();
         confettiParticles.forEach(p => {
             p.y += p.speedY;
             p.x += p.speedX;
-            if (p.y > canvas.height) {
+            if (p.y > rect.height) {
                 p.y = -10;
-                p.x = Math.random() * canvas.width;
+                p.x = Math.random() * rect.width;
             }
             ctx.fillStyle = p.color;
             ctx.fillRect(p.x, p.y, p.size, p.size);
@@ -668,6 +860,7 @@
         let matched = false;
         let toRemove = Array(ROWS).fill().map(() => Array(COLS).fill(false));
 
+        // Horizontal matches
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS - 2; c++) {
                 if (grid[r][c] && grid[r][c] === grid[r][c+1] && grid[r][c] === grid[r][c+2]) {
@@ -677,6 +870,7 @@
             }
         }
 
+        // Vertical matches
         for (let c = 0; c < COLS; c++) {
             for (let r = 0; r < ROWS - 2; r++) {
                 if (grid[r][c] && grid[r][c] === grid[r+1][c] && grid[r][c] === grid[r+2][c]) {
@@ -686,10 +880,31 @@
             }
         }
 
+        // Diagonal matches (Top-Left to Bottom-Right)
+        for (let r = 0; r < ROWS - 2; r++) {
+            for (let c = 0; c < COLS - 2; c++) {
+                if (grid[r][c] && grid[r][c] === grid[r+1][c+1] && grid[r][c] === grid[r+2][c+2]) {
+                    toRemove[r][c] = toRemove[r+1][c+1] = toRemove[r+2][c+2] = true;
+                    matched = true;
+                }
+            }
+        }
+
+        // Diagonal matches (Bottom-Left to Top-Right)
+        for (let r = 2; r < ROWS; r++) {
+            for (let c = 0; c < COLS - 2; c++) {
+                if (grid[r][c] && grid[r][c] === grid[r-1][c+1] && grid[r][c] === grid[r-2][c+2]) {
+                    toRemove[r][c] = toRemove[r-1][c+1] = toRemove[r-2][c+2] = true;
+                    matched = true;
+                }
+            }
+        }
+
         if (matched) {
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     if (toRemove[r][c]) {
+                        addExplosion(offsetX + c * cellSize + cellSize/2, offsetY + r * cellSize + cellSize/2, grid[r][c]);
                         grid[r][c] = null;
                         gameScore += 10;
                     }
@@ -697,11 +912,14 @@
             }
             document.getElementById('score-display').innerText = "Score: " + gameScore;
             applyGravity();
-            
-            // Trigger 3 questions sequentially from a single match event
-            isPausedForQuiz = true;
-            questionsRemainingInCurrentBatch = 3;
-            showNextQuizQuestionInBatch();
+
+            // Trigger Quiz state when matches are formed
+            if (questionsAnsweredTotal < 12) {
+                isPausedForQuiz = true;
+                showQuizQuestion();
+            } else {
+                spawnPiece();
+            }
         } else {
             spawnPiece();
         }
@@ -719,14 +937,6 @@
                 }
             }
         }
-    }
-
-    function showNextQuizQuestionInBatch() {
-        if (questionsAnsweredTotal >= 12 || questionsRemainingInCurrentBatch <= 0) {
-            resumeGameplay();
-            return;
-        }
-        showQuizQuestion();
     }
 
     function updateLivesUI() {
@@ -749,9 +959,7 @@
         quizBox.style.backgroundColor = '#ffeaa7';
         quizBox.style.color = '#2c1a04';
 
-        // Hide hint box clean at start of card
         document.getElementById('quiz-hint-text').style.display = 'none';
-
         document.getElementById('quiz-overlay').style.display = 'flex';
         document.getElementById('quiz-progress').innerText = `Secret Story: ${questionsAnsweredTotal + 1} / 12`;
 
@@ -791,21 +999,19 @@
             playSound(sndCorrect);
             questionsAnsweredTotal++;
             currentQuestionIndex++;
-            questionsRemainingInCurrentBatch--;
             updateProgressUI();
 
             setTimeout(() => {
+                document.getElementById('quiz-overlay').style.display = 'none';
                 if (questionsAnsweredTotal >= 12) {
-                    document.getElementById('quiz-overlay').style.display = 'none';
                     triggerEndGame(true);
                 } else {
-                    showNextQuizQuestionInBatch();
+                    resumeGameplay();
                 }
-            }, 1500);
+            }, 1400);
         } else {
             quizLives--;
             updateLivesUI();
-
             playSound(sndWrong);
 
             if (quizLives <= 0) {
@@ -816,23 +1022,19 @@
                 setTimeout(() => {
                     document.getElementById('quiz-overlay').style.display = 'none';
                     triggerEndGame(false);
-                }, 2000);
+                }, 1800);
             } else {
-                // 1st Incorrect Action: Show interactive idea and add correct-glow classes
                 document.getElementById('question-text').innerText = "Let's think like an early human and try again! 🤔";
                 
-                // Set up and present educational idea text box
                 let customHint = currentQ.hint || "Look closely at nature's simple raw items found all around our early human tribes!";
                 const hintContainer = document.getElementById('quiz-hint-text');
                 hintContainer.innerText = "💡 Idea: " + customHint;
                 hintContainer.style.display = 'block';
 
-                // Add glowing styling to the correct option button element while keeping active options unlocked
                 buttons.forEach(btn => {
                     if (btn.getAttribute('data-value') === correct) {
                         btn.classList.add('correct-glow');
                     }
-                    // Disable only the specific wrong button they just selected so they can make another pick immediately
                     if (btn === buttonElement) {
                         btn.disabled = true;
                     }
@@ -876,6 +1078,7 @@
         document.getElementById('progress-display').innerText = `History: ${questionsAnsweredTotal}/12`;
     }
 
+    // Keyboard Input Listeners
     window.addEventListener('keydown', (e) => {
         if (isPausedForQuiz || isGameOver) return;
         if (e.key === 'ArrowLeft') moveLeft();
@@ -885,13 +1088,26 @@
         draw();
     });
 
-    document.getElementById('left-btn').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); draw(); });
-    document.getElementById('right-btn').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); draw(); });
-    document.getElementById('swap-btn').addEventListener('touchstart', (e) => { e.preventDefault(); swapColors(); draw(); });
-    
-    document.getElementById('left-btn').addEventListener('click', () => { moveLeft(); draw(); });
-    document.getElementById('right-btn').addEventListener('click', () => { moveRight(); draw(); });
-    document.getElementById('swap-btn').addEventListener('click', () => { swapColors(); draw(); });
+    // Mobile / Touch Controls Setup
+    function bindControl(btnId, action) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+
+        const handleAction = (e) => {
+            if (e.cancelable) e.preventDefault();
+            unlockAudio();
+            if (isPausedForQuiz || isGameOver) return;
+            action();
+            draw();
+        };
+
+        btn.addEventListener('pointerdown', handleAction);
+    }
+
+    bindControl('left-btn', moveLeft);
+    bindControl('right-btn', moveRight);
+    bindControl('swap-btn', swapColors);
+    bindControl('down-btn', moveDown);
 </script>
 </body>
 </html>
