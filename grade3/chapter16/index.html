@@ -2,13 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Cut the Gov-Rope! Civic Arcade</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --bg-color: #120c1f;
+            --card-bg: #fffbf0;
+            --primary-wood: #8d5b34;
+            --dark-wood: #5a381e;
+            --accent-orange: #ff6b35;
+            --accent-green: #2ec4b6;
+            --accent-yellow: #ff9f1c;
+            --accent-pink: #ff007f;
+            --text-dark: #2b2d42;
+            --shadow-color: rgba(0, 0, 0, 0.25);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -17,36 +30,43 @@
             user-select: none;
             -webkit-user-select: none;
             touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #1c110c;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 159, 28, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(46, 196, 182, 0.15) 0%, transparent 40%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: 100dvh;
             overflow: hidden;
+            padding: 10px;
         }
 
         #game-wrapper {
             position: relative;
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
             height: 100vh;
-            max-height: 850px;
-            background: #d7b183;
-            border: 8px solid #a0784e;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            height: 100dvh;
+            max-height: 840px;
+            background: linear-gradient(180deg, #f8edeb 0%, #fae1dd 100%);
+            border: 6px solid #4a2e1b;
+            border-radius: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.6);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* --- SCREENS --- */
         .game-screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -54,13 +74,17 @@
             padding: 24px;
             text-align: center;
             z-index: 20;
-            background: #d7b183;
+            background: radial-gradient(circle at center, #fff9ed 0%, #f3e5d8 100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
         .hidden {
             display: none !important;
+            opacity: 0;
+            pointer-events: none;
         }
 
+        /* Splash Screen */
         #splash-screen {
             background: #ffffff;
         }
@@ -69,129 +93,171 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: pulse 1.5s infinite ease-in-out;
+            animation: pulseGlow 2s infinite ease-in-out;
         }
         .logo-img {
             max-width: 220px;
+            width: 80%;
             height: auto;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
         }
 
-        #menu-screen, #instruction-screen {
-            background: radial-gradient(circle, #e2be92 40%, #c49d6f 100%);
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            color: #5c3a21;
-            text-shadow: 3px 3px 0px #fff;
-            line-height: 1.1;
-            margin-bottom: 30px;
+        /* UI Headers & Buttons */
+        h1.game-title {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 2.5rem;
+            line-height: 1.05;
+            color: #ff5722;
+            text-shadow: 3px 3px 0px #fff, 6px 6px 0px #5c3a21;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
         }
 
         .funny-monster-avatar {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite ease-in-out;
+            font-size: 5.5rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.15));
+            animation: cuteFloat 2.5s infinite ease-in-out;
         }
 
-        .btn-play {
-            background: #ff5722;
-            color: #fff;
-            border: 4px solid #fff;
-            padding: 14px 40px;
-            font-size: 1.6rem;
-            font-weight: 700;
+        .btn-arcade {
+            position: relative;
+            background: linear-gradient(180deg, #ff7b54 0%, #ff5722 100%);
+            color: #ffffff;
+            border: 4px solid #ffffff;
+            padding: 14px 42px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 0px #bf360c;
+            box-shadow: 0 8px 0px #bf360c, 0 12px 20px rgba(0,0,0,0.3);
             transform: translateY(0);
-            transition: transform 0.1s;
+            transition: all 0.1s ease;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            outline: none;
         }
-        .btn-play:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0px #bf360c;
+
+        .btn-arcade:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0px #bf360c, 0 4px 10px rgba(0,0,0,0.2);
         }
 
         .info-card {
-            background: rgba(255, 255, 255, 0.85);
-            border: 3px dashed #5c3a21;
-            border-radius: 16px;
+            background: #ffffff;
+            border: 4px solid #e0a96d;
+            border-radius: 20px;
             padding: 20px;
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             color: #4a2e1b;
-            line-height: 1.4;
-            margin-bottom: 40px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+            text-align: left;
         }
 
+        .info-card-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .info-card-item:last-child { margin-bottom: 0; }
+        .info-icon { font-size: 1.6rem; shrink: 0; }
+
+        /* HUD Top Bar */
         #hud-top {
             position: absolute;
-            top: 12px;
+            top: 14px;
             left: 0;
             width: 100%;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 0 16px;
             z-index: 10;
-        }
-        .hud-item {
-            background: rgba(92, 58, 33, 0.85);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border: 2px solid #fff;
+            pointer-events: none;
         }
 
+        .hud-pill {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            color: #5c3a21;
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            border: 3px solid #e0a96d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Canvas Area */
         #canvas-container {
             width: 100%;
             height: 100%;
             position: relative;
-            background: linear-gradient(to bottom, #d7b183, #c29c6e);
+            background: radial-gradient(circle at 50% 30%, #fdf0d5 0%, #eddcd2 100%);
         }
+
         canvas {
             display: block;
             width: 100%;
             height: 100%;
         }
 
+        /* QUIZ OVERLAY */
         #quiz-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
+            background: rgba(18, 12, 31, 0.65);
+            backdrop-filter: blur(6px);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
             z-index: 30;
+            animation: fadeIn 0.25s ease-out;
         }
 
         .quiz-box {
-            background: #fffdf6;
-            border: 6px solid #5c3a21;
-            border-radius: 24px;
+            background: #ffffff;
+            border: 5px solid #ff9f1c;
+            border-radius: 28px;
             width: 100%;
-            padding: 24px 18px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            max-width: 380px;
+            padding: 22px 18px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.35);
             text-align: center;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
         }
 
-        .quiz-title {
-            font-size: 0.9rem;
-            color: #ff5722;
+        .quiz-badge {
+            display: inline-block;
+            background: #ffecb3;
+            color: #b78103;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 4px 14px;
+            border-radius: 12px;
             text-transform: uppercase;
-            font-weight: 700;
-            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
         }
 
         .quiz-text {
-            font-size: 1.25rem;
-            color: #2c3e50;
-            font-weight: 600;
-            line-height: 1.4;
-            margin-bottom: 20px;
+            font-size: 1.15rem;
+            color: #2b2d42;
+            font-weight: 700;
+            line-height: 1.35;
+            margin-bottom: 18px;
         }
 
         .options-grid {
@@ -201,68 +267,129 @@
         }
 
         .option-btn {
-            background: #fdf2e9;
-            border: 3px solid #e0a96d;
-            padding: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
+            background: #fff8f0;
+            border: 3px solid #ffd1a9;
+            padding: 12px 16px;
+            font-size: 1.05rem;
+            font-weight: 800;
             color: #5c3a21;
-            border-radius: 14px;
+            border-radius: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 0px #e6b89c;
+            text-align: center;
+            outline: none;
+            position: relative;
         }
+
         .option-btn:active {
-            background: #e0a96d;
-            color: white;
+            transform: translateY(3px);
+            box-shadow: 0 1px 0px #e6b89c;
+        }
+
+        /* GLOWING HINT EFFECT FOR CORRECT OPTION WHEN MISTAKE IS MADE */
+        .option-btn.hint-glow {
+            border-color: #ffb703 !important;
+            background: #fff9e6 !important;
+            color: #d48800 !important;
+            animation: hintPulse 1.2s infinite ease-in-out alternate;
         }
 
         .hint-box {
-            margin-top: 12px;
+            margin-top: 14px;
             background: #fff3cd;
             border: 2px dashed #ffc107;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 0.95rem;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.9rem;
             color: #856404;
-            font-weight: 600;
-            animation: fadeIn 0.3s;
+            font-weight: 700;
+            animation: fadeIn 0.3s ease-in;
+            line-height: 1.3;
         }
 
+        /* EXPLANATION CARD (SHOWS AFTER CORRECT ANSWER) */
+        .explanation-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .explanation-icon {
+            font-size: 3.2rem;
+            margin-bottom: 8px;
+            animation: cuteBounce 1s infinite alternate ease-in-out;
+        }
+
+        .explanation-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #2ec4b6;
+            margin-bottom: 8px;
+        }
+
+        .explanation-text {
+            font-size: 1.02rem;
+            color: #4a2e1b;
+            line-height: 1.45;
+            background: #f4fbf7;
+            border: 2px solid #b7e4c7;
+            padding: 12px 14px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+
+        /* END SCREEN */
         #end-screen {
-            background: radial-gradient(circle, #34495e 40%, #2c3e50 100%);
+            background: radial-gradient(circle at center, #2b2d42 0%, #1a1b26 100%);
             color: white;
         }
         #end-screen h2 {
-            font-size: 3rem;
-            color: #f1c40f;
-            text-shadow: 2px 2px 0px #000;
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #ff9f1c;
+            text-shadow: 3px 3px 0px #000;
             margin-bottom: 10px;
         }
+
         .final-score-box {
-            font-size: 1.8rem;
-            margin: 20px 0 40px 0;
-            background: rgba(255,255,255,0.1);
-            padding: 15px 30px;
-            border-radius: 20px;
-            border: 2px dashed #f1c40f;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 20px 0 30px 0;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 16px 32px;
+            border-radius: 24px;
+            border: 3px dashed #ff9f1c;
+            backdrop-filter: blur(4px);
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.9; }
+        /* KEYFRAMES */
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.95; }
             50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.9; }
         }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0) scaleX(1); }
-            50% { transform: translateY(-12px) scaleX(0.95); }
+        @keyframes cuteFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        @keyframes cuteBounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
         }
         @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes hintPulse {
+            0% { box-shadow: 0 0 4px #ffb703, inset 0 0 4px #ffb703; transform: scale(1); }
+            100% { box-shadow: 0 0 18px #ffb703, inset 0 0 8px #ffb703; transform: scale(1.02); }
         }
     </style>
 </head>
@@ -270,53 +397,81 @@
 
     <div id="game-wrapper">
 
+        <!-- SPLASH SCREEN -->
         <div id="splash-screen" class="game-screen">
             <div class="logo-container">
                 <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img">
             </div>
         </div>
 
+        <!-- MENU SCREEN -->
         <div id="menu-screen" class="game-screen hidden">
             <div class="funny-monster-avatar">😋</div>
-            <h1>CUT THE<br>GOV-ROPE!</h1>
-            <button class="btn-play" onclick="goToInstructions()">START</button>
+            <h1 class="game-title">CUT THE<br>GOV-ROPE!</h1>
+            <button class="btn-arcade" onclick="goToInstructions()">START</button>
         </div>
 
+        <!-- INSTRUCTION SCREEN -->
         <div id="instruction-screen" class="game-screen hidden">
-            <h1>HOW TO PLAY</h1>
+            <h1 class="game-title" style="font-size: 2.1rem; margin-bottom: 15px;">HOW TO PLAY</h1>
             <div class="info-card">
-                👉 Swipe across the hanging ropes with your finger or mouse to cut them!<br><br>
-                🍬 Drop the knowledge candy directly into the hungry monster's mouth!<br><br>
-                🧠 Answer the quick mixed civic scenarios correctly to get points!
+                <div class="info-card-item">
+                    <span class="info-icon">👉</span>
+                    <span>Swipe across ropes with finger/mouse to cut them!</span>
+                </div>
+                <div class="info-card-item">
+                    <span class="info-icon">🍬</span>
+                    <span>Feed the knowledge candy into the monster's mouth!</span>
+                </div>
+                <div class="info-card-item">
+                    <span class="info-icon">🧠</span>
+                    <span>Answer quick civic questions to earn points & learn!</span>
+                </div>
             </div>
-            <button class="btn-play" onclick="startActualGame()">PLAY!</button>
+            <button class="btn-arcade" onclick="startActualGame()">PLAY!</button>
         </div>
 
+        <!-- HUD TOP -->
         <div id="hud-top">
-            <div class="hud-item">SCORE: <span id="score-display">0</span></div>
-            <div class="hud-item">LEVEL: <span id="level-display">1/5</span></div>
+            <div class="hud-pill">⭐ SCORE: <span id="score-display">0</span></div>
+            <div class="hud-pill">🎯 LEVEL: <span id="level-display">1/5</span></div>
         </div>
 
+        <!-- CANVAS AREA -->
         <div id="canvas-container">
             <canvas id="physicsCanvas"></canvas>
         </div>
 
+        <!-- QUIZ / EXPLANATION OVERLAY -->
         <div id="quiz-overlay" class="hidden">
-            <div class="quiz-box">
-                <div class="quiz-title" id="quiz-badge">Question 1 of 2</div>
-                <div class="quiz-text" id="quiz-question-field">Loading question...</div>
-                <div class="options-grid" id="quiz-options-box"></div>
-                <div id="hint-display" class="hint-box hidden"></div>
+            <div class="quiz-box" id="quiz-modal-box">
+                <!-- Question View -->
+                <div id="quiz-question-view">
+                    <div class="quiz-badge" id="quiz-badge">Question 1 of 2</div>
+                    <div class="quiz-text" id="quiz-question-field">Loading...</div>
+                    <div class="options-grid" id="quiz-options-box"></div>
+                    <div id="hint-display" class="hint-box hidden"></div>
+                </div>
+
+                <!-- Explanation View -->
+                <div id="quiz-explanation-view" class="explanation-card hidden">
+                    <div class="explanation-icon">🎉</div>
+                    <div class="explanation-title">Spot On!</div>
+                    <div class="explanation-text" id="explanation-text-field">Explanation...</div>
+                    <button class="btn-arcade" style="padding: 10px 30px; font-size: 1.2rem;" onclick="handleContinueNext()">CONTINUE ➔</button>
+                </div>
             </div>
         </div>
 
+        <!-- END SCREEN -->
         <div id="end-screen" class="game-screen hidden">
-            <h2>GAME OVER!</h2>
-            <p>You fed the Gov-Monster completely!</p>
+            <div class="funny-monster-avatar">🥳</div>
+            <h2>GREAT JOB!</h2>
+            <p style="font-size: 1.2rem; opacity: 0.9;">You fed the Gov-Monster & mastered Civics!</p>
             <div class="final-score-box">
                 Score: <span id="final-score-display">0</span> / 200
             </div>
-            <button class="btn-play" onclick="restartEntireGame()">PLAY AGAIN</button>
+            <button class="btn-arcade" onclick="restartEntireGame()">PLAY AGAIN</button>
         </div>
 
     </div>
@@ -327,51 +482,125 @@
         const sndWrong = new Audio('assets/wrong.mp3');
         const sndClaps = new Audio('assets/freesound_community-claps-44774.mp3');
 
-        // Structured sequentially into 5 distinct levels. Each level mixes different tiers.
+        // Structured Question Master Database with Explanations & Hints
         const levelQuestionStructure = {
-            1: [ // Level 1: Local + Central
-                { q: "Oh no! A broken pipe is flooding our street with water! Who fixes this?", a: "Local Self-Gov", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Think of workers inside your own neighborhood town!" },
-                { q: "We need to make new ten-rupee shiny coins for the whole country. Who prints them?", a: "Central Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "This big task belongs to the main team sitting in New Delhi!" }
+            1: [
+                { 
+                    q: "Oh no! A broken pipe is flooding our street with water! Who fixes this?", 
+                    a: "Local Self-Gov", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "Think of municipal workers inside your own neighborhood town!",
+                    exp: "Local Self-Government manages municipal services like local water pipelines, street sanitation, and neighborhood maintenance!"
+                },
+                { 
+                    q: "We need to make new ten-rupee shiny coins for the whole country. Who prints them?", 
+                    a: "Central Government", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "This big task belongs to the main central team in the capital!",
+                    exp: "The Central Government issues national currency so money remains uniform and valid across the entire country!"
+                }
             ],
-            2: [ // Level 2: State + Local
-                { q: "A state bus needs a new route to carry people between our regional cities. Who decides?", a: "State Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "This team looks after our whole region, led by the Chief Minister!" },
-                { q: "Our village wants a beautiful new park with a red slide. Who builds it?", a: "Local Self-Gov", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Your neighborhood Council looks after playgrounds!" }
+            2: [
+                { 
+                    q: "A state bus needs a new route to carry people between regional cities. Who decides?", 
+                    a: "State Government", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "This team looks after regional transportation led by the Chief Minister!",
+                    exp: "State Governments oversee state highways, regional bus transit, and transport rules within state boundaries!"
+                },
+                { 
+                    q: "Our village wants a beautiful new park with a red slide. Who builds it?", 
+                    a: "Local Self-Gov", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "Your nearby village Panchayat or City Council looks after playgrounds!",
+                    exp: "Local Panchayats and Municipal Corporations manage public parks, local recreation grounds, and community facilities!"
+                }
             ],
-            3: [ // Level 3: Central + State
-                { q: "An enemy army wants to attack our peaceful borders! Who sends soldiers to protect us?", a: "Central Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Protecting the whole nation is a job for the highest central team!" },
-                { q: "The police officers in our city need new uniforms to catch bad guys. Who pays them?", a: "State Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "The police force is run by your state's regional leaders!" }
+            3: [
+                { 
+                    q: "An enemy army wants to attack our peaceful borders! Who sends soldiers to protect us?", 
+                    a: "Central Government", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "Protecting the whole nation is a job for the highest national team!",
+                    exp: "National Defense and Armed Forces are strictly managed centrally to safeguard the integrity of the entire nation!"
+                },
+                { 
+                    q: "The police officers in our city need new uniforms to catch bad guys. Who pays them?", 
+                    a: "State Government", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "The law enforcement police force is run by state leaders!",
+                    exp: "Police forces and maintaining law & order are primary constitutional duties of the State Government!"
+                }
             ],
-            4: [ // Level 4: Local + State
-                { q: "Look! The school street is full of messy rubbish! Who will sweep it clean?", a: "Local Self-Gov", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Local trash trucks are sent by your nearby town office!" },
-                { q: "Our teacher says our whole state is getting a new school holiday! Who made this rule?", a: "State Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Your state capital city team makes decisions for regional schools!" }
+            4: [
+                { 
+                    q: "Look! The school street is full of messy rubbish! Who will sweep it clean?", 
+                    a: "Local Self-Gov", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "Local trash trucks and sweepers are sent by your nearby town office!",
+                    exp: "Neighborhood waste management, street sweeping, and sanitation are core duties of Local Municipal Bodies!"
+                },
+                { 
+                    q: "Our teacher says our whole state is getting a new school holiday! Who made this rule?", 
+                    a: "State Government", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "Your state capital city leaders make official regional school rules!",
+                    exp: "State Boards of Education regulate regional school schedules, curriculums, and state public holidays!"
+                }
             ],
-            5: [ // Level 5: Central + Local
-                { q: "We need a giant new airport in New Delhi so planes can fly across the world!", a: "Central Government", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Huge international travel systems belong to the highest national power!" },
-                { q: "Who handles the streetlights turning on at night on our local block?", a: "Local Self-Gov", options: ["Central Government", "State Government", "Local Self-Gov"], hint: "Your closest municipality handles minor street setups." }
+            5: [
+                { 
+                    q: "We need a giant new airport so international planes can fly across the world!", 
+                    a: "Central Government", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "Huge international transport systems belong to the highest national power!",
+                    exp: "International aviation, national airways, and border transport hubs are developed under Central Government authority!"
+                },
+                { 
+                    q: "Who handles the streetlights turning on at night on our local block?", 
+                    a: "Local Self-Gov", 
+                    options: ["Central Government", "State Government", "Local Self-Gov"], 
+                    hint: "Your local municipal office manages street lights on neighborhood roads.",
+                    exp: "Neighborhood lighting, local road repairs, and community safety lights fall under Local Self-Government!"
+                }
             ]
         };
 
-        let currentQuestionIndex = 0; 
-        let score = 0;
+        // State Variables
         let currentLevel = 1;
+        let currentQuestionIndex = 0; 
+        let activeLevelQuestions = [];
+        let score = 0;
         let firstAttemptWrong = false;
         let isGameRunning = false;
 
+        // Canvas & Physics Variables
         const canvas = document.getElementById('physicsCanvas');
         const ctx = canvas.getContext('2d');
         let animationFrameId;
         
-        let bubble = { x: 240, y: 220, radius: 24, vx: 0, vy: 0, isFree: false };
+        let bubble = { x: 240, y: 220, radius: 22, vx: 0, vy: 0, isFree: false };
         let ropes = [];
-        let monster = { x: 240, y: 680, width: 70, height: 70, mouthOpen: false };
+        let monster = { x: 240, y: 680, radius: 45, mouthOpen: false };
         let swipePath = [];
         let isSwiping = false;
+        let particles = [];
+
+        // Utility: Randomize array
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
 
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.getElementById('splash-screen').classList.add('hidden');
                 document.getElementById('menu-screen').classList.remove('hidden');
-            }, 5000); // 5 seconds Splash view tracking
+            }, 5000); // 5s tracking
             resizeCanvas();
         });
 
@@ -380,13 +609,21 @@
         function resizeCanvas() {
             const container = document.getElementById('canvas-container');
             if (!container) return;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            monster.x = canvas.width / 2;
-            monster.y = canvas.height - 100;
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            const cssWidth = container.clientWidth;
+            const cssHeight = container.clientHeight;
+
+            monster.x = cssWidth / 2;
+            monster.y = cssHeight - 90;
+            
             if(!bubble.isFree) {
-                bubble.x = canvas.width / 2;
-                bubble.y = 220;
+                bubble.x = cssWidth / 2;
+                bubble.y = 190;
             }
         }
 
@@ -403,132 +640,249 @@
             document.getElementById('score-display').textContent = score;
             document.getElementById('level-display').textContent = `${currentLevel}/5`;
             
+            prepareLevelQuestions();
             isGameRunning = true;
             setupLevelPhysics();
             animatePhysics();
         }
 
+        function prepareLevelQuestions() {
+            // Shuffle question order per level
+            activeLevelQuestions = shuffleArray(levelQuestionStructure[currentLevel]);
+        }
+
         function setupLevelPhysics() {
-            bubble.x = canvas.width / 2;
-            bubble.y = 200;
+            const container = document.getElementById('canvas-container');
+            const cssWidth = container ? container.clientWidth : 360;
+
+            bubble.x = cssWidth / 2;
+            bubble.y = 180;
             bubble.vx = 0;
             bubble.vy = 0;
             bubble.isFree = false;
             monster.mouthOpen = false;
 
             ropes = [
-                { anchorX: canvas.width / 2 - 80, anchorY: 80, length: 150, active: true },
-                { anchorX: canvas.width / 2 + 80, anchorY: 80, length: 150, active: true }
+                { anchorX: cssWidth / 2 - 85, anchorY: 70, length: 140, active: true },
+                { anchorX: cssWidth / 2 + 85, anchorY: 70, length: 140, active: true }
             ];
             
-            if(currentLevel > 2) {
-                ropes.push({ anchorX: canvas.width / 2 + (Math.random() * 100 - 50), anchorY: 50, length: 170, active: true });
+            if (currentLevel > 2) {
+                ropes.push({ anchorX: cssWidth / 2 + (Math.random() * 80 - 40), anchorY: 45, length: 160, active: true });
+            }
+        }
+
+        // Particle System for Cutting & Eating
+        function spawnParticles(x, y, color, count = 10) {
+            for(let i = 0; i < count; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    radius: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1,
+                    life: 0.03 + Math.random() * 0.03
+                });
             }
         }
 
         function animatePhysics() {
             if (!isGameRunning) return;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const container = document.getElementById('canvas-container');
+            const cssWidth = container.clientWidth;
+            const cssHeight = container.clientHeight;
 
-            ctx.strokeStyle = "rgba(92, 58, 33, 0.15)";
-            ctx.lineWidth = 4;
-            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+            ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+            // Draw Background Grid/Pattern
+            ctx.strokeStyle = "rgba(92, 58, 33, 0.08)";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(12, 12, cssWidth - 24, cssHeight - 24);
 
             let attachedCount = 0;
             let targetX = 0, targetY = 0;
 
+            // Draw & Calculate Ropes
             ropes.forEach(rope => {
                 if (!rope.active) return;
                 attachedCount++;
                 
+                // Rope line
                 ctx.beginPath();
-                ctx.strokeStyle = "#4a2e1b";
-                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#6d4c41";
+                ctx.lineWidth = 4;
+                ctx.lineCap = "round";
                 ctx.moveTo(rope.anchorX, rope.anchorY);
                 ctx.lineTo(bubble.x, bubble.y);
                 ctx.stroke();
 
+                // Anchor point peg
                 ctx.beginPath();
-                ctx.fillStyle = "#34495e";
-                ctx.arc(rope.anchorX, rope.anchorY, 6, 0, Math.PI * 2);
+                ctx.fillStyle = "#3e2723";
+                ctx.arc(rope.anchorX, rope.anchorY, 7, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
                 targetX += rope.anchorX;
-                targetY += rope.anchorY + rope.length * 0.9;
+                targetY += rope.anchorY + rope.length * 0.88;
             });
 
+            // Pendulum Physics
             if (!bubble.isFree) {
                 if (attachedCount > 0) {
                     let idealX = targetX / attachedCount;
                     let idealY = (targetY / attachedCount);
-                    bubble.x += (idealX - bubble.x) * 0.1;
-                    bubble.y += (idealY - bubble.y) * 0.1;
+                    bubble.x += (idealX - bubble.x) * 0.12;
+                    bubble.y += (idealY - bubble.y) * 0.12;
                 } else {
                     bubble.isFree = true;
                 }
             } else {
-                bubble.vy += 0.5; 
+                bubble.vy += 0.48; // Gravity
                 bubble.x += bubble.vx;
                 bubble.y += bubble.vy;
             }
 
+            // Monster Distance Detection
             let distanceToMonster = Math.hypot(bubble.x - monster.x, bubble.y - monster.y);
-            if (distanceToMonster < 160) {
-                monster.mouthOpen = true; 
-            }
+            monster.mouthOpen = (distanceToMonster < 150);
 
-            ctx.fillStyle = "#6ab04c";
+            // --- DRAW CUTE MONSTER ---
+            // Feet
+            ctx.fillStyle = "#20bf6b";
             ctx.beginPath();
-            ctx.arc(monster.x, monster.y + 15, 45, 0, Math.PI * 2);
+            ctx.arc(monster.x - 25, monster.y + 30, 16, 0, Math.PI * 2);
+            ctx.arc(monster.x + 25, monster.y + 30, 16, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = "#fff";
+            // Monster Body
+            ctx.fillStyle = "#26de81";
             ctx.beginPath();
-            ctx.arc(monster.x - 18, monster.y - 10, 15, 0, Math.PI * 2);
-            ctx.arc(monster.x + 18, monster.y - 10, 15, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#000";
-            ctx.beginPath();
-            ctx.arc(monster.x - 16, monster.y - 10, 6, 0, Math.PI * 2);
-            ctx.arc(monster.x + 20, monster.y - 10, 6, 0, Math.PI * 2);
+            ctx.arc(monster.x, monster.y, monster.radius, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = monster.mouthOpen ? "#130f40" : "#222";
+            // Rosy Cheeks
+            ctx.fillStyle = "rgba(255, 107, 129, 0.4)";
+            ctx.beginPath();
+            ctx.arc(monster.x - 26, monster.y + 6, 10, 0, Math.PI * 2);
+            ctx.arc(monster.x + 26, monster.y + 6, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cute Eyes
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(monster.x - 16, monster.y - 12, 14, 0, Math.PI * 2);
+            ctx.arc(monster.x + 16, monster.y - 12, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Pupils (Look towards bubble!)
+            let dx = bubble.x - monster.x;
+            let dy = bubble.y - monster.y;
+            let angle = Math.atan2(dy, dx);
+            let pupilDist = 4;
+            let px = Math.cos(angle) * pupilDist;
+            let py = Math.sin(angle) * pupilDist;
+
+            ctx.fillStyle = "#1e272e";
+            ctx.beginPath();
+            ctx.arc(monster.x - 16 + px, monster.y - 12 + py, 6, 0, Math.PI * 2);
+            ctx.arc(monster.x + 16 + px, monster.y - 12 + py, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eye sparkle catchlights
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(monster.x - 18 + px, monster.y - 14 + py, 2.5, 0, Math.PI * 2);
+            ctx.arc(monster.x + 14 + px, monster.y - 14 + py, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Mouth
+            ctx.fillStyle = monster.mouthOpen ? "#1e272e" : "#0be881";
             ctx.beginPath();
             if (monster.mouthOpen) {
-                ctx.arc(monster.x, monster.y + 20, 24, 0, Math.PI, false);
+                ctx.arc(monster.x, monster.y + 14, 22, 0, Math.PI, false);
+                ctx.fill();
+                // Cute Tongue
+                ctx.fillStyle = "#ff5e57";
+                ctx.beginPath();
+                ctx.arc(monster.x, monster.y + 30, 12, 0, Math.PI, true);
+                ctx.fill();
             } else {
-                ctx.arc(monster.x, monster.y + 22, 12, 0, Math.PI, true);
+                ctx.arc(monster.x, monster.y + 16, 10, 0, Math.PI, false);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#05c46b";
+                ctx.stroke();
             }
-            ctx.fill();
 
+            // --- DRAW CANDY BUBBLE ---
             ctx.beginPath();
-            ctx.fillStyle = "rgba(255, 87, 34, 0.85)";
-            ctx.strokeStyle = "#fff";
-            ctx.lineWidth = 3;
+            ctx.fillStyle = "#ff5722";
             ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
             ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 3.5;
             ctx.stroke();
-            
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold 20px Arial";
-            ctx.fillText("🌟", bubble.x - 11, bubble.y + 7);
 
+            // Glossy highlight ring on candy
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+            ctx.lineWidth = 2.5;
+            ctx.arc(bubble.x - 6, bubble.y - 6, bubble.radius * 0.45, Math.PI * 1.1, Math.PI * 1.7);
+            ctx.stroke();
+
+            // Star symbol on candy
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "700 16px Fredoka";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("🌟", bubble.x, bubble.y + 1);
+
+            // Render Swipe Line
             if (swipePath.length > 1) {
                 ctx.beginPath();
-                ctx.strokeStyle = "#e74c3c";
-                ctx.lineWidth = 4;
+                ctx.strokeStyle = "#ff3f34";
+                ctx.lineWidth = 5;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
                 ctx.moveTo(swipePath[0].x, swipePath[0].y);
-                for(let i=1; i<swipePath.length; i++) {
+                for(let i = 1; i < swipePath.length; i++) {
                     ctx.lineTo(swipePath[i].x, swipePath[i].y);
                 }
                 ctx.stroke();
             }
 
-            if (bubble.y > canvas.height + 50) {
+            // Render Particle Effects
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.life;
+                if(p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Out of bounds check -> Reset position
+            if (bubble.y > cssHeight + 40) {
                 setupLevelPhysics();
-            } else if (distanceToMonster < 40) {
+            } 
+            // Monster Eaten Candy
+            else if (distanceToMonster < 38) {
+                spawnParticles(monster.x, monster.y + 10, "#ff5722", 20);
+                spawnParticles(monster.x, monster.y + 10, "#ffdd59", 15);
+                
                 isGameRunning = false; 
                 cancelAnimationFrame(animationFrameId); 
 
@@ -542,6 +896,7 @@
             animationFrameId = requestAnimationFrame(animatePhysics);
         }
 
+        // Swipe Touch & Mouse Controllers
         function startSwipe(clientX, clientY) {
             isSwiping = true;
             swipePath = [];
@@ -555,7 +910,7 @@
             const y = clientY - rect.top;
             
             swipePath.push({x, y});
-            if(swipePath.length > 5) swipePath.shift();
+            if(swipePath.length > 6) swipePath.shift();
 
             if (swipePath.length >= 2) {
                 let p1 = swipePath[swipePath.length - 2];
@@ -565,6 +920,7 @@
                     if (!rope.active) return;
                     if (checkLineIntersection(p1.x, p1.y, p2.x, p2.y, rope.anchorX, rope.anchorY, bubble.x, bubble.y)) {
                         rope.active = false;
+                        spawnParticles((p1.x + p2.x)/2, (p1.y + p2.y)/2, "#f5cd79", 12);
                     }
                 });
             }
@@ -587,11 +943,11 @@
         canvas.addEventListener('mousemove', (e) => { if(e.buttons === 1) addSwipePoint(e.clientX, e.clientY); });
         window.addEventListener('mouseup', endSwipe);
 
-        canvas.addEventListener('touchstart', (e) => { if(e.touches.length > 0) startSwipe(e.touches[0].clientX, e.touches[0].clientY); });
-        canvas.addEventListener('touchmove', (e) => { if(e.touches.length > 0) addSwipePoint(e.touches[0].clientX, e.touches[0].clientY); });
+        canvas.addEventListener('touchstart', (e) => { if(e.touches.length > 0) startSwipe(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
+        canvas.addEventListener('touchmove', (e) => { if(e.touches.length > 0) addSwipePoint(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
         window.addEventListener('touchend', endSwipe);
 
-        // --- QUIZ Display ENGINE ---
+        // --- QUIZ & EXPLANATION SYSTEM ---
         function triggerQuizSequence() {
             displayQuestion();
         }
@@ -600,9 +956,11 @@
             firstAttemptWrong = false;
             document.getElementById('hint-display').classList.add('hidden');
             
-            // Extract the matching question from the strict sequential structure map
-            const currentQuestions = levelQuestionStructure[currentLevel];
-            const currentData = currentQuestions[currentQuestionIndex];
+            // Switch overlay views
+            document.getElementById('quiz-question-view').classList.remove('hidden');
+            document.getElementById('quiz-explanation-view').classList.add('hidden');
+            
+            const currentData = activeLevelQuestions[currentQuestionIndex];
             
             document.getElementById('quiz-badge').textContent = `Question ${currentQuestionIndex + 1} of 2`;
             document.getElementById('quiz-question-field').textContent = currentData.q;
@@ -610,20 +968,24 @@
             const optionsBox = document.getElementById('quiz-options-box');
             optionsBox.innerHTML = '';
 
-            let randomizedOptions = [...currentData.options].sort(() => 0.5 - Math.random());
+            // Randomize Options Order
+            let randomizedOptions = shuffleArray(currentData.options);
 
             randomizedOptions.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.textContent = opt;
-                btn.onclick = () => verifyUserChoice(opt, currentData.a);
+                btn.setAttribute('data-option', opt);
+                btn.onclick = () => verifyUserChoice(opt, currentData.a, btn);
                 optionsBox.appendChild(btn);
             });
 
             document.getElementById('quiz-overlay').classList.remove('hidden');
         }
 
-        function verifyUserChoice(selected, correct) {
+        function verifyUserChoice(selected, correct, clickedBtn) {
+            const currentData = activeLevelQuestions[currentQuestionIndex];
+
             if (selected === correct) {
                 sndCorrect.currentTime = 0;
                 sndCorrect.play().catch(e => console.log("Audio blocked"));
@@ -631,37 +993,61 @@
                 score += 20;
                 document.getElementById('score-display').textContent = score;
                 
-                currentQuestionIndex++;
-
-                if (currentQuestionIndex < 2) {
-                    displayQuestion();
-                } else {
-                    document.getElementById('quiz-overlay').classList.add('hidden');
-                    if (currentLevel >= 5) {
-                        endEntireGame();
-                    } else {
-                        currentLevel++;
-                        currentQuestionIndex = 0; // Reset index counter for the next structural level tier
-                        document.getElementById('level-display').textContent = `${currentLevel}/5`;
-                        isGameRunning = true; 
-                        setupLevelPhysics();
-                        animatePhysics();
-                    }
-                }
+                // Show Explanation Modal Stage!
+                showExplanationScreen(currentData.exp);
             } else {
                 sndWrong.currentTime = 0;
                 sndWrong.play().catch(e => console.log("Audio blocked"));
 
+                // Show Hint Text & Highlight Correct Option Button with glowing animation
                 if (!firstAttemptWrong) {
                     firstAttemptWrong = true;
                     const hintDiv = document.getElementById('hint-display');
-                    hintDiv.textContent = `💡 Hint: ${levelQuestionStructure[currentLevel][currentQuestionIndex].hint}`;
+                    hintDiv.textContent = `💡 Hint: ${currentData.hint}`;
                     hintDiv.classList.remove('hidden');
+
+                    // Highlight the correct option button
+                    const allOptionBtns = document.querySelectorAll('.option-btn');
+                    allOptionBtns.forEach(btn => {
+                        if (btn.getAttribute('data-option') === correct) {
+                            btn.classList.add('hint-glow');
+                        }
+                    });
                 }
-                const box = document.querySelector('.quiz-box');
-                box.style.transform = 'translateX(10px)';
-                setTimeout(() => box.style.transform = 'translateX(-10px)', 80);
+
+                // Shake animation for quiz card
+                const box = document.getElementById('quiz-modal-box');
+                box.style.transform = 'translateX(8px)';
+                setTimeout(() => box.style.transform = 'translateX(-8px)', 80);
                 setTimeout(() => box.style.transform = 'translateX(0)', 160);
+            }
+        }
+
+        function showExplanationScreen(expText) {
+            document.getElementById('quiz-question-view').classList.add('hidden');
+            document.getElementById('quiz-explanation-view').classList.remove('hidden');
+            document.getElementById('explanation-text-field').textContent = expText;
+        }
+
+        function handleContinueNext() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < 2) {
+                displayQuestion();
+            } else {
+                document.getElementById('quiz-overlay').classList.add('hidden');
+                if (currentLevel >= 5) {
+                    endEntireGame();
+                } else {
+                    currentLevel++;
+                    currentQuestionIndex = 0;
+                    prepareLevelQuestions();
+                    
+                    document.getElementById('level-display').textContent = `${currentLevel}/5`;
+                    isGameRunning = true; 
+                    setupLevelPhysics();
+                    animatePhysics();
+                }
             }
         }
 
