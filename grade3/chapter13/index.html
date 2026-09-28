@@ -305,20 +305,23 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.55);
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             z-index: 200;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
         #end-overlay.active-overlay {
-            display: flex;
-            opacity: 1;
+            display: flex !important;
+            animation: fadeInOverlay 0.3s ease forwards;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .score-card {
@@ -330,7 +333,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transform: scale(0.9);
             animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             max-width: 90%;
             text-align: center;
@@ -341,6 +343,7 @@
         }
 
         @keyframes popUp {
+            from { transform: scale(0.8); }
             to { transform: scale(1); }
         }
 
@@ -366,7 +369,7 @@
             margin-bottom: 20px;
             color: #475569;
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         /* Responsive Mobile Tweaks */
@@ -453,7 +456,7 @@
 </div>
 
 <script>
-    // Audio Systems & Safe Autoplay Unlock (Silent on start/play)
+    // Audio Systems & Safe Autoplay Unlock (Completely Silent on start/play)
     let sndCorrect, sndWrong, sndClap;
     let audioUnlocked = false;
 
@@ -469,23 +472,16 @@
 
     function unlockAudio() {
         if (audioUnlocked) return;
+        audioUnlocked = true;
+
+        // Preload sound files silently without calling .play()
         [sndCorrect, sndWrong, sndClap].forEach(snd => {
             if (snd) {
-                let origVol = snd.volume;
-                snd.volume = 0; // Mute during unlock playback so no sound plays on start/play buttons
-                let p = snd.play();
-                if (p !== undefined) {
-                    p.then(() => {
-                        snd.pause();
-                        snd.currentTime = 0;
-                        snd.volume = origVol || 1.0;
-                    }).catch(() => {
-                        snd.volume = origVol || 1.0;
-                    });
-                }
+                try {
+                    snd.load();
+                } catch(e) {}
             }
         });
-        audioUnlocked = true;
     }
 
     function playSound(audioObj) {
@@ -602,8 +598,8 @@
     }
 
     function initGame() {
-        document.getElementById('end-overlay').classList.remove('active-overlay');
-        document.getElementById('end-overlay').style.display = 'none';
+        const endOverlay = document.getElementById('end-overlay');
+        endOverlay.classList.remove('active-overlay');
 
         randomizedQuestions = JSON.parse(JSON.stringify(questionBank));
         shuffle(randomizedQuestions);
@@ -1015,7 +1011,9 @@
             });
 
             if (lives <= 0) {
-                endGame(false);
+                setTimeout(() => {
+                    endGame(false);
+                }, 400);
             } else {
                 revealHint();
             }
@@ -1064,7 +1062,7 @@
             cardNode.classList.add('game-over-card');
             titleNode.innerText = "Uh Oh! 😅";
             starNode.innerText = "💔";
-            scoreNode.innerText = `You ran out of lives!\nFinal Score: ${finalScore} / ${totalPossible}`;
+            scoreNode.innerHTML = `You ran out of lives!<br><b>Final Score: ${finalScore} / ${totalPossible}</b>`;
         } else {
             cardNode.classList.remove('game-over-card');
             if (finalScore >= 100) {
@@ -1077,13 +1075,12 @@
                 titleNode.innerText = "Good Effort! 👍";
                 starNode.innerText = "⭐";
             }
-            scoreNode.innerText = `Your Score: ${finalScore} / ${totalPossible}`;
+            scoreNode.innerHTML = `Your Score: <b>${finalScore} / ${totalPossible}</b>`;
             playSound(sndClap);
         }
 
         const endOverlay = document.getElementById('end-overlay');
-        endOverlay.style.display = 'flex';
-        setTimeout(() => endOverlay.classList.add('active-overlay'), 10);
+        endOverlay.classList.add('active-overlay');
     }
 </script>
 </body>
