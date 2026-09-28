@@ -421,7 +421,7 @@
                 </div>
                 <div class="info-card-item">
                     <span class="info-icon">🍬</span>
-                    <span>Feed the knowledge candy into the monster's mouth!</span>
+                    <span>Feed the candy! The monster uses mouth suction to pull close drops in!</span>
                 </div>
                 <div class="info-card-item">
                     <span class="info-icon">🧠</span>
@@ -731,25 +731,57 @@
                 targetY += rope.anchorY + rope.length * 0.88;
             });
 
-            // Pendulum Physics
+            // Pendulum & Physics Calculation
             if (!bubble.isFree) {
                 if (attachedCount > 0) {
                     let idealX = targetX / attachedCount;
                     let idealY = (targetY / attachedCount);
-                    bubble.x += (idealX - bubble.x) * 0.12;
-                    bubble.y += (idealY - bubble.y) * 0.12;
+                    
+                    // Track swing momentum for release
+                    let nextX = bubble.x + (idealX - bubble.x) * 0.15;
+                    let nextY = bubble.y + (idealY - bubble.y) * 0.15;
+                    bubble.vx = nextX - bubble.x;
+                    bubble.vy = nextY - bubble.y;
+                    
+                    bubble.x = nextX;
+                    bubble.y = nextY;
                 } else {
                     bubble.isFree = true;
                 }
             } else {
-                bubble.vy += 0.48; // Gravity
+                bubble.vy += 0.45; // Gravity
+                bubble.vx *= 0.985; // Air drag
                 bubble.x += bubble.vx;
                 bubble.y += bubble.vy;
             }
 
-            // Monster Distance Detection
+            // Monster Distance Detection & Vacuum Suction
             let distanceToMonster = Math.hypot(bubble.x - monster.x, bubble.y - monster.y);
-            monster.mouthOpen = (distanceToMonster < 150);
+            monster.mouthOpen = (distanceToMonster < 170);
+
+            // Active Suction Pull towards monster mouth
+            if (monster.mouthOpen) {
+                let dx = monster.x - bubble.x;
+                let dy = (monster.y + 10) - bubble.y;
+                let dist = Math.hypot(dx, dy);
+                
+                if (dist > 0 && dist < 170) {
+                    let pullForce = (1 - dist / 170) * 0.8;
+                    bubble.vx += (dx / dist) * pullForce;
+                    bubble.vy += (dy / dist) * pullForce;
+                }
+
+                // Visual Vacuum Air Currents
+                ctx.save();
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath();
+                ctx.moveTo(bubble.x, bubble.y);
+                ctx.lineTo(monster.x, monster.y + 10);
+                ctx.stroke();
+                ctx.restore();
+            }
 
             // --- DRAW CUTE MONSTER ---
             // Feet
@@ -879,7 +911,7 @@
                 setupLevelPhysics();
             } 
             // Monster Eaten Candy
-            else if (distanceToMonster < 38) {
+            else if (distanceToMonster < 40) {
                 spawnParticles(monster.x, monster.y + 10, "#ff5722", 20);
                 spawnParticles(monster.x, monster.y + 10, "#ffdd59", 15);
                 
