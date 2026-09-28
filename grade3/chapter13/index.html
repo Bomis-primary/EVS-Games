@@ -183,6 +183,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
             flex-wrap: nowrap;
             gap: 6px;
+            flex-shrink: 0;
         }
 
         .ui-badge {
@@ -216,37 +217,41 @@
             border: 3px solid #38BDF8;
             border-radius: 20px;
             margin-top: 8px;
-            padding: 10px 16px;
-            min-height: 80px;
+            padding: 12px 18px;
+            min-height: 90px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             box-shadow: 0 6px 16px rgba(14, 165, 233, 0.12);
             z-index: 20;
             position: relative;
+            flex-shrink: 0;
+            gap: 8px;
         }
 
         #question-text {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: #0369A1;
             font-weight: 700;
-            line-height: 1.35;
+            line-height: 1.45;
             text-align: center;
+            width: 100%;
+            word-wrap: break-word;
         }
 
         .hint-container {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-top: 6px;
+            justify-content: center;
+            width: 100%;
         }
 
         #hint-btn {
             background: #FEF08A;
             border: 2px solid #EAB308;
             color: #854D0E;
-            padding: 3px 12px;
+            padding: 4px 14px;
             border-radius: 12px;
             font-size: 0.85rem;
             font-weight: 700;
@@ -265,10 +270,13 @@
             font-size: 0.85rem;
             color: #15803D;
             background: #DCFCE7;
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 10px;
             border: 2px dashed #4ADE80;
             animation: fadeIn 0.3s ease-out;
+            max-width: 95%;
+            text-align: center;
+            line-height: 1.35;
         }
 
         @keyframes fadeIn {
@@ -374,8 +382,9 @@
             #ui-bar { padding: 0 6px; height: 46px; }
             .ui-badge { font-size: 0.8rem; padding: 3px 8px; gap: 2px; border-width: 1px; }
             .lives-display { font-size: 0.85rem; letter-spacing: 0px; }
-            #station-board { padding: 8px 12px; min-height: 70px; margin-top: 6px; }
-            #question-text { font-size: 0.92rem; }
+            #station-board { padding: 8px 10px; min-height: 80px; margin-top: 4px; gap: 6px; }
+            #question-text { font-size: 0.88rem; line-height: 1.35; }
+            #hint-text { font-size: 0.8rem; padding: 4px 10px; }
             .score-card { padding: 20px 22px; width: 92%; border-radius: 24px; }
             .score-card h2 { font-size: 1.6rem; }
             .score-card p { font-size: 1.05rem; margin-bottom: 16px; }
@@ -444,7 +453,7 @@
 </div>
 
 <script>
-    // Audio Systems & Safe Autoplay Unlock
+    // Audio Systems & Safe Autoplay Unlock (Silent on start/play)
     let sndCorrect, sndWrong, sndClap;
     let audioUnlocked = false;
 
@@ -462,10 +471,18 @@
         if (audioUnlocked) return;
         [sndCorrect, sndWrong, sndClap].forEach(snd => {
             if (snd) {
-                snd.play().then(() => {
-                    snd.pause();
-                    snd.currentTime = 0;
-                }).catch(() => {});
+                let origVol = snd.volume;
+                snd.volume = 0; // Mute during unlock playback so no sound plays on start/play buttons
+                let p = snd.play();
+                if (p !== undefined) {
+                    p.then(() => {
+                        snd.pause();
+                        snd.currentTime = 0;
+                        snd.volume = origVol || 1.0;
+                    }).catch(() => {
+                        snd.volume = origVol || 1.0;
+                    });
+                }
             }
         });
         audioUnlocked = true;
@@ -560,7 +577,6 @@
             const viewWidth = container.clientWidth;
             
             // Calculate responsive scale factor so full train always fits across mobile/desktop viewports
-            // Train layout = Engine (110) + 4 Cars (each 115 gap) + safety margin (~20) = ~590px base width
             const baseTrainWidth = 600;
             scaleFactor = Math.min(1.0, Math.max(0.35, (viewWidth - 16) / baseTrainWidth));
             
