@@ -4,47 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Media Mission: Sort the Signals!</title>
+    <!-- Cute Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Reset and Base Styles */
+        /* Reset and Responsive Base */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            font-family: 'Fredoka', 'Quicksand', system-ui, -apple-system, sans-serif;
+            font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
         }
 
         body {
             background-color: #FFE5EC;
+            background: radial-gradient(circle at center, #FFF0F5 0%, #FFE5EC 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: 100dvh;
             overflow: hidden;
             padding: 10px;
         }
 
-        /* Main Game Screen Outer Shell */
+        /* Outer Game Shell */
         #game-container {
             position: relative;
             width: 100%;
-            max-width: 500px;
-            height: 92vh;
-            max-height: 750px;
-            background: linear-gradient(180deg, #FFE5EC 0%, #FFF0F5 100%);
+            max-width: 480px;
+            height: 94vh;
+            height: 94dvh;
+            max-height: 760px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FFF0F5 100%);
             border: 6px solid #FF85A1;
-            border-radius: 30px;
-            box-shadow: 0 12px 24px rgba(255, 133, 161, 0.3);
+            border-radius: 32px;
+            box-shadow: 0 15px 30px rgba(255, 133, 161, 0.35);
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* Decorative Pastel Background Clouds */
+        /* Floating Background Clouds */
         .cloud {
             position: absolute;
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.85);
             border-radius: 50px;
             z-index: 1;
             pointer-events: none;
@@ -52,27 +59,27 @@
         .cloud::before, .cloud::after {
             content: '';
             position: absolute;
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.85);
             border-radius: 50%;
         }
-        .cloud-1 { width: 100px; height: 40px; top: 12%; left: -20px; animation: floatCloud 25s linear infinite; }
-        .cloud-1::before { width: 50px; height: 50px; top: -20px; left: 15px; }
-        .cloud-1::after { width: 40px; height: 40px; top: -15px; left: 45px; }
+        .cloud-1 { width: 90px; height: 35px; top: 8%; left: -20px; animation: floatCloud 22s linear infinite; }
+        .cloud-1::before { width: 45px; height: 45px; top: -18px; left: 12px; }
+        .cloud-1::after { width: 35px; height: 35px; top: -12px; left: 40px; }
 
-        .cloud-2 { width: 120px; height: 45px; top: 40%; right: -30px; animation: floatCloudReverse 30s linear infinite; }
-        .cloud-2::before { width: 60px; height: 60px; top: -25px; left: 20px; }
-        .cloud-2::after { width: 45px; height: 45px; top: -15px; left: 55px; }
+        .cloud-2 { width: 110px; height: 40px; top: 38%; right: -30px; animation: floatCloudReverse 26s linear infinite; }
+        .cloud-2::before { width: 50px; height: 50px; top: -20px; left: 18px; }
+        .cloud-2::after { width: 40px; height: 40px; top: -12px; left: 50px; }
 
         @keyframes floatCloud {
             0% { transform: translateX(-100px); }
-            100% { transform: translateX(600px); }
+            100% { transform: translateX(550px); }
         }
         @keyframes floatCloudReverse {
             0% { transform: translateX(100px); }
-            100% { transform: translateX(-600px); }
+            100% { transform: translateX(-550px); }
         }
 
-        /* Screen States */
+        /* Screen Manager */
         .screen {
             position: absolute;
             top: 0;
@@ -82,8 +89,8 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 24px;
+            justify-content: space-between;
+            padding: 20px 18px;
             z-index: 10;
             text-align: center;
         }
@@ -94,10 +101,11 @@
 
         /* Splash Screen */
         #splash-screen {
+            justify-content: center;
             background-color: #FFFFFF;
         }
         .logo-wrapper {
-            max-width: 220px;
+            max-width: 200px;
             animation: pulseLogo 2s ease-in-out infinite;
         }
         .logo-wrapper img {
@@ -105,45 +113,46 @@
             height: auto;
         }
         .loader-bar {
-            width: 60%;
-            height: 10px;
-            background-color: #F0F0F0;
+            width: 65%;
+            height: 12px;
+            background-color: #FFE5EC;
             border-radius: 10px;
-            margin-top: 30px;
+            margin-top: 25px;
             overflow: hidden;
+            border: 2px solid #FF85A1;
         }
         .loader-progress {
             width: 0%;
-            height: 10px;
-            background-color: #FF85A1;
+            height: 100%;
+            background: linear-gradient(90deg, #FF85A1, #FFB703);
             border-radius: 10px;
-            animation: loadProgress 5s linear forwards;
+            animation: loadProgress 3.5s linear forwards;
         }
 
         @keyframes pulseLogo {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
+            50% { transform: scale(1.05); }
         }
         @keyframes loadProgress {
             0% { width: 0%; }
             100% { width: 100%; }
         }
 
-        /* Interactive Buttons */
+        /* Buttons */
         .btn-kids {
             background: linear-gradient(180deg, #FFB703 0%, #FB8500 100%);
-            color: white;
+            color: #FFFFFF;
             border: none;
-            padding: 16px 36px;
-            font-size: 22px;
+            padding: 14px 32px;
+            font-size: 20px;
             font-weight: 700;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #D06D00, 0 8px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 0 #D06D00, 0 8px 15px rgba(0,0,0,0.12);
             transition: transform 0.1s, box-shadow 0.1s;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 20px;
+            letter-spacing: 0.5px;
+            margin-top: 15px;
             outline: none;
             -webkit-tap-highlight-color: transparent;
         }
@@ -153,53 +162,68 @@
         }
 
         /* Title Screen */
+        #title-screen {
+            justify-content: center;
+        }
         #title-screen h1 {
-            font-size: 34px;
+            font-size: 32px;
             color: #F15BB5;
-            font-weight: 800;
+            font-weight: 700;
             text-shadow: 2px 2px 0px #FFF, 4px 4px 0px #FF85A1;
-            margin-bottom: 30px;
-            line-height: 1.3;
+            margin-bottom: 25px;
+            line-height: 1.25;
+        }
+        .title-badge {
+            font-size: 70px;
+            margin-bottom: 15px;
+            animation: floatBadge 3s ease-in-out infinite;
+        }
+        @keyframes floatBadge {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         /* Instruction Screen */
+        #instruction-screen {
+            justify-content: center;
+        }
         .card-board {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border: 4px dashed #FF85A1;
             border-radius: 24px;
-            padding: 24px;
+            padding: 20px 18px;
             width: 100%;
             box-shadow: 0 8px 16px rgba(0,0,0,0.05);
         }
         .card-board h2 {
             color: #FB8500;
-            margin-bottom: 15px;
-            font-size: 26px;
+            margin-bottom: 12px;
+            font-size: 24px;
             font-weight: 700;
         }
         .card-board ul {
             text-align: left;
             list-style-type: none;
-            font-size: 18px;
-            color: #333333;
-            line-height: 1.6;
+            font-size: 16px;
+            color: #444;
+            line-height: 1.5;
         }
         .card-board li {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             position: relative;
             padding-left: 28px;
         }
         .card-board li::before {
-            content: '⭐';
+            content: '🌟';
             position: absolute;
             left: 0;
-            top: 2px;
+            top: 1px;
         }
 
-        /* Main Arena Screen Layout */
+        /* Arena Layout */
         #arena-screen {
             justify-content: space-between;
-            padding: 15px;
+            padding: 12px;
         }
 
         /* Top HUD Bar */
@@ -213,39 +237,43 @@
         .score-box {
             background: #FFFFFF;
             border: 3px solid #FF85A1;
-            padding: 6px 16px;
-            border-radius: 15px;
-            font-size: 18px;
+            padding: 4px 14px;
+            border-radius: 16px;
+            font-size: 17px;
             font-weight: 700;
             color: #F15BB5;
             box-shadow: 0 4px 0 #FF85A1;
         }
         .lives-box {
             display: flex;
-            gap: 5px;
+            gap: 4px;
         }
         .heart {
-            font-size: 24px;
+            font-size: 22px;
             transition: transform 0.3s ease;
         }
         .heart.lost {
             transform: scale(0);
         }
 
-        /* Expanded Dynamic Scenario Riddle Prompt Bar */
+        /* Question Riddle Bar */
         .question-bar {
             width: 100%;
             background: #FFFFFF;
             border: 3px solid #FF85A1;
             border-radius: 18px;
-            padding: 16px 18px;
-            margin-top: 12px;
-            font-size: 19px; /* Enhanced visibility for readability */
+            padding: 12px 14px;
+            margin-top: 8px;
+            font-size: 16px;
             font-weight: 600;
-            color: #222222;
+            color: #333333;
             box-shadow: 0 4px 8px rgba(241, 91, 181, 0.1);
             z-index: 11;
-            line-height: 1.5;
+            line-height: 1.4;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Central Floating Target Deck Zone */
@@ -256,126 +284,190 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            z-index: 5;
+            z-index: 15;
+            padding: 10px 0;
         }
         .discovery-pod {
-            width: 190px;
-            height: 190px;
+            width: 150px;
+            height: 150px;
             background: #FFFFFF;
             border: 5px solid #FF85A1;
-            border-radius: 32px;
+            border-radius: 28px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 12px 24px rgba(241, 91, 181, 0.15);
+            box-shadow: 0 10px 20px rgba(241, 91, 181, 0.2);
             cursor: grab;
             position: relative;
             touch-action: none;
-            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            z-index: 20;
         }
         .discovery-pod:active {
             cursor: grabbing;
         }
         .discovery-pod.selected {
             border-color: #F15BB5;
-            transform: scale(1.05);
-            box-shadow: 0 0 18px rgba(241, 91, 181, 0.4);
+            transform: scale(1.06);
+            box-shadow: 0 0 20px rgba(241, 91, 181, 0.5);
         }
         .item-icon {
-            font-size: 64px;
-            margin-bottom: 10px;
+            font-size: 52px;
+            margin-bottom: 4px;
+            pointer-events: none;
         }
         .item-text {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 700;
             color: #222222;
+            pointer-events: none;
         }
 
-        /* Hint panel ribbon layout */
+        /* Hint Banner */
         .hint-banner {
             width: 100%;
-            background: #FFF;
-            border: 3px solid #FFB703;
-            border-radius: 16px;
-            padding: 10px 15px;
-            font-size: 15px;
-            color: #FB8500;
+            background: #FFFDF0;
+            border: 3px dashed #FFB703;
+            border-radius: 14px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #D06D00;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: none;
             animation: popHint 0.3s ease-out forwards;
             z-index: 11;
         }
         @keyframes popHint {
-            0% { transform: scale(0.8); opacity: 0; }
+            0% { transform: scale(0.9); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Bottom Grid Layout */
+        /* Baskets Grid */
         .pods-carousel-grid {
             width: 100%;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 8px;
             z-index: 11;
         }
 
-        /* Remodeled Custom Wicker-Style Tapered Baskets */
+        /* Wicker Tapered Baskets */
         .target-pod {
-            border-radius: 12px 12px 35px 35px; /* Basket tapering */
-            padding: 18px 6px 14px 6px;
+            border-radius: 12px 12px 28px 28px;
+            padding: 14px 4px 10px 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 8px 0 rgba(0,0,0,0.12);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
             position: relative;
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
+            min-height: 95px;
         }
-        
-        /* Basket Rim Trim accent decoration */
         .target-pod::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 12px;
+            height: 10px;
             border-bottom: 3px dashed rgba(0,0,0,0.15);
         }
-        
         .target-pod:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 rgba(0,0,0,0.12);
         }
-        
-        #pod-postal { border: 4px solid #FFB703; background: linear-gradient(180deg, #FFFDF5 0%, #FFEFC2 100%); }
-        #pod-postal::before { background-color: #FFB703; }
-        
-        #pod-telecom { border: 4px solid #FF85A1; background: linear-gradient(180deg, #FFF5F7 0%, #FFD1DC 100%); }
-        #pod-telecom::before { background-color: #FF85A1; }
-        
-        #pod-mass { border: 4px solid #F15BB5; background: linear-gradient(180deg, #FFF5FA 0%, #F9CEEB 100%); }
-        #pod-mass::before { background-color: #F15BB5; }
 
-        .pod-icon { font-size: 36px; margin-bottom: 6px; }
-        .pod-label { font-size: 14px; font-weight: 700; color: #333333; }
+        /* Basket Theme Variants */
+        .pod-postal { border: 4px solid #FFB703; background: linear-gradient(180deg, #FFFDF5 0%, #FFEFC2 100%); }
+        .pod-postal::before { background-color: #FFB703; }
 
-        /* End Score Screen elements */
-        .recap-hero { font-size: 70px; margin-bottom: 10px; }
+        .pod-telecom { border: 4px solid #FF85A1; background: linear-gradient(180deg, #FFF5F7 0%, #FFD1DC 100%); }
+        .pod-telecom::before { background-color: #FF85A1; }
+
+        .pod-mass { border: 4px solid #F15BB5; background: linear-gradient(180deg, #FFF5FA 0%, #F9CEEB 100%); }
+        .pod-mass::before { background-color: #F15BB5; }
+
+        .pod-icon { font-size: 30px; margin-bottom: 4px; pointer-events: none; }
+        .pod-label { font-size: 13px; font-weight: 700; color: #333333; pointer-events: none; }
+
+        /* 10-Second Glow Hint Effect */
+        .glow-hint {
+            animation: pulseGlow 1.2s ease-in-out infinite !important;
+            border-color: #00E676 !important;
+        }
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 15px #00E676, inset 0 0 10px #00E676;
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 25px #00E676, inset 0 0 15px #00E676;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Explanation Pop-up Overlay Modal */
+        #explanation-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #FFFFFF;
+            border: 5px solid #00E676;
+            border-radius: 28px;
+            padding: 20px 18px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            animation: popModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 380px;
+            width: 100%;
+        }
+        @keyframes popModal {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .modal-card h3 {
+            color: #00C853;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .modal-card p {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Recap Screen */
+        #recap-screen {
+            justify-content: center;
+        }
+        .recap-hero { font-size: 65px; margin-bottom: 10px; }
         .score-display {
-            font-size: 38px;
+            font-size: 34px;
             color: #F15BB5;
             font-weight: 700;
-            margin: 20px 0;
+            margin: 15px 0;
         }
 
-        /* Error shake structure effect */
+        /* Error Shake Effect */
         .shake {
             animation: shakeAnim 0.4s ease-in-out;
         }
@@ -385,11 +477,11 @@
             40%, 80% { transform: translateX(10px); }
         }
 
-        /* High Density Fireworks Particle Engine */
+        /* High Density Fireworks */
         .firework-particle {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             pointer-events: none;
             z-index: 99;
@@ -404,11 +496,11 @@
 <body>
 
     <div id="game-container">
-        <!-- Background Vector Cloud Formations -->
+        <!-- Clouds -->
         <div class="cloud cloud-1"></div>
         <div class="cloud cloud-2"></div>
 
-        <!-- 1. Splash Loading Screen -->
+        <!-- 1. Splash Screen -->
         <div id="splash-screen" class="screen active-screen">
             <div class="logo-wrapper">
                 <img src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.src='https://placehold.co/200x100?text=Innovine'">
@@ -418,27 +510,28 @@
             </div>
         </div>
 
-        <!-- 2. Title Landing Cover -->
+        <!-- 2. Title Screen -->
         <div id="title-screen" class="screen">
+            <div class="title-badge">📡✨</div>
             <h1>Media Mission:<br>Sort the Signals!</h1>
             <button class="btn-kids" onclick="transitionTo('instruction-screen')">Launch Mission</button>
         </div>
 
-        <!-- 3. Rule Card Guideboard Layout -->
+        <!-- 3. Instruction Screen -->
         <div id="instruction-screen" class="screen">
             <div class="card-board">
                 <h2>How to Play!</h2>
                 <ul>
-                    <li>Read the scenario riddle displayed inside the top bar carefully!</li>
-                    <li>Look at the communication object inside the center box.</li>
-                    <li>Drag it or tap it, then drop it into the right category <b>basket</b>!</li>
-                    <li>Every correct sort yields you <b>+20 points</b> and <b>fireworks</b>!</li>
+                    <li>Read the mini story riddle at the top!</li>
+                    <li>Look at the picture inside the center white box.</li>
+                    <li>Drag or tap it into the correct category <b>basket</b>!</li>
+                    <li>Get <b>+20 points</b> & fun fireworks for every correct sort!</li>
                 </ul>
             </div>
             <button class="btn-kids" onclick="startGame()">Ready, Go!</button>
         </div>
 
-        <!-- 4. Main Arena Operational Deck -->
+        <!-- 4. Main Arena Screen -->
         <div id="arena-screen" class="screen">
             <div class="hud-row">
                 <div class="score-box">Score: <span id="score-val">0</span></div>
@@ -449,11 +542,12 @@
                 </div>
             </div>
 
-            <!-- Dynamic Scenario Riddle Prompt Bar -->
+            <!-- Dynamic Riddle Prompt -->
             <div class="question-bar" id="game-question-text">
                 Loading scenario...
             </div>
 
+            <!-- Floating Target Item -->
             <div class="discovery-zone">
                 <div id="current-item-pod" class="discovery-pod">
                     <div class="item-icon" id="target-icon">✉️</div>
@@ -461,112 +555,128 @@
                 </div>
             </div>
 
-            <div class="hint-banner" id="hint-panel">💡 Hint text wrapper...</div>
+            <!-- Hint Panel -->
+            <div class="hint-banner" id="hint-panel">💡 Hint: ...</div>
 
-            <!-- Cleaned Basket Grid Interfaces (Redundant Basket Emojis Removed) -->
-            <div class="pods-carousel-grid">
-                <div class="target-pod" id="pod-postal" data-category="postal">
-                    <div class="pod-icon">📮</div>
-                    <div class="pod-label">Postal</div>
-                </div>
-                <div class="target-pod" id="pod-telecom" data-category="telecom">
-                    <div class="pod-icon">📱</div>
-                    <div class="pod-label">Telecom</div>
-                </div>
-                <div class="target-pod" id="pod-mass" data-category="mass">
-                    <div class="pod-icon">📺</div>
-                    <div class="pod-label">Mass Media</div>
-                </div>
+            <!-- Dynamic Basket Options Carousel -->
+            <div class="pods-carousel-grid" id="baskets-grid">
+                <!-- Basket items generated via JS -->
             </div>
         </div>
 
-        <!-- 5. Final Recap Layout Summary Screen -->
+        <!-- Explanation Modal Overlay -->
+        <div id="explanation-modal">
+            <div class="modal-card">
+                <h3>⭐ Super Job! ⭐</h3>
+                <p id="explanation-text">Correct answer explanation goes here!</p>
+                <button class="btn-kids" onclick="closeExplanation()">Next Signal ➡️</button>
+            </div>
+        </div>
+
+        <!-- 5. Recap Screen -->
         <div id="recap-screen" class="screen">
             <div class="recap-hero" id="recap-emoji">🎉</div>
-            <h2 id="recap-title">Mission Complete!</h2>
+            <h2 id="recap-title" style="color: #F15BB5; font-size: 26px;">Mission Complete!</h2>
             <div class="score-display" id="final-score-txt">0 / 200</div>
             <button class="btn-kids" onclick="restartGame()">Play Again</button>
         </div>
     </div>
 
-    <!-- Preloaded Sound Interfaces -->
+    <!-- Audio Elements (Original Unchanged Asset Paths) -->
     <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <script>
-        // Scenario-Based Riddle Dataset Mapping
+        // Grade-3 Friendly Dataset with Explanations
         const communicationItems = [
             { 
                 name: "Letter", 
                 icon: "✉️", 
                 cat: "postal", 
-                scenario: "Aarav wrote a long birthday invitation on paper and sealed it in an envelope. Where should he drop it?",
-                hint: "Dropped inside a red mailbox for the postal carrier." 
+                scenario: "Aarav wrote a party invite on paper and placed it inside a stamped envelope. Where does it go?",
+                hint: "Post office workers deliver paper mail in trucks!",
+                explanation: "Letters are physical paper messages carried through the Postal service!" 
             },
             { 
                 name: "Pigeon", 
                 icon: "🐦", 
                 cat: "postal", 
-                scenario: "Ancient kings didn't have phones, so they tied secret scrolls to a bird's leg. Which basket handles this?",
-                hint: "A trained bird used in olden times to bring physical letters." 
+                scenario: "Long ago, kings tied tiny rolled-up notes to a bird's leg. Which basket carries this bird?",
+                hint: "A trained bird used in olden times to bring physical letters.",
+                explanation: "Carrier pigeons delivered paper messages before post offices and phones existed!" 
             },
             { 
                 name: "Aerogramme", 
                 icon: "✉️✈️", 
                 cat: "postal", 
-                scenario: "Meera wants to send a lightweight, blue air-letter to her grandmother living far away in London. Where does it go?",
-                hint: "Special stamped paper used to send letters outside of India." 
+                scenario: "Meera wants to send a light blue paper letter across the ocean to London. Where does it go?",
+                hint: "A special stamped paper letter sent through airplanes.",
+                explanation: "Aerogrammes are light air-mail letters delivered by post office planes!" 
             },
             { 
                 name: "Postcard", 
                 icon: "📇", 
                 cat: "postal", 
-                scenario: "Kabir sent a glossy card from his vacation with a short note written right on the back without an envelope. Where does it belong?",
-                hint: "An open card sent cleanly through the post office stamps." 
+                scenario: "Kabir sent a picture card from his vacation with a quick note on the back. Where does it belong?",
+                hint: "An open card mailed directly with a post office stamp.",
+                explanation: "Postcards are stamped cards sent directly through the Postal system!" 
             },
             { 
                 name: "Smartphone", 
                 icon: "📱", 
                 cat: "telecom", 
-                scenario: "Ananya is using a touch-screen device in her pocket to make a quick video call to her friend. Where should this go?",
-                hint: "A cellular phone used to make wireless personal calls and texts." 
+                scenario: "Ananya is tapping her screen to start a live video call with her best friend. Where should this go?",
+                hint: "A cellular phone used for wireless calls and texts.",
+                explanation: "Smartphones use wireless Telecom signals to make instant private calls!" 
             },
             { 
                 name: "Fax Machine", 
                 icon: "📠", 
                 cat: "telecom", 
-                scenario: "An office needs to scan a printed paper document and instantly print an exact copy in another city using a phone line. Where does it go?",
-                hint: "Sends an exact printed copy of a page over telephone lines." 
+                scenario: "An office scans a paper to print an exact copy far away using phone wires. Where does it go?",
+                hint: "Sends an exact paper copy over telephone lines.",
+                explanation: "Fax machines send paper document signals over Telecom telephone lines!" 
             },
             { 
                 name: "Telephone", 
                 icon: "☎️", 
                 cat: "telecom", 
-                scenario: "Grandpa has a classic dialer device sitting on his desk connected by a wire to make voice calls. Where does it belong?",
-                hint: "Used to make classic personal STD and ISD voice calls over wires." 
+                scenario: "Grandpa picks up a receiver on his desk to make a voice call to his friend. Where does it belong?",
+                hint: "Used for classic one-on-one voice calls over telephone wires.",
+                explanation: "Telephones carry voice messages between two people using Telecom wires!" 
             },
             { 
                 name: "Television", 
                 icon: "📺", 
                 cat: "mass", 
-                scenario: "Millions of families across India are sitting down together to watch the live Cricket World Cup match. Which basket is this?",
-                hint: "Broadcasts live video shows and news to millions of families at once." 
+                scenario: "Millions of families watch an exciting live cricket match together on a big screen. Which basket is this?",
+                hint: "Shows video news and games to huge crowds at the same time.",
+                explanation: "TV is Mass Media because it broadcasts videos to millions of people at once!" 
             },
             { 
                 name: "Radio", 
                 icon: "📻", 
                 cat: "mass", 
-                scenario: "Farmers in a remote village are listening to the weather forecast through a speaker box without any screen. Where does it go?",
-                hint: "Very popular in villages to broadcast news via sound frequencies only." 
+                scenario: "Farmers listen to morning songs and weather news through a friendly speaker box. Where does it go?",
+                hint: "Sends out sound waves to thousands of listeners together.",
+                explanation: "Radio is Mass Media that broadcasts audio and news to large audiences!" 
             },
             { 
                 name: "Newspaper", 
                 icon: "📰", 
                 cat: "mass", 
-                scenario: "Every morning, a delivery person throws a bundle of printed paper sheets filled with global news onto your doorstep. Where does it belong?",
-                hint: "Printed daily sheets read by thousands of citizens in your city." 
+                scenario: "A delivery person drops fresh printed news sheets on doorsteps every morning. Where does it belong?",
+                hint: "Printed daily papers read by thousands of citizens across your town.",
+                explanation: "Newspapers are Mass Media that share printed stories with whole cities every day!" 
             }
+        ];
+
+        // Categories metadata for dynamic basket generation
+        const basketCategories = [
+            { id: "postal", label: "Postal", icon: "📮", class: "pod-postal" },
+            { id: "telecom", label: "Telecom", icon: "📱", class: "pod-telecom" },
+            { id: "mass", label: "Mass Media", icon: "📺", class: "pod-mass" }
         ];
 
         let score = 0;
@@ -574,10 +684,10 @@
         let pool = [];
         let currentItem = null;
         let isSelected = false;
-        let firstMistakeDone = false;
+        let glowTimer = null;
 
-        // Auto transition out from Splash loading sequence
-        setTimeout(() => { transitionTo('title-screen'); }, 5000);
+        // Auto transition from splash loading screen
+        setTimeout(() => { transitionTo('title-screen'); }, 3800);
 
         function transitionTo(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
@@ -588,14 +698,25 @@
             const sound = document.getElementById(audioId);
             if (sound) {
                 sound.currentTime = 0;
-                sound.play().catch(e => console.log("Audio pipeline initialized."));
+                sound.play().catch(e => console.log("Audio play deferred for user interaction."));
             }
+        }
+
+        // Shuffle Utility (Fisher-Yates)
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            let newArr = [...array];
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArr[currentIndex], newArr[randomIndex]] = [newArr[randomIndex], newArr[currentIndex]];
+            }
+            return newArr;
         }
 
         function startGame() {
             score = 0;
             lives = 3;
-            firstMistakeDone = false;
             document.getElementById('score-val').textContent = score;
             document.getElementById('hint-panel').style.display = 'none';
             
@@ -603,16 +724,44 @@
                 document.getElementById(`heart-${i}`).classList.remove('lost');
             }
 
-            pool = [...communicationItems].sort(() => Math.random() - 0.5);
+            // Shuffle questions pool
+            pool = shuffle(communicationItems);
             transitionTo('arena-screen');
             loadNextItem();
         }
 
+        function renderBaskets() {
+            const grid = document.getElementById('baskets-grid');
+            grid.innerHTML = '';
+            
+            // Randomize options/baskets layout
+            const shuffledBaskets = shuffle(basketCategories);
+            
+            shuffledBaskets.forEach(cat => {
+                const pod = document.createElement('div');
+                pod.className = `target-pod ${cat.class}`;
+                pod.setAttribute('data-category', cat.id);
+                pod.id = `pod-${cat.id}`;
+                pod.innerHTML = `
+                    <div class="pod-icon">${cat.icon}</div>
+                    <div class="pod-label">${cat.label}</div>
+                `;
+                pod.addEventListener('click', () => {
+                    if (currentItem) processChoice(cat.id, pod);
+                });
+                grid.appendChild(pod);
+            });
+        }
+
         function loadNextItem() {
+            clearGlowTimer();
+
             if (pool.length === 0 || lives <= 0) {
                 endGame();
                 return;
             }
+
+            renderBaskets(); // Re-render and shuffle options for every round
 
             currentItem = pool.pop();
             document.getElementById('target-label').textContent = currentItem.name;
@@ -623,9 +772,30 @@
             const itemPod = document.getElementById('current-item-pod');
             itemPod.classList.remove('selected');
             itemPod.style.transform = "translate(0px, 0px) scale(1)";
+
+            // Start 10-second timer for glowing hint
+            glowTimer = setTimeout(trigger10SecHint, 10000);
         }
 
-        // Gesture Action Controllers
+        function clearGlowTimer() {
+            if (glowTimer) {
+                clearTimeout(glowTimer);
+                glowTimer = null;
+            }
+            document.querySelectorAll('.target-pod').forEach(pod => {
+                pod.classList.remove('glow-hint');
+            });
+        }
+
+        function trigger10SecHint() {
+            if (!currentItem) return;
+            const targetPod = document.getElementById(`pod-${currentItem.cat}`);
+            if (targetPod) {
+                targetPod.classList.add('glow-hint');
+            }
+        }
+
+        // Gesture Drag & Click Controls
         const itemPod = document.getElementById('current-item-pod');
         let startX = 0, startY = 0;
         let isDragging = false;
@@ -636,81 +806,95 @@
             itemPod.classList.toggle('selected', isSelected);
         });
 
-        document.querySelectorAll('.target-pod').forEach(pod => {
-            pod.addEventListener('click', () => {
-                if (currentItem) processChoice(pod.getAttribute('data-category'), pod);
-            });
-        });
-
         itemPod.addEventListener('pointerdown', (e) => {
-            isDragging = true;
+            isDragging = false;
             startX = e.clientX;
             startY = e.clientY;
             itemPod.setPointerCapture(e.pointerId);
         });
 
         itemPod.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            itemPod.style.transform = `translate(${e.clientX - startX}px, ${e.clientY - startY}px) scale(1.02)`;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                isDragging = true;
+                itemPod.style.transform = `translate(${dx}px, ${dy}px) scale(1.05)`;
+            }
         });
 
         itemPod.addEventListener('pointerup', (e) => {
-            if (!isDragging) return;
+            if (!isDragging) {
+                try { itemPod.releasePointerCapture(e.pointerId); } catch(err){}
+                return;
+            }
             isDragging = false;
-            itemPod.releasePointerCapture(e.pointerId);
+            try { itemPod.releasePointerCapture(e.pointerId); } catch(err){}
 
-            const dy = e.clientY - startY;
-            const dx = e.clientX - startX;
+            // Precise drop collision detection via elementFromPoint
+            itemPod.style.display = 'none'; // Temporarily hide to sample element beneath
+            const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+            itemPod.style.display = 'flex';
 
-            if (dy > 70) {
-                const dropRatio = (startX + dx) / window.innerWidth;
-                let cat = "telecom", el = document.getElementById('pod-telecom');
-                
-                if (dropRatio < 0.38) { cat = "postal"; el = document.getElementById('pod-postal'); }
-                else if (dropRatio > 0.62) { cat = "mass"; el = document.getElementById('pod-mass'); }
+            const podElement = dropTarget ? dropTarget.closest('.target-pod') : null;
 
-                processChoice(cat, el);
+            if (podElement) {
+                const cat = podElement.getAttribute('data-category');
+                processChoice(cat, podElement);
             } else {
                 itemPod.style.transform = "translate(0px, 0px) scale(1)";
                 itemPod.classList.remove('selected');
+                isSelected = false;
             }
         });
 
         function processChoice(categoryName, elementRef) {
             if (!currentItem) return;
 
+            clearGlowTimer();
+
             if (currentItem.cat === categoryName) {
                 score += 20;
                 document.getElementById('score-val').textContent = score;
                 playSound('snd-correct');
                 
-                if(elementRef) burstFireworks(elementRef);
+                if (elementRef) burstFireworks(elementRef);
 
                 document.getElementById('hint-panel').style.display = 'none';
-                loadNextItem();
+                showExplanation(currentItem.explanation);
             } else {
                 lives--;
                 playSound('snd-wrong');
                 
                 const heart = document.getElementById(`heart-${lives + 1}`);
-                if(heart) heart.classList.add('lost');
+                if (heart) heart.classList.add('lost');
 
                 itemPod.classList.add('shake');
                 setTimeout(() => itemPod.classList.remove('shake'), 400);
 
-                firstMistakeDone = true;
                 const hintPanel = document.getElementById('hint-panel');
                 hintPanel.textContent = `💡 Hint: ${currentItem.hint}`;
                 hintPanel.style.display = 'block';
 
                 if (lives <= 0) {
-                    endGame();
+                    setTimeout(endGame, 800);
                 } else {
                     itemPod.style.transform = "translate(0px, 0px) scale(1)";
                     itemPod.classList.remove('selected');
                     isSelected = false;
+                    // Restart 10 sec timer after mistake
+                    glowTimer = setTimeout(trigger10SecHint, 10000);
                 }
             }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanation-text').textContent = text;
+            document.getElementById('explanation-modal').style.display = 'flex';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanation-modal').style.display = 'none';
+            loadNextItem();
         }
 
         function burstFireworks(targetElement) {
@@ -720,14 +904,14 @@
             const originX = (rect.left + rect.width / 2) - containerRect.left;
             const originY = rect.top - containerRect.top;
 
-            const vibrantColors = ['#FF1493', '#FF4500', '#FFD700', '#00FF00', '#00BFFF', '#FF00FF', '#7FFF00'];
+            const vibrantColors = ['#FF1493', '#FF4500', '#FFD700', '#00FF00', '#00BFFF', '#FF00FF', '#00E676'];
 
-            for (let i = 0; i < 35; i++) {
+            for (let i = 0; i < 30; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('firework-particle');
                 
                 const angle = Math.PI + (Math.random() * Math.PI) + (Math.random() * 0.4 - 0.2); 
-                const speed = 70 + Math.random() * 110;
+                const speed = 60 + Math.random() * 100;
                 
                 particle.style.setProperty('--mx', `${Math.cos(angle) * speed}px`);
                 particle.style.setProperty('--my', `${Math.sin(angle) * speed}px`);
@@ -740,11 +924,8 @@
             }
         }
 
-        if (window.crypto && window.crypto.getRandomValues) {
-            // Optional: fallback crypto-driven array shuffling if needed
-        }
-
         function endGame() {
+            clearGlowTimer();
             const maxScore = communicationItems.length * 20;
             document.getElementById('final-score-txt').textContent = `${score} / ${maxScore}`;
             
@@ -757,10 +938,10 @@
                 playSound('snd-claps');
             } else if (lives <= 0) {
                 emojiEl.textContent = "🎈";
-                titleEl.textContent = "Good Try! Review your book!";
+                titleEl.textContent = "Good Try! Keep Learning!";
             } else {
                 emojiEl.textContent = "🎉";
-                titleEl.textContent = "Great Mission Completed!";
+                titleEl.textContent = "Great Job Completed!";
                 playSound('snd-claps');
             }
 
