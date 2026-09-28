@@ -2,17 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Orbit Defender</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-        body {
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
             background-color: #030511;
+        }
+
+        body {
             color: #ffffff;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -22,7 +27,7 @@
             width: 100%;
             height: 100%;
             max-width: 500px;
-            max-height: 880px;
+            max-height: 100dvh;
             position: relative;
             background: radial-gradient(circle at 50% 30%, #0c1738 0%, #030511 100%);
             overflow: hidden;
@@ -52,7 +57,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
             text-align: center;
             z-index: 10;
         }
@@ -63,7 +68,7 @@
             z-index: 100;
         }
         .logo-img { 
-            width: 220px; 
+            width: clamp(160px, 50vw, 220px); 
             height: auto; 
             animation: pulse 2.5s infinite ease-in-out; 
             filter: drop-shadow(0 0 15px rgba(0, 255, 204, 0.4));
@@ -72,26 +77,26 @@
         #title-screen, #instruction-screen, #end-screen { background: rgba(3, 5, 17, 0.95); }
 
         .game-title { 
-            font-size: 2.3rem; 
+            font-size: clamp(1.8rem, 6vw, 2.3rem); 
             color: #00ffcc; 
             text-shadow: 0 0 20px rgba(0, 255, 204, 0.6); 
-            margin-bottom: 8px; 
+            margin-bottom: 6px; 
             font-weight: 800; 
             letter-spacing: 1.5px;
         }
 
         .subtitle {
-            margin-bottom: 24px;
+            margin-bottom: 18px;
             color: #38bdf8;
             letter-spacing: 2px;
-            font-size: 0.9rem;
+            font-size: clamp(0.75rem, 3.5vw, 0.9rem);
             text-transform: uppercase;
             font-weight: 600;
         }
         
         .btn {
             background: linear-gradient(135deg, #00ffcc 0%, #0099ff 100%);
-            border: none; padding: 14px 36px; font-size: 1.1rem; color: #030511;
+            border: none; padding: 12px 32px; font-size: clamp(0.95rem, 4vw, 1.1rem); color: #030511;
             font-weight: 800; border-radius: 50px; cursor: pointer;
             box-shadow: 0 4px 20px rgba(0, 255, 204, 0.4); 
             transition: all 0.2s ease;
@@ -107,50 +112,51 @@
             border: 1px solid rgba(0, 255, 204, 0.3);
             backdrop-filter: blur(12px);
             border-radius: 20px; 
-            padding: 16px; 
+            padding: 14px; 
             width: 100%;
-            max-height: 60vh;
+            max-height: 55vh;
             overflow-y: auto;
-            margin-bottom: 20px; 
+            margin-bottom: 16px; 
             text-align: left;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 255, 204, 0.05);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .instruction-item {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             background: rgba(255, 255, 255, 0.03);
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .instruction-icon {
-            font-size: 1.6rem;
-            min-width: 38px;
-            height: 38px;
+            font-size: 1.4rem;
+            min-width: 34px;
+            height: 34px;
             background: rgba(0, 255, 204, 0.1);
             border: 1px solid rgba(0, 255, 204, 0.3);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .instruction-text h4 {
             color: #00ffcc;
-            font-size: 0.95rem;
+            font-size: clamp(0.85rem, 3.5vw, 0.95rem);
             margin-bottom: 2px;
             font-weight: 700;
         }
 
         .instruction-text p {
             color: #cbd5e1;
-            font-size: 0.82rem;
+            font-size: clamp(0.75rem, 3vw, 0.82rem);
             line-height: 1.3;
         }
 
@@ -158,8 +164,8 @@
         #game-screen.active-screen { display: flex; }
 
         #hud {
-            height: 52px; width: 100%; display: flex; justify-content: space-between; 
-            align-items: center; padding: 0 16px; background: rgba(3, 5, 17, 0.85); 
+            height: 48px; width: 100%; display: flex; justify-content: space-between; 
+            align-items: center; padding: 0 14px; background: rgba(3, 5, 17, 0.85); 
             border-bottom: 1px solid rgba(255, 255, 255, 0.08); z-index: 5;
             backdrop-filter: blur(8px);
             flex-shrink: 0;
@@ -167,28 +173,28 @@
         .hud-badge {
             background: rgba(0, 255, 204, 0.08);
             border: 1px solid rgba(0, 255, 204, 0.25);
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            color: #00ffcc; font-weight: bold; font-family: monospace; font-size: 1rem;
+            color: #00ffcc; font-weight: bold; font-family: monospace; font-size: clamp(0.85rem, 3.5vw, 1rem);
         }
 
         #mission-text {
             background: rgba(15, 23, 42, 0.8); 
             border: 1px solid rgba(0, 163, 255, 0.4);
-            padding: 10px 14px; margin: 8px 14px 2px 14px; border-radius: 12px; text-align: center;
-            font-size: 0.85rem; color: #f1f5f9; z-index: 5; font-weight: 600; min-height: 54px;
-            display: flex; align-items: center; justify-content: center; line-height: 1.35;
+            padding: 8px 12px; margin: 6px 12px 2px 12px; border-radius: 12px; text-align: center;
+            font-size: clamp(0.75rem, 3vw, 0.85rem); color: #f1f5f9; z-index: 5; font-weight: 600; min-height: 46px;
+            display: flex; align-items: center; justify-content: center; line-height: 1.3;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             backdrop-filter: blur(8px);
             flex-shrink: 0;
         }
 
         #hint-banner {
-            margin: 0 14px;
-            font-size: 0.75rem;
+            margin: 0 12px;
+            font-size: clamp(0.7rem, 2.8vw, 0.75rem);
             color: #ffd700;
             text-align: center;
-            min-height: 16px;
+            min-height: 14px;
             font-weight: bold;
             z-index: 5;
             transition: opacity 0.3s ease;
@@ -198,15 +204,16 @@
         #playfield { 
             flex: 1; position: relative; width: 100%; overflow: hidden; 
             border-bottom: 1px solid rgba(255,255,255,0.08); pointer-events: none;
+            min-height: 180px;
         }
         
         .target-box {
             position: absolute; 
             background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
             border: 1px solid rgba(148, 163, 184, 0.3); 
-            border-radius: 8px; padding: 8px 4px;
-            color: #f8fafc; font-weight: bold; font-size: 0.75rem; text-align: center;
-            pointer-events: auto; cursor: pointer; width: 88px;
+            border-radius: 8px; padding: 6px 2px;
+            color: #f8fafc; font-weight: bold; font-size: clamp(0.65rem, 2.6vw, 0.75rem); text-align: center;
+            pointer-events: auto; cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             transition: border-color 0.2s, box-shadow 0.2s;
@@ -221,7 +228,7 @@
         }
 
         #player-ship {
-            position: absolute; bottom: 15px; width: 48px; height: 38px;
+            position: absolute; bottom: 12px; width: 44px; height: 34px;
             background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
             border-radius: 50% 50% 15% 15%;
             z-index: 4; 
@@ -229,10 +236,10 @@
             transition: left 0.05s linear;
         }
         #player-ship::before, #player-ship::after {
-            content: ''; position: absolute; top: 14px; width: 10px; height: 12px; background: #0284c7;
+            content: ''; position: absolute; top: 12px; width: 8px; height: 10px; background: #0284c7;
         }
-        #player-ship::before { left: -8px; border-radius: 4px 0 0 4px; }
-        #player-ship::after { right: -8px; border-radius: 0 4px 4px 0; }
+        #player-ship::before { left: -7px; border-radius: 4px 0 0 4px; }
+        #player-ship::after { right: -7px; border-radius: 0 4px 4px 0; }
 
         .laser {
             position: absolute; width: 4px; height: 16px; 
@@ -251,7 +258,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
             animation: fadeIn 0.3s ease-out;
         }
         #explanation-card {
@@ -259,17 +266,17 @@
             border: 2px solid #00ffcc;
             box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
             border-radius: 20px;
-            padding: 24px;
+            padding: 20px;
             width: 100%;
             max-width: 400px;
             text-align: center;
         }
         #explanation-title {
-            color: #00ffcc; font-size: 1.4rem; font-weight: 800; margin-bottom: 12px;
+            color: #00ffcc; font-size: clamp(1.1rem, 4.5vw, 1.4rem); font-weight: 800; margin-bottom: 10px;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         #explanation-body {
-            color: #e2e8f0; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;
+            color: #e2e8f0; font-size: clamp(0.85rem, 3.5vw, 0.95rem); line-height: 1.45; margin-bottom: 18px;
         }
 
         /* Canvas Overlay */
@@ -280,56 +287,59 @@
             z-index: 25;
         }
 
-        /* Optimized Responsive Mobile Control Deck */
+        /* Fully Responsive & Visible Control Deck */
         #controls-deck {
-            height: min(120px, 16vh); 
+            height: auto;
+            min-height: 70px;
+            max-height: 100px;
             width: 100%; 
-            background: rgba(9, 13, 34, 0.95);
+            background: rgba(9, 13, 34, 0.96);
             display: flex; 
             align-items: center; 
             justify-content: space-evenly;
-            padding: 8px 12px; 
-            border-top: 1px solid rgba(255, 255, 255, 0.1); 
-            z-index: 15;
+            padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.12); 
+            z-index: 20;
             backdrop-filter: blur(10px);
             flex-shrink: 0;
-            gap: 10px;
+            gap: 12px;
         }
 
         .control-arrow {
-            width: clamp(52px, 15vw, 68px); 
-            height: clamp(52px, 15vw, 68px); 
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(0, 255, 204, 0.4); 
+            width: clamp(48px, 14vw, 62px); 
+            height: clamp(48px, 14vw, 62px); 
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(0, 255, 204, 0.5); 
             border-radius: 50%; 
             display: flex;
             align-items: center; 
             justify-content: center; 
-            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            font-size: clamp(1.2rem, 5vw, 1.6rem);
             color: #00ffcc; 
             cursor: pointer; 
             touch-action: manipulation;
             transition: all 0.1s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.15);
+            box-shadow: 0 0 12px rgba(0, 255, 204, 0.2);
             flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         .control-arrow:active { 
             background: #00ffcc; 
             color: #030511; 
             border-color: #00ffcc; 
             transform: scale(0.92); 
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+            box-shadow: 0 0 16px rgba(0, 255, 204, 0.6);
         }
         
         #fire-button {
             flex: 1;
-            max-width: 160px;
-            height: clamp(52px, 15vw, 68px); 
+            max-width: 150px;
+            height: clamp(48px, 14vw, 62px); 
             background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
             border: 2px solid #f87171; 
             border-radius: 16px; 
             color: white;
-            font-size: clamp(1rem, 4vw, 1.2rem); 
+            font-size: clamp(0.95rem, 4vw, 1.15rem); 
             font-weight: 800; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.4);
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
@@ -341,6 +351,7 @@
             letter-spacing: 1px;
             transition: all 0.1s ease;
             flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         #fire-button:active { 
             transform: scale(0.93); 
@@ -372,14 +383,14 @@
         <!-- Modernized Instruction Screen -->
         <div id="instruction-screen" class="screen">
             <h2 class="game-title" style="font-size: 1.8rem;">How to Play 🚀</h2>
-            <p class="subtitle" style="margin-bottom: 14px;">Space Tactical Briefing</p>
+            <p class="subtitle" style="margin-bottom: 12px;">Space Tactical Briefing</p>
             
             <div class="instructions-card">
                 <div class="instruction-item">
                     <div class="instruction-icon">🚀</div>
                     <div class="instruction-text">
                         <h4>Navigate Ship</h4>
-                        <p>Tap or hold the left/right arrow buttons to align under target blocks.</p>
+                        <p>Tap or hold left/right arrows to align under target blocks.</p>
                     </div>
                 </div>
 
@@ -417,7 +428,7 @@
 
             <div id="hud">
                 <div id="score-display" class="hud-badge">SCORE: 00</div>
-                <div id="lives-display" style="font-size: 1.2rem; letter-spacing: 2px;">❤️❤️❤️</div>
+                <div id="lives-display" style="font-size: 1.1rem; letter-spacing: 2px;">❤️❤️❤️</div>
             </div>
             
             <div id="mission-text">Loading Space Coordinates...</div>
@@ -446,7 +457,7 @@
         <!-- End Screen -->
         <div id="end-screen" class="screen">
             <h1 id="end-title" class="game-title">MISSION OVER</h1>
-            <h2 id="end-score" style="font-size: 1.6rem; margin-bottom: 16px; color:#38bdf8;">Final Score: 0</h2>
+            <h2 id="end-score" style="font-size: 1.4rem; margin-bottom: 14px; color:#38bdf8;">Final Score: 0</h2>
             <div id="feedback-text" class="instructions-card" style="border-color: #00ffcc; color: #fff; text-align: center; justify-content: center;"></div>
             <button class="btn" onclick="resetGame()">PLAY AGAIN</button>
         </div>
@@ -626,6 +637,11 @@
     window.addEventListener('resize', () => {
         if (document.getElementById('game-screen').classList.contains('active-screen')) {
             resizeConfettiCanvas();
+            // Re-clamp ship position on resize
+            if (ship && playfield) {
+                shipX = Math.min(shipX, playfield.clientWidth - ship.clientWidth - 5);
+                ship.style.left = shipX + 'px';
+            }
         }
     });
 
@@ -665,10 +681,11 @@
         let shuffled = [...mission.answers].sort(() => Math.random() - 0.5);
         
         const fieldWidth = playfield.clientWidth || 360; 
-        const boxWidth = 84; 
+        // Dynamically compute box width so 4 boxes fit across any screen
+        const boxWidth = Math.min(84, Math.floor((fieldWidth - 16) / 4)); 
         
         const totalFreeSpace = fieldWidth - (boxWidth * 4);
-        const horizontalGap = Math.max( totalFreeSpace / 5, 4);
+        const horizontalGap = Math.max(totalFreeSpace / 5, 2);
 
         shuffled.forEach((text, i) => {
             const box = document.createElement('div');
@@ -677,7 +694,7 @@
             box.style.width = boxWidth + 'px';
             
             const leftPos = horizontalGap + i * (boxWidth + horizontalGap);
-            const topPos = 20;
+            const topPos = 15;
 
             box.style.left = leftPos + 'px';
             box.style.top = topPos + 'px';
@@ -692,7 +709,7 @@
                 x: leftPos,
                 y: topPos,
                 width: boxWidth,
-                height: 38,
+                height: 34,
                 speed: 0.22 + (Math.random() * 0.12)
             });
         });
@@ -764,11 +781,11 @@
 
         if (gameActive) {
             if (holdingLeft && shipX > 5) {
-                shipX -= 7;
+                shipX -= 6;
                 ship.style.left = shipX + 'px';
             }
             if (holdingRight && shipX < (playfield.clientWidth - ship.clientWidth - 5)) {
-                shipX += 7;
+                shipX += 6;
                 ship.style.left = shipX + 'px';
             }
 
@@ -803,7 +820,7 @@
                 target.y += target.speed;
                 target.element.style.top = target.y + 'px';
 
-                if (target.y > playfield.clientHeight - 55) {
+                if (target.y > playfield.clientHeight - 45) {
                     target.y = target.startY; 
                     target.element.style.top = target.y + 'px';
                 }
@@ -842,20 +859,25 @@
     const rightBtn = document.getElementById('right-arrow');
     const fireBtn = document.getElementById('fire-button');
 
-    const startLeft = (e) => { holdingLeft = true; e.preventDefault(); };
-    const stopLeft = (e) => { holdingLeft = false; e.preventDefault(); };
-    const startRight = (e) => { holdingRight = true; e.preventDefault(); };
-    const stopRight = (e) => { holdingRight = false; e.preventDefault(); };
+    const startLeft = (e) => { holdingLeft = true; if (e.cancelable) e.preventDefault(); };
+    const stopLeft = (e) => { holdingLeft = false; if (e.cancelable) e.preventDefault(); };
+    const startRight = (e) => { holdingRight = true; if (e.cancelable) e.preventDefault(); };
+    const stopRight = (e) => { holdingRight = false; if (e.cancelable) e.preventDefault(); };
 
     leftBtn.addEventListener('pointerdown', startLeft);
     leftBtn.addEventListener('pointerup', stopLeft);
+    leftBtn.addEventListener('pointercancel', stopLeft);
     leftBtn.addEventListener('pointerleave', stopLeft);
 
     rightBtn.addEventListener('pointerdown', startRight);
     rightBtn.addEventListener('pointerup', stopRight);
+    rightBtn.addEventListener('pointercancel', stopRight);
     rightBtn.addEventListener('pointerleave', stopRight);
 
-    fireBtn.addEventListener('pointerdown', (e) => { fireLaser(); e.preventDefault(); });
+    fireBtn.addEventListener('pointerdown', (e) => { 
+        fireLaser(); 
+        if (e.cancelable) e.preventDefault(); 
+    });
 
     window.addEventListener('keydown', (e) => {
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') holdingLeft = true;
