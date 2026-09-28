@@ -45,7 +45,7 @@
             height: 100%;
             max-width: 480px;
             max-height: 900px;
-            background: radial-gradient(circle at center, #4a2818 0%, #1d0f07 100%);
+            background: #1e1005;
             box-shadow: 0 0 30px rgba(0,0,0,0.9);
             overflow: hidden;
             display: flex;
@@ -150,7 +150,7 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 10px;
-            background: transparent;
+            background: #140a05;
         }
 
         #game-screen.active-screen { display: flex; }
@@ -184,7 +184,7 @@
             flex: 1;
             width: 100%;
             min-height: 0;
-            background: rgba(10, 5, 2, 0.85);
+            background: #0d0603;
             border: 4px solid var(--amber-gold);
             border-radius: 14px;
             overflow: hidden;
@@ -193,6 +193,9 @@
 
         canvas {
             display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
         }
@@ -294,6 +297,7 @@
             font-weight: 800;
             line-height: 1.4;
             text-align: center;
+            white-space: pre-line;
         }
 
         #quiz-hint-text {
@@ -341,9 +345,9 @@
         
         .option-btn.correct-glow {
             border-color: #f1c40f !important;
-            box-shadow: 0 0 15px #f1c40f, inset 0 0 8px #f1c40f !important;
+            box-shadow: 0 0 18px #f1c40f, inset 0 0 10px #f1c40f !important;
             background: #fffdf0 !important;
-            animation: gentlePulse 1.4s infinite ease-in-out;
+            animation: gentlePulse 1.2s infinite ease-in-out;
         }
 
         /* End Game Overlays */
@@ -402,7 +406,7 @@
 
         @keyframes gentlePulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+            50% { transform: scale(1.03); }
             100% { transform: scale(1); }
         }
     </style>
@@ -488,13 +492,23 @@
     const sndWrong = new Audio('assets/wrong.mp3');
     const sndClap = new Audio('assets/freesound_community-claps-44774.mp3');
 
+    // Muted silent unlock so no sounds or songs play on Start/Play click
     function unlockAudio() {
         if (audioUnlocked) return;
         [sndCorrect, sndWrong, sndClap].forEach(snd => {
-            snd.play().then(() => {
-                snd.pause();
-                snd.currentTime = 0;
-            }).catch(() => {});
+            snd.muted = true;
+            let p = snd.play();
+            if (p !== undefined) {
+                p.then(() => {
+                    snd.pause();
+                    snd.currentTime = 0;
+                    snd.muted = false;
+                }).catch(() => {
+                    snd.muted = false;
+                });
+            } else {
+                snd.muted = false;
+            }
         });
         audioUnlocked = true;
     }
@@ -503,29 +517,110 @@
         unlockAudio();
         try {
             sound.currentTime = 0;
+            sound.muted = false;
             sound.play().catch(e => console.log("Audio waiting for user context"));
         } catch(e) {}
     }
 
     const baseQuestions = [
-        { q: "BRRR! It is raining hard and a big wild cat is chasing you! Where do you hide to stay safe?", a: "Inside a dark cave or up in a tall tree!", hint: "Early humans looked for shelter high up or covered in rock where large animals couldn't easily strike!", options: ["Inside a dark cave or up in a tall tree!", "Inside a modern brick house.", "Under a beach umbrella.", "Inside a camping tent."] },
-        { q: "Oh no! Clothes are not invented yet! What can you wear today to stay warm?", a: "Big leaves, tree bark, and furry animal skins!", hint: "Think about what materials you can find directly on forest floors or from animals in nature!", options: ["Big leaves, tree bark, and furry animal skins!", "A bright yellow raincoat and boots.", "A superhero costume.", "Soft cotton pajamas."] },
-        { q: "Time to eat! You found wild berries and a fish. There are no stoves or microwaves. How do you eat them?", a: "You eat them raw!", hint: "Before humans learned to master fire, food could not be boiled, baked, or cooked at all!", options: ["You eat them raw!", "You bake them into a pizza.", "You fry them in a pan with butter.", "You microwave them."] },
-        { q: "You want to dig up roots to eat, but your hands are not strong enough. What do you look for on the ground to help you?", a: "Sharp stones, animal bones, and horns!", hint: "Nature provides solid, pointy objects lying around long before metal factories existed!", options: ["Sharp stones, animal bones, and horns!", "Metal nails and a screwdriver.", "Colorful plastic toys.", "Pieces of broken glass."] },
-        { q: "SPARK! You rub two special stones together very fast. What amazing thing jumps out?", a: "Bright sparks that start a fire!", hint: "Striking hard rocks like flint creating friction releases a sudden flash of light and high heat!", options: ["Bright sparks that start a fire!", "A magic genie.", "Bubbly cold water.", "Rainbow smoke."] },
-        { q: "A scary wild animal is walking toward your cave! What can you light up to scare it away?", a: "A bright, hot fire!", hint: "Wild animals are terrified of heat, bright flames, and smoke at night!", options: ["A bright, hot fire!", "A big flashlight.", "A neon sign.", "Twinkling fairy lights."] },
-        { q: "You dropped some seeds in the dirt last week. Now, tiny green plants are growing there! What does this teach you?", a: "Seeds grow into new plants for food!", hint: "When seeds stay moist in natural soil, they sprout and transform over time!", options: ["Seeds grow into new plants for food!", "Seeds turn into gold coins.", "Plants fall down from the sky.", "Ants hide secret treasures there."] },
-        { q: "You tie a sharp stone to a strong wooden stick. What useful tool did you just make?", a: "A strong stone axe!", hint: "Combining wood handles with a wedge shape creates an efficient chopping item!", options: ["A strong stone axe!", "An electric chainsaw.", "Kitchen scissors.", "A magic wand."] },
-        { q: "A furry animal walks up to you and wags its tail. It wants to guard your cave. What is your new pet?", a: "A friendly dog!", hint: "This animal is known as humanity's ancient loyal companion, closely linked to wild wolves!", options: ["A friendly dog!", "A roaring tiger.", "A giant elephant.", "A wild mountain lion."] },
-        { q: "Your tribe needs to cross a big, deep river but you cannot swim. How do you get across?", a: "Tie logs together to make a floating raft!", hint: "Wood naturally floats on water surfaces when tied safely side-by-side!", options: ["Tie logs together to make a floating raft!", "Call a fast motorboat.", "Get on a giant cruise ship.", "Ride in a submarine."] },
-        { q: "You see a round tree log rolling down a hill very fast. What great idea does this give you?", a: "To invent the rolling wheel!", hint: "Circular curved objects roll smoothly without dragging weight flatly on earth terrain!", options: ["To invent the rolling wheel!", "To make a square brick.", "To build a triangle roof.", "To make an iron bar."] },
-        { q: "You spin a wooden wheel with wet mud on top to shape a bowl for water. What are you using?", a: "A potter's wheel to make clay pots!", hint: "Shaping wet soil mud on a rotating disc makes storage kitchenware container pots!", options: ["A potter's wheel to make clay pots!", "A car steering wheel.", "A spinning wheel for making clothes.", "A giant Ferris wheel."] }
+        {
+            q: "BRRR! It is raining hard and a big wild cat is chasing you! Where do you hide to stay safe?",
+            a: "Inside a dark cave or up in a tall tree!",
+            exp: "Early humans used caves and high trees as natural shelters to stay dry and safe from dangerous predators.",
+            hint: "Early humans looked for shelter high up or covered in rock where large animals couldn't easily strike!",
+            options: ["Inside a dark cave or up in a tall tree!", "Inside a modern brick house.", "Under a beach umbrella.", "Inside a camping tent."]
+        },
+        {
+            q: "Oh no! Clothes are not invented yet! What can you wear today to stay warm?",
+            a: "Big leaves, tree bark, and furry animal skins!",
+            exp: "Before woven fabrics existed, early humans made warm clothing from animal hides, tree bark, and large plant leaves.",
+            hint: "Think about what materials you can find directly on forest floors or from animals in nature!",
+            options: ["Big leaves, tree bark, and furry animal skins!", "A bright yellow raincoat and boots.", "A superhero costume.", "Soft cotton pajamas."]
+        },
+        {
+            q: "Time to eat! You found wild berries and a fish. There are no stoves or microwaves. How do you eat them?",
+            a: "You eat them raw!",
+            exp: "Before mastering fire, early humans ate fruits, berries, gathering plants, and raw meat or fish.",
+            hint: "Before humans learned to master fire, food could not be boiled, baked, or cooked at all!",
+            options: ["You eat them raw!", "You bake them into a pizza.", "You fry them in a pan with butter.", "You microwave them."]
+        },
+        {
+            q: "You want to dig up roots to eat, but your hands are not strong enough. What do you look for on the ground to help you?",
+            a: "Sharp stones, animal bones, and horns!",
+            exp: "Early humans crafted simple hand tools out of hard stones, animal bones, and antlers to dig, hunt, and cut.",
+            hint: "Nature provides solid, pointy objects lying around long before metal factories existed!",
+            options: ["Sharp stones, animal bones, and horns!", "Metal nails and a screwdriver.", "Colorful plastic toys.", "Pieces of broken glass."]
+        },
+        {
+            q: "SPARK! You rub two special stones together very fast. What amazing thing jumps out?",
+            a: "Bright sparks that start a fire!",
+            exp: "Striking flint stones together generates high-heat sparks, which early humans used to start fires for heat and cooking.",
+            hint: "Striking hard rocks like flint creating friction releases a sudden flash of light and high heat!",
+            options: ["Bright sparks that start a fire!", "A magic genie.", "Bubbly cold water.", "Rainbow smoke."]
+        },
+        {
+            q: "A scary wild animal is walking toward your cave! What can you light up to scare it away?",
+            a: "A bright, hot fire!",
+            exp: "Fire provided warmth, light, cooked food, and served as a powerful shield to keep wild beasts away at night.",
+            hint: "Wild animals are terrified of heat, bright flames, and smoke at night!",
+            options: ["A bright, hot fire!", "A big flashlight.", "A neon sign.", "Twinkling fairy lights."]
+        },
+        {
+            q: "You dropped some seeds in the dirt last week. Now, tiny green plants are growing there! What does this teach you?",
+            a: "Seeds grow into new plants for food!",
+            exp: "Observing how scattered seeds sprouted led early humans to discover agriculture, allowing them to farm and grow crops.",
+            hint: "When seeds stay moist in natural soil, they sprout and transform over time!",
+            options: ["Seeds grow into new plants for food!", "Seeds turn into gold coins.", "Plants fall down from the sky.", "Ants hide secret treasures there."]
+        },
+        {
+            q: "You tie a sharp stone to a strong wooden stick. What useful tool did you just make?",
+            a: "A strong stone axe!",
+            exp: "Binding a sharp stone edge to a sturdy wooden shaft created axes and spears, making hunting and cutting far easier.",
+            hint: "Combining wood handles with a wedge shape creates an efficient chopping item!",
+            options: ["A strong stone axe!", "An electric chainsaw.", "Kitchen scissors.", "A magic wand."]
+        },
+        {
+            q: "A furry animal walks up to you and wags its tail. It wants to guard your cave. What is your new pet?",
+            a: "A friendly dog!",
+            exp: "Early humans domesticated wild wolves over thousands of years, turning them into loyal dogs that guarded camps.",
+            hint: "This animal is known as humanity's ancient loyal companion, closely linked to wild wolves!",
+            options: ["A friendly dog!", "A roaring tiger.", "A giant elephant.", "A wild mountain lion."]
+        },
+        {
+            q: "Your tribe needs to cross a big, deep river but you cannot swim. How do you get across?",
+            a: "Tie logs together to make a floating raft!",
+            exp: "Lashing buoyant wooden logs together created rafts, enabling early human tribes to navigate rivers and waters.",
+            hint: "Wood naturally floats on water surfaces when tied safely side-by-side!",
+            options: ["Tie logs together to make a floating raft!", "Call a fast motorboat.", "Get on a giant cruise ship.", "Ride in a submarine."]
+        },
+        {
+            q: "You see a round tree log rolling down a hill very fast. What great idea does this give you?",
+            a: "To invent the rolling wheel!",
+            exp: "Noticing how circular logs roll smoothly inspired the invention of the wheel, revolutionizing transport and work.",
+            hint: "Circular curved objects roll smoothly without dragging weight flatly on earth terrain!",
+            options: ["To invent the rolling wheel!", "To make a square brick.", "To build a triangle roof.", "To make an iron bar."]
+        },
+        {
+            q: "You spin a wooden wheel with wet mud on top to shape a bowl for water. What are you using?",
+            a: "A potter's wheel to make clay pots!",
+            exp: "Spinning clay on a rotating potter's wheel allowed early humans to craft sturdy water jars and cooking pots.",
+            hint: "Shaping wet soil mud on a rotating disc makes storage kitchenware container pots!",
+            options: ["A potter's wheel to make clay pots!", "A car steering wheel.", "A spinning wheel for making clothes.", "A giant Ferris wheel."]
+        }
     ];
 
     let gameQuestions = [];
     let currentQuestionIndex = 0;
     let questionsAnsweredTotal = 0;
     let quizLives = 3;
+    let hintTimer = null;
+
+    function clearHintTimer() {
+        if (hintTimer) {
+            clearTimeout(hintTimer);
+            hintTimer = null;
+        }
+    }
 
     function shuffleArray(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
@@ -610,9 +705,11 @@
         dpr = window.devicePixelRatio || 1;
         const rect = wrapper.getBoundingClientRect();
 
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
 
+        // Reset transform to avoid compounding scales on resize
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(dpr, dpr);
 
         cellSize = Math.floor(Math.min(rect.width / COLS, rect.height / ROWS));
@@ -632,6 +729,7 @@
         showConfetti = false;
         confettiParticles = [];
         particles = [];
+        clearHintTimer();
         document.getElementById('score-display').innerText = "Score: " + gameScore;
         initQuestions();
         updateProgressUI();
@@ -678,7 +776,18 @@
 
     function draw() {
         const rect = canvas.getBoundingClientRect();
-        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        // Clear canvas completely regardless of transform state
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        // Clip board rendering to canvas dimensions to prevent overflow bleeding
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, rect.width, rect.height);
+        ctx.clip();
 
         // Draw Board Background Grid
         for (let r = 0; r < ROWS; r++) {
@@ -705,6 +814,8 @@
 
         // Draw visual particles
         updateAndDrawParticles();
+
+        ctx.restore();
     }
 
     function drawGem(x, y, color) {
@@ -948,6 +1059,7 @@
     }
 
     function showQuizQuestion() {
+        clearHintTimer();
         if (currentQuestionIndex >= gameQuestions.length) {
             resumeGameplay();
             return;
@@ -977,9 +1089,26 @@
             btn.onclick = () => handleAnswerSelection(opt, currentQ.a, btn);
             container.appendChild(btn);
         });
+
+        // 10-Second Hint Timer System: Makes the correct answer glow after 10 seconds
+        hintTimer = setTimeout(() => {
+            if (!isPausedForQuiz) return;
+            const hintContainer = document.getElementById('quiz-hint-text');
+            let customHint = currentQ.hint || "Look closely at nature's simple raw items found all around our early human tribes!";
+            hintContainer.innerText = "💡 Hint: " + customHint;
+            hintContainer.style.display = 'block';
+
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-value') === currentQ.a) {
+                    btn.classList.add('correct-glow');
+                }
+            });
+        }, 10000);
     }
 
     function handleAnswerSelection(selected, correct, buttonElement) {
+        clearHintTimer();
         const buttons = document.querySelectorAll('.option-btn');
         let currentQ = gameQuestions[currentQuestionIndex];
         const quizBox = document.getElementById('quiz-box');
@@ -993,7 +1122,8 @@
             buttonElement.style.borderColor = '#fff';
             buttonElement.classList.remove('correct-glow');
             
-            document.getElementById('question-text').innerText = "🌟 Excellent! That's correct!";
+            // Replaces question banner with detailed explanation
+            document.getElementById('question-text').innerText = "🌟 Explanation:\n" + (currentQ.exp || currentQ.a);
             document.getElementById('quiz-hint-text').style.display = 'none';
             
             playSound(sndCorrect);
@@ -1008,7 +1138,7 @@
                 } else {
                     resumeGameplay();
                 }
-            }, 1400);
+            }, 2200);
         } else {
             quizLives--;
             updateLivesUI();
@@ -1045,6 +1175,7 @@
 
     function triggerEndGame(isVictory) {
         isGameOver = true;
+        clearHintTimer();
         
         const endOverlay = document.getElementById('end-overlay');
         const endTitle = document.getElementById('end-title');
@@ -1068,6 +1199,7 @@
 
     function resumeGameplay() {
         isPausedForQuiz = false;
+        clearHintTimer();
         document.getElementById('quiz-overlay').style.display = 'none';
         spawnPiece();
         lastTime = performance.now();
