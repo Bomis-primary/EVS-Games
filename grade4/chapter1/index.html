@@ -390,7 +390,7 @@
         <div id="hud" class="hidden">
             <div class="hud-item">🏆 SCORE: <span id="val-score" class="hud-value">0</span></div>
             <div class="hud-item">⭐ LEVEL: <span id="val-level" class="hud-value">1</span></div>
-            <div class="hud-item">🍏 FRUITS: <span id="val-healthy" class="hud-value">0</span>/3</div>
+            <div class="hud-item">🍎 FRUITS: <span id="val-healthy" class="hud-value">0</span>/3</div>
         </div>
 
         <!-- 1. Splash Screen -->
@@ -410,9 +410,9 @@
         <div id="screen-instructions" class="screen hidden">
             <h2 class="subtitle">HOW TO PLAY 🤔</h2>
             <div class="text-card">
-                1. Swipe your finger or mouse to slice <b>healthy foods</b> 🍎🥕.<br><br>
-                2. Avoid slicing oily or sugary <b>junk foods</b> 🍔🍟.<br><br>
-                3. Slice 3 healthy foods to unlock your level quiz 📚.<br><br>
+                1. Swipe your finger or mouse to slice <b>ONLY fresh fruits</b> 🍎🍉🍌.<br><br>
+                2. Slicing anything else (vegetables, milk, bread, or junk food) will trigger a <b>BUZZ penalty</b> 🐝⚡.<br><br>
+                3. Slice 3 fruits to unlock your level quiz 📚.<br><br>
                 4. Select options carefully! Helpful <b>hints</b> appear if you pick wrong 💡.<br><br>
                 5. Complete all 3 levels to achieve ultimate victory! 🏆
             </div>
@@ -480,14 +480,16 @@
             ]
         };
 
-        // Core Configuration
-        const healthyFoods = ["🍎", "🍉", "🍌", "🥦", "🥕", "🥛", "🥚", "🍞"];
-        const junkFoods = ["🍔", "🍟", "🥤", "🍩"];
+        // Strict Classification: Fruits vs Non-Fruits
+        const fruitList = ["🍎", "🍉", "🍌", "🍓", "🍇", "🍊", "🥭", "🍍"];
+        const nonFruitList = ["🥦", "🥕", "🥛", "🥚", "🍞", "🍔", "🍟", "🥤", "🍩"];
         
         const colorPaletteMap = {
-            "🍎": "#ff4d4d", "🍉": "#ff4d6d", "🍌": "#ffdf00", "🥦": "#70e000", 
-            "🥕": "#ff9f1c", "🥛": "#e0f2fe", "🥚": "#f8f9fa", "🍞": "#fb8500",
-            "🍔": "#b5838d", "🍟": "#ffb703", "🥤": "#ff006e", "🍩": "#ffb5a7"
+            "🍎": "#ff4d4d", "🍉": "#ff4d6d", "🍌": "#ffdf00", "🍓": "#ff0055",
+            "🍇": "#7209b7", "🍊": "#ff9f1c", "🥭": "#ffb703", "🍍": "#ffe600",
+            "🥦": "#70e000", "🥕": "#ff9f1c", "🥛": "#e0f2fe", "🥚": "#f8f9fa", 
+            "🍞": "#fb8500", "🍔": "#b5838d", "🍟": "#ffb703", "🥤": "#ff006e", 
+            "🍩": "#ffb5a7"
         };
         
         let canvas, ctx;
@@ -631,10 +633,10 @@
                 const margin = 60;
                 this.x = Math.random() * (width - margin * 2) + margin;
                 this.y = -60; 
-                this.isJunk = Math.random() > 0.65;
-                this.emoji = this.isJunk 
-                    ? junkFoods[Math.floor(Math.random() * junkFoods.length)] 
-                    : healthyFoods[Math.floor(Math.random() * healthyFoods.length)];
+                this.isFruit = Math.random() < 0.55;
+                this.emoji = this.isFruit 
+                    ? fruitList[Math.floor(Math.random() * fruitList.length)] 
+                    : nonFruitList[Math.floor(Math.random() * nonFruitList.length)];
                 
                 this.vx = Math.random() * 1.6 - 0.8; 
                 this.vy = 2.4 + Math.random() * 1.2; 
@@ -820,7 +822,7 @@
                 if(isDrawing) track(e.clientX, e.clientY);
             });
             
-            window.addEventListener('pointerup', clearSwipe);
+window.addEventListener('pointerup', clearSwipe);
             window.addEventListener('pointercancel', clearSwipe);
         }
 
@@ -837,9 +839,14 @@
                         particles.push(new VisualParticle(itm.x, itm.y, particleColor));
                     }
                     
-                    if(itm.isJunk) {
+                    if(!itm.isFruit) {
+                        // Sliced a non-fruit (vegetables, dairy, bread, or junk food) -> Buzz sound & vibration penalty!
                         playAudio(sndWrong);
+                        if ('vibrate' in navigator) {
+                            try { navigator.vibrate([150, 50, 150]); } catch(e){}
+                        }
                     } else {
+                        // Sliced a valid fruit!
                         playAudio(sndCorrect);
                         healthySlices++;
                         updateHUD();
