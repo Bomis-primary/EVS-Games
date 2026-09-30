@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Plaque Attack! - Grade 4 EVS</title>
     <style>
-        /* --- DESIGN SYSTEM & PASTEL PALETTE --- */
+        /* --- DESIGN SYSTEM & PASTEL APP PALETTE --- */
         :root {
-            --bg-pastel: #F3F7FA;
-            --primary: #FF9AA2;
-            --primary-dark: #FF7B87;
-            --secondary: #B5EAD7;
-            --accent: #FFDAC1;
-            --text-dark: #4A4A4A;
+            --bg-pastel: #F0F4F8;
+            --primary: #FF7B87;
+            --primary-light: #FF9AA2;
+            --primary-dark: #E05362;
+            --secondary: #4ECDC4;
+            --secondary-light: #B5EAD7;
+            --secondary-dark: #2BB1A8;
+            --accent: #FFD166;
+            --accent-soft: #FFE5A3;
+            --text-dark: #2D3748;
+            --text-muted: #718096;
             --white: #FFFFFF;
-            --tooth-clean: #FAFAFA;
-            --plaque-yellow: #F3E39D;
-            --plaque-green: #C7ECCE;
-            --cavity-black: #444444;
-            --font-stack: 'Comic Sans MS', 'Chalkboard SE', 'Bubbles', sans-serif;
+            --gum-bg: #FFC0CB;
+            --gum-border: #FF8DA1;
+            --tooth-clean: #FFFFFF;
+            --plaque-yellow: #F6E05E;
+            --plaque-green: #68D391;
+            --cavity-black: #2D3748;
+            --font-stack: 'Comic Sans MS', 'Chalkboard SE', 'Bubbles', system-ui, -apple-system, sans-serif;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * {
@@ -27,42 +36,92 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
-        body {
-            font-family: var(--font-stack);
-            background-color: var(--bg-pastel);
-            color: var(--text-dark);
-            overflow: hidden;
-            position: fixed;
+        html, body {
             width: 100%;
             height: 100%;
+            overflow: hidden;
+            background-color: #1A202C;
+            font-family: var(--font-stack);
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* --- RESPONSIVE WRAPPER --- */
+        /* --- APP WRAPPER CONTAINER --- */
         #game-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             height: 100%;
-            max-height: 850px;
-            background-color: var(--white);
+            height: 100dvh;
+            max-height: 900px;
+            background-color: var(--bg-pastel);
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
         }
 
-        @media (min-width: 601px) {
+        @media (min-width: 500px) and (min-height: 650px) {
             #game-container {
-                border-radius: 30px;
+                border-radius: 36px;
                 height: 94vh;
+                border: 4px solid rgba(255, 255, 255, 0.2);
             }
         }
 
+        /* --- HUD HEADER --- */
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 30;
+            border-bottom: 2px solid #E2E8F0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .stat-badge {
+            background: var(--white);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border: 1.5px solid #EDF2F7;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            background: var(--white);
+            border: 1.5px solid #EDF2F7;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        /* --- SCREENS --- */
         .screen {
             position: absolute;
             top: 0;
@@ -74,114 +133,106 @@
             justify-content: center;
             align-items: center;
             padding: 24px;
+            padding-top: 60px;
             text-align: center;
             opacity: 1;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease, transform 0.25s ease;
             z-index: 10;
+            overflow-y: auto;
         }
 
         .hidden {
             display: none !important;
             opacity: 0;
+            pointer-events: none;
             z-index: 0;
         }
 
         /* --- TYPOGRAPHY & BUTTONS --- */
         h1 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: var(--primary-dark);
-            margin-bottom: 12px;
-            text-shadow: 2px 2px 0px var(--accent);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 0px var(--accent-soft);
+            line-height: 1.2;
         }
 
         p {
-            font-size: 1.05rem;
-            line-height: 1.5;
-            margin-bottom: 24px;
+            font-size: 1rem;
+            line-height: 1.45;
+            margin-bottom: 20px;
             color: var(--text-dark);
         }
 
         .btn {
-            background-color: var(--primary);
+            background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary) 100%);
             color: var(--white);
             border: none;
-            padding: 16px 40px;
-            font-size: 1.25rem;
+            padding: 14px 36px;
+            font-size: 1.2rem;
             font-family: var(--font-stack);
-            font-weight: bold;
+            font-weight: 800;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 0px var(--primary-dark);
+            box-shadow: 0 5px 0px var(--primary-dark), 0 8px 15px rgba(255, 123, 135, 0.3);
             transition: all 0.1s ease;
             transform: translateY(0);
             outline: none;
-            -webkit-tap-highlight-color: transparent;
+            width: 85%;
+            max-width: 280px;
         }
 
         .btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0px var(--primary-dark);
+            transform: translateY(3px);
+            box-shadow: 0 2px 0px var(--primary-dark), 0 4px 8px rgba(255, 123, 135, 0.3);
         }
 
-        /* --- SPLASH SCREEN --- */
-        #screen-logo {
-            background-color: #FFFFFF;
-        }
-        
+        /* --- SPLASH & TITLE SCREEN --- */
+        #screen-logo { background-color: #FFFFFF; }
         .logo-img {
-            max-width: 220px;
+            max-width: 200px;
             height: auto;
             animation: pulse 2s infinite ease-in-out;
         }
 
         .mascot-art {
-            font-size: 4.5rem;
-            margin-bottom: 16px;
-            animation: bounce 2s infinite ease;
+            font-size: 4rem;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.1));
+            animation: bounce 2.5s infinite ease-in-out;
         }
 
         .instruction-card {
-            background-color: var(--bg-pastel);
+            background-color: var(--white);
             border-radius: 20px;
-            padding: 20px;
+            padding: 18px;
             width: 100%;
             text-align: left;
-            margin-bottom: 24px;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            border: 2px solid #EDF2F7;
         }
 
         .instruction-card li {
-            margin-left: 16px;
-            margin-bottom: 12px;
+            margin-left: 14px;
+            margin-bottom: 10px;
             font-size: 0.95rem;
             line-height: 1.4;
+            color: var(--text-dark);
         }
 
-        /* --- HUD HEADER PANEL --- */
-        .game-header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background-color: var(--bg-pastel);
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 20;
-            border-bottom: 2px solid #EAEAEA;
-        }
-
-        .stat-badge {
-            background: var(--white);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
+        .high-score-tag {
+            background: var(--accent-soft);
+            color: #B7791F;
+            padding: 6px 16px;
+            border-radius: 12px;
             font-size: 0.9rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            font-weight: bold;
+            margin-bottom: 16px;
+            display: inline-block;
         }
 
-        /* --- ARCADE TEETH GRID --- */
+        /* --- ARCADE UI & JAW GRID --- */
         .arcade-ui-wrapper {
             display: flex;
             flex-direction: column;
@@ -189,103 +240,139 @@
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding-top: 60px;
+            gap: 8px;
         }
 
         .jaw-title {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #B0B0B0;
-            margin: 6px 0;
-            letter-spacing: 1px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .jaw-container {
+            width: 100%;
+            background: linear-gradient(180deg, #FFB3BA 0%, #FFA0AA 100%);
+            border: 3px solid var(--gum-border);
+            padding: 10px 8px;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        #upper-jaw {
+            border-radius: 24px 24px 8px 8px;
+            margin-bottom: 10px;
+        }
+
+        #lower-jaw {
+            border-radius: 8px 8px 24px 24px;
         }
 
         .teeth-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
+            gap: 5px;
             width: 100%;
-            padding: 12px 10px;
-            background-color: #FFD3D6;
-            box-shadow: inset 0 4px 8px rgba(0,0,0,0.06);
-        }
-
-        #upper-jaw {
-            border-radius: 20px 20px 6px 6px;
-            margin-bottom: 24px;
-        }
-
-        #lower-jaw {
-            border-radius: 6px 6px 20px 20px;
         }
 
         .tooth {
-            aspect-ratio: 1 / 1.2;
-            background-color: var(--tooth-clean);
-            border-radius: 4px 4px 10px 10px;
-            box-shadow: 0 3px 0px #DDD, inset 0 -3px 4px rgba(0,0,0,0.02);
+            aspect-ratio: 1 / 1.25;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 100%);
+            border-radius: 4px 4px 12px 12px;
+            box-shadow: 0 3px 0px #CBD5E0, inset 0 -3px 4px rgba(0,0,0,0.05);
             cursor: pointer;
-            transition: background-color 0.15s ease, transform 0.05s ease;
-            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.08s ease, background 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         #upper-jaw .tooth {
-            border-radius: 10px 10px 4px 4px;
-            box-shadow: 0 -3px 0px #DDD, inset 0 3px 4px rgba(0,0,0,0.02);
+            border-radius: 12px 12px 4px 4px;
+            box-shadow: 0 -3px 0px #CBD5E0, inset 0 3px 4px rgba(0,0,0,0.05);
+        }
+
+        .tooth::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 4px;
+            height: 6px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
         }
 
         .tooth:active {
-            transform: scale(0.9);
+            transform: scale(0.88);
         }
 
         .tooth.yellow {
-            background-color: var(--plaque-yellow) !important;
-            box-shadow: 0 3px 0px #CDB55E !important;
+            background: linear-gradient(180deg, #FAF089 0%, #ECC94B 100%) !important;
+            box-shadow: 0 3px 0px #D69E2E !important;
         }
-        #upper-jaw .tooth.yellow { box-shadow: 0 -3px 0px #CDB55E !important; }
+        #upper-jaw .tooth.yellow { box-shadow: 0 -3px 0px #D69E2E !important; }
 
         .tooth.green {
-            background-color: var(--plaque-green) !important;
-            box-shadow: 0 3px 0px #97C79F !important;
+            background: linear-gradient(180deg, #9AE6B4 0%, #48BB78 100%) !important;
+            box-shadow: 0 3px 0px #2F855A !important;
         }
-        #upper-jaw .tooth.green { box-shadow: 0 -3px 0px #97C79F !important; }
+        #upper-jaw .tooth.green { box-shadow: 0 -3px 0px #2F855A !important; }
 
         .tooth.black {
-            background-color: var(--cavity-black) !important;
-            box-shadow: 0 3px 0px #222 !important;
+            background: linear-gradient(180deg, #4A5568 0%, #1A202C 100%) !important;
+            box-shadow: 0 3px 0px #000000 !important;
             animation: shake 0.2s infinite alternate;
         }
-        #upper-jaw .tooth.black { box-shadow: 0 -3px 0px #222 !important; }
+        #upper-jaw .tooth.black { box-shadow: 0 -3px 0px #000000 !important; }
 
-        /* --- QUIZ CHALLENGE --- */
+        /* Timer Bar */
+        .timer-bar-container {
+            width: 100%;
+            height: 12px;
+            background: #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 1px solid #CBD5E0;
+        }
+
+        .timer-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);
+            transition: width 1s linear;
+        }
+
+        /* --- QUIZ UI --- */
         .quiz-wrapper {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            padding-top: 60px;
+            gap: 12px;
             height: 100%;
             justify-content: center;
         }
 
         .question-card {
-            background-color: #F8FAFC;
+            background-color: var(--white);
             border-radius: 20px;
-            padding: 18px;
-            border: 2px dashed var(--primary);
-            min-height: 100px;
+            padding: 16px;
+            border: 2px dashed var(--primary-light);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            min-height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            font-size: 0.98rem;
             font-weight: bold;
             line-height: 1.4;
+            color: var(--text-dark);
         }
 
         .options-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
         }
 
@@ -293,54 +380,72 @@
             background-color: var(--white);
             border: 2px solid #E2E8F0;
             border-radius: 16px;
-            padding: 14px 18px;
+            padding: 12px 16px;
             text-align: left;
             font-family: var(--font-stack);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            font-weight: 600;
             color: var(--text-dark);
             cursor: pointer;
-            transition: all 0.1s ease;
-            box-shadow: 0 4px 0px #E2E8F0;
+            transition: all 0.15s ease;
+            box-shadow: 0 3px 0px #E2E8F0;
             outline: none;
-            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-badge {
+            background: var(--bg-pastel);
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
         }
 
         .option-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0px #E2E8F0;
+            box-shadow: 0 1px 0px #E2E8F0;
         }
 
         .option-btn.correct {
-            background-color: var(--secondary) !important;
-            border-color: #9BD2C0 !important;
-            box-shadow: 0 4px 0px #82BEAB !important;
-            color: #235141 !important;
+            background-color: var(--secondary-light) !important;
+            border-color: var(--secondary) !important;
+            box-shadow: 0 3px 0px var(--secondary-dark) !important;
+            color: #1A534C !important;
         }
 
         .option-btn.wrong {
-            background-color: #FFCCD0 !important;
-            border-color: #FFA4AC !important;
-            box-shadow: 0 4px 0px #E0828A !important;
-            color: #722229 !important;
+            background-color: #FED7D7 !important;
+            border-color: #FEB2B2 !important;
+            box-shadow: 0 3px 0px #E53E3E !important;
+            color: #9B2C2C !important;
         }
 
         .banner-panel {
-            background-color: #FFF9E6;
-            border-left: 5px solid #FFE082;
+            background-color: #FEFCBF;
+            border-left: 5px solid #D69E2E;
             border-radius: 12px;
             padding: 12px;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             line-height: 1.4;
-            animation: fadeIn 0.2s ease forwards;
+            animation: fadeIn 0.25s ease forwards;
         }
 
         .banner-panel strong {
-            color: #C69500;
+            color: #B7791F;
             display: block;
             margin-bottom: 2px;
         }
 
+        /* --- CANVAS CONFETTI --- */
         #confetti-canvas {
             position: absolute;
             top: 0;
@@ -351,20 +456,37 @@
             z-index: 100;
         }
 
+        /* Floating Score Text */
+        .score-pop {
+            position: absolute;
+            color: #38A169;
+            font-weight: 900;
+            font-size: 1.2rem;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 50;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.8);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+        }
+
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.04); }
         }
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
         @keyframes shake {
-            0% { transform: translateX(-1px); }
-            100% { transform: translateX(1px); }
+            0% { transform: translateX(-2px); }
+            100% { transform: translateX(2px); }
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
@@ -374,71 +496,89 @@
     <div id="game-container">
         <canvas id="confetti-canvas"></canvas>
 
+        <!-- APP HUD HEADER -->
         <div id="game-hud" class="game-header hidden">
-            <div id="hud-round" class="stat-badge">Round: 1/5</div>
+            <div id="hud-round" class="stat-badge">Round 1/5</div>
             <div id="hud-score" class="stat-badge">⭐ 0</div>
             <div id="hud-lives" class="stat-badge">❤️ 4</div>
+            <button id="sound-toggle-btn" class="icon-btn" onclick="toggleAudio()" title="Toggle Sound">🔊</button>
         </div>
 
+        <!-- SPLASH LOGO SCREEN -->
         <div id="screen-logo" class="screen">
             <img src="assets/innovine-logo.png" alt="Innovine Logo" class="logo-img" id="main-logo-asset">
         </div>
 
+        <!-- TITLE SCREEN -->
         <div id="screen-title" class="screen hidden">
             <div class="mascot-art">🦷</div>
             <h1>Plaque Attack!</h1>
-            <p>Brush away the sticky germ monsters and protect your sparkling white teeth!</p>
-            <button class="btn" onclick="goToInstructions()">Start Game</button>
+            <p>Brush away sticky germ monsters and keep your teeth sparkling white!</p>
+            <div id="high-score-display" class="high-score-tag">🏆 Best Score: 0</div>
+            <button class="btn" onclick="goToInstructions()">Start Game 🎮</button>
         </div>
 
+        <!-- INSTRUCTIONS SCREEN -->
         <div id="screen-instructions" class="screen hidden">
-            <h1>How To Play</h1>
+            <h1 style="font-size: 1.6rem;">How To Play</h1>
             <div class="instruction-card">
-                <ul style="list-style-type: none;">
-                    <li>🧼 <strong>Step 1:</strong> Dirty teeth will turn yellow or green. Tap them quickly to brush them clean!</li>
-                    <li>👾 <strong>Watch Out:</strong> If left ignored, they turn into black <strong>Cavities</strong> and you lose a life!</li>
-                    <li>🧠 <strong>Step 2:</strong> Finish the brushing level to unlock 3 fun textbook questions.</li>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li>🧼 <strong>Step 1: Brushing Phase</strong><br>Tap dirty yellow or green teeth quickly before they decay into black cavities!</li>
+                    <li style="margin-top: 8px;">🧠 <strong>Step 2: Quiz Challenge</strong><br>Answer science questions correctly to complete each level!</li>
                 </ul>
             </div>
             <button class="btn" onclick="startGame()">Play Now 🚀</button>
         </div>
 
+        <!-- ARCADE SCREEN -->
         <div id="screen-arcade" class="screen hidden">
             <div class="arcade-ui-wrapper">
                 <div class="jaw-title">UPPER JAW</div>
-                <div id="upper-jaw" class="teeth-grid"></div>
-                
-                <div id="lower-jaw" class="teeth-grid"></div>
+                <div id="upper-jaw" class="jaw-container">
+                    <div id="upper-jaw-grid" class="teeth-grid"></div>
+                </div>
+
+                <div id="lower-jaw" class="jaw-container">
+                    <div id="lower-jaw-grid" class="teeth-grid"></div>
+                </div>
                 <div class="jaw-title">LOWER JAW</div>
-                
-                <p style="margin-top:15px; font-size:0.9rem; color:#777;" id="arcade-timer-text">
-                    Tap the dirty teeth quickly!
-                </p>
+
+                <div style="width: 100%; margin-top: 10px;">
+                    <div id="arcade-timer-text" style="font-size: 0.85rem; font-weight: bold; color: var(--text-dark);">
+                        Brush dirty teeth! 10s
+                    </div>
+                    <div class="timer-bar-container">
+                        <div id="timer-bar-fill" class="timer-bar-fill"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- QUIZ SCREEN -->
         <div id="screen-quiz" class="screen hidden">
             <div class="quiz-wrapper">
                 <div id="quiz-question" class="question-card">
                     Loading question...
                 </div>
-                
+
                 <div id="quiz-options" class="options-container"></div>
-                
+
                 <div id="quiz-banner" class="banner-panel hidden"></div>
             </div>
         </div>
 
+        <!-- GAME OVER SCREEN -->
         <div id="screen-gameover" class="screen hidden">
-            <div id="gameover-icon" style="font-size: 4.5rem; margin-bottom:10px;">🏆</div>
+            <div id="gameover-icon" style="font-size: 4rem; margin-bottom:8px;">🏆</div>
             <h1 id="gameover-title">Fantastic!</h1>
             <p id="gameover-feedback">Loading report card...</p>
-            
-            <div class="instruction-card" style="text-align:center; background:#FAFAFA;">
-                <span style="font-size:1rem; color:#666;">Your Score:</span>
-                <div id="gameover-score" style="font-size:3rem; font-weight:bold; color:var(--primary-dark);">0</div>
+
+            <div class="instruction-card" style="text-align:center;">
+                <span style="font-size:0.9rem; color: var(--text-muted);">Your Final Score:</span>
+                <div id="gameover-score" style="font-size:2.8rem; font-weight:900; color:var(--primary-dark);">0</div>
+                <div id="star-rating" style="font-size: 1.6rem; margin-top: 4px;">⭐⭐⭐</div>
             </div>
-            
+
             <button class="btn" onclick="resetToTitle()">Play Again 🔄</button>
         </div>
     </div>
@@ -552,27 +692,82 @@
             }
         ];
 
+        // State Variables
         let activeQuestions = [];
         let currentQuestionIndex = 0;
         let gameScore = 0;
+        let highScore = parseInt(localStorage.getItem('plaque_attack_highscore') || '0');
         let gameRound = 1; 
         let arcadeLives = 4;
         let quizLives = 3;
         let currentWrongAttempts = 0;
-        
+        let soundMuted = localStorage.getItem('plaque_attack_muted') === 'true';
+
         let arcadeTimer = null;
         let plaqueSpawnInterval = null;
         let arcadeActive = false;
         let teethState = Array(16).fill(null).map((_, i) => ({ id: i, status: "clean", timer: null }));
 
-        function playAudio(src) {
+        // WEB AUDIO SYNTH & FILE FALLBACK AUDIO SYSTEM
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSynthSound(type) {
+            if (soundMuted || !audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'brush') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(180, now + 0.12);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {
+                console.log("Audio Synth Error", e);
+            }
+        }
+
+        function playAudio(src, synthFallbackType) {
+            if (soundMuted) return;
             const sound = new Audio(src);
             sound.volume = 0.4;
-            sound.play().catch(() => {
-                console.log(`Audio handled for path: ${src}`);
+            sound.play().then(() => {}).catch(() => {
+                playSynthSound(synthFallbackType);
             });
         }
 
+        function toggleAudio() {
+            soundMuted = !soundMuted;
+            localStorage.setItem('plaque_attack_muted', soundMuted);
+            document.getElementById('sound-toggle-btn').innerText = soundMuted ? '🔇' : '🔊';
+        }
+
+        // CONFETTI ENGINE
         const canvas = document.getElementById("confetti-canvas");
         const ctx = canvas.getContext("2d");
         let confettiParticles = [];
@@ -586,8 +781,8 @@
 
         function triggerConfettiEffect() {
             confettiParticles = [];
-            const colors = ['#FF9AA2', '#B5EAD7', '#FFDAC1', '#E2C974', '#C7CEEA'];
-            for(let i=0; i<40; i++) {
+            const colors = ['#FF9AA2', '#B5EAD7', '#FFDAC1', '#FFD166', '#C7CEEA'];
+            for(let i=0; i<35; i++) {
                 confettiParticles.push({
                     x: canvas.width / 2,
                     y: canvas.height / 2,
@@ -595,7 +790,7 @@
                     vy: (Math.random() - 0.7) * 10,
                     color: colors[Math.floor(Math.random() * colors.length)],
                     radius: Math.random() * 3 + 3,
-                    gravity: 0.25
+                    gravity: 0.22
                 });
             }
             animateConfettiLoop();
@@ -617,6 +812,7 @@
             requestAnimationFrame(animateConfettiLoop);
         }
 
+        // NAVIGATION & HUDS
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
@@ -632,16 +828,19 @@
 
         window.onload = () => {
             const logo = document.getElementById('main-logo-asset');
-            logo.onerror = function() {
-                this.style.display = 'none';
-            };
-            
-            setTimeout(() => { showScreen('screen-title'); }, 3000);
+            logo.onerror = function() { this.style.display = 'none'; };
+            document.getElementById('high-score-display').innerText = `🏆 Best Score: ${highScore}`;
+            document.getElementById('sound-toggle-btn').innerText = soundMuted ? '🔇' : '🔊';
+
+            setTimeout(() => { showScreen('screen-title'); }, 2500);
             createTeethDOM();
         };
 
         function goToInstructions() { showScreen('screen-instructions'); }
-        function resetToTitle() { showScreen('screen-title'); }
+        function resetToTitle() { 
+            document.getElementById('high-score-display').innerText = `🏆 Best Score: ${highScore}`;
+            showScreen('screen-title'); 
+        }
 
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -663,7 +862,7 @@
         }
 
         function refreshHUD() {
-            document.getElementById('hud-round').innerText = `Round: ${gameRound}/5`;
+            document.getElementById('hud-round').innerText = `Round ${gameRound}/5`;
             document.getElementById('hud-score').innerText = `⭐ ${gameScore}`;
             
             const currentScreen = document.querySelector('.screen:not(.hidden)').id;
@@ -675,8 +874,8 @@
         }
 
         function createTeethDOM() {
-            const upperContainer = document.getElementById('upper-jaw');
-            const lowerContainer = document.getElementById('lower-jaw');
+            const upperContainer = document.getElementById('upper-jaw-grid');
+            const lowerContainer = document.getElementById('lower-jaw-grid');
             upperContainer.innerHTML = '';
             lowerContainer.innerHTML = '';
 
@@ -686,13 +885,14 @@
                 tooth.dataset.id = i;
                 tooth.addEventListener('pointerdown', (e) => {
                     e.preventDefault();
-                    brushTooth(i);
+                    brushTooth(i, e);
                 });
                 if(i < 8) upperContainer.appendChild(tooth);
                 else lowerContainer.appendChild(tooth);
             }
         }
 
+        // ARCADE WAVE LOGIC
         function initiateArcadeWave() {
             showScreen('screen-arcade');
             arcadeActive = true;
@@ -703,20 +903,25 @@
             });
             drawTeethGraphics();
 
-            let timeLeft = 10;
-            document.getElementById('arcade-timer-text').innerText = `Keep teeth clean! Time remaining: ${timeLeft}s`;
+            let totalTime = 10;
+            let timeLeft = totalTime;
+            const timerText = document.getElementById('arcade-timer-text');
+            const timerFill = document.getElementById('timer-bar-fill');
             
+            timerText.innerText = `Keep teeth clean! Time: ${timeLeft}s`;
+            timerFill.style.width = '100%';
+
             arcadeTimer = setInterval(() => {
                 timeLeft--;
+                timerFill.style.width = `${(timeLeft / totalTime) * 100}%`;
                 if(timeLeft <= 0) {
                     endArcadeWave(true);
                 } else {
-                    document.getElementById('arcade-timer-text').innerText = `Keep teeth clean! Time remaining: ${timeLeft}s`;
+                    timerText.innerText = `Keep teeth clean! Time: ${timeLeft}s`;
                 }
             }, 1000);
 
-            // Pacified: Reduced the speed at which plaque pops up sequentially
-            let speed = Math.max(2400 - (gameRound * 200), 1400);
+            let speed = Math.max(2200 - (gameRound * 200), 1300);
             plaqueSpawnInterval = setInterval(() => { spawnPlaque(); }, speed);
         }
 
@@ -729,21 +934,20 @@
             target.status = Math.random() > 0.5 ? "yellow" : "green";
             drawTeethGraphics();
 
-            // Pacified: Added a longer grace period before it rots completely to cavity
-            let delay = Math.max(3800 - (gameRound * 300), 2400);
+            let delay = Math.max(3600 - (gameRound * 300), 2200);
             target.timer = setTimeout(() => {
                 if(target.status === "yellow" || target.status === "green") {
                     target.status = "black";
                     arcadeLives--;
                     refreshHUD();
                     drawTeethGraphics();
-                    playAudio('assets/wrong.mp3');
+                    playAudio('assets/wrong.mp3', 'wrong');
                     if(arcadeLives <= 0) endArcadeWave(false);
                 }
             }, delay);
         }
 
-        function brushTooth(id) {
+        function brushTooth(id, event) {
             if(!arcadeActive) return;
             let tooth = teethState[id];
             if(tooth.status === "yellow" || tooth.status === "green") {
@@ -753,6 +957,18 @@
                 gameScore += 5;
                 refreshHUD();
                 drawTeethGraphics();
+                playSynthSound('brush');
+
+                // Floating Score Popup Effect
+                if (event) {
+                    const pop = document.createElement('div');
+                    pop.className = 'score-pop';
+                    pop.innerText = '+5';
+                    pop.style.left = `${event.clientX || event.touches?.[0]?.clientX || 150}px`;
+                    pop.style.top = `${(event.clientY || event.touches?.[0]?.clientY || 200) - 20}px`;
+                    document.body.appendChild(pop);
+                    setTimeout(() => pop.remove(), 600);
+                }
             }
         }
 
@@ -780,6 +996,7 @@
             }
         }
 
+        // QUIZ WAVE LOGIC
         function initiateQuizWave() {
             showScreen('screen-quiz');
             loadNextQuestion();
@@ -796,10 +1013,11 @@
             const optionsBox = document.getElementById('quiz-options');
             optionsBox.innerHTML = '';
 
+            const badges = ['A', 'B', 'C', 'D'];
             data.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.innerText = opt;
+                btn.innerHTML = `<span class="option-badge">${badges[idx]}</span> <span>${opt}</span>`;
                 btn.onclick = () => selectOption(idx, btn);
                 optionsBox.appendChild(btn);
             });
@@ -812,19 +1030,18 @@
 
             if(idx === data.answer) {
                 btn.classList.add('correct');
-                // Updated: Awards +20 for each question correctly answered
                 gameScore += 20;
                 refreshHUD();
-                playAudio('assets/correct.mp3');
-                playAudio('assets/freesound_community-claps-44774.mp3');
+                playAudio('assets/correct.mp3', 'correct');
+                playAudio('assets/freesound_community-claps-44774.mp3', 'correct');
                 triggerConfettiEffect();
-                setTimeout(() => { proceedQuizFlow(); }, 1500);
+                setTimeout(() => { proceedQuizFlow(); }, 1400);
             } else {
                 btn.classList.add('wrong');
                 currentWrongAttempts++;
                 quizLives--;
                 refreshHUD();
-                playAudio('assets/wrong.mp3');
+                playAudio('assets/wrong.mp3', 'wrong');
 
                 if(quizLives <= 0) {
                     setTimeout(() => { wrapUpGameSession(false); }, 1200);
@@ -842,7 +1059,7 @@
                 } else {
                     banner.innerHTML = `<strong>📘 Learning Core:</strong> ${data.explanation}`;
                     buttons[data.answer].classList.add('correct');
-                    setTimeout(() => { proceedQuizFlow(); }, 4000);
+                    setTimeout(() => { proceedQuizFlow(); }, 3800);
                 }
             }
         }
@@ -866,16 +1083,24 @@
             const title = document.getElementById('gameover-title');
             const feedback = document.getElementById('gameover-feedback');
             const icon = document.getElementById('gameover-icon');
+            const stars = document.getElementById('star-rating');
             document.getElementById('gameover-score').innerText = gameScore;
+
+            if(gameScore > highScore) {
+                highScore = gameScore;
+                localStorage.setItem('plaque_attack_highscore', highScore.toString());
+            }
 
             if(didWin) {
                 icon.innerText = "🏆";
                 title.innerText = "Teeth Champion!";
-                feedback.innerText = "Amazing job! You protected your teeth from plaque and successfully solved your textbook challenge perfectly!";
+                feedback.innerText = "Superb! You protected your teeth and mastered all dental hygiene questions!";
+                stars.innerText = gameScore >= 300 ? "⭐⭐⭐" : "⭐⭐";
             } else {
                 icon.innerText = "🧼";
                 title.innerText = "Keep Brushing!";
-                feedback.innerText = "Those stubborn cavities took over this round! Let's clear our brush and try again to improve our score.";
+                feedback.innerText = "Cavities got the upper hand this round! Let's clean up and try again!";
+                stars.innerText = "⭐";
             }
         }
     </script>
