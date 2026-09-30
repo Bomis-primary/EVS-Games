@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Chapter 5: Animal Adaptation Safari</title>
     <style>
         :root {
             --bg-canvas: #F4F9F5;
             --safari-green: #2E7D32;
+            --safari-dark: #1B5E20;
+            --safari-light: #E8F5E9;
             --accent-gold: #FFA000;
             --target-pink: #FF4081;
             --white: #FFFFFF;
             --earth-brown: #5D4037;
             --text-dark: #1B5E20;
-            --font-kids: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            --font-kids: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', system-ui, sans-serif;
+            --app-height: 100vh;
         }
 
         * {
@@ -22,38 +25,41 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body {
-            font-family: var(--font-kids);
-            background-color: var(--bg-canvas);
-            color: var(--earth-brown);
-            overflow: hidden;
-            position: fixed;
+        html, body {
             width: 100%;
             height: 100%;
+            height: var(--app-height, 100vh);
+            overflow: hidden;
+            background-color: #1a331e;
+            font-family: var(--font-kids);
             display: flex;
             justify-content: center;
             align-items: center;
+            touch-action: manipulation;
         }
 
         #game-wrapper {
             width: 100%;
-            max-width: 450px;
+            max-width: 460px;
             height: 100%;
-            max-height: 820px;
+            max-height: 860px;
             background-color: var(--white);
             position: relative;
-            box-shadow: 0 16px 48px rgba(46, 125, 50, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            will-change: transform;
         }
 
-        @media (min-width: 601px) {
+        @media (min-width: 601px) and (min-height: 600px) {
             #game-wrapper {
                 border-radius: 28px;
-                height: 95vh;
+                height: 94vh;
                 border: 6px solid var(--safari-green);
             }
         }
@@ -66,88 +72,111 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            padding: 24px;
+            padding: 20px 18px;
             text-align: center;
             background-color: var(--white);
             z-index: 10;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* --- SCREEN 1: BRAND LOGO SPLASH --- */
+        /* --- SCREEN 1: SPLASH LOGO --- */
         #screen-logo {
             background-color: #FFFFFF;
+            justify-content: center;
+            cursor: pointer;
         }
+
         .brand-logo-img {
             width: 220px;
+            max-width: 70%;
             height: auto;
             max-height: 220px;
             object-fit: contain;
-            margin-bottom: 12px;
-            animation: pulseFade 1.5s infinite ease-in-out;
+            margin-bottom: 16px;
+            animation: pulseFade 1.6s infinite ease-in-out;
         }
 
-        /* --- MENU & NAVIGATION --- */
+        .tap-skip-hint {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 12px;
+        }
+
+        /* --- INTRO & INSTRUCTIONS --- */
         #screen-intro, #screen-instructions {
-            background: linear-gradient(180deg, #FFFFFF, #E8F5E9);
+            background: linear-gradient(180deg, #FFFFFF 0%, #E8F5E9 100%);
+            justify-content: center;
+            gap: 16px;
         }
 
         .decorative-badge {
-            font-size: 4.5rem;
-            margin-bottom: 10px;
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 4px;
             animation: float 3s infinite ease-in-out;
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));
         }
 
         .main-title {
             color: var(--safari-green);
-            font-size: 2.1rem;
-            margin-bottom: 12px;
-            font-weight: bold;
+            font-size: 2rem;
+            line-height: 1.2;
+            font-weight: 800;
+            text-shadow: 0 2px 0 rgba(255,255,255,0.8);
         }
 
         .instruction-box {
-            background-color: rgba(255,255,255,0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             border: 2px dashed var(--safari-green);
             border-radius: 20px;
-            padding: 22px;
+            padding: 18px 20px;
             text-align: left;
             width: 100%;
-            max-width: 360px;
-            margin-top: 15px;
+            max-width: 380px;
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.08);
         }
 
         .instruction-box ul {
             padding-left: 20px;
             color: var(--earth-brown);
-            font-size: 1rem;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        .instruction-box li {
+            margin-bottom: 8px;
         }
 
         .btn-action {
-            background-color: var(--safari-green);
+            background: linear-gradient(180deg, #4CAF50 0%, var(--safari-green) 100%);
             color: var(--white);
             border: none;
-            padding: 16px 40px;
-            font-size: 1.25rem;
+            padding: 14px 36px;
+            font-size: 1.2rem;
             font-family: var(--font-kids);
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 0px #1B5E20;
-            transition: all 0.1s ease;
-            margin-top: 25px;
+            box-shadow: 0 6px 0px var(--safari-dark), 0 10px 20px rgba(0,0,0,0.15);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            width: auto;
+            min-width: 200px;
+            touch-action: manipulation;
         }
 
         .btn-action:active {
             transform: translateY(4px);
-            box-shadow: 0 2px 0px #1B5E20;
+            box-shadow: 0 2px 0px var(--safari-dark), 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* --- HUD CONTROLS --- */
+        /* --- GAMEPLAY HUD --- */
         .hud-row {
             width: 100%;
             background-color: var(--safari-green);
@@ -155,51 +184,86 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 10px 14px;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            z-index: 12;
+            gap: 6px;
         }
 
         .hud-item {
-            background-color: rgba(255,255,255,0.2);
-            padding: 6px 14px;
+            background-color: rgba(255, 255, 255, 0.22);
+            padding: 6px 12px;
             border-radius: 20px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        /* --- SNAKE MAP ARENA --- */
+        .hud-btn {
+            background-color: rgba(255, 255, 255, 0.25);
+            border: none;
+            color: var(--white);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .hud-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* --- SNAKE CANVAS ARENA --- */
         .canvas-frame-container {
             flex: 1;
+            width: 100%;
             position: relative;
-            background-color: #F9FDF9;
+            background-color: #F0F8F1;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 8px;
+            overflow: hidden;
+            touch-action: none;
         }
 
         #safari-game-canvas {
             background-color: #E8F5E9;
-            border: 3px solid rgba(46, 125, 50, 0.2);
+            border: 3px solid rgba(46, 125, 50, 0.3);
             border-radius: 16px;
+            box-shadow: inset 0 0 20px rgba(46, 125, 50, 0.08);
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
         }
 
-        /* --- JOYPAD SYSTEM --- */
+        /* --- JOYPAD / D-PAD CONTROLS --- */
         .joypad-panel {
+            width: 100%;
             background-color: #E8F5E9;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-top: 2px solid rgba(46, 125, 50, 0.1);
+            border-top: 2px solid rgba(46, 125, 50, 0.15);
+            flex-shrink: 0;
         }
 
         .d-pad-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 8px;
-            width: 170px;
-            height: 170px;
+            gap: 6px;
+            width: 160px;
+            height: 160px;
         }
 
         .joy-btn {
@@ -212,11 +276,15 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        .joy-btn:active {
+        .joy-btn:active, .joy-btn.active-press {
             transform: translateY(3px);
             border-bottom-width: 2px;
+            background-color: #C8E6C9;
         }
 
         /* --- ADAPTIVE QUIZ MODAL --- */
@@ -230,77 +298,97 @@
             z-index: 100;
             display: flex;
             flex-direction: column;
-            padding: 24px;
+            padding: 18px;
             animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            overflow-y: auto;
+        }
+
+        .quiz-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 12px;
         }
 
         .quiz-top-badge {
             background-color: #E8F5E9;
             color: var(--safari-green);
-            padding: 6px 16px;
+            padding: 6px 14px;
             border-radius: 30px;
             font-size: 0.85rem;
             font-weight: bold;
-            margin-bottom: 15px;
         }
 
         .question-bubble-box {
             background-color: #FAFAFA;
             border: 2px dashed var(--safari-green);
-            border-radius: 20px;
-            padding: 18px;
-            font-size: 1.1rem;
+            border-radius: 18px;
+            padding: 16px;
+            font-size: 1.05rem;
             font-weight: bold;
-            line-height: 1.45;
-            margin-bottom: 20px;
+            line-height: 1.4;
+            margin-bottom: 16px;
             text-align: left;
             color: var(--earth-brown);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
 
         .options-vertical-stack {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
         }
 
         .option-card-row {
             background-color: var(--white);
             border: 2px solid #DCEDC8;
-            border-bottom: 5px solid #C5E1A5;
-            border-radius: 16px;
-            padding: 14px 18px;
+            border-bottom: 4px solid #C5E1A5;
+            border-radius: 14px;
+            padding: 12px 16px;
             font-family: var(--font-kids);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             text-align: left;
             cursor: pointer;
             color: #33691E;
+            transition: all 0.15s ease;
+            touch-action: manipulation;
+        }
+
+        .option-card-row:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
         }
 
         .option-card-row.correct-choice {
             background-color: #E8F5E9 !important;
             border-color: #2E7D32 !important;
             color: #1B5E20 !important;
+            animation: popIn 0.3s ease-out;
         }
 
         .option-card-row.wrong-choice {
             background-color: #FFEBEE !important;
             border-color: #D32F2F !important;
             color: #C62828 !important;
+            animation: shake 0.4s ease;
         }
 
         .hint-banner-alert {
-            margin-top: auto;
+            margin-top: 14px;
             background-color: #FFF8E1;
             border-left: 5px solid var(--accent-gold);
             border-radius: 8px;
             padding: 12px;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             line-height: 1.4;
+            color: #5D4037;
         }
 
+        /* --- ANIMATIONS --- */
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-8px); }
@@ -315,85 +403,126 @@
             0%, 100% { opacity: 0.85; transform: scale(0.98); }
             50% { opacity: 1; transform: scale(1.02); }
         }
+
+        @keyframes popIn {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* --- SMALL DEVICE OPTIMIZATIONS --- */
+        @media (max-height: 650px) {
+            .decorative-badge { font-size: 3rem; }
+            .main-title { font-size: 1.6rem; }
+            .instruction-box { padding: 12px 14px; font-size: 0.85rem; }
+            .btn-action { padding: 10px 28px; font-size: 1.1rem; }
+            .d-pad-grid { width: 135px; height: 135px; gap: 4px; }
+            .joy-btn { font-size: 1.2rem; border-radius: 12px; }
+            .question-bubble-box { font-size: 0.95rem; padding: 12px; margin-bottom: 10px; }
+            .option-card-row { padding: 10px 14px; font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body>
 
     <div id="game-wrapper">
 
-        <div id="screen-logo" class="screen">
+        <!-- SCREEN 1: BRAND LOGO SPLASH -->
+        <div id="screen-logo" class="screen" onclick="skipLogoToIntro()">
             <img src="assets/innovine-logo.png" class="brand-logo-img" alt="Innovine Logo">
+            <div class="tap-skip-hint">Tap anywhere to start</div>
         </div>
 
+        <!-- SCREEN 2: INTRO MENU -->
         <div id="screen-intro" class="screen hidden">
-            <div class="decorative-badge">🦁</div>
-            <h1 class="main-title">Animal Adaptation<br>Safari Arcade</h1>
-            <p style="color: #5D4037; font-size: 1.05rem; padding: 0 12px;">Discover how amazing wildlife survives on Earth!</p>
+            <div></div>
+            <div>
+                <div class="decorative-badge">🦁</div>
+                <h1 class="main-title">Animal Adaptation<br>Safari Arcade</h1>
+                <p style="color: #5D4037; font-size: 1.05rem; margin-top: 8px; padding: 0 10px;">Discover how amazing wildlife survives on Earth!</p>
+            </div>
             <button class="btn-action" onclick="showInstructionsScreen()">Start Game ➔</button>
+            <div></div>
         </div>
 
+        <!-- SCREEN 3: INSTRUCTIONS -->
         <div id="screen-instructions" class="screen hidden">
-            <div class="decorative-badge">📝</div>
-            <h1 class="main-title" style="font-size: 1.8rem;">How to Play</h1>
-            
+            <div></div>
+            <div>
+                <div class="decorative-badge" style="font-size: 3.2rem;">📝</div>
+                <h1 class="main-title" style="font-size: 1.7rem;">How to Play</h1>
+            </div>
+
             <div class="instruction-box">
                 <ul>
-                    <li>Use <b>🔼 🔽 ◀️ ▶️</b> control pads to move the friendly trail.</li>
-                    <li>Chomp down on <b>2 pink stars</b> to pop open adaptation quiz screens.</li>
-                    <li>Answer each question correctly to secure <b>+20 points</b>.</li>
-                    <li>Watch your steps! You share <b>3 lives</b> across all quiz interactions.</li>
+                    <li>Use <b>🔼 🔽 ◀️️ ▶️</b> buttons or <b>swipe the screen</b> to guide your trail.</li>
+                    <li>Chomp down on <b>2 pink stars</b> to unlock adaptation safari quizzes.</li>
+                    <li>Answer questions correctly to earn <b>+20 points</b>!</li>
+                    <li>Watch your steps! You have <b>3 lives</b> across all quiz rounds.</li>
                 </ul>
             </div>
 
             <button class="btn-action" onclick="launchArcadeGameLoop()">Play Now 🚀</button>
+            <div></div>
         </div>
 
-        <div id="screen-gameplay" class="screen hidden" style="padding:0;">
+        <!-- SCREEN 4: GAMEPLAY -->
+        <div id="screen-gameplay" class="screen hidden" style="padding:0; justify-content: flex-start;">
             <div class="hud-row">
-                <div class="hud-item" id="hud-score">Score: 0</div>
-                <div class="hud-item" id="hud-berries">Stars: 0/2</div>
+                <div class="hud-item" id="hud-score">🏆 Score: 0</div>
+                <div class="hud-item" id="hud-berries">⭐ Stars: 0/2</div>
+                <button class="hud-btn" id="sound-toggle-btn" title="Toggle Sound" onclick="toggleMuteAudio()">🔊</button>
             </div>
 
-            <div class="canvas-frame-container">
+            <div class="canvas-frame-container" id="canvas-container">
                 <canvas id="safari-game-canvas"></canvas>
             </div>
 
             <div class="joypad-panel">
                 <div class="d-pad-grid">
                     <div></div>
-                    <button class="joy-btn" onclick="injectDirectionVector('UP')">🔼</button>
+                    <button class="joy-btn" id="btn-up" onclick="injectDirectionVector('UP')">🔼</button>
                     <div></div>
-                    <button class="joy-btn" onclick="injectDirectionVector('LEFT')">◀️</button>
-                    <div style="background-color: var(--accent-gold); border-radius: 50%; width:16px; height:16px; justify-self:center; align-self:center;"></div>
-                    <button class="joy-btn" onclick="injectDirectionVector('RIGHT')">▶️</button>
+                    <button class="joy-btn" id="btn-left" onclick="injectDirectionVector('LEFT')">◀️</button>
+                    <div style="background-color: var(--accent-gold); border-radius: 50%; width:14px; height:14px; justify-self:center; align-self:center; opacity: 0.7;"></div>
+                    <button class="joy-btn" id="btn-right" onclick="injectDirectionVector('RIGHT')">▶️</button>
                     <div></div>
-                    <button class="joy-btn" onclick="injectDirectionVector('DOWN')">🔽</button>
+                    <button class="joy-btn" id="btn-down" onclick="injectDirectionVector('DOWN')">🔽</button>
                     <div></div>
                 </div>
             </div>
         </div>
 
+        <!-- SCREEN 5: QUIZ MODAL -->
         <div id="screen-quiz" class="quiz-modal-container hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; width:100%;">
+            <div class="quiz-header-bar">
                 <div class="quiz-top-badge" id="quiz-header-badge">Question 1 / 3</div>
-                <div style="font-weight: bold; font-size:0.9rem;" id="quiz-lives-badge">❤️ Lives: 3/3</div>
+                <div style="font-weight: bold; font-size:0.9rem; color: #D32F2F;" id="quiz-lives-badge">❤️ Lives: 3/3</div>
             </div>
             <div class="question-bubble-box" id="quiz-question-lbl">Loading safari data...</div>
             <div class="options-vertical-stack" id="quiz-options-box"></div>
             <div class="hint-banner-alert hidden" id="quiz-hint-lbl"></div>
         </div>
 
-        <div id="screen-gameover" class="screen hidden">
-            <div style="font-size: 4.5rem; margin-bottom: 15px;" id="summary-emoticon">🏆</div>
+        <!-- SCREEN 6: GAME OVER / RESULTS -->
+        <div id="screen-gameover" class="screen hidden" style="justify-content: center; gap: 16px;">
+            <div style="font-size: 4rem; line-height: 1;" id="summary-emoticon">🏆</div>
             <h1 class="main-title">Safari Results</h1>
             
-            <div style="background-color: #E8F5E9; padding: 15px 45px; border-radius: 24px; margin-bottom: 20px; width: 80%;">
-                <span style="font-size: 0.9rem; color: var(--safari-green); text-transform: uppercase; font-weight: bold;">Final Score</span>
-                <div style="font-size: 3.2rem; font-weight: bold; color: var(--safari-green);" id="summary-score-lbl">0</div>
+            <div style="background-color: #E8F5E9; padding: 14px 30px; border-radius: 20px; width: 85%;">
+                <span style="font-size: 0.85rem; color: var(--safari-green); text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Final Score</span>
+                <div style="font-size: 3rem; font-weight: bold; color: var(--safari-green);" id="summary-score-lbl">0</div>
+                <div style="font-size: 0.85rem; color: #555; margin-top: 2px;" id="summary-high-score">Best Score: 0</div>
             </div>
 
-            <div style="background-color: #FAFAFA; border: 2px dashed #C5E1A5; padding: 16px; border-radius: 16px; margin-bottom: 25px; width: 100%; font-size: 1rem; color: var(--earth-brown); line-height: 1.4;" id="summary-subtext">
-                Feedback box container content loaded dynamically.
+            <div style="background-color: #FAFAFA; border: 2px dashed #C5E1A5; padding: 14px; border-radius: 16px; width: 100%; font-size: 0.95rem; color: var(--earth-brown); line-height: 1.4;" id="summary-subtext">
+                Feedback box container content.
             </div>
 
             <button class="btn-action" onclick="resetWholeGameContext()">Play Again 🔄</button>
@@ -402,8 +531,94 @@
     </div>
 
     <script>
-        // --- ROOT AUDIO RESOURCE PRELOAD HANDLERS WITH CORS CRASH PROTECTION ---
+        // --- DYNAMIC VIEWPORT & SCREEN HEIGHT REGISTRATION ---
+        function updateAppViewportHeight() {
+            const vh = window.innerHeight;
+            document.documentElement.style.setProperty('--app-height', `${vh}px`);
+        }
+        window.addEventListener('resize', updateAppViewportHeight);
+        window.addEventListener('orientationchange', () => setTimeout(updateAppViewportHeight, 100));
+        updateAppViewportHeight();
+
+        // --- ROOT AUDIO RESOURCE PRELOAD HANDLERS WITH CORS & SYNTHESIS FALLBACK ---
         let sfxCorrect, sfxWrong, sfxStar;
+        let isAudioMuted = false;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtxClass) {
+                    audioCtx = new AudioCtxClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Web Audio Synthesizer fallback for low-connectivity/blocked environments
+        function playSynthTone(type) {
+            if (isAudioMuted) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.exponentialRampToValueAtTime(130.81, now + 0.25); // C3
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'star') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, now); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch(e) {
+                // Silent fail gracefully
+            }
+        }
+
+        function safePlayAudio(audioObj, synthFallbackType) {
+            if (isAudioMuted) return;
+            getAudioContext();
+            
+            if (audioObj && typeof audioObj.play === 'function') {
+                audioObj.currentTime = 0;
+                let playPromise = audioObj.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        playSynthTone(synthFallbackType);
+                    });
+                }
+            } else {
+                playSynthTone(synthFallbackType);
+            }
+        }
 
         try {
             sfxCorrect = new Audio('assets/correct.mp3');
@@ -414,11 +629,15 @@
             sfxWrong.preload = 'auto';
             sfxStar.preload = 'auto';
         } catch (e) {
-            console.warn("Audio loading skipped due to local browser security restriction. Running in silent fallback mode.");
-            const silentFallback = { play: () => Promise.resolve(), currentTime: 0 };
-            sfxCorrect = silentFallback;
-            sfxWrong = silentFallback;
-            sfxStar = silentFallback;
+            sfxCorrect = null;
+            sfxWrong = null;
+            sfxStar = null;
+        }
+
+        function toggleMuteAudio() {
+            isAudioMuted = !isAudioMuted;
+            const btn = document.getElementById('sound-toggle-btn');
+            btn.innerText = isAudioMuted ? '🔇' : '🔊';
         }
 
         // --- CHAPTER 5 CORE SIMPLIFIED NATURE POOL ---
@@ -438,6 +657,7 @@
         ];
 
         let gameScore = 0;
+        let highScore = parseInt(localStorage.getItem('safari_high_score') || '0', 10);
         let livesLeft = 3;
         let runtimeQuestionsPool = [];
         let indexQuizBatchTracker = 0;
@@ -449,7 +669,8 @@
         const canvas = document.getElementById("safari-game-canvas");
         const ctx = canvas.getContext("2d");
         const boxSize = 20; 
-        let gridWidth, gridHeight;
+        let gridWidth = 15;
+        let gridHeight = 15;
 
         let snakeArr = [];
         let currentDirection = "RIGHT";
@@ -457,28 +678,43 @@
         let targetStarObj = { x: 0, y: 0 };
         let consumedStarsCounter = 0;
         let engineClockTimerId = null;
+        let splashTimerId = null;
 
-        // AUTOMATIC TIMER TRANSITION FROM LOGO TO TITLE SCREEN (EXACTLY 5 SECONDS)
+        // AUTOMATIC TIMER TRANSITION FROM LOGO TO TITLE SCREEN
         window.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                document.getElementById('screen-logo').classList.add('hidden');
-                document.getElementById('screen-intro').classList.remove('hidden');
-            }, 5000);
+            splashTimerId = setTimeout(() => {
+                skipLogoToIntro();
+            }, 3000);
         });
 
+        function skipLogoToIntro() {
+            if (splashTimerId) clearTimeout(splashTimerId);
+            const logoScreen = document.getElementById('screen-logo');
+            if (!logoScreen.classList.contains('hidden')) {
+                logoScreen.classList.add('hidden');
+                document.getElementById('screen-intro').classList.remove('hidden');
+            }
+        }
+
         function showInstructionsScreen() {
+            getAudioContext();
             document.getElementById('screen-intro').classList.add('hidden');
             document.getElementById('screen-instructions').classList.remove('hidden');
         }
 
         function setCanvasViewportDimensions() {
-            canvas.width = 300;
-            canvas.height = 300;
+            const container = document.getElementById("canvas-container");
+            const maxDim = Math.min(container.clientWidth - 16, container.clientHeight - 16, 360);
+            const sideLength = Math.max(Math.floor(maxDim / boxSize) * boxSize, 260);
+
+            canvas.width = sideLength;
+            canvas.height = sideLength;
             gridWidth = canvas.width / boxSize;
             gridHeight = canvas.height / boxSize;
         }
 
         function launchArcadeGameLoop() {
+            getAudioContext();
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('screen-gameplay').classList.remove('hidden');
             
@@ -487,8 +723,11 @@
             resetSnakePositionContext();
             spawnRandomStarEntity();
             
+            gameScore = 0;
+            livesLeft = 3;
             consumedStarsCounter = 0;
-            document.getElementById('hud-berries').innerText = `Stars: 0/2`;
+            document.getElementById('hud-score').innerText = `🏆 Score: ${gameScore}`;
+            document.getElementById('hud-berries').innerText = `⭐ Stars: 0/2`;
             
             startSnakeClockTimer();
         }
@@ -499,10 +738,11 @@
         }
 
         function resetSnakePositionContext() {
+            const startY = Math.floor(gridHeight / 2);
             snakeArr = [
-                { x: 5, y: 7 },
-                { x: 4, y: 7 },
-                { x: 3, y: 7 }
+                { x: 5, y: startY },
+                { x: 4, y: startY },
+                { x: 3, y: startY }
             ];
             currentDirection = "RIGHT";
             nextDirection = "RIGHT";
@@ -518,23 +758,74 @@
         }
 
         function injectDirectionVector(dir) {
+            getAudioContext();
             if (dir === "UP" && currentDirection !== "DOWN") nextDirection = "UP";
             if (dir === "DOWN" && currentDirection !== "UP") nextDirection = "DOWN";
             if (dir === "LEFT" && currentDirection !== "RIGHT") nextDirection = "LEFT";
             if (dir === "RIGHT" && currentDirection !== "LEFT") nextDirection = "RIGHT";
         }
 
+        // TOUCH SWIPE CONTROLS FOR CANVAS
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        const canvasContainerNode = document.getElementById("canvas-container");
+        canvasContainerNode.addEventListener("touchstart", (e) => {
+            if (e.touches.length > 0) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        canvasContainerNode.addEventListener("touchend", (e) => {
+            if (!e.changedTouches || e.changedTouches.length === 0) return;
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            const deltaY = e.changedTouches[0].clientY - touchStartY;
+            const minSwipeDist = 20;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (Math.abs(deltaX) > minSwipeDist) {
+                    injectDirectionVector(deltaX > 0 ? "RIGHT" : "LEFT");
+                }
+            } else {
+                if (Math.abs(deltaY) > minSwipeDist) {
+                    injectDirectionVector(deltaY > 0 ? "DOWN" : "UP");
+                }
+            }
+        }, { passive: true });
+
+        // KEYBOARD EVENT LISTENERS
         document.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowUp" || e.key === "w") injectDirectionVector("UP");
-            if (e.key === "ArrowDown" || e.key === "s") injectDirectionVector("DOWN");
-            if (e.key === "ArrowLeft" || e.key === "a") injectDirectionVector("LEFT");
-            if (e.key === "ArrowRight" || e.key === "d") injectDirectionVector("RIGHT");
+            const gameplayScreen = document.getElementById('screen-gameplay');
+            if (gameplayScreen.classList.contains('hidden')) return;
+
+            if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") injectDirectionVector("UP");
+            if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") injectDirectionVector("DOWN");
+            if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") injectDirectionVector("LEFT");
+            if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") injectDirectionVector("RIGHT");
         });
+
+        // HIGH-RESPONSIVENESS TOUCH EVENT BINDING FOR D-PAD
+        const bindPadBtn = (id, dir) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const handler = (e) => {
+                e.preventDefault();
+                injectDirectionVector(dir);
+                el.classList.add('active-press');
+                setTimeout(() => el.classList.remove('active-press'), 120);
+            };
+            el.addEventListener('touchstart', handler, { passive: false });
+        };
+        bindPadBtn('btn-up', 'UP');
+        bindPadBtn('btn-down', 'DOWN');
+        bindPadBtn('btn-left', 'LEFT');
+        bindPadBtn('btn-right', 'RIGHT');
 
         function startSnakeClockTimer() {
             if (engineClockTimerId) clearInterval(engineClockTimerId);
-            // REDUCED PACE: Shifted interval tick rate from 160ms to 320ms for comfortable elementary student play
-            engineClockTimerId = setInterval(processSnakeGameFrame, 320);
+            // Optimised for comfortable elementary gameplay & responsive low-spec tick rate
+            engineClockTimerId = setInterval(processSnakeGameFrame, 280);
         }
 
         function processSnakeGameFrame() {
@@ -547,13 +838,16 @@
             if (currentDirection === "LEFT") headX--;
             if (currentDirection === "RIGHT") headX++;
 
+            // Screen wrapping for forgiving kids mechanics
             if (headX >= gridWidth) headX = 0;
             if (headX < 0) headX = gridWidth - 1;
             if (headY >= gridHeight) headY = 0;
             if (headY < 0) headY = gridHeight - 1;
 
+            // Self-collision safety check
             if (snakeArr.some((seg, i) => i > 0 && seg.x === headX && seg.y === headY)) {
                 resetSnakePositionContext();
+                renderCanvasGraphics();
                 return;
             }
 
@@ -562,16 +856,13 @@
 
             if (headX === targetStarObj.x && headY === targetStarObj.y) {
                 consumedStarsCounter++;
-                document.getElementById('hud-berries').innerText = `Stars: ${consumedStarsCounter}/2`;
+                document.getElementById('hud-berries').innerText = `⭐ Stars: ${consumedStarsCounter}/2`;
                 
-                try {
-                    sfxStar.currentTime = 0;
-                    sfxStar.play().catch(() => {});
-                } catch(err){}
+                safePlayAudio(sfxStar, 'star');
 
                 if (consumedStarsCounter >= 2) {
                     clearInterval(engineClockTimerId);
-                    setTimeout(triggerQuizModalSequence, 400);
+                    setTimeout(triggerQuizModalSequence, 350);
                 } else {
                     spawnRandomStarEntity();
                 }
@@ -582,28 +873,75 @@
             renderCanvasGraphics();
         }
 
+        let starPulseAngle = 0;
+
         function renderCanvasGraphics() {
+            // Draw background grid
             ctx.fillStyle = "#E8F5E9";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // DRAW TARGET STAR
+            // Subtle grid line pattern
+            ctx.strokeStyle = "rgba(46, 125, 50, 0.05)";
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= canvas.width; x += boxSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += boxSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // DRAW TARGET STAR WITH GLOW
+            starPulseAngle += 0.15;
+            const pulseScale = 1 + Math.sin(starPulseAngle) * 0.1;
+            const radiusOffset = boxSize / 2;
+            const starCenterX = targetStarObj.x * boxSize + radiusOffset;
+            const starCenterY = targetStarObj.y * boxSize + radiusOffset;
+
+            ctx.fillStyle = "rgba(255, 64, 129, 0.25)";
+            ctx.beginPath();
+            ctx.arc(starCenterX, starCenterY, (radiusOffset + 2) * pulseScale, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.fillStyle = "#FF4081";
             ctx.beginPath();
-            let radiusOffset = boxSize / 2;
-            ctx.arc(targetStarObj.x * boxSize + radiusOffset, targetStarObj.y * boxSize + radiusOffset, radiusOffset - 2, 0, Math.PI * 2);
+            ctx.arc(starCenterX, starCenterY, (radiusOffset - 3) * pulseScale, 0, Math.PI * 2);
             ctx.fill();
 
             // DRAW SAFARI TRAIL
             snakeArr.forEach((seg, i) => {
-                ctx.fillStyle = i === 0 ? "#1B5E20" : "#4CAF50";
-                ctx.beginPath();
-                ctx.roundRect(seg.x * boxSize + 1, seg.y * boxSize + 1, boxSize - 2, boxSize - 2, i === 0 ? 8 : 4);
-                ctx.fill();
+                const segX = seg.x * boxSize;
+                const segY = seg.y * boxSize;
 
                 if (i === 0) {
+                    // Head segment
+                    ctx.fillStyle = "#1B5E20";
+                    ctx.beginPath();
+                    ctx.roundRect(segX + 1, segY + 1, boxSize - 2, boxSize - 2, 8);
+                    ctx.fill();
+
+                    // Eyes pointing in currentDirection
                     ctx.fillStyle = "#FFFFFF";
-                    ctx.fillRect(seg.x * boxSize + 4, seg.y * boxSize + 5, 3, 3);
-                    ctx.fillRect(seg.x * boxSize + 12, seg.y * boxSize + 5, 3, 3);
+                    let eye1X = segX + 5, eye1Y = segY + 5;
+                    let eye2X = segX + 11, eye2Y = segY + 5;
+
+                    if (currentDirection === "RIGHT") { eye1X = segX + 12; eye1Y = segY + 4; eye2X = segX + 12; eye2Y = segY + 12; }
+                    else if (currentDirection === "LEFT") { eye1X = segX + 4; eye1Y = segY + 4; eye2X = segX + 4; eye2Y = segY + 12; }
+                    else if (currentDirection === "DOWN") { eye1X = segX + 4; eye1Y = segY + 12; eye2X = segX + 12; eye2Y = segY + 12; }
+                    
+                    ctx.fillRect(eye1X, eye1Y, 3, 3);
+                    ctx.fillRect(eye2X, eye2Y, 3, 3);
+                } else {
+                    // Body segments
+                    ctx.fillStyle = i % 2 === 0 ? "#4CAF50" : "#66BB6A";
+                    ctx.beginPath();
+                    ctx.roundRect(segX + 1.5, segY + 1.5, boxSize - 3, boxSize - 3, 5);
+                    ctx.fill();
                 }
             });
         }
@@ -632,7 +970,7 @@
             activeShuffledOptions.forEach((opt, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-card-row';
-                btn.innerText = opt;
+                btn.innerText = `${index + 1}.  ${opt}`;
                 btn.onclick = () => evaluateOptionSubmission(index, btn);
                 box.appendChild(btn);
             });
@@ -645,21 +983,15 @@
             allOptionNodes.forEach(b => b.style.pointerEvents = 'none');
 
             if (selectedIdx === correctOptionIndexInActive) {
-                try {
-                    sfxCorrect.currentTime = 0;
-                    sfxCorrect.play().catch(() => {});
-                } catch(err){}
+                safePlayAudio(sfxCorrect, 'correct');
 
                 btnNode.classList.add('correct-choice');
                 gameScore += 20;
-                document.getElementById('hud-score').innerText = `Score: ${gameScore}`;
+                document.getElementById('hud-score').innerText = `🏆 Score: ${gameScore}`;
 
-                setTimeout(advanceQuizLoopState, 1200);
+                setTimeout(advanceQuizLoopState, 1100);
             } else {
-                try {
-                    sfxWrong.currentTime = 0;
-                    sfxWrong.play().catch(() => {});
-                } catch(err){}
+                safePlayAudio(sfxWrong, 'wrong');
 
                 btnNode.classList.add('wrong-choice');
                 questionAttemptsTracker++;
@@ -675,12 +1007,15 @@
                 } else {
                     livesLeft--;
                     document.getElementById('quiz-lives-badge').innerText = `❤️ Lives: ${livesLeft}/3`;
-                    allOptionNodes[correctOptionIndexInActive].classList.add('correct-choice');
+                    
+                    if (allOptionNodes[correctOptionIndexInActive]) {
+                        allOptionNodes[correctOptionIndexInActive].classList.add('correct-choice');
+                    }
 
                     if (livesLeft <= 0) {
-                        setTimeout(() => concludeArcadeSession(false), 1500);
+                        setTimeout(() => concludeArcadeSession(false), 1400);
                     } else {
-                        setTimeout(advanceQuizLoopState, 2000);
+                        setTimeout(advanceQuizLoopState, 1800);
                     }
                 }
             }
@@ -690,12 +1025,12 @@
             batchCounterCount++;
             indexQuizBatchTracker++;
 
-            if (indexQuizBatchTracker >= 12) {
+            if (indexQuizBatchTracker >= MASTER_QUESTIONS_ARRAY.length) {
                 concludeArcadeSession(true);
             } else if (batchCounterCount >= 3) {
                 document.getElementById('screen-quiz').classList.add('hidden');
                 consumedStarsCounter = 0;
-                document.getElementById('hud-berries').innerText = `Stars: 0/2`;
+                document.getElementById('hud-berries').innerText = `⭐ Stars: 0/2`;
                 resetSnakePositionContext();
                 spawnRandomStarEntity();
                 startSnakeClockTimer();
@@ -709,20 +1044,28 @@
             document.getElementById('screen-gameplay').classList.add('hidden');
             document.getElementById('screen-gameover').classList.remove('hidden');
 
+            if (gameScore > highScore) {
+                highScore = gameScore;
+                try {
+                    localStorage.setItem('safari_high_score', highScore.toString());
+                } catch(e){}
+            }
+
             document.getElementById('summary-score-lbl').innerText = gameScore;
+            document.getElementById('summary-high-score').innerText = `Best Score: ${highScore}`;
 
             let feedbackText = "";
             let emoticon = "🏆";
 
             if (victoryFlag && gameScore >= 200) {
                 emoticon = "🦁";
-                feedbackText = "⭐ <strong>Super Safari King!</strong> You answered everything perfectly and fully understand how animals adapt to live safely on Earth!";
+                feedbackText = "⭐ <b>Super Safari King!</b> You answered everything perfectly and fully understand how animals adapt to live safely on Earth!";
             } else if (gameScore >= 120) {
                 emoticon = "🦊";
-                feedbackText = "👍 <strong>Great Job Explorer!</strong> You have a solid grasp of animal camouflage, habitats, and special traits. Try again to get a perfect score!";
+                feedbackText = "👍 <b>Great Job Explorer!</b> You have a solid grasp of animal camouflage, habitats, and special traits. Try again to get a perfect score!";
             } else {
                 emoticon = "🐢";
-                feedbackText = "🍃 <strong>Keep Learning!</strong> Some adaptations can be tricky. Look at your text fields again and try another run to hit the top score!";
+                feedbackText = "🍃 <b>Keep Learning!</b> Some adaptations can be tricky. Review your science notes and try another run to hit the top score!";
             }
 
             document.getElementById('summary-emoticon').innerText = emoticon;
@@ -732,16 +1075,20 @@
         function resetWholeGameContext() {
             gameScore = 0;
             livesLeft = 3;
-            document.getElementById('hud-score').innerText = `Score: 0`;
+            document.getElementById('hud-score').innerText = `🏆 Score: 0`;
             document.getElementById('screen-gameover').classList.add('hidden');
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('screen-intro').classList.remove('hidden'); 
         }
 
-        document.addEventListener('click', () => {
-            const context = new (window.AudioContext || window.webkitAudioContext)();
-            if (context.state === 'suspended') context.resume();
-        }, { once: true });
+        // Global User-Gesture unlock for Mobile Web Audio Contexts
+        const unlockAudioOnGesture = () => {
+            getAudioContext();
+            document.removeEventListener('click', unlockAudioOnGesture);
+            document.removeEventListener('touchstart', unlockAudioOnGesture);
+        };
+        document.addEventListener('click', unlockAudioOnGesture, { once: true });
+        document.addEventListener('touchstart', unlockAudioOnGesture, { once: true });
     </script>
 </body>
 </html>
