@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#e0f2fe">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Chapter 7: My Home Game</title>
     <style>
         :root {
@@ -15,7 +14,7 @@
             --board-green: #14532d;
         }
 
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -28,23 +27,23 @@
         html, body {
             width: 100%;
             height: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
             overflow-x: hidden;
             background-color: var(--bg-sky);
-            color: var(--slate-dark);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--slate-dark);
             -webkit-text-size-adjust: 100%;
         }
 
         body {
-            min-height: 100vh;
-            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
         }
 
-        /* Screen Layout Wrapper (Scrollable Vertically, No Horizontal Scroll) */
+        /* Screen Layout Wrapper (Scrollable Up and Down) */
         .screen-layout {
             display: none;
             width: 100%;
@@ -57,9 +56,8 @@
             align-items: center;
             gap: 15px;
             overflow-y: auto; 
-            overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
-            contain: layout style;
+            margin: 0 auto;
         }
 
         .active-view {
@@ -72,7 +70,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
+            width: 100%;
             height: 100vh;
             height: 100dvh;
             display: flex;
@@ -86,8 +84,8 @@
             width: 75%;
             max-width: 300px;
             height: auto;
-            will-change: transform;
             animation: pulseSoft 1.5s infinite ease-in-out;
+            will-change: transform;
         }
         .loading-track {
             width: 65%;
@@ -103,8 +101,8 @@
             height: 100%;
             background: var(--clay-orange);
             transform: translateX(-100%);
-            will-change: transform;
             animation: startLoad 4.5s forwards linear;
+            will-change: transform;
         }
 
         /* Welcome Main Menu */
@@ -116,8 +114,8 @@
         .welcome-house {
             font-size: clamp(70px, 18vh, 120px);
             line-height: 1;
-            will-change: transform;
             animation: floatMove 3s infinite ease-in-out;
+            will-change: transform;
         }
         .welcome-heading {
             font-size: clamp(24px, 6vw, 36px);
@@ -129,20 +127,17 @@
             background: var(--clay-orange);
             color: white;
             border: none;
-            padding: 16px 42px;
-            font-size: clamp(17px, 4.5vw, 22px);
+            padding: 16px 40px;
+            font-size: clamp(16px, 4.5vw, 22px);
             font-weight: bold;
             border-radius: 35px;
             cursor: pointer;
-            min-height: 48px;
-            min-width: 160px;
-            box-shadow: 0 7px 0 #c2410c;
-            transform: translateZ(0);
+            box-shadow: 0 6px 0 #c2410c;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
         .btn-push:active {
             transform: translateY(4px);
-            box-shadow: 0 3px 0 #c2410c;
+            box-shadow: 0 2px 0 #c2410c;
         }
 
         .hud-row {
@@ -170,9 +165,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             flex-shrink: 0;
-            position: relative;
         }
         .display-frame {
             width: 100%;
@@ -182,20 +176,20 @@
             border-radius: 16px;
             background-color: #fafafa;
             position: relative;
-            min-height: 120px;
             overflow: hidden;
+            min-height: 120px;
         }
         .display-frame img {
             width: 100%;
             max-width: 380px; 
             height: auto;
-            max-height: 220px;
+            max-height: 200px;
             object-fit: contain;
             border-radius: 12px;
         }
 
         .question-bubble {
-            font-size: clamp(15px, 4vw, 20px);
+            font-size: clamp(15px, 4vw, 19px);
             font-weight: 700;
             text-align: center;
             color: #0369a1;
@@ -205,24 +199,18 @@
             word-break: break-word;
         }
 
-        /* Touch Swipeable Conveyor Belt Track Framework - Zebra Crossing (Black & White Lines Only) */
+        /* Touch Swipeable Conveyor Belt Track Framework */
         .conveyor-belt-system {
             width: 100%;
-            background: repeating-linear-gradient(
-                90deg,
-                #1e293b 0px,
-                #1e293b 25px,
-                #ffffff 25px,
-                #ffffff 50px
-            );
-            border-top: 6px solid #0f172a;
-            border-bottom: 8px solid #0f172a;
-            padding: 16px 0;
+            background: #475569;
+            border-top: 6px solid #334155;
+            border-bottom: 8px solid #1e293b;
+            padding: 14px 0;
             overflow-x: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             border-radius: 20px;
-            box-shadow: inset 0 8px 16px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: inset 0 8px 16px rgba(0,0,0,0.4);
             flex-shrink: 0;
         }
         .conveyor-belt-system::-webkit-scrollbar {
@@ -232,10 +220,11 @@
         .conveyor-track-infinite {
             display: flex;
             width: max-content;
-            gap: 25px;
+            gap: 20px;
             padding: 0 20px;
-            will-change: transform;
             animation: moveConveyorLoop 25s linear infinite;
+            will-change: transform;
+            transform: translateZ(0);
         }
 
         .conveyor-belt-system:active .conveyor-track-infinite {
@@ -243,29 +232,27 @@
         }
 
         .choice-item-btn {
-            background: #ffffff;
+            background: white;
             border: 4px solid #cbd5e1;
             border-radius: 20px;
-            padding: 12px 16px;
+            padding: 10px 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             text-align: center;
             font-weight: 700;
             font-size: clamp(13px, 3.5vw, 15px);
             color: #1e293b;
-            box-shadow: 0 6px 0 #94a3b8;
+            box-shadow: 0 5px 0 #94a3b8;
             flex-shrink: 0;
-            max-width: 260px;
-            min-height: 54px;
-            transform: translateZ(0);
+            max-width: 240px;
+            transition: transform 0.1s ease;
         }
         .choice-item-btn img {
             height: clamp(65px, 12vh, 90px);
             width: auto;
-            max-width: 120px;
             object-fit: contain;
             pointer-events: none;
         }
@@ -275,40 +262,38 @@
             display: none;
             width: 100%;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
             flex-shrink: 0;
         }
         .btn-stamp {
             border: none;
-            padding: 18px 10px;
+            padding: 16px 10px;
             font-size: clamp(15px, 4vw, 18px);
             font-weight: 900;
             color: white;
-            border-radius: 24px;
+            border-radius: 20px;
             cursor: pointer;
-            min-height: 52px;
-            box-shadow: 0 7px 0 rgba(0,0,0,0.25);
-            transform: translateZ(0);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+            transition: transform 0.1s ease;
         }
-        .btn-danger { background: var(--brick-red); box-shadow: 0 7px 0 #b91c1c; }
-        .btn-safe { background: var(--grass-green); box-shadow: 0 7px 0 #15803d; }
-        .btn-stamp:active { transform: translateY(4px); box-shadow: 0 3px 0 rgba(0,0,0,0.25); }
+        .btn-danger { background: var(--brick-red); box-shadow: 0 6px 0 #b91c1c; }
+        .btn-safe { background: var(--grass-green); box-shadow: 0 6px 0 #15803d; }
+        .btn-stamp:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
 
         .stamp-feedback-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-10deg);
-            font-size: clamp(26px, 7vw, 36px);
+            font-size: clamp(24px, 6vw, 36px);
             font-weight: 950;
             padding: 10px 20px;
             border-radius: 16px;
             background: white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             display: none;
             z-index: 10;
             white-space: nowrap;
-            pointer-events: none;
         }
 
         .animate-shake { animation: shakeLeftRight 0.4s ease-in-out; border-color: var(--brick-red)!important; background: #fef2f2!important; }
@@ -319,14 +304,14 @@
             color: white;
             justify-content: center;
             text-align: center;
-            gap: 25px;
-            padding: 25px 15px;
+            gap: 20px;
+            padding: 20px;
         }
         .blackboard {
             background: var(--board-green);
-            border: 10px solid #b45309;
+            border: 8px solid #b45309;
             border-radius: 16px;
-            padding: 25px 18px;
+            padding: 24px 16px;
             width: 100%;
             box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
         }
@@ -337,57 +322,43 @@
             font-weight: bold;
         }
 
-        /* Keyframes optimized for smooth GPU performance */
-        @keyframes moveConveyorLoop {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(calc(-50% - 12.5px), 0, 0); }
-        }
-        @keyframes startLoad { from { transform: translate3d(-100%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
-        @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-        @keyframes floatMove { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -10px, 0); } }
-        @keyframes pulsePop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        @keyframes shakeLeftRight {
-            0%, 100% { transform: translate3d(0, 0, 0); }
-            25% { transform: translate3d(-6px, 0, 0); }
-            50% { transform: translate3d(6px, 0, 0); }
-            75% { transform: translate3d(-4px, 0, 0); }
-        }
-
-        /* Landscape and Small Device Responsive Optimization */
-        @media (max-height: 600px) and (orientation: landscape) {
+        /* Low-height & Landscape Device Enhancements */
+        @media (max-height: 600px) {
             .screen-layout {
-                padding: 10px;
-                gap: 10px;
+                gap: 8px;
+                padding: 8px;
             }
             .welcome-house {
-                font-size: 60px;
+                font-size: 50px;
             }
             .display-frame img {
-                max-height: 130px;
-            }
-            .hud-row {
-                padding: 8px 14px;
+                max-height: 120px;
             }
             .choice-item-btn img {
                 height: 55px;
             }
-            .btn-push {
-                padding: 10px 30px;
+            .btn-stamp {
+                padding: 12px 6px;
+            }
+            .main-card {
+                padding: 10px;
+                gap: 8px;
             }
         }
 
-        @media (max-width: 360px) {
-            .screen-layout {
-                padding: 10px;
-                gap: 12px;
-            }
-            .choice-item-btn {
-                max-width: 200px;
-                padding: 8px 12px;
-            }
-            .choice-item-btn img {
-                height: 60px;
-            }
+        @keyframes moveConveyorLoop {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(calc(-50% - 10px), 0, 0); }
+        }
+        @keyframes startLoad { from { transform: translateX(-100%); } to { transform: translateX(0%); } }
+        @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+        @keyframes floatMove { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulsePop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes shakeLeftRight {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-4px); }
         }
     </style>
 </head>
@@ -398,7 +369,7 @@
     <audio id="audio-cheer" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <div id="screen-splash">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo" decoding="async">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
         <div class="loading-track">
             <div class="loading-bar-fill"></div>
         </div>
@@ -418,7 +389,7 @@
 
         <div class="main-card">
             <div id="canvas-img-frame" class="display-frame">
-                <img id="canvas-target-pic" src="" alt="Target Display" decoding="async">
+                <img id="canvas-target-pic" src="" alt="Target Display">
                 <div id="stamp-alert-overlay" class="stamp-feedback-overlay"></div>
             </div>
             
@@ -436,7 +407,7 @@
     </div>
 
     <div id="screen-explain" class="screen-layout overlay-screen">
-        <div style="font-size: 60px;">💡</div>
+        <div style="font-size: clamp(50px, 10vh, 65px);">💡</div>
         <h2 style="color: #f59e0b; font-size: clamp(22px, 5vw, 26px);">Let's Think!</h2>
         <p id="explain-message-text" style="font-size: clamp(15px, 4vw, 18px); max-width: 420px; line-height: 1.5; font-weight: 600;"></p>
         <button class="btn-push" style="background:#3b82f6; box-shadow: 0 6px 0 #1d4ed8;" onclick="returnToGameLayout()">Try Again 🔄</button>
@@ -450,20 +421,21 @@
     </div>
 
     <div id="screen-victory" class="screen-layout overlay-screen" style="background: #1e1b4b;">
-        <div style="font-size: clamp(70px, 18vh, 90px); animation: floatMove 2.5s infinite ease-in-out;">🏆</div>
+        <div style="font-size: clamp(65px, 15vh, 90px); animation: floatMove 2.5s infinite ease-in-out;">🏆</div>
         <h1 style="color: #f59e0b; font-size: clamp(26px, 6vw, 32px); font-weight: 900;">Super Eco Hero!</h1>
         <p style="font-size: clamp(15px, 4vw, 18px); max-width: 450px; color: #cbd5e1; font-weight: 600;">You know all about houses, clean rooms, and how to stay safe!</p>
         <button class="btn-push" onclick="restartWholeApp()">Play Again 🔄</button>
     </div>
 
     <script>
-        // Universal Mobile Audio Autoplay Unlocker
-        let audioUnlocked = false;
-        function unlockAudio() {
-            if (audioUnlocked) return;
-            const audioIds = ['audio-right', 'audio-wrong', 'audio-cheer'];
-            audioIds.forEach(id => {
-                const a = document.getElementById(id);
+        // Web Audio Autoplay Mobile Unlock Handler
+        function unlockAudioContext() {
+            const audios = [
+                document.getElementById('audio-right'),
+                document.getElementById('audio-wrong'),
+                document.getElementById('audio-cheer')
+            ];
+            audios.forEach(a => {
                 if (a) {
                     a.play().then(() => {
                         a.pause();
@@ -471,20 +443,15 @@
                     }).catch(() => {});
                 }
             });
-            audioUnlocked = true;
-            document.removeEventListener('touchstart', unlockAudio);
-            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudioContext);
+            document.removeEventListener('click', unlockAudioContext);
         }
-        document.addEventListener('touchstart', unlockAudio, { passive: true });
-        document.addEventListener('click', unlockAudio, { passive: true });
+        document.addEventListener('touchstart', unlockAudioContext, { once: true });
+        document.addEventListener('click', unlockAudioContext, { once: true });
 
-        // Optimized Priority Preloading
+        // Preload Priority Graphics
         const priorityPics = ["assets/building.png", "assets/hut.png", "assets/igloo.png"];
-        priorityPics.forEach(path => { 
-            const dummy = new Image(); 
-            dummy.decoding = "async";
-            dummy.src = path; 
-        });
+        priorityPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
 
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -492,14 +459,9 @@
                     "assets/kitchen.png", "assets/bedroom.png", "assets/livingroom.png",
                     "assets/throwingwaste.png", "assets/climbingladder.png", "assets/playingwithmatchbox.png"
                 ];
-                backgroundPics.forEach(path => { 
-                    const dummy = new Image(); 
-                    dummy.decoding = "async";
-                    dummy.src = path; 
-                });
-            }, 800);
+                backgroundPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
+            }, 1000);
 
-            // Firm 5000ms splash delay hold
             setTimeout(() => { 
                 const splash = document.getElementById('screen-splash');
                 if (splash) splash.style.display = 'none';
@@ -583,10 +545,7 @@
         function changeScreen(id) {
             document.querySelectorAll('.screen-layout').forEach(s => s.classList.remove('active-view'));
             const target = document.getElementById(id);
-            if (target) {
-                target.classList.add('active-view');
-                target.scrollTop = 0;
-            }
+            if (target) target.classList.add('active-view');
         }
 
         function scramble(array) {
@@ -601,7 +560,10 @@
             const clip = document.getElementById(id);
             if (clip) {
                 clip.currentTime = 0;
-                clip.play().catch(() => {});
+                const promise = clip.play();
+                if (promise !== undefined) {
+                    promise.catch(() => {});
+                }
             }
         }
 
@@ -677,8 +639,7 @@
 
                 const img = document.createElement('img');
                 img.src = c.img;
-                img.alt = "Choice option";
-                img.decoding = "async";
+                img.alt = "Choice Option";
                 btn.appendChild(img);
 
                 btn.addEventListener('click', processPlayerClick);
