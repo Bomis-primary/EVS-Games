@@ -428,7 +428,7 @@
     </div>
 
     <script>
-        // Web Audio Autoplay Mobile Unlock Handler
+        // Web Audio Autoplay Mobile Unlock Handler (Muted test prevents startup audio pop)
         function unlockAudioContext() {
             const audios = [
                 document.getElementById('audio-right'),
@@ -437,10 +437,14 @@
             ];
             audios.forEach(a => {
                 if (a) {
+                    a.muted = true;
                     a.play().then(() => {
                         a.pause();
                         a.currentTime = 0;
-                    }).catch(() => {});
+                        a.muted = false;
+                    }).catch(() => {
+                        a.muted = false;
+                    });
                 }
             });
             document.removeEventListener('touchstart', unlockAudioContext);
@@ -480,6 +484,7 @@
             level1: {
                 rounds: [
                     {
+                        bgImage: "assets/igloo.png",
                         prompt: "Brrr! Chiku the monkey is freezing in the mountain snow! ❄️\nWhere should he hide to stay warm?",
                         correctChoice: { img: "assets/igloo.png" },
                         wrongHints: [
@@ -488,6 +493,7 @@
                         ]
                     },
                     {
+                        bgImage: "assets/building.png",
                         prompt: "Welcome to busy Mumbai city! There is no flat ground land left! 🚗\nWhich home stacks rooms up high into the clouds?",
                         correctChoice: { img: "assets/building.png" },
                         wrongHints: [
@@ -496,6 +502,7 @@
                         ]
                     },
                     {
+                        bgImage: "assets/hut.png",
                         prompt: "Look at this lovely farm village! 🌾\nWhat can the farmer build today using only mud and straw grass?",
                         correctChoice: { img: "assets/hut.png" },
                         wrongHints: [
@@ -534,9 +541,9 @@
             },
             level3: {
                 rounds: [
-                    { src: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action a good habit or not safe?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
-                    { src: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this action is a good habit or not safe?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
-                    { src: "assets/throwingwaste.png", isSafe: true, prompt: "This helpful child is throwing his empty wrapper into the trash. ✨\nHow do we rate this choice—is it a good habit or not safe?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from spreading sickness." }
+                    { src: "assets/playingwithmatchbox.png", bgImage: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action a good habit or not safe?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
+                    { src: "assets/climbingladder.png", bgImage: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this action is a good habit or not safe?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
+                    { src: "assets/throwingwaste.png", bgImage: "assets/throwingwaste.png", isSafe: true, prompt: "This helpful child is throwing his empty wrapper into the trash. ✨\nHow do we rate this choice—is it a good habit or not safe?", hint: "This is awesome behavior! Putting waste directly into the dustbin stops dirty houseflies, mosquitoes, and mice from spreading sickness." }
                 ],
                 summary: "Throw trash inside a closed bin to keep bugs away. Never play with sharp knives, hot stoves, or matchsticks because they can hurt you!"
             }
@@ -599,18 +606,23 @@
             const imgNode = document.getElementById('canvas-target-pic');
             document.getElementById('canvas-prompt-msg').innerText = roundItem.prompt;
 
-            if (activeLevel === 1) {
+            // Display question image for all levels
+            const imgSrc = roundItem.bgImage || roundItem.src;
+            if (imgSrc) {
+                imgNode.src = imgSrc;
+                imgNode.style.display = "block";
+            } else {
                 imgNode.style.display = "none";
+            }
+
+            if (activeLevel === 1) {
                 buildLevel1Belt();
             } 
             else if (activeLevel === 2) {
-                imgNode.src = roundItem.bgImage;
-                imgNode.style.display = "block";
                 buildLevel2Belt();
             } 
             else if (activeLevel === 3) {
-                imgNode.src = roundItem.src;
-                imgNode.style.display = "block";
+                // Stamp interaction handles user feedback for Level 3
             }
         }
 
