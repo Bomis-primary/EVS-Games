@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#e0f2fe">
     <title>Chapter 7: My Home Game</title>
     <style>
         :root {
@@ -21,31 +22,44 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            background-color: var(--bg-sky);
+            color: var(--slate-dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-sky);
-            color: var(--slate-dark);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
         }
 
-        /* Screen Layout Wrapper (Scrollable Up and Down) */
+        /* Screen Layout Wrapper (Scrollable Vertically, No Horizontal Scroll) */
         .screen-layout {
             display: none;
             width: 100%;
             max-width: 650px;
             min-height: 100vh;
+            min-height: 100dvh;
             padding: 15px;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             gap: 15px;
             overflow-y: auto; 
+            overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            contain: layout style;
         }
 
         .active-view {
@@ -60,6 +74,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -70,6 +85,8 @@
         .splash-logo {
             width: 75%;
             max-width: 300px;
+            height: auto;
+            will-change: transform;
             animation: pulseSoft 1.5s infinite ease-in-out;
         }
         .loading-track {
@@ -86,6 +103,7 @@
             height: 100%;
             background: var(--clay-orange);
             transform: translateX(-100%);
+            will-change: transform;
             animation: startLoad 4.5s forwards linear;
         }
 
@@ -96,11 +114,13 @@
             gap: 25px;
         }
         .welcome-house {
-            font-size: clamp(80px, 20vh, 130px);
+            font-size: clamp(70px, 18vh, 120px);
+            line-height: 1;
+            will-change: transform;
             animation: floatMove 3s infinite ease-in-out;
         }
         .welcome-heading {
-            font-size: clamp(26px, 6.5vw, 36px);
+            font-size: clamp(24px, 6vw, 36px);
             color: #0369a1;
             font-weight: 800;
         }
@@ -109,12 +129,16 @@
             background: var(--clay-orange);
             color: white;
             border: none;
-            padding: 16px 45px;
-            font-size: clamp(18px, 4.5vw, 22px);
+            padding: 16px 42px;
+            font-size: clamp(17px, 4.5vw, 22px);
             font-weight: bold;
             border-radius: 35px;
             cursor: pointer;
+            min-height: 48px;
+            min-width: 160px;
             box-shadow: 0 7px 0 #c2410c;
+            transform: translateZ(0);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
         .btn-push:active {
             transform: translateY(4px);
@@ -125,12 +149,13 @@
             width: 100%;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             background: white;
             padding: 12px 20px;
             border-radius: 16px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.04);
             font-weight: 800;
-            font-size: 18px;
+            font-size: clamp(15px, 4vw, 18px);
             flex-shrink: 0;
         }
 
@@ -147,6 +172,7 @@
             align-items: center;
             gap: 15px;
             flex-shrink: 0;
+            position: relative;
         }
         .display-frame {
             width: 100%;
@@ -156,6 +182,8 @@
             border-radius: 16px;
             background-color: #fafafa;
             position: relative;
+            min-height: 120px;
+            overflow: hidden;
         }
         .display-frame img {
             width: 100%;
@@ -167,27 +195,34 @@
         }
 
         .question-bubble {
-            font-size: clamp(16px, 4.2vw, 20px);
+            font-size: clamp(15px, 4vw, 20px);
             font-weight: 700;
             text-align: center;
             color: #0369a1;
             line-height: 1.4;
             white-space: pre-line;
             padding: 0 5px;
+            word-break: break-word;
         }
 
-        /* Touch Swipeable Conveyor Belt Track Framework */
+        /* Touch Swipeable Conveyor Belt Track Framework - Zebra Crossing (Black & White Lines Only) */
         .conveyor-belt-system {
             width: 100%;
-            background: #475569;
-            border-top: 6px solid #334155;
-            border-bottom: 8px solid #1e293b;
+            background: repeating-linear-gradient(
+                90deg,
+                #1e293b 0px,
+                #1e293b 25px,
+                #ffffff 25px,
+                #ffffff 50px
+            );
+            border-top: 6px solid #0f172a;
+            border-bottom: 8px solid #0f172a;
             padding: 16px 0;
             overflow-x: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             border-radius: 20px;
-            box-shadow: inset 0 8px 16px rgba(0,0,0,0.4);
+            box-shadow: inset 0 8px 16px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.15);
             flex-shrink: 0;
         }
         .conveyor-belt-system::-webkit-scrollbar {
@@ -199,6 +234,7 @@
             width: max-content;
             gap: 25px;
             padding: 0 20px;
+            will-change: transform;
             animation: moveConveyorLoop 25s linear infinite;
         }
 
@@ -207,7 +243,7 @@
         }
 
         .choice-item-btn {
-            background: white;
+            background: #ffffff;
             border: 4px solid #cbd5e1;
             border-radius: 20px;
             padding: 12px 16px;
@@ -218,16 +254,20 @@
             gap: 12px;
             text-align: center;
             font-weight: 700;
-            font-size: 15px;
+            font-size: clamp(13px, 3.5vw, 15px);
             color: #1e293b;
             box-shadow: 0 6px 0 #94a3b8;
             flex-shrink: 0;
             max-width: 260px;
+            min-height: 54px;
+            transform: translateZ(0);
         }
         .choice-item-btn img {
-            height: 90px;
+            height: clamp(65px, 12vh, 90px);
             width: auto;
+            max-width: 120px;
             object-fit: contain;
+            pointer-events: none;
         }
 
         /* Level 3 Habit Selection Action Button Layout */
@@ -240,13 +280,15 @@
         }
         .btn-stamp {
             border: none;
-            padding: 20px 10px;
-            font-size: 18px;
+            padding: 18px 10px;
+            font-size: clamp(15px, 4vw, 18px);
             font-weight: 900;
             color: white;
             border-radius: 24px;
             cursor: pointer;
+            min-height: 52px;
             box-shadow: 0 7px 0 rgba(0,0,0,0.25);
+            transform: translateZ(0);
         }
         .btn-danger { background: var(--brick-red); box-shadow: 0 7px 0 #b91c1c; }
         .btn-safe { background: var(--grass-green); box-shadow: 0 7px 0 #15803d; }
@@ -257,14 +299,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-10deg);
-            font-size: 36px;
+            font-size: clamp(26px, 7vw, 36px);
             font-weight: 950;
             padding: 10px 20px;
             border-radius: 16px;
             background: white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             display: none;
             z-index: 10;
+            white-space: nowrap;
+            pointer-events: none;
         }
 
         .animate-shake { animation: shakeLeftRight 0.4s ease-in-out; border-color: var(--brick-red)!important; background: #fef2f2!important; }
@@ -276,36 +320,74 @@
             justify-content: center;
             text-align: center;
             gap: 25px;
-            padding: 25px;
+            padding: 25px 15px;
         }
         .blackboard {
             background: var(--board-green);
-            border: 12px solid #b45309;
+            border: 10px solid #b45309;
             border-radius: 16px;
-            padding: 30px 20px;
+            padding: 25px 18px;
             width: 100%;
             box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
         }
         .blackboard-text {
-            font-size: 20px;
+            font-size: clamp(16px, 4.5vw, 20px);
             color: #f0fdf4;
             line-height: 1.5;
             font-weight: bold;
         }
 
+        /* Keyframes optimized for smooth GPU performance */
         @keyframes moveConveyorLoop {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-50% - 12px)); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(calc(-50% - 12.5px), 0, 0); }
         }
-        @keyframes startLoad { from { transform: translateX(-100%); } to { transform: translateX(0%); } }
+        @keyframes startLoad { from { transform: translate3d(-100%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
         @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-        @keyframes floatMove { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes floatMove { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -10px, 0); } }
         @keyframes pulsePop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         @keyframes shakeLeftRight {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            50% { transform: translateX(6px); }
-            75% { transform: translateX(-4px); }
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            25% { transform: translate3d(-6px, 0, 0); }
+            50% { transform: translate3d(6px, 0, 0); }
+            75% { transform: translate3d(-4px, 0, 0); }
+        }
+
+        /* Landscape and Small Device Responsive Optimization */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .screen-layout {
+                padding: 10px;
+                gap: 10px;
+            }
+            .welcome-house {
+                font-size: 60px;
+            }
+            .display-frame img {
+                max-height: 130px;
+            }
+            .hud-row {
+                padding: 8px 14px;
+            }
+            .choice-item-btn img {
+                height: 55px;
+            }
+            .btn-push {
+                padding: 10px 30px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .screen-layout {
+                padding: 10px;
+                gap: 12px;
+            }
+            .choice-item-btn {
+                max-width: 200px;
+                padding: 8px 12px;
+            }
+            .choice-item-btn img {
+                height: 60px;
+            }
         }
     </style>
 </head>
@@ -316,7 +398,7 @@
     <audio id="audio-cheer" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
     <div id="screen-splash">
-        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo">
+        <img src="assets/innovine-logo.png" alt="Innovine Logo" class="splash-logo" decoding="async">
         <div class="loading-track">
             <div class="loading-bar-fill"></div>
         </div>
@@ -336,7 +418,7 @@
 
         <div class="main-card">
             <div id="canvas-img-frame" class="display-frame">
-                <img id="canvas-target-pic" src="">
+                <img id="canvas-target-pic" src="" alt="Target Display" decoding="async">
                 <div id="stamp-alert-overlay" class="stamp-feedback-overlay"></div>
             </div>
             
@@ -354,9 +436,9 @@
     </div>
 
     <div id="screen-explain" class="screen-layout overlay-screen">
-        <div style="font-size: 65px;">💡</div>
-        <h2 style="color: #f59e0b; font-size: 26px;">Let's Think!</h2>
-        <p id="explain-message-text" style="font-size: 18px; max-width: 420px; line-height: 1.5; font-weight: 600;"></p>
+        <div style="font-size: 60px;">💡</div>
+        <h2 style="color: #f59e0b; font-size: clamp(22px, 5vw, 26px);">Let's Think!</h2>
+        <p id="explain-message-text" style="font-size: clamp(15px, 4vw, 18px); max-width: 420px; line-height: 1.5; font-weight: 600;"></p>
         <button class="btn-push" style="background:#3b82f6; box-shadow: 0 6px 0 #1d4ed8;" onclick="returnToGameLayout()">Try Again 🔄</button>
     </div>
 
@@ -368,15 +450,41 @@
     </div>
 
     <div id="screen-victory" class="screen-layout overlay-screen" style="background: #1e1b4b;">
-        <div style="font-size: 90px; animation: floatMove 2.5s infinite ease-in-out;">🏆</div>
-        <h1 style="color: #f59e0b; font-size: 32px; font-weight: 900;">Super Eco Hero!</h1>
-        <p style="font-size: 18px; max-width: 450px; color: #cbd5e1; font-weight: 600;">You know all about houses, clean rooms, and how to stay safe!</p>
+        <div style="font-size: clamp(70px, 18vh, 90px); animation: floatMove 2.5s infinite ease-in-out;">🏆</div>
+        <h1 style="color: #f59e0b; font-size: clamp(26px, 6vw, 32px); font-weight: 900;">Super Eco Hero!</h1>
+        <p style="font-size: clamp(15px, 4vw, 18px); max-width: 450px; color: #cbd5e1; font-weight: 600;">You know all about houses, clean rooms, and how to stay safe!</p>
         <button class="btn-push" onclick="restartWholeApp()">Play Again 🔄</button>
     </div>
 
     <script>
+        // Universal Mobile Audio Autoplay Unlocker
+        let audioUnlocked = false;
+        function unlockAudio() {
+            if (audioUnlocked) return;
+            const audioIds = ['audio-right', 'audio-wrong', 'audio-cheer'];
+            audioIds.forEach(id => {
+                const a = document.getElementById(id);
+                if (a) {
+                    a.play().then(() => {
+                        a.pause();
+                        a.currentTime = 0;
+                    }).catch(() => {});
+                }
+            });
+            audioUnlocked = true;
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('click', unlockAudio);
+        }
+        document.addEventListener('touchstart', unlockAudio, { passive: true });
+        document.addEventListener('click', unlockAudio, { passive: true });
+
+        // Optimized Priority Preloading
         const priorityPics = ["assets/building.png", "assets/hut.png", "assets/igloo.png"];
-        priorityPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
+        priorityPics.forEach(path => { 
+            const dummy = new Image(); 
+            dummy.decoding = "async";
+            dummy.src = path; 
+        });
 
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -384,12 +492,17 @@
                     "assets/kitchen.png", "assets/bedroom.png", "assets/livingroom.png",
                     "assets/throwingwaste.png", "assets/climbingladder.png", "assets/playingwithmatchbox.png"
                 ];
-                backgroundPics.forEach(path => { const dummy = new Image(); dummy.src = path; });
-            }, 1000);
+                backgroundPics.forEach(path => { 
+                    const dummy = new Image(); 
+                    dummy.decoding = "async";
+                    dummy.src = path; 
+                });
+            }, 800);
 
-            // Firm 5000ms delay hold logic before booting screen-welcome
+            // Firm 5000ms splash delay hold
             setTimeout(() => { 
-                document.getElementById('screen-splash').style.display = 'none';
+                const splash = document.getElementById('screen-splash');
+                if (splash) splash.style.display = 'none';
                 changeScreen('screen-welcome'); 
             }, 5000);
         });
@@ -432,7 +545,6 @@
                 summary: "Houses keep us safe from the hot sun, cold wind, rain, and wild animals! Strong houses use bricks. Weak huts use mud."
             },
             level2: {
-                // FIXED: The user choice is the ONLY intruder. The surrounding loop consists entirely of safe objects belonging to that exact room.
                 rounds: [
                     {
                         bgImage: "assets/kitchen.png",
@@ -459,7 +571,6 @@
                 summary: "Our home has different rooms. We cook in the kitchen, sleep in the bedroom, and welcome guests in the living room."
             },
             level3: {
-                // FIXED: Unique 3-round sequence using custom action buttons labels.
                 rounds: [
                     { src: "assets/playingwithmatchbox.png", isSafe: false, prompt: "This boy is striking matches all alone to watch the sparks. 🔥\nIs this action a good habit or not safe?", hint: "Stop! A single tiny matchstick spark can catch onto curtains or clothes and cause a giant fire. Matches are tools for grown-ups, never toys!" },
                     { src: "assets/climbingladder.png", isSafe: false, prompt: "Look! Someone is climbing a tall, wobbly ladder to reach a toy. 🪜\nWho can tell if this action is a good habit or not safe?", hint: "Watch out! Shaky ladders can tip over easily. Falling from high up will hurt your bones. Always wait and ask a grown-up for help!" },
@@ -472,7 +583,10 @@
         function changeScreen(id) {
             document.querySelectorAll('.screen-layout').forEach(s => s.classList.remove('active-view'));
             const target = document.getElementById(id);
-            if (target) target.classList.add('active-view');
+            if (target) {
+                target.classList.add('active-view');
+                target.scrollTop = 0;
+            }
         }
 
         function scramble(array) {
@@ -563,6 +677,8 @@
 
                 const img = document.createElement('img');
                 img.src = c.img;
+                img.alt = "Choice option";
+                img.decoding = "async";
                 btn.appendChild(img);
 
                 btn.addEventListener('click', processPlayerClick);
@@ -575,10 +691,8 @@
             track.innerHTML = "";
 
             let items = [];
-            // Correct intruder item injection setup
             items.push({ text: roundItem.correctText, isCorrect: true, hint: "" });
 
-            // Pull room decoys matching the room setting context
             let safeDecoys = [...roundItem.roomDecoys];
             scramble(safeDecoys);
             
