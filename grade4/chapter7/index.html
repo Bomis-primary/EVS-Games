@@ -256,11 +256,18 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.04);
         }
 
+        .scrollable-parchment ul {
+            list-style-type: none;
+        }
+
         .scrollable-parchment li {
             margin-bottom: 8px;
             font-size: 0.95rem;
             line-height: 1.35;
-            list-style-type: '✨ ';
+        }
+
+        .scrollable-parchment li::before {
+            content: "✨ ";
         }
 
         /* --- PRETTY HUD --- */
@@ -389,6 +396,8 @@
             animation: popUpIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             position: relative;
             z-index: 20;
+            display: flex;
+            flex-direction: column;
         }
 
         .explanation-card.incorrect-mode {
@@ -422,7 +431,7 @@
             font-family: var(--font-fancy);
             border-radius: 18px;
             cursor: pointer;
-            float: right;
+            align-self: flex-end;
             box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
             touch-action: manipulation;
         }
@@ -555,7 +564,7 @@
 
         <!-- RULES SCREEN -->
         <div id="screen-instructions" class="screen hidden">
-            <div class="magical-avatar">🧚‍♀️️</div>
+            <div class="magical-avatar">🧚‍♀️</div>
             <h1 class="dreamy-title" style="font-size: 1.6rem;">Arcade Rules</h1>
             <div class="scrollable-parchment">
                 <ul>
@@ -630,7 +639,6 @@
                         Explanation details...
                     </div>
                     <button class="btn-continue-step" id="btn-next-step" onclick="continueToNextQuestion()">Next ➔</button>
-                    <div style="clear: both;"></div>
                 </div>
 
                 <div class="fruit-levers-deck">
@@ -805,7 +813,7 @@
             setTimeout(() => {
                 document.getElementById('screen-logo').classList.add('hidden');
                 document.getElementById('screen-intro').classList.remove('hidden');
-            }, 5000);
+            }, 2000);
         });
 
         function spawnParticles() {
@@ -882,7 +890,7 @@
             document.getElementById('game-level-tag').innerText = item.tag;
             document.getElementById('hud-progress-label').innerText = `Q ${activeIdx + 1}/${activeQuestionsArr.length}`;
             
-            const progressPct = ((activeIdx) / activeQuestionsArr.length) * 100;
+            const progressPct = (activeIdx / activeQuestionsArr.length) * 100;
             document.getElementById('hud-progress-fill').style.width = `${progressPct}%`;
             
             const elementCard = document.getElementById('active-scenario-card');
@@ -944,6 +952,9 @@
                 nextBtn.className = "btn-continue-step incorrect-btn";
                 nextBtn.innerText = "Understood ➔";
             }
+
+            const progressPct = ((activeIdx + 1) / activeQuestionsArr.length) * 100;
+            document.getElementById('hud-progress-fill').style.width = `${progressPct}%`;
 
             setTimeout(() => {
                 explanationBox.classList.remove('hidden');
