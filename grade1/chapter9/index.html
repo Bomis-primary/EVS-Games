@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Safe Route Planner - EVS Chapter 9</title>
     <style>
         :root {
@@ -25,28 +25,34 @@
         html, body {
             width: 100%;
             height: 100%;
+            height: 100dvh;
             overflow: hidden;
             background-color: #0c4a6e;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', -apple-system, BlinkMacSystemFont, sans-serif;
+            touch-action: manipulation;
         }
 
         .game-cabinet-stage {
-            width: 500px;
-            height: 850px;
-            max-height: 95vh;
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 850px;
             background: linear-gradient(180deg, var(--bg-sky) 0%, #e0f2fe 100%);
-            border: 8px solid #38bdf8;
-            border-radius: 24px;
+            border: 6px solid #38bdf8;
+            border-radius: 20px;
             position: relative;
             overflow-y: auto;
+            overflow-x: hidden;
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
         }
 
         .game-cabinet-stage::-webkit-scrollbar {
-            width: 10px;
+            width: 6px;
         }
         .game-cabinet-stage::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.05);
@@ -61,9 +67,10 @@
             display: none;
             width: 100%;
             min-height: 100%;
-            padding: 16px;
+            padding: 12px;
             flex-direction: column;
             position: relative;
+            box-sizing: border-box;
         }
 
         .active-view {
@@ -77,14 +84,15 @@
         }
 
         .intro-logo-graphic {
-            width: 75%;
-            max-width: 300px;
+            width: 70%;
+            max-width: 280px;
             object-fit: contain;
         }
 
         #screen-welcome {
             background: url('assets/startscreenimage.png') no-repeat center center;
-            background-size: 100% 100%;
+            background-size: cover;
+            background-color: #0c4a6e;
             height: 100%;
             width: 100%;
             position: absolute;
@@ -95,77 +103,82 @@
 
         .native-play-hotspot {
             position: absolute;
-            bottom: 24%;
+            bottom: 22%;
             left: 50%;
             transform: translateX(-50%);
-            width: 280px;
-            height: 80px;
+            width: 75%;
+            max-width: 280px;
+            height: 75px;
             cursor: pointer;
             background: rgba(255, 255, 255, 0.01);
             border-radius: 40px;
         }
 
         #screen-game {
-            gap: 10px;
-            justify-content: flex-start;
+            gap: 8px;
+            justify-content: space-between;
         }
 
         .btn-kids-action {
             background: linear-gradient(180deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
             color: white;
             border: 4px solid #fff;
-            padding: 12px 40px;
-            font-size: 24px;
+            padding: 10px 30px;
+            font-size: clamp(18px, 4.5vw, 24px);
             font-weight: 900;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #c2410c, 0 8px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 0 #c2410c, 0 8px 15px rgba(0,0,0,0.3);
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
             text-transform: uppercase;
             align-self: center;
             transition: transform 0.1s;
+            will-change: transform;
+            min-height: 48px;
         }
         .btn-kids-action:active {
             transform: translateY(3px);
-            box-shadow: 0 3px 0 #c2410c;
+            box-shadow: 0 2px 0 #c2410c;
         }
 
         .kids-hud {
             width: 100%;
-            height: 50px;
+            min-height: 44px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #ffffff;
-            border: 4px solid #38bdf8;
-            padding: 0 16px;
-            border-radius: 18px;
+            border: 3px solid #38bdf8;
+            padding: 4px 14px;
+            border-radius: 16px;
             font-weight: 900;
-            font-size: 18px;
+            font-size: clamp(14px, 3.8vw, 18px);
         }
 
         .stars-container {
             color: #facc15;
-            font-size: 22px;
+            font-size: clamp(18px, 5vw, 22px);
         }
 
         .task-instruction-banner {
             width: 100%;
             background: #fef08a;
-            border: 4px dashed #eab308;
-            border-radius: 14px;
-            padding: 10px;
+            border: 3px dashed #eab308;
+            border-radius: 12px;
+            padding: 8px 10px;
             text-align: center;
-            font-size: 15px;
+            font-size: clamp(12px, 3.2vw, 15px);
             font-weight: 900;
             color: #713f12;
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
         .grid-box-wrapper {
             width: 100%;
+            max-width: 420px;
             aspect-ratio: 1 / 1;
             position: relative;
+            margin: 0 auto;
         }
 
         .kids-map-grid {
@@ -174,92 +187,115 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: 6px;
+            gap: 5px;
             background: var(--grass-green);
-            border: 6px solid #fcd34d;
-            border-radius: 20px;
-            padding: 6px;
+            border: 5px solid #fcd34d;
+            border-radius: 18px;
+            padding: 5px;
             position: relative;
         }
 
         .kids-tile {
             position: relative;
-            border-radius: 14px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            touch-action: manipulation;
         }
         .tile-empty {
             background: #86efac;
-            border: 3px dashed #22c55e;
+            border: 2px dashed #22c55e;
             cursor: pointer;
         }
         .tile-obstacle {
             background: #4ade80;
-            font-size: 42px;
+            font-size: clamp(24px, 6vw, 40px);
         }
         .tile-road-lane {
             background: var(--road-asphalt);
-            border-top: 3px dashed #94a3b8;
-            border-bottom: 3px dashed #94a3b8;
+            border-top: 2px dashed #94a3b8;
+            border-bottom: 2px dashed #94a3b8;
         }
         
         .tile-anchor-building {
             background: #93c5fd;
-            border: 4px solid #2563eb;
+            border: 3px solid #2563eb;
             position: relative;
         }
         .anchor-tag-lbl {
-            font-size: 10px;
+            font-size: clamp(8px, 2.2vw, 10px);
             font-weight: 900;
             color: #1e3a8a;
             background: white;
-            padding: 1px 5px;
-            border-radius: 5px;
+            padding: 1px 4px;
+            border-radius: 4px;
             border: 1px solid #2563eb;
             position: absolute;
             bottom: 2px;
             z-index: 5;
         }
 
-        .placed-footpath-block { background: var(--sidewalk-gray); border: 3px solid #94a3b8; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 46px; }
-        .placed-zebra-block { background: linear-gradient(90deg, var(--road-asphalt) 15%, #fff 15%, #fff 35%, var(--road-asphalt) 35%, var(--road-asphalt) 65%, #fff 65%, #fff 85%, var(--road-asphalt) 85%); border: 3px solid white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 46px; }
+        .placed-footpath-block { 
+            background: var(--sidewalk-gray); 
+            border: 2px solid #94a3b8; 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: clamp(24px, 6.5vw, 42px); 
+        }
+        
+        /* CLEAN ZEBRA CROSSING TILE WITHOUT FLAG */
+        .placed-zebra-block { 
+            background: linear-gradient(90deg, var(--road-asphalt) 15%, #fff 15%, #fff 35%, var(--road-asphalt) 35%, var(--road-asphalt) 65%, #fff 65%, #fff 85%, var(--road-asphalt) 85%); 
+            border: 2px solid white; 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 6px;
+        }
 
         .standing-signal-pole-hardware {
             position: absolute;
-            right: 8px;
-            bottom: 8px;
-            width: 32px;
-            height: 70px;
+            width: clamp(26px, 6vw, 32px);
+            height: clamp(55px, 12vw, 70px);
             background: #1e293b;
-            border: 3px solid #64748b;
+            border: 2px solid #64748b;
             border-radius: 8px;
             z-index: 250;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify- headspace: space-around;
-            padding: 4px 0;
+            justify-content: space-around;
+            padding: 3px 0;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            touch-action: manipulation;
         }
         .pole-light-bulb {
-            width: 16px;
-            height: 16px;
+            width: clamp(12px, 3vw, 16px);
+            height: clamp(12px, 3vw, 16px);
             border-radius: 50%;
             background: #475569;
             border: 1px solid #000;
             transition: background 0.2s, box-shadow 0.2s;
         }
-        .standing-signal-pole-hardware.red-on .bulb-top { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
-        .standing-signal-pole-hardware.green-on .bulb-bottom { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
+        .standing-signal-pole-hardware.red-on .bulb-top { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+        .standing-signal-pole-hardware.green-on .bulb-bottom { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
 
         .placement-valid-glow { border: 4px solid #22c55e !important; }
         .placement-invalid-glow { border: 4px solid #ef4444 !important; }
 
-        .lane-vehicle-token { position: absolute; font-size: 38px; z-index: 10; pointer-events: none; transition: left 0.035s linear; }
+        .lane-vehicle-token { 
+            position: absolute; 
+            font-size: clamp(26px, 7vw, 38px); 
+            z-index: 10; 
+            pointer-events: none; 
+            will-change: left;
+        }
 
         #sam-player-token {
             position: absolute;
@@ -269,54 +305,56 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: left 0.35s ease-out, top 0.35s ease-out;
             pointer-events: none;
+            will-change: left, top;
         }
         #sam-player-token img {
             width: 90%;
             height: 90%;
             object-fit: contain;
-            filter: drop-shadow(0 5px 6px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.3));
         }
 
         .grid-control-bar {
             width: 100%;
             display: flex;
             justify-content: space-between;
-            gap: 10px;
+            gap: 8px;
         }
         .btn-control-utility {
             flex: 1;
             background: #ffffff;
-            border: 3px solid #cbd5e1;
-            padding: 10px;
+            border: 2px solid #cbd5e1;
+            padding: 8px;
             font-weight: 900;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            font-size: 15px;
+            gap: 4px;
+            font-size: clamp(12px, 3.2vw, 14px);
             color: #475569;
-            box-shadow: 0 4px 0 #cbd5e1;
+            box-shadow: 0 3px 0 #cbd5e1;
+            min-height: 40px;
         }
 
         .inventory-tray {
             width: 100%;
             background: #ffffff;
-            border: 4px solid #fcd34d;
-            border-radius: 18px;
-            padding: 10px;
+            border: 3px solid #fcd34d;
+            border-radius: 16px;
+            padding: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
         .tool-card {
-            width: 75px;
-            height: 75px;
-            border-radius: 14px;
+            width: clamp(60px, 16vw, 75px);
+            height: clamp(60px, 16vw, 75px);
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -324,6 +362,7 @@
             justify-content: center;
             font-weight: 900;
             position: relative;
+            touch-action: manipulation;
         }
         .counter-badge {
             position: absolute;
@@ -331,27 +370,32 @@
             right: -5px;
             background: #ef4444;
             color: white;
-            font-size: 11px;
-            padding: 2px 7px;
+            font-size: 10px;
+            padding: 1px 6px;
             border-radius: 10px;
             border: 2px solid white;
         }
         .tool-footpath { background: var(--sidewalk-gray); border: 3px solid #94a3b8; }
-        .tool-zebra { background: linear-gradient(45deg, #475569 25%, #fff 25%, #fff 50%, #475569 50%, #475569 75%, #fff 75%); background-size: 10px 10px; border: 3px solid #475569; color: white;}
+        .tool-zebra { 
+            background: linear-gradient(45deg, #475569 25%, #fff 25%, #fff 50%, #475569 50%, #475569 75%, #fff 75%); 
+            background-size: 10px 10px; 
+            border: 3px solid #475569; 
+            color: white;
+        }
 
         .game-speech-bubble {
             position: absolute;
-            bottom: 140px;
+            bottom: 130px;
             left: 5%;
             width: 90%;
             background: #ffffff;
-            border: 5px solid #ef4444;
-            border-radius: 16px;
-            padding: 12px;
+            border: 4px solid #ef4444;
+            border-radius: 14px;
+            padding: 10px;
             text-align: center;
             font-weight: 900;
-            font-size: 16px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            font-size: clamp(13px, 3.5vw, 15px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
             display: none;
             z-index: 200;
         }
@@ -360,16 +404,16 @@
             background: rgba(12, 74, 110, 0.96);
             justify-content: center;
             align-items: center;
-            padding: 24px;
-            gap: 20px;
+            padding: 18px;
+            gap: 16px;
             color: white;
             text-align: center;
         }
         .briefing-card {
             background: #ffffff;
-            border: 6px solid #fb923c;
-            border-radius: 20px;
-            padding: 24px 16px;
+            border: 5px solid #fb923c;
+            border-radius: 18px;
+            padding: 18px 14px;
             color: var(--text-dark);
             width: 100%;
         }
@@ -380,53 +424,55 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.88);
             z-index: 500;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
         }
         .quiz-popup-card {
             background: #ffffff;
-            border: 6px solid #eab308;
-            border-radius: 20px;
-            padding: 20px;
+            border: 5px solid #eab308;
+            border-radius: 18px;
+            padding: 16px;
             text-align: center;
             width: 100%;
+            max-width: 420px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
         .quiz-popup-question {
-            font-size: 18px;
+            font-size: clamp(15px, 4vw, 18px);
             font-weight: 900;
             color: #1e3a8a;
-            margin-bottom: 16px;
-            line-height: 1.4;
+            margin-bottom: 14px;
+            line-height: 1.35;
         }
         .quiz-popup-options-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
         }
         .quiz-popup-btn {
             width: 100%;
             background: #f8fafc;
             border: 3px solid #cbd5e1;
-            padding: 14px;
-            border-radius: 14px;
-            font-size: 15px;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: clamp(13px, 3.5vw, 15px);
             font-weight: 900;
             color: #334155;
             cursor: pointer;
             transition: transform 0.1s;
+            min-height: 46px;
         }
         .quiz-hint-text {
             color: #ea580c;
-            font-size: 14px;
+            font-size: clamp(12px, 3.2vw, 14px);
             font-weight: 900;
-            margin-top: 12px;
+            margin-top: 10px;
             display: none;
             background: #fff7ed;
             padding: 8px;
@@ -434,13 +480,12 @@
             border: 1px dashed #fdba74;
         }
 
-        /* DYNAMIC SAFETY CERTIFICATE DESIGN */
         .kids-award-certificate {
             width: 100%;
             background: #fffdfa;
-            border: 8px double #eab308;
-            border-radius: 16px;
-            padding: 20px 10px;
+            border: 6px double #eab308;
+            border-radius: 14px;
+            padding: 16px 10px;
             color: #1e3a8a;
             text-align: center;
             box-shadow: 0 6px 15px rgba(0,0,0,0.15);
@@ -451,11 +496,11 @@
             border-bottom: 3px dashed #3b82f6;
             background: transparent;
             text-align: center;
-            font-size: 22px;
+            font-size: clamp(18px, 4.8vw, 22px);
             font-weight: 900;
             color: #ea580c;
             outline: none;
-            margin: 10px 0;
+            margin: 8px 0;
             font-family: 'Comic Sans MS', sans-serif;
         }
 
@@ -473,6 +518,12 @@
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-6px); }
             75% { transform: translateX(6px); }
+        }
+
+        @media (max-width: 360px) {
+            .screen-view { padding: 8px; }
+            .kids-hud { padding: 2px 8px; }
+            .btn-kids-action { padding: 8px 20px; }
         }
     </style>
 </head>
@@ -497,10 +548,10 @@
 
         <!-- 3. INTERACTIVE BRIEFING OVERLAY SCREEN -->
         <div id="screen-briefing" class="screen-view briefing-overlay">
-            <h2 id="briefing-title-lbl" style="color: #facc15; font-size: 34px; font-weight: 900;">LEVEL 1</h2>
+            <h2 id="briefing-title-lbl" style="color: #facc15; font-size: clamp(26px, 7vw, 34px); font-weight: 900;">LEVEL 1</h2>
             <div class="briefing-card">
-                <p style="font-size: 14px; font-weight: 900; color: #a1a1aa; margin-bottom: 4px; text-transform: uppercase;">Your Mission:</p>
-                <p id="briefing-text-lbl" style="font-size: 18px; font-weight: bold; line-height: 1.4; color: #1e3a8a;"></p>
+                <p style="font-size: 13px; font-weight: 900; color: #a1a1aa; margin-bottom: 4px; text-transform: uppercase;">Your Mission:</p>
+                <p id="briefing-text-lbl" style="font-size: clamp(15px, 4vw, 18px); font-weight: bold; line-height: 1.4; color: #1e3a8a;"></p>
             </div>
             <button class="btn-kids-action" onclick="loadActiveLevelSandboxState()">START ▶️</button>
         </div>
@@ -509,7 +560,7 @@
         <div id="screen-game" class="screen-view">
             <div id="live-quiz-modal" class="midway-quiz-overlay">
                 <div class="quiz-popup-card" id="quiz-card-frame">
-                    <p id="quiz-badge-title" style="color: #fb923c; font-size: 14px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase;">Safety Quiz! 🎓</p>
+                    <p id="quiz-badge-title" style="color: #fb923c; font-size: 13px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase;">Safety Quiz! 🎓</p>
                     <div id="quiz-modal-q-text" class="quiz-popup-question"></div>
                     <div id="quiz-modal-options-box" class="quiz-popup-options-list"></div>
                     <div id="quiz-modal-hint" class="quiz-hint-text"></div>
@@ -540,31 +591,48 @@
 
             <div id="inventory-dock" class="inventory-tray"></div>
 
-            <button id="btn-action-trigger" class="btn-kids-action" style="width: 100%; background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%); box-shadow: 0 6px 0 #15803d; font-size:24px; padding:12px; margin-top: 5px;" onclick="beginRouteVerificationWalk()">GO HOME! 🏃‍♂️</button>
+            <button id="btn-action-trigger" class="btn-kids-action" style="width: 100%; background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%); box-shadow: 0 5px 0 #15803d; padding:10px; margin-top: 2px;" onclick="beginRouteVerificationWalk()">GO HOME! 🏃‍♂️</button>
         </div>
 
         <!-- 5. FINAL PERFORMANCE VICTORY METRICS OVERLAY VIEW PANEL WITH CERTIFICATE -->
-        <div id="screen-victory" class="screen-view briefing-overlay" style="justify-content:center; gap:16px; background: rgba(224, 242, 254, 0.98);">
-            <div style="font-size: 50px; line-height:1;">🏆</div>
-            <h1 style="color: #16a34a; font-size: 26px; font-weight: 900;">YOU DID IT!</h1>
+        <div id="screen-victory" class="screen-view briefing-overlay" style="justify-content:center; gap:14px; background: rgba(224, 242, 254, 0.98);">
+            <div style="font-size: 42px; line-height:1;">🏆</div>
+            <h1 style="color: #16a34a; font-size: clamp(22px, 6vw, 26px); font-weight: 900;">YOU DID IT!</h1>
             
             <div class="kids-award-certificate">
-                <h3 style="color: #ea580c; font-size: 20px; font-weight: 900; letter-spacing: 1px;">ROAD SAFETY SUPERSTAR</h3>
-                <p style="font-size: 13px; margin-top: 5px; color: #475569;">This safety award belongs to:</p>
+                <h3 style="color: #ea580c; font-size: clamp(16px, 4.5vw, 20px); font-weight: 900; letter-spacing: 1px;">ROAD SAFETY SUPERSTAR</h3>
+                <p style="font-size: 12px; margin-top: 4px; color: #475569;">This safety award belongs to:</p>
                 <input type="text" class="cert-input-name" placeholder="Type your name here! 👉" onclick="this.focus();">
-                <p style="font-size: 13px; font-weight: bold; padding: 0 10px; line-height: 1.4; margin-top: 8px;">
+                <p style="font-size: 12px; font-weight: bold; padding: 0 8px; line-height: 1.35; margin-top: 6px;">
                     For learning how to walk on the footpath, use crosswalks, and watch the traffic lights!
                 </p>
-                <div style="margin-top: 12px; font-size: 16px; font-weight: 900; color: #16a34a;">
+                <div style="margin-top: 10px; font-size: clamp(13px, 3.5vw, 16px); font-weight: 900; color: #16a34a;">
                     🚦 JUNIOR ROAD SAFETY OFFICER 🚦
                 </div>
             </div>
 
-            <button class="btn-kids-action" style="background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); box-shadow: 0 6px 0 #1e40af; font-size: 20px;" onclick="resetWholeAppEngine()">PLAY AGAIN 🔄</button>
+            <button class="btn-kids-action" style="background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); box-shadow: 0 5px 0 #1e40af; font-size: 18px;" onclick="resetWholeAppEngine()">PLAY AGAIN 🔄</button>
         </div>
     </div>
 
     <script>
+        // MOBILE AUDIO UNLOCK HANDLER
+        function unlockAudioContext() {
+            ['audio-right', 'audio-wrong', 'audio-claps'].forEach(id => {
+                const a = document.getElementById(id);
+                if (a) {
+                    a.play().then(() => {
+                        a.pause();
+                        a.currentTime = 0;
+                    }).catch(() => {});
+                }
+            });
+            document.removeEventListener('click', unlockAudioContext);
+            document.removeEventListener('touchstart', unlockAudioContext);
+        }
+        document.addEventListener('click', unlockAudioContext, { once: true });
+        document.addEventListener('touchstart', unlockAudioContext, { once: true });
+
         setTimeout(() => { switchScreenLayout('screen-welcome'); }, 3000);
 
         function switchScreenLayout(id) {
@@ -586,11 +654,11 @@
         let autoSignalTimerClock = null;
         let routeSimulationLockFlag = false;
         let vehiclesBrakedForZebra = false;
+        let currentSamPos = { r: 0, c: 0 };
         
-        let confettiIntervalClock = null;
+        let confettiAnimationId = null;
         let confettiParticlesCollection = [];
 
-        // GRADE-1 SIMPLIFIED ROAD SAFETY QUIZZES
         const mapsDatabase = {
             level1: {
                 shortBrief: "Build a safe path from School to Home using Footpaths! Keep Sam off the grass and road!",
@@ -648,8 +716,8 @@
                         q: "What should you use to cross a busy road safely?",
                         hint: "Hint: Look for the painted black and white lines on the road!",
                         options: [
-                            { text: "A Zebra Crossing! 🏁", correct: true },
-                            { text: "Just run across anywhere! 🏃‍♂️", correct: false }
+                            { text: "A Zebra Crossing!", correct: true },
+                            { text: "Just run across anywhere! 🏃‍♂️️", correct: false }
                         ]
                     },
                     {
@@ -763,10 +831,10 @@
 
                     if (tileCodeType === 'school') {
                         nodeCell.className += " tile-anchor-building";
-                        nodeCell.innerHTML = `<span style="font-size:38px;">🏫</span><span class="anchor-tag-lbl">SCHOOL</span>`;
+                        nodeCell.innerHTML = `<span style="font-size:clamp(28px, 7vw, 38px);">🏫</span><span class="anchor-tag-lbl">SCHOOL</span>`;
                     } else if (tileCodeType === 'home') {
                         nodeCell.className += " tile-anchor-building";
-                        nodeCell.innerHTML = `<span style="font-size:38px;">🏠</span><span class="anchor-tag-lbl">HOME</span>`;
+                        nodeCell.innerHTML = `<span style="font-size:clamp(28px, 7vw, 38px);">🏠</span><span class="anchor-tag-lbl">HOME</span>`;
                     } else if (tileCodeType === 'obstacle') {
                         nodeCell.innerText = "🌳";
                     } else if (tileCodeType === 'road_lane_left' || tileCodeType === 'road_lane_right') {
@@ -781,23 +849,10 @@
             }
 
             if (activeLevelIdx === 3) {
-                const roadReferenceCell = containerGridBox.querySelector('.kids-tile[data-row="2"][data-col="1"]');
-                setTimeout(() => {
-                    const poleNode = document.createElement('div');
-                    poleNode.id = "level3-signal-pole";
-                    poleNode.className = "standing-signal-pole-hardware red-on";
-                    poleNode.innerHTML = `
-                        <div class="pole-light-bulb bulb-top"></div>
-                        <div class="pole-light-bulb bulb-bottom"></div>
-                    `;
-                    poleNode.style.top = (roadReferenceCell.offsetTop - 35) + "px";
-                    poleNode.style.left = (roadReferenceCell.offsetLeft + roadReferenceCell.offsetWidth - 20) + "px";
-                    poleNode.addEventListener('click', (e) => manuallyToggleStandingSignalLight(e));
-                    containerGridBox.appendChild(poleNode);
-                }, 80);
+                setTimeout(repositionSignalPole, 100);
             }
 
-            setTimeout(() => { placeSamCharacterPawnCoordinates(specBlueprint.start.r, specBlueprint.start.c); }, 70);
+            setTimeout(() => { placeSamCharacterPawnCoordinates(specBlueprint.start.r, specBlueprint.start.c); }, 80);
             renderInventoryTrayUI();
 
             if (activeLevelIdx >= 2) {
@@ -822,14 +877,15 @@
                 const availableQuantity = runningInventoryPoolMap[key];
                 const blockCard = document.createElement('div');
                 blockCard.className = `tool-card tool-${key}`;
-                if (currentlySelectedToolType === key) blockCard.style.outline = "5px solid #ea580c";
+                if (currentlySelectedToolType === key) blockCard.style.outline = "4px solid #ea580c";
 
                 let iconGraphicSymbol = "🧱"; let labelNameStr = "Footpath";
-                if (key === 'zebra') { iconGraphicSymbol = "🏁"; labelNameStr = "Zebra"; }
+                // ZEBRA CARD DISPLAY WITHOUT MISPLACED FLAG
+                if (key === 'zebra') { iconGraphicSymbol = ""; labelNameStr = "Zebra"; }
 
                 blockCard.innerHTML = `
-                    <span style="font-size: 28px; line-height: 1;">${iconGraphicSymbol}</span>
-                    <span style="font-size: 11px; font-weight: 900; margin-top: 4px;">${labelNameStr}</span>
+                    <span style="font-size: 24px; line-height: 1;">${iconGraphicSymbol}</span>
+                    <span style="font-size: 11px; font-weight: 900; margin-top: 2px;">${labelNameStr}</span>
                     <div class="counter-badge" style="background:${availableQuantity <= 0 ? '#64748b':'#ef4444'}">${availableQuantity}</div>
                 `;
 
@@ -840,7 +896,7 @@
                     }
                     currentlySelectedToolType = key;
                     document.querySelectorAll('.tool-card').forEach(c => c.style.outline = "none");
-                    blockCard.style.outline = "5px solid #ea580c";
+                    blockCard.style.outline = "4px solid #ea580c";
                 });
 
                 dock.appendChild(blockCard);
@@ -864,12 +920,13 @@
 
             if (currentlySelectedToolType === 'zebra') {
                 if (initialIdentityState === 'road_lane_left' || initialIdentityState === 'road_lane_right') {
-                    targetTileNode.innerHTML = `<div class="placed-zebra-block">🏁</div>`;
+                    // PLACED ZEBRA TILE HAS NO FLAG EMOJI
+                    targetTileNode.innerHTML = `<div class="placed-zebra-block"></div>`;
                     fieldMatrixConfiguration[r][c] = 'paved_zebra';
                     wasPlacementSuccessful = true;
                 } else {
                     triggerTactileFlashFeedback(targetTileNode, "placement-invalid-glow");
-                    displayKidsSpeechBubble("Place the Zebra Crossing directly on the dark road! 🏁");
+                    displayKidsSpeechBubble("Place the Zebra Crossing directly on the dark road!");
                 }
             } 
             else if (currentlySelectedToolType === 'footpath') {
@@ -927,6 +984,7 @@
         }
 
         function placeSamCharacterPawnCoordinates(r, c) {
+            currentSamPos = { r: r, c: c };
             const fieldCanvasGrid = document.getElementById('kids-map-mesh');
             const targetTileCell = fieldCanvasGrid.querySelector(`.kids-tile[data-row="${r}"][data-col="${c}"]`);
             if (!targetTileCell) return;
@@ -938,10 +996,33 @@
             samTokenBox.style.height = targetTileCell.offsetHeight + "px";
         }
 
+        function repositionSignalPole() {
+            const containerGridBox = document.getElementById('kids-map-mesh');
+            let poleNode = document.getElementById('level3-signal-pole');
+            const roadReferenceCell = containerGridBox.querySelector('.kids-tile[data-row="2"][data-col="1"]');
+            
+            if (!roadReferenceCell) return;
+
+            if (!poleNode) {
+                poleNode = document.createElement('div');
+                poleNode.id = "level3-signal-pole";
+                poleNode.className = "standing-signal-pole-hardware red-on";
+                poleNode.innerHTML = `
+                    <div class="pole-light-bulb bulb-top"></div>
+                    <div class="pole-light-bulb bulb-bottom"></div>
+                `;
+                poleNode.addEventListener('click', (e) => manuallyToggleStandingSignalLight(e));
+                containerGridBox.appendChild(poleNode);
+            }
+
+            poleNode.style.top = (roadReferenceCell.offsetTop - (roadReferenceCell.offsetHeight * 0.35)) + "px";
+            poleNode.style.left = (roadReferenceCell.offsetLeft + roadReferenceCell.offsetWidth - (roadReferenceCell.offsetWidth * 0.25)) + "px";
+        }
+
         function deployDynamicLaneTrafficEngine() {
-            let velocityModifier = (activeLevelIdx === 3) ? 6.5 : 3.5;
+            let velocityModifier = (activeLevelIdx === 3) ? 4.5 : 2.5;
             spawnIndependentLaneVehicle(2, "🚗", velocityModifier, "left");
-            spawnIndependentLaneVehicle(2, "🚌", velocityModifier - 1, "right");
+            spawnIndependentLaneVehicle(2, "🚌", velocityModifier - 0.8, "right");
         }
 
         function spawnIndependentLaneVehicle(targetRow, spriteSymbol, movementVelocity, directionPathStr) {
@@ -953,6 +1034,7 @@
 
             const rowAnchorTile = meshCanvas.querySelector(`.kids-tile[data-row="${targetRow}"][data-col="0"]`);
             setTimeout(() => {
+                if(!rowAnchorTile) return;
                 let offsetHeightModifier = (directionPathStr === "left") ? 2 : (rowAnchorTile.offsetHeight / 2 - 2);
                 vehicleNode.style.top = (rowAnchorTile.offsetTop + offsetHeightModifier) + "px";
             }, 60);
@@ -960,27 +1042,29 @@
             let calculatedCoordinateX = (directionPathStr === "right") ? -50 : (meshCanvas.clientWidth + 50);
             vehicleNode.style.left = calculatedCoordinateX + "px";
 
-            const operationalClockTimer = setInterval(() => {
-                if (activeLevelIdx === 2 && vehiclesBrakedForZebra) {
-                    return;
+            let isRunning = true;
+
+            function animateVehicle() {
+                if (!isRunning) return;
+
+                if (!(activeLevelIdx === 2 && vehiclesBrakedForZebra) &&
+                    !(activeLevelIdx === 3 && lightSignalState === "red" && calculatedCoordinateX >= (meshCanvas.clientWidth * 0.15) && calculatedCoordinateX <= (meshCanvas.clientWidth * 0.80))) {
+                    
+                    if (directionPathStr === "right") {
+                        calculatedCoordinateX += movementVelocity;
+                        if (calculatedCoordinateX > meshCanvas.clientWidth + 50) calculatedCoordinateX = -50;
+                    } else {
+                        calculatedCoordinateX -= movementVelocity;
+                        if (calculatedCoordinateX < -50) calculatedCoordinateX = meshCanvas.clientWidth + 50;
+                    }
+                    vehicleNode.style.left = calculatedCoordinateX + "px";
                 }
 
-                // LEVEL 3 FIX: Cars stop when light is RED, allowing Sam to safely walk across!
-                if (activeLevelIdx === 3 && lightSignalState === "red" && calculatedCoordinateX >= (meshCanvas.clientWidth * 0.15) && calculatedCoordinateX <= (meshCanvas.clientWidth * 0.80)) {
-                    return;
-                }
+                requestAnimationFrame(animateVehicle);
+            }
 
-                if (directionPathStr === "right") {
-                    calculatedCoordinateX += movementVelocity;
-                    if (calculatedCoordinateX > meshCanvas.clientWidth + 50) calculatedCoordinateX = -50;
-                } else {
-                    calculatedCoordinateX -= movementVelocity;
-                    if (calculatedCoordinateX < -50) calculatedCoordinateX = meshCanvas.clientWidth + 50;
-                }
-                vehicleNode.style.left = calculatedCoordinateX + "px";
-            }, 35);
-
-            activeLanesVehiclesCollection.push({ element: vehicleNode, clock: operationalClockTimer });
+            requestAnimationFrame(animateVehicle);
+            activeLanesVehiclesCollection.push({ element: vehicleNode, stop: () => { isRunning = false; vehicleNode.remove(); } });
         }
 
         function launchTrafficLightSignalAutomation() {
@@ -1014,7 +1098,7 @@
         }
 
         function clearVehiclesSimulationThreads() {
-            activeLanesVehiclesCollection.forEach(obj => { obj.element.remove(); clearInterval(obj.clock); });
+            activeLanesVehiclesCollection.forEach(obj => obj.stop());
             activeLanesVehiclesCollection = [];
             if (autoSignalTimerClock) { clearInterval(autoSignalTimerClock); autoSignalTimerClock = null; }
         }
@@ -1023,7 +1107,7 @@
             const bubbleNode = document.getElementById('speech-bubble-prompt');
             bubbleNode.innerText = msg;
             bubbleNode.style.display = "block";
-            setTimeout(() => { bubbleNode.style.display = "none"; }, 4500);
+            setTimeout(() => { bubbleNode.style.display = "none"; }, 4200);
         }
 
         async function triggerLevelGraduationChallengeSequenceAsync(quizArray) {
@@ -1141,15 +1225,14 @@
                 currentR = targetNextStep.r;
                 currentC = targetNextStep.c;
                 placeSamCharacterPawnCoordinates(currentR, currentC);
-                await executeAsyncSleepTimer(500);
+                await executeAsyncSleepTimer(450);
 
                 if (activeLevelIdx === 2 && currentR === 1 && currentC === 1) {
                     vehiclesBrakedForZebra = true;
-                    displayKidsSpeechBubble("Look! The cars stopped for the Zebra Crossing! Go ahead, Sam! 🏁");
-                    await executeAsyncSleepTimer(1000);
+                    displayKidsSpeechBubble("Look! The cars stopped for the Zebra Crossing! Go ahead, Sam!");
+                    await executeAsyncSleepTimer(900);
                 }
 
-                // LEVEL 3 SAFETY HITBOX FIXED RULE: Sam CAN cross only when light is RED (cars are safely stopped)
                 if (activeLevelIdx === 3 && fieldMatrixConfiguration[currentR][currentC] === 'paved_zebra' && lightSignalState === 'green') {
                     triggerAudioOutputEffect('audio-wrong');
                     displayKidsSpeechBubble("Stop, Sam! The light is GREEN! Fast cars are driving. Switch it to RED first! 🚦");
@@ -1193,15 +1276,18 @@
         function startConfettiParticleEngine() {
             const canvas = document.getElementById('confetti-canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 500; canvas.height = 850;
+            const stage = document.getElementById('master-game-stage');
+            canvas.width = stage.clientWidth; 
+            canvas.height = stage.clientHeight;
+            
             confettiParticlesCollection = [];
             const colorPalettes = ['#facc15', '#f43f5e', '#3b82f6', '#10b981', '#a855f7', '#fb923c'];
 
-            for (let i = 0; i < 90; i++) {
+            for (let i = 0; i < 75; i++) {
                 confettiParticlesCollection.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height - canvas.height,
-                    r: Math.random() * 6 + 4,
+                    r: Math.random() * 5 + 3,
                     d: Math.random() * canvas.height,
                     color: colorPalettes[Math.floor(Math.random() * colorPalettes.length)],
                     tilt: Math.random() * 10 - 5,
@@ -1210,27 +1296,49 @@
                 });
             }
 
-            clearInterval(confettiIntervalClock);
-            confettiIntervalClock = setInterval(() => {
+            stopConfettiParticleEngine();
+
+            function renderConfetti() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 confettiParticlesCollection.forEach((p, idx) => {
                     p.tiltAngle += p.tiltAngleIncremental;
-                    p.y += (p.r + 1) / 2; p.x += Math.sin(p.tiltAngle);
+                    p.y += (p.r + 1) / 2; 
+                    p.x += Math.sin(p.tiltAngle);
                     p.tilt = Math.sin(p.tiltAngle - idx/3) * 10;
-                    ctx.beginPath(); ctx.lineWidth = p.r; ctx.strokeStyle = p.color;
+                    
+                    ctx.beginPath(); 
+                    ctx.lineWidth = p.r; 
+                    ctx.strokeStyle = p.color;
                     ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
-                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2); ctx.stroke();
-                    if (p.y > canvas.height) { p.x = Math.random() * canvas.width; p.y = -20; }
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2); 
+                    ctx.stroke();
+
+                    if (p.y > canvas.height) { 
+                        p.x = Math.random() * canvas.width; 
+                        p.y = -20; 
+                    }
                 });
-            }, 25);
+                confettiAnimationId = requestAnimationFrame(renderConfetti);
+            }
+
+            confettiAnimationId = requestAnimationFrame(renderConfetti);
         }
 
         function stopConfettiParticleEngine() {
-            clearInterval(confettiIntervalClock);
+            if (confettiAnimationId) {
+                cancelAnimationFrame(confettiAnimationId);
+                confettiAnimationId = null;
+            }
             const canvas = document.getElementById('confetti-canvas');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
+
+        // AUTO-RESIZE & ORIENTATION HANDLER
+        window.addEventListener('resize', () => {
+            if (activeLevelIdx === 3) repositionSignalPole();
+            placeSamCharacterPawnCoordinates(currentSamPos.r, currentSamPos.c);
+        });
     </script>
 </body>
 </html>
