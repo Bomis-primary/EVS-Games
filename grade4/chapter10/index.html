@@ -4,18 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Civic Chain Reaction</title>
+    <!-- Kid-Friendly Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --pastel-teal: #e0f2f1;
-            --pastel-mint: #e8f5e9;
-            --pastel-blue: #e3f2fd;
-            --accent-mint: #4db6ac;
-            --accent-green: #81c784;
-            --accent-blue: #64b5f6;
-            --text-dark: #2c3e50;
-            --soft-red: #ff8a80;
-            --soft-gold: #ffd54f;
-            --card-border: #b2dfdb;
+            --pastel-bg: linear-gradient(135deg, #ffd3b6 0%, #ffaaa5 30%, #d4a5a5 60%, #a8e6cf 100%);
+            --card-bg: #ffffff;
+            --primary-mint: #4eceac;
+            --primary-mint-dark: #32a88c;
+            --accent-pink: #ff70a6;
+            --accent-pink-dark: #e05287;
+            --accent-yellow: #ffd166;
+            --accent-purple: #a29bfe;
+            --accent-blue: #70a6ff;
+            --accent-green: #6bcb77;
+            --accent-red: #ff6b6b;
+            --text-dark: #2d3748;
+            --text-muted: #718096;
+            --font-main: 'Fredoka', 'Nunito', 'Comic Sans MS', sans-serif;
         }
 
         * {
@@ -28,32 +37,59 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
-            background: linear-gradient(135deg, #d7ebd9 0%, #ccebe6 50%, #d2e7f7 100%);
+            font-family: var(--font-main);
+            background: #eef2f5;
+            background-image: 
+                radial-gradient(at 10% 20%, #ffe5ec 0px, transparent 50%),
+                radial-gradient(at 90% 10%, #e8e8ff 0px, transparent 50%),
+                radial-gradient(at 80% 80%, #e0f8e9 0px, transparent 50%),
+                radial-gradient(at 20% 80%, #fff4cc 0px, transparent 50%);
+            background-attachment: fixed;
             color: var(--text-dark);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 15px;
+            padding: 12px;
             overflow: hidden;
+        }
+
+        /* Floating background decoration bubbles */
+        .bg-bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 0;
+            pointer-events: none;
+            animation: floatSlow 8s infinite ease-in-out;
+        }
+        .bg-bubble-1 { width: 90px; height: 90px; top: 8%; left: 6%; animation-delay: 0s; }
+        .bg-bubble-2 { width: 120px; height: 120px; bottom: 10%; right: 5%; animation-delay: -3s; }
+        .bg-bubble-3 { width: 60px; height: 60px; bottom: 20%; left: 10%; animation-delay: -5s; }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
         }
 
         .game-window {
             width: 100%;
             max-width: 430px;
-            height: 85vh;
-            min-height: 590px;
-            max-height: 740px;
-            background: rgba(255, 255, 255, 0.72);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 40px;
-            box-shadow: 0 20px 50px rgba(135, 165, 155, 0.25);
-            padding: 24px;
-            border: 6px solid #ffffff;
+            height: 88vh;
+            min-height: 580px;
+            max-height: 760px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 36px;
+            box-shadow: 0 20px 45px rgba(100, 110, 140, 0.2), inset 0 0 0 4px #ffffff;
+            padding: 20px;
             position: relative;
             overflow: hidden;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .screen {
@@ -63,85 +99,82 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            animation: smoothFade 0.4s ease-out forwards;
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
         }
 
         .screen.active {
             display: flex;
         }
 
-        @keyframes smoothFade {
-            0% { opacity: 0; transform: scale(0.97); }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.92); }
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* --- IN-GAME TOAST HINT NOTIFICATION --- */
+        /* --- TOAST HINT NOTIFICATION --- */
         .toast-hint {
             position: absolute;
-            top: -100px;
-            left: 20px;
-            right: 20px;
-            background: #fffde7;
-            border: 3px solid var(--soft-gold);
-            border-radius: 20px;
+            top: -110px;
+            left: 16px;
+            right: 16px;
+            background: #fffbe6;
+            border: 3px solid var(--accent-yellow);
+            border-radius: 22px;
             padding: 12px 16px;
             font-size: 0.95rem;
-            font-weight: bold;
-            color: #f57f17;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            font-weight: 700;
+            color: #d97706;
+            box-shadow: 0 10px 25px rgba(217, 119, 6, 0.2);
             z-index: 100;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.25);
-            text-align: left;
+            text-align: center;
             pointer-events: none;
+            line-height: 1.3;
         }
         .toast-hint.show {
-            transform: translateY(120px);
+            transform: translateY(125px);
         }
 
         /* --- SCREEN 1: SPLASH SCREEN --- */
         #screen-splash {
-            display: none;
-            flex-direction: column;
             justify-content: center;
-            align-items: center;
-            gap: 25px;
-            height: 100%;
-        }
-        #screen-splash.active {
-            display: flex;
+            gap: 20px;
         }
         .splash-logo-box {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             width: 100%;
             flex-grow: 1;
         }
         .splash-logo {
-            width: 75%;
-            max-width: 260px;
+            width: 78%;
+            max-width: 250px;
             height: auto;
             object-fit: contain;
-            animation: bubbleFloat 3s infinite ease-in-out;
+            animation: bounceFloat 2.5s infinite ease-in-out;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.08));
         }
-        @keyframes bubbleFloat {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-8px) scale(1.03); }
+        @keyframes bounceFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
         }
         .bar-bg {
-            width: 180px;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
+            width: 200px;
+            height: 14px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 20px;
             overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.05);
-            margin-bottom: 40px;
+            padding: 3px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
         .bar-fill {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, var(--accent-mint), var(--accent-green));
-            border-radius: 10px;
+            background: linear-gradient(90deg, var(--accent-pink), var(--accent-yellow), var(--primary-mint));
+            border-radius: 20px;
             animation: loaderProgress 5s linear forwards;
         }
         @keyframes loaderProgress {
@@ -150,62 +183,70 @@
 
         /* --- BUTTONS --- */
         .btn-bubbly {
-            background: linear-gradient(135deg, #5fc3b9 0%, #4db6ac 100%);
+            background: linear-gradient(180deg, #ff85b3 0%, var(--accent-pink) 100%);
             color: white;
             border: none;
-            padding: 16px 32px;
-            font-size: 1.3rem;
+            padding: 16px 28px;
+            font-size: 1.25rem;
             font-weight: 700;
-            border-radius: 24px;
+            border-radius: 28px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(77, 182, 172, 0.35);
-            transition: all 0.2s ease;
-            width: 85%;
-            border-bottom: 4px solid #3b9189;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 0 var(--accent-pink-dark), 0 12px 20px rgba(255, 112, 166, 0.35);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 90%;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
             font-family: inherit;
+            touch-action: manipulation;
+            letter-spacing: 0.5px;
         }
         .btn-bubbly:active {
-            transform: translateY(3px);
-            border-bottom-width: 1px;
-            box-shadow: 0 4px 10px rgba(77, 182, 172, 0.2);
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 var(--accent-pink-dark), 0 4px 10px rgba(255, 112, 166, 0.2);
         }
 
         /* --- TYPOGRAPHY --- */
         h1 {
-            font-size: 2.25rem;
-            color: #2c4a45;
-            margin: 10px 0;
-            font-weight: 800;
-            line-height: 1.2;
+            font-size: clamp(1.8rem, 6vw, 2.3rem);
+            color: var(--text-dark);
+            margin: 8px 0;
+            font-weight: 700;
+            line-height: 1.15;
+            text-shadow: 0 2px 0 rgba(255,255,255,0.8);
         }
         p {
-            font-size: 1.1rem;
-            color: #556b67;
-            line-height: 1.4;
-            margin: 5px 0;
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            line-height: 1.35;
+            margin: 4px 0;
+            font-weight: 600;
         }
 
         /* --- RULES VIEW --- */
         .rules-wrapper {
-            background: rgba(255, 255, 255, 0.45);
-            border-radius: 24px;
-            padding: 20px;
-            border: 2px dashed #b2dfdb;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 28px;
+            padding: 18px 16px;
+            border: 3px solid #e2e8f0;
             text-align: left;
             width: 100%;
             margin: auto 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03);
         }
         .rule-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
             margin-bottom: 14px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: #3b4d49;
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #334155;
+            background: white;
+            padding: 10px 14px;
+            border-radius: 18px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.03);
         }
         .rule-item:last-child { margin-bottom: 0; }
+        .rule-icon { font-size: 1.5rem; flex-shrink: 0; }
 
         /* --- HUD --- */
         .hud {
@@ -213,143 +254,198 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            background: rgba(255, 255, 255, 0.6);
-            padding: 11px 16px;
-            border-radius: 18px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 22px;
             font-weight: 700;
-            font-size: 1rem;
-            border: 1px solid rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 2px solid #f1f5f9;
         }
-        .score-box { color: #388e3c; }
-        .lives-box { color: var(--soft-red); letter-spacing: 2px; }
+        .score-box { color: var(--primary-mint-dark); font-size: 1.05rem; }
+        .lives-box { color: var(--accent-red); letter-spacing: 3px; font-size: 1.1rem; }
 
         /* --- GRID CONTAINER --- */
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 10px;
             width: 100%;
-            margin: 15px 0;
+            margin: 10px 0;
             flex-grow: 1;
+            align-content: center;
         }
         .card {
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid #e0f2f1;
-            border-radius: 20px;
-            padding: 12px 10px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--text-dark);
+            background: var(--card-bg);
+            border: 3px solid #edf2f7;
+            border-radius: 22px;
+            padding: 10px 8px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
-            touch-action: none;
+            gap: 6px;
+            box-shadow: 0 6px 0 #e2e8f0, 0 8px 15px rgba(0,0,0,0.03);
+            transition: all 0.15s ease;
+            touch-action: manipulation;
             text-align: center;
+            min-height: 105px;
+        }
+        .card:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #e2e8f0;
         }
         .card .icon {
-            font-size: 2rem;
+            font-size: 2.1rem;
             pointer-events: none;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
         .card .card-text {
-            font-size: 0.95rem;
-            color: #455a64;
-            line-height: 1.25;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #4a5568;
+            line-height: 1.2;
             pointer-events: none;
         }
         .card.selected {
             border-color: var(--accent-blue);
-            background: #e3f2fd;
+            background: #ebf8ff;
             transform: scale(0.96);
-            box-shadow: 0 2px 5px rgba(100,181,246,0.3);
+            box-shadow: 0 3px 0 var(--accent-blue);
         }
         .card.matched {
-            background: #e8f5e9 !important;
+            background: #f0fff4 !important;
             border-color: var(--accent-green) !important;
-            color: #2e7d32 !important;
-            opacity: 0.55;
+            box-shadow: 0 3px 0 var(--accent-green) !important;
+            opacity: 0.65;
             pointer-events: none;
         }
-        .card.matched .card-text { color: #2e7d32; }
+        .card.matched .card-text { color: #276749; }
+        .card.shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
 
         /* --- POPUP MODAL --- */
         .popup-modal {
             display: none;
             position: absolute;
-            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            top: 12px; left: 12px; right: 12px; bottom: 12px;
             background: #ffffff;
-            border-radius: 32px;
-            border: 4px solid #b39ddb;
-            padding: 22px;
+            border-radius: 30px;
+            border: 4px solid var(--accent-purple);
+            padding: 18px;
             z-index: 10;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-            animation: popUpEffect 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            animation: popUpEffect 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+            overflow-y: auto;
         }
         @keyframes popUpEffect {
-            0 { transform: translateY(20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
         .popup-tag {
-            background: #9575cd;
+            background: linear-gradient(135deg, #b8aeff, var(--accent-purple));
             color: white;
-            padding: 4px 14px;
+            padding: 6px 16px;
             font-size: 0.85rem;
-            font-weight: 700;
-            border-radius: 12px;
+            font-weight: 800;
+            border-radius: 14px;
             align-self: center;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(162, 155, 254, 0.4);
         }
         .popup-q {
-            font-size: 1.12rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--text-dark);
-            line-height: 1.4;
-            margin: 12px 0;
+            line-height: 1.35;
+            margin: 10px 0;
+            text-align: center;
         }
         .options-list {
             display: flex;
             flex-direction: column;
             width: 100%;
-            gap: 10px;
+            gap: 8px;
         }
         .opt-btn {
             background: #f8fafc;
             border: 2px solid #e2e8f0;
-            padding: 14px 16px;
-            border-radius: 16px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 12px 14px;
+            border-radius: 18px;
+            font-size: 0.92rem;
+            font-weight: 700;
             cursor: pointer;
             text-align: left;
             transition: all 0.15s ease;
-            color: var(--text-dark);
+            color: #334155;
             font-family: inherit;
-            touch-action: none;
+            touch-action: manipulation;
+            box-shadow: 0 4px 0 #cbd5e1;
         }
-        .opt-btn.correct { background: #e8f5e9 !important; border-color: var(--accent-green) !important; color: #2e7d32 !important; }
-        .opt-btn.wrong { background: #ffebee !important; border-color: var(--soft-red) !important; color: #c62828 !important; }
+        .opt-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #cbd5e1;
+        }
+        .opt-btn.correct { 
+            background: #f0fff4 !important; 
+            border-color: var(--accent-green) !important; 
+            color: #22543d !important; 
+            box-shadow: 0 4px 0 var(--accent-green) !important;
+        }
+        .opt-btn.wrong { 
+            background: #fff5f5 !important; 
+            border-color: var(--accent-red) !important; 
+            color: #742a2a !important; 
+            box-shadow: 0 4px 0 var(--accent-red) !important;
+        }
 
         .hint-container {
             width: 100%;
-            background: #fffde7;
-            border: 2px solid var(--soft-gold);
+            background: #fffbe6;
+            border: 2px solid var(--accent-yellow);
             border-radius: 16px;
             padding: 10px 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #f57f17;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #b45309;
             text-align: left;
             display: none;
-            margin-top: 10px;
+            margin-top: 8px;
+            line-height: 1.3;
+        }
+
+        /* --- RESULTS VIEW --- */
+        #screen-results h1 { margin-bottom: 2px; }
+        .score-badge {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            border: 3px solid var(--primary-mint);
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #234e52;
+            display: inline-block;
+            margin: 12px 0;
+            box-shadow: 0 8px 20px rgba(78, 206, 172, 0.25);
         }
     </style>
 </head>
 <body>
+
+<!-- Decorative Background Bubbles -->
+<div class="bg-bubble bg-bubble-1"></div>
+<div class="bg-bubble bg-bubble-2"></div>
+<div class="bg-bubble bg-bubble-3"></div>
 
 <div class="game-window">
     <div class="toast-hint" id="toast-hint-view">💡 Hint Alert Banner Container...</div>
@@ -358,62 +454,66 @@
     <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
 
+    <!-- SCREEN 1: SPLASH -->
     <div id="screen-splash" class="screen active">
         <div class="splash-logo-box">
             <img class="splash-logo" src="assets/innovine-logo.png" alt="Innovine Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
-            <h2 id="fallback-logo" style="display:none; color: #004d40; font-weight:800; margin:0; font-size: 2.2rem;">INNOVINE</h2>
+            <h2 id="fallback-logo" style="display:none; color: #234e52; font-weight:800; margin:0; font-size: 2.2rem; letter-spacing: 1px;">INNOVINE</h2>
         </div>
         <div class="bar-bg"><div class="bar-fill"></div></div>
     </div>
 
+    <!-- SCREEN 2: WELCOME -->
     <div id="screen-welcome" class="screen">
-        <div style="text-align: center; margin-top: 25px;">
-            <span style="font-size: 3.8rem;">✨</span>
+        <div style="text-align: center; margin-top: 15px;">
+            <div style="font-size: 4rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">✨</div>
             <h1>Civic Chain<br>Reaction</h1>
-            <p style="font-weight: 600; color: #78909c;">Explore Our Rights & Duties Together</p>
+            <p>Explore Rights & Duties Together!</p>
         </div>
-        <button class="btn-bubbly" id="btn-start-welcome">START GAME</button>
+        <button class="btn-bubbly" id="btn-start-welcome">START GAME 🎮</button>
     </div>
 
+    <!-- SCREEN 3: RULES -->
     <div id="screen-rules" class="screen">
         <h1>How To Play 🧩</h1>
         <div class="rules-wrapper">
-            <div class="rule-item"><span>🟢</span><span>Connect an action scenario tile with its matching value. Order doesn't matter!</span></div>
-            <div class="rule-item"><span>🔥</span><span>Every successful match instantly triggers <b>2 Randomized Bonus Questions</b>!</span></div>
-            <div class="rule-item"><span>❤️</span><span>You start with <b>4 lives</b>. Your first mistake unlocks an instant layout hint!</span></div>
+            <div class="rule-item"><span class="rule-icon">🟢</span><span>Match an action scenario tile with its civic value.</span></div>
+            <div class="rule-item"><span class="rule-icon">🔥</span><span>Each match triggers <b>2 Bonus Questions</b>!</span></div>
+            <div class="rule-item"><span class="rule-icon">❤️</span><span>Start with <b>4 lives</b>. Mistakes unlock instant hints!</span></div>
         </div>
         <button class="btn-bubbly" id="btn-play-rules">PLAY NOW 🚀</button>
     </div>
 
+    <!-- SCREEN 4: PLAY GAME -->
     <div id="screen-play" class="screen">
         <div class="hud">
-            <span class="score-box">Score: <span id="val-score">0</span></span>
-            <span id="val-tracker" style="color: #546e7a;">Circuit 1/4</span>
+            <span class="score-box">Score: <strong id="val-score">0</strong></span>
+            <span id="val-tracker" style="color: #64748b; font-weight:800;">Circuit 1/4</span>
             <span class="lives-box" id="val-lives">❤️❤️❤️❤️</span>
         </div>
 
-        <p style="font-size: 0.95rem; font-weight: 700; color: #78909c; text-align: center; margin: 8px 0 0 0;">Tap two matching cards:</p>
+        <p style="font-size: 0.92rem; font-weight: 700; color: #64748b; text-align: center; margin: 6px 0 2px 0;">Tap two matching cards:</p>
 
-        <div class="grid" id="game-grid-matrix">
-            </div>
+        <div class="grid" id="game-grid-matrix"></div>
 
+        <!-- BONUS MODAL -->
         <div class="popup-modal" id="bonus-chain-modal">
             <div class="popup-tag" id="tag-bonus-title">BONUS QUESTION</div>
-            <div class="popup-q" id="text-bonus-q">Question line prompt content template...</div>
-            <div class="options-list" id="box-options-list">
-                </div>
-            <div class="hint-container" id="box-hint-view">Hint description container...</div>
+            <div class="popup-q" id="text-bonus-q">Question prompt...</div>
+            <div class="options-list" id="box-options-list"></div>
+            <div class="hint-container" id="box-hint-view">Hint description...</div>
         </div>
     </div>
 
+    <!-- SCREEN 5: RESULTS -->
     <div id="screen-results" class="screen">
-        <div style="text-align: center; margin-top: 25px;">
-            <span style="font-size: 3.5rem;">🏆</span>
-            <h1>Finished!</h1>
-            <div style="background: #e8f5e9; padding: 12px 28px; border-radius: 20px; font-size: 1.8rem; font-weight: 800; color: #2e7d32; display: inline-block; margin: 15px 0;">
-                <span id="val-final-score">0 / 0</span>
+        <div style="text-align: center; margin-top: 15px;">
+            <div style="font-size: 4rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">🏆</div>
+            <h1>Awesome Job!</h1>
+            <div class="score-badge">
+                <span id="val-final-score">0 / 320</span> Points
             </div>
-            <p id="text-final-feedback" style="font-weight: 600; padding: 0 10px; font-size: 1.1rem;"></p>
+            <p id="text-final-feedback" style="font-weight: 700; padding: 0 10px;"></p>
         </div>
         <button class="btn-bubbly" id="btn-replay-results">PLAY AGAIN 🔄</button>
     </div>
@@ -502,7 +602,7 @@
     let roundsOrder = [];
     let activeRoundIndex = 0;
     let totalScore = 0;
-    let maxPossibleScore = 0;
+    const maxPossibleScore = 320; // 4 rounds * (20 grid match + 30 Q1 + 30 Q2)
     let userLives = 4;
     let initialMistakeMade = false;
     let selectedFirstCard = null;
@@ -511,7 +611,18 @@
     let currentBonusIdx = 0;
     let lockInput = false;
 
-    // Fixed 5-Second Splash Loader View Sequence
+    // Audio Playback Helper
+    function playAudioSound(soundId) {
+        try {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+        } catch (e) {}
+    }
+
+    // Splash Loader Sequence
     setTimeout(() => { changeView('screen-welcome'); }, 5000);
 
     function changeView(id) {
@@ -519,9 +630,10 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // Zero-lag instant touch listener helper
+    // Touch Binding Helper
     function bindInstantTouch(elementId, callback) {
         const item = document.getElementById(elementId);
+        if (!item) return;
         item.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             callback();
@@ -536,12 +648,11 @@
         const banner = document.getElementById('toast-hint-view');
         banner.innerText = "💡 " + msg;
         banner.classList.add('show');
-        setTimeout(() => { banner.classList.remove('show'); }, 4000);
+        setTimeout(() => { banner.classList.remove('show'); }, 4200);
     }
 
     function restartGame() {
         totalScore = 0;
-        maxPossibleScore = 0;
         userLives = 4;
         activeRoundIndex = 0;
         initialMistakeMade = false;
@@ -569,7 +680,7 @@
             }
         });
 
-        // Full Randomization of board layout positioning
+        // Board Layout Randomization
         tilesList.sort(() => Math.random() - 0.5);
         
         const container = document.getElementById('game-grid-matrix');
@@ -580,7 +691,6 @@
             block.className = "card";
             block.innerHTML = `<div class="icon">${data.icon}</div><div class="card-text">${data.text}</div>`;
             
-            // Lag-free responsive pointerdown binding
             block.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
                 handleCardInteraction(block, data);
@@ -598,7 +708,7 @@
     }
 
     function handleCardInteraction(element, cardInfo) {
-        if (element.classList.contains('matched') || element.classList.contains('selected')) return;
+        if (element.classList.contains('matched') || element.classList.contains('selected') || lockInput) return;
 
         if (!selectedFirstCard) {
             selectedFirstCard = { dom: element, data: cardInfo };
@@ -615,30 +725,35 @@
 
             let currentActiveMatchId = roundsOrder[activeRoundIndex].id;
 
-            // Bidirectional Matching (Scene-to-Rule AND Rule-to-Scene match perfectly)
+            // Matching Logic
             if (previousSelection.data.id === cardInfo.id && cardInfo.id === currentActiveMatchId && previousSelection.data.type !== cardInfo.type) {
                 previousSelection.dom.className = "card matched";
                 element.className = "card matched";
 
-                try { document.getElementById('snd-correct').play(); } catch(e){}
+                playAudioSound('snd-correct');
                 totalScore += 20;
-                maxPossibleScore += 20;
                 refreshHUD();
 
-                setTimeout(() => { triggerBonusSequence(roundsOrder[activeRoundIndex].bonus); }, 600);
+                setTimeout(() => { triggerBonusSequence(roundsOrder[activeRoundIndex].bonus); }, 500);
             } else {
                 previousSelection.dom.classList.remove('selected');
-                try { document.getElementById('snd-wrong').play(); } catch(e){}
+                previousSelection.dom.classList.add('shake');
+                element.classList.add('shake');
+                setTimeout(() => {
+                    previousSelection.dom.classList.remove('shake');
+                    element.classList.remove('shake');
+                }, 400);
+
+                playAudioSound('snd-wrong');
                 userLives--;
                 refreshHUD();
 
                 if (!initialMistakeMade) {
                     initialMistakeMade = true;
-                    launchCustomToastHint(`Match items belonging to the ${roundsOrder[activeRoundIndex].scenario.icon} behavior or duty option category!`);
+                    launchCustomToastHint(`Match items belonging to the ${roundsOrder[activeRoundIndex].scenario.icon} behavior or duty!`);
                 }
 
                 if (userLives <= 0) {
-                    maxPossibleScore += 20; // Include this round's grid match in total points
                     setTimeout(() => concludeGameFlow(false), 600);
                 }
             }
@@ -646,7 +761,6 @@
     }
 
     function triggerBonusSequence(questionsArray) {
-        // Shuffling the order of the questions entirely
         queueBonusData = [...questionsArray].sort(() => Math.random() - 0.5);
         currentBonusIdx = 0;
         displayBonusPrompt();
@@ -657,13 +771,12 @@
         document.getElementById('box-hint-view').style.display = 'none';
 
         let quizData = queueBonusData[currentBonusIdx];
-        document.getElementById('tag-bonus-title').innerText = `💥 BONUS CHAIN QUESTION ${currentBonusIdx + 1}/2 (+30 PTS)`;
+        document.getElementById('tag-bonus-title').innerText = `💥 BONUS QUESTION ${currentBonusIdx + 1}/2 (+30 PTS)`;
         document.getElementById('text-bonus-q').innerText = quizData.q;
 
         const container = document.getElementById('box-options-list');
         container.innerHTML = "";
 
-        // Shuffling multiple choice answer positions dynamically
         let dynamicShuffledOptions = [...quizData.o].sort(() => Math.random() - 0.5);
 
         dynamicShuffledOptions.forEach(choice => {
@@ -685,20 +798,18 @@
         if (lockInput) return;
         lockInput = true;
 
-        maxPossibleScore += 30; // Every bonus question presented adds to potential total
-
         const hintContainer = document.getElementById('box-hint-view');
         hintContainer.innerText = "💡 " + learningHint;
         hintContainer.style.display = "block";
 
         if (chosenAnswer === correctAnswer) {
             buttonDOM.classList.add('correct');
-            try { document.getElementById('snd-correct').play(); } catch(e){}
+            playAudioSound('snd-correct');
             totalScore += 30;
             refreshHUD();
         } else {
             buttonDOM.classList.add('wrong');
-            try { document.getElementById('snd-wrong').play(); } catch(e){}
+            playAudioSound('snd-wrong');
             userLives--;
             refreshHUD();
 
@@ -721,7 +832,7 @@
                 document.getElementById('bonus-chain-modal').style.display = 'none';
                 advanceToNextRound();
             }
-        }, 3200);
+        }, 3000);
     }
 
     function advanceToNextRound() {
@@ -735,16 +846,16 @@
 
     function concludeGameFlow(isVictory) {
         changeView('screen-results');
-        document.getElementById('val-final-score').innerText = `${totalScore} / ${maxPossibleScore} Points`;
-        try { document.getElementById('snd-claps').play(); } catch(e){}
+        document.getElementById('val-final-score').innerText = `${totalScore} / ${maxPossibleScore}`;
+        playAudioSound('snd-claps');
 
         const dashboardText = document.getElementById('text-final-feedback');
         if (isVictory && totalScore === maxPossibleScore) {
-            dashboardText.innerText = "Fantastic! You are a model citizen. You completed everything flawlessly!";
+            dashboardText.innerText = "🌟 Fantastic! You are a model citizen. Perfect Score!";
         } else if (isVictory) {
-            dashboardText.innerText = "Great job! You connected the circuits successfully. Play again to get a perfect score!";
+            dashboardText.innerText = "🎉 Great job! You completed the circuits. Try again for a perfect score!";
         } else {
-            dashboardText.innerText = "Nice try! Review your Rights and Duties to beat your previous score next time.";
+            dashboardText.innerText = "💪 Nice try! Review your Rights & Duties to beat your score next time.";
         }
     }
 </script>
