@@ -283,6 +283,24 @@
         .score-box { color: var(--primary-mint-dark); font-size: 1rem; }
         .lives-box { color: var(--accent-red); letter-spacing: 2px; font-size: 1rem; }
 
+        /* --- TARGET INSTRUCTION BOX --- */
+        .target-prompt-box {
+            width: 100%;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 6px 10px;
+            margin: 6px 0 2px 0;
+            text-align: center;
+            font-size: clamp(0.82rem, 2.8vw, 0.92rem);
+            font-weight: 700;
+            color: #475569;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .target-prompt-box span {
+            color: #0284c7;
+        }
+
         /* --- GRID CONTAINER --- */
         .grid {
             display: grid;
@@ -495,6 +513,7 @@
 <div class="game-window">
     <div class="toast-hint" id="toast-hint-view">💡 Hint Alert Banner Container...</div>
 
+    <!-- Audio Elements: UNTOUCHED FILE PATHS -->
     <audio id="snd-correct" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="snd-wrong" src="assets/wrong.mp3" preload="auto"></audio>
     <audio id="snd-claps" src="assets/freesound_community-claps-44774.mp3" preload="auto"></audio>
@@ -537,7 +556,9 @@
             <span class="lives-box" id="val-lives">❤️❤️❤️❤️</span>
         </div>
 
-        <p style="font-size: clamp(0.8rem, 2.8vw, 0.9rem); font-weight: 700; color: #64748b; text-align: center; margin: 4px 0 2px 0;">Tap two matching cards:</p>
+        <div class="target-prompt-box" id="target-prompt-container">
+            Find the match for: <span id="target-title-text">...</span>
+        </div>
 
         <div class="grid" id="game-grid-matrix"></div>
 
@@ -657,7 +678,7 @@
     let lockInput = false;
     let audioUnlocked = false;
 
-    // Cross-Platform Audio Unlock (Bypasses iOS/Android Autoplay restrictions)
+    // Cross-Platform Audio Unlock (Bypasses browser autoplay restrictions)
     function unlockAudioContext() {
         if (audioUnlocked) return;
         ['snd-correct', 'snd-wrong', 'snd-claps'].forEach(id => {
@@ -691,8 +712,10 @@
 
     // Allow quick skip on splash screen
     document.getElementById('screen-splash').addEventListener('click', () => {
-        clearTimeout(splashTimer);
-        changeView('screen-welcome');
+        if (document.getElementById('screen-splash').classList.contains('active')) {
+            clearTimeout(splashTimer);
+            changeView('screen-welcome');
+        }
     });
 
     function changeView(id) {
@@ -739,9 +762,14 @@
 
     function renderMatrixGrid() {
         selectedFirstCard = null;
+        lockInput = false;
         refreshHUD();
 
         let coreCircuit = roundsOrder[activeRoundIndex];
+        
+        // Update Target Header
+        document.getElementById('target-title-text').innerHTML = `${coreCircuit.scenario.icon} <strong>${coreCircuit.scenario.short}</strong>`;
+
         let tilesList = [
             { id: coreCircuit.id, type: "scene", text: coreCircuit.scenario.short, icon: coreCircuit.scenario.icon },
             { id: coreCircuit.id, type: "rule", text: coreCircuit.rule.short, icon: coreCircuit.rule.icon }
@@ -781,7 +809,7 @@
     }
 
     function handleCardInteraction(element, cardInfo) {
-        if (element.classList.contains('matched') || element.classList.contains('selected') || lockInput) return;
+        if (lockInput || element.classList.contains('matched') || element.classList.contains('selected')) return;
 
         if (!selectedFirstCard) {
             selectedFirstCard = { dom: element, data: cardInfo };
@@ -793,6 +821,7 @@
                 return;
             }
 
+            lockInput = true; // Lock interaction during match verification
             let previousSelection = selectedFirstCard;
             selectedFirstCard = null;
 
@@ -811,12 +840,8 @@
                 previousSelection.dom.classList.remove('selected');
                 previousSelection.dom.classList.add('shake');
                 element.classList.add('shake');
-                setTimeout(() => {
-                    previousSelection.dom.classList.remove('shake');
-                    element.classList.remove('shake');
-                }, 400);
-
                 playAudioSound('snd-wrong');
+
                 userLives--;
                 refreshHUD();
 
@@ -825,9 +850,16 @@
                     launchCustomToastHint(`Match items belonging to the ${roundsOrder[activeRoundIndex].scenario.icon} behavior or duty!`);
                 }
 
-                if (userLives <= 0) {
-                    setTimeout(() => concludeGameFlow(false), 600);
-                }
+                setTimeout(() => {
+                    previousSelection.dom.classList.remove('shake');
+                    element.classList.remove('shake');
+                    
+                    if (userLives <= 0) {
+                        concludeGameFlow(false);
+                    } else {
+                        lockInput = false;
+                    }
+                }, 450);
             }
         }
     }
@@ -904,7 +936,7 @@
                 document.getElementById('bonus-chain-modal').style.display = 'none';
                 advanceToNextRound();
             }
-        }, 2800);
+        }, 2600);
     }
 
     function advanceToNextRound() {
